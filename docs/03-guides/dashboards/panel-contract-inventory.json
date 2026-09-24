@@ -16,7 +16,7 @@
   "target_counts": {
     "http": 43,
     "loki": 0,
-    "promql": 176,
+    "promql": 177,
     "tempo": 0,
     "unknown": 0
   },
@@ -3024,11 +3024,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "bioetl_incident_alert_priority",
+      "formula": "label_replace(bioetl_incident_alert_priority,\"provider\",\"Not provided\",\"provider\",\"^$\")",
       "kind": "promql",
       "panel_id": 2005,
-      "panel_title": "Monitor Current Alerts",
-      "query": "bioetl_incident_alert_priority",
+      "panel_title": "Monitor Global Alerts",
+      "query": "label_replace(bioetl_incident_alert_priority,\"provider\",\"Not provided\",\"provider\",\"^$\")",
       "query_tokens": [
         "bioetl_incident_alert_priority"
       ],
@@ -3086,13 +3086,13 @@
       "dashboard_uid": "bioetl-incident-v1",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "label_replace(bioetl_incident_ranked_evidence,\"route_pipeline\",\"$pipeline\",\"pipeline\",\"unknown\")",
+      "formula": "label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\")",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "label_replace(bioetl_incident_ranked_evidence,\"route_pipeline\",\"$pipeline\",\"pipeline\",\"unknown\")",
+      "query": "label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\")",
       "query_tokens": [
         "bioetl_incident_ranked_evidence"
       ],
@@ -3226,6 +3226,27 @@
       "runbook_urls": [],
       "thresholds": [],
       "unit": "none"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "(label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m])) >= 300,\"signal\",\"stage_lag\",\"\",\"\"),\"window\",\"15m maximum\",\"\",\"\"),\"threshold\",\">= 300 s (15m maximum)\",\"\",\"\"),\"unit\",\"s\",\"\",\"\"),\"observation_time\",\"Not provided\",\"\",\"\"),\"publication_time\",\"Not provided\",\"\",\"\"),\"freshness\",\"Not verified: observed/published timestamps not provided\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max by (pipeline, run_type, stage) (bioetl_stage_backlog_records{stage!=\"validation\"}) > 0,\"signal\",\"stage_backlog\",\"\",\"\"),\"window\",\"instant\",\"\",\"\"),\"threshold\",\"> 0 records (instant)\",\"\",\"\"),\"unit\",\"records\",\"\",\"\"),\"observation_time\",\"Not provided\",\"\",\"\"),\"publication_time\",\"Not provided\",\"\",\"\"),\"freshness\",\"Not verified: observed/published timestamps not provided\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\"))",
+      "kind": "promql",
+      "panel_id": 22011,
+      "panel_title": "Inspect Global Signal Measurements",
+      "query": "(label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m])) >= 300,\"signal\",\"stage_lag\",\"\",\"\"),\"window\",\"15m maximum\",\"\",\"\"),\"threshold\",\">= 300 s (15m maximum)\",\"\",\"\"),\"unit\",\"s\",\"\",\"\"),\"observation_time\",\"Not provided\",\"\",\"\"),\"publication_time\",\"Not provided\",\"\",\"\"),\"freshness\",\"Not verified: observed/published timestamps not provided\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max by (pipeline, run_type, stage) (bioetl_stage_backlog_records{stage!=\"validation\"}) > 0,\"signal\",\"stage_backlog\",\"\",\"\"),\"window\",\"instant\",\"\",\"\"),\"threshold\",\"> 0 records (instant)\",\"\",\"\"),\"unit\",\"records\",\"\",\"\"),\"observation_time\",\"Not provided\",\"\",\"\"),\"publication_time\",\"Not provided\",\"\",\"\"),\"freshness\",\"Not verified: observed/published timestamps not provided\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\"))",
+      "query_tokens": [
+        "bioetl_stage_backlog_records",
+        "bioetl_stage_lag_seconds"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
     },
     {
       "coverage_class": "required_current",
