@@ -1,108 +1,81 @@
-# Аудит diagrams
+# Diagrams audit
 
-| Поле | Значение |
+| Field | Value |
 | --- | --- |
-| domain_id | diagrams |
-| prompt_id | prompt.audit.diagrams |
-| MODE | audit |
-| AUDIT_MODE | full |
+| Prompt | `prompt.audit.diagrams` v1.2.0 |
+| SCOPE | docs diagrams + related scripts |
+| MODE | `propose-patches` (патчи **не** применялись) |
 | LANGUAGE | ru |
-| SCOPE | `docs/02-architecture/diagrams/` + `scripts/diagrams/` |
-| surface_score | **2** / 3 |
-| blocked | false |
-| REQUIRE_GH_TRACKING | false |
-| Дата | 2026-08-26 |
-| Debt outcome | unchanged (только аудит, бюджеты не трогались, `.env` не трогался) |
+| AUDIT_MODE | full |
+| `REQUIRE_GH_TRACKING` | true |
+| Base | worktree `73e76c20c0df`; `origin/main` tip `2348b89f6a11` (gitignore/registry only, не диаграммы) |
+| `surface_score` | **2** / 3 |
+| Open PROVEN | **3** (все P3) |
+| Confirmed secret | **нет** |
 
 ## Executive summary
 
-Канонический контур диаграмм BioETL в целом зрелый: text-as-code (`.mmd` / `.mermaid`) в VCS, pinned `@mermaid-js/mermaid-cli@10.6.1` через lockfile `npm ci` (без `npx -y` в diagram CI), SVG как publication baseline, PNG gitignored (DOC-GOV-02), lint/render/nightly budget, corpus regression tests на 89/145/55/290/165.
+Канон — text-as-code Mermaid (`.mmd` / views `.mermaid`), рендер SVG в git, PNG **намеренно gitignored**. CI: pinned `@mermaid-js/mermaid-cli@10.6.1` через `npm ci` + lockfile, **без** `npx -y`. Lint 492 файла, **0 ERROR**. C4 current-state описывает процессы, не Docker; observability optional (ADR-010). PlantUML/drawio/dot в `docs/` нет.
 
-Score не 3, потому что модель на ключевых схемах расходится с кодом/политикой, а derived publication (INDEX/bundle) ссылается на переименованные stems. Это не «бинарный SSOT» и не сломанный рендер, но достаточный drift, чтобы не ставить полный контроль.
+Отстаёт документация масштаба (ADR-040 всё ещё «290 `.mmd`») и метаданные `@nodes` на 35 файлах; штамп `current-state-diagrams.md` 2026-08-05. Это не ломает security/deploy модель.
 
-P0 нет: local-only / отсутствие Redis/Docker на диаграммах соблюдено; секретов на схемах нет (`api_key` — имена полей).
+| Check | Result |
+| --- | --- |
+| Inventory | 328 `.mmd`, 165 `.mermaid`, 492 SVG, 0 tracked PNG, 0 puml/drawio |
+| ADR-040 baseline | mmd 290 vs live **328**; views 165 = 165 |
+| `lint_diagrams.py docs/02-architecture/diagrams --json` | exit 0; 0 failed; 168 WARNING |
+| `check-artifacts` visual-smoke (6 SVG) | exit 0 |
+| setup-mermaid | pin 10.6.1, refuse other versions |
+| `npx -y` in `scripts/diagrams` / `.github` | не найдено |
+| local `mmdc` | отсутствует (smoke рендер не гонялся локально) |
+| Embedded ` ```mermaid ` in `docs/**` (ex archive) | 88 fences; current-state помечен `diagram-audit:summary-only` |
 
 ## Surface score
 
-| Score | Критерий карточки | Факт |
-| ---: | --- | --- |
-| 3 | Text source + deterministic render + CI + model matches system | Источник и CI есть; **model не полностью matches** |
-| **2** | Diagrams current; часть regeneration/review ручная | **Выбрано**: ядро верно, INDEX/bundle и часть labels требуют ручного refresh |
-| 1 | Binary-only / unclear source / regular drift | Не применимо: `.mmd` SSOT, PNG не tracked |
-| 0 | Key diagram wrong enough for bad security/deploy | Не применимо: local-only не перевёрнут; Gold/Parquet — P1 storage, не P0 security |
+**2** — источники в VCS, CI lint/artifacts зелёные, модель C4/слоёв согласована с кодом; регенерация PNG и полный render остаются ручными/nightly, ADR census и `@nodes` не доведены.
 
-## Inventory
+Не 3: нет полного tracked PNG, visual-smoke узкий (6 SVG), ADR-040 baseline устарел. Не 1: не binary-only, CI есть. Не 0: ключевые C4/observability не толкают к плохому deploy.
 
-| Коллекция | Источники | SVG sibling (list_dir) | Класс |
-| --- | ---: | ---: | --- |
-| architecture | 89 `.mmd` | 89 | component / data |
-| class-diagrams | 145 `.mmd` (curated + `90-pkg-*` ≤30 nodes) | 145 | class |
-| foundation | 55 `.mmd` | 55 | context / deploy |
-| views | 165 `.mermaid` | 165 | view |
-| sequence | 5 | 5 | sequence |
-| state-machines | 5 | 5 | state |
-| providers | 28 (7×4) | 28 | data |
-| template | 1 `_template.mmd` | n/a | — |
-| PlantUML / drawio / Graphviz в SCOPE | 0 | — | retired |
+## Findings
 
-Совпадает с ADR-040 / `test_governance_docs_match_active_diagram_counts`. C4: context (`foundation/01`, `12-local-deployment`), container (`architecture/01-*`), component (`13*`, `05*`), data (`03*`, `49-52*`, providers), sequence/state, class slices — не один code-level dump монорепо.
+### DIAG-ADR040-CENSUS — P3 PROVEN
 
-## Что работает
+ADR-040 «measured baseline 2026-07-18»: 290 `.mmd` (architecture 89 + class 145 + foundation 55 + template). Live: **328** = то же + `providers/` 28 + `sequence/` 5 + `state-machines/` 5.
 
-- Entrypoint `python -m scripts.diagrams` (`lint`, `lint-budget`, `checks`, `check-artifacts`, `check-visual-smoke`, `nightly`).
-- Pin 10.6.1: `.github/actions/setup-mermaid/package.json`, отказ unlocked version, Docker `minlag/mermaid-cli:10.6.1`.
-- PR `docs.yml`: syntax, lint, render, visual-smoke, quality-gates, `generate-dataflows --check`, package-family `--check`.
-- Nightly: render + `--require-png` compatibility + budget `--max-lint-errors 0` + STALE-001 issue.
-- PNG `/docs/02-architecture/diagrams/**/png/` в `.gitignore`.
-- Medallion canonical `architecture/03-medallion-data-flow.mmd` показывает Gold как Delta Lake (в отличие от foundation/12).
-- `90-pkg-*` режутся на slices (`@nodes 30`), не один huge class dump.
+**Patch (не применён):** обновить числа/семьи в ADR-040; не поднимать quality budgets.
 
-## Findings (PROVEN, max 12)
+### DIAG-META-NODES — P3 PROVEN
 
-| ID | P | Суть |
-| --- | --- | --- |
-| DIAG-001 | P1 | `foundation/12-local-deployment`: Gold «Delta/Parquet», quarantine/lineage «Parquet» vs Delta + JSONL |
-| DIAG-002 | P1 | INDEX/bundle/descriptions ссылаются на отсутствующие `13a/13b/13c-port-contracts-*.svg`; live = `13g/13h/13i` |
-| DIAG-003 | P2 | `13g` адаптеры PA/UA/CRA/OAA/SSA/PCA без подписей |
-| DIAG-004 | P2 | `17-security` HASHED/BW/SW без node declarations |
-| DIAG-005 | P2 | drift gate + pre-commit не покрывают sequence/state-machines/providers |
-| DIAG-006 | P2 | `09-observability` Grafana не optional |
-| DIAG-007 | P2 | smoke baseline `foundation/01-full-system-component` Updated 2026-03-28 → STALE-001 (151d) |
-| DIAG-008 | P2 | README «48 core», нет 49–52 chembl dataflow |
-| DIAG-009 | P3 | cheatsheet `diagram_lint` — несуществующие команды |
-| DIAG-010 | P3 | `policy.md` last verified 2026-03-29 / hex case vs ADR-040 |
-| DIAG-011 | P3 | PR lint hint «update diagram budget»; lint-budget только nightly |
-| DIAG-012 | P3 | `13h` SVG показывает голые id SW/GW/NOMW при подписанном .mmd |
+ADR-040 D4 требует `%% @nodes` на `.mmd`. Нет на 35 файлах: architecture `24`–`48`, все `sequence/`, все `state-machines/`. Lint не падает (ELK/`SIZE` смотрят `@nodes` только если он есть).
 
-Полные поля: `findings.json`.
+**Patch:** проставить `@nodes` (посчитать узлы) без смены семантики.
 
-## Top remediations
+### DIAG-CURRENT-STATE-STAMP — P3 PROVEN
 
-1. Исправить подписи storage на `foundation/12-local-deployment-architecture.mmd` (Gold Delta-only, quarantine Delta, lineage JSONL).
-2. Перегенерировать `architecture/svg/INDEX.md`, `bundles/architecture.bundle.md`, description cards под stems `13g/13h/13i`.
-3. Подписать адаптеры в `13g-port-contracts-data-sources.mmd`; развязать chained edges в `13h`.
-4. Дописать HASHED/BronzeWriter/SilverWriter в `17-security-pii-audit.mmd`.
-5. Расширить `check-diagram-drift` и pre-commit regex на `sequence/`, `state-machines/`, `providers/`.
-6. Пометить Prometheus/Grafana как optional на `09-observability-stack.mmd`.
-7. Re-verify + bump `%% Updated:` у smoke baseline и остальных `@date 2026-03-28` **без** увеличения `ERROR_STALE_DAYS`.
-8. Добавить 49–52 в README; починить cheatsheet; убрать «update the accepted diagram budget» из `docs.yml`.
+`docs/02-architecture/current-state-diagrams.md` `Last verified: 2026-08-05`. Сами C4 Context/Container и слои **согласованы** с ADR-010 (optional Grafana, container = процесс). Это stamp-drift, не wrong model.
 
-## Skipped / NOT_PROVEN
+**Patch:** обновить `Last verified` после сверки (уже сделана этим аудитом).
 
-В этой сессии нет shell-инструмента. Не запускались:
+## Lint warnings (не отдельные issues)
 
-- `python -m scripts.diagrams lint|lint-budget|check-artifacts|check-visual-smoke|check-quality-gates`
-- `generate-dataflows --check`
-- `render.sh` (намеренно: пишет product SVG/PNG)
-- memory `pre-task` / `post-task`
+168 WARNING: SIZE-002×97, STALE-002×24 (>90d), LINK-001×22, LABEL-001×20, SIZE-003×3, CLASS-003×2. ERROR=0. Не GH, пока не ERROR.
 
-Текущий lint error_count поэтому **не утверждается**. STALE-001 для `01-full-system-component` выведен из даты и константы 150d, не из JSON lint-отчёта.
+## Canonical source map
 
-Секреты на диаграммах не найдены. `npx -y` в diagram CI нет.
+См. `canonical-source-map.md`. Рендер: `docs/02-architecture/diagrams/tooling/render.sh` / `make render-diagrams`; CI `docs.yml` + `diagram-nightly.yml` + `.github/actions/setup-mermaid`.
 
-## Guardrails
+PNG: `.gitignore` `docs/02-architecture/diagrams/**/png/` — не finding (анти-pattern «huge binary churn»).
 
-- Техдолг-бюджеты не повышались.
-- `.env` не создавался и не менялся.
-- Product code / `.mmd` не редактировались (MODE=audit).
-- Артефакты только под `reports/audit/diagrams/`.
+## Proposed patches
+
+Только с явным «приступай». Порядок: ADR census → `@nodes` → Last verified. Без mass PNG commit. Full-repo class dump `90-pkg-*` уже generated-from-code — не расширять до monorepo god-diagram.
+
+## Skips
+
+- Полный локальный `mmdc` render / `git diff` SVG (нет CLI; политика CI path-filter).
+- `lint-budget` без JSON input (CI передаёт lint JSON).
+- Docker/monitoring stack не поднимался.
+
+## Residual risk
+
+STALE-002 станет STALE-001 ERROR после 150 дней. Visual-smoke не покрывает 328 источников.
