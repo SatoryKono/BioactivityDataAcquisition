@@ -456,6 +456,8 @@ reports/security/
 .vercel/
 /puppeteer-config.json
 nul
+# Windows PowerShell module-analysis cache accidentally reintroduced at root (#10968).
+Microsoft/
 /profile.svg
 .output.txt
 .mkdocs-site-tmp/
