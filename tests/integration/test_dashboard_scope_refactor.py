@@ -302,7 +302,7 @@ def test_run_explorer_selects_rows_without_removed_detail_groups() -> None:
     for token in (
         "var-pipeline=${__data.fields.Pipeline}",
         "var-run_type=${__data.fields.run_type}",
-        "var-run_id=${__data.fields.run_id:percentencode}",
+        "var-run_id=${__data.fields.Run:percentencode}",
         "${__url_time_range}",
     ):
         assert token in link["url"]

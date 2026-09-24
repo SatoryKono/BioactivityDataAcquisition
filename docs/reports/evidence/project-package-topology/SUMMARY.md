@@ -1,5 +1,15 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-24): hash-only reconcile after application_core
+publication-term bound and derived-scan shrink. Counts and the source
+fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=ed7e887cf7609b0efa2b50ef5a0e2835a376c6bcb72501fdbf66dc91ba99ca04`
+
+`source_module_count=2479`
+
 Refresh note (2026-09-23): hash-only reconcile after publication-term HTTP
 limit cassette alignment. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain

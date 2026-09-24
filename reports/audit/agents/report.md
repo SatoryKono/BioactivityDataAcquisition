@@ -1,71 +1,90 @@
 # Agents / runtime audit
 
-*Status: audit-report | domain=`agents-runtime` | prompt=`prompt.audit.agents-runtime`*
-*Generated (UTC): 2026-09-14T06:27:53Z*
+*Status: audit-report | domain=`agents-runtime` | prompt=`prompt.audit.agents-runtime` v1.2.0*
+*Generated (UTC): 2026-09-24T06:52:35Z*
 *MODE=audit AUDIT_MODE=full LANGUAGE=ru REQUIRE_GH_TRACKING=false*
+*Checkout: `main` @ `8199f679` (origin/main ahead 1; telemetry WIP not inspected)*
 
 ## Surface score
 
-**1 / 3** (domain scale: conflicting instructions + implicit Windows env). Runtime trees `.codex/**` / `.junie/**` are internally consistent; operator kit and Windows command matrix are not.
+**2 / 3** (domain scale: core runtime consistent; residual Windows/docs/prune gaps).
 
-Not 0: no proven secret-on-stdout, `curl|bash`, or unguarded destructive script. Not 2: RHAI/REGISTRY card-path contradiction is material for the nine-domain kit.
+Not 0: no proven secret-on-stdout, `curl|bash`, or unguarded product-data destroy. Not 3: Windows still documents bare `python -m` for post-change gates; CLAUDE.md version stamp stale; PowerShell MCP prune applies by default unlike bash.
+
+Vs 2026-09-14 (`surface_score=1`): **improved**. P1 AGT-001 closed (RHAI/REGISTRY + `test_nine_domain_audit_rhai_registry.py`).
 
 ## Instruction scope graph
 
 ```
 AGENTS.md
-  ├─ .codex/agents/CODEX-RUNTIME.md + py-*.md + py-*.toml + .codex/skills/**
-  ├─ .junie/agents/JUNIE-RUNTIME.md + guidelines.md + py-*.md + .junie/skills/**  (equal peer; parity contract)
+  ├─ .codex/agents/CODEX-RUNTIME.md + py-*.md + py-*.toml + .codex/skills/**  (14 skills)
+  ├─ .junie/agents/JUNIE-RUNTIME.md + guidelines.md + py-*.md + .junie/skills/**  (equal peer; 14 skills)
   ├─ .devin/agents/DEVIN-RUNTIME.md + */AGENT.md + .devin/skills/**  (Devin)
+  ├─ opencode.json + .opencode/agent/** + .opencode/command/**  (Phase 1 subordinate; write deny)
   ├─ docs/00-project/ai/**  (mirrors/guides; not behavior SSOT)
   │    ├─ agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md
-  │    ├─ grok/  (tracked Grok overlays; install via install_skills.ps1)
+  │    ├─ grok/  (tracked overlays; install_skills.ps1)
   │    └─ prompts/  (operator paste; NOT runtime SSOT)
-  ├─ .github/copilot-instructions.md
-  └─ scripts/ai/**  (bootstrap/validate/check; RHAI + install_skills.ps1)
+  ├─ .github/copilot-instructions.md + .github/instructions/**
+  ├─ GEMINI.md (root routing stub; no tracked .gemini/agents)
+  └─ scripts/ai/**  (bootstrap/validate/check; MCP wrappers)
 ```
 
 ## What is healthy
 
-- Junie mirror: `.venv-win\Scripts\python.exe scripts\ai\junie\check_junie_mirror.py --check` exit 0. `bash scripts/ai/junie/check_junie_mirror.sh --check` not run (Windows limitation).
-- `.junie/agents/CODEX-RUNTIME.md` is an intentional navigation stub, not a drifted Codex map.
-- Grok child agents (`docs/00-project/ai/grok/agents/*.md`) forbid MCP `github` / `gh` / `git push`; parent retains GitHub. `install_skills.ps1` matches skills/agents/personas sources and supports `-WhatIf`.
-- `.devin/skills/coderabbit-audit` is an allowed Codex–Devin variant (`skills-mirror-contract.json`).
-- GitHub MCP wrapper comments and stderr paths do not print token values.
-- Prompts library is not treated as runtime SSOT in AGENTS.md or ownership contract.
+- Junie mirror: `.venv-win\Scripts\python.exe scripts\ai\junie\check_junie_mirror.py --check` exit 0 @ 2026-09-24T06:50:53Z.
+- Prompt library: `python -m scripts.ai.prompts check` — 46 registry entries, 30 cards, 0 errors.
+- Architecture: `test_nine_domain_audit_rhai_registry.py` + `test_junie_runtime_ci_contract.py` — 7 passed.
+- RHAI `ALL_DOMAINS` card_path/prompt_id match `REGISTRY.yaml` (AGT-001 closed).
+- `install_skills.ps1` copies skills, agents, personas, and `*.rhai` (SupportsShouldProcess / `-WhatIf`).
+- Domain RHAI jobs `capability_mode: read-only`; synthesizer `read-write` limited to `reports/audit/**`.
+- `domains.yaml` SSOT path is `agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`.
+- GitHub MCP wrapper stderr logs token *path name*, not the secret.
+- OpenCode Phase 1: `write/edit/bash` deny on `repo-agent`; `/oc` fix command disabled.
+- Cursor `05-agent-workflow.mdc` precedence is runtime-first (prior AUD-001 closed).
+- Windsurf core governance aligned with `AGENTS.md` (prior AUD-002 closed).
+- `check_quality_exemptions.py` owns the debt gate (prior AUD-004 closed).
 
 ## Findings (PROVEN)
 
 | id | P | path | observation |
 | --- | --- | --- | --- |
-| AGT-001 | P1 | `scripts/ai/grok/workflows/nine-domain-audit.rhai:151` | RHAI/generator card_path missing vs REGISTRY.yaml |
-| AGT-002 | P2 | `AGENTS.md:98` | Windows: bash-only mirror check; bare `python -m` vs `.venv-win` |
-| AGT-003 | P2 | `docs/00-project/ai/prompts/domains.yaml:23` | SSOT path `docs/00-project/ai/AI_RUNTIME_MIRROR_OWNERSHIP.md` missing |
-| AGT-004 | P3 | `docs/00-project/ai/grok/README.md:18` | `grok-bootstrap.md` missing; deprecated cycle card listed |
-| AGT-005 | P2 | `scripts/ai/grok/install_skills.ps1:35` | installer does not copy tracked `.rhai` workflows |
-| AGT-006 | P2 | `scripts/ai/grok/workflows/nine-domain-audit.rhai:263` | `capability_mode: read-only` vs write `report.md` |
-| AGT-007 | P3 | `docs/00-project/ai/prompts/library/audit/agents-runtime.md:46` | `prompt.audit.generic-nine.pack` not in REGISTRY |
+| AGT-002 | P2 | `AGENTS.md:105` | Post-change still uses bare `python -m` for coverage/inventory; CODEX-RUNTIME requires `.venv-win` |
+| AGT-007 | P3 | `library/audit/agents-runtime.md:46` | Kit id `prompt.audit.generic-nine.pack` not in `REGISTRY.yaml` |
+| AGT-008 | P2 | `guides/CLAUDE.md:9` | Stamp `RULES.md v6.1.5`; live RULES header is `6.1.11` |
+| AGT-009 | P3 | `POST_CHANGE_VALIDATION.md:27` | Heading «incl. .devin/**»; body lists only `.codex/**` / `.junie/**` |
+| AGT-010 | P3 | `AGENTS.md:158` | Dashboard skill path Codex-only; Junie guidelines names equal-peer `.junie/skills/` |
+| AGT-011 | P3 | `copilot-instructions.md:6` | Canonical Sources list starts at NORMATIVE_SOURCES; later paragraph says runtime-first |
+| AGT-012 | P2 | `mcp_docker_prune.ps1:10` | PowerShell prune applies unless `BIOETL_MCP_PRUNE_DRY_RUN=1`; bash defaults dry-run |
+| AGT-013 | P3 | `library/audit/agents-runtime.md` Discovery | Card omits `.opencode/**` while `AGENTS.md` documents the surface |
 
-Proven: 7. P0+P1: 1. Unrelated product WIP on `main` not inspected.
+Closed since 2026-09-14: AGT-001, AGT-003, AGT-004, AGT-005, AGT-006.
+
+Proven open: 8. P0+P1: 0.
 
 ## Top remediations
 
-1. Point RHAI + `generate_project_domain_audit_workflow.py` at live REGISTRY paths (`library/doc/audit.md`, `library/test/system-audit.md`, `library/doc/pipeline.md`, `library/audit/architecture-review.md`) and `prompt.docs.audit`.
-2. Add a test: every RHAI `card_path` exists and equals `REGISTRY.yaml`.
-3. Document Windows Python mirror check beside the bash line in `AGENTS.md` / POST_CHANGE.
-4. Fix `domains.yaml` SSOT path to `agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`.
-5. Retarget Grok README; optionally install workflows from `install_skills.ps1` after AGT-001.
-6. Narrow RHAI domain-job writes to `reports/audit/**` (parent or reports-only capability).
+1. Dual-document `.venv-win` next to remaining `python -m` post-change lines (AGT-002).
+2. Align `mcp_docker_prune.ps1` with bash: default dry-run, explicit apply env (AGT-012).
+3. Refresh CLAUDE.md RULES version stamp or drop pinned version (AGT-008).
+4. Name both `.codex` and `.junie` dashboard skill paths in `AGENTS.md` (AGT-010).
+5. Add `.opencode/**` to agents-runtime Discovery; register or drop `generic-nine.pack` (AGT-007/013).
+
+MODE=`audit` — no runtime patches in this run.
 
 ## Checks
 
 | Check | Result |
 | --- | --- |
-| `check_junie_mirror.py --check` | pass (exit 0) |
-| `check_junie_mirror.sh --check` | skipped (native Windows; no bash invocation) |
+| `check_junie_mirror.py --check` | pass (exit 0) @ 2026-09-24T06:50:53Z |
+| `check_junie_mirror.sh --check` | skipped (native Windows; Python checker used) |
+| `python -m scripts.ai.prompts check` | pass (exit 0) |
+| `pytest tests/architecture/test_nine_domain_audit_rhai_registry.py tests/architecture/test_junie_runtime_ci_contract.py` | 7 passed |
+| `memory.tooling.workflow pre-task` | skipped (`BIOETL_AI_MEMORY_MODE` not required for hash-adjacent reports-only; main has foreign telemetry WIP) |
 | Runtime trees edited | no (audit artifacts only) |
 | Destructive agent scripts | not run |
+| `gh` | not used (py-audit-bot least-privilege; REQUIRE_GH_TRACKING=false) |
 
 ## Out of scope
 
-Product WIP on `main`. Prompts are operator aid, not runtime SSOT — cited only where they contradict REGISTRY or runtime command matrix.
+Unrelated `main` telemetry WIP (`configs/quality/test_telemetry_baseline.yaml` and siblings). Prompts are operator aid, not runtime SSOT. Branch-cleanup worktrees from the prior session were not re-audited.

@@ -1,74 +1,37 @@
 {
   "domain": "agents-runtime",
   "prompt_id": "prompt.audit.agents-runtime",
-  "generated_at_utc": "2026-09-14T06:27:53Z",
-  "surface_score": 1,
+  "prompt_version": "1.2.0",
+  "generated_at_utc": "2026-09-24T06:52:35Z",
+  "mode": "audit",
+  "audit_mode": "full",
+  "language": "ru",
+  "surface_score": 2,
+  "debt_outcome": "improved",
+  "checkout": {
+    "branch": "main",
+    "head": "8199f679",
+    "note": "ahead of origin/main by 1; telemetry WIP not in scope"
+  },
   "mirror_check": {
     "command": ".venv-win\\Scripts\\python.exe scripts\\ai\\junie\\check_junie_mirror.py --check",
     "exit_code": 0,
+    "timestamp": "2026-09-24T06:50:53Z",
     "bash_wrapper": "not executed (native Windows; Python checker used)",
     "result": "Junie mirror parity OK"
   },
+  "closed_since_2026_09_14": [
+    "AGT-001",
+    "AGT-003",
+    "AGT-004",
+    "AGT-005",
+    "AGT-006"
+  ],
   "findings": [
-    {
-      "finding_id": "AGT-001",
-      "id": "AGT-001",
-      "fingerprint": "4d4c8760d68534d9aa6d8d441bcdbed3ce266c52e28d1c3e4952cffeaee64e6c",
-      "status": "PROVEN",
-      "evidence_class": "CONTRADICTION",
-      "priority": "P1",
-      "severity": "High",
-      "confidence": "high",
-      "confidence_score": 0.95,
-      "requirement_id": "GAP",
-      "domain": "agents-runtime",
-      "category": "instruction-conflict",
-      "claim": "RHAI nine-domain-audit and the project-domain generator point at missing library cards and a prompt id that REGISTRY.yaml does not define.",
-      "broken_invariant": "Operator workflow card_path/prompt_id must resolve to REGISTRY.yaml entries and existing files.",
-      "root_cause": "rhai-card-path-not-aligned-with-prompt-registry",
-      "path": "scripts/ai/grok/workflows/nine-domain-audit.rhai:151",
-      "observation": "ALL_DOMAINS card_path values for docs-content, tests-system, docs-pipeline, and architecture-review do not exist; REGISTRY maps those domains to library/doc/audit.md, library/test/system-audit.md, library/doc/pipeline.md, and library/audit/architecture-review.md. RHAI prompt_id prompt.audit.docs-content is absent from REGISTRY (id is prompt.docs.audit).",
-      "method": "Path.exists on RHAI card_path vs REGISTRY.yaml entries.path; grep prompt.audit.docs-content in REGISTRY.yaml (no match).",
-      "expected": "Each RHAI/generator card_path equals the REGISTRY.yaml path for that prompt_id, and the file exists.",
-      "actual": "Four card_path files missing; prompt.audit.docs-content not in REGISTRY; same stale list in generate_project_domain_audit_workflow.py:137-145; orchestrator.md:115 and library/doc/pipeline.md:49 still cite prompt.audit.docs-content.",
-      "impact": "Nine-domain fan-out agents cannot load the audit card; audits fail or invent scope. Wrong build/release equivalent for this operator kit.",
-      "affected_paths": [
-        "scripts/ai/grok/workflows/nine-domain-audit.rhai",
-        "scripts/ai/generate_project_domain_audit_workflow.py",
-        "docs/00-project/ai/prompts/REGISTRY.yaml",
-        "docs/00-project/ai/prompts/library/audit/orchestrator.md",
-        "docs/00-project/ai/prompts/library/doc/pipeline.md"
-      ],
-      "evidence": {
-        "path": "scripts/ai/grok/workflows/nine-domain-audit.rhai",
-        "line": 151,
-        "command": "python -c path-exists vs REGISTRY.yaml",
-        "scope": "SCOPE=AGENTS.md .codex/ .junie/ .devin/ docs/00-project/ai/",
-        "timestamp": "2026-09-14T06:27:53Z",
-        "exit_code": 0,
-        "output": "MISSING library/audit/docs-content.md tests-system.md docs-pipeline.md library/architecture/review-assessment.md; REGISTRY paths exist"
-      },
-      "acceptance": "RHAI ALL_DOMAINS and generator all_prompts use REGISTRY paths; prompt_id matches entries.id; Test-Path/CI fails if a card is missing.",
-      "validation_commands": [
-        ".\\.venv-win\\Scripts\\python.exe -m scripts.ai.prompts check",
-        ".\\.venv-win\\Scripts\\python.exe -c \\\"from pathlib import Path; import yaml; r=yaml.safe_load(Path('docs/00-project/ai/prompts/REGISTRY.yaml').read_text(encoding='utf-8'))\\\""
-      ],
-      "rollback": "Revert RHAI/generator path edits only; do not edit .codex/.junie.",
-      "owner_surface": "composition",
-      "remediation": "Align nine-domain-audit.rhai and generate_project_domain_audit_workflow.py card_path/prompt_id with REGISTRY.yaml; add a unit test that every RHAI card_path exists and matches the registry entry.",
-      "effort": "S",
-      "automation": "Extend tests/unit/scripts/ai/test_prompt_library.py to parse RHAI ALL_DOMAINS against REGISTRY.yaml",
-      "automated_fix_possible": true,
-      "dependencies": [],
-      "validation": [
-        "All RHAI card_path files exist",
-        "prompt_id in REGISTRY.yaml entries"
-      ]
-    },
     {
       "finding_id": "AGT-002",
       "id": "AGT-002",
-      "fingerprint": "f62ff64498a84ee5014537f4d7f0e26a1596822f90b6ee6652fed5eddf44db21",
+      "fingerprint": "8980793faf82f093a36466ea5ad9dc57b6954bfcda6686c7f12d0a2b40953ed4",
       "status": "PROVEN",
       "evidence_class": "CONTRADICTION",
       "priority": "P2",
@@ -78,277 +41,66 @@
       "requirement_id": "GAP",
       "domain": "agents-runtime",
       "category": "windows-venv",
-      "claim": "AGENTS.md and POST_CHANGE_VALIDATION document POSIX bash + bare python -m, while CODEX-RUNTIME and Grok skills require .venv-win on native Windows.",
+      "claim": "AGENTS.md still documents bare python -m for module-coverage and docs-inventory refresh, while CODEX-RUNTIME requires .venv-win on native Windows.",
       "broken_invariant": "Documented post-change commands must be executable on the first-class Windows operator path.",
       "root_cause": "windows-postchange-commands-posix-only",
-      "path": "AGENTS.md:98",
-      "observation": "Post-change mirror check is specified only as bash scripts/ai/junie/check_junie_mirror.sh --check. Python checker scripts/ai/junie/check_junie_mirror.py --check exited 0 on this Windows checkout. AGENTS.md also uses bare python -m for coverage/inventory; CODEX-RUNTIME.md:127 requires .venv-win/Scripts/python.exe. Grok bioetl-session SKILL.md:19 locks .venv-win then line 63 uses bare python -m scripts.docs generate-cleanup-inventory.",
-      "method": "Inspection of AGENTS.md, POST_CHANGE_VALIDATION.md, CODEX-RUNTIME.md, grok bioetl-session SKILL.md; ran Python mirror checker.",
-      "expected": "Windows operators have an explicit Python/.venv-win command that satisfies the same gate as the bash wrapper.",
-      "actual": "bash wrapper is the only command in AGENTS.md/POST_CHANGE; tests/architecture/test_junie_runtime_ci_contract.py asserts the bash string. Python equivalent exists and is green here; no .ps1 wrapper.",
-      "impact": "Windows agents skip or fail required runtime-mirror validation, or invoke the wrong interpreter.",
+      "path": "AGENTS.md:105",
+      "observation": "Mirror check now has an explicit Windows Python line (AGENTS.md:100-101; POST_CHANGE:54). Coverage and cleanup-inventory lines still use bare python -m (AGENTS.md:105,110).",
+      "method": "Inspection of AGENTS.md, POST_CHANGE_VALIDATION.md, CODEX-RUNTIME.md; ran Python mirror checker.",
+      "expected": "Every post-change python -m invocation names .venv-win on Windows next to the POSIX form.",
+      "actual": "Only the Junie mirror gate has a Windows twin; two other required python -m gates do not.",
+      "impact": "Windows agents may skip coverage/inventory refresh or invoke a non-venv interpreter.",
       "affected_paths": [
         "AGENTS.md",
         "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-        ".codex/agents/CODEX-RUNTIME.md",
-        "docs/00-project/ai/grok/skills/bioetl-session/SKILL.md",
-        "scripts/ai/junie/check_junie_mirror.py"
+        ".codex/agents/CODEX-RUNTIME.md"
       ],
       "evidence": {
         "path": "AGENTS.md",
-        "line": 98,
+        "line": 105,
         "command": "E:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe scripts\\ai\\junie\\check_junie_mirror.py --check",
-        "scope": "native Windows",
-        "timestamp": "2026-09-14T06:27:53Z",
+        "scope": "SCOPE=AGENTS.md .codex/ .junie/ POST_CHANGE_VALIDATION.md",
+        "timestamp": "2026-09-24T06:50:53Z",
         "exit_code": 0,
-        "output": "Junie mirror parity OK: .codex/** == .junie/** (per junie-mirror-contract.json)."
+        "output": "Junie mirror parity OK; AGENTS.md:105 still python -m scripts.engineering.qa report-module-coverage"
       },
-      "acceptance": "AGENTS.md and POST_CHANGE list the Python Windows command beside bash; Grok session skill uses .venv-win for cleanup-inventory.",
+      "acceptance": "AGENTS.md and POST_CHANGE list .venv-win twins for coverage and cleanup-inventory, matching the mirror-check pattern.",
       "validation_commands": [
-        ".\\.venv-win\\Scripts\\python.exe scripts\\ai\\junie\\check_junie_mirror.py --check"
+        "Select-String -Path AGENTS.md,docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md -Pattern 'python -m scripts'"
       ],
-      "rollback": "Docs-only revert of command-matrix wording.",
-      "owner_surface": "composition",
-      "remediation": "Document Windows: .venv-win\\Scripts\\python.exe scripts/ai/junie/check_junie_mirror.py --check next to the bash line; replace bare python -m in AGENTS.md/Grok session skill with the Windows interpreter when describing native Windows.",
+      "rollback": "Revert docs-only command-matrix wording; no runtime tree edit required.",
+      "owner_surface": "docs",
+      "remediation": "Add the same Windows python.exe prefix used for check_junie_mirror.py beside the remaining python -m post-change lines.",
       "effort": "S",
-      "automation": "Keep CI on bash; add a docs/contract test that POST_CHANGE mentions check_junie_mirror.py",
+      "automation": "Architecture test: every AGENTS.md python -m gate has a .venv-win sibling within N lines, or a single Windows note covering the section.",
       "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "POST_CHANGE mentions check_junie_mirror.py",
-        "mirror --check exit 0"
-      ]
-    },
-    {
-      "finding_id": "AGT-003",
-      "id": "AGT-003",
-      "fingerprint": "ae781d395869a9374fddaf7fccd7ed68dd2cdf9a264a541209b3a131f21043e4",
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.95,
-      "requirement_id": "GAP",
-      "domain": "agents-runtime",
-      "category": "ssot-path-drift",
-      "claim": "domains.yaml agents-memory SSOT cites a non-existent ownership file.",
-      "broken_invariant": "Overlay SSOT paths must exist in the checkout.",
-      "root_cause": "overlay-ssot-path-does-not-exist",
-      "path": "docs/00-project/ai/prompts/domains.yaml:23",
-      "observation": "domains.agents-memory.SSOT lists docs/00-project/ai/AI_RUNTIME_MIRROR_OWNERSHIP.md which is missing. Canonical file is docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md (AGENTS.md Related Files and ownership contract).",
-      "method": "Path.exists on both paths; grep SSOT in domains.yaml.",
-      "expected": "SSOT path equals docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md.",
-      "actual": "Missing file at docs/00-project/ai/AI_RUNTIME_MIRROR_OWNERSHIP.md.",
-      "impact": "Cycle overlay for agents-memory points auditors at a dead path; ownership contract is skipped.",
-      "affected_paths": [
-        "docs/00-project/ai/prompts/domains.yaml",
-        "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md"
-      ],
-      "evidence": {
-        "path": "docs/00-project/ai/prompts/domains.yaml",
-        "line": 23,
-        "command": "Path.exists",
-        "scope": "prompts overlay",
-        "timestamp": "2026-09-14T06:27:53Z",
-        "exit_code": 0,
-        "output": "MISSING docs/00-project/ai/AI_RUNTIME_MIRROR_OWNERSHIP.md; EXISTS agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md"
-      },
-      "acceptance": "domains.yaml SSOT path exists and matches AGENTS.md Related Files.",
-      "validation_commands": [
-        ".\\.venv-win\\Scripts\\python.exe -c \\\"from pathlib import Path; assert Path('docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md').is_file()\\\""
-      ],
-      "rollback": "Revert domains.yaml path string.",
-      "owner_surface": "composition",
-      "remediation": "Replace domains.yaml SSOT entry with docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md.",
-      "effort": "S",
-      "automation": "Prompt overlay path-existence check",
-      "automated_fix_possible": true,
-      "dependencies": [],
-      "validation": [
-        "domains.yaml SSOT paths all exist"
-      ]
-    },
-    {
-      "finding_id": "AGT-004",
-      "id": "AGT-004",
-      "fingerprint": "9342a3b38467750d2aa09a678ecc50129b9499c168c1fcf1ea66d29b9b0170a4",
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "requirement_id": "GAP",
-      "domain": "agents-runtime",
-      "category": "discoverability",
-      "claim": "Grok README points at a missing session card and a deprecated audit cycle card.",
-      "broken_invariant": "Tracked Grok operator index must cite live REGISTRY paths.",
-      "root_cause": "grok-readme-stale-prompt-paths",
-      "path": "docs/00-project/ai/grok/README.md:18",
-      "observation": "README Layout lists ../prompts/library/session/grok-bootstrap.md (MISSING). REGISTRY prompt.session.grok-bootstrap path is library/session/bootstrap.md. Same README lists grok-audit-cycle.md which is status deprecated (successor prompt.audit.cycle). grok-operator-runbook.md:121 already has the correct bootstrap.md link.",
-      "method": "Path.exists; REGISTRY.yaml entries; grok-audit-cycle.md frontmatter status.",
-      "expected": "README matches REGISTRY and the operator runbook.",
-      "actual": "Stale grok-bootstrap.md path; deprecated cycle card still listed as current.",
-      "impact": "Operators following Grok README open a dead session card; install_skills.ps1 itself is consistent with skills/agents/personas.",
-      "affected_paths": [
-        "docs/00-project/ai/grok/README.md",
-        "docs/00-project/ai/prompts/library/session/bootstrap.md",
-        "docs/00-project/ai/prompts/library/audit/grok-audit-cycle.md",
-        "docs/00-project/ai/agents/guides/grok-operator-runbook.md"
-      ],
-      "evidence": {
-        "path": "docs/00-project/ai/grok/README.md",
-        "line": 18,
-        "command": "Path.exists grok-bootstrap.md",
-        "scope": "docs/00-project/ai/grok/",
-        "timestamp": "2026-09-14T06:27:53Z",
-        "exit_code": 0,
-        "output": "MISSING grok-bootstrap.md; EXISTS library/session/bootstrap.md; grok-audit-cycle.md status=deprecated"
-      },
-      "acceptance": "README session/audit rows match REGISTRY active cards.",
-      "validation_commands": [
-        ".\\.venv-win\\Scripts\\python.exe -c \\\"from pathlib import Path; assert Path('docs/00-project/ai/prompts/library/session/bootstrap.md').is_file()\\\""
-      ],
-      "rollback": "Revert README table rows.",
-      "owner_surface": "composition",
-      "remediation": "Retarget Grok README to library/session/bootstrap.md and prompt.audit.cycle; keep grok-audit-cycle as deprecated alias only.",
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "dependencies": [],
-      "validation": [
-        "README links resolve"
-      ]
-    },
-    {
-      "finding_id": "AGT-005",
-      "id": "AGT-005",
-      "fingerprint": "6bc9395c6802a1e47a1638e6845018d0ea3f2bd9371561fd63d5a2212fc15f32",
-      "status": "PROVEN",
-      "evidence_class": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.85,
-      "requirement_id": "GAP",
-      "domain": "agents-runtime",
-      "category": "bootstrap",
-      "claim": "install_skills.ps1 installs skills/agents/personas from docs/00-project/ai/grok/ but never copies tracked RHAI workflows.",
-      "broken_invariant": "Documented Grok install path should materialize the tracked workflow used for nine-domain audits, or the README must say it is manual-only.",
-      "root_cause": "grok-workflow-not-in-install-skills",
-      "path": "scripts/ai/grok/install_skills.ps1:35",
-      "observation": "install_skills.ps1 copies SKILL.md, agents/*.md, personas/*.toml only. nine-domain-audit.rhai header says copy to .grok/workflows/ for /workflow invoke. docs/00-project/ai/grok/README.md Layout table omits workflows/. generate_project_domain_audit_workflow.py emits a second machine-local project-domain-audit.rhai with the same stale card paths.",
-      "method": "Read install_skills.ps1 destinations; glob scripts/ai/grok/workflows; grep grok README for workflows.",
-      "expected": "Either install_skills.ps1 copies tracked .rhai into ~/.grok/workflows (or -Project .grok/workflows) with -WhatIf, or README/runbook states the manual copy and a single canonical workflow file.",
-      "actual": "No workflow copy in the installer; two generator/RHAI sources; Grok README does not mention nine-domain-audit.rhai.",
-      "impact": "Operators who only run install_skills.ps1 cannot invoke the nine-domain kit; those who copy RHAI still hit AGT-001 missing cards.",
-      "affected_paths": [
-        "scripts/ai/grok/install_skills.ps1",
-        "scripts/ai/grok/workflows/nine-domain-audit.rhai",
-        "scripts/ai/generate_project_domain_audit_workflow.py",
-        "docs/00-project/ai/grok/README.md"
-      ],
-      "evidence": {
-        "path": "scripts/ai/grok/install_skills.ps1",
-        "line": 35,
-        "command": "inspect install_skills.ps1 SourceRoot/AgentSourceRoot/PersonaSourceRoot",
-        "scope": "Grok install",
-        "timestamp": "2026-09-14T06:27:53Z",
-        "exit_code": 0,
-        "output": "Source roots: skills, agents, personas only; no workflows destination"
-      },
-      "acceptance": "README documents workflow install-or-skip; installer and RHAI share one path list.",
-      "validation_commands": [
-        "powershell -NoProfile -File scripts\\ai\\grok\\install_skills.ps1 -WhatIf"
-      ],
-      "rollback": "Revert installer/README changes.",
-      "owner_surface": "composition",
-      "remediation": "Add optional workflow copy in install_skills.ps1 (or document manual copy in Grok README) after AGT-001 path fix; do not treat prompts/RHAI as runtime SSOT.",
-      "effort": "M",
-      "automation": "WhatIf test for workflow copy",
-      "automated_fix_possible": true,
-      "dependencies": [
-        "AGT-001"
-      ],
-      "validation": [
-        "README mentions workflows or installer copies .rhai"
-      ]
-    },
-    {
-      "finding_id": "AGT-006",
-      "id": "AGT-006",
-      "fingerprint": "1b9a7b5d473c6422469b36ba3544ba0c4e9e120bb40a76f8f0786d1c56e93819",
-      "status": "PROVEN",
-      "evidence_class": "CONTRADICTION",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.85,
-      "requirement_id": "GAP",
-      "domain": "agents-runtime",
-      "category": "least-privilege",
-      "claim": "Nine-domain RHAI labels domain agents capability_mode read-only while the spawned prompt requires writing report.md and findings.json.",
-      "broken_invariant": "Write of audit artifacts must match the agent's declared capability.",
-      "root_cause": "audit-write-vs-readonly-capability",
-      "path": "scripts/ai/grok/workflows/nine-domain-audit.rhai:263",
-      "observation": "RHAI sets capability_mode read-only then tells the agent to write artifacts under report_dir. Grok py-audit-bot.md has permission_mode: plan and Remain read-only. Codex py-audit-bot.toml sandbox_mode=read-only. Domain cards including agents-runtime.md require reports/audit/<domain>/report.md + findings.json. Synthesis job correctly uses read-write.",
-      "method": "Read RHAI jobs.push capability_mode vs prompt write sentence; compare Grok/Codex py-audit-bot sandbox.",
-      "expected": "Domain audit jobs that must persist artifacts use a narrow write capability limited to reports/audit/**, or the parent writes files from structured output.",
-      "actual": "read-only capability + mandatory file writes; Grok py-audit-bot plan mode has no file editing tools.",
-      "impact": "Domain agents return JSON without persisting artifacts, or refuse writes; rollup becomes incomplete. Not a secret/RCE issue.",
-      "affected_paths": [
-        "scripts/ai/grok/workflows/nine-domain-audit.rhai",
-        "docs/00-project/ai/grok/agents/py-audit-bot.md",
-        ".codex/agents/py-audit-bot.toml",
-        "docs/00-project/ai/prompts/library/audit/agents-runtime.md"
-      ],
-      "evidence": {
-        "path": "scripts/ai/grok/workflows/nine-domain-audit.rhai",
-        "line": 263,
-        "command": "inspect capability_mode vs Write artifacts",
-        "scope": "nine-domain-audit",
-        "timestamp": "2026-09-14T06:27:53Z",
-        "exit_code": 0,
-        "output": "capability_mode: read-only; prompt requires Write artifacts under report_dir; syn uses read-write"
-      },
-      "acceptance": "Domain jobs that persist reports use an explicit reports-only write mode, or parent materializes files from output_schema.",
-      "validation_commands": [
-        "rg -n capability_mode scripts/ai/grok/workflows/nine-domain-audit.rhai"
-      ],
-      "rollback": "Revert RHAI capability_mode wording.",
-      "owner_surface": "composition",
-      "remediation": "Keep py-audit-bot product-tree read-only; either parent writes reports/audit/** from structured output or RHAI uses a reports-only write capability (not full workspace-write).",
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "dependencies": [],
-      "validation": [
-        "RHAI domain job capability matches artifact write policy"
+        "Windows operator can copy-paste coverage and inventory commands without guessing the interpreter"
       ]
     },
     {
       "finding_id": "AGT-007",
       "id": "AGT-007",
-      "fingerprint": "1e34b93bd8dcc89eda96d8115e69ddeb6b3574db87e077ec0ba68f25219d6b18",
+      "fingerprint": "28d10adbb8b6289a546e30f95b6d4aaf523dd9c61134fb283a60ed9bd81e7dda",
       "status": "PROVEN",
       "evidence_class": "GAP",
       "priority": "P3",
       "severity": "Low",
       "confidence": "high",
-      "confidence_score": 0.8,
+      "confidence_score": 0.95,
       "requirement_id": "GAP",
       "domain": "agents-runtime",
       "category": "discoverability",
-      "claim": "Nine-kit cards still cite prompt.audit.generic-nine.pack which is not a REGISTRY.yaml id.",
-      "broken_invariant": "Active operator cards should cite live prompt ids or an explicit archive successor.",
-      "root_cause": "generic-nine-pack-id-not-in-registry",
+      "claim": "Nine-domain audit cards cite prompt.audit.generic-nine.pack, which is not an entries.id in REGISTRY.yaml.",
+      "broken_invariant": "Operator kit identifiers in cards should resolve in REGISTRY.yaml or be marked deprecated/historical.",
+      "root_cause": "generic-nine-pack-id-not-in-prompt-registry",
       "path": "docs/00-project/ai/prompts/library/audit/agents-runtime.md:46",
-      "observation": "agents-runtime.md Kit line cites prompt.audit.generic-nine.pack. REGISTRY.yaml has no such id (grep empty). Kit lives in docs/99-archive/prompts-2026-09/archive/campaigns/generic-nine-audit-kit-2026-08.md. Same Kit line appears on other nine cards.",
-      "method": "Grep REGISTRY.yaml for prompt.audit.generic-nine; read agents-runtime.md:46.",
-      "expected": "Kit citation is prompt.audit.cycle + domains.yaml, or a registered pack id.",
-      "actual": "Dangling pack id on the live agents-runtime card.",
-      "impact": "Operators search REGISTRY for a pack that does not exist; not a runtime SSOT break.",
+      "observation": "Card body: Kit: prompt 6 of prompt.audit.generic-nine.pack. REGISTRY.yaml has no such id (grep empty). prompts check still passes because the string is body text, not entries.id.",
+      "method": "Grep REGISTRY.yaml for generic-nine; python -m scripts.ai.prompts check exit 0.",
+      "expected": "Either a registry pack entry, or cards drop the unresolved pack id.",
+      "actual": "Pack id appears in multiple library/audit and library/doc cards; not in REGISTRY.yaml.",
+      "impact": "Operators cannot render or lint the pack as a unit; kit membership is prose-only.",
       "affected_paths": [
         "docs/00-project/ai/prompts/library/audit/agents-runtime.md",
         "docs/00-project/ai/prompts/REGISTRY.yaml"
@@ -356,25 +108,327 @@
       "evidence": {
         "path": "docs/00-project/ai/prompts/library/audit/agents-runtime.md",
         "line": 46,
-        "command": "rg prompt.audit.generic-nine docs/00-project/ai/prompts/REGISTRY.yaml",
-        "scope": "prompt library",
-        "timestamp": "2026-09-14T06:27:53Z",
+        "command": "python -m scripts.ai.prompts check",
+        "scope": "docs/00-project/ai/prompts/",
+        "timestamp": "2026-09-24T06:51:26Z",
         "exit_code": 0,
-        "output": "no REGISTRY match; pack referenced from live nine cards"
+        "output": "OK — no issues; generic-nine.pack absent from REGISTRY.yaml entries"
       },
-      "acceptance": "Live cards cite prompt.audit.cycle / sequential-run or a registered pack.",
+      "acceptance": "REGISTRY contains the pack id or cards no longer cite it.",
       "validation_commands": [
-        ".\\.venv-win\\Scripts\\python.exe -c \\\"from scripts.ai.prompts.registry import load_registry; ids=[e.id for e in load_registry()]; assert 'prompt.audit.generic-nine.pack' not in ids\\\""
+        ".\\.venv-win\\Scripts\\python.exe -m scripts.ai.prompts check"
       ],
-      "rollback": "Revert Kit line wording.",
-      "owner_surface": "composition",
-      "remediation": "Replace Kit: prompt.audit.generic-nine.pack with prompt.audit.cycle / sequential-run plus archive pointer.",
+      "rollback": "Revert REGISTRY or card prose only.",
+      "owner_surface": "docs",
+      "remediation": "Add a deprecated/active pack entry in REGISTRY.yaml or replace the kit line with the nine prompt.audit.* ids.",
+      "effort": "S",
+      "automation": "Optional hygiene: unknown prompt.* tokens in card bodies fail check.",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "prompts check still green after pack registration or prose removal"
+      ]
+    },
+    {
+      "finding_id": "AGT-008",
+      "id": "AGT-008",
+      "fingerprint": "b25f20710c4de2d923ceac6c33695089e7c1172ae913f7b33de0c3541c48ed86",
+      "status": "PROVEN",
+      "evidence_class": "CONTRADICTION",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "requirement_id": "GAP",
+      "domain": "agents-runtime",
+      "category": "docs-mirror-staleness",
+      "claim": "CLAUDE.md claims sync with RULES.md v6.1.5 (2026-07-16); live RULES.md header is Version 6.1.11 Last verified 2026-08-25.",
+      "broken_invariant": "Docs mirrors must not pin a stale RULES version as if current.",
+      "root_cause": "claude-guide-stale-rules-version-stamp",
+      "path": "docs/00-project/ai/agents/guides/CLAUDE.md:9",
+      "observation": "guides/CLAUDE.md:9 and stub agents/CLAUDE.md:9 still say v6.1.5. RULES.md:3 says 6.1.11.",
+      "method": "Read file headers of CLAUDE.md and RULES.md.",
+      "expected": "No pinned RULES version, or stamp matches RULES.md header.",
+      "actual": "6.1.5 vs 6.1.11.",
+      "impact": "Claude Code sessions may treat an outdated constitution version as current.",
+      "affected_paths": [
+        "docs/00-project/ai/agents/guides/CLAUDE.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/CLAUDE.md"
+      ],
+      "evidence": {
+        "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
+        "line": 9,
+        "command": "read RULES.md header vs CLAUDE.md stamp",
+        "scope": "docs/00-project/",
+        "timestamp": "2026-09-24T06:52:35Z",
+        "exit_code": 0,
+        "output": "CLAUDE stamp v6.1.5 (2026-07-16); RULES.md Version: 6.1.11 Last verified: 2026-08-25"
+      },
+      "acceptance": "Stamp removed or equal to RULES.md Version header.",
+      "validation_commands": [
+        "Select-String -Path docs/00-project/ai/agents/guides/CLAUDE.md,docs/00-project/RULES.md -Pattern 'Version'"
+      ],
+      "rollback": "Revert CLAUDE.md stamp only.",
+      "owner_surface": "docs",
+      "remediation": "Replace pinned RULES version with 'read RULES.md header' (Windsurf already uses this pattern).",
+      "effort": "S",
+      "automation": "Test: CLAUDE.md must not contain a RULES version literal, or must match RULES.md header.",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "No CLAUDE.md RULES version disagrees with RULES.md:3"
+      ]
+    },
+    {
+      "finding_id": "AGT-009",
+      "id": "AGT-009",
+      "fingerprint": "a933ed11ddd8207615a8f34c97d8a6ce2a994a6970aa587574d073b459f8563e",
+      "status": "PROVEN",
+      "evidence_class": "CONTRADICTION",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "requirement_id": "GAP",
+      "domain": "agents-runtime",
+      "category": "instruction-conflict",
+      "claim": "POST_CHANGE_VALIDATION heading says Applies To incl. .devin/**, but the bullet list only names .codex/** and .junie/**.",
+      "broken_invariant": "Applies-To list must name every tracked runtime tree that AGENTS.md treats as canonical.",
+      "root_cause": "post-change-applies-to-omits-devin-paths",
+      "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md:27",
+      "observation": "Heading line 20: incl. .devin/**. Body 27-29: runtime AI files in .codex/** and .junie/**, optional .gemini/**, AGENTS.md, guidelines.md — no .devin/agents path.",
+      "method": "Inspection of POST_CHANGE_VALIDATION.md vs AGENTS.md Devin paragraph.",
+      "expected": ".devin/agents/** and .devin/skills/** listed in Applies To body.",
+      "actual": "Devin only in the heading.",
+      "impact": "Devin-profile edits may skip post-change mirror/parity notes.",
+      "affected_paths": [
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+        ".devin/agents/DEVIN-RUNTIME.md"
+      ],
+      "evidence": {
+        "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+        "line": 27,
+        "command": "read Applies To section",
+        "scope": "POST_CHANGE_VALIDATION.md",
+        "timestamp": "2026-09-24T06:52:35Z",
+        "exit_code": 0,
+        "output": "heading includes .devin/**; bullets omit .devin/agents and .devin/skills"
+      },
+      "acceptance": "Applies To bullets name .devin/agents/** and .devin/skills/**.",
+      "validation_commands": [
+        "Select-String -Path docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md -Pattern '\\.devin'"
+      ],
+      "rollback": "Revert the Applies To bullets.",
+      "owner_surface": "docs",
+      "remediation": "Add .devin/agents/** and .devin/skills/** to the Applies To bullet list.",
       "effort": "S",
       "automation": "n/a",
       "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "no live card cites unregistered pack id without archive qualifier"
+        "POST_CHANGE body mentions .devin/agents"
+      ]
+    },
+    {
+      "finding_id": "AGT-010",
+      "id": "AGT-010",
+      "fingerprint": "0fb5002820815bbc7286c18c2790cbb325468d886acb4c8d8fd8c0af6b39c075",
+      "status": "PROVEN",
+      "evidence_class": "CONTRADICTION",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "requirement_id": "GAP",
+      "domain": "agents-runtime",
+      "category": "instruction-conflict",
+      "claim": "AGENTS.md Dashboard Skill Routing points only at .codex/skills/observability-*; Junie guidelines name the equal-peer .junie/skills/ paths.",
+      "broken_invariant": "Root contract SHOULD name both equal-peer skill trees or say 'matching runtime tree'.",
+      "root_cause": "root-dashboard-skill-path-codex-only",
+      "path": "AGENTS.md:158",
+      "observation": "AGENTS.md:158-160 Codex-only. .junie/guidelines.md:166-170 Junie path plus 'equal-peer mirror of .codex/...'.",
+      "method": "Read AGENTS.md Dashboard Skill Routing vs .junie/guidelines.md same section.",
+      "expected": "AGENTS.md names both trees or a runtime-relative skill path.",
+      "actual": "Root contract is Codex-only; Junie peer documents both.",
+      "impact": "Junie sessions following AGENTS.md literally skip the Junie skill tree.",
+      "affected_paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "evidence": {
+        "path": "AGENTS.md",
+        "line": 158,
+        "command": "read Dashboard Skill Routing in AGENTS.md and .junie/guidelines.md",
+        "scope": "AGENTS.md .junie/guidelines.md",
+        "timestamp": "2026-09-24T06:52:35Z",
+        "exit_code": 0,
+        "output": "AGENTS.md .codex/skills/observability-dashboard/; guidelines.md .junie/skills/observability-dashboard/"
+      },
+      "acceptance": "AGENTS.md Dashboard section names both .codex and .junie skill paths.",
+      "validation_commands": [
+        "Select-String -Path AGENTS.md,.junie/guidelines.md -Pattern 'observability-dashboard'"
+      ],
+      "rollback": "Revert AGENTS.md Dashboard section.",
+      "owner_surface": "codex",
+      "remediation": "Mirror the Junie guidelines wording into AGENTS.md (both paths, Codex canonical / Junie peer).",
+      "effort": "S",
+      "automation": "Junie mirror contract does not copy AGENTS.md; optional test that dashboard paths appear in both files.",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "AGENTS.md contains .junie/skills/observability-dashboard"
+      ]
+    },
+    {
+      "finding_id": "AGT-011",
+      "id": "AGT-011",
+      "fingerprint": "2a9f9565e38139f934fc51110e492732952670bac23e3f973ad27c99b43f5a6b",
+      "status": "PROVEN",
+      "evidence_class": "CONTRADICTION",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.8,
+      "requirement_id": "GAP",
+      "domain": "agents-runtime",
+      "category": "instruction-conflict",
+      "claim": "copilot-instructions.md Canonical Sources ordered list starts with NORMATIVE_SOURCES.md, while AGENTS.md and a later paragraph in the same file require runtime-source-first.",
+      "broken_invariant": "A single instruction file must not present two conflicting precedence orders.",
+      "root_cause": "copilot-canonical-sources-list-not-runtime-first",
+      "path": ".github/copilot-instructions.md:6",
+      "observation": "Lines 6-13 list NORMATIVE_SOURCES then RULES then AGENTS.md. Lines 16-17 say runtime-source-first from AGENTS.md.",
+      "method": "Read .github/copilot-instructions.md Canonical Sources vs AGENTS.md Canonical Precedence.",
+      "expected": "List order matches AGENTS.md runtime-first.",
+      "actual": "List is docs-first; paragraph is runtime-first.",
+      "impact": "Hosted Copilot may load RULES before runtime maps on conflict.",
+      "affected_paths": [
+        ".github/copilot-instructions.md",
+        "AGENTS.md"
+      ],
+      "evidence": {
+        "path": ".github/copilot-instructions.md",
+        "line": 6,
+        "command": "read Canonical Sources",
+        "scope": ".github/copilot-instructions.md",
+        "timestamp": "2026-09-24T06:52:35Z",
+        "exit_code": 0,
+        "output": "first bullet NORMATIVE_SOURCES.md; later 'follow the runtime-source-first precedence defined in AGENTS.md'"
+      },
+      "acceptance": "Canonical Sources list starts with AGENTS.md / runtime trees.",
+      "validation_commands": [
+        "Get-Content .github/copilot-instructions.md -TotalCount 20"
+      ],
+      "rollback": "Revert copilot-instructions.md list order.",
+      "owner_surface": "docs",
+      "remediation": "Reorder the Copilot Canonical Sources list to match AGENTS.md.",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "First canonical bullet is AGENTS.md or .codex/.junie"
+      ]
+    },
+    {
+      "finding_id": "AGT-012",
+      "id": "AGT-012",
+      "fingerprint": "49bb32f9cb322e0badd0ac8e3eaf31add9acd35772968f05222385fb90cd3249",
+      "status": "PROVEN",
+      "evidence_class": "CONTRADICTION",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "requirement_id": "GAP",
+      "domain": "agents-runtime",
+      "category": "destructive-default",
+      "claim": "mcp_docker_prune.ps1 deletes matching exited containers unless BIOETL_MCP_PRUNE_DRY_RUN=1; mcp_docker_prune.sh defaults to dry-run unless MCP_DOCKER_PRUNE_APPLY=1.",
+      "broken_invariant": "Destructive agent-adjacent scripts MUST default to dry-run on every platform.",
+      "root_cause": "mcp-prune-powershell-apply-by-default-vs-bash-dry-run",
+      "path": "scripts/ai/mcp/support/mcp_docker_prune.ps1:10",
+      "observation": "ps1: dryRun = env BIOETL_MCP_PRUNE_DRY_RUN -eq '1'; else docker rm -f. sh: apply default 0; docker rm only if apply==1. Different env var names.",
+      "method": "Read ps1 and sh prune helpers; did not execute docker rm.",
+      "expected": "Both helpers dry-run by default; same apply flag name.",
+      "actual": "Windows apply-by-default; bash dry-run-by-default; env names differ.",
+      "impact": "Windows MCP wrapper startup can remove exited MCP containers without an apply flag.",
+      "affected_paths": [
+        "scripts/ai/mcp/support/mcp_docker_prune.ps1",
+        "scripts/ai/mcp/support/mcp_docker_prune.sh"
+      ],
+      "evidence": {
+        "path": "scripts/ai/mcp/support/mcp_docker_prune.ps1",
+        "line": 10,
+        "command": "read prune helpers (not executed)",
+        "scope": "scripts/ai/mcp/support/",
+        "timestamp": "2026-09-24T06:52:35Z",
+        "exit_code": 0,
+        "output": "ps1 BIOETL_MCP_PRUNE_DRY_RUN opt-in; sh MCP_DOCKER_PRUNE_APPLY opt-in; skipped bioetl-* names in both"
+      },
+      "acceptance": "ps1 defaults to dry-run; apply requires an explicit env/flag; names documented next to sh.",
+      "validation_commands": [
+        "Select-String -Path scripts/ai/mcp/support/mcp_docker_prune.ps1,scripts/ai/mcp/support/mcp_docker_prune.sh -Pattern 'dry-run|APPLY|DRY_RUN|docker rm'"
+      ],
+      "rollback": "Revert ps1 default only.",
+      "owner_surface": "composition",
+      "remediation": "Invert ps1 default to dry-run; accept MCP_DOCKER_PRUNE_APPLY=1 (and keep BIOETL_MCP_PRUNE_DRY_RUN as alias if needed).",
+      "effort": "S",
+      "automation": "Unit/architecture test: ps1 source contains default dry-run before docker rm -f.",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "ps1 does not call docker rm unless apply env is 1"
+      ]
+    },
+    {
+      "finding_id": "AGT-013",
+      "id": "AGT-013",
+      "fingerprint": "d5cec057fca9b59cb5321b1de03e69cd71b1a19fbc7ad9650037998dd943070e",
+      "status": "PROVEN",
+      "evidence_class": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "requirement_id": "GAP",
+      "domain": "agents-runtime",
+      "category": "discoverability",
+      "claim": "prompt.audit.agents-runtime Discovery list omits opencode.json / .opencode/**, which AGENTS.md now treats as a subordinate runtime discovery surface.",
+      "broken_invariant": "The agents-runtime card Must include when present the surfaces AGENTS.md documents.",
+      "root_cause": "agents-runtime-card-omits-opencode-surface",
+      "path": "docs/00-project/ai/prompts/library/audit/agents-runtime.md",
+      "observation": "Card Discovery lists AGENTS.md, .codex, .junie, .devin, docs/00-project/ai, copilot, CLAUDE/GEMINI. No .opencode. AGENTS.md OpenCode section exists; .opencode/agent/repo-agent.md is write-deny Phase 1.",
+      "method": "Grep agents-runtime.md for opencode (no match); read AGENTS.md OpenCode section and .opencode/agent/repo-agent.md.",
+      "expected": "Discovery includes opencode.json and .opencode/agent/** when present.",
+      "actual": "Surface exists and is governed in AGENTS.md; card ignores it.",
+      "impact": "Nine-domain agents-runtime audits can miss OpenCode write-path / permission drift.",
+      "affected_paths": [
+        "docs/00-project/ai/prompts/library/audit/agents-runtime.md",
+        "AGENTS.md",
+        ".opencode/agent/repo-agent.md"
+      ],
+      "evidence": {
+        "path": "docs/00-project/ai/prompts/library/audit/agents-runtime.md",
+        "line": 46,
+        "command": "grep opencode in agents-runtime.md; read AGENTS.md OpenCode section",
+        "scope": "docs/00-project/ai/prompts/library/audit/agents-runtime.md AGENTS.md .opencode/",
+        "timestamp": "2026-09-24T06:52:35Z",
+        "exit_code": 0,
+        "output": "agents-runtime.md: no opencode; AGENTS.md has OpenCode GitHub Repo Agent (Phase 1); repo-agent.md write: false"
+      },
+      "acceptance": "Discovery bullet for opencode.json and .opencode/**; optional CI/workflow files.",
+      "validation_commands": [
+        "Select-String -Path docs/00-project/ai/prompts/library/audit/agents-runtime.md -Pattern 'opencode'"
+      ],
+      "rollback": "Revert card Discovery list.",
+      "owner_surface": "docs",
+      "remediation": "Add optional Discovery entries for opencode.json, .opencode/agent/**, .github/workflows/opencode-*.yml.",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "agents-runtime.md mentions .opencode"
       ]
     }
   ]
