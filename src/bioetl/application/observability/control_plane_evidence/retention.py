@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from typing import Protocol
+from bioetl.application.observability.control_plane_evidence.timing import evidence_stage
 
 from bioetl.application.observability.control_plane_evidence.checks import (
     EvidenceCheckResult,
@@ -58,7 +59,8 @@ def build_retention_checks(
     )
     checks = retention_evidence_checks(manifest, relevant, cutoff=plan.cutoff)
     if archive_verifier is not None and checks[-1].reason != "archive_not_applicable":
-        verified, reason = archive_verifier.verify(manifest=manifest, plan=plan)
+        with evidence_stage("archive_verification"):
+            verified, reason = archive_verifier.verify(manifest=manifest, plan=plan)
         archive = EvidenceCheckResult(
             "archive",
             _archive_status(verified),

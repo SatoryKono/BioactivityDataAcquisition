@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from typing import Protocol
+from bioetl.application.observability.control_plane_evidence.timing import evidence_stage
 
 from bioetl.application.observability.control_plane_evidence import (
     EvidenceCheckResult,
@@ -54,11 +55,12 @@ async def resolve_evidence_scope(
     """Resolve one selector scope, mapping source failures to stable evidence."""
     requested_pipeline = _safe_required_param(host, query, "pipeline")
     try:
-        scope = await asyncio.to_thread(
-            resolve_control_plane_identity_scope,
-            host,
-            query,
-        )
+        with evidence_stage("manifest_resolution"):
+            scope = await asyncio.to_thread(
+                resolve_control_plane_identity_scope,
+                host,
+                query,
+            )
     except SOURCE_READ_ERRORS:
         fallback = _unresolved_evidence_scope(
             host,

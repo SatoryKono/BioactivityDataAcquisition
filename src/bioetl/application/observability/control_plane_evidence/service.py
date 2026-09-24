@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from typing import cast
+from bioetl.application.observability.control_plane_evidence.timing import evidence_stage
 
 from bioetl.application.observability.control_plane_evidence.checkpoint_validation import (
     build_checkpoint_checks,
@@ -223,11 +224,12 @@ class ControlPlaneEvidenceService:
                     ),
                 ),
             )
-        fragments = tuple(
-            self.lineage_store.list_by_manifest_id(scope.manifest.manifest_id)
-        )
-        if not fragments:
-            fragments = tuple(self.lineage_store.list_by_run_id(scope.manifest.run_id))
+        with evidence_stage("lineage_read"):
+            fragments = tuple(
+                self.lineage_store.list_by_manifest_id(scope.manifest.manifest_id)
+            )
+            if not fragments:
+                fragments = tuple(self.lineage_store.list_by_run_id(scope.manifest.run_id))
         run_ledger_entries = (
             ledger_snapshot
             if ledger_snapshot is not None
@@ -283,7 +285,8 @@ class ControlPlaneEvidenceService:
                     else ledger_entries(self.ledger_port, scope.manifest)
                 ),
             )
-        plan = self._bounded_retention_plan(scope.manifest, now)
+        with evidence_stage("retention_plan"):
+            plan = self._bounded_retention_plan(scope.manifest, now)
         checks, relevant_artifacts = build_retention_checks(
             manifest=scope.manifest,
             plan=plan,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from bioetl.application.observability.control_plane_evidence.timing import evidence_stage
 
 from bioetl.application.observability.control_plane_evidence.checks import (
     EvidenceCheckResult,
@@ -94,7 +95,8 @@ def ledger_entries(
     """Load one manifest ledger as an immutable tuple."""
     if port is None:
         return ()
-    return tuple(port.list_entries(manifest.manifest_id))
+    with evidence_stage("ledger_read"):
+        return tuple(port.list_entries(manifest.manifest_id))
 
 
 __all__ = [
