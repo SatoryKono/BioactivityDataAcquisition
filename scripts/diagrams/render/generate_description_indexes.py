@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
+import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -49,11 +51,87 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "Defaults to all supported targets."
         ),
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail when tracked indexes drift. Stamp text is normalized.",
+    )
     return parser.parse_args(argv)
 
 
+_STAMP_RE = re.compile(r"(_Автогенерация: )[^_\n]+(_)|(- Generated: )\S+")
+_UTC_STAMP_RE = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00")
+_STAMP_PAYLOAD_RE = re.compile(r"_Автогенерация: ([^_]+)_|- Generated: (\S+)")
+
+
+def deterministic_stamp(source: Path) -> str:
+    """UTC stamp from SOURCE_DATE_EPOCH or the newest commit touching source."""
+    epoch = os.environ.get("SOURCE_DATE_EPOCH", "").strip()
+    if epoch:
+        moment = datetime.fromtimestamp(int(epoch), tz=timezone.utc)
+        return moment.isoformat(timespec="seconds")
+    result = subprocess.run(
+        ["git", "log", "-1", "--format=%cI", "--", source.as_posix()],
+        cwd=REPO_ROOT_IMPORT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    raw = result.stdout.strip()
+    if result.returncode != 0 or not raw:
+        return "1970-01-01T00:00:00+00:00"
+    moment = datetime.fromisoformat(raw)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    return moment.astimezone(timezone.utc).isoformat(timespec="seconds")
+
+
+def normalize_generated_stamp(text: str) -> str:
+    """Replace generated stamp payloads so --check ignores clock drift."""
+
+    def _replace(match: re.Match[str]) -> str:
+        if match.group(1):
+            return f"{match.group(1)}<stamp>{match.group(2)}"
+        return f"{match.group(3)}<stamp>"
+
+    return _STAMP_RE.sub(_replace, text.replace("\r\n", "\n"))
+
+
+def generated_stamps_are_utc(text: str) -> bool:
+    payloads = [left or right for left, right in _STAMP_PAYLOAD_RE.findall(text)]
+    return bool(payloads) and all(_UTC_STAMP_RE.fullmatch(item) for item in payloads)
+
+
+def atomic_write_text(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.tmp")
+    temporary.write_text(content, encoding="utf-8", newline="\n")
+    os.replace(temporary, path)
+
+
+def write_or_check(path: Path, content: str, *, check: bool) -> int:
+    if not content.endswith("\n"):
+        content = f"{content}\n"
+    if not check:
+        atomic_write_text(path, content)
+        print(f"[OK] Generated: {path}")
+        return 0
+    if not path.is_file():
+        print(f"[ERROR] Missing generated file: {path}")
+        return 1
+    existing = path.read_text(encoding="utf-8")
+    if not generated_stamps_are_utc(existing):
+        print(f"[ERROR] Generated stamp is not UTC: {path}")
+        return 1
+    if normalize_generated_stamp(existing) != normalize_generated_stamp(content):
+        print(f"[ERROR] Generated content drift: {path}")
+        return 1
+    print(f"[OK] Checked: {path}")
+    return 0
+
+
 def _generated_at() -> str:
-    return datetime.now().astimezone().isoformat(timespec="seconds")
+    return deterministic_stamp(DESCRIPTION_ROOT)
 
 
 def collect_cards(family: str) -> list[Path]:
@@ -203,30 +281,31 @@ def build_class_index_markdown(class_cards: list[Path]) -> str:
     return "\n".join(lines)
 
 
-def write_index(path: Path, content: str) -> None:
-    path.write_text(content, encoding="utf-8")
-
-
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     targets = set(args.target or TARGETS)
 
     cards_by_family = {family: collect_cards(family) for family in FAMILY_DIR_LABELS}
+    exit_code = 0
 
     if "root" in targets:
-        write_index(ROOT_INDEX_PATH, build_root_index_markdown(cards_by_family))
-        print(f"[OK] Generated: {ROOT_INDEX_PATH}")
+        exit_code |= write_or_check(
+            ROOT_INDEX_PATH,
+            build_root_index_markdown(cards_by_family),
+            check=args.check,
+        )
 
     if "class" in targets:
-        write_index(
+        exit_code |= write_or_check(
             CLASS_INDEX_PATH,
             build_class_index_markdown(cards_by_family["class"]),
+            check=args.check,
         )
-        print(f"[OK] Generated: {CLASS_INDEX_PATH}")
 
     generated_targets = ", ".join(sorted(targets))
-    print(f"[INFO] Description index targets updated: {generated_targets}")
-    return 0
+    mode = "checked" if args.check else "updated"
+    print(f"[INFO] Description index targets {mode}: {generated_targets}")
+    return exit_code
 
 
 if __name__ == "__main__":

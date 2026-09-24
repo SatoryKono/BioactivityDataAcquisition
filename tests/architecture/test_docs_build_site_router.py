@@ -22,6 +22,15 @@ import yaml
 pytestmark = pytest.mark.architecture
 
 
+def test_build_site_defaults_to_strict_and_allows_opt_out() -> None:
+    module = importlib.import_module("scripts.docs.build.mkdocs_build")
+
+    assert module._with_default_strict([]) == ["--strict"]
+    assert module._with_default_strict(["--strict", "--clean"]) == ["--strict", "--clean"]
+    assert module._with_default_strict(["--no-strict", "--clean"]) == ["--clean"]
+    assert module._with_default_strict(["--help"]) == ["--help"]
+
+
 def test_build_site_router_targets_importable_backend() -> None:
     root = Path(__file__).resolve().parents[2]
     router = (root / "scripts" / "docs" / "__main__.py").read_text(encoding="utf-8")

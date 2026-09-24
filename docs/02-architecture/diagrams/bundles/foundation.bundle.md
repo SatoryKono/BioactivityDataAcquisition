@@ -1,6 +1,6 @@
 # BioETL Foundation Diagrams Bundle
 
-- Generated: 2026-07-06T11:30:27
+- Generated: 2026-09-24T19:11:39+00:00
 - Diagram count: 55
 
 ## Table of Contents
@@ -72,12 +72,12 @@
 ![01-full-system-component](../foundation/svg/01-full-system-component.svg)
 
 ### Описание
-Диаграмма «Full System Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters), composition/runtime_builders, application/core. Схема имеет плотность порядка 35 узлов и 53 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, Interfaces Layer, Composition Layer, Application Layer, Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: Bioactivity APIs, Publication APIs, CLI run / run-all / run-composite, CLI run-manifest / lineage / checkpoint, Signal orchestration, execution_api. Связанный ADR: ADR-040.
+Диаграмма «Full System Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters), composition/runtime_builders, application/core. Схема имеет плотность порядка 35 узлов и 53 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, Interfaces Layer, Composition Layer, Application Layer, Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: Bioactivity APIs, Publication APIs, CLI run / run-all / run-composite, CLI run-manifest / lineage / checkpoint, Signal orchestration, entrypoints / composite_catalog. Связанный ADR: ADR-040.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-03-28`
+- Дата: `2026-09-03`
 - Узлы (metadata): `35`
 - ADR: `ADR-040`
 
@@ -97,7 +97,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
+- Дата: `2026-07-31`
 - Узлы (metadata): `20`
 
 \newpage
@@ -135,7 +135,7 @@
 ### Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Component / Class`
-- Дата: `2026-03-24`
+- Дата: `2026-08-21`
 - Узлы (metadata): `10`
 
 \newpage
@@ -192,7 +192,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Component / Class`
-- Дата: `2026-03-24`
+- Дата: `2026-08-21`
 - Узлы (metadata): `21`
 
 \newpage
@@ -230,7 +230,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Component / Class`
-- Дата: `2026-03-28`
+- Дата: `2026-09-03`
 - Узлы (metadata): `25`
 
 \newpage
@@ -249,7 +249,7 @@
 ### Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Component / Class`
-- Дата: `2026-03-24`
+- Дата: `2026-08-21`
 - Узлы (metadata): `13`
 
 \newpage
@@ -306,7 +306,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Component / Class`
-- Дата: `2026-03-24`
+- Дата: `2026-08-21`
 - Узлы (metadata): `25`
 
 \newpage
@@ -358,12 +358,12 @@
 ![10-infrastructure-layer-class-diagram](../foundation/svg/10-infrastructure-layer-class-diagram.svg)
 
 ### Описание
-Диаграмма «Infrastructure Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Infrastructure Layer), §3.6 (Resilience), RF-014. Схема имеет плотность порядка 18 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: HTTP Infrastructure, DataSource Adapters, Storage Writers, Coordination, Observability. Показательные узлы для быстрого чтения: UnifiedHTTPClient, CircuitBreaker, TokenBucket, ChemblAdapter, PubchemAdapter, UniprotAdapter.
+Диаграмма «Infrastructure Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Infrastructure Layer), §3.6 (Resilience), RF-014. Схема имеет плотность порядка 18 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: HTTP Infrastructure, DataSource Adapters, Storage Writers, Coordination, Observability. Показательные узлы для быстрого чтения: UnifiedHTTPClient, CircuitBreakerGuard, TokenBucketRateLimiter, ChemblAdapter, PubChemAdapter, UniProtAdapter.
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-03-19`
+- Дата: `2026-08-17`
 - Узлы (metadata): `18`
 
 \newpage
@@ -515,7 +515,7 @@
 ### Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-03-24`
+- Дата: `2026-08-21`
 - Узлы (metadata): `7`
 
 \newpage
@@ -534,7 +534,7 @@
 ### Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-03-24`
+- Дата: `2026-08-21`
 - Узлы (metadata): `7`
 
 \newpage
@@ -591,7 +591,7 @@
 ### Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-03-24`
+- Дата: `2026-08-21`
 - Узлы (metadata): `7`
 
 \newpage
@@ -610,7 +610,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-03-19`
+- Дата: `2026-08-17`
 - Узлы (metadata): `9`
 
 \newpage
@@ -700,12 +700,12 @@
 ![28-composition-root-di-graph](../foundation/svg/28-composition-root-di-graph.svg)
 
 ### Описание
-Диаграмма «Composition Root Wiring — Public APIs and Assembly» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Module)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Layer), ADR-005, RF-011. Схема имеет плотность порядка 23 узлов и 32 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Interfaces, Public composition APIs, Composition assembly, Created runtime objects. Показательные узлы для быстрого чтения: CLI / interfaces layer, execution_api runner creation + metrics flush, control_plane_api inspection + admin accessors, health_api health + quarantine accessors, maintenance_api maintenance accessors, resources_api cleanup / checkpoint / archive helpers.
+Диаграмма «Composition Root Wiring — Public APIs and Assembly» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Module)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Layer), ADR-005, RF-011. Схема имеет плотность порядка 23 узлов и 32 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Interfaces, Public composition APIs, Composition assembly, Created runtime objects. Показательные узлы для быстрого чтения: CLI / interfaces layer, execution_api external compatibility shim, control_plane_service_access first-party inspection + admin, health_service_access first-party health + quarantine, maintenance_api external compatibility shim, resources_runtime first-party checkpoint + lifecycle.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Module)`
-- Дата: `2026-03-28`
+- Дата: `2026-09-03`
 - Узлы (metadata): `23`
 
 \newpage
@@ -719,13 +719,13 @@
 ![29-composite-pipeline-workflow](../foundation/svg/29-composite-pipeline-workflow.svg)
 
 ### Описание
-Диаграмма «Composite Pipeline Full Workflow — Seed to Gold (ADR-026)» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/composite runner, checkpoint snapshot + ledger replay, runtime bootstrap. Схема имеет плотность порядка 19 узлов и 38 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Phase 1: Initialization, Phase 2: Seed Pipeline, Phase 3: Dependencies, Phase 3.5: Key Extraction, Phase 4: Fan-Out Enrichment, Phase 5: Merge. Показательные узлы для быстрого чтения: [S] Load CompositeConfig from YAML, [S] Run seed PipelineRunner (e.g., chembl_publication), ("[D, [S] DependencyCoordinatorService • run_dependencies(), ("[D, [S] KeyExtractorService • extract_keys(seed_silver, join_keys=[doi, pmid]).
+Диаграмма «Composite Pipeline Full Workflow — Seed to Gold (ADR-026)» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/composite runner, checkpoint snapshot + ledger replay, runtime bootstrap. Схема имеет плотность порядка 20 узлов и 43 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Phase 1: Initialization, Phase 2: Seed Pipeline, Phase 3: Dependencies, Phase 3.5: Key Extraction, Phase 4: Fan-Out Enrichment, Phase 5: Merge. Показательные узлы для быстрого чтения: \[S\] Load CompositeConfig from YAML, \[S\] Run seed PipelineRunner (e.g., chembl_publication), ("\[D, \[S\] DependencyCoordinatorService • run_dependencies(), ("\[D, \[S\] KeyExtractorService • extract(seed_silver, keys=\[doi, pmid\]).
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-04-02`
-- Узлы (metadata): `19`
+- Дата: `2026-09-03`
+- Узлы (metadata): `20`
 
 \newpage
 
@@ -738,7 +738,7 @@
 ![30-port-adapter-mapping](../foundation/svg/30-port-adapter-mapping.svg)
 
 ### Описание
-Диаграмма «Port-to-Adapter Mapping Table Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.2 (Ports & Adapters), ARCH-008 (Single Source). Схема имеет плотность порядка 35 узлов и 79 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Ports (domain/ports/), Core Data & State, Observability & DQ, Validation & Policy, Runtime Controls, Infrastructure Adapters. Показательные узлы для быстрого чтения: [P] DataSourcePort, [P] FilterableDataSourcePort, [P] Bronze/Silver/Gold/MergedStoragePorts, [P] LockPort, [P] CheckpointPort, [P] QuarantinePort.
+Диаграмма «Port-to-Adapter Mapping Table Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.2 (Ports & Adapters), ARCH-008 (Single Source). Схема имеет плотность порядка 35 узлов и 79 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Ports (domain/ports/), Core Data & State, Observability & DQ, Validation & Policy, Runtime Controls, Infrastructure Adapters. Показательные узлы для быстрого чтения: \[P\] DataSourcePort, \[P\] FilterableDataSourcePort, \[P\] Bronze/Silver/Gold/MergedStoragePorts, \[P\] LockPort, \[P\] CheckpointPort, \[P\] QuarantinePort.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -781,7 +781,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Component / Class`
-- Дата: `2026-03-24`
+- Дата: `2026-08-21`
 - Узлы (metadata): `19`
 
 \newpage
@@ -800,7 +800,7 @@
 ### Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Module)`
-- Дата: `2026-03-19`
+- Дата: `2026-08-17`
 - Узлы (metadata): `10`
 
 \newpage
@@ -819,7 +819,7 @@
 ### Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Component / Class`
-- Дата: `2026-03-24`
+- Дата: `2026-08-21`
 - Узлы (metadata): `14`
 
 \newpage
@@ -838,7 +838,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-03-24`
+- Дата: `2026-08-21`
 - Узлы (metadata): `28`
 
 \newpage
@@ -876,7 +876,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Component / Class`
-- Дата: `2026-03-28`
+- Дата: `2026-09-03`
 - Узлы (metadata): `23`
 
 \newpage
@@ -895,7 +895,7 @@
 ### Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Component / Class`
-- Дата: `2026-03-28`
+- Дата: `2026-09-03`
 - Узлы (metadata): `12`
 
 \newpage
@@ -928,12 +928,12 @@
 ![40-application-core-collaboration](../foundation/svg/40-application-core-collaboration.svg)
 
 ### Описание
-Диаграмма «Application Core Component Collaboration» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), application/core/. Схема имеет плотность порядка 15 узлов и 19 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: PipelineRunner (application/core/runner.py), Lifecycle Services, Pre/Post Services, Batch Execution, Observability, PipelineService bundle. Показательные узлы для быстрого чтения: run() — main orchestrator, HeartbeatService • start() • stop(), CheckpointRuntimeService • load_checkpoint() • save_checkpoint(), ShutdownService • is_shutting_down() • initiate_shutdown(), PreflightService • validate_pipeline_config() • validate_provider_health(), PostrunService • run() • run_dq_checks() • run_vacuum_if_enabled().
+Диаграмма «Application Core Component Collaboration» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), application/core/. Схема имеет плотность порядка 15 узлов и 19 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: PipelineRunner (application/core/runner.py), Lifecycle Services, Pre/Post Services, Batch Execution, Observability, PipelineService bundle. Показательные узлы для быстрого чтения: run() — main orchestrator, HeartbeatTask • start() • stop(), CheckpointRuntimeService • load_checkpoint() • save_checkpoint(), ShutdownService • is_shutting_down() • initiate_shutdown(), PreflightService • validate_pipeline_config() • validate_provider_health(), PostrunService • run() • run_dq_checks() • run_vacuum_if_enabled().
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-03-24`
+- Дата: `2026-08-21`
 - Узлы (metadata): `15`
 
 \newpage
@@ -947,7 +947,7 @@
 ![41-error-classification-tree](../foundation/svg/41-error-classification-tree.svg)
 
 ### Описание
-Диаграмма «Error Classification Decision Tree — Full Logic» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3.1 (Error Handling), domain/exceptions/. Схема имеет плотность порядка 22 узлов и 44 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: HTTP Branch Outcomes, Domain Branch Outcomes, Infrastructure Branch Outcomes, Error Actions. Показательные узлы для быстрого чтения: Error Occurred, [A] RETRY max_attempts: 3 multiplier: 2.0 jitter: MD5-based, [A] FAIL FAST No retry Pipeline terminates ExitCode.PIPELINE_ERROR, [A] BATCH FAIL error_rate > 20% Entire batch rejected Checkpoint NOT saved.
+Диаграмма «Error Classification Decision Tree — Full Logic» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3.1 (Error Handling), domain/exceptions/. Схема имеет плотность порядка 22 узлов и 44 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: HTTP Branch Outcomes, Domain Branch Outcomes, Infrastructure Branch Outcomes, Error Actions. Показательные узлы для быстрого чтения: Error Occurred, \[A\] RETRY max_attempts: 3 multiplier: 2.0 jitter: MD5-based, \[A\] FAIL FAST No retry Pipeline terminates ExitCode.PIPELINE_ERROR, \[A\] BATCH FAIL error_rate &gt; 20% Entire batch rejected Checkpoint NOT saved.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -971,7 +971,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Component / Class`
-- Дата: `2026-03-24`
+- Дата: `2026-08-21`
 - Узлы (metadata): `11`
 
 \newpage
@@ -985,7 +985,7 @@
 ![43-fan-out-fan-in-pattern](../foundation/svg/43-fan-out-fan-in-pattern.svg)
 
 ### Описание
-Диаграмма «Fan-Out/Fan-In Pattern — Composite Pipeline Enrichment» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: ADR-026 (Composite Pipeline Pattern), application/composite/. Схема имеет плотность порядка 18 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Seed Pipeline Result, Key Extraction, Fan-Out (EnrichmentCoordinator), Enricher Silver Tables, Fan-In (MergeService), Gold Output. Показательные узлы для быстрого чтения: ("Seed Silver Table (e.g., chembl/publication )  "), DOI Keys (~50,000 unique), PMID Keys (~30,000 unique), CrossRef Enricher filter_ids = DOIs required = true timeout = 3600s, PubMed Enricher filter_ids = PMIDs required = true timeout = 3600s, OpenAlex Enricher filter_ids = DOIs required = false timeout = 1800s.
+Диаграмма «Fan-Out/Fan-In Pattern — Composite Pipeline Enrichment» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: ADR-026 (Composite Pipeline Pattern), application/composite/. Схема имеет плотность порядка 18 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Seed Pipeline Result, Key Extraction, Fan-Out (EnrichmentCoordinator), Enricher Silver Tables, Fan-In (MergeService), Gold Output. Показательные узлы для быстрого чтения: ("Seed Silver Table (e.g., chembl/publication ) "), DOI Keys (~50,000 unique), PMID Keys (~30,000 unique), CrossRef Enricher filter_ids = DOIs required = true timeout = 3600s, PubMed Enricher filter_ids = PMIDs required = true timeout = 3600s, OpenAlex Enricher filter_ids = DOIs required = false timeout = 1800s.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1028,7 +1028,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-04-02`
+- Дата: `2026-09-03`
 - Узлы (metadata): `23`
 
 \newpage
@@ -1061,13 +1061,13 @@
 ![48-composite-phase-lifecycle](../foundation/svg/48-composite-phase-lifecycle.svg)
 
 ### Описание
-Диаграмма «Composite Pipeline Phase Lifecycle and Resume Semantics» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма состояний (state diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: domain/composite/state.py, checkpoint replay gate, run-ledger stage semantics. Схема имеет плотность порядка 10 узлов и 26 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности.
+Диаграмма «Composite Pipeline Phase Lifecycle and Resume Semantics» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма состояний (state diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: domain/composite/state.py, checkpoint replay gate, run-ledger stage semantics. Схема имеет плотность порядка 12 узлов и 32 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности.
 
 ### Метаданные
 - Тип: `stateDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-04-02`
-- Узлы (metadata): `10`
+- Дата: `2026-09-03`
+- Узлы (metadata): `12`
 
 \newpage
 
@@ -1080,12 +1080,12 @@
 ![49-composite-runner-class](../foundation/svg/49-composite-runner-class.svg)
 
 ### Описание
-Диаграмма «CompositePipelineRunner — Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/composite/ (runner facade, dependency group, checkpoint facade, coordinators). Схема имеет плотность порядка 16 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: CompositePipelineRunner, CompositeRunnerDependencyGroup, CompositeConfig, CompositeRuntimeConfig, FSMStateHelperService, KeyExtractorService.
+Диаграмма «CompositePipelineRunner — Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/composite/ (runner facade, dependency group, checkpoint facade, coordinators). Схема имеет плотность порядка 16 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: CompositePipelineRunner, CompositeRunnerDependencies, CompositeConfig, CompositeRuntimeConfig, FSMStateHelperService, KeyExtractorService.
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-03-28`
+- Дата: `2026-09-03`
 - Узлы (metadata): `16`
 
 \newpage

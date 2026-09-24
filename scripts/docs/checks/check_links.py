@@ -654,6 +654,28 @@ def _iter_markdown_targets(
     return targets
 
 
+def _image_target_stem(raw_target: str) -> str:
+    return raw_target.split("#", 1)[0].split("?", 1)[0].strip()
+
+
+def _is_local_image_target(raw_target: str) -> bool:
+    stem = _image_target_stem(raw_target).lower()
+    if stem.startswith(("http://", "https://", "data:", "mailto:")):
+        return False
+    return stem.endswith((".png", ".svg"))
+
+
+def _is_remote_image_target(raw_target: str) -> bool:
+    stem = _image_target_stem(raw_target).lower()
+    return stem.startswith(("http://", "https://", "data:", "mailto:")) and stem.endswith(
+        (".png", ".svg")
+    )
+
+
+def _image_target_path(source_file: Path, raw_target: str) -> Path:
+    return (source_file.parent / _image_target_stem(raw_target)).resolve()
+
+
 def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
     broken: list[tuple[Path, int, str, str]] = []
 
@@ -666,7 +688,12 @@ def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
         for line_no, link_text, raw_target, _, resolved in _iter_markdown_targets(
             md_file, lines
         ):
-            if raw_target.endswith((".png", ".svg")):
+            if _is_remote_image_target(raw_target):
+                continue
+            if _is_local_image_target(raw_target):
+                image_path = _image_target_path(md_file, raw_target)
+                if not image_path.exists():
+                    broken.append((md_file, line_no, link_text, raw_target))
                 continue
             if not resolved.exists():
                 broken.append((md_file, line_no, link_text, raw_target))

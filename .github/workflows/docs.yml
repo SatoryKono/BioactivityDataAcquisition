@@ -174,6 +174,11 @@ jobs:
           uv run --frozen --no-build python -m scripts.data_quality
           check-entity-config-parity
 
+      - name: Check diagram index and bundle stamp drift
+        run: |
+          uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check
+          uv run --frozen --no-build python scripts/diagrams/render/generate_all_bundles.py --check
+
       - name: Run canonical docs verification chain
         run: uv run --frozen --no-build python -m scripts.docs verify
 
@@ -497,7 +502,8 @@ jobs:
               ':(glob)docs/02-architecture/diagrams/architecture/*.mmd' \
               ':(glob)docs/02-architecture/diagrams/foundation/*.mmd' \
               ':(glob)docs/02-architecture/diagrams/class-diagrams/*.mmd' \
-              ':(glob)docs/02-architecture/diagrams/views/*.mermaid' || true
+              ':(glob)docs/02-architecture/diagrams/views/*.mermaid' \
+              ':(glob)docs/02-architecture/diagrams/providers/**/*.mmd' || true
           )
           if [ -z "$changed_diagrams" ]; then
             echo "No diagram source files changed — skipping drift check."

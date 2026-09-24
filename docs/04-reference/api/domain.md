@@ -43,7 +43,6 @@ The top-level package currently exports the following live public symbols from
 | `map_domain_event_to_observability_event` | `bioetl.domain.observability_event_mapping` |
 | `get_runtime_observability_publication_contract` | `bioetl.domain.runtime_observability_publication_contract` |
 | `is_canonical_runtime_observability_emitter` | `bioetl.domain.runtime_observability_publication_contract` |
-| `get_version` | `bioetl.domain.version` |
 
 ### Lazy submodule exports
 
