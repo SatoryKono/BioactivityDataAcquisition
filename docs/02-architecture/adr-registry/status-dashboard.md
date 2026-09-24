@@ -2,14 +2,13 @@
 
 Quick overview of ADR status and distribution.
 
-**Last Updated**: 2026-09-16 11:31:34
+**Last Updated**: 2026-09-22 09:32:15
 
 ## 📈 Status Distribution
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 58 | 95.1% |
-| `proposed` | 1 | 1.6% |
+| `accepted` | 59 | 96.7% |
 | `superseded` | 2 | 3.3% |
 
 ## 🏷️  Category Distribution
@@ -40,14 +39,14 @@ Quick overview of ADR status and distribution.
 
 Last 5 updated ADRs:
 
+- **ADR-059**: Package Cohesion Budgets (2026-09-22)
 - **ADR-061**: Persisted Selected Run Assessment (2026-09-16)
 - **ADR-060**: Prompt Kernel and Overlay Architecture (2026-08-28)
 - **ADR-058**: Layered Port Registries (2026-08-25)
-- **ADR-059**: Package Cohesion Budgets (2026-08-25)
 - **ADR-057**: Deterministic Runtime Config Authority and Identity (2026-08-10)
 
 ## 🎯 Health Metrics
 
-- **Accepted ADRs**: 58/61 (95.1%)
-- **Maintenance Ratio**: 58:3
+- **Accepted ADRs**: 59/61 (96.7%)
+- **Maintenance Ratio**: 59:2
 - **Average ADRs/Year**: 20.3 (assuming 3-year project)

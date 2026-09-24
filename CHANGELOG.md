@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Ops HTTP backend logs stay under data/repo ops dirs (#10951):** detached
+  `bioetl health server` startup logs use `<data_root>/ops/` or
+  `logs/ops/bioetl-ops-http-backend-{port}.log`, not `tempfile.gettempdir()`.
+
+- **ADR-061 accepted in decision index (#10952):** `decisions/README.md` and
+  `RULES.md` appendix status aligned with the ADR header (was Proposed);
+  enforcement matrix includes ADR-061.
+
+- **Architecture-index census 2479/2426 (#10953):** live coverage inventory
+  and import-linter file counts plus Windows `lint_imports(..., no_cache=True)`
+  note.
+
 - **Composite merge includes PARTIAL enrichers (#10949):** `_load_enricher_dataframes`
   now joins Silver for `EnrichmentStatus.PARTIAL` as well as `SUCCESS`. Optional
   enrichers that complete below the hard DQ threshold (live Semantic Scholar

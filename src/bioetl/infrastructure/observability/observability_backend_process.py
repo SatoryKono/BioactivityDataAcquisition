@@ -7,7 +7,6 @@ import os
 import signal
 import subprocess  # nosec B404 - see suppression registry
 import sys
-import tempfile
 import time
 from collections.abc import Mapping
 from pathlib import Path
@@ -257,14 +256,22 @@ def _build_detached_backend_env(
     return env
 
 
-def build_detached_backend_log_path(port: int) -> Path:
+def build_detached_backend_log_path(
+    port: int,
+    *,
+    data_root: Path | None = None,
+) -> Path:
     """Return the deterministic detached Ops HTTP backend startup log path.
 
-    Uses ``bioetl-ops-http-backend-{port}.log``. A legacy
+    Prefer ``data_root/ops/`` when a medallion/data root is supplied. Otherwise
+    use repository-local ``logs/ops/`` (gitignored). A legacy
     ``bioetl-quarantine-backend-{port}.log`` path is accepted as a read alias
     only by failure-detail helpers when present.
     """
-    return Path(tempfile.gettempdir()) / f"bioetl-ops-http-backend-{port}.log"
+    filename = f"bioetl-ops-http-backend-{port}.log"
+    if data_root is not None:
+        return Path(data_root) / "ops" / filename
+    return _BIOETL_REPOSITORY_ROOT / "logs" / "ops" / filename
 
 
 def start_detached_ops_http_backend(
@@ -279,10 +286,10 @@ def start_detached_ops_http_backend(
     """Launch ``bioetl health server`` as a detached Ops HTTP backend process.
 
     This is the shipping identity surface for BioETL Ops HTTP dashboard panels.
-    ``data_root`` is accepted for call-site compatibility but is not used by
-    the health-server command line.
+    ``data_root`` selects the startup log directory (``<data_root>/ops/``);
+    the health-server command line still discovers control-plane roots from
+    runtime config.
     """
-    del data_root  # health server discovers control-plane roots from runtime config
     command = [
         python_executable or sys.executable,
         "-m",
@@ -299,7 +306,7 @@ def start_detached_ops_http_backend(
     kwargs.pop("stderr", None)
     kwargs["cwd"] = str(_BIOETL_REPOSITORY_ROOT)
     kwargs["env"] = _build_detached_backend_env(current_env=current_env)
-    log_path = build_detached_backend_log_path(port)
+    log_path = build_detached_backend_log_path(port, data_root=data_root)
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log_path.write_text("", encoding="utf-8")
     with log_path.open("ab") as log_handle:

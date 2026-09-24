@@ -186,7 +186,7 @@
   "integral_score": 10.0,
   "interpretation": "excellent",
   "metrics": {
-    "accepted_adr_count": 58,
+    "accepted_adr_count": 59,
     "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
@@ -225,7 +225,7 @@
   "schema_version": 2,
   "source_artifacts": {
     "adr_enforcement_matrix": {
-      "accepted_adr_count": 58,
+      "accepted_adr_count": 59,
       "blocking_gap_count": 0,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
@@ -269,7 +269,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "3ae2f3245652299d9d1c14e0dafc94a07e8dad196f0ce580df143f7d9784bab0"
+      "source_tree_sha256": "665ce6bf2128e88c750ac4e635e8c82f8188836788959832cec4597cf14d5031"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

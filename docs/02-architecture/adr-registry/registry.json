@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-16T11:31:34+00:00",
+  "generated": "2026-09-22T09:32:15+00:00",
   "total_adrs": 61,
   "adrs": [
     {
@@ -1135,7 +1135,7 @@
       "category": "Architecture",
       "owner": "BioETL Team",
       "decision_date": "2026-08-25",
-      "last_reviewed": "2026-08-25",
+      "last_reviewed": "2026-09-22",
       "context": "Per-file LOC caps (`test_code_metrics.py`) force horizontal splits:\n`domain/aggregates` has 19 modules, several of which are mixins created to\nstay under the domain 305-line cap. Package-level cohe...",
       "decision": "1. Per-file layer LOC caps stay unchanged (no tech-debt budget growth).\n2. New shrink-only package budgets live in\n   `configs/quality/package_cohesion_budget.yaml`:\n   `max_modules` and `max_packa...",
       "consequences": "Mixin files that exist only to satisfy the 305 LOC cap may be merged when\nthe merged file stays under the cap. Helper-ratio for\n`application_services_control_plane` is tracked as a shrink-only targ...",
@@ -1174,8 +1174,8 @@
       "adr_number": "061",
       "title": "Persisted Selected Run Assessment",
       "file_path": "ADR-061-persisted-selected-run-assessment.md",
-      "status": "proposed",
-      "source_status": "Proposed",
+      "status": "accepted",
+      "source_status": "Accepted (Implemented #10490)",
       "category": "Observability",
       "owner": "BioETL Team",
       "decision_date": "2026-09-16",
@@ -1191,9 +1191,8 @@
   ],
   "stats": {
     "by_status": {
-      "accepted": 58,
-      "superseded": 2,
-      "proposed": 1
+      "accepted": 59,
+      "superseded": 2
     },
     "by_category": {
       "Storage": 3,

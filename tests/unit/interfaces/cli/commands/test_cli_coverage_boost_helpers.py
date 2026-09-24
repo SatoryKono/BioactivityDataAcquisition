@@ -899,7 +899,9 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
     captured: dict[str, object] = {}
     log_path = tmp_path / "backend.log"
     monkeypatch.setattr(
-        backend_process, "build_detached_backend_log_path", lambda port: log_path
+        backend_process,
+        "build_detached_backend_log_path",
+        lambda port, **_kwargs: log_path,
     )
     monkeypatch.setattr(
         backend_process,

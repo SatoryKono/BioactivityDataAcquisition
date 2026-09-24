@@ -393,9 +393,14 @@ def test_ensure_backend_failure_message_includes_exit_code_and_log_tail(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(process_subject.tempfile, "gettempdir", lambda: str(tmp_path))
+    def _log_path(port: int, **_kwargs: object) -> Path:
+        return tmp_path / "ops" / f"bioetl-ops-http-backend-{port}.log"
+
+    monkeypatch.setattr(process_subject, "build_detached_backend_log_path", _log_path)
+    monkeypatch.setattr(runtime_subject, "build_detached_backend_log_path", _log_path)
     port = 18081
-    log_path = build_detached_backend_log_path(port)
+    log_path = _log_path(port)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
     log_path.write_text("Traceback line\nRuntimeError: boom\n", encoding="utf-8")
     try:
         probe = MagicMock(return_value=False)
@@ -538,7 +543,9 @@ def test_ensure_backend_failed_startup_appends_process_diagnostics_to_log(
     # Create the log file first to ensure it exists for appending
     log_path.write_text("", encoding="utf-8")
     monkeypatch.setattr(
-        runtime_subject, "build_detached_backend_log_path", lambda _port: log_path
+        runtime_subject,
+        "build_detached_backend_log_path",
+        lambda _port, **_kwargs: log_path,
     )
     monkeypatch.setattr(
         runtime_subject,
@@ -769,7 +776,9 @@ def test_build_detached_backend_env_prefixes_src_pythonpath() -> None:
     assert pythonpath[1] == "existing-path"
 
 
-def test_start_detached_quarantine_backend_sets_repo_cwd_and_env() -> None:
+def test_start_detached_quarantine_backend_sets_repo_cwd_and_env(
+    tmp_path: Path,
+) -> None:
     captured: dict[str, object] = {}
 
     class _Process:
@@ -784,6 +793,7 @@ def test_start_detached_quarantine_backend_sets_repo_cwd_and_env() -> None:
         bind_host="0.0.0.0",
         port=8000,
         python_executable="python",
+        data_root=tmp_path,
         popen_factory=fake_popen,
     )
 
@@ -828,16 +838,26 @@ def test_start_detached_quarantine_backend_ignores_data_root_for_health_server(
         popen_factory=fake_popen,
     )
 
-    # Shipping Ops HTTP backend is health server; data_root is not forwarded.
+    # Health-server argv still omits --data-root; logs use data_root/ops/.
     assert "--data-root" not in captured["command"]
     assert captured["command"][2:5] == ["bioetl", "health", "server"]
+    assert (tmp_path / "ops" / "bioetl-ops-http-backend-8000.log").is_file()
 
 
-def test_build_detached_backend_log_path_uses_tempdir_and_port() -> None:
+def test_build_detached_backend_log_path_uses_repo_logs_ops_and_port() -> None:
     path = build_detached_backend_log_path(8000)
 
     assert path.name == "bioetl-ops-http-backend-8000.log"
-    assert path.parent.exists()
+    assert path.parent.name == "ops"
+    assert path.parent.parent.name == "logs"
+
+
+def test_build_detached_backend_log_path_uses_data_root_when_provided(
+    tmp_path: Path,
+) -> None:
+    path = build_detached_backend_log_path(9000, data_root=tmp_path)
+
+    assert path == tmp_path / "ops" / "bioetl-ops-http-backend-9000.log"
 
 
 def test_should_disable_transient_health_server_only_on_matching_live_backend() -> None:
