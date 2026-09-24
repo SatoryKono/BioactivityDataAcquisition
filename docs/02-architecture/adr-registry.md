@@ -8,19 +8,18 @@ This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
 **Total ADRs**: 61
-**Last Updated**: 2026-09-16
+**Last Updated**: 2026-09-22
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 58 | 95.1% |
-| `proposed` | 1 | 1.6% |
+| `accepted` | 59 | 96.7% |
 | `superseded` | 2 | 3.3% |
 
 ## 🟢 Accepted ADRs
 
-### 58 decisions
+### 59 decisions
 
 ### ADR-001: Delta Lake vs Parquet
 
@@ -721,13 +720,11 @@ stay un...
 
 ---
 
-## 🟡 Proposed ADRs
-
-### 1 decisions
-
 ### ADR-061: Persisted Selected Run Assessment
 
-**Status**: `proposed` | **Category**: `Observability` | **Owner**: `BioETL Team`
+**Status**: `accepted` | **Category**: `Observability` | **Owner**: `BioETL Team`
+
+**Source status text**: `Accepted (Implemented #10490)`
 
 **Context**: Prometheus freshness and dashboard ranges describe current telemetry and chart
 coverage. They cannot define the outcome of a completed run. A successf...

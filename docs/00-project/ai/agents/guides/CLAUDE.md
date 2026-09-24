@@ -6,7 +6,7 @@
 
 **Normative stack (read first):** [`docs/00-project/NORMATIVE_SOURCES.md`](../../../NORMATIVE_SOURCES.md) → [`RULES.md`](../../../RULES.md) → [`REQUIREMENTS.md`](../../../../01-requirements/REQUIREMENTS.md) → [`docs/02-architecture/decisions/`](../../../../02-architecture/decisions/).
 
-*Синхронизировано с RULES.md v6.1 | `docs/00-project/RULES.md` header `Version:` | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.7.0*
+*Синхронизировано с `docs/00-project/RULES.md` (читай header `Version:`; не копируй номер сюда) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.7.0*
 
 > **Runtime-specific note:** orchestration guidance for Claude lives in
 > runtime-specific orchestration copy. Codex keeps its own runtime-specific
