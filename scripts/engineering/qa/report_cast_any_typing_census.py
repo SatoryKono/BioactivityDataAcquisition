@@ -48,6 +48,7 @@ LINKED_ISSUE = "#10596"
 DEFAULT_SRC_ROOT = Path("src/bioetl")
 DEFAULT_JSON = Path("reports/quality/cast-any-typing-census.json")
 DEFAULT_MD = Path("reports/quality/cast-any-typing-census.md")
+_MD_ALIGN_TWO = "| --- | ---: |"
 
 # Ordered so the first matching category wins; keeps classification stable.
 JUSTIFICATION_CATEGORIES: tuple[tuple[str, str], ...] = (
@@ -299,7 +300,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "## By category",
         "",
         "| Category | Count |",
-        "| --- | ---: |",
+        _MD_ALIGN_TWO,
     ]
     for category, count in summary["by_category"].items():
         lines.append(f"| `{category}` | {count} |")
@@ -317,7 +318,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "## Unjustified by sub-bucket (triage only)",
         "",
         "| Sub-bucket | Count |",
-        "| --- | ---: |",
+        _MD_ALIGN_TWO,
     ]
     for subcategory, count in summary["unjustified_by_subcategory"].items():
         lines.append(f"| `{subcategory}` | {count} |")
@@ -337,7 +338,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "## Unjustified free-form reason tags",
         "",
         "| Reason | Count |",
-        "| --- | ---: |",
+        _MD_ALIGN_TWO,
     ]
     for row in report["unjustified_reason_tags"]:
         lines.append(f"| `{row['reason']}` | {row['count']} |")

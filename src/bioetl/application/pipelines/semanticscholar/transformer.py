@@ -46,11 +46,14 @@ def _publication_type_inputs(
     *,
     resolve_scalar: Callable[[object], str | None],
 ) -> tuple[list[str] | None, str | None]:
-    raw_types_list = (
-        [str(t).strip() for t in publication_types if t is not None and str(t).strip()]
-        if isinstance(publication_types, list)
-        else None
-    )
+    raw_types_list: list[str] | None
+    if isinstance(publication_types, list):
+        items: list[object] = publication_types
+        raw_types_list = [
+            str(t).strip() for t in items if t is not None and str(t).strip()
+        ]
+    else:
+        raw_types_list = None
     raw_type = None if raw_types_list else resolve_scalar(publication_types)
     return raw_types_list, raw_type
 

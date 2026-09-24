@@ -6,6 +6,9 @@ from copy import deepcopy
 
 from scripts.ops.observability.grafana._dashboard_state_followup import override, walk
 
+_WIDTH = "custom.width"
+_CELL = "custom.cellOptions"
+
 
 def _table(panel: dict, *, compact: bool = True) -> None:
     panel.setdefault("options", {}).update(cellHeight="sm" if compact else "md")
@@ -23,7 +26,7 @@ def _flex(panel: dict, names: set[str]) -> None:
             item["properties"] = [
                 p
                 for p in item["properties"]
-                if p["id"] not in {"custom.width", "custom.minWidth"}
+                if p["id"] not in {_WIDTH, "custom.minWidth"}
             ]
 
 
@@ -77,33 +80,68 @@ def _runtime(p: dict[int, dict]) -> None:
     p[2460]["description"] = p[2460].get("description", "").removesuffix(note) + note
 
 
-def _trust(p: dict[int, dict]) -> None:
+def _replace_rate_intervals(p: dict[int, dict]) -> None:
     for panel in p.values():
         for target in panel.get("targets", []):
             expr = target.get("expr", "")
             if "increase(" in expr or "rate(" in expr:
                 target["expr"] = expr.replace("[$__interval]", "[$__rate_interval]")
+
+
+def _stamp_counter_no_observations(panel: dict) -> None:
+    panel["fieldConfig"]["defaults"]["noValue"] = "NO OBSERVATIONS"
+    for mapping in panel["fieldConfig"]["defaults"].get("mappings", []):
+        if mapping.get("type") == "special" and mapping["options"].get("match") == "null":
+            mapping["options"]["result"]["text"] = "NO OBSERVATIONS"
+    note = (
+        " No observations means this outcome has no samples in the selected window; "
+        "it does not prove zero failures. A measured zero is displayed numerically."
+    )
+    description = panel.get("description", "")
+    panel["description"] = (
+        description + note if "No observations means" not in description else description
+    )
+
+
+def _disable_cell_wrap(panel: dict) -> None:
+    panel["fieldConfig"]["defaults"]["custom"]["cellOptions"] = {
+        "type": "auto",
+        "wrapText": False,
+    }
+    for item in panel["fieldConfig"].get("overrides", []):
+        for prop in item["properties"]:
+            if prop["id"] != _CELL:
+                continue
+            if item["matcher"].get("options") in {"value", "percentage", "row_status"}:
+                prop["value"].pop("wrapText", None)
+            else:
+                prop["value"]["wrapText"] = False
+
+
+def _compact_trust_evidence_table(p: dict[int, dict], panel_id: int) -> None:
+    panel = p[panel_id]
+    _table(panel, compact=False)
+    _flex(panel, {"Current", "Value"})
+    if panel_id == 9403:
+        override(panel, "value", **{_WIDTH: 70})
+    panel["options"].setdefault("footer", {}).update(
+        enablePagination=True, countRows=True
+    )
+    # Grafana pagination uses the configured row height. Wrapped cells can
+    # exceed it and hide the last row; full values remain available in Inspect.
+    _disable_cell_wrap(panel)
+    for name in ("Current", "Parameter", "Action"):
+        override(panel, name, **{_CELL: {"type": "auto", "wrapText": False}})
+
+
+def _trust(p: dict[int, dict]) -> None:
+    _replace_rate_intervals(p)
     p[5]["targets"][0]["expr"] = (
         "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total"
         '{pipeline=~"$pipeline"}[$__rate_interval]))'
     )
     for panel_id in (3, 104, 120, 101, 102, 103, 4, 136, 122, 137):
-        p[panel_id]["fieldConfig"]["defaults"]["noValue"] = "NO OBSERVATIONS"
-        for mapping in p[panel_id]["fieldConfig"]["defaults"].get("mappings", []):
-            if (
-                mapping.get("type") == "special"
-                and mapping["options"].get("match") == "null"
-            ):
-                mapping["options"]["result"]["text"] = "NO OBSERVATIONS"
-        p[panel_id]["description"] = (
-            (
-                p[panel_id].get("description", "")
-                + " No observations means this outcome has no samples in the selected window; "
-                "it does not prove zero failures. A measured zero is displayed numerically."
-            )
-            if "No observations means" not in p[panel_id].get("description", "")
-            else p[panel_id]["description"]
-        )
+        _stamp_counter_no_observations(p[panel_id])
     p[892]["fieldConfig"]["defaults"]["thresholds"] = {
         "mode": "absolute",
         "steps": [{"color": "blue", "value": None}],
@@ -125,39 +163,7 @@ def _trust(p: dict[int, dict]) -> None:
     }
     latency["gridPos"]["h"] = 10
     for panel_id in (9404, 9405, 9406, 9407, 9408, 9409, 9402, 9403, 9417):
-        panel = p[panel_id]
-        _table(panel, compact=False)
-        _flex(panel, {"Current", "Value"})
-        if panel_id == 9403:
-            override(panel, "value", **{"custom.width": 70})
-        panel["options"].setdefault("footer", {}).update(
-            enablePagination=True, countRows=True
-        )
-        # Grafana pagination uses the configured row height. Wrapped cells can
-        # exceed it and hide the last row; full values remain available in Inspect.
-        panel["fieldConfig"]["defaults"]["custom"]["cellOptions"] = {
-            "type": "auto",
-            "wrapText": False,
-        }
-        for item in panel["fieldConfig"].get("overrides", []):
-            for prop in item["properties"]:
-                if prop["id"] == "custom.cellOptions":
-                    if item["matcher"].get("options") in {
-                        "value",
-                        "percentage",
-                        "row_status",
-                    }:
-                        prop["value"].pop("wrapText", None)
-                    else:
-                        prop["value"]["wrapText"] = False
-        for name in ("Current", "Parameter", "Action"):
-            override(
-                panel,
-                name,
-                **{
-                    "custom.cellOptions": {"type": "auto", "wrapText": False},
-                },
-            )
+        _compact_trust_evidence_table(p, panel_id)
     _bands(
         p[905],
         [
@@ -174,6 +180,32 @@ def _trust(p: dict[int, dict]) -> None:
     _bands(p[9412], [[(9402, 0, 24, 12)], [(9403, 0, 24, 12)], [(9417, 0, 24, 7)]])
 
 
+_ACTION_LABELS = {
+    "Runtime": "Pipeline Diagnostics",
+    "Runtime (wf)": "Pipeline Diagnostics",
+    "Control Plane": "Trust",
+    "DQ": "Data Quality",
+    "Provider": "Provider Health",
+}
+
+
+def _remap_action_label_texts(panel: dict) -> None:
+    for item in panel["fieldConfig"]["overrides"]:
+        for prop in item["properties"]:
+            if prop["id"] != "mappings":
+                continue
+            for mapping in prop["value"]:
+                _remap_mapping_texts(mapping)
+
+
+def _remap_mapping_texts(mapping: dict) -> None:
+    for value in mapping.get("options", {}).values():
+        if isinstance(value, dict):
+            value["text"] = _ACTION_LABELS.get(
+                value.get("text"), value.get("text", "")
+            )
+
+
 def _overview(p: dict[int, dict]) -> None:
     # Align the current verdict with the selected-run domains column below it.
     p[99]["gridPos"].update(x=0, w=16)
@@ -187,27 +219,15 @@ def _overview(p: dict[int, dict]) -> None:
                 panel,
                 name,
                 **{
-                    "custom.width": 210,
-                    "custom.cellOptions": {"type": "auto", "wrapText": True},
+                    _WIDTH: 210,
+                    _CELL: {"type": "auto", "wrapText": True},
                 },
             )
-        for item in panel["fieldConfig"]["overrides"]:
-            for prop in item["properties"]:
-                if prop["id"] == "mappings":
-                    for mapping in prop["value"]:
-                        for value in mapping.get("options", {}).values():
-                            if isinstance(value, dict):
-                                value["text"] = {
-                                    "Runtime": "Pipeline Diagnostics",
-                                    "Runtime (wf)": "Pipeline Diagnostics",
-                                    "Control Plane": "Trust",
-                                    "DQ": "Data Quality",
-                                    "Provider": "Provider Health",
-                                }.get(value.get("text"), value.get("text", ""))
+        _remap_action_label_texts(panel)
     _table(p[20215], compact=False)
     # Reserve only the short label columns; leave the explanation responsive.
     for name, width in (("Priority", 80), ("Pipeline", 120), ("action_target", 190)):
-        override(p[215], name, **{"custom.width": width})
+        override(p[215], name, **{_WIDTH: width})
     p[20215]["gridPos"]["h"] = 14
     # Retain domain-specific links and queries, but compare the six diagnostics in one banded grid.
     _bands(
@@ -220,13 +240,13 @@ def _overview(p: dict[int, dict]) -> None:
     )
 
 
-def _provider(p: dict[int, dict]) -> None:
+def _provider_status_columns(p: dict[int, dict]) -> None:
     # Compact categorical columns; let the explanatory column take spare width.
     _flex(p[9101], {"provider", "Provider", "Value", "Severity"})
-    override(p[9101], "Severity", **{"custom.width": 130, "custom.align": "left"})
+    override(p[9101], "Severity", **{_WIDTH: 130, "custom.align": "left"})
     _flex(p[9107], {"provider", "Provider", "reason", "Source state", "Status"})
     for name, width in (("Provider", 105), ("Source state", 105), ("Status", 110)):
-        override(p[9107], name, **{"custom.width": width, "custom.align": "left"})
+        override(p[9107], name, **{_WIDTH: width, "custom.align": "left"})
     override(p[9107], "reason", **{"displayName": "Reason"})
     for panel_id in (9103, 9113):
         _table(p[panel_id])
@@ -234,9 +254,11 @@ def _provider(p: dict[int, dict]) -> None:
         override(
             p[panel_id],
             "cause",
-            **{"custom.cellOptions": {"type": "auto", "wrapText": True}},
+            **{_CELL: {"type": "auto", "wrapText": True}},
         )
-    _bands(p[9105], [[(9111, 0, 12, 5), (9112, 12, 12, 5)], [(9113, 0, 24, 5)]])
+
+
+def _provider_latency_panels(p: dict[int, dict]) -> None:
     p[102]["options"]["textMode"] = "value_and_name"
     p[102]["fieldConfig"]["defaults"].pop("displayName", None)
     p[102]["gridPos"]["h"] = 5
@@ -259,12 +281,18 @@ def _provider(p: dict[int, dict]) -> None:
         )
         panel["fieldConfig"]["defaults"]["noValue"] = "TELEMETRY MISSING"
     p[110]["options"]["legend"].update(placement="right", width=400)
-    raw = p[114]
-    _table(raw)
+
+
+def _rename_raw_count_header(raw: dict) -> None:
     for item in raw["fieldConfig"]["overrides"]:
         for prop in item["properties"]:
             if prop["id"] == "displayName" and prop["value"] == "Count":
                 prop["value"] = "Best raw status in range"
+
+
+def _provider_raw_health(raw: dict) -> None:
+    _table(raw)
+    _rename_raw_count_header(raw)
     _flex(raw, {"Value"})
     raw["description"] = (
         "TIME RANGE / DIAGNOSTIC · 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN. Raw provider health enum evidence: best observed status in the selected range, "
@@ -334,6 +362,28 @@ def _provider(p: dict[int, dict]) -> None:
                 "noValue": "UNKNOWN",
             },
         )
+
+
+def _provider_disable_summary_wrap(p: dict[int, dict]) -> None:
+    for panel_id in (9402, 9403):
+        _table(p[panel_id], compact=False)
+        p[panel_id]["options"].pop("enablePagination", None)
+        p[panel_id]["options"]["footer"].update(enablePagination=True, countRows=True)
+        for item in p[panel_id]["fieldConfig"].get("overrides", []):
+            _clear_wrap_text(item)
+
+
+def _clear_wrap_text(item: dict) -> None:
+    for prop in item["properties"]:
+        if prop["id"] == _CELL and "wrapText" in prop["value"]:
+            prop["value"]["wrapText"] = False
+
+
+def _provider(p: dict[int, dict]) -> None:
+    _provider_status_columns(p)
+    _bands(p[9105], [[(9111, 0, 12, 5), (9112, 12, 12, 5)], [(9113, 0, 24, 5)]])
+    _provider_latency_panels(p)
+    _provider_raw_health(p[114])
     _bands(
         p[9404],
         [
@@ -355,15 +405,7 @@ def _provider(p: dict[int, dict]) -> None:
             [(31, 0, 12, 5), (32, 12, 12, 5)],
         ],
     )
-
-    for panel_id in (9402, 9403):
-        _table(p[panel_id], compact=False)
-        p[panel_id]["options"].pop("enablePagination", None)
-        p[panel_id]["options"]["footer"].update(enablePagination=True, countRows=True)
-        for item in p[panel_id]["fieldConfig"].get("overrides", []):
-            for prop in item["properties"]:
-                if prop["id"] == "custom.cellOptions" and "wrapText" in prop["value"]:
-                    prop["value"]["wrapText"] = False
+    _provider_disable_summary_wrap(p)
     _bands(p[9405], [[(9402, 0, 24, 12)], [(9403, 0, 24, 12)]])
 
 
@@ -480,7 +522,7 @@ def _incident(p: dict[int, dict]) -> None:
                         },
                     }
                 ],
-                "custom.cellOptions": {"type": "color-text"},
+                _CELL: {"type": "color-text"},
             },
         )
 

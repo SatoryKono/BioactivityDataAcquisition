@@ -124,7 +124,14 @@ class UserMemoryStore:
             owner_id=user_id,
             repo_id=context.repo_id,
         )
-        self.grant_consent(replace(consent, active=False))
+        self.grant_consent(
+            UserMemoryConsent(
+                user_id=consent.user_id,
+                repo_id=consent.repo_id,
+                granted_at=consent.granted_at,
+                active=False,
+            )
+        )
 
     def put(
         self,
@@ -224,7 +231,12 @@ class UserMemoryStore:
             json.dumps(content, sort_keys=True),
             trust=current.envelope.trust,
         )
-        corrected = replace(current, content=dict(content))
+        corrected = UserMemoryRecord(
+            owner_id=current.owner_id,
+            envelope=current.envelope,
+            content=dict(content),
+            tombstoned=current.tombstoned,
+        )
         atomic_write_json(
             self._record_path(owner_id, context.repo_id, record_id),
             corrected.to_dict(),
@@ -247,8 +259,8 @@ class UserMemoryStore:
             repo_id=context.repo_id,
         )
         current = self._read_record(owner_id, context.repo_id, record_id)
-        tombstoned = replace(
-            current,
+        tombstoned = UserMemoryRecord(
+            owner_id=current.owner_id,
             envelope=replace(current.envelope, status=RecordStatus.ARCHIVED),
             content={},
             tombstoned=True,

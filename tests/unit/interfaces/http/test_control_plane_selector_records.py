@@ -517,8 +517,9 @@ def test_filter_options_apply_exact_run_fallback_and_validate_dimension() -> Non
         dimension="run_id",
         response_shape="list",
         requested_pipeline=None,
-        exact_run_only=True,
-        fallback_value=" fallback-run ",
+        run_id_policy=selector_context.RunIdOptionPolicy(
+            exact_run_only=True, fallback_value=" fallback-run "
+        ),
     )
     no_fallback_value = selector_context.build_selector_filter_options_payload(
         manifests=(),
@@ -527,8 +528,9 @@ def test_filter_options_apply_exact_run_fallback_and_validate_dimension() -> Non
         response_shape="list",
         requested_pipeline=None,
         selected_run_id="missing-run",
-        exact_run_only=True,
-        fallback_value=None,
+        run_id_policy=selector_context.RunIdOptionPolicy(
+            exact_run_only=True, fallback_value=None
+        ),
     )
     manifest = _manifest(10)
     selected = selector_context.build_selector_filter_options_payload(
@@ -538,8 +540,9 @@ def test_filter_options_apply_exact_run_fallback_and_validate_dimension() -> Non
         response_shape="list",
         requested_pipeline=None,
         selected_run_id=str(manifest.run_id),
-        exact_run_only=True,
-        fallback_value="unused-fallback",
+        run_id_policy=selector_context.RunIdOptionPolicy(
+            exact_run_only=True, fallback_value="unused-fallback"
+        ),
     )
 
     assert fallback == {"items": ["-", "fallback-run"]}
@@ -639,8 +642,9 @@ def test_run_option_labels_mark_unknown_when_catalog_record_is_missing() -> None
         dimension="run_id",
         response_shape="options",
         requested_pipeline=None,
-        exact_run_only=True,
-        fallback_value="orphan-run",
+        run_id_policy=selector_context.RunIdOptionPolicy(
+            exact_run_only=True, fallback_value="orphan-run"
+        ),
     )
     items = cast(list[dict[str, str]], payload["items"])
     assert items[0] == {"text": "SELECT RUN", "value": "-"}

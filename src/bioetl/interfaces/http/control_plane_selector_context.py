@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC
+from dataclasses import dataclass
 
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
 from bioetl.interfaces.http._control_plane_selector_filters import (
@@ -33,9 +34,21 @@ __all__ = (
     "RUN_ID_NO_SELECTION",
     "SELECTOR_CONTEXT_CONTRACT",
     "UNKNOWN_SCOPE",
+    "RunIdOptionPolicy",
     "build_selector_context_payload",
     "build_selector_filter_options_payload",
 )
+
+
+@dataclass(frozen=True, slots=True)
+class RunIdOptionPolicy:
+    """Exact-run option policy for Grafana variable queries."""
+
+    exact_run_only: bool = False
+    fallback_value: str | None = None
+
+
+_DEFAULT_RUN_ID_OPTION_POLICY = RunIdOptionPolicy()
 
 
 def build_selector_context_payload(
@@ -200,8 +213,7 @@ def build_selector_filter_options_payload(
     selected_run_types: tuple[str, ...] = (),
     selected_run_statuses: tuple[str, ...] = (),
     selected_run_id: str | None = None,
-    exact_run_only: bool = False,
-    fallback_value: str | None = None,
+    run_id_policy: RunIdOptionPolicy = _DEFAULT_RUN_ID_OPTION_POLICY,
     workflow_manifests: tuple[WorkflowManifest, ...] = (),
     timezone: str = "UTC",
 ) -> dict[str, object]:
@@ -242,9 +254,9 @@ def build_selector_filter_options_payload(
     values = _dimension_option_values(
         dimension=dimension,
         options=options,
-        exact_run_only=exact_run_only,
+        exact_run_only=run_id_policy.exact_run_only,
         selected_run_id=selected_run_id,
-        fallback_value=fallback_value,
+        fallback_value=run_id_policy.fallback_value,
     )
     if response_shape == "options" and dimension == "run_id":
         return _run_option_labels(values, option_records, timezone=timezone)

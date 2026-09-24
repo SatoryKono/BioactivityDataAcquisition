@@ -123,6 +123,24 @@ def unavailable_status(
     }
 
 
+def _accounting_conflicts(
+    reconciliation: object, verdict: object
+) -> list[str]:
+    if not isinstance(reconciliation, dict):
+        return []
+    conflicts: list[str] = []
+    for stage in ("silver", "gold"):
+        prior = "bronze" if stage == "silver" else "silver"
+        key = f"{stage}_vs_{prior}_status"
+        if reconciliation.get(key) == "FAILING":
+            conflicts.append(
+                f"Saved report accounting conflict: {key}=FAILING, "
+                f"delta={reconciliation.get(f'{stage}_delta', 'UNKNOWN')}. "
+                f"Saved Trust verdict: {verdict}; inspect report and ledger."
+            )
+    return conflicts
+
+
 def _saved_trust(
     report: dict[str, object], summary: dict[str, object], rows: list[dict[str, object]]
 ) -> dict[str, object]:
@@ -139,17 +157,7 @@ def _saved_trust(
     ):
         reasons = reasons.get(key) if isinstance(reasons, dict) else None
     reasons_text = reasons if isinstance(reasons, str) else str(control["reason"])
-    reconciliation = report.get("reconciliation")
-    conflicts = []
-    if isinstance(reconciliation, dict):
-        for stage in ("silver", "gold"):
-            key = f"{stage}_vs_{'bronze' if stage == 'silver' else 'silver'}_status"
-            if reconciliation.get(key) == "FAILING":
-                conflicts.append(
-                    f"Saved report accounting conflict: {key}=FAILING, "
-                    f"delta={reconciliation.get(f'{stage}_delta', 'UNKNOWN')}. "
-                    f"Saved Trust verdict: {control['verdict']}; inspect report and ledger."
-                )
+    conflicts = _accounting_conflicts(report.get("reconciliation"), control["verdict"])
     if conflicts:
         reasons_text = "\n".join(filter(None, (reasons_text, *conflicts)))
     return {
@@ -347,6 +355,34 @@ def load_selected_run_status(
     }
 
 
+def _merge_active_diagnostics(
+    active: Mapping[str, object],
+    *,
+    pipeline: str,
+    run_id: str,
+) -> dict[str, object]:
+    merged = unavailable_status(
+        str(active.get("pipeline", pipeline)),
+        run_id,
+        str(active["verdict"]),
+        str(active["reason"]),
+    )
+    merged.update(active)
+    for row in cast(list[dict[str, object]], merged["domains"]):
+        row.update(active)
+        row["run_verdict"] = active["verdict"]
+    for field in ("summary", "presentation_summary"):
+        for row in cast(list[dict[str, object]], merged[field]):
+            row.update(active)
+    for field in ("trust", "presentation_trust"):
+        for row in cast(list[dict[str, object]], merged[field]):
+            row["processing_status"] = active.get("execution_state", "UNKNOWN")
+    merged["presentation_domains"] = presentation_rows(
+        cast(list[dict[str, object]], merged["domains"])
+    )
+    return merged
+
+
 async def handle_selected_run_status(
     host: _HealthObservabilityRoutingHost,
     writer: asyncio.StreamWriter,
@@ -361,26 +397,8 @@ async def handle_selected_run_status(
         if result.get("reason") == "run_not_found":
             active = active_run_diagnostics(host, pipeline, run_id)
             if active is not None:
-                result = unavailable_status(
-                    str(active.get("pipeline", pipeline)),
-                    run_id,
-                    str(active["verdict"]),
-                    str(active["reason"]),
-                )
-                result.update(active)
-                for row in cast(list[dict[str, object]], result["domains"]):
-                    row.update(active)
-                    row["run_verdict"] = active["verdict"]
-                for field in ("summary", "presentation_summary"):
-                    for row in cast(list[dict[str, object]], result[field]):
-                        row.update(active)
-                for field in ("trust", "presentation_trust"):
-                    for row in cast(list[dict[str, object]], result[field]):
-                        row["processing_status"] = active.get(
-                            "execution_state", "UNKNOWN"
-                        )
-                result["presentation_domains"] = presentation_rows(
-                    cast(list[dict[str, object]], result["domains"])
+                result = _merge_active_diagnostics(
+                    active, pipeline=pipeline, run_id=run_id
                 )
         if result.get("execution_state") not in {None, "UNKNOWN"} and not scope_matches(
             result, query

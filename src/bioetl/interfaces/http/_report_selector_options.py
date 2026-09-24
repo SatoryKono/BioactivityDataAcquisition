@@ -92,6 +92,34 @@ def _option_label(
     return f"{started} · {entry.owner} · {identity.get('status', 'unknown')} · {value}"
 
 
+def _maybe_report_option(
+    *,
+    entry: ReportIndexEntry,
+    dimension: str,
+    response_shape: str,
+    scopes: dict[str, tuple[str, ...]],
+    root: Path,
+    timezone: str,
+    seen: set[object],
+) -> object | None:
+    if not _entry_matches_catalog(entry, scopes):
+        return None
+    known_value = entry.owner if dimension == "pipeline" else entry.run_id
+    if dimension in {"pipeline", "run_id"} and known_value in seen:
+        return None
+    identity = _checked_identity(entry, root)
+    if not _identity_matches_scopes(identity, scopes):
+        return None
+    value = identity.get(_FIELDS[dimension])
+    if not isinstance(value, str) or not value or value in seen:
+        return None
+    seen.add(value)
+    label = _option_label(dimension, identity, entry, value, timezone)
+    if response_shape == "options":
+        return {"text": label, "value": value}
+    return value
+
+
 def supplement_report_options(
     payload: dict[str, object],
     *,
@@ -112,24 +140,17 @@ def supplement_report_options(
     items = list(raw_items) if isinstance(raw_items, list) else []
     seen = {item.get("value") if isinstance(item, dict) else item for item in items}
     for entry in sorted(entries, key=lambda item: item.started_at or "", reverse=True):
-        if not _entry_matches_catalog(entry, scopes):
-            continue
-        # Existing manifest-backed values already have their own evidence. Only
-        # a newly contributed option needs the full report identity check.
-        known_value = entry.owner if dimension == "pipeline" else entry.run_id
-        if dimension in {"pipeline", "run_id"} and known_value in seen:
-            continue
-        identity = _checked_identity(entry, root)
-        if not _identity_matches_scopes(identity, scopes):
-            continue
-        value = identity.get(_FIELDS[dimension])
-        if not isinstance(value, str) or not value or value in seen:
-            continue
-        seen.add(value)
-        label = _option_label(dimension, identity, entry, value, timezone)
-        items.append(
-            {"text": label, "value": value} if response_shape == "options" else value
+        option = _maybe_report_option(
+            entry=entry,
+            dimension=dimension,
+            response_shape=response_shape,
+            scopes=scopes,
+            root=root,
+            timezone=timezone,
+            seen=seen,
         )
+        if option is not None:
+            items.append(option)
     return {**payload, "items": items}
 
 

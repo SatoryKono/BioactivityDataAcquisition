@@ -51,7 +51,7 @@ __all__ = [
 def build_request_params(
     *,
     offset: int,
-    entity_type: str | None,
+    _entity_type: str | None,
     page_size: int,
     extraction_params: ExtractionParams,
 ) -> JsonDict:

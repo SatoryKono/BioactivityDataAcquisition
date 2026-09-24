@@ -244,7 +244,7 @@ async def test_chembl_fetch_mixin_and_request_helpers() -> None:
 
     params = build_request_params(
         offset=10,
-        entity_type="protein_class",
+        _entity_type="protein_class",
         page_size=50,
         extraction_params=ExtractionParams.empty(),
     )
@@ -252,7 +252,7 @@ async def test_chembl_fetch_mixin_and_request_helpers() -> None:
     assert params["offset"] == 10
     filled = build_request_params(
         offset=10,
-        entity_type="activity",
+        _entity_type="activity",
         page_size=50,
         extraction_params=ExtractionParams(params={"molecule_chembl_id": "CHEMBL1"}),
     )

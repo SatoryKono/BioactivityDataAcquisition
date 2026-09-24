@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import replace
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
@@ -73,7 +72,16 @@ class QuarantineManagerSupportMixin:
             batch_metrics=self._batch_metrics,
             run_type=getattr(self, "_run_type", "unknown"),
         )
-        return replace(ports, stage=stage)
+        return QuarantineRuntimeDependencies(
+            quarantine=ports.quarantine,
+            emitter=ports.emitter,
+            pipeline_name=ports.pipeline_name,
+            metrics=ports.metrics,
+            pipeline_metrics=ports.pipeline_metrics,
+            batch_metrics=ports.batch_metrics,
+            run_type=ports.run_type,
+            stage=stage,
+        )
 
     async def quarantine_record(
         self,

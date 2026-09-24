@@ -7,6 +7,9 @@ from scripts.ops.observability.grafana._visual_usability import _bands
 
 _WIDTH = "custom.width"
 _HIDDEN = "custom.hidden"
+_WRAP = "custom.wrapText"
+_CELL = "custom.cellOptions"
+_SELECT_RUN = "SELECT RUN"
 _OPEN_REPORT = "Open report"
 
 
@@ -97,8 +100,8 @@ def _saved_run(p: dict[int, dict]) -> None:
             options["renameByName"]["reason_display"] = "Reason"
     _override(panel, "action_path", _HIDDEN, True)
     _table(panel, {"Domain": 125, "Status": 115, "Action": 170})
-    _override(panel, "Reason", "custom.wrapText", True)
-    _override(panel, "Reason", "custom.cellOptions", {"type": "auto", "wrapText": True})
+    _override(panel, "Reason", _WRAP, True)
+    _override(panel, "Reason", _CELL, {"type": "auto", "wrapText": True})
     _override(
         panel,
         "Reason",
@@ -184,7 +187,7 @@ def _overview(p: dict[int, dict]) -> None:
         _override(
             p[pid],
             "Pipeline",
-            "custom.cellOptions",
+            _CELL,
             {"type": "auto", "wrapText": False},
         )
     for pid in (9010, 9011):
@@ -195,42 +198,40 @@ def _overview(p: dict[int, dict]) -> None:
         _table(p[pid], {"Run Type": 130, "Status": 110, "Failures": 110, "Runs": 110})
 
 
-def _trust(p: dict[int, dict]) -> None:
+def _stamp_select_run_states(mapping: dict) -> None:
+    if mapping["type"] != "value":
+        return
+    for state in (_SELECT_RUN, "UNFINISHED"):
+        mapping["options"][state] = {"text": state, "color": "#A3A3A3"}
+
+
+def _stamp_result_mapping_prop(prop: dict) -> None:
+    if prop["id"] != "mappings":
+        return
+    for mapping in prop["value"]:
+        _stamp_select_run_states(mapping)
+
+
+def _trust_select_run_mappings(p: dict[int, dict]) -> None:
     # An unselected run is not a successful processing result.
     for override in p[9418]["fieldConfig"]["overrides"]:
-        if override.get("matcher", {}).get("options") == "Result":
-            for prop in override["properties"]:
-                if prop["id"] == "mappings":
-                    for mapping in prop["value"]:
-                        if mapping["type"] == "value":
-                            for state in ("SELECT RUN", "UNFINISHED"):
-                                mapping["options"][state] = {
-                                    "text": state,
-                                    "color": "#A3A3A3",
-                                }
-    _table(p[9418], {"Result": 110, "Trust": 105, "Reasons": 90, "Observed": 165})
+        if override.get("matcher", {}).get("options") != "Result":
+            continue
+        for prop in override["properties"]:
+            _stamp_result_mapping_prop(prop)
+
+
+def _trust_anchors(p: dict[int, dict]) -> None:
     anchors = p[9404]
     _table(anchors)
     anchors["options"]["cellHeight"] = "lg"
     anchors["fieldConfig"]["defaults"]["custom"]["wrapText"] = True
     anchors["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"] = True
-    _override(anchors, "value_full", "custom.wrapText", True)
-    _override(
-        anchors, "value_full", "custom.cellOptions", {"type": "auto", "wrapText": True}
-    )
-    for pid in (9408, 9409, 9406):
-        _table(p[pid], {"Result": 125, "Status": 115, "Action": 160})
-    # A missing cell is not an empty table: retain the per-row MISSING result
-    # without repeating the panel-level no-rows explanation in each cell.
-    _override(p[9406], "checkpoint_value_short", "noValue", "UNKNOWN")
-    _override(p[9409], "Action", _WIDTH, 190)
-    for pid in (9413, 9414, 9415):
-        _table(p[pid], {"check": 220, "status": 110})
-        _override(p[pid], "reason", _HIDDEN, True)
-        _override(p[pid], "reason_display", _HIDDEN, True)
-        _override(p[pid], "detail", "displayName", "Reason")
-        _override(p[pid], "check", "displayName", "Check")
-        _override(p[pid], "status", "displayName", "Status")
+    _override(anchors, "value_full", _WRAP, True)
+    _override(anchors, "value_full", _CELL, {"type": "auto", "wrapText": True})
+
+
+def _trust_layout(p: dict[int, dict]) -> None:
     _legend(p[7])
     y = p[901]["gridPos"]["y"] + 1
     p[908]["gridPos"].update(x=0, y=y, w=24, h=4)
@@ -284,6 +285,26 @@ def _trust(p: dict[int, dict]) -> None:
     )
     p[122]["gridPos"].update(x=0, w=8, h=3)
     p[137]["gridPos"].update(x=8, w=8, h=3)
+
+
+def _trust(p: dict[int, dict]) -> None:
+    _trust_select_run_mappings(p)
+    _table(p[9418], {"Result": 110, "Trust": 105, "Reasons": 90, "Observed": 165})
+    _trust_anchors(p)
+    for pid in (9408, 9409, 9406):
+        _table(p[pid], {"Result": 125, "Status": 115, "Action": 160})
+    # A missing cell is not an empty table: retain the per-row MISSING result
+    # without repeating the panel-level no-rows explanation in each cell.
+    _override(p[9406], "checkpoint_value_short", "noValue", "UNKNOWN")
+    _override(p[9409], "Action", _WIDTH, 190)
+    for pid in (9413, 9414, 9415):
+        _table(p[pid], {"check": 220, "status": 110})
+        _override(p[pid], "reason", _HIDDEN, True)
+        _override(p[pid], "reason_display", _HIDDEN, True)
+        _override(p[pid], "detail", "displayName", "Reason")
+        _override(p[pid], "check", "displayName", "Check")
+        _override(p[pid], "status", "displayName", "Status")
+    _trust_layout(p)
 
 
 def _runtime(p: dict[int, dict]) -> None:
@@ -357,7 +378,7 @@ def _provider(p: dict[int, dict]) -> None:
     _override(p[9107], "Source state", "displayName", "Source")
     _override(p[9111], "Provider", _WIDTH, 200)
     _override(
-        p[9111], "Provider", "custom.cellOptions", {"type": "auto", "wrapText": False}
+        p[9111], "Provider", _CELL, {"type": "auto", "wrapText": False}
     )
     for pid in (9101, 9107):
         p[pid]["gridPos"].update(y=7, h=8)
@@ -472,14 +493,7 @@ def _dq(p: dict[int, dict]) -> None:
     _stack(p[221], {1: 10, 4: 3, 3: 3, 101: 3, 9: 7, 12: 3, 151: 3})
 
 
-def _incident(p: dict[int, dict]) -> None:
-    p[9401]["title"] = "Monitor Scope Status"
-    p[9400]["gridPos"]["h"] = 3
-    p[9401]["gridPos"]["h"] = 3
-    p[9401]["fieldConfig"]["defaults"]["displayName"] = "Monitor Scope Status"
-    p[2001]["gridPos"].update(y=5, h=2)
-    p[2010]["gridPos"].update(y=7, h=5)
-    p[2005]["gridPos"].update(y=12, h=5)
+def _incident_row_limits(p: dict[int, dict]) -> None:
     for panel_id, limit in ((2010, 2), (2005, 2)):
         for transform in p[panel_id]["transformations"]:
             if transform["id"] == "limit":
@@ -487,39 +501,9 @@ def _incident(p: dict[int, dict]) -> None:
         for link in p[panel_id].get("links", []):
             if link.get("title", "").startswith("Show all rows"):
                 link["title"] = f"Show all rows and total (summary: up to {limit})"
-    _override(
-        p[2010], "Confidence", "custom.cellOptions", {"type": "auto", "wrapText": False}
-    )
-    for pid in (2010, 22010):
-        _override(
-            p[pid],
-            "Action",
-            "mappings",
-            [{"type": "value", "options": {"data_quality": {"text": "DQ"}}}],
-        )
-    _stack(p[2099], {2002: 7, 2003: 4, 2004: 7})
-    _table(p[2002], {"pipeline": 230, "reason": 300, "run_type": 110})
-    _override(p[2002], "reason", "custom.wrapText", True)
-    _table(p[2004], {"Pipeline": 250, "Signal": 88})
-    p[22010]["options"].setdefault("footer", {}).update(
-        enablePagination=False, countRows=False
-    )
-    p[22010]["gridPos"]["h"] = 12
-    for field in ("Object", "Signal", "Details"):
-        _override(p[22010], field, "custom.wrapText", True)
-        _override(
-            p[22010], field, "custom.cellOptions", {"type": "auto", "wrapText": True}
-        )
-    p[22010]["description"] = (
-        "GLOBAL / CURRENT · Empty successful result: no ranked suspects. Missing telemetry remains "
-        "UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action."
-    )
-    p[9400]["options"]["content"] = (
-        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">GLOBAL suspects are not verified causes. Telemetry gaps are UNKNOWN.</div>'
-    )
-    p[2001]["options"]["content"] = (
-        '<div style="font-size:16px;line-height:1.2">Open Action for evidence; PENDING has not fired. Use alert history.</div>'
-    )
+
+
+def _incident_alert_tables(p: dict[int, dict]) -> None:
     for pid in (2005, 22005):
         _table(p[pid], {"severity": 90, "alertstate": 100})
         _override(p[pid], "alertname", "displayName", "Alert")
@@ -533,9 +517,48 @@ def _incident(p: dict[int, dict]) -> None:
     p[2006]["options"].update(perPage=8, rowHeight=0.85, showValue="never")
     p[2006]["fieldConfig"]["defaults"]["custom"]["axisWidth"] = 650
     _table(p[2005], {"severity": 75, "provider": 110, "alertstate": 75})
-    _override(
-        p[2005], "alertname", "custom.cellOptions", {"type": "auto", "wrapText": False}
+    _override(p[2005], "alertname", _CELL, {"type": "auto", "wrapText": False})
+
+
+def _incident(p: dict[int, dict]) -> None:
+    p[9401]["title"] = "Monitor Scope Status"
+    p[9400]["gridPos"]["h"] = 3
+    p[9401]["gridPos"]["h"] = 3
+    p[9401]["fieldConfig"]["defaults"]["displayName"] = "Monitor Scope Status"
+    p[2001]["gridPos"].update(y=5, h=2)
+    p[2010]["gridPos"].update(y=7, h=5)
+    p[2005]["gridPos"].update(y=12, h=5)
+    _incident_row_limits(p)
+    _override(p[2010], "Confidence", _CELL, {"type": "auto", "wrapText": False})
+    for pid in (2010, 22010):
+        _override(
+            p[pid],
+            "Action",
+            "mappings",
+            [{"type": "value", "options": {"data_quality": {"text": "DQ"}}}],
+        )
+    _stack(p[2099], {2002: 7, 2003: 4, 2004: 7})
+    _table(p[2002], {"pipeline": 230, "reason": 300, "run_type": 110})
+    _override(p[2002], "reason", _WRAP, True)
+    _table(p[2004], {"Pipeline": 250, "Signal": 88})
+    p[22010]["options"].setdefault("footer", {}).update(
+        enablePagination=False, countRows=False
     )
+    p[22010]["gridPos"]["h"] = 12
+    for field in ("Object", "Signal", "Details"):
+        _override(p[22010], field, _WRAP, True)
+        _override(p[22010], field, _CELL, {"type": "auto", "wrapText": True})
+    p[22010]["description"] = (
+        "GLOBAL / CURRENT · Empty successful result: no ranked suspects. Missing telemetry remains "
+        "UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action."
+    )
+    p[9400]["options"]["content"] = (
+        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">GLOBAL suspects are not verified causes. Telemetry gaps are UNKNOWN.</div>'
+    )
+    p[2001]["options"]["content"] = (
+        '<div style="font-size:16px;line-height:1.2">Open Action for evidence; PENDING has not fired. Use alert history.</div>'
+    )
+    _incident_alert_tables(p)
 
 
 def _selection_summary(panel: dict) -> None:
@@ -551,7 +574,7 @@ def _selection_summary(panel: dict) -> None:
             [
                 {
                     "type": "value",
-                    "options": {"SELECT RUN": {"text": "—", "color": "text"}},
+                    "options": {_SELECT_RUN: {"text": "—", "color": "text"}},
                 }
             ],
         )
@@ -565,7 +588,7 @@ def _selection_summary(panel: dict) -> None:
         [
             {
                 "type": "value",
-                "options": {"SELECT RUN": {"text": "Choose a run", "color": "text"}},
+                "options": {_SELECT_RUN: {"text": "Choose a run", "color": "text"}},
             }
         ],
     )
@@ -626,9 +649,9 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
                     name: index for index, name in enumerate(fields)
                 }
                 transform["options"]["renameByName"]["reason_display"] = "Reason"
-        _override(panel, "Reason", "custom.wrapText", True)
+        _override(panel, "Reason", _WRAP, True)
         _override(
-            panel, "Reason", "custom.cellOptions", {"type": "auto", "wrapText": True}
+            panel, "Reason", _CELL, {"type": "auto", "wrapText": True}
         )
         _override(panel, "Reason", "displayName", "Reason")
         _override(
@@ -689,19 +712,68 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
     p[9002]["fieldConfig"]["defaults"]["custom"]["wrapText"] = True
     for field in ("Domain", "Status", "Reason"):
         _override(p[9002], field, "links", [])
-    _override(p[9002], "Reason", "custom.wrapText", True)
+    _override(p[9002], "Reason", _WRAP, True)
     _override(
-        p[9002], "Reason", "custom.cellOptions", {"type": "auto", "wrapText": True}
+        p[9002], "Reason", _CELL, {"type": "auto", "wrapText": True}
     )
+
+
+def _apply_stat_value_sizes(p: dict[int, dict]) -> None:
+    for panel in p.values():
+        _selection_summary(panel)
+        if panel["type"] == "stat":
+            panel.setdefault("options", {})["text"] = {"valueSize": 20, "titleSize": 14}
+
+
+def _apply_enum_verdict_copy(uid: object, p: dict[int, dict]) -> None:
+    # These are enum verdicts, not blocker counts: code 3 is UNKNOWN.
+    # Counter panels intentionally retain their >=2=CRIT threshold copy.
+    enum_panels = {
+        "bioetl-dq-v2": (9401,),
+        "bioetl-provider-health-v2": (9401,),
+        "bioetl-overview-v2": (9031, 9007),
+    }
+    for pid in enum_panels.get(uid, ()):
+        p[pid]["description"] = (
+            p[pid]["description"]
+            .replace(">=2=CRIT", "2=CRIT")
+            .replace("`null=UNKNOWN`", "`3/null=UNKNOWN`")
+        )
+
+
+def _apply_run_summary_wrap(p: dict[int, dict]) -> None:
+    if 9402 not in p or p[9402].get("title") != "Review Run Summary":
+        return
+    # Hashes and composite parameter names need two lines at 900px.
+    # Large rows keep pagination from placing wrapped text under its footer.
+    summary = p[9402]
+    _table(summary, {"Parameter": 300})
+    summary["options"]["cellHeight"] = "lg"
+    summary["fieldConfig"]["defaults"]["custom"]["wrapText"] = True
+    summary["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"] = True
+    for field in ("Parameter", "Value"):
+        _override(summary, field, _WRAP, True)
+        _override(summary, field, _CELL, {"type": "auto", "wrapText": True})
+
+
+def _rename_trust_monitor_titles(p: dict[int, dict]) -> None:
+    for pid, title in {
+        9401: "Monitor Readiness",
+        891: "Monitor Replay",
+        892: "Track Checkpoint",
+        893: "Monitor Ledger",
+    }.items():
+        if pid in p:
+            p[pid]["title"] = title
+            p[pid].setdefault("fieldConfig", {}).setdefault("defaults", {})[
+                "displayName"
+            ] = title
 
 
 def apply_evidence_readability(payload: dict) -> None:
     """Preserve queries while improving evidence readability at narrow widths."""
     p = {panel["id"]: panel for panel in _panels(payload["panels"])}
-    for panel in p.values():
-        _selection_summary(panel)
-        if panel["type"] == "stat":
-            panel.setdefault("options", {})["text"] = {"valueSize": 20, "titleSize": 14}
+    _apply_stat_value_sizes(p)
     _saved_run(p)
     handlers = {
         "bioetl-overview-v2": _overview,
@@ -722,44 +794,10 @@ def apply_evidence_readability(payload: dict) -> None:
         explain_incident(p, _override)
     if payload.get("uid") in {"bioetl-overview-v2", "bioetl-dq-v2"}:
         _selected_verdict_reasons(p, overview=payload["uid"] == "bioetl-overview-v2")
-    # These are enum verdicts, not blocker counts: code 3 is UNKNOWN.
-    # Counter panels intentionally retain their >=2=CRIT threshold copy.
-    enum_panels = {
-        "bioetl-dq-v2": (9401,),
-        "bioetl-provider-health-v2": (9401,),
-        "bioetl-overview-v2": (9031, 9007),
-    }
-    for pid in enum_panels.get(payload.get("uid"), ()):
-        p[pid]["description"] = (
-            p[pid]["description"]
-            .replace(">=2=CRIT", "2=CRIT")
-            .replace("`null=UNKNOWN`", "`3/null=UNKNOWN`")
-        )
-    if 9402 in p and p[9402].get("title") == "Review Run Summary":
-        # Hashes and composite parameter names need two lines at 900px.
-        # Large rows keep pagination from placing wrapped text under its footer.
-        summary = p[9402]
-        _table(summary, {"Parameter": 300})
-        summary["options"]["cellHeight"] = "lg"
-        summary["fieldConfig"]["defaults"]["custom"]["wrapText"] = True
-        summary["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"] = True
-        for field in ("Parameter", "Value"):
-            _override(summary, field, "custom.wrapText", True)
-            _override(
-                summary, field, "custom.cellOptions", {"type": "auto", "wrapText": True}
-            )
+    _apply_enum_verdict_copy(payload.get("uid"), p)
+    _apply_run_summary_wrap(p)
     if payload.get("uid") == "bioetl-control-plane-v1":
-        for pid, title in {
-            9401: "Monitor Readiness",
-            891: "Monitor Replay",
-            892: "Track Checkpoint",
-            893: "Monitor Ledger",
-        }.items():
-            if pid in p:
-                p[pid]["title"] = title
-                p[pid].setdefault("fieldConfig", {}).setdefault("defaults", {})[
-                    "displayName"
-                ] = title
+        _rename_trust_monitor_titles(p)
 
 
 def _run_links(run: dict):

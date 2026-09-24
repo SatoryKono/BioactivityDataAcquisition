@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
-
 from bioetl.domain.behavior.validation_result_envelopes import build_validation_result
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import ValidationIssue, ValidationResult
@@ -60,8 +58,14 @@ def apply_issue_override(
     """Return issue with overridden severity when configuration requires it."""
     if override is None:
         return issue
-    overridden_issue: ValidationIssue = replace(issue, severity=override)
-    return overridden_issue
+    return ValidationIssue(
+        code=issue.code,
+        severity=override,
+        layer=issue.layer,
+        message=issue.message,
+        details=issue.details,
+        location=issue.location,
+    )
 
 
 def resolve_policy_block_state(

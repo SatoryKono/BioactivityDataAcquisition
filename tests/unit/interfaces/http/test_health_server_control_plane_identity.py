@@ -61,6 +61,7 @@ from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAda
 from bioetl.interfaces.http import _health_server_checkpoint_freshness
 from bioetl.interfaces.http import _health_server_identity_evidence
 from bioetl.interfaces.http.control_plane_selector_context import (
+    RunIdOptionPolicy,
     build_selector_filter_options_payload,
 )
 from bioetl.interfaces.http.control_plane_identity import (
@@ -573,8 +574,9 @@ def test_control_plane_filter_options_exact_run_only_returns_fallback_without_se
         dimension="workflow",
         response_shape="list",
         requested_pipeline=None,
-        exact_run_only=True,
-        fallback_value="chembl_target",
+        run_id_policy=RunIdOptionPolicy(
+            exact_run_only=True, fallback_value="chembl_target"
+        ),
     )
 
     assert payload == {"items": ["chembl_target"]}
@@ -636,8 +638,7 @@ def test_control_plane_filter_options_exact_run_only_resolves_provider_for_selec
         response_shape="list",
         requested_pipeline=None,
         selected_run_id=str(run_id),
-        exact_run_only=True,
-        fallback_value="unknown",
+        run_id_policy=RunIdOptionPolicy(exact_run_only=True, fallback_value="unknown"),
     )
 
     assert payload == {"items": ["chembl"]}

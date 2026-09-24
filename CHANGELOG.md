@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **SonarCloud residual SNR-R4 (#10988–#10994):** clear remaining OPEN
+  code smells without `sonar.*exclusions` or mass `NOSONAR` — typed
+  `replace`/unused params, Grafana script S1192+S3776 splits with
+  bit-identical dashboard JSON, HTTP selector arity, remaining
+  `src/bioetl` cognitive-complexity helpers.
+
 - **Root hygiene (#10968–#10971):** untrack accidental
   `Microsoft/Windows/PowerShell/ModuleAnalysisCache` and ignore `Microsoft/`;
   remove GitLab CI pilot `.gitlab-ci.yml`; register `.opencode/` in the
