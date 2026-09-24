@@ -438,6 +438,8 @@ class TestPIIHandling:
         {
             # NCBI-required technical contact resolved by the PubMed adapter factory.
             "infrastructure/adapters/pubmed/_adapter_support.py",
+            # stdlib email.utils for HTTP Retry-After dates, not a PII field.
+            "infrastructure/adapters/http/_client_retry_policy.py",
         }
     )
 

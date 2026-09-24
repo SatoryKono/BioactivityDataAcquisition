@@ -1875,11 +1875,15 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     else:
         assert "valid empty" in identity_no_value.lower()
         assert "query error" in processed_no_value.lower()
-    assert (
-        identity.get("options", {}).get("cellHeight")
-        == processed.get("options", {}).get("cellHeight")
-        == ("md" if full_width_evidence else "sm")
-    )
+    if dashboard_name == "bioetl-control-plane-v1.json":
+        assert identity.get("options", {}).get("cellHeight") == "lg"
+        assert processed.get("options", {}).get("cellHeight") == "md"
+    else:
+        assert (
+            identity.get("options", {}).get("cellHeight")
+            == processed.get("options", {}).get("cellHeight")
+            == ("md" if full_width_evidence else "sm")
+        )
     default_identity_cell_options = (
         identity.get("fieldConfig", {})
         .get("defaults", {})

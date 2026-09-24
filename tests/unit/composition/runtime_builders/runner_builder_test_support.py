@@ -215,6 +215,7 @@ def _build_settings(
 
 def _build_pipeline_config(**overrides: object) -> SimpleNamespace:
     values: dict[str, object] = {
+        "pipeline_name": "chembl_activity",
         "provider": "chembl",
         "entity_type": "activity",
         "version": "2.0.0",

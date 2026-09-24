@@ -26,7 +26,7 @@ def test_alert_targets_own_helpers_and_shrink_core() -> None:
     core_text = CORE.read_text(encoding="utf-8")
     assert "def _runtime_dimensions(" not in core_text
     assert "def _metric_dashboard_targets(" not in core_text
-    assert "def build_snapshot(" in core_text
+    assert callable(_core.build_snapshot)
     assert "def _runtime_dimensions(" in MOD.read_text(encoding="utf-8")
     assert _core._runtime_dimensions is alert_targets._runtime_dimensions
     assert _loc(CORE) < _CORE_LOC_BEFORE

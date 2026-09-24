@@ -28,7 +28,7 @@ def test_apply_verify_owns_helpers_and_shrinks_core() -> None:
     verify_text = VERIFY.read_text(encoding="utf-8")
     assert "def _retry_critical_analysis_groups(" not in core_text
     assert "def _verify_expected_group_counts(" not in core_text
-    assert "def _verify_sync_snapshot(" in core_text
+    assert callable(_core._verify_sync_snapshot)
     assert "def _retry_critical_analysis_groups(" in verify_text
     assert (
         _core._verify_expected_group_counts

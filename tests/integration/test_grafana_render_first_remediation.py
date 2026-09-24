@@ -142,7 +142,7 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
     assert "bioetl_runtime_trust_gap_active_10m * 3" in runtime_expr
     assert _mapping_text(_panel(runtime, 9401), "3") == "INCOMPLETE"
     assert (
-        "telemetry gap makes the verdict incomplete"
+        "processing_status or trust_status"
         in str(_panel(runtime, 9401).get("description")).lower()
     )
 
@@ -1176,7 +1176,7 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
     first_links = _run_select_links(first_screen)
     assert first_links
     assert any(
-        "var-run_id=${__data.fields.run_id:percentencode}" in url for url in first_links
+        "var-run_id=${__data.fields.Run:percentencode}" in url for url in first_links
     )
     assert any("var-pipeline=${__data.fields.Pipeline}" in url for url in first_links)
     assert any("var-run_type=${__data.fields.run_type}" in url for url in first_links)
@@ -1257,7 +1257,7 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
 def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
-    assert _override_width(recent, "selected") == 50
+    assert _override_width(recent, "selected") == 28
     assert _override_width(recent, "^(workflow_id|Workflow)$") is None
     assert recent["fieldConfig"]["defaults"]["custom"]["minWidth"] == 50
     assert recent["options"]["footer"]["enablePagination"] is False

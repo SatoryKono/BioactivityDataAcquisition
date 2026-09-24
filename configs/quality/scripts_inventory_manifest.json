@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-23T20:15:05.681179+00:00",
+  "generated_at": "2026-09-24T08:50:45.360204+00:00",
   "summary": {
     "total_scripts": 624,
     "status_counts": {
@@ -2591,7 +2591,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 84,
+          "line": 85,
           "source_group": "docs",
           "text": "- Grok project-domain audit workflow: scripts/ai/generate_project_domain_audit_workflow.py -- generates .grok/workflows/project-domain-audit.rhai"
         },
@@ -2695,7 +2695,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-          "line": 54,
+          "line": 58,
           "source_group": "docs",
           "text": "`.\\.venv-win\\Scripts\\python.exe scripts/ai/junie/check_junie_mirror.py --check`."
         },
@@ -4719,7 +4719,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
@@ -4744,6 +4744,12 @@
           "line": 116,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ai\" / \"mcp\" / \"support\" / \"mcp_docker_prune.ps1\""
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_mcp_docker_prune_defaults.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "PS1 = REPO_ROOT / \"scripts\" / \"ai\" / \"mcp\" / \"support\" / \"mcp_docker_prune.ps1\""
         }
       ]
     },
@@ -4752,7 +4758,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
@@ -4767,10 +4773,22 @@
           "text": "source \"${script_dir}/support/mcp_docker_prune.sh\""
         },
         {
+          "path": "scripts/ai/mcp/support/mcp_docker_prune.ps1",
+          "line": 4,
+          "source_group": "scripts",
+          "text": "# Default is dry-run (same as mcp_docker_prune.sh). Set MCP_DOCKER_PRUNE_APPLY=1"
+        },
+        {
           "path": "tests/architecture/test_runtime_orchestration_surfaces.py",
           "line": 113,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ai\" / \"mcp\" / \"support\" / \"mcp_docker_prune.sh\""
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_mcp_docker_prune_defaults.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "SH = REPO_ROOT / \"scripts\" / \"ai\" / \"mcp\" / \"support\" / \"mcp_docker_prune.sh\""
         }
       ]
     },
@@ -5095,19 +5113,19 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 74,
+          "line": 75,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts compile --domain docs --profile audit-readonly"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 75,
+          "line": 76,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.cycle --param SCOPE=src/bioetl --param DOMAIN=docs"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 76,
+          "line": 77,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts check"
         },
@@ -16186,7 +16204,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-          "line": 97,
+          "line": 101,
           "source_group": "docs",
           "text": "generator from `scripts/engineering/qa/report_module_coverage_inventory.py`"
         },
@@ -18044,7 +18062,7 @@
       "references": [
         {
           "path": "AGENTS.md",
-          "line": 122,
+          "line": 126,
           "source_group": "agents",
           "text": "`scripts/engineering/repo/cleanup_root_local_clutter.py`. See"
         },

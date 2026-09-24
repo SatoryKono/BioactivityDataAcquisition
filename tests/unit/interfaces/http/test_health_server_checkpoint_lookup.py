@@ -127,14 +127,17 @@ async def test_legacy_non_object_metadata_maps_to_bounded_endpoint_error(
         },
     )
 
-    assert payload["status"] == "ERROR"
+    assert payload["status"] == "UNKNOWN"
     assert payload["rows"] == [
         {
             "check": "parse",
-            "status": "ERROR",
+            "status": "UNKNOWN",
             "reason": "checkpoint_parse_error",
             "reason_display": "checkpoint_parse_error",
-            "detail": "Persisted control-plane evidence could not be read or parsed.",
+            "detail": (
+                "Persisted control-plane evidence is UNAVAILABLE "
+                "(could not be read or parsed)."
+            ),
         }
     ]
     assert "raw-secret-wrong-shape" not in str(payload)

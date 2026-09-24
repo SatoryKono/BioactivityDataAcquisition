@@ -608,6 +608,7 @@ class TestContractRegistryHealthConfigAndRefs:
         payload.write_text(
             json.dumps(
                 {
+                    "schema_version": "provider_health_evidence_v1",
                     "provider": "chembl",
                     "status": 1,
                     "observed_at": "2026-01-01T00:00:00+00:00",

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from types import SimpleNamespace
+from typing import Any, cast
 from unittest.mock import AsyncMock
 
 import pytest
@@ -18,6 +19,7 @@ from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationRequest,
 )
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_loaded import (
+    ReconcileLoadedRowsHost,
     reconcile_loaded_rows,
 )
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_normalization import (
@@ -27,6 +29,7 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_normaliza
     row_has_null_foreign_key,
 )
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads import (
+    ForeignKeyReadsHost,
     GoldReconciliationReaderProtocol,
     GoldSnapshotReaderProtocol,
     _current_flag_column,
@@ -375,6 +378,46 @@ async def test_read_rows_awaitable_gold_reader() -> None:
         current_only=False,
     )
     assert rows == [{"target_id": "T1"}]
+
+
+@pytest.mark.asyncio
+async def test_reconciliation_protocol_seams_default_to_noop() -> None:
+    """Protocol base bodies stay no-ops; concrete hosts must override (#10962).
+
+    Invokes the ``...`` stubs directly: fakes override them, so only a
+    direct call attributes the loaded 30/32/34 and reads 34/36/62 arcs.
+    """
+    stub_host = cast(Any, SimpleNamespace())
+    assert (
+        ReconcileLoadedRowsHost._record_metrics(
+            stub_host, scanned=1, retained=1, deleted=0
+        )
+        is None
+    )
+    assert ReconcileLoadedRowsHost._log(stub_host, "info", "noop probe") is None
+    assert (
+        ReconcileLoadedRowsHost._write_debug_artifacts(
+            stub_host,
+            _complete_request(),
+            cast(Any, None),
+            retained_rows=[],
+            orphan_rows=[],
+        )
+        is None
+    )
+    assert (
+        ForeignKeyReadsHost._record_metrics(
+            stub_host, scanned=0, retained=0, deleted=0
+        )
+        is None
+    )
+    assert ForeignKeyReadsHost._log(stub_host, "warning", "noop probe") is None
+    assert (
+        await GoldSnapshotReaderProtocol.read_reconciliation_snapshot(
+            stub_host, "silver.assay"
+        )
+        is None
+    )
 
 
 def test_gold_reader_protocols_are_runtime_checkable() -> None:

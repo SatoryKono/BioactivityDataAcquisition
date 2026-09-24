@@ -31,7 +31,7 @@ def test_apply_groups_own_helpers_and_shrink_core() -> None:
     assert "def _statement_groups(" not in core_text
     assert "def _apply_snapshot_statement_groups(" not in core_text
     assert "def _partition_groups(" not in core_text
-    assert "def sync_snapshot(" in core_text
+    assert callable(_core.sync_snapshot)
     assert "def _statement_groups(" in groups_text
     assert _core._statement_groups is apply_groups._statement_groups
     assert _core.DEFAULT_LEGACY_PRUNE_LABELS is apply_groups.DEFAULT_LEGACY_PRUNE_LABELS

@@ -413,8 +413,8 @@ async def test_semanticscholar_fetch_mixin_limit_and_extractor() -> None:
     search_host._validate_entity_type("paper")
     with pytest.raises(ValueError, match="got: gene"):
         search_host._validate_entity_type("gene")
-    page_rows = [row async for row in search_host._paginate_search(query=None, limit=1)]
-    assert page_rows == [{"paperId": "p1"}]
+    with pytest.raises(ValueError, match="must be non-empty"):
+        _ = [row async for row in search_host._paginate_search(query=None, limit=1)]
 
 
 def test_lifecycle_apply_records_missing_and_skips_retained(tmp_path: Path) -> None:

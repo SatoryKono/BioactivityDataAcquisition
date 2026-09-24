@@ -49,7 +49,7 @@ panels:
     title: Inspect Recent Runs (last 10)
     endpoint: pipeline_run_reports
     url: /ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}
-    root_selector: items
+    root_selector: 'index_state = "valid_empty" and $exists(items) and $count(items) = 0 ? [{"pipeline": "VALID EMPTY"}] : items'
     no_value_tokens: [VALID EMPTY]
     copy_tokens: [TREE_MISSING, LAYOUT_UNHEALTHY]
   - id: 9451

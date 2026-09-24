@@ -210,4 +210,4 @@ def test_recent_timing_null_does_not_inherit_empty_catalog_message() -> None:
     }
     for field in ("Duration", "Event age"):
         assert properties[field]["noValue"] == "UNKNOWN"
-    assert panel["fieldConfig"]["defaults"]["noValue"].startswith("VALID EMPTY")
+    assert panel["fieldConfig"]["defaults"]["noValue"].startswith("UNKNOWN")

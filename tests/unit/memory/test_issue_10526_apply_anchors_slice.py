@@ -29,7 +29,7 @@ def test_apply_anchors_own_helpers_and_shrink_core() -> None:
     anchors_text = ANCHORS.read_text(encoding="utf-8")
     assert "def _targeted_apply_required_anchor_labels(" not in core_text
     assert "def _ensure_targeted_apply_prerequisites(" not in core_text
-    assert "def sync_snapshot(" in core_text
+    assert callable(_core.sync_snapshot)
     assert "def _targeted_apply_required_anchor_labels(" in anchors_text
     assert (
         _core._ensure_targeted_apply_prerequisites

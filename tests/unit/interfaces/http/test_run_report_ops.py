@@ -258,6 +258,8 @@ def test_list_workflow_payloads_includes_identity_and_artifact_paths(
             "workflow": "chembl_core",
             "workflow_run_id": "wf1",
             "status": "success",
+            "processing_status": "success",
+            "trust_status": "Inspect in 1. Trust",
             "completed_at": "2026-08-10T00:00:00Z",
             "selected": 0,
             "json_path": str(target.as_posix()),

@@ -21,6 +21,9 @@ for _name in _cli_mod.__all__:
 _CORE_EXPORTS = frozenset(_core_mod.__all__)
 _CLI_EXPORTS = frozenset(_cli_mod.__all__)
 
+# Package file build_snapshot.py must not hide the callable _core export.
+build_snapshot = _core_mod.build_snapshot
+
 
 def __getattr__(name: str) -> Any:
     if name in _CORE_EXPORTS:
