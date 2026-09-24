@@ -1133,22 +1133,25 @@
                         "text": "Workflow review"
                       },
                       "runtime_evidence_missing": {
-                        "text": "Runtime: evidence missing"
+                        "text": "Runtime: no evidence"
                       },
                       "control_plane_evidence_missing": {
-                        "text": "Control Plane: evidence missing"
+                        "text": "Trust: no evidence"
                       },
                       "gold_evidence_missing": {
-                        "text": "Gold: evidence missing"
+                        "text": "Gold: no evidence"
                       },
                       "dq_evidence_missing": {
-                        "text": "DQ: evidence missing"
+                        "text": "Dq: no evidence"
                       },
                       "provider_evidence_missing": {
-                        "text": "Provider: evidence missing"
+                        "text": "Provider: no evidence"
                       },
                       "workflow_evidence_missing": {
-                        "text": "Workflow: evidence missing"
+                        "text": "Workflow: no evidence"
+                      },
+                      "provider_scope_degradation": {
+                        "text": "Provider degraded"
                       }
                     }
                   },
@@ -1217,7 +1220,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 155
+                "value": 120
               }
             ]
           },
@@ -5057,22 +5060,25 @@
                             "text": "Workflow review"
                           },
                           "runtime_evidence_missing": {
-                            "text": "Runtime: evidence missing; verify source"
+                            "text": "Runtime: no evidence"
                           },
                           "control_plane_evidence_missing": {
-                            "text": "Control Plane: evidence missing; verify source"
+                            "text": "Trust: no evidence"
                           },
                           "gold_evidence_missing": {
-                            "text": "Gold: evidence missing; verify source"
+                            "text": "Gold: no evidence"
                           },
                           "dq_evidence_missing": {
-                            "text": "Dq: evidence missing; verify source"
+                            "text": "Dq: no evidence"
                           },
                           "provider_evidence_missing": {
-                            "text": "Provider: evidence missing; verify source"
+                            "text": "Provider: no evidence"
                           },
                           "workflow_evidence_missing": {
-                            "text": "Workflow: evidence missing; verify source"
+                            "text": "Workflow: no evidence"
+                          },
+                          "provider_scope_degradation": {
+                            "text": "Provider degraded"
                           }
                         }
                       }
@@ -5166,7 +5172,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 170
+                    "value": 120
                   }
                 ]
               },

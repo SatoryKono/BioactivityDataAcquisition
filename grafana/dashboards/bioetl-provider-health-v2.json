@@ -802,6 +802,25 @@
                 "value": "Status"
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Provider"
+            },
+            "properties": [
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
           }
         ]
       },
@@ -813,7 +832,7 @@
       },
       "id": 9101,
       "options": {
-        "cellHeight": "sm",
+        "cellHeight": "lg",
         "dataLinks": [
           {
             "targetBlank": true,

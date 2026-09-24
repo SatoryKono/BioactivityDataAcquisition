@@ -188,6 +188,30 @@ def apply_workflow_scope(payload: dict) -> None:
             panel.setdefault("options", {})["cellHeight"] = "lg"
             for override in panel.get("fieldConfig", {}).get("overrides", []):
                 for prop in override.get("properties", []):
+                    if prop["id"] == "custom.width":
+                        field = override["matcher"].get("options")
+                        if field in {"Priority", "Action"}:
+                            prop["value"] = 90 if field == "Priority" else 120
+                    if (
+                        override["matcher"].get("options") == "action_reason"
+                        and prop["id"] == "mappings"
+                    ):
+                        for mapping in prop["value"]:
+                            if mapping.get("type") == "value":
+                                for domain, label in (
+                                    ("runtime", "runtime"),
+                                    ("control_plane", "Trust"),
+                                    ("gold", "Gold"),
+                                    ("dq", "DQ"),
+                                    ("provider", "provider"),
+                                    ("workflow", "workflow"),
+                                ):
+                                    mapping["options"][f"{domain}_evidence_missing"] = {
+                                        "text": f"{label.capitalize()}: no evidence"
+                                    }
+                                mapping["options"]["provider_scope_degradation"] = {
+                                    "text": "Provider degraded"
+                                }
                     if prop["id"] == "links":
                         for link in prop["value"]:
                             if "${__data.fields.action_scope" in link.get("url", ""):

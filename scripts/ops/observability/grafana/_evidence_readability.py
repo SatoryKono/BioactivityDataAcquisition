@@ -337,8 +337,8 @@ def _runtime(p: dict[int, dict]) -> None:
 def _provider(p: dict[int, dict]) -> None:
     p[9101]["title"] = "Monitor Fleet Status"
     p[9107]["title"] = "Inspect Health Evidence"
-    p[9107]["options"]["cellHeight"] = "lg"
     for pid in (9101, 9107):
+        p[pid]["options"]["cellHeight"] = "lg"
         target = p[pid]["targets"][0]
         if target["expr"].startswith("topk(3, ") and target["expr"].endswith(")"):
             target["expr"] = target["expr"][8:-1]
@@ -349,6 +349,8 @@ def _provider(p: dict[int, dict]) -> None:
             "availability, not the selected historical run."
         )
     _override(p[9101], "Severity", "displayName", "Status")
+    _override(p[9101], "Provider", "custom.wrapText", True)
+    _override(p[9101], "Provider", _CELL, {"type": "auto", "wrapText": True})
     p[9101]["options"]["sortBy"] = [{"displayName": "Status", "desc": True}]
     for transform in p[9107]["transformations"]:
         if transform["id"] == "organize":
