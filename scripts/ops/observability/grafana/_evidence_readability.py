@@ -351,7 +351,7 @@ def _dq(p: dict[int, dict]) -> None:
     p[8]["description"] = (
         "TIME RANGE · Worst age in hours at the selected range end, using the "
         "latest timestamp observed per series within that range. Missing series "
-        "remain UNKNOWN; an older non-null age is never carried forward. "
+        "show TELEMETRY MISSING (UNKNOWN); an older non-null age is never carried forward. "
         "SLA 24/72: WARN at 24h and CRIT at 72h apply only to observed evidence. "
         "This is range evidence, not a selected-run or CURRENT completeness verdict."
     )
