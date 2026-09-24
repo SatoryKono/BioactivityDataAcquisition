@@ -1250,7 +1250,7 @@
       },
       "id": 9107,
       "options": {
-        "cellHeight": "sm",
+        "cellHeight": "lg",
         "footer": {
           "countRows": false,
           "fields": "",

@@ -1381,6 +1381,12 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-12-14"
     },
+    "scripts/ops/observability/grafana/_workflow_scope.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep workflow-scope transformations internal to render_nav_bus. This module has no standalone CLI or deployment entrypoint.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-12-14"
+    },
     "scripts/ops/observability/grafana/action_target_routes.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the typed action-target allowlist shared by Grafana dashboard tooling and regression tests; keep it supporting unless promoted through the canonical scripts.ops command surface.",

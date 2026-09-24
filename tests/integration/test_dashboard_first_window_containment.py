@@ -99,6 +99,19 @@ def test_every_first_window_table_owns_a_row_cap() -> None:
                 missing.append(f"{dashboard_path.name}:{panel.get('id')}")
                 continue
             declared = panel_declared_row_cap(panel)
+            if contract["bind"] == "paginate":
+                # Pagination bounds the viewport, not the returned provider set.
+                assert (
+                    panel.get("options", {}).get("footer", {}).get("enablePagination")
+                    is True
+                ), key
+                assert declared is None, (
+                    f"{key}: pagination must retain every source row"
+                )
+                assert (
+                    panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
+                ), key
+                continue
             if declared is None or declared > int(contract["max_rows"]):
                 unbound.append(
                     f"{dashboard_path.name}:{panel.get('id')} "
@@ -343,7 +356,7 @@ def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
         panel = panels[pid]
         assert panel_declared_row_cap(panel) == cap
         assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
-        assert panel["options"]["cellHeight"] == "sm"
+        assert panel["options"]["cellHeight"] == ("lg" if pid == 215 else "sm")
     assert "bioetl_workflow_scope_action" in panels[215]["targets"][0]["expr"]
     assert "presentation_domains" in panels[9002]["targets"][0]["root_selector"]
     assert "/selected-run-status?" in panels[9002]["targets"][0]["url"]

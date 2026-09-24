@@ -338,7 +338,7 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">CURRENT · Pipeline: ${pipeline:text}. Open the first action; VERIFY means evidence is missing.<br>SELECTED RUN below is persisted history, not current health.</div>",
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">CURRENT card: ${workflow:text} / ${pipeline:text} / ${run_type:text}.<br>Open First Action; VERIFY means evidence is missing. SELECTED RUN is persisted history.</div>",
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence"
       },
@@ -1326,7 +1326,7 @@
           "show": false,
           "enablePagination": false
         },
-        "cellHeight": "sm",
+        "cellHeight": "lg",
         "sortBy": [
           {
             "desc": true,
@@ -5209,7 +5209,7 @@
               "enablePagination": true,
               "countRows": true
             },
-            "cellHeight": "sm",
+            "cellHeight": "lg",
             "sortBy": [
               {
                 "desc": true,

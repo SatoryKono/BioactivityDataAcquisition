@@ -147,6 +147,19 @@ def apply_workflow_scope(payload: dict) -> None:
     ):
         return
     for panel in panels:
+        if panel.get("type") == "text" and panel.get("id") in {99, 9400}:
+            suffix = (
+                "GLOBAL tables below cover all pipelines; suspects are not verified causes."
+                if payload["uid"] == "bioetl-incident-v1"
+                else "Open First Action; VERIFY means evidence is missing. SELECTED RUN is persisted history."
+            )
+            panel["options"]["content"] = (
+                '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
+                'font-size:16px;line-height:1.2;overflow-wrap:anywhere">'
+                "CURRENT card: ${workflow:text} / ${pipeline:text} / ${run_type:text}.<br>"
+                + suffix
+                + "</div>"
+            )
         if panel.get("title") in {"Monitor Scope Health", "Monitor Scope Status"}:
             panel["targets"] = [
                 {
@@ -172,6 +185,7 @@ def apply_workflow_scope(payload: dict) -> None:
                     'bioetl_workflow_scope_action{workflow=~"$workflow",',
                 )
         if panel.get("id") in {215, 20215}:
+            panel.setdefault("options", {})["cellHeight"] = "lg"
             for override in panel.get("fieldConfig", {}).get("overrides", []):
                 for prop in override.get("properties", []):
                     if prop["id"] == "links":

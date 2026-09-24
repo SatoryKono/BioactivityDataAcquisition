@@ -337,6 +337,7 @@ def _runtime(p: dict[int, dict]) -> None:
 def _provider(p: dict[int, dict]) -> None:
     p[9101]["title"] = "Monitor Fleet Status"
     p[9107]["title"] = "Inspect Health Evidence"
+    p[9107]["options"]["cellHeight"] = "lg"
     for pid in (9101, 9107):
         target = p[pid]["targets"][0]
         if target["expr"].startswith("topk(3, ") and target["expr"].endswith(")"):

@@ -304,7 +304,8 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
         for prop in action_override.get("properties", [])
     }
     assert action_props.get("custom.cellOptions", {}).get("type") == "auto"
-    assert next_action.get("options", {}).get("cellHeight") == "sm"
+    # Workflow and reason wrap to multiple lines at the narrow viewport.
+    assert next_action.get("options", {}).get("cellHeight") == "lg"
     action_widths = [
         prop["value"]
         for item in overrides
