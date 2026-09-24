@@ -20,6 +20,12 @@ def explain_incident(panels: dict[int, dict], override) -> None:
     )
     panels[32010]["title"] = "Browse Global Suspects"
     panels[32005]["title"] = "Browse Global Alerts"
+    _explain_ranked_suspects(panels, override)
+    _explain_global_alerts(panels, override)
+    _measurements(panels)
+
+
+def _explain_ranked_suspects(panels: dict[int, dict], override) -> None:
     for pid in (2010, 22010):
         panel = panels[pid]
         panel["title"] = (
@@ -86,6 +92,9 @@ def explain_incident(panels: dict[int, dict], override) -> None:
                     "includeVars": False,
                 }
             ]
+
+
+def _explain_global_alerts(panels: dict[int, dict], override) -> None:
     for pid in (2005, 22005):
         panel = panels[pid]
         panel["title"] = (
@@ -110,7 +119,6 @@ def explain_incident(panels: dict[int, dict], override) -> None:
         override(panel, "provider", "displayName", "Provider")
         override(panel, "pipeline", "displayName", "Pipeline")
         override(panel, "severity", "displayName", "Severity")
-    _measurements(panels)
 
 
 def _measurements(panels: dict[int, dict]) -> None:

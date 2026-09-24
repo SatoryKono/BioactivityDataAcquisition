@@ -19,7 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   code smells without `sonar.*exclusions` or mass `NOSONAR` — typed
   `replace`/unused params, Grafana script S1192+S3776 splits with
   bit-identical dashboard JSON, HTTP selector arity, remaining
-  `src/bioetl` cognitive-complexity helpers.
+  `src/bioetl` cognitive-complexity helpers. After #10996 index, split
+  `_selected_verdict_reasons` and `explain_incident` (two leftover S3776).
 
 - **Root hygiene (#10968–#10971):** untrack accidental
   `Microsoft/Windows/PowerShell/ModuleAnalysisCache` and ignore `Microsoft/`;

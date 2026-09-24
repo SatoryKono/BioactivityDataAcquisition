@@ -594,16 +594,20 @@ def _selection_summary(panel: dict) -> None:
     )
 
 
-def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
-    """Expose explanations without replacing the aggregate saved-run verdict."""
-    summary = next(
-        panel
-        for panel in p.values()
-        if panel.get("title") == "Review Selected Run Status"
-    )
+_REASON_MAPPINGS = {
+    "execution_success": {"text": "Processing completed"},
+    "standalone_pipeline": {"text": "Standalone pipeline"},
+    "run_dq_threshold_evaluation": {"text": "Data quality checks"},
+    "run_preflight_provider_observation": {"text": "Provider preflight check"},
+    "run_gold_schema_validation": {"text": "Gold schema validation"},
+    "Archive missing": {"text": "No verified archive"},
+    "archive_evidence_not_recorded": {"text": "No verified archive"},
+}
+
+
+def _bind_selected_run_envelope(summary: dict, source: dict) -> None:
     # The previous Dashboard datasource reused domain rows. Query the envelope
     # directly: the first domain's verdict is not the aggregate run verdict.
-    source = p[9002] if overview else p[9451]
     summary["datasource"] = deepcopy(source["datasource"])
     summary["targets"] = deepcopy(source["targets"])
     summary["targets"][0]["root_selector"] = (
@@ -616,81 +620,59 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
     target["uql"] = (
         'parse-json | jsonata "' + target["root_selector"].replace('"', "'") + '"'
     )
-    summary_fields = ["execution_state", "verdict", "reason_display"]
-    if overview:
-        # Share one envelope; never substitute the first domain verdict for trust.
-        source_target = source["targets"][0]
-        projection = (
-            "($s := presentation_summary[0]; $r := presentation_trust[0].reasons_display; "
-            "$map(presentation_domains, function($d) { $merge([$d, {"
-            "'run_execution': $s.execution_state, 'run_verdict': $s.verdict, "
-            "'run_reason': $r ? $r : $s.reason}]) }))"
-        )
-        source_target["parser"] = "uql"
-        source_target["root_selector"] = projection
-        source_target["uql"] = 'parse-json | jsonata "' + projection + '"'
-        summary["datasource"] = {"type": "datasource", "uid": "-- Dashboard --"}
-        summary["targets"] = [{"panelId": 9002, "refId": "A", "withTransforms": False}]
-        summary_fields = ["run_execution", "run_verdict", "run_reason"]
-        for transform in summary["transformations"]:
-            if transform["id"] == "organize":
-                transform["options"]["renameByName"].update(
-                    run_execution="Result", run_verdict="Status", run_reason="Reason"
-                )
-    views = [(summary, summary_fields)]
-    if overview:
-        views.append((p[9002], ["domain", "verdict", "reason_display"]))
-    for panel, fields in views:
-        for transform in panel["transformations"]:
-            if transform["id"] == "filterFieldsByName":
-                transform["options"]["include"]["names"] = fields
-            elif transform["id"] == "organize":
-                transform["options"]["indexByName"] = {
-                    name: index for index, name in enumerate(fields)
-                }
-                transform["options"]["renameByName"]["reason_display"] = "Reason"
-        _override(panel, "Reason", _WRAP, True)
-        _override(
-            panel, "Reason", _CELL, {"type": "auto", "wrapText": True}
-        )
-        _override(panel, "Reason", "displayName", "Reason")
-        _override(
-            panel,
-            "Reason",
-            "mappings",
-            [
-                {
-                    "type": "value",
-                    "options": {
-                        "execution_success": {"text": "Processing completed"},
-                        "standalone_pipeline": {"text": "Standalone pipeline"},
-                        "run_dq_threshold_evaluation": {"text": "Data quality checks"},
-                        "run_preflight_provider_observation": {
-                            "text": "Provider preflight check"
-                        },
-                        "run_gold_schema_validation": {
-                            "text": "Gold schema validation"
-                        },
-                        "Archive missing": {"text": "No verified archive"},
-                        "archive_evidence_not_recorded": {
-                            "text": "No verified archive"
-                        },
-                    },
-                }
-            ],
-        )
-        panel["description"] += (
-            (
-                " Reason explains the saved assessment; missing archive evidence remains "
-                "INCOMPLETE. Evidence completeness remains available in the saved report."
+
+
+def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
+    # Share one envelope; never substitute the first domain verdict for trust.
+    source_target = source["targets"][0]
+    projection = (
+        "($s := presentation_summary[0]; $r := presentation_trust[0].reasons_display; "
+        "$map(presentation_domains, function($d) { $merge([$d, {"
+        "'run_execution': $s.execution_state, 'run_verdict': $s.verdict, "
+        "'run_reason': $r ? $r : $s.reason}]) }))"
+    )
+    source_target["parser"] = "uql"
+    source_target["root_selector"] = projection
+    source_target["uql"] = 'parse-json | jsonata "' + projection + '"'
+    summary["datasource"] = {"type": "datasource", "uid": "-- Dashboard --"}
+    summary["targets"] = [{"panelId": 9002, "refId": "A", "withTransforms": False}]
+    for transform in summary["transformations"]:
+        if transform["id"] == "organize":
+            transform["options"]["renameByName"].update(
+                run_execution="Result", run_verdict="Status", run_reason="Reason"
             )
-            if "Reason explains the saved assessment" not in panel["description"]
-            else ""
+    return ["run_execution", "run_verdict", "run_reason"]
+
+
+def _apply_reason_columns(panel: dict, fields: list[str]) -> None:
+    for transform in panel["transformations"]:
+        if transform["id"] == "filterFieldsByName":
+            transform["options"]["include"]["names"] = fields
+        elif transform["id"] == "organize":
+            transform["options"]["indexByName"] = {
+                name: index for index, name in enumerate(fields)
+            }
+            transform["options"]["renameByName"]["reason_display"] = "Reason"
+    _override(panel, "Reason", _WRAP, True)
+    _override(panel, "Reason", _CELL, {"type": "auto", "wrapText": True})
+    _override(panel, "Reason", "displayName", "Reason")
+    _override(
+        panel,
+        "Reason",
+        "mappings",
+        [{"type": "value", "options": _REASON_MAPPINGS}],
+    )
+    panel["description"] += (
+        (
+            " Reason explains the saved assessment; missing archive evidence remains "
+            "INCOMPLETE. Evidence completeness remains available in the saved report."
         )
-    _override(summary, "Result", "displayName", "Processing")
-    _override(summary, "Status", "displayName", "Trust")
-    if not overview:
-        return
+        if "Reason explains the saved assessment" not in panel["description"]
+        else ""
+    )
+
+
+def _overview_selected_run_layout(p: dict[int, dict], summary: dict) -> None:
     _table(p[9002], {"Domain": 120, "Status": 115})
     # Three evidence columns need half the first-screen width at narrow viewports.
     p[9002]["gridPos"].update(x=12, w=12)
@@ -713,9 +695,30 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
     for field in ("Domain", "Status", "Reason"):
         _override(p[9002], field, "links", [])
     _override(p[9002], "Reason", _WRAP, True)
-    _override(
-        p[9002], "Reason", _CELL, {"type": "auto", "wrapText": True}
+    _override(p[9002], "Reason", _CELL, {"type": "auto", "wrapText": True})
+
+
+def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
+    """Expose explanations without replacing the aggregate saved-run verdict."""
+    summary = next(
+        panel
+        for panel in p.values()
+        if panel.get("title") == "Review Selected Run Status"
     )
+    source = p[9002] if overview else p[9451]
+    _bind_selected_run_envelope(summary, source)
+    summary_fields = ["execution_state", "verdict", "reason_display"]
+    if overview:
+        summary_fields = _overview_share_envelope(summary, source)
+    views = [(summary, summary_fields)]
+    if overview:
+        views.append((p[9002], ["domain", "verdict", "reason_display"]))
+    for panel, fields in views:
+        _apply_reason_columns(panel, fields)
+    _override(summary, "Result", "displayName", "Processing")
+    _override(summary, "Status", "displayName", "Trust")
+    if overview:
+        _overview_selected_run_layout(p, summary)
 
 
 def _apply_stat_value_sizes(p: dict[int, dict]) -> None:
