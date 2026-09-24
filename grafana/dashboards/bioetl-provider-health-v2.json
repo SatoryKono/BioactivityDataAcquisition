@@ -1069,7 +1069,7 @@
                     "type": "value",
                     "options": {
                       "missing_health_status": {
-                        "text": "No health observation"
+                        "text": "No health check result available"
                       },
                       "observed_health_status": {
                         "text": "Health observation available"

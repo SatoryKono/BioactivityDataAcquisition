@@ -1,5 +1,18 @@
 path,type,audience,owner,last_change,status,score,priority,evidence
-README.md:168 setup-plugins,how-to,eng,BioETL Team,current,broken-on-win-powershell,1,P1,"F1: bash path mangling на нативном Windows"
-.env.example:37 quarantine serve,reference,eng,BioETL Team,current,contradicts-cli,2,P2,"F2: recommended launcher против retired-статуса"
-.python-version vs README:141-153,reference,eng,BioETL Team,current,minor-mismatch,3,P3,"F3: 3.13 против baseline 3.12"
-README.md:261-306 env defaults,reference,eng,BioETL Team,current,single-sourced-unverified,3,P3,"F4: defaults только в README, противоречий нет"
+docs/04-reference/cli.md,reference,developer,BioETL Team,2026-09-24,active,,P1,"DOCS-001: CLI reference tells operators to set BIOETL_TRACING_ENABLED, and Settings ignores that name."
+docs/03-guides/cheatsheets/cli-commands.md,how-to,developer,BioETL Team,2026-09-17,active,,P1,"DOCS-001: CLI reference tells operators to set BIOETL_TRACING_ENABLED, and Settings ignores that name."
+docs/03-guides/running-pipelines.md,how-to,developer,BioETL Team,2026-09-24,active,,P1,"DOCS-002: running-pipelines.md and the CLI env tables say BIOETL_METRICS_ENABLED turns metrics on or off, but the runtime gate is observability.metrics_enabled."
+docs/04-reference/cli.md,reference,developer,BioETL Team,2026-09-24,active,,P1,"DOCS-002: running-pipelines.md and the CLI env tables say BIOETL_METRICS_ENABLED turns metrics on or off, but the runtime gate is observability.metrics_enabled."
+docs/03-guides/cheatsheets/cli-commands.md,how-to,developer,BioETL Team,2026-09-17,active,,P1,"DOCS-002: running-pipelines.md and the CLI env tables say BIOETL_METRICS_ENABLED turns metrics on or off, but the runtime gate is observability.metrics_enabled."
+docs/04-reference/environment-variables.md,reference,developer,,2026-08-26,,,P2,"DOCS-003: environment-variables.md lists BIOETL_ENV modes dev, test, prod, and Settings rejects test."
+docs/04-reference/cli.md,reference,developer,BioETL Team,2026-09-24,active,,P2,"DOCS-003: environment-variables.md lists BIOETL_ENV modes dev, test, prod, and Settings rejects test."
+docs/04-reference/environment-variables.md,reference,developer,,2026-08-26,,,P2,"DOCS-004: The env reference calls the OpenAlex API key an optional rate-limit upgrade, while the provider page requires it for production-like runs."
+docs/04-reference/providers/openalex/publication.md,reference,developer,BioETL Team,2026-08-19,active,,P2,"DOCS-004: The env reference calls the OpenAlex API key an optional rate-limit upgrade, while the provider page requires it for production-like runs."
+docs/03-guides/running-pipelines.md,how-to,developer,BioETL Team,2026-09-24,active,,P2,DOCS-005: running-pipelines.md presents the tracing uv extra set and make install as the same canonical bootstrap.
+docs/03-guides/quick-start.md,tutorial,developer,BioETL Team,2026-09-15,active,,P2,DOCS-005: running-pipelines.md presents the tracing uv extra set and make install as the same canonical bootstrap.
+docs/03-guides/getting-started.md,tutorial,developer,BioETL Team,2026-09-15,active,,P2,DOCS-006: BIOETL_LOG_LEVEL is documented as a core setting and is not read by Settings or any Python module.
+docs/04-reference/environment-variables.md,reference,developer,,2026-08-26,,,P2,DOCS-006: BIOETL_LOG_LEVEL is documented as a core setting and is not read by Settings or any Python module.
+docs/04-reference/cli.md,reference,developer,BioETL Team,2026-09-24,active,,P2,DOCS-006: BIOETL_LOG_LEVEL is documented as a core setting and is not read by Settings or any Python module.
+docs/03-guides/cheatsheets/cli-commands.md,how-to,developer,BioETL Team,2026-09-17,active,,P2,DOCS-006: BIOETL_LOG_LEVEL is documented as a core setting and is not read by Settings or any Python module.
+docs/03-guides/metrics-monitoring.md,how-to,developer,BioETL Team,2026-09-22,active,,P2,DOCS-006: BIOETL_LOG_LEVEL is documented as a core setting and is not read by Settings or any Python module.
+docs/03-guides/cheatsheets/cli-commands.md,how-to,developer,BioETL Team,2026-09-17,active,,P3,DOCS-007: cli-commands.md says make test-deps installs test-only dependencies.

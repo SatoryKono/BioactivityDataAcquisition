@@ -370,7 +370,7 @@ def _provider(p: dict[int, dict]) -> None:
                 "options": {
                     "observed_health_status": {"text": "Health observation available"},
                     "invalid_health_timestamp": {"text": "Invalid observation time"},
-                    "missing_health_status": {"text": "No health observation"},
+                    "missing_health_status": {"text": "No health check result available"},
                 },
             }
         ],

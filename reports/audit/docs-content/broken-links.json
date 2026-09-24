@@ -1,1 +1,8 @@
-{"checked_files": 601, "false_positives": ["docs/02-architecture/01-domain-layer.md:413 — regex [A-Z][A-Z0-9]{2}[0-9] в code span, не ссылка"], "key_entry_docs": {"broken": 0, "files": ["README.md", "CONTRIBUTING.md", "docs/00-project/00-map.md", "docs/00-project/RULES.md", "docs/04-reference/environment-variables.md", "docs/04-reference/cli.md", "docs/03-guides/docs-verification.md", "docs/03-guides/local-storage-layout.md", "docs/01-requirements/REQUIREMENTS.md"]}, "scope": "docs/** published (исключены site/, 99-archive/, reports/, exports/, ru/)", "total_broken": 0}
+{
+  "source": "reports/audit/docs-content/check-links.json",
+  "command": "python -m scripts.docs check-links --report-json reports/audit/docs-content/check-links.json",
+  "timestamp": "2026-09-24T17:32:58.889126+00:00",
+  "exit_code": 0,
+  "status": "pass",
+  "broken": []
+}

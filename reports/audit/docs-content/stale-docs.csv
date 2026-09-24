@@ -1,3 +1,1 @@
 path,type,audience,owner,last_change,status,score,priority,evidence
-docs/04-reference/environment-variables.md,reference,eng,BioETL Team,unknown,partial-single-source,2,P3,"покрывает Core/Providers/Observability; PIPELINE/DQ/Quarantine/Delta только в README"
-.env.example,reference,eng,BioETL Team,unknown,subset-of-README,2,P3,"11 BIOETL_-ключей против ~40 в README-таблице"
