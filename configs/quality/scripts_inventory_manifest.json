@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-24T11:57:21.187657+00:00",
+  "generated_at": "2026-09-24T12:32:22.249134+00:00",
   "summary": {
     "total_scripts": 625,
     "status_counts": {
@@ -20112,7 +20112,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1448,
+          "line": 1400,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20137,7 +20137,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1482,
+          "line": 1434,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -20174,7 +20174,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1479,
+          "line": 1431,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
         }
@@ -20189,7 +20189,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_evidence_readability.py",
-          "line": 720,
+          "line": 696,
           "source_group": "scripts",
           "text": "from ._incident_explanations import explain_incident"
         }
@@ -20278,7 +20278,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1474,
+          "line": 1426,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
@@ -20651,7 +20651,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1442,
+          "line": 1394,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
