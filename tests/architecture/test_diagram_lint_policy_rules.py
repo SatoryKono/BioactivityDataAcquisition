@@ -36,6 +36,24 @@ def _load_lint_module() -> ModuleType:
     return module
 
 
+def test_colour_rule_flags_hex_outside_canonical_palette() -> None:
+    """COLOUR-001 flags fill/stroke hex outside ADR-040, including #ea580c."""
+    lint = _load_lint_module()
+    offending = [
+        "classDef composition fill:#fff7ed,stroke:#ea580c,stroke-width:2px",
+    ]
+    allowed = [
+        "classDef composition fill:#fff7ed,stroke:#f59e0b,color:#111827",
+    ]
+
+    issues = lint.check_colour_policy(Path("docs/02-architecture/demo.mmd"), offending)
+    clean = lint.check_colour_policy(Path("docs/02-architecture/demo.mmd"), allowed)
+
+    assert [issue.rule for issue in issues] == ["COLOUR-001"]
+    assert "#ea580c" in issues[0].message
+    assert clean == []
+
+
 def test_colour_rule_flags_deprecated_palette() -> None:
     """COLOUR-001 must flag legacy pre-ADR palette in style/classDef lines."""
     lint = _load_lint_module()

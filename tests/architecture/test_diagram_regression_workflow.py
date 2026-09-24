@@ -145,6 +145,9 @@ def test_docs_workflow_diagram_drift_uses_pr_base_ref() -> None:
     assert 'git diff --name-only "${base_ref}"...HEAD' in workflow
     drift_block = workflow.split("check-diagram-drift:", maxsplit=1)[1]
     assert "origin/main...HEAD" not in drift_block
+    assert "docs/02-architecture/diagrams/providers/**/*.mmd" in drift_block
+    assert "generate_description_indexes.py --check" in workflow
+    assert "generate_all_bundles.py --check" in workflow
 
 
 def test_docs_workflow_diagram_change_filter_covers_regression_tests() -> None:
