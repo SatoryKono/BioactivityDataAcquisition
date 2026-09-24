@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-18'
+  Last verified: '2026-09-24'
 
 ______________________________________________________________________
 
 # BioETL Architecture Diagrams Index
 
-*Updated: 2026-07-18*
+*Updated: 2026-09-24*
 
 > **Canonical root:** [docs/02-architecture/diagrams/](../README.md)
 > **Diagram governance:** [ADR-040](../../decisions/ADR-040-diagram-governance.md)
@@ -25,6 +25,9 @@ ______________________________________________________________________
   - `architecture/` — 89 files
   - `class-diagrams/` — 145 files
   - `foundation/` — 55 files
+  - `providers/` — 28 files
+  - `sequence/` — 5 files
+  - `state-machines/` — 5 files
 - Decomposed `.mermaid` views:
   - `views/` — 165 files
 - Template:
