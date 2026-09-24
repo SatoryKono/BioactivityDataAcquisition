@@ -12143,7 +12143,7 @@
       "github_issue_url": null,
       "inbound_links": 3,
       "lifecycle": null,
-      "outbound_links": 16,
+      "outbound_links": 17,
       "owner": "BioETL Team",
       "path": "docs/00-project/ai/prompts/README.md",
       "recommended_action": "generate-automatically",
@@ -12986,6 +12986,34 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "docs/00-project/ai/prompts/library/audit/diagrams.md",
+      "recommended_action": "generate-automatically",
+      "root_doc_kind": null,
+      "section": "00-project",
+      "status": "Generated",
+      "surface_family": "generated",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": "ignored_local_export",
+      "declared_class": "index",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "regenerate",
+      "generated_route": "ai-local-generated-docs-helpers",
+      "generated_route_exception": null,
+      "generator": "AI runtime memory, prompts, and local skill generators",
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 1,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/00-project/ai/prompts/library/audit/generic-nine.pack.md",
       "recommended_action": "generate-automatically",
       "root_doc_kind": null,
       "section": "00-project",
@@ -19645,7 +19673,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 6,
+      "inbound_links": 5,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -19675,7 +19703,7 @@
       "github_issue_url": null,
       "inbound_links": 2,
       "lifecycle": null,
-      "outbound_links": 122,
+      "outbound_links": 121,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/decisions/README.md",
       "recommended_action": "keep",
@@ -104025,14 +104053,14 @@
     "by_recommended_action": {
       "archive-after-github-state-check": 337,
       "archive-after-migration": 1015,
-      "generate-automatically": 1045,
+      "generate-automatically": 1046,
       "keep": 1279,
       "reconcile-with-github-state": 8,
       "replace-with-link": 2
     },
     "by_section": {
       ".github": 353,
-      "00-project": 261,
+      "00-project": 262,
       "01-requirements": 4,
       "02-architecture": 992,
       "03-data-model": 2,
@@ -104065,7 +104093,7 @@
       "Archived": 292,
       "Canonical": 74,
       "Deprecated": 2,
-      "Generated": 1045,
+      "Generated": 1046,
       "Working": 1519
     },
     "by_surface_family": {
@@ -104073,11 +104101,11 @@
       "archive": 292,
       "canonical": 74,
       "duplicate": 2,
-      "generated": 1045,
+      "generated": 1046,
       "working": 1519
     },
     "by_tracking_state": {
-      "tracked": 3686
+      "tracked": 3687
     },
     "docs_reports_local_count": 55,
     "duplicate_group_count": 7,
@@ -104093,8 +104121,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3686,
+    "total_doc_like": 3687,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3686
+    "total_doc_like_tracked": 3687
   }
 }

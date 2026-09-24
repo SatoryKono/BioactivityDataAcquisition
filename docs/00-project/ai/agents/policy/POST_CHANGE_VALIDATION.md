@@ -25,7 +25,8 @@ Verify changes against the current normative stack:
 - docs and diagrams
 - prompts
 - runtime AI files in `.codex/**` and `.junie/**` (equal-peer tracked runtime
-  trees), any tracked `.gemini/**` tree that exists in the current checkout,
+  trees), `.devin/agents/**` and `.devin/skills/**` (tracked Devin runtime),
+  any tracked `.gemini/**` tree that exists in the current checkout,
   `AGENTS.md`, and `.junie/guidelines.md`
 
 ## Required Protocol
@@ -40,6 +41,9 @@ Verify changes against the current normative stack:
    final report.
 
 ## Minimum Surface Checks
+
+On native Windows, invoke `python -m …` as
+`.\.venv-win\Scripts\python.exe -m …` (same module path).
 
 ### Runtime AI files
 

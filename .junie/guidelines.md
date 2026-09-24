@@ -105,19 +105,25 @@ Minimum expectation:
 1. **Runtime mirror parity:** after changes under `.codex/agents/**`,
    `.codex/skills/**`, `.junie/agents/**`, or `.junie/skills/**`, run
    `bash scripts/ai/junie/check_junie_mirror.sh --check` and report the
-   result. Divergences MUST be resolved before submit (typically via
+   result. On native Windows equivalently:
+   `.\.venv-win\Scripts\python.exe scripts/ai/junie/check_junie_mirror.py --check`.
+   Divergences MUST be resolved before submit (typically via
    `--sync` from Codex-side changes).
 1. After changes under `src/bioetl/**/*.py`, refresh
    `reports/quality/module-coverage-inventory.json` field `source_tree_sha256`
    via `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`
-   and run the architecture hash guard when feasible.
+   and run the architecture hash guard when feasible. On native Windows
+   equivalently:
+   `.\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`.
 1. After markdown/docs changes that add, remove, or retarget local links, or
    that change `Owner:` / `Status:` / `Class:` headers, refresh
    `docs/reports/generated/documentation-cleanup-inventory.{json,md}` via
    `python -m scripts.docs generate-cleanup-inventory --update` and commit
-   those artifacts with the docs change. `--check` reads the working tree;
-   skipping `--update` fails `test_documentation_cleanup_inventory_check_passes`
-   and stops `architecture-fast`.
+   those artifacts with the docs change. On native Windows equivalently:
+   `.\.venv-win\Scripts\python.exe -m scripts.docs generate-cleanup-inventory --update`.
+   `--check` reads the working tree; skipping `--update` fails
+   `test_documentation_cleanup_inventory_check_passes` and stops
+   `architecture-fast`.
 1. Report checks run, skipped checks, and mirror-sync status explicitly.
 
 ## Guardrails

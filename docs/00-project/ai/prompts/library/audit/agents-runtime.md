@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.agents-runtime
-version: 1.2.0
+version: 1.2.1
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -75,6 +75,8 @@ Must include when present:
 - `docs/00-project/ai/prompts/**` (library)
 - optional: `.github/copilot-instructions.md`, `.github/instructions/**`,
   `.github/agents/**`, `CLAUDE.md`, `GEMINI.md`
+- optional: `opencode.json`, `.opencode/agent/**`, `.opencode/command/**`,
+  `.github/workflows/opencode-*.yml` (Phase 1 subordinate; not runtime SSOT)
 - `scripts/` matching agent/bootstrap/validate/check/review/docs
 
 Build **instruction scope graph**: root → path-specific → agent profile →

@@ -107,7 +107,7 @@ def test_agent_guide_does_not_recommend_git_add_dot() -> None:
 
 
 def test_mcp_docker_prune_ps1_supports_dry_run() -> None:
-    """#9296: PowerShell MCP prune honors BIOETL_MCP_PRUNE_DRY_RUN; bash stays apply-opt-in."""
+    """#9296: both helpers default dry-run; APPLY=1 removes; DRY_RUN=1 forces dry-run on ps1."""
     root = Path(__file__).resolve().parents[2]
     sh = (
         root / "scripts" / "ai" / "mcp" / "support" / "mcp_docker_prune.sh"
@@ -116,6 +116,8 @@ def test_mcp_docker_prune_ps1_supports_dry_run() -> None:
         root / "scripts" / "ai" / "mcp" / "support" / "mcp_docker_prune.ps1"
     ).read_text(encoding="utf-8")
     assert "MCP_DOCKER_PRUNE_APPLY" in sh
+    assert "MCP_DOCKER_PRUNE_APPLY" in ps1
     assert "BIOETL_MCP_PRUNE_DRY_RUN" in ps1
     assert "dry-run: would docker rm -f" in ps1
     assert "docker rm -f" in sh
+    assert "-not $apply" in ps1

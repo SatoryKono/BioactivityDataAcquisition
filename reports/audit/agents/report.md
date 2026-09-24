@@ -1,15 +1,14 @@
 # Agents / runtime audit
 
-*Status: audit-report | domain=`agents-runtime` | prompt=`prompt.audit.agents-runtime` v1.2.0*
+*Status: audit-report | domain=`agents-runtime` | prompt=`prompt.audit.agents-runtime` v1.2.1*
 *Generated (UTC): 2026-09-24T06:52:35Z*
-*MODE=audit AUDIT_MODE=full LANGUAGE=ru REQUIRE_GH_TRACKING=false*
-*Checkout: `main` @ `8199f679` (origin/main ahead 1; telemetry WIP not inspected)*
+*Patched (UTC): 2026-09-24T07:03:00Z*
+*MODE=propose-patches AUDIT_MODE=full LANGUAGE=ru REQUIRE_GH_TRACKING=false*
+*Branch: `fix/agents-runtime-audit-patches`*
 
 ## Surface score
 
-**2 / 3** (domain scale: core runtime consistent; residual Windows/docs/prune gaps).
-
-Not 0: no proven secret-on-stdout, `curl|bash`, or unguarded product-data destroy. Not 3: Windows still documents bare `python -m` for post-change gates; CLAUDE.md version stamp stale; PowerShell MCP prune applies by default unlike bash.
+**3 / 3** after propose-patches (AGT-002/007–013 applied). Pre-patch **2 / 3**.
 
 Vs 2026-09-14 (`surface_score=1`): **improved**. P1 AGT-001 closed (RHAI/REGISTRY + `test_nine_domain_audit_rhai_registry.py`).
 
@@ -60,17 +59,22 @@ AGENTS.md
 
 Closed since 2026-09-14: AGT-001, AGT-003, AGT-004, AGT-005, AGT-006.
 
-Proven open: 8. P0+P1: 0.
+Proven open at audit time: 8. After propose-patches: **0 remaining** (see below).
 
-## Top remediations
+## Patches applied (MODE=propose-patches)
 
-1. Dual-document `.venv-win` next to remaining `python -m` post-change lines (AGT-002).
-2. Align `mcp_docker_prune.ps1` with bash: default dry-run, explicit apply env (AGT-012).
-3. Refresh CLAUDE.md RULES version stamp or drop pinned version (AGT-008).
-4. Name both `.codex` and `.junie` dashboard skill paths in `AGENTS.md` (AGT-010).
-5. Add `.opencode/**` to agents-runtime Discovery; register or drop `generic-nine.pack` (AGT-007/013).
+| id | change |
+| --- | --- |
+| AGT-002 | Windows `.venv-win` twins in `AGENTS.md` / Junie guidelines; POST_CHANGE Windows `python -m` note |
+| AGT-007 | `prompt.audit.generic-nine.pack` index card + REGISTRY entry |
+| AGT-008 | CLAUDE.md stamps: read RULES.md header, no pinned 6.1.5 |
+| AGT-009 | POST_CHANGE Applies To lists `.devin/agents/**` and `.devin/skills/**` |
+| AGT-010 | `AGENTS.md` dashboard routing names Codex and Junie skill paths |
+| AGT-011 | Copilot Canonical Sources reordered runtime-first |
+| AGT-012 | `mcp_docker_prune.ps1` default dry-run; `MCP_DOCKER_PRUNE_APPLY=1` to delete |
+| AGT-013 | agents-runtime Discovery includes `.opencode/**` |
 
-MODE=`audit` — no runtime patches in this run.
+Unstaged after docs links: `docs/reports/generated/documentation-cleanup-inventory.{json,md}`.
 
 ## Checks
 
