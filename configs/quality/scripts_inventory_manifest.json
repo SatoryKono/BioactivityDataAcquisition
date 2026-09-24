@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-24T17:07:50.978611+00:00",
+  "generated_at": "2026-09-24T19:03:36.912509+00:00",
   "summary": {
     "total_scripts": 626,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 75,
       "scripts": 525,
       "skills": 12,
-      "tests": 439
+      "tests": 440
     }
   },
   "scripts": [
@@ -2756,7 +2756,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1929,
+          "line": 1931,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -7329,7 +7329,7 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 769,
+          "line": 770,
           "source_group": "docs",
           "text": "| `scripts/diagrams/render.ps1` | Diagram render helper |"
         },
@@ -8335,7 +8335,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1450,
+          "line": 1444,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
@@ -10267,7 +10267,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1356,
+          "line": 1358,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10753,7 +10753,7 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1813,
+          "line": 1807,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev run-tests cov"
         },
@@ -11010,7 +11010,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1998,
+          "line": 2000,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -13885,13 +13885,13 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1548,
+          "line": 1542,
           "source_group": "docs",
           "text": "| **Файл:строки**      | Точная ссылка на код (`runner.py:116-123`)    |"
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1560,
+          "line": 1554,
           "source_group": "docs",
           "text": "- **Файл**: `runner.py:116-123` (175 строк, 9 методов)"
         },
@@ -14254,7 +14254,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1671,
+          "line": 1665,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -19155,13 +19155,13 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 747,
+          "line": 748,
           "source_group": "docs",
           "text": "| `scripts.ops` | Ops helpers (docker setup, data maintenance) | `scripts/ops/docker-setup.ps1` / `.sh` |"
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 768,
+          "line": 769,
           "source_group": "docs",
           "text": "| `scripts/ops/docker-setup.ps1` | Docker stack helpers (when Docker work is explicitly required) |"
         },
@@ -20164,7 +20164,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_evidence_readability.py",
@@ -20176,6 +20176,12 @@
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 1493,
           "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
+        },
+        {
+          "path": "tests/integration/test_grafana_trust_provider_corrections.py",
+          "line": 8,
+          "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
         }
       ]
@@ -20189,7 +20195,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_evidence_readability.py",
-          "line": 802,
+          "line": 807,
           "source_group": "scripts",
           "text": "from ._incident_explanations import explain_incident"
         }
@@ -21570,14 +21576,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
-        {
-          "path": "docs/05-operations/deployment/deployment-guide.md",
-          "line": 90,
-          "source_group": "docs",
-          "text": "scripts/ops/runtime/deploy/deploy-bioetl.sh deploy dev"
-        },
         {
           "path": "docs/05-operations/deployment/k8s-summary.md",
           "line": 68,
@@ -22103,7 +22103,7 @@
         },
         {
           "path": "docs/04-reference/environment-variables.md",
-          "line": 78,
+          "line": 81,
           "source_group": "docs",
           "text": "| `BIOETL_RUNTIME_SOURCE_ID` | Managed runtime source identity (injected by runtime_manager.py) | No |"
         },
