@@ -23,8 +23,8 @@
     "bioetl-control-plane-v1": "2a61a8450ca9abd1a674ee6593adfe8474bff2078aa1c3554efb283facdaeb53",
     "bioetl-dq-v2": "37d309b658e3a43438cd0113e8f93b97881a1fc5a72a68ca822fa027ed6447fe",
     "bioetl-incident-v1": "e82599954f04f3fd38a9dd769008631619395fd37d1d3af4f5b65c96c895597a",
-    "bioetl-overview-v2": "42a3c2ffbf0698ca7e365b9c5c6766b122ebe70b88c2ae3c48cca0df1ff238a3",
-    "bioetl-provider-health-v2": "10e1c76f151bec677e01b10a4d854cba200d4ed2984fa3e9e6a9e7b9aa34fd4c",
+    "bioetl-overview-v2": "f486b693dd5f12b061daa3ef42dd903883b96eaf756c680fc1ba9ba4d213c2f2",
+    "bioetl-provider-health-v2": "1df4a180d559843892dd5b0dc727cdc2630a8c0f9f86bcd077bd318391d3ba2a",
     "bioetl-run-explorer-v1": "6593cd9104921368f5681cff2699c21b3222641c446448bb40f62f159999c407",
     "bioetl-runtime": "937d40657cf3fc9dadfb5f9a47db71a5dbee644b668f76aea66a5add14f9db69"
   },
@@ -2719,13 +2719,13 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-provider-health-v2",
       "panel_id": 9101,
-      "panel_title": "Monitor Fleet Severity",
+      "panel_title": "Monitor Fleet Status",
       "route": "dependency-health",
       "source": {
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(3, max by (provider) (bioetl_provider_current_status{provider!~\"^(test|synthetic)$\"}))"
+          "max by (provider) (bioetl_provider_current_status{provider!~\"^(test|synthetic)$\"})"
         ],
         "target_count": 1
       }
@@ -2738,13 +2738,13 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-provider-health-v2",
       "panel_id": 9107,
-      "panel_title": "Inspect Status Reason",
+      "panel_title": "Inspect Health Evidence",
       "route": "dependency-health",
       "source": {
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(3, max by (provider, reason, source_state) (bioetl_provider_current_status_info))"
+          "max by (provider, reason, source_state) (bioetl_provider_current_status_info)"
         ],
         "target_count": 1
       }
