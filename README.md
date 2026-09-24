@@ -285,10 +285,9 @@ pip install -e ".[dev,tests,tracing,docs]"
    | `BIOETL_PII_SALT_NEXT`                     | Next salt for rotation                                      | —                         |
    | `BIOETL_SALT_ROTATION_ACTIVE`              | Whether salt rotation is active                             | `false`                   |
    | **Observability**                          |                                                             |                           |
-   | `BIOETL_LOG_LEVEL`                         | Logging level (`DEBUG`/`INFO`/`WARNING`/`ERROR`/`CRITICAL`) | `INFO`                    |
    | `BIOETL_LOG_FORMAT`                        | Log format (`json` / `text`)                                | `json`                    |
    | `BIOETL_LOG_FILE`                          | Log file path                                               | `reports/logs/bioetl.log` |
-   | `BIOETL_METRICS_ENABLED`                   | Enable Prometheus metrics                                   | `true`                    |
+   | `BIOETL_OBSERVABILITY__METRICS_ENABLED`    | Enable Prometheus metrics                                   | `true`                    |
    | `BIOETL_METRICS_PORT`                      | Prometheus HTTP server port                                 | `8000`                    |
    | `BIOETL_OBSERVABILITY__TRACING_ENABLED`    | Enable OpenTelemetry tracing                                | `false`                   |
    | `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED` | Enable data quality monitoring                              | `false`                   |
@@ -308,6 +307,7 @@ pip install -e ".[dev,tests,tracing,docs]"
    | `BIOETL_QUARANTINE_PAYLOAD_MAX_SIZE`       | Max payload size (bytes)                                    | `65536`                   |
 
    See [`.env.example`](.env.example) for the full list with comments.
+   `BIOETL_LOG_LEVEL` is not a Settings field. The default log level is `INFO`; use `bioetl run --debug` or workflow `--log-level`.
 
 1. **Verify Installation**:
    Run tests to ensure everything works.

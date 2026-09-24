@@ -400,7 +400,7 @@ Observability-подсистема BioETL следует принципам Hexa
 
 - **PrometheusMetrics** (Adapter) реализует MetricsPort в infrastructure-слое (`src/bioetl/infrastructure/observability/prometheus_metrics.py`). Использует библиотеку `prometheus_client` для создания и экспорта метрик.
 
-- **NoOpMetrics** — Null Object реализация MetricsPort (`src/bioetl/domain/ports/noop/_metrics.py`). Используется когда метрики отключены (`BIOETL_METRICS_ENABLED=false`). Все вызовы становятся no-op без каких-либо побочных эффектов.
+- **NoOpMetrics** — Null Object реализация MetricsPort (`src/bioetl/domain/ports/noop/_metrics.py`). Используется когда метрики отключены (`BIOETL_OBSERVABILITY__METRICS_ENABLED=false`). Все вызовы становятся no-op без каких-либо побочных эффектов.
 
 - **Composition Root** собирает зависимости в `src/bioetl/composition/bootstrap/runtime/observability.py`. Функция `bootstrap_metrics_port(settings)` создаёт PrometheusMetrics или NoOpMetrics в зависимости от настроек. Функция `maybe_start_metrics_server(settings)` запускает HTTP-сервер для экспорта метрик.
 
@@ -712,7 +712,7 @@ make monitoring-down
 
 ```bash
 # Убедитесь, что в .env:
-# BIOETL_METRICS_ENABLED=true
+# BIOETL_OBSERVABILITY__METRICS_ENABLED=true
 # BIOETL_METRICS_PORT=8000
 # BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED=true
 
@@ -743,7 +743,7 @@ curl -sS 'http://localhost:9090/api/v1/targets' | python -c "import sys,json; ts
 
 | Переменная                                     | Значение по умолчанию | Описание                                                |
 | ---------------------------------------------- | --------------------- | ------------------------------------------------------- |
-| `BIOETL_METRICS_ENABLED`                       | `true`                | Включить/выключить сбор метрик                          |
+| `BIOETL_OBSERVABILITY__METRICS_ENABLED`        | `true`                | Включить/выключить сбор метрик                          |
 | `BIOETL_METRICS_PORT`                          | `8000`                | Порт HTTP-сервера метрик                                |
 | `BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED` | `true`                | Запускать ли HTTP-сервер                                |
 | `BIOETL_OBSERVABILITY__METRICS_FAIL_FAST`      | `false`               | Падать при ошибке запуска сервера                       |
@@ -1767,7 +1767,7 @@ actual theme/viewport parity plus `terminal_state_validation.status=ok`.
 grep BIOETL_METRICS .env
 
 # Должно быть:
-# BIOETL_METRICS_ENABLED=true
+# BIOETL_OBSERVABILITY__METRICS_ENABLED=true
 # BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED=true
 ```
 

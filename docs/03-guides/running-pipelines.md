@@ -56,9 +56,10 @@ ______________________________________________________________________
    uv run python -m scripts.engineering.dev run-tests smoke
    ```
 
-   Канонический bootstrap — `uv sync --extra dev --extra tests --extra tracing` /
-   `make install`; `scripts/engineering/dev/dev_setup.sh` **удалён** и не является
-   поддерживаемым bootstrap path.
+   Minimal local-dev набор — `uv sync --extra dev --extra tests --extra tracing`.
+   `make install` — другой набор: `dev`, `tests`, `tests_full`, `export`
+   (цель `install` в Makefile). `scripts/engineering/dev/dev_setup.sh` **удалён**
+   и не является поддерживаемым bootstrap path.
 
 > **Note:** BioETL использует **Local-Only** архитектуру (ADR-010).
 > Docker и внешние сервисы (Redis, MinIO) **не требуются**.
@@ -439,12 +440,8 @@ ______________________________________________________________________
 ### Log Levels
 
 ```bash
-# Via флаг
+# Уровень задаётся CLI. BIOETL_LOG_LEVEL не читается Settings.
 bioetl run --pipeline chembl_activity --debug --required-persistence-profile degraded_observable
-
-# Via переменную окружения
-export BIOETL_LOG_LEVEL=DEBUG
-bioetl run --pipeline chembl_activity --required-persistence-profile degraded_observable
 ```
 
 | Уровень   | Использование               |
@@ -478,10 +475,10 @@ curl http://localhost:8000/metrics | grep bioetl_
 
 ```bash
 # Включить (по умолчанию)
-export BIOETL_METRICS_ENABLED=true
+export BIOETL_OBSERVABILITY__METRICS_ENABLED=true
 
 # Отключить
-export BIOETL_METRICS_ENABLED=false
+export BIOETL_OBSERVABILITY__METRICS_ENABLED=false
 ```
 
 > **Подробнее:** [Metrics & Monitoring Guide](metrics-monitoring.md)
