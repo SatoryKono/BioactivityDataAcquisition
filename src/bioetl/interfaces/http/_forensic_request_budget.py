@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Callable, Coroutine, Mapping
+from functools import partial
 from time import perf_counter
 from typing import Any
 from uuid import uuid4
@@ -18,6 +19,18 @@ FORENSIC_ENDPOINT_QUEUE_TIMEOUT_SECONDS = 0.25
 FORENSIC_ENDPOINT_TIMEOUT_SECONDS = 12.0
 FORENSIC_ENDPOINT_ERROR_CONTRACT = "forensic_endpoint_error_v1"
 _LOGGER = logging.getLogger(__name__)
+
+
+def _log_stage(request_id: str, endpoint: str, stage: str, elapsed: float) -> None:
+    """Log only bounded stage labels and durations, never evidence contents."""
+    _LOGGER.log(
+        logging.WARNING if elapsed >= 1.0 else logging.INFO,
+        "forensic_stage request_id=%s endpoint=%s stage=%s seconds=%.6f",
+        request_id,
+        endpoint,
+        stage,
+        elapsed,
+    )
 
 
 class ForensicEndpointUnavailable(RuntimeError):
@@ -134,18 +147,8 @@ async def run_bounded_forensic_operation[ResultT](
     started_at = perf_counter()
     queue_seconds = started_at - queued_at
 
-    def observe_stage(stage: str, elapsed: float) -> None:
-        _LOGGER.log(
-            logging.WARNING if elapsed >= 1.0 else logging.INFO,
-            "forensic_stage request_id=%s endpoint=%s stage=%s seconds=%.6f",
-            request_id,
-            endpoint,
-            stage,
-            elapsed,
-        )
-
     try:
-        with observe_evidence_stages(observe_stage):
+        with observe_evidence_stages(partial(_log_stage, request_id, endpoint)):
             operation_task = asyncio.create_task(operation_factory())
     except BaseException:
         limiter.release()
