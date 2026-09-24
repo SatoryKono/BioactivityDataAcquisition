@@ -435,6 +435,19 @@ def _correct_control_plane(uid: object, panels: dict[int, dict]) -> None:
     if uid != "bioetl-control-plane-v1":
         return
     retention = panels[9416]
+    # B repeated the full retention/hash verification only to rename a header.
+    # Keep the evidence rows from A; their statuses already convey the result.
+    retention["targets"] = [
+        target for target in retention["targets"] if target.get("refId") != "B"
+    ]
+    retention["transformations"] = [
+        transform
+        for transform in retention.get("transformations", [])
+        if not (
+            transform.get("id") == "configFromData"
+            and transform.get("options", {}).get("configRefId") == "B"
+        )
+    ]
     for item in retention["fieldConfig"]["overrides"]:
         if item["matcher"].get("options") in ("Check", "Status"):
             item["properties"] = [
