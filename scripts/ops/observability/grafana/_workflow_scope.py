@@ -187,11 +187,22 @@ def apply_workflow_scope(payload: dict) -> None:
         if panel.get("id") in {215, 20215}:
             panel.setdefault("options", {})["cellHeight"] = "lg"
             for override in panel.get("fieldConfig", {}).get("overrides", []):
+                if override["matcher"].get("options") == "Priority":
+                    # Full-action navigation remains in the panel header; a
+                    # duplicate link reserves space and clips UNKNOWN.
+                    override["properties"] = [
+                        p
+                        for p in override["properties"]
+                        if p["id"] not in {"links", "custom.inspect"}
+                    ]
+                    override["properties"].append(
+                        {"id": "custom.inspect", "value": False}
+                    )
                 for prop in override.get("properties", []):
                     if prop["id"] == "custom.width":
                         field = override["matcher"].get("options")
                         if field in {"Priority", "Action"}:
-                            prop["value"] = 110 if field == "Priority" else 120
+                            prop["value"] = 100 if field == "Priority" else 110
                     if (
                         override["matcher"].get("options") == "action_reason"
                         and prop["id"] == "mappings"
