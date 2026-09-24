@@ -79,7 +79,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-058](ADR-058-layered-port-registries.md) | Layered Port Registries | Accepted | Architecture | 2026-08-25 |
 | [ADR-059](ADR-059-package-cohesion-budgets.md) | Package Cohesion Budgets | Accepted | Architecture | 2026-08-25 |
 | [ADR-060](ADR-060-prompt-kernel-and-overlay-architecture.md) | Prompt Kernel and Overlay Architecture | Accepted | Architecture | 2026-08-28 |
-| [ADR-061](ADR-061-persisted-selected-run-assessment.md) | Persisted Selected Run Assessment | Proposed | Observability | 2026-09-16 |
+| [ADR-061](ADR-061-persisted-selected-run-assessment.md) | Persisted Selected Run Assessment | Accepted | Observability | 2026-09-16 |
 
 ## ADRs by Category
 
@@ -121,6 +121,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement
 - [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing for Local-Only
 - [ADR-023](ADR-023-entity-type-patterns.md): Entity Type Patterns (transformer entity_type)
+- [ADR-061](ADR-061-persisted-selected-run-assessment.md): Persisted Selected Run Assessment
 
 ### Lifecycle Management
 

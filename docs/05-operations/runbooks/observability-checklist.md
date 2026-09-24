@@ -124,6 +124,7 @@ curl -sS http://127.0.0.1:8000/health/ready | python -c "import json,sys; print(
   - `manifest_id` where a manifest has already been created
 - Confirm the current incident or validation session can be traced from logs back
   to the active run.
+- Detached `bioetl health server` startup stdout/stderr is `logs/ops/bioetl-ops-http-backend-{port}.log` under the repository root, or `<data_root>/ops/` when a data root is passed into the process helper. These files are gitignored (`logs/`).
 
 ```bash
 cat reports/logs/bioetl.log | jq 'select(.run_id and .pipeline and .pipeline_name)'
