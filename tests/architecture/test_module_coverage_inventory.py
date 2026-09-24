@@ -665,6 +665,7 @@ def test_hotspot_refactor_targets_have_authoritative_module_coverage_gates() -> 
     for family_name, thresholds in gated_families.items():
         family_row = hotspot_family_coverage[family_name]
         assert family_row["thresholds"] == thresholds
+        assert family_row["threshold_status"] == "pass", family_name
         assert family_row["threshold_status"] == _expected_hotspot_threshold_status(
             family_row
         ), family_name
