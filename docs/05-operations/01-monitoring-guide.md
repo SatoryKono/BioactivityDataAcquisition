@@ -299,7 +299,7 @@ QA image, rule fixtures, and monitoring-profile pins in one reviewed change.
      (opt-in monitoring stack).
 - **Дашборд пустой**:
   1. Проверьте, что пайплайн-процесс запущен и не завершился с ошибкой.
-  1. Убедитесь, что пайплайн запущен с метриками (`BIOETL_METRICS_ENABLED=true`).
+  1. Убедитесь, что пайплайн запущен с метриками (`BIOETL_OBSERVABILITY__METRICS_ENABLED=true`).
   1. Проверьте доступность endpoint метрик на порту 8000 (`/metrics`).
 - **Grafana/Prometheus container healthy, но `localhost:3000` / `localhost:9090`
   из shell или браузера не открываются**:
