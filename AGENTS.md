@@ -103,14 +103,18 @@ Minimum expectation:
 1. After changes under `src/bioetl/**/*.py`, refresh
    `reports/quality/module-coverage-inventory.json` field `source_tree_sha256`
    via `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`
-   and run the architecture hash guard when feasible.
+   and run the architecture hash guard when feasible. On native Windows
+   equivalently:
+   `.\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`.
 1. After markdown/docs changes that add, remove, or retarget local links, or
    that change `Owner:` / `Status:` / `Class:` headers, refresh
    `docs/reports/generated/documentation-cleanup-inventory.{json,md}` via
    `python -m scripts.docs generate-cleanup-inventory --update` and commit
-   those artifacts with the docs change. `--check` reads the working tree;
-   skipping `--update` fails `test_documentation_cleanup_inventory_check_passes`
-   and stops `architecture-fast`.
+   those artifacts with the docs change. On native Windows equivalently:
+   `.\.venv-win\Scripts\python.exe -m scripts.docs generate-cleanup-inventory --update`.
+   `--check` reads the working tree; skipping `--update` fails
+   `test_documentation_cleanup_inventory_check_passes` and stops
+   `architecture-fast`.
 1. Report checks run, skipped checks, and mirror-sync status explicitly.
 
 ## Guardrails
@@ -154,10 +158,12 @@ Minimum expectation:
   `:8000`). Loki, Tempo, and Quarantine Explorer UI were removed.
 - For BioETL Grafana screenshot refresh, render preflight, panel-audit,
   render-blocker diagnosis, dashboard JSON, query, variable, navigation, or
-  operator-facing UX work, agents **SHOULD** use
-  `.codex/skills/observability-dashboard/`.
+  operator-facing UX work, agents **SHOULD** use the matching runtime skill:
+  `.codex/skills/observability-dashboard/` or the equal-peer
+  `.junie/skills/observability-dashboard/`.
 - For Prometheus alert or recording-rule edits, tests, or query diagnosis,
-  agents **SHOULD** use `.codex/skills/observability-prometheus/`.
+  agents **SHOULD** use `.codex/skills/observability-prometheus/` or
+  `.junie/skills/observability-prometheus/`.
 
 ## OpenCode GitHub Repo Agent (Phase 1, subordinate surface)
 
