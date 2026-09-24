@@ -638,7 +638,8 @@ async def test_routing_support_filter_options_and_selector_context(
     assert isinstance(payload, dict)
     assert payload["run_ids"] == ["run-2"]
     assert payload["kwargs"]["requested_pipeline"] == "chembl_activity"
-    assert payload["kwargs"]["exact_run_only"] is True
+    assert payload["kwargs"]["run_id_policy"].exact_run_only is True
+    assert payload["kwargs"]["run_id_policy"].fallback_value == "run-fallback"
     assert routing_support._read_truthy_query_param({}, "exact_run_only") is False
     assert (
         routing_support._read_truthy_query_param(
