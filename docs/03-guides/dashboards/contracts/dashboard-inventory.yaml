@@ -119,7 +119,7 @@ dashboards:
     panel_count: 40
     key_panels:
       - id: 9101
-        title: Monitor Fleet Severity
+        title: Monitor Fleet Status
         type: table
         description: Provider health severity matrix
       - id: 9103

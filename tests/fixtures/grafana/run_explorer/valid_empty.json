@@ -2,12 +2,12 @@
   "contract": "run_explorer_request_snapshot_v1",
   "endpoint": "pipeline_run_reports",
   "expected_empty_copy_tokens": [
-    "VALID EMPTY"
+    "UNKNOWN"
   ],
   "method": "GET",
   "panel_id": 3010,
   "response_state": "valid_empty",
-  "root_selector": "items",
+  "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items",
   "scenario": "valid_empty",
   "selectors": {
     "__timezone": "utc",

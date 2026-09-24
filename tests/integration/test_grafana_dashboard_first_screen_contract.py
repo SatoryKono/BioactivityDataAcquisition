@@ -220,8 +220,8 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             "Review Runtime Blockers": "bioetl_runtime_current_blocker_reason",
         },
         "bioetl-provider-health-v2.json": {
-            "Monitor Fleet Severity": "bioetl_provider_current_status",
-            "Inspect Status Reason": "bioetl_provider_current_status_info",
+            "Monitor Fleet Status": "bioetl_provider_current_status",
+            "Inspect Health Evidence": "bioetl_provider_current_status_info",
         },
         "bioetl-dq-v2.json": {
             "Monitor Current DQ Status": "bioetl_dq_current_status",
@@ -370,7 +370,7 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
             "Review Runtime Blockers",
         ],
         "bioetl-provider-health-v2.json": [
-            "Monitor Fleet Severity",
+            "Monitor Fleet Status",
             "Inspect Top Provider Causes",
             "Monitor Telemetry Presence",
         ],

@@ -1,15 +1,16 @@
-# Debt heatmap (`src`, 2026-09-23)
+# Debt heatmap (`src/bioetl`, 2026-09-24)
 
 Heat = probability × blast. Не TODO-count.
 
 ```
                     blast →
                  low          medium              high
-prob high    | AUD-005     | AUD-004 FK     | AUD-001 gates
-             | type-ignore | 10 partial     | AUD-002 _core.py
-prob med     | waiver      | AUD-003 util   |
-             | aggregates  |                |
-prob low     | pragma      | CLI ~410 LOC   | memory/query.py 1978
+prob high    | F-003       | F-001 FK       | AUD-001 gates
+             | 17 ignores  | 100% (rebind   | AUD-002 _core.py
+             | watch       |  pending)      | (carry-over, src/mem)
+prob med     | waiver      | F-004 util     |
+             | aggregates  | (unmeasured)   |
+prob low     | pragma      | CLI ~410 LOC   |
              | facades     | outside family |
 ```
 

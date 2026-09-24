@@ -585,7 +585,7 @@
       },
       "options": {
         "bioetlDisplayTitle": "Start Provider Triage",
-        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0;white-space:normal;overflow-wrap:anywhere\">Next action: open the worst Fleet Severity row.</div>",
+        "content": "<div style=\"font-size:16px;line-height:1\">Next action: inspect non-OK Fleet Status rows.</div>",
         "mode": "html"
       },
       "links": [
@@ -621,7 +621,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Do not put full UUIDs into Prometheus labels. First-screen worst three providers by current status. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Interpret with freshness: critical -> degraded -> unknown/stale -> healthy. TELEMETRY MISSING or no data with UNKNOWN Status is a blind spot, not evidence of a healthy fleet. Complete fleet rows remain in Inspect Full Fleet Evidence. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
+      "description": "GLOBAL / CURRENT · All observed provider status series, independent of the selected Provider. TELEMETRY MISSING is a blind spot, not a healthy fleet. Missing series are not proof of health. Status is the current assessment; evidence describes observation availability, not the selected historical run.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -796,13 +796,17 @@
               {
                 "id": "custom.width",
                 "value": 130
+              },
+              {
+                "id": "displayName",
+                "value": "Status"
               }
             ]
           }
         ]
       },
       "gridPos": {
-        "h": 7,
+        "h": 9,
         "w": 12,
         "x": 0,
         "y": 7
@@ -823,13 +827,14 @@
           "reducer": [
             "sum"
           ],
-          "show": false
+          "show": false,
+          "enablePagination": true
         },
         "showHeader": true,
         "sortBy": [
           {
-            "desc": true,
-            "displayName": "Severity"
+            "displayName": "Status",
+            "desc": true
           }
         ]
       },
@@ -867,7 +872,7 @@
           }
         }
       ],
-      "title": "Monitor Fleet Severity",
+      "title": "Monitor Fleet Status",
       "type": "table"
     },
     {
@@ -875,7 +880,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Remote API evidence. Cached Bronze replay does not exercise the API and proves neither outage nor health. missing_health_status = no observation; invalid_health_timestamp = missing, zero or future timestamp. Both are UNKNOWN. The latest valid observation has no age expiry. GLOBAL: independent of selected run.",
+      "description": "GLOBAL / CURRENT · All observed provider status series, independent of the selected Provider. TELEMETRY MISSING is a blind spot, not a healthy fleet. Missing series are not proof of health. Status is the current assessment; evidence describes observation availability, not the selected historical run.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1020,15 +1025,15 @@
             },
             "properties": [
               {
-                "id": "displayName",
-                "value": "Reason"
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "Evidence"
               },
               {
                 "id": "mappings",
@@ -1037,13 +1042,13 @@
                     "type": "value",
                     "options": {
                       "missing_health_status": {
-                        "text": "Missing"
+                        "text": "No health observation"
                       },
                       "observed_health_status": {
-                        "text": "Observed"
+                        "text": "Health observation available"
                       },
                       "invalid_health_timestamp": {
-                        "text": "Bad time"
+                        "text": "Invalid observation time"
                       }
                     }
                   },
@@ -1230,7 +1235,7 @@
         ]
       },
       "gridPos": {
-        "h": 7,
+        "h": 9,
         "w": 12,
         "x": 12,
         "y": 7
@@ -1244,7 +1249,8 @@
           "reducer": [
             "sum"
           ],
-          "show": false
+          "show": false,
+          "enablePagination": true
         },
         "showHeader": true,
         "sortBy": [
@@ -1264,7 +1270,7 @@
           "refId": "A"
         }
       ],
-      "title": "Inspect Status Reason",
+      "title": "Inspect Health Evidence",
       "type": "table",
       "transformations": [
         {
@@ -1275,7 +1281,8 @@
               "__name__": true,
               "job": true,
               "instance": true,
-              "endpoint": true
+              "endpoint": true,
+              "source_state": true
             },
             "indexByName": {
               "provider": 0,
@@ -1356,10 +1363,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 16
       },
       "id": 9104,
       "options": {
@@ -1404,7 +1411,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "panels": [
         {
@@ -1717,9 +1724,9 @@
           },
           "gridPos": {
             "h": 8,
-            "w": 12,
+            "w": 24,
             "x": 0,
-            "y": 18
+            "y": 19
           },
           "id": 9102,
           "options": {
@@ -2066,9 +2073,9 @@
           },
           "gridPos": {
             "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 18
+            "w": 24,
+            "x": 0,
+            "y": 27
           },
           "id": 9103,
           "options": {
@@ -2151,7 +2158,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "id": 9105,
       "title": "Inspect Full Fleet Evidence",
@@ -2165,8 +2172,8 @@
           "description": "CURRENT · TIME RANGE · Complete GLOBAL provider severity matrix. First-screen Monitor Fleet Severity is the four-row summary. TELEMETRY MISSING is a blind spot, not a healthy fleet. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "gridPos": {
             "x": 0,
-            "y": 19,
-            "w": 12,
+            "y": 20,
+            "w": 24,
             "h": 5
           },
           "id": 9111,
@@ -2361,9 +2368,9 @@
           },
           "description": "GLOBAL · Current fleet, independent of the selected Provider. VALID EMPTY requires every observed provider to have health evidence and current status OK. Missing coverage remains UNKNOWN; query failure is not a healthy empty fleet.",
           "gridPos": {
-            "x": 12,
-            "y": 19,
-            "w": 12,
+            "x": 0,
+            "y": 25,
+            "w": 24,
             "h": 5
           },
           "id": 9112,
@@ -2598,7 +2605,7 @@
           "description": "TIME RANGE · Complete current cause evidence, unbounded copy of Inspect Top Provider Causes. Same one-state rule: active-cause rows, or a single FLEET verdict row. VALID EMPTY needs proven coverage — recorded status for every provider, no provider above OK, present health telemetry, present cause series, and no active cause. Unproven coverage stays UNKNOWN and means restore provider telemetry. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "gridPos": {
             "x": 0,
-            "y": 24,
+            "y": 30,
             "w": 24,
             "h": 5
           },
@@ -2785,7 +2792,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 20
       },
       "id": 91,
       "title": "Selected Provider Details",
@@ -2849,7 +2856,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 20,
+            "y": 21,
             "w": 24,
             "h": 5
           },
@@ -2951,7 +2958,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 25,
+            "y": 26,
             "w": 24,
             "h": 4
           },
@@ -3100,7 +3107,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 29,
+            "y": 30,
             "w": 24,
             "h": 4
           },
@@ -3194,7 +3201,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 33,
+            "y": 34,
             "w": 24,
             "h": 5
           },
@@ -3281,8 +3288,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 38,
-            "w": 8,
+            "y": 39,
+            "w": 24,
             "h": 10
           },
           "id": 102,
@@ -3376,9 +3383,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 8,
-            "y": 38,
-            "w": 16,
+            "x": 0,
+            "y": 49,
+            "w": 24,
             "h": 10
           },
           "id": 110,
@@ -3465,8 +3472,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 48,
-            "w": 12,
+            "y": 59,
+            "w": 24,
             "h": 5
           },
           "id": 111,
@@ -3542,9 +3549,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 48,
-            "w": 12,
+            "x": 0,
+            "y": 64,
+            "w": 24,
             "h": 5
           },
           "id": 115,
@@ -3632,8 +3639,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 53,
-            "w": 12,
+            "y": 69,
+            "w": 24,
             "h": 5
           },
           "id": 112,
@@ -3709,9 +3716,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 53,
-            "w": 12,
+            "x": 0,
+            "y": 74,
+            "w": 24,
             "h": 5
           },
           "id": 113,
@@ -3807,8 +3814,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 58,
-            "w": 12,
+            "y": 79,
+            "w": 24,
             "h": 5
           },
           "id": 31,
@@ -3885,9 +3892,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 58,
-            "w": 12,
+            "x": 0,
+            "y": 84,
+            "w": 24,
             "h": 5
           },
           "id": 32,
@@ -3929,7 +3936,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "id": 9404,
       "description": "Expand for selected-range and debug evidence after current fleet severity, causes, and telemetry presence have been interpreted together.",
@@ -4127,7 +4134,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 21,
+            "y": 22,
             "w": 24,
             "h": 10
           },
@@ -4247,7 +4254,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 31,
+            "y": 32,
             "w": 24,
             "h": 10
           },
@@ -4318,7 +4325,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 41,
+            "y": 42,
             "w": 24,
             "h": 3
           },
@@ -4392,7 +4399,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 44,
+            "y": 45,
             "w": 24,
             "h": 3
           },
@@ -4476,7 +4483,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 47,
+            "y": 48,
             "w": 24,
             "h": 3
           },
@@ -4556,7 +4563,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 50,
+            "y": 51,
             "w": 24,
             "h": 3
           },
@@ -4600,7 +4607,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 22
       },
       "id": 9405,
       "description": "Expand for compact HTTP-backed run context; Run Explorer is the canonical exact-run workspace.",
@@ -4611,7 +4618,7 @@
           "title": "Inspect Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 22,
+            "y": 23,
             "w": 24,
             "h": 12
           },
@@ -4868,7 +4875,7 @@
           "title": "Inspect Processed Records",
           "gridPos": {
             "x": 0,
-            "y": 34,
+            "y": 35,
             "w": 24,
             "h": 12
           },
@@ -5232,7 +5239,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 22,
+        "y": 23,
         "w": 24,
         "h": 1
       },
@@ -5243,7 +5250,7 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 23,
+            "y": 24,
             "w": 24,
             "h": 12
           },
@@ -5468,7 +5475,7 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 35,
+            "y": 36,
             "w": 24,
             "h": 8
           },

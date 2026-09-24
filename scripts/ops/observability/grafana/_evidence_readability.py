@@ -350,7 +350,7 @@ def _provider(p: dict[int, dict]) -> None:
     p[9002]["options"]["content"] = (
         '<div style="font-size:16px;line-height:1">Next action: inspect non-OK Fleet Status rows.</div>'
     )
-    p[9002]["gridPos"]["h"] = 1
+    p[9002]["gridPos"]["h"] = 2
     p[102]["title"] = "Inspect Health p95"
     for field, width in {"Provider": 140, "Source state": 70, "Status": 90}.items():
         _override(p[9107], field, _WIDTH, width)
@@ -360,8 +360,9 @@ def _provider(p: dict[int, dict]) -> None:
         p[9111], "Provider", "custom.cellOptions", {"type": "auto", "wrapText": False}
     )
     for pid in (9101, 9107):
-        p[pid]["gridPos"].update(y=6, h=9)
-    p[9104]["gridPos"].update(y=15, h=2)
+        p[pid]["gridPos"].update(y=7, h=9)
+        p[pid]["options"].setdefault("footer", {})["enablePagination"] = True
+    p[9104]["gridPos"].update(y=16, h=2)
     p[9104]["options"]["colorMode"] = "value"
     _stack(p[9404], {114: 10, 1: 10, 2: 3, 105: 3, 104: 3, 7: 3})
     _table(
@@ -378,6 +379,11 @@ def _provider(p: dict[int, dict]) -> None:
         "TIME RANGE · Observed degraded health checks in the selected range; "
         "historical count, not current severity. Missing evidence remains UNKNOWN."
     )
+    for y, pid in enumerate((9106, 9105, 91, 9404, 9405, 9450), start=18):
+        p[pid]["gridPos"]["y"] = y
+        _stack(
+            p[pid], {child["id"]: child["gridPos"]["h"] for child in p[pid]["panels"]}
+        )
 
 
 def _dq(p: dict[int, dict]) -> None:
@@ -565,7 +571,7 @@ def _selection_summary(panel: dict) -> None:
     )
 
 
-def _overview_verdict_reasons(p: dict[int, dict]) -> None:
+def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
     """Expose explanations without replacing the aggregate saved-run verdict."""
     summary = next(
         panel
@@ -574,8 +580,9 @@ def _overview_verdict_reasons(p: dict[int, dict]) -> None:
     )
     # The previous Dashboard datasource reused domain rows. Query the envelope
     # directly: the first domain's verdict is not the aggregate run verdict.
-    summary["datasource"] = deepcopy(p[9002]["datasource"])
-    summary["targets"] = deepcopy(p[9002]["targets"])
+    source = p[9002] if overview else p[9451]
+    summary["datasource"] = deepcopy(source["datasource"])
+    summary["targets"] = deepcopy(source["targets"])
     summary["targets"][0]["root_selector"] = (
         '[$merge([presentation_summary[0], {"reason_display": '
         "presentation_trust[0].reasons_display ? "
@@ -586,10 +593,10 @@ def _overview_verdict_reasons(p: dict[int, dict]) -> None:
     target["uql"] = (
         'parse-json | jsonata "' + target["root_selector"].replace('"', "'") + '"'
     )
-    for panel, fields in (
-        (summary, ["execution_state", "verdict", "reason_display"]),
-        (p[9002], ["domain", "verdict", "reason_display"]),
-    ):
+    views = [(summary, ["execution_state", "verdict", "reason_display"])]
+    if overview:
+        views.append((p[9002], ["domain", "verdict", "reason_display"]))
+    for panel, fields in views:
         for transform in panel["transformations"]:
             if transform["id"] == "filterFieldsByName":
                 transform["options"]["include"]["names"] = fields
@@ -638,6 +645,8 @@ def _overview_verdict_reasons(p: dict[int, dict]) -> None:
         )
     _override(summary, "Result", "displayName", "Processing")
     _override(summary, "Status", "displayName", "Trust")
+    if not overview:
+        return
     _table(p[9002], {"Domain": 120, "Status": 105})
     # Three evidence columns need half the first-screen width at narrow viewports.
     p[9002]["gridPos"].update(x=12, w=12)
@@ -678,8 +687,8 @@ def apply_evidence_readability(payload: dict) -> None:
     if payload.get("uid") == "bioetl-run-explorer-v1":
         _run_explorer(p)
     _first_window_widths(payload, p)
-    if payload.get("uid") == "bioetl-overview-v2":
-        _overview_verdict_reasons(p)
+    if payload.get("uid") in {"bioetl-overview-v2", "bioetl-dq-v2"}:
+        _selected_verdict_reasons(p, overview=payload["uid"] == "bioetl-overview-v2")
     # These are enum verdicts, not blocker counts: code 3 is UNKNOWN.
     # Counter panels intentionally retain their >=2=CRIT threshold copy.
     enum_panels = {

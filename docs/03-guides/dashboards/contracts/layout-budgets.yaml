@@ -304,7 +304,7 @@ answer_panels:
       title: Monitor Pipeline Status
   bioetl-provider-health-v2.json:
     - id: 9101
-      title: Monitor Fleet Severity
+      title: Monitor Fleet Status
   bioetl-dq-v2.json:
     - id: 9401
       title: Monitor Current DQ Status

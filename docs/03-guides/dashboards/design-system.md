@@ -273,13 +273,18 @@ Normative rules:
   accounting evidence. It intentionally omits reconciliation status, accounted
   subtotal, and delta rows, and MUST NOT replace the dashboard role-specific
   `Status` or `First Action` decision path.
-- Overview `Review Selected Run Status` shows processing, aggregate trust, and
+- Overview and Data Quality `Review Selected Run Status` show processing, aggregate trust, and
   the saved explanation (`Processing`, `Trust`, `Reason`). It must not use the
   first domain verdict as the aggregate. `Review Run Domains` also shows the
   domain explanation. Missing archive evidence reads `No verified archive`
   and remains `INCOMPLETE`; evidence completeness remains in the saved report.
   Reason labels use readable English (for example, `Standalone pipeline`),
   while the underlying reason codes remain unchanged.
+- Provider Health fleet tables query all observed providers without a top-k
+  cutoff. `Monitor Fleet Status` shows current status; `Inspect Health Evidence`
+  distinguishes status from observation availability. The duplicate source-state
+  column is hidden. Pagination preserves additional rows as the fleet grows;
+  absent telemetry never becomes a healthy provider.
 - `Processed Records` percentage evidence MUST stay denominator-explicit:
   Bronze renders `100%`, and all Silver and Gold outcome rows divide by
   `bronze [total]`. Zero-valued rows are omitted from the compact table, but
