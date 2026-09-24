@@ -191,7 +191,7 @@ def apply_workflow_scope(payload: dict) -> None:
                     if prop["id"] == "custom.width":
                         field = override["matcher"].get("options")
                         if field in {"Priority", "Action"}:
-                            prop["value"] = 90 if field == "Priority" else 120
+                            prop["value"] = 110 if field == "Priority" else 120
                     if (
                         override["matcher"].get("options") == "action_reason"
                         and prop["id"] == "mappings"
