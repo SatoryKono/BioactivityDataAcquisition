@@ -114,7 +114,7 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   root-level txt dump.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
   project surfaces: `.agents`, `.claude`, `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`,
-  `.junie`, `.vibe`, `.vscode`, `.zed`, `artifacts`, `assets`, `configs`, `data`,
+  `.junie`, `.opencode`, `.vibe`, `.vscode`, `.zed`, `artifacts`, `assets`, `configs`, `data`,
   `docs`, `grafana`, `reports`, `scripts`, `src`, and `tests`.
 - Canonical machine-readable root governance lives in `.github/root-allowlist.txt`,
   `configs/quality/repo_structure_catalog.yaml`,
@@ -123,6 +123,7 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   MUST stay aligned with those enforcement surfaces.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
 - Shared repo tooling surfaces such as `.agents/`, `.claude/`, `.codex/`, `.gemini/`, `.junie/`,
+  `.opencode/`,
   curated `.vibe/`,
   and curated shared editor metadata roots such as `.cursor/`, `.vscode/`, and
   `.zed/` MAY оставаться tracked только если они поддерживаются как
@@ -143,7 +144,7 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   untracked. Reviewed portable PyCharm settings MUST live under
   `configs/ide/pycharm/` and MAY be copied into local `.idea/`.
 - Generated/runtime root trees such as `node_modules/`, `output/`, `test-output/`,
-  `logs/`, `MagicMock/`, `caddy/`, and local package trees like
+  `logs/`, `Microsoft/`, `MagicMock/`, `caddy/`, and local package trees like
   `.python-user/` MUST NOT попадать в git-index.
 - Legacy root compatibility carryovers such as `script-codex/` or
   `script-gemini/` MUST NOT be treated as approved tracked roots. If they exist

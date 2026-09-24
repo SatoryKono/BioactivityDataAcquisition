@@ -652,11 +652,11 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
     p[9002]["gridPos"].update(x=12, w=12)
     p[214]["gridPos"].update(x=16, w=8)
     p[215]["gridPos"]["w"] = 12
-    p[215]["options"]["cellHeight"] = "lg"
+    p[215]["options"]["cellHeight"] = "sm"
     summary["gridPos"]["w"] = 12
     _override(summary, "Result", _WIDTH, 100)
     _override(summary, "Status", _WIDTH, 115)
-    p[9002]["options"]["cellHeight"] = "lg"
+    p[9002]["options"]["cellHeight"] = "sm"
     p[9002]["fieldConfig"]["defaults"]["custom"]["wrapText"] = True
     for field in ("Domain", "Status", "Reason"):
         _override(p[9002], field, "links", [])

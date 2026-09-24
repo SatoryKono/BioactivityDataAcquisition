@@ -422,6 +422,10 @@
                 ]
               },
               {
+                "id": "displayName",
+                "value": "Trust"
+              },
+              {
                 "id": "custom.width",
                 "value": 115
               },
