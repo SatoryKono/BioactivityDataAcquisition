@@ -50,6 +50,82 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
+async def test_stage_context_crosses_threads_without_crossing_requests(caplog) -> None:
+    from bioetl.application.observability.control_plane_evidence.timing import (
+        evidence_stage,
+    )
+
+    caplog.set_level("INFO")
+    limiter = asyncio.Semaphore(2)
+
+    def read(stage: str) -> None:
+        with evidence_stage(stage):
+            pass
+
+    async def request(name: str) -> None:
+        await run_bounded_forensic_operation(
+            limiter=limiter,
+            operation_factory=lambda: asyncio.to_thread(read, name),
+            endpoint=name,
+        )
+
+    await asyncio.gather(
+        request("manifest_resolution"), request("archive_verification")
+    )
+    messages = [
+        r.getMessage()
+        for r in caplog.records
+        if r.getMessage().startswith("forensic_stage")
+    ]
+    assert len(messages) == 2
+    assert len({message.split()[1] for message in messages}) == 2
+    for message in messages:
+        assert message.split()[2].split("=")[1] == message.split()[3].split("=")[1]
+    read("outside_request")
+    assert len(caplog.records) == 2
+
+
+@pytest.mark.asyncio
+async def test_timeout_and_deferred_completion_share_diagnostic_id(caplog) -> None:
+    limiter = asyncio.Semaphore(1)
+    finished = asyncio.Event()
+
+    async def operation() -> None:
+        await finished.wait()
+
+    with pytest.raises(ForensicEndpointUnavailable) as failure:
+        await run_bounded_forensic_operation(
+            limiter=limiter,
+            operation_factory=operation,
+            timeout_seconds=0.01,
+            endpoint="/ops/control-plane/retention-compliance",
+        )
+    assert limiter.locked()
+    finished.set()
+    for _ in range(10):
+        await asyncio.sleep(0)
+        if not limiter.locked():
+            break
+    messages = [record.getMessage() for record in caplog.records]
+    deadline = next(m for m in messages if m.startswith("forensic_deadline_exceeded"))
+    completion = next(
+        m for m in messages if m.startswith("forensic_deferred_completion")
+    )
+    assert deadline.split()[1] == completion.split()[1]
+    assert deadline.split()[1] == f"request_id={failure.value.request_id}"
+    payload = forensic_unavailable_table_payload(
+        endpoint="retention-compliance",
+        reason=failure.value.reason,
+        request_id=failure.value.request_id,
+    )
+    assert payload["request_id"] == failure.value.request_id
+    assert "queue_seconds=" in deadline
+    assert "endpoint=/ops/control-plane/retention-compliance" in deadline
+    assert "operation_seconds=" in deadline
+    assert not limiter.locked()
+
+
+@pytest.mark.asyncio
 async def test_synchronous_factory_failure_releases_capacity() -> None:
     limiter = asyncio.Semaphore(1)
 

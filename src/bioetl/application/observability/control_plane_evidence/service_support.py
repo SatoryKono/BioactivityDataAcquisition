@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from bioetl.application.observability.control_plane_evidence.timing import evidence_stage
 
 from bioetl.application.observability.control_plane_evidence.checks import (
     EvidenceCheckResult,
 )
 from bioetl.application.observability.control_plane_evidence.models import (
     evidence_payload,
+)
+from bioetl.application.observability.control_plane_evidence.timing import (
+    evidence_stage,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.ports import RunLedgerPort

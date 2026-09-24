@@ -128,6 +128,7 @@ async def dispatch_control_plane_evidence_request(
         payload = await run_bounded_forensic_operation(
             limiter=host._forensic_endpoint_limiter,
             operation_factory=operation_factory,
+            endpoint=path,
         )
     except ForensicEndpointUnavailable as exc:
         status_code = 200 if table_error_as_http_ok(query) else exc.status_code
@@ -138,6 +139,7 @@ async def dispatch_control_plane_evidence_request(
                 endpoint=path,
                 reason=exc.reason,
                 observed_at=current_utc_time().isoformat(),
+                request_id=exc.request_id,
             ),
         )
         return True
