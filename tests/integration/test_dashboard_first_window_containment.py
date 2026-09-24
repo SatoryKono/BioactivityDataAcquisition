@@ -285,7 +285,7 @@ def test_row_cap_contracts_are_unique_and_owned() -> None:
         assert key not in seen, f"duplicate row-cap contract {key}"
         seen.add(key)
         assert str(item["owner"]).startswith("@")
-        assert item["bind"] in {"topk", "limit", "filter"}
+        assert item["bind"] in {"topk", "limit", "filter", "paginate"}
         max_rows = int(item["max_rows"])
         cap = {3010: 10, 9002: 6}.get(int(item["id"]), 5)
         assert 1 <= max_rows <= cap
