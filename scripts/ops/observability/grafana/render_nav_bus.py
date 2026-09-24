@@ -1482,6 +1482,8 @@ def apply_to_dashboard(
     _layout_uid_detail_panels(panels, current_uid=current_uid)
     _attach_nav_bus(nav, current_uid=current_uid)
     stamp_selector_columns(payload)
+    # Remove our generated row before other appenders calculate their tail y.
+    payload["panels"] = [p for p in payload["panels"] if p.get("id") != 9700]
     stamp_selected_run_panels(payload)
     from scripts.ops.observability.grafana._visual_usability import (
         apply_visual_usability,
@@ -1496,6 +1498,9 @@ def apply_to_dashboard(
     )
 
     apply_evidence_readability(payload)
+    from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope
+
+    apply_workflow_scope(payload)
     finalize_dashboard_links(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")

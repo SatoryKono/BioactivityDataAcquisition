@@ -621,7 +621,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "GLOBAL / CURRENT · Top three observed provider status series; full fleet below, independent of Pipeline and Run ID; independent of the selected Provider. Missing series are not proof of health. Status is the current assessment; evidence describes observation availability, not the selected historical run.",
+      "description": "GLOBAL / CURRENT · All observed provider status series, paginated; independent of Pipeline and Run ID; independent of the selected Provider. Missing series are not proof of health. Status is the current assessment; evidence describes observation availability, not the selected historical run.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -841,7 +841,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(3, max by (provider) (bioetl_provider_current_status{provider!~\"^(test|synthetic)$\"}))",
+          "expr": "max by (provider) (bioetl_provider_current_status{provider!~\"^(test|synthetic)$\"})",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -880,7 +880,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "GLOBAL / CURRENT · Top three observed provider status series; full fleet below, independent of Pipeline and Run ID; independent of the selected Provider. Missing series are not proof of health. Status is the current assessment; evidence describes observation availability, not the selected historical run.",
+      "description": "GLOBAL / CURRENT · All observed provider status series, paginated; independent of Pipeline and Run ID; independent of the selected Provider. Missing series are not proof of health. Status is the current assessment; evidence describes observation availability, not the selected historical run.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1025,15 +1025,23 @@
             },
             "properties": [
               {
+                "id": "displayName",
+                "value": "Evidence"
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
-                "id": "displayName",
-                "value": "Evidence"
+                "id": "custom.inspect",
+                "value": true
               },
               {
                 "id": "mappings",
@@ -1263,7 +1271,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(3, max by (provider, reason, source_state) (bioetl_provider_current_status_info))",
+          "expr": "max by (provider, reason, source_state) (bioetl_provider_current_status_info)",
           "format": "table",
           "instant": true,
           "legendFormat": "{{provider}} {{reason}} {{source_state}}",

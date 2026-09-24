@@ -375,7 +375,7 @@
       "id": 9401,
       "type": "stat",
       "title": "Monitor Scope Status",
-      "description": "CURRENT snapshot · Selected pipeline/run_type status at evaluation time. Ranked suspects (2010) are GLOBAL/UNVERIFIED and independent of this card. Pair with Provenance reason + action; never read as OK. Not a healthy OK. Ranked suspects may be WORKFLOW/GLOBAL blast radius — check scope labels on tables. Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace",
+      "description": "CURRENT · Selected workflow, pipeline and run type; not Selected Run. Inspect Current Workflow Evidence below for the source and publication clock.",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -388,9 +388,9 @@
       },
       "targets": [
         {
-          "expr": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A",
-          "instant": true
+          "instant": true,
+          "expr": "max(bioetl_workflow_scope_priority{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
         }
       ],
       "fieldConfig": {
@@ -404,16 +404,16 @@
                   "color": "green"
                 },
                 "1": {
+                  "text": "UNKNOWN",
+                  "color": "#555555"
+                },
+                "2": {
                   "text": "WARN",
                   "color": "orange"
                 },
-                "2": {
+                "3": {
                   "text": "CRIT",
                   "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "#555555"
                 }
               }
             },
@@ -4027,6 +4027,158 @@
             }
           ],
           "links": []
+        }
+      ]
+    },
+    {
+      "id": 9700,
+      "type": "row",
+      "title": "Inspect Current Workflow Evidence",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 9701,
+          "type": "table",
+          "title": "Review Current Workflow Evidence",
+          "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric.",
+          "gridPos": {
+            "x": 0,
+            "y": 24,
+            "w": 24,
+            "h": 9
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "instant": true,
+              "format": "table",
+              "expr": "label_replace(max by(workflow)(bioetl_workflow_scope_input_status{input=\"workflow\",workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"reason\",\"Reason unavailable\",\"\",\"\")"
+            },
+            {
+              "refId": "B",
+              "instant": true,
+              "format": "table",
+              "expr": "bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 1000"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "workflow",
+                "mode": "outer"
+              }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "workflow",
+                    "pipeline",
+                    "run_type",
+                    "Value #A",
+                    "Value #B",
+                    "reason"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "renameByName": {
+                  "workflow": "Workflow",
+                  "pipeline": "Pipeline",
+                  "run_type": "Run Type",
+                  "Value #A": "Status",
+                  "Value #B": "Published at",
+                  "reason": "Reason"
+                }
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "wrapText": true,
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              "noValue": "UNKNOWN"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "0": {
+                            "text": "OK"
+                          },
+                          "1": {
+                            "text": "WARN"
+                          },
+                          "2": {
+                            "text": "CRIT"
+                          },
+                          "3": {
+                            "text": "UNKNOWN"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Published at"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            }
+          },
+          "links": [
+            {
+              "title": "Show all rows and total (summary: up to 2)",
+              "url": "/d/bioetl-incident-v1/6-incident-workspace?viewPanel=22010&from=${__from}&to=${__to}",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ]
         }
       ]
     }

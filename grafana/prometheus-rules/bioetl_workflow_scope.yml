@@ -1,0 +1,140 @@
+# CURRENT workflow-scoped projection; retained publication does not expire by age.
+# Display priority: 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT.
+groups:
+- name: bioetl.workflow_scope
+  interval: 30s
+  rules:
+  - record: bioetl_workflow_scope_universe
+    expr: "group by (workflow, pipeline, run_type) (bioetl_workflow_pipeline_expected) or group by (workflow, pipeline,\
+      \ run_type) (\n  label_replace(label_replace(\n    bioetl_workflow_current_status{pipeline_context!=\"\",pipeline_context!=\"\
+      unknown\",run_type_context!=\"All\"},\n    \"pipeline\", \"$1\", \"pipeline_context\", \"(.+)\"),\n    \"\
+      run_type\", \"$1\", \"run_type_context\", \"(.+)\"))"
+  - record: bioetl_workflow_scope_publication_missing
+    expr: "group by (workflow) (\n  bioetl_workflow_current_status{job=~\"bioetl_workflow_.+\"}\n  unless on (job)\
+      \ (push_time_seconds{job=~\"bioetl_workflow_.+\",pipeline=\"\",run_type=\"\"} > 0\n    and push_time_seconds{job=~\"\
+      bioetl_workflow_.+\",pipeline=\"\",run_type=\"\"} <= time()))"
+  - record: bioetl_workflow_scope_status
+    expr: "(max by (workflow) (bioetl_workflow_current_status)\n  unless on (workflow) bioetl_workflow_scope_publication_missing)\n\
+      or (bioetl_workflow_scope_publication_missing * 3)"
+  - record: bioetl_workflow_scope_published_seconds
+    expr: "max by (workflow) (group by (workflow, job) (bioetl_workflow_current_status)\n  * on (job) group_left\
+      \ ()\n  (push_time_seconds{job=~\"bioetl_workflow_.+\",pipeline=\"\",run_type=\"\"} > 0\n   and push_time_seconds{job=~\"\
+      bioetl_workflow_.+\",pipeline=\"\",run_type=\"\"} <= time()))"
+  - record: bioetl_workflow_scope_input_status
+    labels:
+      input: runtime
+    expr: bioetl_workflow_scope_universe * on (pipeline, run_type) group_left () bioetl_l0_input_status_selected{input="runtime"}
+  - record: bioetl_workflow_scope_input_status
+    labels:
+      input: control_plane
+    expr: bioetl_workflow_scope_universe * on (pipeline, run_type) group_left () bioetl_l0_input_status_selected{input="control_plane"}
+  - record: bioetl_workflow_scope_input_status
+    labels:
+      input: dq
+    expr: bioetl_workflow_scope_universe * on (pipeline, run_type) group_left () bioetl_l0_input_status_selected{input="dq"}
+  - record: bioetl_workflow_scope_input_status
+    labels:
+      input: provider
+    expr: bioetl_workflow_scope_universe * on (pipeline, run_type) group_left () bioetl_l0_input_status_selected{input="provider"}
+  - record: bioetl_workflow_scope_input_status
+    labels:
+      input: gold
+    expr: bioetl_workflow_scope_universe * on (pipeline, run_type) group_left () bioetl_l0_input_status_selected{input="gold"}
+  - record: bioetl_workflow_scope_input_status
+    labels:
+      input: workflow
+    expr: (bioetl_workflow_scope_universe * on (workflow) group_left () bioetl_workflow_scope_status) or (bioetl_workflow_scope_universe
+      * 3)
+  - record: bioetl_workflow_scope_priority
+    expr: "max by (workflow, pipeline, run_type) (\n  (bioetl_workflow_scope_input_status == bool 2) * 3\n  + (bioetl_workflow_scope_input_status\
+      \ == bool 1) * 2\n  + (bioetl_workflow_scope_input_status == bool 3))"
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: runtime
+      action_reason: runtime_blockers_active
+      action_dashboard_uid: bioetl-runtime
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="runtime"} == bool 2) * 50), "action_scope",
+      "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: control_plane
+      action_reason: control_plane_guardrail_active
+      action_dashboard_uid: bioetl-control-plane-v1
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="control_plane"} == bool 2) * 40), "action_scope",
+      "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: runtime
+      action_reason: gold_lifecycle_blocking
+      action_dashboard_uid: bioetl-runtime
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="gold"} == bool 2) * 35), "action_scope", "var-pipeline=$1&var-stage=$$__all",
+      "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: dq
+      action_reason: dq_threshold_or_validation_signal
+      action_dashboard_uid: bioetl-dq-v2
+    expr: label_replace((((bioetl_workflow_scope_input_status{input="dq"} >= bool 1) * (bioetl_workflow_scope_input_status{input="dq"}
+      < bool 3)) * 30), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: provider
+      action_reason: provider_scope_degradation
+      action_dashboard_uid: bioetl-provider-health-v2
+    expr: label_replace((bioetl_workflow_scope_input_status{input="provider"} == bool 2) * 20, "action_scope", "var-pipeline=$1&var-provider=$$__all&var-pipeline_context=$1",
+      "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: workflow
+      action_reason: workflow_scope_requires_review
+      action_dashboard_uid: bioetl-runtime
+    expr: label_replace((((bioetl_workflow_scope_input_status{input="workflow"} >= bool 1) * (bioetl_workflow_scope_input_status{input="workflow"}
+      < bool 3)) * 10), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: monitor
+      action_reason: no_recent_activity_or_unknown_state
+      action_dashboard_uid: bioetl-overview-v2
+    expr: label_replace((bioetl_workflow_scope_universe * 5), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: runtime
+      action_reason: runtime_evidence_missing
+      action_dashboard_uid: bioetl-runtime
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="runtime"} == bool 3) * 15), "action_scope",
+      "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: control_plane
+      action_reason: control_plane_evidence_missing
+      action_dashboard_uid: bioetl-control-plane-v1
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="control_plane"} == bool 3) * 15), "action_scope",
+      "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: runtime
+      action_reason: gold_evidence_missing
+      action_dashboard_uid: bioetl-runtime
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="gold"} == bool 3) * 15), "action_scope", "var-pipeline=$1&var-stage=$$__all",
+      "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: dq
+      action_reason: dq_evidence_missing
+      action_dashboard_uid: bioetl-dq-v2
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="dq"} == bool 3) * 15), "action_scope", "var-pipeline=$1&var-stage=$$__all",
+      "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: provider
+      action_reason: provider_evidence_missing
+      action_dashboard_uid: bioetl-provider-health-v2
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="provider"} == bool 3) * 15), "action_scope",
+      "var-pipeline=$1&var-provider=$$__all&var-pipeline_context=$1", "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: workflow
+      action_reason: workflow_evidence_missing
+      action_dashboard_uid: bioetl-runtime
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="workflow"} == bool 3) * 15), "action_scope",
+      "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")

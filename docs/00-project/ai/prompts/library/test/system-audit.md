@@ -11,7 +11,7 @@ params:
 - MODE = propose-patches
 - LANGUAGE = ru
 - AUDIT_MODE = full
-- REQUIRE_GH_TRACKING =true
+- REQUIRE_GH_TRACKING = false
 includes:
 - fragments/git-safety.md
 - fragments/debt-budget-ban.md

@@ -339,10 +339,10 @@ def _provider(p: dict[int, dict]) -> None:
     p[9107]["title"] = "Inspect Health Evidence"
     for pid in (9101, 9107):
         target = p[pid]["targets"][0]
-        if not target["expr"].startswith("topk(3, "):
-            target["expr"] = f"topk(3, {target['expr']})"
+        if target["expr"].startswith("topk(3, ") and target["expr"].endswith(")"):
+            target["expr"] = target["expr"][8:-1]
         p[pid]["description"] = (
-            "GLOBAL / CURRENT · Top three observed provider status series; full fleet below, independent of "
+            "GLOBAL / CURRENT · All observed provider status series, paginated; independent of "
             "Pipeline and Run ID; independent of the selected Provider. Missing series are not proof of "
             "health. Status is the current assessment; evidence describes observation "
             "availability, not the selected historical run."
@@ -353,6 +353,10 @@ def _provider(p: dict[int, dict]) -> None:
         if transform["id"] == "organize":
             transform["options"]["excludeByName"]["source_state"] = True
     _override(p[9107], "reason", "displayName", "Evidence")
+    # The mapped explanation must remain readable in the narrow fleet table.
+    _override(p[9107], "reason", _WRAP, True)
+    _override(p[9107], "reason", _CELL, {"type": "auto", "wrapText": True})
+    _override(p[9107], "reason", "custom.inspect", True)
     _override(
         p[9107],
         "reason",

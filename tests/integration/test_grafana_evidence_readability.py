@@ -104,7 +104,7 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
         )
 
 
-def test_provider_first_window_caps_summary_and_explains_full_fleet():
+def test_provider_first_window_preserves_full_fleet_with_pagination():
     dashboard = json.loads(
         (ROOT / "grafana/dashboards/bioetl-provider-health-v2.json").read_text(
             encoding="utf-8"
@@ -113,8 +113,10 @@ def test_provider_first_window_caps_summary_and_explains_full_fleet():
     panels = {p["id"]: p for p in _panels(dashboard["panels"])}
     for pid in (9101, 9107):
         query = panels[pid]["targets"][0]["expr"]
-        assert query.startswith("topk(3, max by (")
-        assert "full fleet below" in panels[pid]["description"]
+        assert query.startswith("max by (")
+        assert "topk(" not in query
+        assert "All observed provider" in panels[pid]["description"]
+        assert panels[pid]["options"]["footer"]["enablePagination"] is True
         assert not any(t["id"] == "limit" for t in panels[pid]["transformations"])
     organize = next(
         t["options"] for t in panels[9107]["transformations"] if t["id"] == "organize"

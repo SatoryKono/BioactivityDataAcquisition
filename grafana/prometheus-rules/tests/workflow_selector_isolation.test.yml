@@ -1,0 +1,119 @@
+rule_files:
+- ../bioetl_workflow_scope.yml
+evaluation_interval: 30s
+tests:
+- name: Selected OK workflow is isolated from critical sibling, including actions; old publication remains valid
+  interval: 1m
+  input_series:
+  - &id001
+    series: bioetl_workflow_pipeline_expected{workflow="chembl_publication",pipeline="chembl_publication",run_type="backfill"}
+    values: 1+0x30
+  - &id002
+    series: bioetl_workflow_pipeline_expected{workflow="chembl_reference_pack",pipeline="chembl_publication",run_type="backfill"}
+    values: 1+0x30
+  - &id011
+    series: bioetl_workflow_current_status{workflow="chembl_publication",job="bioetl_workflow_chembl_publication"}
+    values: 0+0x30
+  - &id003
+    series: bioetl_workflow_current_status{workflow="chembl_reference_pack",job="bioetl_workflow_chembl_reference_pack"}
+    values: 2+0x30
+  - &id004
+    series: push_time_seconds{job="bioetl_workflow_chembl_publication"}
+    values: 1+0x30
+  - &id005
+    series: push_time_seconds{job="bioetl_workflow_chembl_reference_pack"}
+    values: 1+0x30
+  - &id006
+    series: bioetl_l0_input_status_selected{input="runtime",pipeline="chembl_publication",run_type="backfill"}
+    values: 0+0x30
+  - &id007
+    series: bioetl_l0_input_status_selected{input="dq",pipeline="chembl_publication",run_type="backfill"}
+    values: 0+0x30
+  - &id008
+    series: bioetl_l0_input_status_selected{input="provider",pipeline="chembl_publication",run_type="backfill"}
+    values: 0+0x30
+  - &id009
+    series: bioetl_l0_input_status_selected{input="gold",pipeline="chembl_publication",run_type="backfill"}
+    values: 0+0x30
+  - &id010
+    series: bioetl_l0_input_status_selected{input="control_plane",pipeline="chembl_publication",run_type="backfill"}
+    values: 0+0x30
+  promql_expr_test:
+  - expr: max(bioetl_workflow_scope_priority{workflow="chembl_publication"})
+    eval_time: 16m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max(bioetl_workflow_scope_priority{workflow="chembl_reference_pack"})
+    eval_time: 16m
+    exp_samples:
+    - labels: '{}'
+      value: 3
+  - expr: max(bioetl_workflow_scope_priority)
+    eval_time: 16m
+    exp_samples:
+    - labels: '{}'
+      value: 3
+  - expr: count(bioetl_workflow_scope_action{workflow="chembl_publication",action_target="workflow"} > 0) or vector(0)
+    eval_time: 16m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max(bioetl_workflow_scope_action{workflow="chembl_reference_pack",action_target="workflow"})
+    eval_time: 16m
+    exp_samples:
+    - labels: '{}'
+      value: 10
+  - expr: max(bioetl_workflow_scope_published_seconds{workflow="chembl_publication"})
+    eval_time: 16m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+- name: Missing selected workflow is UNKNOWN and never adopts sibling CRIT
+  interval: 1m
+  input_series:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  promql_expr_test:
+  - expr: max(bioetl_workflow_scope_priority{workflow="chembl_publication"})
+    eval_time: 16m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+  - expr: max(bioetl_workflow_scope_priority)
+    eval_time: 16m
+    exp_samples:
+    - labels: '{}'
+      value: 3
+  - expr: max(bioetl_workflow_scope_action{workflow="chembl_publication",action_target="workflow"})
+    eval_time: 16m
+    exp_samples:
+    - labels: '{}'
+      value: 15
+- name: Absent publication clock does not grant workflow OK
+  interval: 1m
+  input_series:
+  - *id001
+  - *id002
+  - *id011
+  - *id003
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  promql_expr_test:
+  - expr: max(bioetl_workflow_scope_priority{workflow="chembl_publication"})
+    eval_time: 16m
+    exp_samples:
+    - labels: '{}'
+      value: 1

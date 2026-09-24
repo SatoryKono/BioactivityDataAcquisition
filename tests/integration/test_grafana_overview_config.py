@@ -186,7 +186,7 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     next_action = panels["Review First Action"]
 
     assert status.get("type") == "stat"
-    assert "bioetl_l0_status" in _panel_expr(status)
+    assert "bioetl_workflow_scope_priority" in _panel_expr(status)
     assert "$__range" not in _panel_expr(status)
     assert status.get("options", {}).get("colorMode") == "background"
     assert status.get("options", {}).get("textMode") == "value"
@@ -196,7 +196,7 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     next_action_expr = _panel_expr(next_action)
     description = str(next_action.get("description", ""))
     assert next_action.get("type") == "table"
-    assert "bioetl_l0_next_action_route" in next_action_expr
+    assert "bioetl_workflow_scope_action" in next_action_expr
     # Keep the full response for the detail table; bound only the sorted summary.
     assert "topk(" not in next_action_expr
     transformations = next_action["transformations"]
@@ -581,8 +581,8 @@ def test_overview_queries_are_backed_by_expected_records_and_metrics() -> None:
     all_expressions = "\n".join(get_panel_expressions(_dashboard()))
 
     for required_token in (
-        "bioetl_l0_status",
-        "bioetl_l0_next_action_route",
+        "bioetl_workflow_scope_priority",
+        "bioetl_workflow_scope_action",
         "bioetl_l0_input_status_selected",
         "bioetl_l1_gold_lifecycle_status",
         "bioetl_pipeline_runs_total",

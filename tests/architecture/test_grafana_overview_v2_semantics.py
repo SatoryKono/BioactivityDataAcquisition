@@ -35,7 +35,7 @@ def test_overview_v2_semantics_contract():
     assert titles.count("Monitor Scope Health") == 1
     system = next(p for p in panels if p.get("title") == "Monitor Scope Health")
     expr = "\n".join(t.get("expr", "") for t in system.get("targets", []))
-    assert "bioetl_l0_status" in expr
+    assert "bioetl_workflow_scope_priority" in expr
     assert "$__range" not in expr
     mapping = json.dumps(
         system.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])

@@ -344,7 +344,7 @@ def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
         assert panel_declared_row_cap(panel) == cap
         assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
         assert panel["options"]["cellHeight"] == "sm"
-    assert "bioetl_l0_next_action_route" in panels[215]["targets"][0]["expr"]
+    assert "bioetl_workflow_scope_action" in panels[215]["targets"][0]["expr"]
     assert "presentation_domains" in panels[9002]["targets"][0]["root_selector"]
     assert "/selected-run-status?" in panels[9002]["targets"][0]["url"]
     assert panels[9603]["targets"] == [
