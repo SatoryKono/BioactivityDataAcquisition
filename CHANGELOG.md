@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Root hygiene (#10968–#10971):** untrack accidental
+  `Microsoft/Windows/PowerShell/ModuleAnalysisCache` and ignore `Microsoft/`;
+  remove GitLab CI pilot `.gitlab-ci.yml`; register `.opencode/` in the
+  structure catalog and file-policy; align root-file count prose 37→38.
+
 - **Remote-main architecture debt baseline rebound (#10957):**
   `architecture-debt-remote-main-baseline` tracks current `origin/main`;
   `generated_artifact_drift` / debt-gates `--check` pass without raising
