@@ -546,6 +546,10 @@
                 "value": "Reason"
               },
               {
+                "id": "links",
+                "value": []
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
@@ -582,7 +586,7 @@
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "sm",
+        "cellHeight": "lg",
         "footer": {
           "show": false
         }
@@ -987,11 +991,11 @@
                         "color": "text"
                       },
                       "runtime": {
-                        "text": "Diagnostics",
+                        "text": "Diagnose",
                         "color": "text"
                       },
                       "workflow": {
-                        "text": "Diagnostics",
+                        "text": "Diagnose",
                         "color": "text"
                       }
                     }
@@ -4921,11 +4925,11 @@
                             "color": "text"
                           },
                           "runtime": {
-                            "text": "Pipeline Diagnostics",
+                            "text": "Diagnose",
                             "color": "text"
                           },
                           "workflow": {
-                            "text": "Pipeline Diagnostics",
+                            "text": "Diagnose",
                             "color": "text"
                           }
                         }
