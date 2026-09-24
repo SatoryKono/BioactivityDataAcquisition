@@ -367,7 +367,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Incident Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">GLOBAL suspects are not verified causes. Telemetry gaps are UNKNOWN.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.2\">GLOBAL · All pipelines · independent of selected Pipeline, Provider and Run ID.</div>"
       },
       "links": []
     },
@@ -491,7 +491,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Start Incident Triage",
-        "content": "<div style=\"font-size:16px;line-height:1.2\">Open Action for evidence; PENDING has not fired. Use alert history.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.2\">Rule triggered; cause not confirmed. Open Action to verify. PENDING has not fired. <a href=\"/d/bioetl-incident-v1/6-incident-workspace?viewPanel=22011&from=${__from}&to=${__to}\">Stage lag/backlog measurements</a>.</div>"
       },
       "links": [
         {
@@ -505,8 +505,8 @@
     {
       "id": 2010,
       "type": "table",
-      "title": "Inspect Ranked Suspects",
-      "description": "GLOBAL · CURRENT at query evaluation time (range end), not SELECTED RUN. Rank is severity order: CRIT=2, WARN=1, UNKNOWN=0; ties have equal urgency, not higher confidence. Confidence is UNVERIFIED: a rule signal alone does not establish cause or impact. Pipeline/provider identifies potential impact scope; confirm with domain evidence. Only active (>0) signals are ranked; telemetry_gap stays UNKNOWN. VALID EMPTY means no active suspects with available evidence; TELEMETRY MISSING is not a zero and not VALID EMPTY. Domain details use the same GLOBAL scope and evaluation time. Rule sample time is not the underlying event time. Inspect retains source labels; Action preserves row scope. TIME RANGE selects evaluation time, not an event-history rank. First screen shows four rows; complete domain evidence remains below. Rank is ordering only, never confidence. Telemetry gaps are observation problems, not confirmed incidents.",
+      "title": "Inspect Global Suspects",
+      "description": "GLOBAL · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. Rule triggered; cause not confirmed. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Summary shows up to two rows; open all rows for complete evidence.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -523,7 +523,7 @@
           "instant": true,
           "range": false,
           "format": "table",
-          "expr": "label_replace(bioetl_incident_ranked_evidence,\"route_pipeline\",\"$pipeline\",\"pipeline\",\"unknown\")"
+          "expr": "label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\")"
         }
       ],
       "transformations": [
@@ -684,32 +684,7 @@
               }
             ]
           },
-          "links": [
-            {
-              "title": "Open Pipeline Diagnostics",
-              "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            },
-            {
-              "title": "Open Provider Health",
-              "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-pipeline_context=${pipeline:percentencode}&var-provider=${__data.fields.provider:percentencode}&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            },
-            {
-              "title": "Open Data Quality",
-              "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            },
-            {
-              "title": "Open Run Explorer",
-              "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ],
+          "links": [],
           "mappings": []
         },
         "overrides": [
@@ -793,16 +768,8 @@
             },
             "properties": [
               {
-                "id": "noValue",
-                "value": "UNVERIFIED"
-              },
-              {
                 "id": "custom.hidden",
                 "value": false
-              },
-              {
-                "id": "custom.width",
-                "value": 125
               },
               {
                 "id": "custom.cellOptions",
@@ -810,6 +777,31 @@
                   "type": "auto",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "Cause verification"
+              },
+              {
+                "id": "custom.width",
+                "value": 155
+              },
+              {
+                "id": "noValue",
+                "value": "Not verified"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "UNVERIFIED": {
+                        "text": "Not verified"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -876,6 +868,10 @@
               {
                 "id": "custom.hidden",
                 "value": false
+              },
+              {
+                "id": "links",
+                "value": []
               }
             ]
           },
@@ -1003,17 +999,6 @@
                 "value": false
               },
               {
-                "id": "links",
-                "value": [
-                  {
-                    "title": "Open domain diagnostics",
-                    "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.route_pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
-                    "targetBlank": false,
-                    "includeVars": false
-                  }
-                ]
-              },
-              {
                 "id": "custom.width",
                 "value": 90
               },
@@ -1042,6 +1027,17 @@
                         "text": "DQ"
                       }
                     }
+                  }
+                ]
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Verify this object's evidence",
+                    "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
+                    "targetBlank": false,
+                    "includeVars": false
                   }
                 ]
               }
@@ -1166,8 +1162,8 @@
     {
       "id": 2005,
       "type": "table",
-      "title": "Monitor Current Alerts",
-      "description": "GLOBAL · CURRENT firing/pending alerts ranked critical before warning before other/unknown severity, then firing before pending, before the three-row limit. Object labels retain alert instance scope. Open the incident response runbook; full evidence remains below.",
+      "title": "Monitor Global Alerts",
+      "description": "GLOBAL · All pipelines; independent of selected Pipeline, Provider and Run ID. Not provided means the alert has no provider attribute, not unknown provider health. FIRING and PENDING retain their original alert state.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -1180,7 +1176,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_incident_alert_priority",
+          "expr": "label_replace(bioetl_incident_alert_priority,\"provider\",\"Not provided\",\"provider\",\"^$\")",
           "format": "table",
           "instant": true,
           "refId": "A"
@@ -1348,6 +1344,10 @@
               {
                 "id": "custom.width",
                 "value": 75
+              },
+              {
+                "id": "displayName",
+                "value": "Severity"
               }
             ]
           },
@@ -1358,8 +1358,28 @@
             },
             "properties": [
               {
+                "id": "noValue",
+                "value": "Not provided"
+              },
+              {
                 "id": "custom.width",
-                "value": 110
+                "value": 130
+              },
+              {
+                "id": "displayName",
+                "value": "Provider"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Pipeline"
               }
             ]
           }
@@ -2172,6 +2192,220 @@
               "show": false
             }
           }
+        },
+        {
+          "id": 22011,
+          "type": "table",
+          "title": "Inspect Global Signal Measurements",
+          "description": "GLOBAL · Exact runtime rule operands at the same query evaluation time. Lag uses a 15m maximum; backlog uses the latest sample. Event and publication timestamps are not provided by these gauges: freshness and current run liveness cannot be verified. Persisted gauges can outlive a finished run or exporter restart. Evaluation time is not observation time. Empty successful result means no matching threshold crossings; query failures are errors.",
+          "gridPos": {
+            "x": 0,
+            "y": 37,
+            "w": 24,
+            "h": 10
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "(label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m])) >= 300,\"signal\",\"stage_lag\",\"\",\"\"),\"window\",\"15m maximum\",\"\",\"\"),\"threshold\",\">= 300 s (15m maximum)\",\"\",\"\"),\"unit\",\"s\",\"\",\"\"),\"observation_time\",\"Not provided\",\"\",\"\"),\"publication_time\",\"Not provided\",\"\",\"\"),\"freshness\",\"Not verified: observed/published timestamps not provided\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max by (pipeline, run_type, stage) (bioetl_stage_backlog_records{stage!=\"validation\"}) > 0,\"signal\",\"stage_backlog\",\"\",\"\"),\"window\",\"instant\",\"\",\"\"),\"threshold\",\"> 0 records (instant)\",\"\",\"\"),\"unit\",\"records\",\"\",\"\"),\"observation_time\",\"Not provided\",\"\",\"\"),\"publication_time\",\"Not provided\",\"\",\"\"),\"freshness\",\"Not verified: observed/published timestamps not provided\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\"))",
+              "instant": true,
+              "range": false,
+              "format": "table"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "__name__": true,
+                  "pipeline": true,
+                  "run_type": true,
+                  "stage": true,
+                  "window": true,
+                  "observation_time": true,
+                  "publication_time": true
+                },
+                "indexByName": {
+                  "scope": 0,
+                  "signal": 3,
+                  "Value": 4,
+                  "unit": 5,
+                  "threshold": 6,
+                  "window": 7,
+                  "freshness": 8,
+                  "observation_time": 9,
+                  "publication_time": 10,
+                  "Time": 11
+                },
+                "renameByName": {
+                  "pipeline": "Pipeline",
+                  "run_type": "Run type",
+                  "stage": "Stage",
+                  "signal": "Signal",
+                  "Value": "Measured",
+                  "unit": "Unit",
+                  "threshold": "Threshold",
+                  "window": "Window",
+                  "freshness": "Freshness",
+                  "observation_time": "Observed",
+                  "publication_time": "Published",
+                  "Time": "Evaluated",
+                  "scope": "Pipeline / Run type / Stage"
+                }
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "Not provided",
+              "custom": {
+                "align": "left",
+                "inspect": true,
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline / Run type / Stage"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 205
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Signal"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 100
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Measured"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 85
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Unit"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 65
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Threshold"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 140
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Freshness"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 190
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Evaluated"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 160
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Signal"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "stage_lag": {
+                            "text": "Stage lag"
+                          },
+                          "stage_backlog": {
+                            "text": "Stage backlog"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Measured"
+                },
+                "properties": [
+                  {
+                    "id": "decimals",
+                    "value": 3
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "lg",
+            "footer": {
+              "enablePagination": true
+            }
+          }
         }
       ]
     },
@@ -2413,8 +2647,8 @@
         {
           "id": 22010,
           "type": "table",
-          "title": "Inspect Full Ranked Suspects",
-          "description": "GLOBAL / CURRENT · Empty successful result: no ranked suspects. Missing telemetry remains UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action.",
+          "title": "Inspect Global Suspects",
+          "description": "GLOBAL · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. Rule triggered; cause not confirmed. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Summary shows up to two rows; open all rows for complete evidence.",
           "gridPos": {
             "x": 0,
             "y": 21,
@@ -2429,7 +2663,8 @@
             {
               "panelId": 2010,
               "refId": "A",
-              "withTransforms": false
+              "withTransforms": false,
+              "expr": "label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\")"
             }
           ],
           "transformations": [
@@ -2584,32 +2819,7 @@
                   }
                 ]
               },
-              "links": [
-                {
-                  "title": "Open Pipeline Diagnostics",
-                  "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-                  "targetBlank": false,
-                  "includeVars": false
-                },
-                {
-                  "title": "Open Provider Health",
-                  "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-pipeline_context=${pipeline:percentencode}&var-provider=${__data.fields.provider:percentencode}&${__url_time_range}",
-                  "targetBlank": false,
-                  "includeVars": false
-                },
-                {
-                  "title": "Open Data Quality",
-                  "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-                  "targetBlank": false,
-                  "includeVars": false
-                },
-                {
-                  "title": "Open Run Explorer",
-                  "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-                  "targetBlank": false,
-                  "includeVars": false
-                }
-              ],
+              "links": [],
               "mappings": []
             },
             "overrides": [
@@ -2693,10 +2903,6 @@
                 },
                 "properties": [
                   {
-                    "id": "noValue",
-                    "value": "UNVERIFIED"
-                  },
-                  {
                     "id": "custom.hidden",
                     "value": false
                   },
@@ -2708,8 +2914,29 @@
                     }
                   },
                   {
+                    "id": "displayName",
+                    "value": "Cause verification"
+                  },
+                  {
                     "id": "custom.width",
-                    "value": 125
+                    "value": 155
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "Not verified"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "UNVERIFIED": {
+                            "text": "Not verified"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -2771,10 +2998,6 @@
                     "value": false
                   },
                   {
-                    "id": "links",
-                    "value": []
-                  },
-                  {
                     "id": "custom.wrapText",
                     "value": true
                   },
@@ -2784,6 +3007,10 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "links",
+                    "value": []
                   }
                 ]
               },
@@ -2923,17 +3150,6 @@
                     "value": false
                   },
                   {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Open domain diagnostics",
-                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.route_pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
-                        "targetBlank": false,
-                        "includeVars": false
-                      }
-                    ]
-                  },
-                  {
                     "id": "custom.width",
                     "value": 90
                   },
@@ -2962,6 +3178,17 @@
                             "text": "DQ"
                           }
                         }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Verify this object's evidence",
+                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
+                        "targetBlank": false,
+                        "includeVars": false
                       }
                     ]
                   }
@@ -3099,8 +3326,8 @@
         {
           "id": 22005,
           "type": "table",
-          "title": "Inspect Full Current Alerts",
-          "description": "CURRENT · GLOBAL · CURRENT firing/pending alerts ranked critical before warning before other/unknown severity, then firing before pending, before the three-row limit. Object labels retain alert instance scope. Open the incident response runbook; full evidence remains below.",
+          "title": "Monitor Global Alerts",
+          "description": "GLOBAL · All pipelines; independent of selected Pipeline, Provider and Run ID. Not provided means the alert has no provider attribute, not unknown provider health. FIRING and PENDING retain their original alert state.",
           "gridPos": {
             "x": 0,
             "y": 22,
@@ -3115,7 +3342,8 @@
             {
               "panelId": 2005,
               "refId": "A",
-              "withTransforms": false
+              "withTransforms": false,
+              "expr": "label_replace(bioetl_incident_alert_priority,\"provider\",\"Not provided\",\"provider\",\"^$\")"
             }
           ],
           "fieldConfig": {
@@ -3288,6 +3516,42 @@
                   {
                     "id": "custom.width",
                     "value": 90
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Severity"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "provider"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "Not provided"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 130
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Provider"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline"
                   }
                 ]
               }

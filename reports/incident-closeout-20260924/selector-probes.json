@@ -1,0 +1,3493 @@
+[
+  {
+    "attempt": 0,
+    "workflow": ".*",
+    "http": 200,
+    "elapsed_s": 4.595,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  },
+                  {
+                    "text": "uniprot_protein",
+                    "value": "uniprot_protein"
+                  },
+                  {
+                    "text": "uniprot_idmapping",
+                    "value": "uniprot_idmapping"
+                  },
+                  {
+                    "text": "chembl_target_protein_classification",
+                    "value": "chembl_target_protein_classification"
+                  },
+                  {
+                    "text": "chembl_protein_class",
+                    "value": "chembl_protein_class"
+                  },
+                  {
+                    "text": "chembl_target_component",
+                    "value": "chembl_target_component"
+                  },
+                  {
+                    "text": "chembl_target",
+                    "value": "chembl_target"
+                  },
+                  {
+                    "text": "composite_target",
+                    "value": "composite_target"
+                  },
+                  {
+                    "text": "pubchem_compound",
+                    "value": "pubchem_compound"
+                  },
+                  {
+                    "text": "chembl_molecule",
+                    "value": "chembl_molecule"
+                  },
+                  {
+                    "text": "composite_molecule",
+                    "value": "composite_molecule"
+                  },
+                  {
+                    "text": "chembl_tissue",
+                    "value": "chembl_tissue"
+                  },
+                  {
+                    "text": "chembl_cell_line",
+                    "value": "chembl_cell_line"
+                  },
+                  {
+                    "text": "chembl_assay",
+                    "value": "chembl_assay"
+                  },
+                  {
+                    "text": "composite_assay",
+                    "value": "composite_assay"
+                  },
+                  {
+                    "text": "chembl_compound_record",
+                    "value": "chembl_compound_record"
+                  },
+                  {
+                    "text": "chembl_activity",
+                    "value": "chembl_activity"
+                  },
+                  {
+                    "text": "composite_activity",
+                    "value": "composite_activity"
+                  },
+                  {
+                    "text": "chembl_publication",
+                    "value": "chembl_publication"
+                  },
+                  {
+                    "text": "composite_publication",
+                    "value": "composite_publication"
+                  },
+                  {
+                    "text": "semanticscholar_publication",
+                    "value": "semanticscholar_publication"
+                  },
+                  {
+                    "text": "pubmed_publication",
+                    "value": "pubmed_publication"
+                  },
+                  {
+                    "text": "openalex_publication",
+                    "value": "openalex_publication"
+                  },
+                  {
+                    "text": "crossref_publication",
+                    "value": "crossref_publication"
+                  },
+                  {
+                    "text": "chembl_subcellular_fraction",
+                    "value": "chembl_subcellular_fraction"
+                  },
+                  {
+                    "text": "chembl_publication_term",
+                    "value": "chembl_publication_term"
+                  },
+                  {
+                    "text": "chembl_publication_similarity",
+                    "value": "chembl_publication_similarity"
+                  },
+                  {
+                    "text": "chembl_assay_parameters",
+                    "value": "chembl_assay_parameters"
+                  },
+                  {
+                    "text": "test_pipeline",
+                    "value": "test_pipeline"
+                  }
+                ]
+              },
+              "duration": 2531508617,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.*",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ],
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "attempt": 1,
+    "workflow": ".*",
+    "http": 200,
+    "elapsed_s": 4.657,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  },
+                  {
+                    "text": "uniprot_protein",
+                    "value": "uniprot_protein"
+                  },
+                  {
+                    "text": "uniprot_idmapping",
+                    "value": "uniprot_idmapping"
+                  },
+                  {
+                    "text": "chembl_target_protein_classification",
+                    "value": "chembl_target_protein_classification"
+                  },
+                  {
+                    "text": "chembl_protein_class",
+                    "value": "chembl_protein_class"
+                  },
+                  {
+                    "text": "chembl_target_component",
+                    "value": "chembl_target_component"
+                  },
+                  {
+                    "text": "chembl_target",
+                    "value": "chembl_target"
+                  },
+                  {
+                    "text": "composite_target",
+                    "value": "composite_target"
+                  },
+                  {
+                    "text": "pubchem_compound",
+                    "value": "pubchem_compound"
+                  },
+                  {
+                    "text": "chembl_molecule",
+                    "value": "chembl_molecule"
+                  },
+                  {
+                    "text": "composite_molecule",
+                    "value": "composite_molecule"
+                  },
+                  {
+                    "text": "chembl_tissue",
+                    "value": "chembl_tissue"
+                  },
+                  {
+                    "text": "chembl_cell_line",
+                    "value": "chembl_cell_line"
+                  },
+                  {
+                    "text": "chembl_assay",
+                    "value": "chembl_assay"
+                  },
+                  {
+                    "text": "composite_assay",
+                    "value": "composite_assay"
+                  },
+                  {
+                    "text": "chembl_compound_record",
+                    "value": "chembl_compound_record"
+                  },
+                  {
+                    "text": "chembl_activity",
+                    "value": "chembl_activity"
+                  },
+                  {
+                    "text": "composite_activity",
+                    "value": "composite_activity"
+                  },
+                  {
+                    "text": "chembl_publication",
+                    "value": "chembl_publication"
+                  },
+                  {
+                    "text": "composite_publication",
+                    "value": "composite_publication"
+                  },
+                  {
+                    "text": "semanticscholar_publication",
+                    "value": "semanticscholar_publication"
+                  },
+                  {
+                    "text": "pubmed_publication",
+                    "value": "pubmed_publication"
+                  },
+                  {
+                    "text": "openalex_publication",
+                    "value": "openalex_publication"
+                  },
+                  {
+                    "text": "crossref_publication",
+                    "value": "crossref_publication"
+                  },
+                  {
+                    "text": "chembl_subcellular_fraction",
+                    "value": "chembl_subcellular_fraction"
+                  },
+                  {
+                    "text": "chembl_publication_term",
+                    "value": "chembl_publication_term"
+                  },
+                  {
+                    "text": "chembl_publication_similarity",
+                    "value": "chembl_publication_similarity"
+                  },
+                  {
+                    "text": "chembl_assay_parameters",
+                    "value": "chembl_assay_parameters"
+                  },
+                  {
+                    "text": "test_pipeline",
+                    "value": "test_pipeline"
+                  }
+                ]
+              },
+              "duration": 2361742586,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.*",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ],
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "attempt": 2,
+    "workflow": ".*",
+    "http": 200,
+    "elapsed_s": 4.491,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  },
+                  {
+                    "text": "uniprot_protein",
+                    "value": "uniprot_protein"
+                  },
+                  {
+                    "text": "uniprot_idmapping",
+                    "value": "uniprot_idmapping"
+                  },
+                  {
+                    "text": "chembl_target_protein_classification",
+                    "value": "chembl_target_protein_classification"
+                  },
+                  {
+                    "text": "chembl_protein_class",
+                    "value": "chembl_protein_class"
+                  },
+                  {
+                    "text": "chembl_target_component",
+                    "value": "chembl_target_component"
+                  },
+                  {
+                    "text": "chembl_target",
+                    "value": "chembl_target"
+                  },
+                  {
+                    "text": "composite_target",
+                    "value": "composite_target"
+                  },
+                  {
+                    "text": "pubchem_compound",
+                    "value": "pubchem_compound"
+                  },
+                  {
+                    "text": "chembl_molecule",
+                    "value": "chembl_molecule"
+                  },
+                  {
+                    "text": "composite_molecule",
+                    "value": "composite_molecule"
+                  },
+                  {
+                    "text": "chembl_tissue",
+                    "value": "chembl_tissue"
+                  },
+                  {
+                    "text": "chembl_cell_line",
+                    "value": "chembl_cell_line"
+                  },
+                  {
+                    "text": "chembl_assay",
+                    "value": "chembl_assay"
+                  },
+                  {
+                    "text": "composite_assay",
+                    "value": "composite_assay"
+                  },
+                  {
+                    "text": "chembl_compound_record",
+                    "value": "chembl_compound_record"
+                  },
+                  {
+                    "text": "chembl_activity",
+                    "value": "chembl_activity"
+                  },
+                  {
+                    "text": "composite_activity",
+                    "value": "composite_activity"
+                  },
+                  {
+                    "text": "chembl_publication",
+                    "value": "chembl_publication"
+                  },
+                  {
+                    "text": "composite_publication",
+                    "value": "composite_publication"
+                  },
+                  {
+                    "text": "semanticscholar_publication",
+                    "value": "semanticscholar_publication"
+                  },
+                  {
+                    "text": "pubmed_publication",
+                    "value": "pubmed_publication"
+                  },
+                  {
+                    "text": "openalex_publication",
+                    "value": "openalex_publication"
+                  },
+                  {
+                    "text": "crossref_publication",
+                    "value": "crossref_publication"
+                  },
+                  {
+                    "text": "chembl_subcellular_fraction",
+                    "value": "chembl_subcellular_fraction"
+                  },
+                  {
+                    "text": "chembl_publication_term",
+                    "value": "chembl_publication_term"
+                  },
+                  {
+                    "text": "chembl_publication_similarity",
+                    "value": "chembl_publication_similarity"
+                  },
+                  {
+                    "text": "chembl_assay_parameters",
+                    "value": "chembl_assay_parameters"
+                  },
+                  {
+                    "text": "test_pipeline",
+                    "value": "test_pipeline"
+                  }
+                ]
+              },
+              "duration": 2443123646,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.*",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ],
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "attempt": 3,
+    "workflow": ".*",
+    "http": 200,
+    "elapsed_s": 4.333,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  },
+                  {
+                    "text": "uniprot_protein",
+                    "value": "uniprot_protein"
+                  },
+                  {
+                    "text": "uniprot_idmapping",
+                    "value": "uniprot_idmapping"
+                  },
+                  {
+                    "text": "chembl_target_protein_classification",
+                    "value": "chembl_target_protein_classification"
+                  },
+                  {
+                    "text": "chembl_protein_class",
+                    "value": "chembl_protein_class"
+                  },
+                  {
+                    "text": "chembl_target_component",
+                    "value": "chembl_target_component"
+                  },
+                  {
+                    "text": "chembl_target",
+                    "value": "chembl_target"
+                  },
+                  {
+                    "text": "composite_target",
+                    "value": "composite_target"
+                  },
+                  {
+                    "text": "pubchem_compound",
+                    "value": "pubchem_compound"
+                  },
+                  {
+                    "text": "chembl_molecule",
+                    "value": "chembl_molecule"
+                  },
+                  {
+                    "text": "composite_molecule",
+                    "value": "composite_molecule"
+                  },
+                  {
+                    "text": "chembl_tissue",
+                    "value": "chembl_tissue"
+                  },
+                  {
+                    "text": "chembl_cell_line",
+                    "value": "chembl_cell_line"
+                  },
+                  {
+                    "text": "chembl_assay",
+                    "value": "chembl_assay"
+                  },
+                  {
+                    "text": "composite_assay",
+                    "value": "composite_assay"
+                  },
+                  {
+                    "text": "chembl_compound_record",
+                    "value": "chembl_compound_record"
+                  },
+                  {
+                    "text": "chembl_activity",
+                    "value": "chembl_activity"
+                  },
+                  {
+                    "text": "composite_activity",
+                    "value": "composite_activity"
+                  },
+                  {
+                    "text": "chembl_publication",
+                    "value": "chembl_publication"
+                  },
+                  {
+                    "text": "composite_publication",
+                    "value": "composite_publication"
+                  },
+                  {
+                    "text": "semanticscholar_publication",
+                    "value": "semanticscholar_publication"
+                  },
+                  {
+                    "text": "pubmed_publication",
+                    "value": "pubmed_publication"
+                  },
+                  {
+                    "text": "openalex_publication",
+                    "value": "openalex_publication"
+                  },
+                  {
+                    "text": "crossref_publication",
+                    "value": "crossref_publication"
+                  },
+                  {
+                    "text": "chembl_subcellular_fraction",
+                    "value": "chembl_subcellular_fraction"
+                  },
+                  {
+                    "text": "chembl_publication_term",
+                    "value": "chembl_publication_term"
+                  },
+                  {
+                    "text": "chembl_publication_similarity",
+                    "value": "chembl_publication_similarity"
+                  },
+                  {
+                    "text": "chembl_assay_parameters",
+                    "value": "chembl_assay_parameters"
+                  },
+                  {
+                    "text": "test_pipeline",
+                    "value": "test_pipeline"
+                  }
+                ]
+              },
+              "duration": 2295792690,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.*",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ],
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "attempt": 4,
+    "workflow": ".*",
+    "http": 200,
+    "elapsed_s": 4.178,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  },
+                  {
+                    "text": "uniprot_protein",
+                    "value": "uniprot_protein"
+                  },
+                  {
+                    "text": "uniprot_idmapping",
+                    "value": "uniprot_idmapping"
+                  },
+                  {
+                    "text": "chembl_target_protein_classification",
+                    "value": "chembl_target_protein_classification"
+                  },
+                  {
+                    "text": "chembl_protein_class",
+                    "value": "chembl_protein_class"
+                  },
+                  {
+                    "text": "chembl_target_component",
+                    "value": "chembl_target_component"
+                  },
+                  {
+                    "text": "chembl_target",
+                    "value": "chembl_target"
+                  },
+                  {
+                    "text": "composite_target",
+                    "value": "composite_target"
+                  },
+                  {
+                    "text": "pubchem_compound",
+                    "value": "pubchem_compound"
+                  },
+                  {
+                    "text": "chembl_molecule",
+                    "value": "chembl_molecule"
+                  },
+                  {
+                    "text": "composite_molecule",
+                    "value": "composite_molecule"
+                  },
+                  {
+                    "text": "chembl_tissue",
+                    "value": "chembl_tissue"
+                  },
+                  {
+                    "text": "chembl_cell_line",
+                    "value": "chembl_cell_line"
+                  },
+                  {
+                    "text": "chembl_assay",
+                    "value": "chembl_assay"
+                  },
+                  {
+                    "text": "composite_assay",
+                    "value": "composite_assay"
+                  },
+                  {
+                    "text": "chembl_compound_record",
+                    "value": "chembl_compound_record"
+                  },
+                  {
+                    "text": "chembl_activity",
+                    "value": "chembl_activity"
+                  },
+                  {
+                    "text": "composite_activity",
+                    "value": "composite_activity"
+                  },
+                  {
+                    "text": "chembl_publication",
+                    "value": "chembl_publication"
+                  },
+                  {
+                    "text": "composite_publication",
+                    "value": "composite_publication"
+                  },
+                  {
+                    "text": "semanticscholar_publication",
+                    "value": "semanticscholar_publication"
+                  },
+                  {
+                    "text": "pubmed_publication",
+                    "value": "pubmed_publication"
+                  },
+                  {
+                    "text": "openalex_publication",
+                    "value": "openalex_publication"
+                  },
+                  {
+                    "text": "crossref_publication",
+                    "value": "crossref_publication"
+                  },
+                  {
+                    "text": "chembl_subcellular_fraction",
+                    "value": "chembl_subcellular_fraction"
+                  },
+                  {
+                    "text": "chembl_publication_term",
+                    "value": "chembl_publication_term"
+                  },
+                  {
+                    "text": "chembl_publication_similarity",
+                    "value": "chembl_publication_similarity"
+                  },
+                  {
+                    "text": "chembl_assay_parameters",
+                    "value": "chembl_assay_parameters"
+                  },
+                  {
+                    "text": "test_pipeline",
+                    "value": "test_pipeline"
+                  }
+                ]
+              },
+              "duration": 2102614494,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.*",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ],
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "attempt": 5,
+    "workflow": ".*",
+    "http": 200,
+    "elapsed_s": 4.351,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  },
+                  {
+                    "text": "uniprot_protein",
+                    "value": "uniprot_protein"
+                  },
+                  {
+                    "text": "uniprot_idmapping",
+                    "value": "uniprot_idmapping"
+                  },
+                  {
+                    "text": "chembl_target_protein_classification",
+                    "value": "chembl_target_protein_classification"
+                  },
+                  {
+                    "text": "chembl_protein_class",
+                    "value": "chembl_protein_class"
+                  },
+                  {
+                    "text": "chembl_target_component",
+                    "value": "chembl_target_component"
+                  },
+                  {
+                    "text": "chembl_target",
+                    "value": "chembl_target"
+                  },
+                  {
+                    "text": "composite_target",
+                    "value": "composite_target"
+                  },
+                  {
+                    "text": "pubchem_compound",
+                    "value": "pubchem_compound"
+                  },
+                  {
+                    "text": "chembl_molecule",
+                    "value": "chembl_molecule"
+                  },
+                  {
+                    "text": "composite_molecule",
+                    "value": "composite_molecule"
+                  },
+                  {
+                    "text": "chembl_tissue",
+                    "value": "chembl_tissue"
+                  },
+                  {
+                    "text": "chembl_cell_line",
+                    "value": "chembl_cell_line"
+                  },
+                  {
+                    "text": "chembl_assay",
+                    "value": "chembl_assay"
+                  },
+                  {
+                    "text": "composite_assay",
+                    "value": "composite_assay"
+                  },
+                  {
+                    "text": "chembl_compound_record",
+                    "value": "chembl_compound_record"
+                  },
+                  {
+                    "text": "chembl_activity",
+                    "value": "chembl_activity"
+                  },
+                  {
+                    "text": "composite_activity",
+                    "value": "composite_activity"
+                  },
+                  {
+                    "text": "chembl_publication",
+                    "value": "chembl_publication"
+                  },
+                  {
+                    "text": "composite_publication",
+                    "value": "composite_publication"
+                  },
+                  {
+                    "text": "semanticscholar_publication",
+                    "value": "semanticscholar_publication"
+                  },
+                  {
+                    "text": "pubmed_publication",
+                    "value": "pubmed_publication"
+                  },
+                  {
+                    "text": "openalex_publication",
+                    "value": "openalex_publication"
+                  },
+                  {
+                    "text": "crossref_publication",
+                    "value": "crossref_publication"
+                  },
+                  {
+                    "text": "chembl_subcellular_fraction",
+                    "value": "chembl_subcellular_fraction"
+                  },
+                  {
+                    "text": "chembl_publication_term",
+                    "value": "chembl_publication_term"
+                  },
+                  {
+                    "text": "chembl_publication_similarity",
+                    "value": "chembl_publication_similarity"
+                  },
+                  {
+                    "text": "chembl_assay_parameters",
+                    "value": "chembl_assay_parameters"
+                  },
+                  {
+                    "text": "test_pipeline",
+                    "value": "test_pipeline"
+                  }
+                ]
+              },
+              "duration": 2217881376,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.*",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ],
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "attempt": 6,
+    "workflow": ".*",
+    "http": 200,
+    "elapsed_s": 4.135,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  },
+                  {
+                    "text": "uniprot_protein",
+                    "value": "uniprot_protein"
+                  },
+                  {
+                    "text": "uniprot_idmapping",
+                    "value": "uniprot_idmapping"
+                  },
+                  {
+                    "text": "chembl_target_protein_classification",
+                    "value": "chembl_target_protein_classification"
+                  },
+                  {
+                    "text": "chembl_protein_class",
+                    "value": "chembl_protein_class"
+                  },
+                  {
+                    "text": "chembl_target_component",
+                    "value": "chembl_target_component"
+                  },
+                  {
+                    "text": "chembl_target",
+                    "value": "chembl_target"
+                  },
+                  {
+                    "text": "composite_target",
+                    "value": "composite_target"
+                  },
+                  {
+                    "text": "pubchem_compound",
+                    "value": "pubchem_compound"
+                  },
+                  {
+                    "text": "chembl_molecule",
+                    "value": "chembl_molecule"
+                  },
+                  {
+                    "text": "composite_molecule",
+                    "value": "composite_molecule"
+                  },
+                  {
+                    "text": "chembl_tissue",
+                    "value": "chembl_tissue"
+                  },
+                  {
+                    "text": "chembl_cell_line",
+                    "value": "chembl_cell_line"
+                  },
+                  {
+                    "text": "chembl_assay",
+                    "value": "chembl_assay"
+                  },
+                  {
+                    "text": "composite_assay",
+                    "value": "composite_assay"
+                  },
+                  {
+                    "text": "chembl_compound_record",
+                    "value": "chembl_compound_record"
+                  },
+                  {
+                    "text": "chembl_activity",
+                    "value": "chembl_activity"
+                  },
+                  {
+                    "text": "composite_activity",
+                    "value": "composite_activity"
+                  },
+                  {
+                    "text": "chembl_publication",
+                    "value": "chembl_publication"
+                  },
+                  {
+                    "text": "composite_publication",
+                    "value": "composite_publication"
+                  },
+                  {
+                    "text": "semanticscholar_publication",
+                    "value": "semanticscholar_publication"
+                  },
+                  {
+                    "text": "pubmed_publication",
+                    "value": "pubmed_publication"
+                  },
+                  {
+                    "text": "openalex_publication",
+                    "value": "openalex_publication"
+                  },
+                  {
+                    "text": "crossref_publication",
+                    "value": "crossref_publication"
+                  },
+                  {
+                    "text": "chembl_subcellular_fraction",
+                    "value": "chembl_subcellular_fraction"
+                  },
+                  {
+                    "text": "chembl_publication_term",
+                    "value": "chembl_publication_term"
+                  },
+                  {
+                    "text": "chembl_publication_similarity",
+                    "value": "chembl_publication_similarity"
+                  },
+                  {
+                    "text": "chembl_assay_parameters",
+                    "value": "chembl_assay_parameters"
+                  },
+                  {
+                    "text": "test_pipeline",
+                    "value": "test_pipeline"
+                  }
+                ]
+              },
+              "duration": 2087413444,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.*",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ],
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "attempt": 7,
+    "workflow": ".*",
+    "http": 200,
+    "elapsed_s": 5.008,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  },
+                  {
+                    "text": "uniprot_protein",
+                    "value": "uniprot_protein"
+                  },
+                  {
+                    "text": "uniprot_idmapping",
+                    "value": "uniprot_idmapping"
+                  },
+                  {
+                    "text": "chembl_target_protein_classification",
+                    "value": "chembl_target_protein_classification"
+                  },
+                  {
+                    "text": "chembl_protein_class",
+                    "value": "chembl_protein_class"
+                  },
+                  {
+                    "text": "chembl_target_component",
+                    "value": "chembl_target_component"
+                  },
+                  {
+                    "text": "chembl_target",
+                    "value": "chembl_target"
+                  },
+                  {
+                    "text": "composite_target",
+                    "value": "composite_target"
+                  },
+                  {
+                    "text": "pubchem_compound",
+                    "value": "pubchem_compound"
+                  },
+                  {
+                    "text": "chembl_molecule",
+                    "value": "chembl_molecule"
+                  },
+                  {
+                    "text": "composite_molecule",
+                    "value": "composite_molecule"
+                  },
+                  {
+                    "text": "chembl_tissue",
+                    "value": "chembl_tissue"
+                  },
+                  {
+                    "text": "chembl_cell_line",
+                    "value": "chembl_cell_line"
+                  },
+                  {
+                    "text": "chembl_assay",
+                    "value": "chembl_assay"
+                  },
+                  {
+                    "text": "composite_assay",
+                    "value": "composite_assay"
+                  },
+                  {
+                    "text": "chembl_compound_record",
+                    "value": "chembl_compound_record"
+                  },
+                  {
+                    "text": "chembl_activity",
+                    "value": "chembl_activity"
+                  },
+                  {
+                    "text": "composite_activity",
+                    "value": "composite_activity"
+                  },
+                  {
+                    "text": "chembl_publication",
+                    "value": "chembl_publication"
+                  },
+                  {
+                    "text": "composite_publication",
+                    "value": "composite_publication"
+                  },
+                  {
+                    "text": "semanticscholar_publication",
+                    "value": "semanticscholar_publication"
+                  },
+                  {
+                    "text": "pubmed_publication",
+                    "value": "pubmed_publication"
+                  },
+                  {
+                    "text": "openalex_publication",
+                    "value": "openalex_publication"
+                  },
+                  {
+                    "text": "crossref_publication",
+                    "value": "crossref_publication"
+                  },
+                  {
+                    "text": "chembl_subcellular_fraction",
+                    "value": "chembl_subcellular_fraction"
+                  },
+                  {
+                    "text": "chembl_publication_term",
+                    "value": "chembl_publication_term"
+                  },
+                  {
+                    "text": "chembl_publication_similarity",
+                    "value": "chembl_publication_similarity"
+                  },
+                  {
+                    "text": "chembl_assay_parameters",
+                    "value": "chembl_assay_parameters"
+                  },
+                  {
+                    "text": "test_pipeline",
+                    "value": "test_pipeline"
+                  }
+                ]
+              },
+              "duration": 2799410873,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.*",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ],
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "attempt": 8,
+    "workflow": ".*",
+    "http": 200,
+    "elapsed_s": 5.03,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  },
+                  {
+                    "text": "uniprot_protein",
+                    "value": "uniprot_protein"
+                  },
+                  {
+                    "text": "uniprot_idmapping",
+                    "value": "uniprot_idmapping"
+                  },
+                  {
+                    "text": "chembl_target_protein_classification",
+                    "value": "chembl_target_protein_classification"
+                  },
+                  {
+                    "text": "chembl_protein_class",
+                    "value": "chembl_protein_class"
+                  },
+                  {
+                    "text": "chembl_target_component",
+                    "value": "chembl_target_component"
+                  },
+                  {
+                    "text": "chembl_target",
+                    "value": "chembl_target"
+                  },
+                  {
+                    "text": "composite_target",
+                    "value": "composite_target"
+                  },
+                  {
+                    "text": "pubchem_compound",
+                    "value": "pubchem_compound"
+                  },
+                  {
+                    "text": "chembl_molecule",
+                    "value": "chembl_molecule"
+                  },
+                  {
+                    "text": "composite_molecule",
+                    "value": "composite_molecule"
+                  },
+                  {
+                    "text": "chembl_tissue",
+                    "value": "chembl_tissue"
+                  },
+                  {
+                    "text": "chembl_cell_line",
+                    "value": "chembl_cell_line"
+                  },
+                  {
+                    "text": "chembl_assay",
+                    "value": "chembl_assay"
+                  },
+                  {
+                    "text": "composite_assay",
+                    "value": "composite_assay"
+                  },
+                  {
+                    "text": "chembl_compound_record",
+                    "value": "chembl_compound_record"
+                  },
+                  {
+                    "text": "chembl_activity",
+                    "value": "chembl_activity"
+                  },
+                  {
+                    "text": "composite_activity",
+                    "value": "composite_activity"
+                  },
+                  {
+                    "text": "chembl_publication",
+                    "value": "chembl_publication"
+                  },
+                  {
+                    "text": "composite_publication",
+                    "value": "composite_publication"
+                  },
+                  {
+                    "text": "semanticscholar_publication",
+                    "value": "semanticscholar_publication"
+                  },
+                  {
+                    "text": "pubmed_publication",
+                    "value": "pubmed_publication"
+                  },
+                  {
+                    "text": "openalex_publication",
+                    "value": "openalex_publication"
+                  },
+                  {
+                    "text": "crossref_publication",
+                    "value": "crossref_publication"
+                  },
+                  {
+                    "text": "chembl_subcellular_fraction",
+                    "value": "chembl_subcellular_fraction"
+                  },
+                  {
+                    "text": "chembl_publication_term",
+                    "value": "chembl_publication_term"
+                  },
+                  {
+                    "text": "chembl_publication_similarity",
+                    "value": "chembl_publication_similarity"
+                  },
+                  {
+                    "text": "chembl_assay_parameters",
+                    "value": "chembl_assay_parameters"
+                  },
+                  {
+                    "text": "test_pipeline",
+                    "value": "test_pipeline"
+                  }
+                ]
+              },
+              "duration": 2937556912,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.*",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ],
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "attempt": 9,
+    "workflow": ".*",
+    "http": 200,
+    "elapsed_s": 4.813,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  },
+                  {
+                    "text": "uniprot_protein",
+                    "value": "uniprot_protein"
+                  },
+                  {
+                    "text": "uniprot_idmapping",
+                    "value": "uniprot_idmapping"
+                  },
+                  {
+                    "text": "chembl_target_protein_classification",
+                    "value": "chembl_target_protein_classification"
+                  },
+                  {
+                    "text": "chembl_protein_class",
+                    "value": "chembl_protein_class"
+                  },
+                  {
+                    "text": "chembl_target_component",
+                    "value": "chembl_target_component"
+                  },
+                  {
+                    "text": "chembl_target",
+                    "value": "chembl_target"
+                  },
+                  {
+                    "text": "composite_target",
+                    "value": "composite_target"
+                  },
+                  {
+                    "text": "pubchem_compound",
+                    "value": "pubchem_compound"
+                  },
+                  {
+                    "text": "chembl_molecule",
+                    "value": "chembl_molecule"
+                  },
+                  {
+                    "text": "composite_molecule",
+                    "value": "composite_molecule"
+                  },
+                  {
+                    "text": "chembl_tissue",
+                    "value": "chembl_tissue"
+                  },
+                  {
+                    "text": "chembl_cell_line",
+                    "value": "chembl_cell_line"
+                  },
+                  {
+                    "text": "chembl_assay",
+                    "value": "chembl_assay"
+                  },
+                  {
+                    "text": "composite_assay",
+                    "value": "composite_assay"
+                  },
+                  {
+                    "text": "chembl_compound_record",
+                    "value": "chembl_compound_record"
+                  },
+                  {
+                    "text": "chembl_activity",
+                    "value": "chembl_activity"
+                  },
+                  {
+                    "text": "composite_activity",
+                    "value": "composite_activity"
+                  },
+                  {
+                    "text": "chembl_publication",
+                    "value": "chembl_publication"
+                  },
+                  {
+                    "text": "composite_publication",
+                    "value": "composite_publication"
+                  },
+                  {
+                    "text": "semanticscholar_publication",
+                    "value": "semanticscholar_publication"
+                  },
+                  {
+                    "text": "pubmed_publication",
+                    "value": "pubmed_publication"
+                  },
+                  {
+                    "text": "openalex_publication",
+                    "value": "openalex_publication"
+                  },
+                  {
+                    "text": "crossref_publication",
+                    "value": "crossref_publication"
+                  },
+                  {
+                    "text": "chembl_subcellular_fraction",
+                    "value": "chembl_subcellular_fraction"
+                  },
+                  {
+                    "text": "chembl_publication_term",
+                    "value": "chembl_publication_term"
+                  },
+                  {
+                    "text": "chembl_publication_similarity",
+                    "value": "chembl_publication_similarity"
+                  },
+                  {
+                    "text": "chembl_assay_parameters",
+                    "value": "chembl_assay_parameters"
+                  },
+                  {
+                    "text": "test_pipeline",
+                    "value": "test_pipeline"
+                  }
+                ]
+              },
+              "duration": 2765042976,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.*",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ],
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "attempt": 10,
+    "workflow": ".*",
+    "http": 200,
+    "elapsed_s": 6.994,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  },
+                  {
+                    "text": "uniprot_protein",
+                    "value": "uniprot_protein"
+                  },
+                  {
+                    "text": "uniprot_idmapping",
+                    "value": "uniprot_idmapping"
+                  },
+                  {
+                    "text": "chembl_target_protein_classification",
+                    "value": "chembl_target_protein_classification"
+                  },
+                  {
+                    "text": "chembl_protein_class",
+                    "value": "chembl_protein_class"
+                  },
+                  {
+                    "text": "chembl_target_component",
+                    "value": "chembl_target_component"
+                  },
+                  {
+                    "text": "chembl_target",
+                    "value": "chembl_target"
+                  },
+                  {
+                    "text": "composite_target",
+                    "value": "composite_target"
+                  },
+                  {
+                    "text": "pubchem_compound",
+                    "value": "pubchem_compound"
+                  },
+                  {
+                    "text": "chembl_molecule",
+                    "value": "chembl_molecule"
+                  },
+                  {
+                    "text": "composite_molecule",
+                    "value": "composite_molecule"
+                  },
+                  {
+                    "text": "chembl_tissue",
+                    "value": "chembl_tissue"
+                  },
+                  {
+                    "text": "chembl_cell_line",
+                    "value": "chembl_cell_line"
+                  },
+                  {
+                    "text": "chembl_assay",
+                    "value": "chembl_assay"
+                  },
+                  {
+                    "text": "composite_assay",
+                    "value": "composite_assay"
+                  },
+                  {
+                    "text": "chembl_compound_record",
+                    "value": "chembl_compound_record"
+                  },
+                  {
+                    "text": "chembl_activity",
+                    "value": "chembl_activity"
+                  },
+                  {
+                    "text": "composite_activity",
+                    "value": "composite_activity"
+                  },
+                  {
+                    "text": "chembl_publication",
+                    "value": "chembl_publication"
+                  },
+                  {
+                    "text": "composite_publication",
+                    "value": "composite_publication"
+                  },
+                  {
+                    "text": "semanticscholar_publication",
+                    "value": "semanticscholar_publication"
+                  },
+                  {
+                    "text": "pubmed_publication",
+                    "value": "pubmed_publication"
+                  },
+                  {
+                    "text": "openalex_publication",
+                    "value": "openalex_publication"
+                  },
+                  {
+                    "text": "crossref_publication",
+                    "value": "crossref_publication"
+                  },
+                  {
+                    "text": "chembl_subcellular_fraction",
+                    "value": "chembl_subcellular_fraction"
+                  },
+                  {
+                    "text": "chembl_publication_term",
+                    "value": "chembl_publication_term"
+                  },
+                  {
+                    "text": "chembl_publication_similarity",
+                    "value": "chembl_publication_similarity"
+                  },
+                  {
+                    "text": "chembl_assay_parameters",
+                    "value": "chembl_assay_parameters"
+                  },
+                  {
+                    "text": "test_pipeline",
+                    "value": "test_pipeline"
+                  }
+                ]
+              },
+              "duration": 4934343244,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.*",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=.%2A'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ],
+            [
+              "unknown",
+              "uniprot_protein",
+              "uniprot_idmapping",
+              "chembl_target_protein_classification",
+              "chembl_protein_class",
+              "chembl_target_component",
+              "chembl_target",
+              "composite_target",
+              "pubchem_compound",
+              "chembl_molecule",
+              "composite_molecule",
+              "chembl_tissue",
+              "chembl_cell_line",
+              "chembl_assay",
+              "composite_assay",
+              "chembl_compound_record",
+              "chembl_activity",
+              "composite_activity",
+              "chembl_publication",
+              "composite_publication",
+              "semanticscholar_publication",
+              "pubmed_publication",
+              "openalex_publication",
+              "crossref_publication",
+              "chembl_subcellular_fraction",
+              "chembl_publication_term",
+              "chembl_publication_similarity",
+              "chembl_assay_parameters",
+              "test_pipeline"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "attempt": 11,
+    "workflow": "chembl_baseline",
+    "http": 200,
+    "elapsed_s": 6.827,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  },
+                  {
+                    "text": "chembl_assay",
+                    "value": "chembl_assay"
+                  },
+                  {
+                    "text": "chembl_target",
+                    "value": "chembl_target"
+                  },
+                  {
+                    "text": "chembl_publication",
+                    "value": "chembl_publication"
+                  }
+                ]
+              },
+              "duration": 4767463271,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=chembl_baseline",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=chembl_baseline\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=chembl_baseline'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown",
+              "chembl_assay",
+              "chembl_target",
+              "chembl_publication"
+            ],
+            [
+              "unknown",
+              "chembl_assay",
+              "chembl_target",
+              "chembl_publication"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "attempt": 12,
+    "workflow": "nonexistent_acceptance_workflow",
+    "http": 200,
+    "elapsed_s": 7.054,
+    "status": 200,
+    "error": null,
+    "frames": [
+      {
+        "schema": {
+          "name": "variable",
+          "refId": "variable",
+          "meta": {
+            "typeVersion": [
+              0,
+              0
+            ],
+            "custom": {
+              "data": {
+                "items": [
+                  {
+                    "text": "unknown",
+                    "value": "unknown"
+                  }
+                ]
+              },
+              "duration": 4993831521,
+              "error": "",
+              "query": {
+                "alias": "",
+                "columns": [
+                  {
+                    "selector": "text",
+                    "text": "__text",
+                    "timestampFormat": "",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "value",
+                    "text": "__value",
+                    "timestampFormat": "",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [],
+                "csv_options": {
+                  "columns": "",
+                  "comment": "",
+                  "delimiter": "",
+                  "relax_column_count": false,
+                  "skip_empty_lines": false,
+                  "skip_lines_with_error": false
+                },
+                "data": "",
+                "dataOverrides": null,
+                "expression": "",
+                "filterExpression": "",
+                "filters": null,
+                "format": "table",
+                "global_query_id": "",
+                "groq": "",
+                "json_options": {
+                  "columnar": false,
+                  "root_is_not_array": false
+                },
+                "parser": "backend",
+                "query_mode": "",
+                "refId": "variable",
+                "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+                "seriesCount": 0,
+                "source": "url",
+                "summarizeAlias": "",
+                "summarizeBy": "",
+                "summarizeExpression": "",
+                "type": "json",
+                "uql": "",
+                "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=nonexistent_acceptance_workflow",
+                "url_options": {
+                  "body_content_type": "",
+                  "body_form": null,
+                  "body_graphql_query": "",
+                  "body_graphql_variables": "",
+                  "body_type": "",
+                  "data": "",
+                  "headers": null,
+                  "method": "GET",
+                  "params": null
+                }
+              },
+              "responseCodeFromServer": 200
+            },
+            "executedQueryString": "###############\n## URL\n###############\n\nhttp://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=nonexistent_acceptance_workflow\n\n###############\n## Curl Command\n###############\n\ncurl -X 'GET' -H 'Accept: application/json;q=0.9,text/plain' -H 'Accept-Encoding: gzip' 'http://bioetl:8000/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=nonexistent_acceptance_workflow'"
+          },
+          "fields": [
+            {
+              "name": "__text",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            },
+            {
+              "name": "__value",
+              "type": "string",
+              "typeInfo": {
+                "frame": "string",
+                "nullable": true
+              }
+            }
+          ]
+        },
+        "data": {
+          "values": [
+            [
+              "unknown"
+            ],
+            [
+              "unknown"
+            ]
+          ]
+        }
+      }
+    ]
+  }
+]

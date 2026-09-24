@@ -1,0 +1,212 @@
+Browser tab: 10, Title: "3. Pipeline Diagnostics - BioETL - Dashboards - Grafana", URL: "http://localhost:3000/d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&var-stage=$__all&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=browser&orgId=1&var-provider_hint=$__all&refresh=60s".
+1 AXWebArea 3. Pipeline Diagnostics - BioETL - Dashboards - Grafana, URL: localhost:3000/d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&var-stage=$__all&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=browser&orgId=1&var-provider_hint=$__all&refresh=60s
+	2 container reactRoot
+		3 container
+			4 link Description: Skip to main content, Value: localhost:3000/#pageContent
+			5 button Description: Open menu, ID: mega-menu-toggle
+				6 image Grafana
+			7 container Breadcrumbs
+				8 content list
+					9 link Description: Home, Value: localhost:3000/
+					19 link Description: Dashboards, Value: localhost:3000/dashboards
+					20 link Description: BioETL, Value: localhost:3000/dashboards/f/bioetl/bioetl
+					21 text 3. Pipeline Diagnostics
+			11 container
+				12 button Search...
+				13 text ctrl+k
+			14 button (collapsed) Description: New, Secondary Actions: Expand
+			15 button Help
+			16 button Profile
+				17 image User avatar
+			22 container
+				23 button Mark as favorite
+				24 button Edit
+				25 button Export 
+					26 text Export
+				27 button Share
+				28 button Toggle share menu
+			18 container pageContent
+				29 container
+					30 container
+						31 text Workflow
+						32 image Layer_1
+						33 container 232918e8-5954-4cb1-a560-db1b9e643ed4
+							34 container
+								35 text All
+								36 combo box (collapsed, settable) ID: react-select-7-input, Secondary Actions: Expand
+						37 text Pipeline
+						38 image Layer_1
+						41 container fbf77373-a746-4c08-8a75-4f1c1e566963
+							42 container
+								118 text chembl_compound_record
+								44 combo box (collapsed, settable) ID: react-select-8-input, Secondary Actions: Expand
+						45 text Run Type
+						46 image Layer_1
+						47 container 220866bd-3498-46da-a549-a7bcb28b620f
+							48 container
+								49 container
+									50 text All
+									51 button Remove
+								52 combo box (collapsed, settable) ID: react-select-9-input, Secondary Actions: Expand
+								119 button Clear value
+						54 text Run ID
+						55 image Layer_1
+						56 container aadd51f7-5805-48dc-bcbe-b986b9eaaf33
+							57 container
+								120 text SELECT RUN
+								59 combo box (collapsed, settable) ID: react-select-10-input, Secondary Actions: Expand
+						60 text Stage
+						61 image Layer_1
+						62 container f66baec0-a4c8-40b6-b8b9-25aa7d92f890
+							63 container
+								64 container
+									65 text All
+									66 button Remove
+								67 combo box (collapsed, settable) ID: react-select-11-input, Secondary Actions: Expand
+								121 button Clear value
+						69 button Move time range backwards
+						70 button (collapsed) Description: Time range selected: 2026-09-24 03:00 to 2026-09-24 13:40, Secondary Actions: Expand
+							71 text 2026-09-24 03:00 to 2026-09-24 13:40
+						72 button Move time range forwards
+						73 button Zoom out time range
+						122 button Refresh
+							123 text Refresh
+						76 button (collapsed) Description: Auto refresh turned off. Choose refresh time interval, Secondary Actions: Expand
+					77 container
+						78 container
+							79 container
+								80 link Description: 0. Run Explorer, Help: 0. Run Explorer (Run Explorer). Preserves selected scope and time range., Value: localhost:3000/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+								81 link Description: 1. Trust, Help: 1. Trust (Trust). Preserves selected scope and time range., Value: localhost:3000/d/bioetl-control-plane-v1/1-trust?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+								82 link Description: 2. Overview, Help: 2. Overview (Overview). Preserves selected scope and time range., Value: localhost:3000/d/bioetl-overview-v2/2-overview?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+								83 link Description: 3. Pipeline Diagnostics, Help: 3. Pipeline Diagnostics (Pipeline Diagnostics), Value: localhost:3000/#bioetl-runtime
+								84 link Description: 4. Provider Health, Help: 4. Provider Health (Provider Health). Scope reset: provider=All; preserves time range, pipeline context., Value: localhost:3000/d/bioetl-provider-health-v2/4-provider-health?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&var-provider=$__all&var-pipeline_context=chembl_compound_record&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+								85 link Description: 5. Data Quality, Help: 5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range., Value: localhost:3000/d/bioetl-dq-v2/5-data-quality?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&var-stage=$__all&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+								86 link Description: 6. Incident Workspace, Help: 6. Incident Workspace (Incident Workspace). Preserves selected scope and time range., Value: localhost:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+						87 container
+							88 text CURRENT · Pipeline / Run Type. Missing stages: INCOMPLETE / UNKNOWN. SCRAPING is not an active blocker; no blockers do not prove completeness.
+						89 container Monitor Pipeline Status
+							91 heading Monitor Pipeline Status, Value: 2
+								92 text Monitor Pipeline Status
+							124 text CRIT
+						93 container Review Runtime Blockers
+							95 heading Review Runtime Blockers, Value: 2
+								96 text Review Runtime Blockers
+							125 table
+								126 container
+									127 row table header
+										128 cell
+											129 button severity, Help: Toggle SortBy
+												130 text severity
+										131 cell
+											132 button reason, Help: Toggle SortBy
+												133 text reason
+										134 cell
+											135 button Action, Help: Toggle SortBy
+												136 text Action
+										137 cell
+											138 button stage, Help: Toggle SortBy
+												139 text stage
+									140 container
+										141 row
+											142 cell
+												143 button failing
+											144 cell
+												145 text stage_backlog
+											146 cell
+												147 link Description: Runtime, Help: Open blocker diagnostics, Value: localhost:3000/d/bioetl-runtime/?var-workflow=$__all&var-pipeline=chembl_compound_record&var-stage=$__all&var-run_type=incremental&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+											148 cell
+												149 button ingestion
+										150 row
+											151 cell
+												152 button failing
+											153 cell
+												154 text stage_lag
+											155 cell
+												156 link Description: Runtime, Help: Open blocker diagnostics, Value: localhost:3000/d/bioetl-runtime/?var-workflow=$__all&var-pipeline=chembl_compound_record&var-stage=$__all&var-run_type=incremental&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+											157 cell
+												158 button ingestion
+										159 row
+											160 cell
+												161 button degraded
+											162 cell
+												163 text ingestion_throughput_degraded
+											164 cell
+												165 link Description: Runtime, Help: Open blocker diagnostics, Value: localhost:3000/d/bioetl-runtime/?var-workflow=$__all&var-pipeline=chembl_compound_record&var-stage=$__all&var-run_type=incremental&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+											166 cell
+												167 button None observed
+						97 container Monitor Coverage
+							99 heading Monitor Coverage, Value: 2
+								100 text Monitor Coverage
+							101 link Description: Open observability runbook, Value: github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md
+							102 button Description: Menu for panel Monitor Coverage, Help: Menu
+							168 container :rm2:
+								169 container
+									170 text Endpoint
+									171 text SCRAPING
+								172 container
+									173 text Expected stage signals
+									174 container
+										175 text 100 %
+								176 container
+									177 text Rule age
+									178 container
+										179 text 35  s
+						103 container Review Stage Progress
+							105 heading Review Stage Progress, Value: 2
+								106 text Review Stage Progress
+							107 link Description: Show all rows and total (summary: up to 3), Value: localhost:3000/d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&viewPanel=22460&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+							180 table
+								181 container
+									182 row table header
+										183 cell
+											184 button Pipeline / Stage, Help: Toggle SortBy
+												185 text Pipeline / Stage
+										186 cell
+											187 button Backlog, Help: Toggle SortBy
+												188 text Backlog
+										189 cell
+											190 button Lag, Help: Toggle SortBy
+												191 text Lag
+										192 cell
+											193 button Throughput, Help: Toggle SortBy
+												194 text Throughput
+									195 container
+										196 row
+											197 cell
+												198 text chembl_compound_record / incremental / ingestion
+											199 cell
+												200 text 2
+											201 cell
+												202 text 10.0 mins
+											203 cell
+												204 text 0 records/s
+										205 row
+											206 cell
+												207 text chembl_compound_record / incremental / output
+											208 cell
+												209 text 0
+											210 cell
+												211 text 0 s
+											212 cell
+												213 text 0 records/s
+										214 row
+											215 cell
+												216 text chembl_compound_record / incremental / validation
+											217 cell
+												218 text 0
+											219 cell
+												220 text 0 s
+											221 cell
+												222 text 0 records/s
+						108 container 21
+							109 button Expand row
+								110 heading Inspect Detection Signals, Value: 2
+									111 text Inspect Detection Signals
+							112 text ( 6 panels )
+						113 container 22
+							114 button Expand row
+								115 heading Localize Runtime Cause, Value: 2
+									116 text Localize Runtime Cause
+							117 text ( 5 panels )
+
+The focused UI element is 1 AXWebArea 3. Pipeline Diagnostics - BioETL - Dashboards - Grafana, URL: localhost:3000/d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&var-stage=$__all&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=browser&orgId=1&var-provider_hint=$__all&refresh=60s

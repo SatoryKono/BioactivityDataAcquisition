@@ -91,6 +91,21 @@ next_action=`Monitor Telemetry` then runbook checkpoint debug.
 `GLOBAL matrix=CRIT`, `selected Status=OK` is **not** a contradiction if selected
 provider is healthy while fleet peers fail. Copy must say **fleet vs selected**.
 
+## Incident evidence
+
+Incident suspect and alert tables are GLOBAL, independent of the selected
+Pipeline, Provider and Run ID. `CRIT` is the rule's urgency; `Not verified`
+is the display of raw `UNVERIFIED` cause verification. A triggered rule does
+not establish causality. Row actions reset historical Run ID and workflow
+scope and open the row's domain evidence.
+
+`Not provided` in an alert's Provider column means a missing attribute, not
+`UNKNOWN` provider health. Signal measurements preserve pipeline, run type
+and stage. Stage lag uses the 15-minute maximum and a `>=300 s` threshold;
+non-validation backlog uses the latest sample and `>0 records`. Evaluation
+time is not event time. Without observation/publication timestamps, freshness
+is explicitly unverified, including gauges retained after completion or restart.
+
 ## DUX5 expansion
 
 Operator-facing empty-state and applicability classes (None observed / Not started / Not available / Selection required / Telemetry missing) are listed in [dux5-copy-dictionary.md](archive/audit-protocols/dux5-copy-dictionary.md). L0 Status enum tokens remain OK/WARN/CRIT/UNKNOWN/INCOMPLETE.
