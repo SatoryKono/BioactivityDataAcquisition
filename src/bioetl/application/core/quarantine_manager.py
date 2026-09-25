@@ -26,6 +26,7 @@ class DQQuarantineEntry(NamedTuple):
     record: BronzeRecord
     error_type: ErrorType
     error_details: str
+    reason_code: str | None = None
 
 
 class FilteredQuarantineEntry(NamedTuple):

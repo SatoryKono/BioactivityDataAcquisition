@@ -223,15 +223,19 @@ class TestMolecule:
 
     def test_structures_molecule__molecule_id_raises__7915f8f8(self) -> None:
         from bioetl.domain.entities.chembl_structures import Molecule
+        from bioetl.domain.exceptions.validation import ValidationError
 
-        with pytest.raises(ValueError, match="Molecule ChEMBL ID is required"):
+        with pytest.raises(ValidationError, match="Molecule ChEMBL ID is required") as caught:
             Molecule(**BASE_KWARGS, molecule_id="")
+        assert caught.value.reason_code == "missing_compound_identifier"
 
     def test_invalid_max_phase_raises(self) -> None:
         from bioetl.domain.entities.chembl_structures import Molecule
+        from bioetl.domain.exceptions.validation import ValidationError
 
-        with pytest.raises(ValueError, match="max_phase must be one of"):
+        with pytest.raises(ValidationError, match="max_phase must be one of") as caught:
             Molecule(**BASE_KWARGS, molecule_id="CHEMBL25", max_phase=5)
+        assert caught.value.reason_code == "INVALID_DATA:max_phase"
 
     @pytest.mark.parametrize("phase", [-1, 0, 0.5, 1, 2, 3, 4])
     def test_valid_max_phase(self, phase: int | float) -> None:

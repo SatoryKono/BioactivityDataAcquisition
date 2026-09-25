@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from bioetl.application.services.run_reports.observations import record_run_observation
+
 from collections.abc import Awaitable
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, cast
@@ -108,6 +110,16 @@ async def write_silver_then_gold(
         )
         if gold_outcome is not None:
             gold_written = len(transform_result.gold_records)
+    if not transform_result.gold_records:
+        record_run_observation(
+            "Data Validation",
+            verdict="N/A",
+            reason="no_gold_candidates",
+            facts={
+                "gold_candidates": 0,
+                "silver_records": len(transform_result.silver_records),
+            },
+        )
     track_storage_write_metrics(
         batch_metrics,
         transform_result=transform_result,

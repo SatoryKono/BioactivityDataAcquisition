@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, ClassVar, cast
 
+from bioetl.application.core.base_transformer.errors import TransformationError
 from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
     FieldGroup,
@@ -23,6 +24,7 @@ from bioetl.application.pipelines.chembl.provider_aliases import (
     normalize_provider_aliases,
 )
 from bioetl.domain.entities import Molecule
+from bioetl.domain.exceptions.validation import ValidationError
 from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects import SMILES, InChIKey
@@ -166,6 +168,19 @@ class MoleculeTransformer(BaseChemblTransformer):
     _PROVIDER_ALIASES: ClassVar[Mapping[str, str]] = {
         "molecule_id": "molecule_chembl_id"
     }
+
+    def _resolve_primary_id(self, record: BronzeRecord) -> PrimaryId:
+        """Map a missing molecule id to the catalog reason code."""
+        try:
+            return super()._resolve_primary_id(record)
+        except TransformationError as error:
+            if error.field != self.primary_id_field:
+                raise
+            raise ValidationError(
+                str(error),
+                field=self.primary_id_field,
+                reason_code="missing_compound_identifier",
+            ) from error
 
     def _prepare_record(
         self,

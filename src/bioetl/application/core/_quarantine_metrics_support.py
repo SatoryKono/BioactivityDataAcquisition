@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.batch_metrics_accounting import (
     _record_silver_removal_accounting,
 )
-from bioetl.domain.types import BronzeRecord, ErrorType
+from bioetl.domain.types import ErrorType
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -22,6 +22,21 @@ if TYPE_CHECKING:
 FILTERED_OUT_SILVER = "FILTERED_OUT_SILVER"
 
 
+def iter_dq_quarantine_parts(
+    records: Sequence[object],
+):
+    """Yield record, error type, message, and catalog reason code."""
+    from bioetl.application.core.quarantine_manager import DQQuarantineEntry
+
+    for item in records:
+        if isinstance(item, DQQuarantineEntry):
+            reason_code = item.reason_code or item.error_type.value
+            yield item.record, item.error_type, item.error_details, reason_code
+            continue
+        record, error_type, error_details = item  # type: ignore[misc]
+        yield record, error_type, error_details, error_type.value
+
+
 def track_quarantine_metrics(
     *,
     metrics: MetricsPort | None,
@@ -32,6 +47,7 @@ def track_quarantine_metrics(
     error_type: ErrorType,
     count: int,
     stage: str = "silver",
+    reason_code: str | None = None,
 ) -> None:
     """Emit quarantine metrics through batch, MetricsPort, and pipeline APIs.
 
@@ -39,7 +55,9 @@ def track_quarantine_metrics(
     the port is injected; batch metrics take precedence when present.
     """
     if batch_metrics is not None:
-        batch_metrics.track_quarantined_records(error_type, count, stage=stage)
+        batch_metrics.track_quarantined_records(
+            error_type, count, stage=stage, reason_code=reason_code
+        )
         return
     elif metrics is not None:
         metrics.increment_counter(
@@ -56,7 +74,10 @@ def track_quarantine_metrics(
         count=count,
     )
     _record_silver_removal_accounting(
-        outcome="quarantined", reason_code=error_type.value, count=count, stage=stage
+        outcome="quarantined",
+        reason_code=reason_code or error_type.value,
+        count=count,
+        stage=stage,
     )
 
 
@@ -86,10 +107,12 @@ def track_processed_quarantined(
 
 
 def count_dq_error_types(
-    records: Sequence[tuple[BronzeRecord, ErrorType, str]],
+    records: Sequence[object],
 ) -> Counter[ErrorType]:
     """Count DQ quarantine entries by error type."""
-    return Counter(error_type for _, error_type, _ in records)
+    return Counter(
+        error_type for _, error_type, _, _ in iter_dq_quarantine_parts(records)
+    )
 
 
 def record_filtered_quarantine_metrics(

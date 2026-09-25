@@ -191,7 +191,12 @@ class BatchMetricsRecorderService:
         _record_stage_outcome_accounting(stage, outcome, count)
 
     def track_quarantined_records(
-        self, error_type: ErrorType, count: int, *, stage: str = "silver"
+        self,
+        error_type: ErrorType,
+        count: int,
+        *,
+        stage: str = "silver",
+        reason_code: str | None = None,
     ) -> None:
         """Record quarantined-record counters and flow projections."""
         if self._metrics:
@@ -215,7 +220,8 @@ class BatchMetricsRecorderService:
             )
         _record_silver_removal_accounting(
             outcome="quarantined",
-            reason_code=getattr(error_type, "value", str(error_type)),
+            reason_code=reason_code
+            or getattr(error_type, "value", str(error_type)),
             count=count,
             stage=stage,
         )

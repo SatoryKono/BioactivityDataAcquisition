@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core._quarantine_metrics_support import (
     FILTERED_OUT_SILVER,
-    count_dq_error_types,
+    iter_dq_quarantine_parts,
     record_filtered_quarantine_metrics,
     track_processed_quarantined,
     track_quarantine_metrics,
@@ -123,27 +123,33 @@ async def persist_dq_quarantine_requests(
     ingestion_ts: datetime,
 ) -> None:
     """Write multiple DQ quarantine requests and emit metrics/events."""
+    parts = tuple(iter_dq_quarantine_parts(records))
     await write_quarantine_requests_with_events(
         quarantine=ports.quarantine,
         requests=requests,
         emitter=ports.emitter,
         pipeline_name=ports.pipeline_name,
-        error_codes=tuple(error_type.value for _, error_type, _ in records),
-        error_messages=tuple(error_details for _, _, error_details in records),
+        error_codes=tuple(error_type.value for _, error_type, _, _ in parts),
+        error_messages=tuple(error_details for _, _, error_details, _ in parts),
         batch_id=batch_id,
         run_id=run_id,
         ingestion_ts=ingestion_ts,
     )
-    for reason, count in count_dq_error_types(records).items():
+    reason_counts: dict[tuple[ErrorType, str], int] = {}
+    for _, error_type, _, reason_code in parts:
+        key = (error_type, reason_code)
+        reason_counts[key] = reason_counts.get(key, 0) + 1
+    for (error_type, reason_code), count in reason_counts.items():
         track_quarantine_metrics(
             metrics=ports.metrics,
             pipeline_metrics=ports.pipeline_metrics,
             batch_metrics=ports.batch_metrics,
             pipeline_name=ports.pipeline_name,
             run_type=ports.run_type,
-            error_type=reason,
+            error_type=error_type,
             count=count,
             stage=ports.stage,
+            reason_code=reason_code,
         )
     if ports.stage == "silver":
         track_processed_quarantined(

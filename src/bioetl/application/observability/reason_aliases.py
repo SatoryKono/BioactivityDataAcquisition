@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 REASON_ALIASES: dict[str, str] = {
+    "no_gold_candidates": "No Gold candidates",
+    "run_observation_missing": "Result not recorded",
     "archive_evidence_not_recorded": "Archive missing",
     "archive_restore_verified": "Archive verified",
     "archive_not_applicable": "N/A: policy",

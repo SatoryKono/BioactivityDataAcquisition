@@ -435,6 +435,69 @@ async def test_transform_record_attempt_processing_error_path() -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
+async def test_transform_attempt_type_error_is_not_quarantined() -> None:
+    """Programming errors must not be stored as INVALID_DATA."""
+
+    async def transform(_ctx, _record, _index):
+        raise TypeError("transform bug")
+
+    with pytest.raises(TypeError, match="transform bug"):
+        await transform_record_attempt(
+            context=_attempt_context(),
+            error_classifier=MagicMock(),
+            batch_metrics=MagicMock(),
+            transform=transform,
+            gold_filter=lambda _ctx, _rec: True,
+            gold_transform=lambda _ctx, rec: rec,
+            dq_config=None,
+            normalization_processor=None,
+            debug_export_service=None,
+            raw_record={"id": "bad"},
+            batch_id=deterministic_batch_uuid_from_callsite(
+                "test_transform_attempt_type_error_is_not_quarantined"
+            ),
+            index=3,
+        )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_transform_attempt_keeps_validation_reason_code() -> None:
+    """Domain validation reason_code survives into the quarantine entry."""
+    from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.exceptions.validation import ValidationError
+
+    async def transform(_ctx, _record, _index):
+        raise ValidationError(
+            "Molecule ChEMBL ID is required",
+            field="molecule_id",
+            reason_code="missing_compound_identifier",
+        )
+
+    outcome = await transform_record_attempt(
+        context=_attempt_context(),
+        error_classifier=ErrorClassifier(),
+        batch_metrics=MagicMock(),
+        transform=transform,
+        gold_filter=lambda _ctx, _rec: True,
+        gold_transform=lambda _ctx, rec: rec,
+        dq_config=None,
+        normalization_processor=None,
+        debug_export_service=None,
+        raw_record={"molecule_id": ""},
+        batch_id=deterministic_batch_uuid_from_callsite(
+            "test_transform_attempt_keeps_validation_reason_code"
+        ),
+        index=4,
+    )
+
+    assert outcome.dq_entry is not None
+    assert outcome.dq_entry.reason_code == "missing_compound_identifier"
+    assert outcome.dq_entry.error_type == ErrorType.INVALID_DATA
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
 async def test_transform_attempt_projects_runtime_dq_warning_flags(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

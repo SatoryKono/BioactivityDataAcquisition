@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.domain.entities.base import BaseEntity
+from bioetl.domain.exceptions.validation import ValidationError
 from bioetl.domain.schemas.chembl.similarity_pair import (
     validate_legacy_pair,
     validate_public_pair,
@@ -71,10 +72,16 @@ class Molecule(BaseEntity):
 
     def _validate_invariants(self) -> None:
         if not self.molecule_id:
-            raise ValueError("Molecule ChEMBL ID is required")
+            raise ValidationError(
+                "Molecule ChEMBL ID is required",
+                field="molecule_id",
+                reason_code="missing_compound_identifier",
+            )
         if self.max_phase is not None and self.max_phase not in MAX_PHASE_VALUES:
-            raise ValueError(
-                f"max_phase must be one of {MAX_PHASE_VALUES}, got {self.max_phase}"
+            raise ValidationError(
+                f"max_phase must be one of {MAX_PHASE_VALUES}, got {self.max_phase}",
+                field="max_phase",
+                reason_code="INVALID_DATA:max_phase",
             )
 
 

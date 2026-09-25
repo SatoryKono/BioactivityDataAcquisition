@@ -534,15 +534,31 @@ class TestMoleculeTransformer:
 
     @pytest.mark.asyncio
     async def test_transform_missing_molecule_id(self, transformer, mock_context):
-        """Test transformation returns None when molecule_id is missing."""
+        """Missing molecule id is a catalogued data-quality error."""
+        from bioetl.domain.exceptions.validation import ValidationError
+
         record = {
             "pref_name": "TEST MOLECULE",
             "molecule_type": "Small molecule",
         }
 
-        result = await transformer.transform(mock_context, record, index=0)
+        with pytest.raises(ValidationError, match="molecule_id") as caught:
+            await transformer.transform(mock_context, record, index=0)
+        assert caught.value.reason_code == "missing_compound_identifier"
 
-        assert result is None
+    @pytest.mark.asyncio
+    async def test_transform_invalid_max_phase(self, transformer, mock_context):
+        """Invalid max_phase keeps the field on the report reason code."""
+        from bioetl.domain.exceptions.validation import ValidationError
+
+        record = {
+            "molecule_id": "CHEMBL25",
+            "max_phase": 5,
+        }
+
+        with pytest.raises(ValidationError, match="max_phase") as caught:
+            await transformer.transform(mock_context, record, index=0)
+        assert caught.value.reason_code == "INVALID_DATA:max_phase"
 
     @pytest.mark.asyncio
     async def test_transform_with_flags(self, transformer, mock_context):

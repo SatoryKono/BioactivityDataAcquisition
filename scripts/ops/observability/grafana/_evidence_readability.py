@@ -728,7 +728,7 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
     for panel, fields in views:
         _apply_reason_columns(panel, fields)
     _override(summary, "Result", "displayName", "Processing")
-    _override(summary, "Status", "displayName", "Trust")
+    _override(summary, "Status", "displayName", "Overall verdict")
     if overview:
         _overview_selected_run_layout(p, summary)
 

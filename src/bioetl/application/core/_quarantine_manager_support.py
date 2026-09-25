@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
+from bioetl.application.core._quarantine_metrics_support import iter_dq_quarantine_parts
 from bioetl.application.core._quarantine_request_builders import (
     build_dq_quarantine_request,
     build_filtered_quarantine_request,
@@ -125,26 +126,27 @@ class QuarantineManagerSupportMixin:
         """Persist a batch of DQ quarantine records with shared run context."""
         if not records:
             return
-        write_requests = [
-            build_dq_quarantine_request(
-                pipeline_name=self._pipeline_name,
-                record=record,
-                error_type=error_type,
-                error_details=error_details,
-                batch_id=batch_id,
-                run_id=run_id,
-                ingestion_ts=ingestion_ts,
-            )
-            for record, error_type, error_details in records
-        ]
-        await persist_dq_quarantine_requests(
-            self._quarantine_runtime_ports(stage),
-            requests=write_requests,
-            records=records,
+    parts = tuple(iter_dq_quarantine_parts(records))
+    write_requests = [
+        build_dq_quarantine_request(
+            pipeline_name=self._pipeline_name,
+            record=record,
+            error_type=error_type,
+            error_details=error_details,
             batch_id=batch_id,
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
+        for record, error_type, error_details, _reason_code in parts
+    ]
+    await persist_dq_quarantine_requests(
+        self._quarantine_runtime_ports(stage),
+        requests=write_requests,
+        records=records,
+        batch_id=batch_id,
+        run_id=run_id,
+        ingestion_ts=ingestion_ts,
+    )
 
     async def quarantine_filtered_record(
         self,

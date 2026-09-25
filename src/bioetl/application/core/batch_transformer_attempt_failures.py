@@ -147,6 +147,8 @@ def handle_transform_processing_error(
         index=index,
         error=error,
     )
+    if isinstance(error, (TypeError, RuntimeError, OSError)):
+        raise error
     error_type = error_classifier.classify(error)
     if not error_type.is_data_quality():
         raise error
@@ -174,6 +176,9 @@ def handle_data_quality_transform_error(
     """Apply invalid-record policy to a data-quality transform error."""
     batch_metrics.track_error("transform", error_type)
     policy = _resolve_invalid_record_policy(dq_config)
+    reason_code = getattr(error, "reason_code", None)
+    if not isinstance(reason_code, str) or not reason_code.strip():
+        reason_code = None
     if debug_export_service is not None:
         debug_export_service.record_data_quality_failure(
             raw_record=raw_record,
@@ -191,7 +196,9 @@ def handle_data_quality_transform_error(
     return RecordTransformOutcome(
         silver_record=None,
         gold_record=None,
-        dq_entry=DQQuarantineEntry(raw_record, error_type, str(error)),
+        dq_entry=DQQuarantineEntry(
+            raw_record, error_type, str(error), reason_code
+        ),
     )
 
 

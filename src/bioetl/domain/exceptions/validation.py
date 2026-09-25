@@ -40,6 +40,7 @@ class ValidationError(DataQualityError):
         message: str,
         record_id: str | None = None,
         field: str | None = None,
+        reason_code: str | None = None,
     ) -> None:
         """Initialize ValidationError.
 
@@ -47,11 +48,13 @@ class ValidationError(DataQualityError):
             message: Human-readable error message.
             record_id: Optional ID of the affected record.
             field: Optional name of the field with validation error.
+            reason_code: Catalog code recorded in the run report.
         """
         super().__init__(message)
         # Always present so callers can access without AttributeError.
         self.record_id = record_id
         self.field = field
+        self.reason_code = reason_code
 
 
 class SchemaViolationError(ValidationError):

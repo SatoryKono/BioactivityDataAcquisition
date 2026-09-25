@@ -308,6 +308,13 @@ def load_selected_run_status(
     }
     domain_rows = assessment["domains"]
     assert isinstance(domain_rows, list)  # Produced by the verified assessment.
+    issues = [
+        f"{row['domain']}: {display_reason(str(row.get('reason', '')))}"
+        for row in domain_rows
+        if row.get("verdict") not in {"OK", "N/A"}
+    ]
+    if issues:
+        summary["reason"] = "; ".join(issues)
     rows = [
         {
             **summary,

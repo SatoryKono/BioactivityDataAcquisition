@@ -726,6 +726,34 @@ class TestTrackQuarantinedRecords:
         assert accounting.sum_outcome("gold", "quarantined") == 2
         assert accounting.sum_outcome("silver", "quarantined") == 1
 
+    def test_quarantine_reason_code_overrides_error_type(
+        self, recorder: BatchMetricsRecorderService
+    ) -> None:
+        """A catalog reason code is what the run report records."""
+        from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
+        from bioetl.domain.run_reports.context import (
+            bind_stage_accounting,
+            reset_stage_accounting,
+        )
+
+        accounting = StageAccountingAccumulator()
+        token = bind_stage_accounting(accounting)
+        try:
+            recorder.track_quarantined_records(
+                error_type=ErrorType.INVALID_DATA,
+                count=1,
+                reason_code="missing_compound_identifier",
+            )
+            recorder.track_quarantined_records(
+                error_type=ErrorType.INVALID_DATA,
+                count=2,
+                reason_code="INVALID_DATA:max_phase",
+            )
+        finally:
+            reset_stage_accounting(token)
+        codes = {str(item["reason_code"]) for item in accounting.top_reasons()}
+        assert codes == {"missing_compound_identifier", "INVALID_DATA:max_phase"}
+
     def test_includes_run_type_label_in_counter(
         self,
         mock_metrics: MagicMock,

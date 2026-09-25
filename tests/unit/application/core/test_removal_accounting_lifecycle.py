@@ -265,3 +265,55 @@ async def test_hard_threshold_persists_quarantine_before_abort() -> None:
         assert accounting.measured_record_metrics()["records_quarantined"] == 1
     finally:
         reset_stage_accounting(token)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("previous", [None, "OK", "ERROR"])
+async def test_no_gold_candidates_records_not_applicable_without_erasing_checks(
+    previous,
+):
+    from bioetl.application.core._batch_processing_layer_write_support import (
+        write_silver_then_gold,
+    )
+    from bioetl.application.services.run_reports.observations import (
+        bind_run_observations,
+        reset_run_observations,
+        record_run_observation,
+        run_observations,
+    )
+
+    token = bind_run_observations()
+
+    async def execute_span(name, operation, *args, **kwargs):
+        return await operation
+
+    writer = MagicMock(
+        write_silver=AsyncMock(return_value=True), write_gold=AsyncMock()
+    )
+    try:
+        if previous:
+            record_run_observation(
+                "Data Validation", verdict=previous, reason="prior_batch", facts={}
+            )
+        await write_silver_then_gold(
+            execute_with_span=execute_span,
+            writer=writer,
+            quarantine_manager=MagicMock(),
+            logger=MagicMock(),
+            batch_metrics=BatchMetricsRecorderService(
+                None, "chembl_molecule", "backfill"
+            ),
+            run_id=None,
+            domain_event_emitter=None,
+            transform_result=MagicMock(silver_records=[{}], gold_records=[]),
+            batch_id=BatchID(UUID("11111111-1111-4111-8111-111111111111")),
+            ingestion_ts=datetime(2026, 9, 25, tzinfo=UTC),
+            bronze_refs=None,
+        )
+        observation = run_observations()["Data Validation"]
+        assert observation["verdict"] == (previous or "N/A")
+        if previous is None:
+            assert observation["reason"] == "no_gold_candidates"
+        writer.write_gold.assert_not_awaited()
+    finally:
+        reset_run_observations(token)
