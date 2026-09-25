@@ -64,6 +64,7 @@ def validate_observability_preflight(
         impl=_validate_observability_preflight_impl,
     )
 
+
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
 

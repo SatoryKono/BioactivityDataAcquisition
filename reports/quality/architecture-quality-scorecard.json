@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2479,
+        "source_module_count": 2496,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -36,7 +36,7 @@
     },
     {
       "evidence_metrics": {
-        "composition_util": 0.9492,
+        "composition_util": 0.9661,
         "layer_violations": 0,
         "lazy_util": 0.0,
         "public_entrypoint_growth_count": 0,
@@ -45,9 +45,9 @@
       },
       "id": "composition_di",
       "name": "Composition root / DI",
-      "score": 10.0,
+      "score": 6.5,
       "weight": 0.1,
-      "weighted_score": 1.0
+      "weighted_score": 0.65
     },
     {
       "evidence_metrics": {
@@ -115,7 +115,7 @@
     },
     {
       "evidence_metrics": {
-        "composition_util": 0.9492,
+        "composition_util": 0.9661,
         "expired_compat_count": 0,
         "hotspot_budget_warning_count": 0,
         "public_entrypoint_growth_count": 0,
@@ -128,9 +128,9 @@
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 10.0,
+      "score": 7.0,
       "weight": 0.06,
-      "weighted_score": 0.6
+      "weighted_score": 0.42
     }
   ],
   "debt_budget_policy": {
@@ -168,8 +168,8 @@
   },
   "diagnostics": {
     "composition_module_cap": 295,
-    "composition_module_count": 280,
-    "composition_util": 0.9492,
+    "composition_module_count": 285,
+    "composition_util": 0.9661,
     "families_at_budget": [],
     "families_at_budget_count": 0,
     "grade_kind": "diagnostic_proxy",
@@ -183,16 +183,16 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 10.0,
-  "interpretation": "excellent",
+  "integral_score": 9.47,
+  "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 59,
     "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
     "composition_module_cap": 295,
-    "composition_module_count": 280,
-    "composition_util": 0.9492,
+    "composition_module_count": 285,
+    "composition_util": 0.9661,
     "contract_blocking_issue_count": 0,
     "dashboarded_without_declaration_count": 0,
     "dashboarded_without_emission_count": 0,
@@ -214,7 +214,7 @@
     "retained_public_export_facade_count": 3,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2479,
+    "source_module_count": 2496,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
@@ -269,7 +269,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "e68122becf56412da6449521c8f603667730782f75a1ba6d2147345635ade44f"
+      "source_tree_sha256": "7b7003e008bae5714376ba4ff31b63855f6be745b947fe4b1d4d4e54be4c3321"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

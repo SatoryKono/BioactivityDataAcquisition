@@ -44,7 +44,7 @@ gate.
   that depended on composition-private Protocols).
 - Remaining composition Protocol declarations decrease only.
 - Inventory `configs/quality/composition_protocol_inventory.yaml` must
-  stay complete: 62 = domain + application + composition_contracts.
+  stay complete: 77 = domain + application + composition_contracts.
 
 ## Rollback
 

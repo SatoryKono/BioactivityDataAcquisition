@@ -15,9 +15,11 @@ from bioetl.application.composite.column_orderer_semantic import (
     get_ordered_columns,
     group_columns,
 )
-from bioetl.application.composite.column_priority_orderer import get_enricher_prefix
 from bioetl.application.composite.column_service_priority import (
     ColumnPriorityOrderingPolicy as ColumnPriorityOrderingPolicy,
+)
+from bioetl.application.composite.column_service_stage_delegates import (
+    ColumnOrderStageDelegates,
 )
 from bioetl.application.composite.column_service_support import (
     collect_explicit_group_columns,
@@ -29,7 +31,6 @@ from bioetl.application.composite.column_service_support import (
 from bioetl.application.composite.helpers.column_service_layer_filter import (
     filter_columns_by_layer_config,
 )
-from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
 from bioetl.domain.composite import (
     ColumnGroupConfig,
     EnricherConfig,
@@ -50,7 +51,7 @@ __all__ = [
 ]
 
 
-class ColumnOrderService:
+class ColumnOrderService(ColumnOrderStageDelegates):
     """Unified service for column ordering supporting semantic and priority strategies."""
 
     def __init__(
@@ -237,21 +238,3 @@ class ColumnOrderService:
             collect_group_columns=self._collect_group_columns,
             logger=self._logger,
         )
-
-    @staticmethod
-    def _apply_renames_stage(
-        columns: list[str],
-        rename_map: dict[str, str],
-    ) -> list[str]:
-        """Delegate legacy service-level rename calls to the focused helper."""
-        return apply_renames(columns, rename_map)
-
-    @staticmethod
-    def get_enricher_prefix(enricher_pipeline: str) -> str:
-        """Get enricher prefix with trailing separator."""
-        return get_enricher_prefix(enricher_pipeline)
-
-    @staticmethod
-    def _parse_pipeline_name(pipeline: str) -> tuple[str, str]:
-        """Parse provider_entity pipeline name into tuple."""
-        return parse_pipeline_name(pipeline)

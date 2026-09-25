@@ -9,9 +9,9 @@
 | Family | Files | Total LOC | Files >=250 LOC | Helper ratio | Duplication | Max fan-in | Max fan-in module | Budgets | Budget warnings | Budget review notes |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |
 | `application_core` | 196 | 24085 | 0 | 0.384 | 0 | 5 | `bioetl.application.core.target_data_source_mixins` | `files_ge_250_loc=0, max_internal_fan_in=7` | `-` | `-` |
-| `composition_bootstrap_runtime` | 50 | 6113 | 0 | 0.326 | 0 | 3 | `bioetl.composition.bootstrap.runtime.observability_bundle` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `at_budget:max_internal_fan_in=3/3` |
+| `composition_bootstrap_runtime` | 50 | 6160 | 0 | 0.323 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 | `composition_factories_pipeline` | 32 | 3870 | 0 | 0.358 | 0 | 2 | `bioetl.composition.factories.pipeline.runner_constructor` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
-| `application_services_control_plane` | 124 | 14622 | 0 | 0.375 | 0 | 2 | `bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `at_budget:max_internal_fan_in=2/2` |
+| `application_services_control_plane` | 124 | 14660 | 0 | 0.374 | 0 | 1 | `bioetl.application.services.control_plane.workflow.manifest_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `-` |
 | `composition_runtime_builders` | 56 | 7398 | 0 | 0.386 | 0 | 2 | `bioetl.composition.runtime_builders.runner_inputs` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 
 ## `application_core` internal fan-in
@@ -23,13 +23,10 @@ No modules currently sit at the fan-in cap.
 
 ## `composition_bootstrap_runtime` internal fan-in
 
-- distribution: `0:3, 1:34, 2:11, 3:2`
-- at_budget_module_count: `2` (cap `3`)
+- distribution: `0:3, 1:34, 2:13`
+- at_budget_module_count: `0` (cap `3`)
 
-| Module | Fan-in | Runtime importers |
-| --- | ---: | --- |
-| `bioetl.composition.bootstrap.runtime._composite_control_plane_support` | 3 | `bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support`, `bioetl.composition.bootstrap.runtime._composite_control_plane_support_resolve_composite_replay_capability`, `bioetl.composition.bootstrap.runtime.composite_control_plane_builder` |
-| `bioetl.composition.bootstrap.runtime.observability_bundle` | 3 | `bioetl.composition.bootstrap.runtime.observability`, `bioetl.composition.bootstrap.runtime.observability_validate_observability_preflight`, `bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases` |
+No modules currently sit at the fan-in cap.
 
 ## `composition_factories_pipeline` internal fan-in
 
@@ -40,17 +37,10 @@ No modules currently sit at the fan-in cap.
 
 ## `application_services_control_plane` internal fan-in
 
-- distribution: `0:20, 1:98, 2:6`
-- at_budget_module_count: `6` (cap `2`)
+- distribution: `0:20, 1:104`
+- at_budget_module_count: `0` (cap `2`)
 
-| Module | Fan-in | Runtime importers |
-| --- | ---: | --- |
-| `bioetl.application.services.control_plane.manifest.diagnostics.artifact_support` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.summary_support`, `bioetl.application.services.control_plane.manifest.diagnostics.summary_support_build_exact_replay_anchors` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_build_operator_replay_projection` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_build_operator_replay_projection` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_types` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support_refresh_replay_summary_build_policy_assessment` |
-| `bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores` | 2 | `bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation`, `bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation_evaluate_threshold_failures` |
-| `bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core` | 2 | `bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores`, `bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_score_lineage_completeness` |
+No modules currently sit at the fan-in cap.
 
 ## `composition_runtime_builders` internal fan-in
 

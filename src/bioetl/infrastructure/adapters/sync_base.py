@@ -37,7 +37,9 @@ from bioetl.domain.ports import (
     LoggerPort,
     MetricsPort,
 )
-from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProviderMixin
+from bioetl.infrastructure.adapters.health_check_provider_mixin import (
+    HealthCheckProviderMixin,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import CircuitBreakerPort
