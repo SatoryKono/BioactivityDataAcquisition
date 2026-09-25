@@ -49853,7 +49853,19 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
+<<<<<<< HEAD
   "source_tree_sha256": "b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f",
+||||||| c9a64bb879a6
+  "source_tree_sha256": "f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940",
+=======
+<<<<<<< Updated upstream
+  "source_tree_sha256": "f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940",
+||||||| Stash base
+  "source_tree_sha256": "b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6",
+=======
+  "source_tree_sha256": "b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f",
+>>>>>>> Stashed changes
+>>>>>>> master20260925-6
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -50008,10 +50020,34 @@
         "unmeasured_module_count": 0
       }
     },
+<<<<<<< HEAD
     "source_module_count": 2492,
+||||||| c9a64bb879a6
+    "source_module_count": 2499,
+=======
+<<<<<<< Updated upstream
+    "source_module_count": 2499,
+||||||| Stash base
+    "source_module_count": 2494,
+=======
+    "source_module_count": 2492,
+>>>>>>> Stashed changes
+>>>>>>> master20260925-6
     "status_counts": {
       "coverage_xml_missing": 0,
+<<<<<<< HEAD
       "fully_covered": 2484,
+||||||| c9a64bb879a6
+      "fully_covered": 2491,
+=======
+<<<<<<< Updated upstream
+      "fully_covered": 2491,
+||||||| Stash base
+      "fully_covered": 2486,
+=======
+      "fully_covered": 2484,
+>>>>>>> Stashed changes
+>>>>>>> master20260925-6
       "no_executable_lines": 1,
       "partially_covered": 7,
       "uncovered": 0,
