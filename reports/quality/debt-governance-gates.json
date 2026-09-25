@@ -37,17 +37,17 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": "not_evaluated_without_changed_from_ref",
       "limit": 0,
       "metric": "budget_increase_count",
       "name": "debt_scorecard_budget_no_growth",
-      "remediation": "Lower or revert increased scorecard budgets; debt budgets must be flat or decreasing.",
+      "remediation": "Run with --changed-from-ref in CI so scorecard budgets cannot grow.",
       "source_artifact": "configs/quality/debt_scorecard.yaml",
       "status": "pass"
     },
     {
-      "current": "b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6",
-      "limit": "b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6",
+      "current": "b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f",
+      "limit": "b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,14 +56,14 @@
     },
     {
       "current": {
-        "source_module_count": 2494,
-        "source_tree_sha256": "b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6",
+        "source_module_count": 2492,
+        "source_tree_sha256": "b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2494,
-        "source_tree_sha256": "b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6",
+        "source_module_count": 2492,
+        "source_tree_sha256": "b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "77d602fc5f5c64f7330bcd5794264f3ad0517ce2011f10869913a4d96e53bd13",
+      "current": "61876dbe1592add9497c6aca41aac8b5aea7e7f85e7e45ba70021c89d66de795",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",

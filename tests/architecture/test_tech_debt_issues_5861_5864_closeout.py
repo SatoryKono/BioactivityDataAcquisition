@@ -111,6 +111,11 @@ def test_issue_5861_dq_evaluator_has_golden_and_property_evidence() -> None:
 def test_issue_5862_contract_registry_and_ledger_have_domain_invariant_evidence() -> (
     None
 ):
+    closeout = _load_json(CLOSEOUT)
+    inventory = _load_json(MODULE_COVERAGE)
+    ledger_row = _module_row(
+        inventory, "bioetl.domain.control_plane.ledger.core_events"
+    )
     ledger_source = (
         ROOT
         / "src"
@@ -124,10 +129,10 @@ def test_issue_5862_contract_registry_and_ledger_have_domain_invariant_evidence(
     assert GOLD_CONTRACT_GOLDEN.exists()
     assert "def to_mapping(" in ledger_source
     # Skip coverage percent check for local development with uncommitted changes
-    # assert (
-    #     ledger_row["coverage_percent"]
-    #     == closeout["metrics"]["ledger_core_events_coverage_percent"]["current"]
-    # )
+    assert (
+        ledger_row["coverage_percent"]
+        == closeout["metrics"]["ledger_core_events_coverage_percent"]["current"]
+    )
     assert (
         ROOT / "tests/unit/domain/control_plane/test_contract_registry_invariants.py"
     ).exists()
