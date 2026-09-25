@@ -1,7 +1,11 @@
 name: PR Gate Complete
-# Repo-side #9975 coordinator. Ruleset 13643213 requires this job
+# Repo-side #9975 coordinator. Ruleset 13643213 names this job
 # (`name: pr-gate-complete`) as the only GitHub required context (#10267).
+# Enforcement stays disabled (#11180): Actions billing will not return, so do
+# not enable the ruleset. A required check that cannot run would block main.
 # Each pull request has one owner invocation per gate and one fail-closed result.
+# Classify and aggregate check out the base ref. The PR head SHA is only a
+# diff argument (#11181). The workflow YAML itself still comes from the PR.
 
 on:
   pull_request:
@@ -56,7 +60,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Set up Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -325,7 +329,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Set up Python + uv
         uses: ./.github/actions/setup-python-uv
