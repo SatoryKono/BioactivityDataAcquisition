@@ -25,9 +25,9 @@ def _bash_executable() -> str:
             if candidate.is_file():
                 return str(candidate)
     found = shutil.which("bash")
-    if found:
-        return found
-    pytest.skip("bash is required for pretest_guardrails runtime tests")
+    if found is None:
+        pytest.skip("bash is required for pretest_guardrails runtime tests")
+    return found
 
 
 def _command(report_path: Path) -> list[str]:

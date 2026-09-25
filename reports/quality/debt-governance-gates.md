@@ -16,29 +16,9 @@
 | `retained_public_entrypoint_burden` | `pass` | `current_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml#compatibility_debt_metrics` |
 | `debt_budget_growth_policy` | `pass` | `budget_growth_allowed` | `False` | `False` | `configs/quality/debt_scorecard.yaml` |
 | `flaky_test_review_input_preflight` | `pass` | `required_json_input` | `available_valid_object` | `available_valid_object` | `reports/quality/flaky-test-burndown-review.json` |
-<<<<<<< HEAD
 | `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `not_evaluated_without_changed_from_ref` | `0` | `configs/quality/debt_scorecard.yaml` |
 | `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f` | `b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f` | `reports/quality/module-coverage-inventory.json` |
 | `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2492, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f'}` | `{'source_module_count': 2492, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
-||||||| c9a64bb879a6
-| `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940` | `f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940` | `reports/quality/module-coverage-inventory.json` |
-| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2499, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940'}` | `{'source_module_count': 2499, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
-=======
-<<<<<<< Updated upstream
-| `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940` | `f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940` | `reports/quality/module-coverage-inventory.json` |
-| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2499, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940'}` | `{'source_module_count': 2499, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
-||||||| Stash base
-| `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6` | `b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6` | `reports/quality/module-coverage-inventory.json` |
-| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2494, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6'}` | `{'source_module_count': 2494, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
-=======
-| `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `not_evaluated_without_changed_from_ref` | `0` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f` | `b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f` | `reports/quality/module-coverage-inventory.json` |
-| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2492, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f'}` | `{'source_module_count': 2492, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
->>>>>>> Stashed changes
->>>>>>> master20260925-6
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `hotspot_family_baseline_budget_warnings` | `pass` | `budget_warnings` | `0` | `0` | `reports/quality/hotspot-family-baseline.json` |
@@ -76,17 +56,5 @@
 | `observability_touched_metric_inventory_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_touched_metric_review_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_review.json` |
 | `adr_enforcement_blocking_gaps` | `pass` | `blocking_gap_count` | `0` | `0` | `reports/quality/adr-enforcement-matrix.json` |
-<<<<<<< HEAD
 | `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `61876dbe1592add9497c6aca41aac8b5aea7e7f85e7e45ba70021c89d66de795` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
-||||||| c9a64bb879a6
-| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `91be52dfb8a6fa112767bfce2578d85a74fee698b190d587da87796fbed2442b` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
-=======
-<<<<<<< Updated upstream
-| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `91be52dfb8a6fa112767bfce2578d85a74fee698b190d587da87796fbed2442b` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
-||||||| Stash base
-| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `77d602fc5f5c64f7330bcd5794264f3ad0517ce2011f10869913a4d96e53bd13` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
-=======
-| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `61876dbe1592add9497c6aca41aac8b5aea7e7f85e7e45ba70021c89d66de795` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
->>>>>>> Stashed changes
->>>>>>> master20260925-6
 | `generated_artifact_drift` | `pass` | `stale_artifact_count` | `{'count': 0, 'artifacts': []}` | `0` | `reports/quality/*.json` |
