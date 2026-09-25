@@ -75,7 +75,9 @@ bash scripts/engineering/dev/run_mypy.sh
 
 **Главные ресурсы:**
 
-1. `docs/00-project/RULES.md` — Конституция проекта (RFC 2119 keywords)
+1. `AGENTS.md` — runtime entry. При противоречии он и активный runtime map выше остальных документов.
+1. Runtime maps: `.codex/agents/CODEX-RUNTIME.md`, `.junie/agents/JUNIE-RUNTIME.md`, `.devin/agents/` — равные peers, как в `guides/AGENT.md`.
+1. `docs/00-project/RULES.md` — конституция продуктовых правил (RFC 2119 keywords)
 1. `docs/00-project/ai/memory/agent-memory.md` — Компактный контекст
 1. `AGENT.md` — Детальные инструкции для агента
 1. `docs/03-guides/dashboards/dashboard-extension-llm.md` — если задача затрагивает `grafana/dashboards/*.json`, links или drilldown в Grafana
@@ -214,8 +216,8 @@ src/bioetl/
 
 | Компонент                   | ❌ Ложное утверждение                                     | ✅ Реальность                                                                                                                                                                                                |
 | --------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Email в config/adapters** | "PII поля (email) требуют хэширования HashService"        | **НЕ PII**: `default-email` — технический идентификатор для NCBI API, не персональные данные. NCBI требует email для идентификации инструмента. См. `config.py:364-371`, `pubmed_client.py:38-42`            |
-| **PipelineRunner**          | "God object, слишком много ответственностей"              | **189 строк**, делегирует через `PipelineServices` bundle (`runner.py:54,89`)                                                                                                                                |
+| **Email в config/adapters** | "PII поля (email) требуют хэширования HashService"        | **НЕ PII**: `default_email` — технический идентификатор для NCBI API, не персональные данные. См. `src/bioetl/infrastructure/config/_base.py:161`                                                            |
+| **PipelineRunner**          | "God object, слишком много ответственностей"              | Класс делегирует сервисам через `PipelineRunnerServicesProtocol`. См. `src/bioetl/application/core/runner.py:50`                                                                                             |
 | **bootstrap-pipeline**      | "Смешивает сборку и бизнес-логику"                        | Тонкий фасад, делегирует фабрикам: `factory.create-runner()`                                                                                                                                                 |
 | **ChEMBL Adapter**          | "Монолит 517 строк, объединяет всё"                       | **1124 строки**, делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter` (`client.py`)                                                                                       |
 | **GoldWriter**              | "Монолит 593 строки, требует декомпозиции"                | **938 строк**, делегирует CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold_writer.py`)                                                                              |
@@ -227,14 +229,14 @@ src/bioetl/
 | **DQ/Medallion политики**   | "Нет автоматизации"                                       | Реализовано: `MedallionPolicy`, `DQConfig`, `SilverWriteMode`, `GoldWriteMode` enums                                                                                                                         |
 | **bootstrap-pipeline**      | "140+ строк, усложняет тестирование"                      | Рефакторинг в `composition/bootstrap/` (directory с `assembly/`, `cli/`, `runtime/`), делегирует через фабрики и helper-функции                                                                              |
 | **RecordProcessor**         | "Совмещает метрики/карантин/запись"                       | **Делегирует** в `BatchMetricsRecorder`, `BatchTransformer`, `BatchWriter`, `QuarantineManager` (`record_processor.py:59-85`)                                                                                |
-| **PipelineRunner**          | "Не выпускает метрики по стадиям"                         | Использует `PipelineObserver` через `PipelineServices` (`runner.py:89`)                                                                                                                                      |
-| **Write mode validation**   | "Нет валидации через Enum"                                | **Реализовано**: `SilverWriteMode`, `GoldWriteMode` enums (`delta_writer.py:53-64`, `gold_writer.py:42-54`)                                                                                                  |
+| **PipelineRunner**          | "Не выпускает метрики по стадиям"                         | Наблюдаемость идёт через сервисы раннера. См. `src/bioetl/application/core/runner.py:50`                                                                                                                     |
+| **Write mode validation**   | "Нет валидации через Enum"                                | **Реализовано**: `SilverWriteMode` и `GoldWriteMode` в `src/bioetl/domain/medallion.py:31` и `:57`                                                                                                          |
 | **Архитектурные тесты**     | "Не связаны с метриками"                                  | Архитектурные проверки живут в `tests/architecture/`; локально используется `make test-architecture`, в CI — `pytest tests/architecture/` и отдельные targeted gates                                         |
 | **MemoryLock**              | "Требуется Redis для распределённых блокировок"           | **MemoryLock достаточен** для локального запуска. Проект **by design** использует локальные пайплайны. См. §5 Блокировки.                                                                                    |
 | **MemoryMonitor**           | "Возвращает захардкоженные нули, баг"                     | **Graceful degradation** — возвращает консервативные оценки (50% использования), не нули. Это **валидный паттерн** при недоступности psutil. См. `memory_monitor.py:170-180`                                 |
-| **DQ метрики**              | "Не экспортируются в Prometheus"                          | **УЖЕ РЕАЛИЗОВАНО**: `postrun_service.py:158-163` эмитит `dq-soft-threshold-exceeded` (counter), `dq-check-duration-ms` (histogram). `DQConfig` имеет `soft-fail-threshold=0.05`, `hard-fail-threshold=0.20` |
+| **DQ метрики**              | "Не экспортируются в Prometheus"                          | **УЖЕ РЕАЛИЗОВАНО**: `bioetl_dq_soft_threshold_exceeded` и `bioetl_dq_check_duration_ms` (`data_quality_thresholds.py`, `data_quality_anomalies.py`). `hard_fail` равен `0.50` в `configs/base/quality.yaml` и `src/bioetl/domain/config/dq.py:109` |
 | **protocols.py**            | "Пустой файл с нулевым покрытием"                         | Содержит 4 Protocol: `TransformCallback`, `GoldFilterCallback`, `GoldTransformCallback`, `TransformerPort`. См. `application/core/protocols.py`                                                              |
-| **Coverage gate**           | "Нет coverage gate в CI, нужно добавить --cov-fail-under" | **УЖЕ РЕАЛИЗОВАНО**: `Makefile:63` (`--cov-fail-under=85`), `.github/workflows/tests.yml:158`. Верификация: 2026-01-06                                                                                       |
+| **Coverage gate**           | "Нет coverage gate в CI, нужно добавить --cov-fail-under" | **УЖЕ РЕАЛИЗОВАНО**: `Makefile:115` (`--cov-fail-under=85`) и `.github/workflows/architecture.yml:88`                                                                                                        |
 | **OTLPSpanExporter**        | "Ошибка Optional-аннотации, mypy --strict падает"         | **ОШИБОК НЕТ**: `uv run mypy src/bioetl --strict` → "Success: no issues found in 326 source files". Код в `tracing.py:36-44` корректен. Верификация: 2025-12-31                                              |
 | **OpenTelemetryTracer**     | "Типизация сломана, mypy --strict не проходит"            | **ОШИБОК НЕТ**: mypy strict проходит без ошибок. Верификация: 2025-12-31                                                                                                                                     |
 
@@ -284,9 +286,9 @@ src/bioetl/
 
 1. **DQ метрики уже реализованы**:
 
-   - `DQConfig` в `domain/config.py:28-40` с `soft-fail-threshold=0.05`, `hard-fail-threshold=0.20`
-   - `postrun_service.py:122-163` проверяет пороги и эмитит метрики
-   - Счётчик `dq-soft-threshold-exceeded` и гистограмма `dq-check-duration-ms`
+   - `DQConfig.hard_fail_threshold` равен `0.50` в `src/bioetl/domain/config/dq.py:109`; тот же дефолт в `configs/base/quality.yaml` (`hard_fail: 0.50`)
+   - Пороги и метрики: `src/bioetl/application/services/quality/data_quality_thresholds.py` и `data_quality_anomalies.py`
+   - Счётчик `bioetl_dq_soft_threshold_exceeded_total` и гистограмма `bioetl_dq_check_duration_ms`
    - **НЕ требуется** дополнительная реализация
 
 1. **Click для CLI (а не Typer)**:
@@ -409,9 +411,9 @@ ______________________________________________________________________
 
 - **Critical**: Падение пайплайна (auth failure, schema mismatch)
 - **Recoverable**: Retry с backoff (429, 502/504)
-- **Data Quality**: Лог + пропуск (>5% warning, >20% fail batch)
+- **Data Quality**: лог + пропуск. Soft warning `>5%`. Hard fail — `hard_fail=0.50` (`REQ-THRESHOLD-002`)
 
-**Circuit Breaker**: 5 consecutive errors → Open 5 мин (см. [ADR-007](../../../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
+**Circuit Breaker**: код-дефолт — 5 ошибок и `recovery_timeout` 300 с. Shipped ChEMBL override в `configs/providers/chembl.yaml`: `failure_threshold: 3`, `recovery_timeout: 3000`. См. [ADR-007](../../../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)
 
 **Актуальный набор ADR** определяет архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
 Перед ссылкой на номер ADR проверь текущий список файлов, а не исторический диапазон.
@@ -577,7 +579,7 @@ ______________________________________________________________________
 | `docs/02-architecture/decisions/`           | Актуальный набор ADR — архитектурные решения                                    |
 | `docs/01-requirements/REQUIREMENTS.md`      | Тестируемые требования; при ссылке на total проверяй live по текущему документу |
 
-> **Иерархия документации**: При противоречиях приоритет имеет `docs/00-project/RULES.md`.
+> **Иерархия документации**: сначала `AGENTS.md` и runtime maps (как в `guides/AGENT.md`), затем `docs/00-project/RULES.md`.
 > CLAUDE файл (`docs/00-project/ai/agents/guides/CLAUDE.md`) содержит специфику для Claude Code и протокол верификации.
 
 ______________________________________________________________________

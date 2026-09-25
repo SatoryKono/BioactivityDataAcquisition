@@ -175,7 +175,7 @@ _Связанные документы: diagram-modernization-program.md, diagra
 1. DIAG-T024..T030 переведены в nightly workflow `.github/workflows/diagram-nightly.yml`, но пока не являются PR hard-gate.
 1. DIAG-T025 реализован эвристикой (aspect/text parity), без pixel-level visual diff.
 1. DIAG-T026 использует git-baseline drift; отдельное baseline storage still pending.
-1. Для DIAG-T030 canary версия задана матрицей (`10.6.1` stable + `11.4.0` canary, allow-failure).
+1. Для DIAG-T030 canary-матрица в `mermaid-minor-canary` содержит только pin `10.6.1`. Ветка 11.x отложена, пока нет lockfile pin; незакреплённый `npm install` не используется.
 
 ## 11. Как запускать проверки
 

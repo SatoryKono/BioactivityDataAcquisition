@@ -22,7 +22,7 @@ Local pytest defaults remain **serial** (`forbid_global_xdist_addopts`). CI enab
 2. **Application / composition unit**: may use fakes; bootstrap may use **session-scoped immutable catalogs** only (`tests/helpers/bootstrap_cache.py`).
 3. **FS-heavy “unit”** (`tmp_path` / `write_text`): prefer `repo_backed` or integration when behavior is filesystem/config-path contract, not domain logic (#6893).
 4. **Architecture tests**: boundary/determinism fast suite first; tech-debt residual non-growth is centralized in `reports/quality/live-residual-snapshot.json` + `tests/architecture/test_live_residual_snapshot.py` (#6891).
-   Windows `architecture-fast-boundary` is **not** CI merge-truth: four FS-heavy
+   Windows `architecture-fast-boundary` is **not** CI merge-truth: six FS-heavy
    modules skip via `mounted_worktree_skip_reason()` (NTFS timeout). Those skips
    are inventoried in `configs/quality/test_skip_inventory.yaml`
    `architecture_platform_skips` (#10418). Linux CI architecture lanes remain
