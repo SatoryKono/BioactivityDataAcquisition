@@ -286,22 +286,30 @@ GOVERNANCE_SKILL_LABELS = (
 )
 
 
-def _docs_skill_mirror_header(canonical: Path) -> str:
-    canonical_text = canonical.as_posix()
+def _docs_skill_mirror_header(canonical: Path, *, present: bool) -> str:
+    if present:
+        source_line = f"> Canonical runtime source: `{canonical.as_posix()}`\n"
+    else:
+        source_line = (
+            "> Canonical runtime source: none. This published overlay has no "
+            "`.codex/skills` runtime file.\n"
+        )
     return (
         "> Mirror status: This file is a published/internal mirror under "
         "`docs/00-project/ai/**`. It is not a canonical runtime surface.\n"
-        f"> Canonical runtime source: `{canonical_text}`\n"
+        f"{source_line}"
         "> Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md\n"
         "> Edit the runtime source first, then refresh this mirror.\n"
         "______________________________________________________________________\n\n"
     )
 
 
-def _ensure_docs_skill_mirror_header(body: str, canonical: Path) -> str:
-    return _docs_skill_mirror_header(canonical) + _strip_mirror_header(body).lstrip(
-        "\n"
-    )
+def _ensure_docs_skill_mirror_header(
+    body: str, canonical: Path, *, present: bool
+) -> str:
+    return _docs_skill_mirror_header(
+        canonical, present=present
+    ) + _strip_mirror_header(body).lstrip("\n")
 
 
 def _ensure_docs_skill_governance(body: str) -> str:
@@ -340,7 +348,11 @@ def sync_docs_skill_mirrors(
             / SKILL_FILE_NAME
         )
         original = path.read_text(encoding="utf-8")
-        updated = _ensure_docs_skill_mirror_header(original, canonical)
+        updated = _ensure_docs_skill_mirror_header(
+            original,
+            canonical,
+            present=(root / canonical).is_file(),
+        )
         updated = _ensure_docs_skill_governance(updated)
         updated = updated.rstrip("\r\n") + "\n"
         if updated != original:

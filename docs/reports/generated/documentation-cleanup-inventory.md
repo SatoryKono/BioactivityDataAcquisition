@@ -397,7 +397,7 @@
 | grafana-panel-fill-error-report | `scripts/ops/observability/grafana/check_dashboard_panel_fill.py` | working_output |
 | hotspot-family-baseline-quality-report | `scripts/engineering/qa/report_hotspot_family_baseline.py` | tracked_quality_baseline |
 | invariant-audit-rebaseline-quality-report | `scripts/engineering/qa/report_invariant_audit_rebaseline.py` | tracked_quality_baseline |
-| matrix-dictionaries-curated-docs | `scripts/docs/matrix/build_matrix_dicts.py` | tracked_curated_generated_doc |
+| matrix-dictionaries-curated-docs | `scripts/docs/matrix/build_matrix_dicts.py` | ignored_local_output |
 | observability-runtime-cardinality-evidence | `scripts/engineering/qa/report_observability_metric_inventory.py` | tracked_quality_baseline |
 | pipeline-config-contract-ownership-quality-baseline | `scripts/engineering/qa/report_pipeline_config_contract_ownership.py` | tracked_quality_baseline |
 | pipeline-dataflow-generated-docs | `scripts/diagrams/render/generate_pipeline_dataflows.py` | tracked_curated_generated_doc |

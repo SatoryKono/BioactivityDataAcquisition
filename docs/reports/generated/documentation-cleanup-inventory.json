@@ -104687,10 +104687,10 @@
       ]
     },
     {
-      "commit_policy": "tracked_curated_generated_doc",
+      "commit_policy": "ignored_local_output",
       "generator": "scripts/docs/matrix/build_matrix_dicts.py",
       "id": "matrix-dictionaries-curated-docs",
-      "notes": "Generated dictionaries are curated docs report artifacts.",
+      "notes": "Dictionaries are gitignored under /docs/reports/* and are local generator output, not tracked SoT.",
       "output_kind": "curated_generated_docs",
       "outputs": [
         "docs/reports/dictionaries/"

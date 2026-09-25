@@ -120,16 +120,18 @@ AI runtime scripts should follow their respective conventions:
 
 ## Current State Analysis
 
+Measured 2026-09-25 from `scripts/**` (Python stem `snake_case`; `.sh`/`.ps1`/`.bat` stem `kebab-case`; a leading `EXCEPTION:` header would exempt a file). Mass rename is not in scope. These counts are the known backlog until a validator lands. Sunset for that validator: 2026-11-30. No file currently carries an `EXCEPTION:` header.
+
 ### Python Scripts
-- **Total:** 406 scripts
-- **Compliant:** 405 scripts (99.8%)
-- **Non-compliant:** 1 script (0.2%)
+- **Total:** 456 scripts
+- **Compliant:** 455 scripts
+- **Non-compliant:** 1 script
   - `scripts/ops/runtime/mcp/apply-shared-to-devin.py`
 
-### Shell Scripts
-- **Total:** 111 scripts
-- **Compliant:** 42 scripts (38%)
-- **Non-compliant:** 69 scripts (62%)
+### Shell, PowerShell, and Batch Scripts
+- **Total:** 211 scripts
+- **Compliant:** 96 scripts
+- **Non-compliant:** 115 scripts
 
 **Most common non-compliant patterns:**
 - Underscores instead of hyphens: `check_skills_layout.sh`

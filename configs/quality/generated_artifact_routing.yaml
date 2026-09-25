@@ -180,10 +180,10 @@ routes:
   - id: matrix-dictionaries-curated-docs
     generator: scripts/docs/matrix/build_matrix_dicts.py
     output_kind: curated_generated_docs
-    commit_policy: tracked_curated_generated_doc
+    commit_policy: ignored_local_output
     outputs:
       - docs/reports/dictionaries/
-    notes: Generated dictionaries are curated docs report artifacts.
+    notes: Dictionaries are gitignored under /docs/reports/* and are local generator output, not tracked SoT.
 
   - id: schema-generated-source
     generator: scripts/schema/generation/generate_schema_artifacts.py
