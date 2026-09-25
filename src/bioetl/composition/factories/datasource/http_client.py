@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.composition.factories.datasource.provider_registry_resolution import (
+from bioetl.composition.factories.datasource.data_source_factory import (
     resolve_datasource_provider_registry as _resolve_provider_registry,
 )
 from bioetl.composition.providers.provider_registry import (

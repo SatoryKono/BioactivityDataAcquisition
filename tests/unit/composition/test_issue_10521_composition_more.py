@@ -322,7 +322,7 @@ def test_create_metrics_service_compat(monkeypatch: pytest.MonkeyPatch) -> None:
     orig_import = mb.import_module
 
     def _import(name: str, *args: object, **kwargs: object) -> object:
-        if name == "bioetl.composition.bootstrap.assembly.metrics_service":
+        if name == "bioetl.composition.bootstrap.cli.metrics":
             return SimpleNamespace(create_metrics_service=lambda **_k: sentinel)
         return orig_import(name, *args, **kwargs)
 

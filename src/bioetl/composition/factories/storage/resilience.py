@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
+from collections.abc import Callable
+
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
@@ -13,7 +16,13 @@ from bioetl.infrastructure.storage.delta.resilience import (
 __all__ = [
     "create_silver_atomic_retry_policy",
     "create_silver_merge_resilience_policy",
+    "run_storage_blocking",
 ]
+
+
+async def run_storage_blocking[T](call: Callable[[], T]) -> T:
+    """Run a blocking storage callable off the event-loop thread."""
+    return await asyncio.to_thread(call)
 
 
 def _resolve_merge_execution_timeout_seconds(timeout_cfg: object) -> float:

@@ -33,7 +33,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.composition.factories.datasource.provider_registry_resolution import (
+from bioetl.composition.factories.datasource.data_source_factory import (
     resolve_datasource_provider_registry,
 )
 from bioetl.composition.providers.provider_registry import create_provider_registry
@@ -53,7 +53,7 @@ def test_resolve_datasource_provider_registry_uses_explicit_registry(
         return candidate
 
     monkeypatch.setattr(
-        "bioetl.composition.factories.datasource.provider_registry_resolution.resolve_provider_registry",
+        "bioetl.composition.factories.datasource.data_source_factory.resolve_provider_registry",
         _fake_resolve_provider_registry,
     )
 
@@ -74,7 +74,7 @@ def test_resolve_datasource_provider_registry_uses_provider_registry_default_pat
     sentinel_registry = MagicMock(name="sentinel_registry")
 
     monkeypatch.setattr(
-        "bioetl.composition.factories.datasource.provider_registry_resolution.resolve_provider_registry",
+        "bioetl.composition.factories.datasource.data_source_factory.resolve_provider_registry",
         lambda candidate, *, ensure_ready=False: (
             captured.update(
                 registry=candidate,

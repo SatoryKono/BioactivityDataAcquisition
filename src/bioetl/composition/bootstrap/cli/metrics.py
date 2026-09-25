@@ -16,10 +16,15 @@ from bioetl.application.observability.control_plane_integrity_metrics import (
     ControlPlaneIntegrityMetricsService,
 )
 from bioetl.application.services.ops.metrics_service import MetricsService
-from bioetl.composition.bootstrap.assembly.metrics_service import (
-    create_metrics_service,
-)
 from bioetl.composition.observability_resolution import resolve_tracing_port
+from bioetl.infrastructure.observability.metrics_publisher_adapter import (
+    MetricsPublisherAdapter,
+)
+from bioetl.infrastructure.observability.metrics_server_adapter import (
+    MetricsServerAdapter,
+)
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.time import SystemClock
 from bioetl.composition.runtime_builders import control_plane_root
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.exceptions import BioETLError
@@ -30,10 +35,26 @@ from bioetl.infrastructure.control_plane import (
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, TracingPort
     from bioetl.infrastructure.config.settings_api import Settings
 
-__all__ = ["bootstrap_metrics_service"]
+__all__ = ["bootstrap_metrics_service", "create_metrics_service"]
+
+
+def create_metrics_service(
+    *,
+    logger: LoggerPort | None = None,
+    tracer: TracingPort | None = None,
+) -> MetricsService:
+    """Build a metrics service with a composition-owned server adapter."""
+    resolved_logger = logger if logger is not None else NoOpLogger()
+    return MetricsService(
+        logger=resolved_logger,
+        clock=SystemClock(),
+        tracer=tracer,
+        _server=MetricsServerAdapter(logger=resolved_logger),
+        _publisher=MetricsPublisherAdapter(logger=resolved_logger),
+    )
 
 
 def refresh_control_plane_integrity_metrics(

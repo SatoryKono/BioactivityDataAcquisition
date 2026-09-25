@@ -8,9 +8,6 @@ from typing import TYPE_CHECKING, cast
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
-from bioetl.composition.factories.datasource.provider_registry_resolution import (
-    resolve_datasource_provider_registry as _resolve_provider_registry,
-)
 from bioetl.composition.providers.provider_registry import (
     DataSourceCreatorProtocol,
     ProviderDataSourceAccessProtocol,
@@ -165,6 +162,20 @@ class DataSourceFactory:
         """List all available providers."""
         providers: list[str] = _resolve_provider_registry().list_providers()
         return providers
+
+
+def resolve_datasource_provider_registry(
+    provider_registry: ProviderDataSourceAccessProtocol | None = None,
+) -> ProviderDataSourceAccessProtocol:
+    """Resolve and initialize the registry used by datasource factory helpers."""
+    resolved_registry = resolve_provider_registry(
+        provider_registry,
+        ensure_ready=True,
+    )
+    return cast("ProviderDataSourceAccessProtocol", resolved_registry)
+
+
+_resolve_provider_registry = resolve_datasource_provider_registry
 
 
 __all__ = [

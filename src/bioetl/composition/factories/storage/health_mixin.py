@@ -7,7 +7,7 @@ from collections.abc import Awaitable
 from pathlib import Path
 from typing import Any, TYPE_CHECKING, cast
 
-from bioetl.composition.factories.storage import run_storage_blocking
+from bioetl.composition.factories.storage.resilience import run_storage_blocking
 from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:
