@@ -274,6 +274,8 @@ permissions:
 [Profile-specific system prompt and instructions]
 ```
 
+Read-only profiles `py-audit-bot`, `py-plan-bot`, and `py-debug-bot` must not allow bare `Exec(python)`. `deny: write` and `deny: edit` do not stop a child `python` process from writing the product tree. Keep allows on read-only commands such as `Exec(git)`, `Exec(pytest)`, `Exec(mypy)`, and `Exec(pdb)`.
+
 ## Env File Guardrail
 
 - Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.

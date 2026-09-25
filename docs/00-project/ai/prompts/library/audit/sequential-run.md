@@ -61,7 +61,12 @@ max_body_lines: 280
 ---
 # BioETL — последовательный аудит `library/audit` (v1.1)
 
-Не runtime SSOT. Precedence: `AGENTS.md` → `docs/00-project/NORMATIVE_SOURCES.md`
+Не runtime SSOT: эта библиотека prompt не переопределяет runtime maps.
+Precedence: активные runtime maps (`.codex/agents/CODEX-RUNTIME.md`,
+`.junie/agents/JUNIE-RUNTIME.md`, `.devin/agents/DEVIN-RUNTIME.md` для Devin)
+→ профили и skills своего дерева → `docs/00-project/NORMATIVE_SOURCES.md`
+→ `docs/00-project/RULES.md` → `docs/01-requirements/REQUIREMENTS.md`
+→ accepted ADR → mirrors `docs/00-project/ai/**`
 → `prompt.audit.cycle` + `domains.yaml`. Method cards are not a second full run.
 Язык: `{{LANGUAGE}}`. Технические литералы не переводить.
 

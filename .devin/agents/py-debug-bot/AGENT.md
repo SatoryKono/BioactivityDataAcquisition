@@ -10,7 +10,6 @@ allowed-tools:
 permissions:
   allow:
     - Read(**)
-    - Exec(python)
     - Exec(pytest)
     - Exec(pdb)
   deny:
