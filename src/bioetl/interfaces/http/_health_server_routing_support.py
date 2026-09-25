@@ -43,7 +43,10 @@ from bioetl.interfaces.http._report_selector_options import (
     load_report_selector_entries,
     supplement_report_options,
 )
-from bioetl.interfaces.http._selector_catalog import SelectorCatalog
+from bioetl.interfaces.http._selector_catalog import (
+    SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
+    SelectorCatalog,
+)
 from bioetl.interfaces.http.control_plane_selector_context import (
     RUN_ID_NO_SELECTION,
     RunIdOptionPolicy,
@@ -198,6 +201,7 @@ async def handle_control_plane_filter_options(
             limiter=host._selector_endpoint_limiter,
             operation_factory=lambda: _filter_options_payload(host, query),
             timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
+            queue_timeout_seconds=SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
             endpoint="/ops/control-plane/filter-options",
         )
     except ForensicEndpointUnavailable as exc:

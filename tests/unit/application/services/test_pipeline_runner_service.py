@@ -164,6 +164,35 @@ def mock_logger():
     return logger
 
 
+def _seed_mock_gold_exclusion_reasons() -> None:
+    """Match mocked gold exclusion metrics with per-record stage accounting."""
+    from bioetl.domain.run_reports.context import get_stage_accounting
+    from bioetl.domain.run_reports.models import StageId
+
+    accounting = get_stage_accounting()
+    if accounting is None:
+        return
+    if accounting.sum_outcome(StageId.GOLD.value, "excluded_by_contract") > 0:
+        return
+    accounting.record_removal(
+        StageId.GOLD.value,
+        outcome="excluded_by_contract",
+        reason_code="gold_filter_exclusion",
+        count=4,
+    )
+
+
+_MOCK_EXECUTION_METRICS = {
+    "records_fetched": 100,
+    "records_bronze": 95,
+    "records_silver": 90,
+    "records_gold": 85,
+    "records_gold_excluded_by_contract": 4,
+    "records_quarantined": 5,
+    "records_filtered_out": 7,
+}
+
+
 @pytest.fixture
 def mock_runner():
     """Create a mock runner that implements execution+metrics runner contract."""
@@ -174,15 +203,7 @@ def mock_runner():
         "test_pipeline_runner_service"
     )
     runner.manifest_id = "manifest-123"
-    runner.execution_metrics = {
-        "records_fetched": 100,
-        "records_bronze": 95,
-        "records_silver": 90,
-        "records_gold": 85,
-        "records_gold_excluded_by_contract": 4,
-        "records_quarantined": 5,
-        "records_filtered_out": 7,
-    }
+    runner.execution_metrics = dict(_MOCK_EXECUTION_METRICS)
     return runner
 
 
@@ -198,19 +219,14 @@ def mock_runner_factory(mock_runner):
 
 @pytest.fixture
 def mock_metrics_extractor():
-    """Create a mock metrics extractor."""
+    """Create a mock metrics extractor that keeps gold exclusions accounted."""
+
+    def _extract(_runner: object) -> dict[str, int]:
+        _seed_mock_gold_exclusion_reasons()
+        return dict(_MOCK_EXECUTION_METRICS)
+
     extractor = MagicMock()
-    extractor.extract_metrics = MagicMock(
-        return_value={
-            "records_fetched": 100,
-            "records_bronze": 95,
-            "records_silver": 90,
-            "records_gold": 85,
-            "records_gold_excluded_by_contract": 4,
-            "records_quarantined": 5,
-            "records_filtered_out": 7,
-        }
-    )
+    extractor.extract_metrics = MagicMock(side_effect=_extract)
     return extractor
 
 

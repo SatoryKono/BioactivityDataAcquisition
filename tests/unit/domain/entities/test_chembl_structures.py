@@ -225,7 +225,9 @@ class TestMolecule:
         from bioetl.domain.entities.chembl_structures import Molecule
         from bioetl.domain.exceptions.validation import ValidationError
 
-        with pytest.raises(ValidationError, match="Molecule ChEMBL ID is required") as caught:
+        with pytest.raises(
+            ValidationError, match="Molecule ChEMBL ID is required"
+        ) as caught:
             Molecule(**BASE_KWARGS, molecule_id="")
         assert caught.value.reason_code == "missing_compound_identifier"
 

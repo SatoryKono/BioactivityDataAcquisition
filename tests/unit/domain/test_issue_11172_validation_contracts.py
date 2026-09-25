@@ -77,16 +77,16 @@ def test_absolute_relative_path_is_rejected_before_segment_cleanup() -> None:
 
 
 def test_unknown_severity_aliases_fall_back_to_info() -> None:
-    """warn/fatal are not vocabulary members and do not alias (#11172)."""
+    """Known aliases map into the vocabulary; unknown tokens fall back to info."""
     assert normalize_severity("warning", fallback="debug") == "warning"
-    assert normalize_severity("warn", fallback="debug") == "info"
-    assert normalize_severity("fatal", fallback="debug") == "info"
+    assert normalize_severity("warn", fallback="debug") == "warning"
+    assert normalize_severity("fatal", fallback="debug") == "error"
+    assert normalize_severity("loud", fallback="debug") == "info"
 
 
-def test_unknown_standard_profile_override_is_ignored() -> None:
-    spec = coerce_standard_profile_spec(None, {**_PROFILE_OVERRIDES, "not_a_field": 1})
-    assert spec.profile_name == "activity"
-    assert not hasattr(spec, "not_a_field")
+def test_unknown_standard_profile_override_is_rejected() -> None:
+    with pytest.raises(ValueError, match="unknown standard profile fields"):
+        coerce_standard_profile_spec(None, {**_PROFILE_OVERRIDES, "not_a_field": 1})
 
 
 def test_metre_and_molar_aliases_share_lowercased_lookup() -> None:

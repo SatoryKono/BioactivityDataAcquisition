@@ -15,13 +15,13 @@ _FLOW_ACCOUNTING_STAGES = frozenset({"bronze", "silver", "gold", "filtered_out"}
 _SILVER_REMOVAL_REASONS = {
     "filtered_out": "FILTERED_OUT_SILVER",
     "quarantined": "SCHEMA_VALIDATION_FAILURE",
-    "skipped": "UNKNOWN_REASON",
+    "skipped": "OPERATOR_SKIPPED",
     "deduplicated": "DEDUP_KEY_COLLISION",
 }
 _GOLD_REMOVAL_REASONS = {
     "excluded_by_contract": "gold_filter_exclusion",
     "quarantined": "gold_semantic_business_exclusion",
-    "skipped": "UNKNOWN_REASON",
+    "skipped": "OPERATOR_SKIPPED",
     "deduplicated": "DEDUP_KEY_COLLISION",
 }
 

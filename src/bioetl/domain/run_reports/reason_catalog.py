@@ -75,6 +75,51 @@ _BUILTIN_REASONS: dict[str, dict[str, str]] = {
         "default_outcome": "quarantined",
         "layer": "silver",
     },
+    "SCHEMA_REQUIRED_FIELD_MISSING": {
+        "family": "dq",
+        "default_outcome": "quarantined",
+        "layer": "silver",
+    },
+    "SCHEMA_TYPE_MISMATCH": {
+        "family": "dq",
+        "default_outcome": "quarantined",
+        "layer": "silver",
+    },
+    "DQ_SOFT_RULE_FAILED": {
+        "family": "dq",
+        "default_outcome": "filtered_out",
+        "layer": "silver",
+    },
+    "DQ_HARD_RULE_FAILED": {
+        "family": "dq",
+        "default_outcome": "quarantined",
+        "layer": "silver",
+    },
+    "QUARANTINE_POLICY": {
+        "family": "dq",
+        "default_outcome": "quarantined",
+        "layer": "silver",
+    },
+    "DUPLICATE_PRIMARY_KEY": {
+        "family": "dedup",
+        "default_outcome": "deduplicated",
+        "layer": "silver",
+    },
+    "OPERATOR_SKIPPED": {
+        "family": "operator",
+        "default_outcome": "skipped",
+        "layer": "silver",
+    },
+    "SCHEMA_MISMATCH_GOLD": {
+        "family": "contract",
+        "default_outcome": "quarantined",
+        "layer": "gold",
+    },
+    "CROSS_VALIDATION_NULLIFIED": {
+        "family": "dq",
+        "default_outcome": "quarantined",
+        "layer": "silver",
+    },
     "DEDUP_KEY_COLLISION": {
         "family": "dedup",
         "default_outcome": "deduplicated",
