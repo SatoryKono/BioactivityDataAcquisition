@@ -103,3 +103,29 @@ class TestEntityOwnershipCoverage:
                 assert (provider, entity) in existing, (
                     f"matrix references missing entity config '{provider}.{entity}'"
                 )
+
+    def test_composite_assay_owner_executes_composite_assay_not_chembl_assay(
+        self,
+    ) -> None:
+        """Owned paths for composite.assay must run composite_assay, not chembl_assay."""
+        matrix = load_matrix()
+        composite_paths = ownership_paths(matrix, "composite.assay")
+        chembl_paths = {
+            path.resolve() for path in ownership_paths(matrix, "chembl.assay")
+        }
+
+        assert composite_paths, "composite.assay must declare an owned test path"
+        for owned in composite_paths:
+            relative = owned.relative_to(ROOT).as_posix()
+            assert relative != "tests/e2e/test_chembl_assay_e2e.py", (
+                "composite.assay owner must not be the chembl_assay e2e lane"
+            )
+            assert owned.resolve() not in chembl_paths, (
+                f"{relative} is shared with chembl.assay and cannot distinguish "
+                "composite_assay from chembl_assay"
+            )
+            source = owned.read_text(encoding="utf-8")
+            assert 'config.name == "composite_assay"' in source, (
+                f"{relative} must execute composite_assay"
+            )
+            assert 'create_deterministic_test_context("chembl_assay"' not in source
