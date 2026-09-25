@@ -268,8 +268,8 @@ review_lanes:
         action_if_reintroduced: migrate_to_codex_or_remove_root_surface
       - path: .gemini
         current_live_state: present_local_only_root_surface
-        canonical_path: GEMINI.md
-        action_if_reintroduced: keep machine-local Gemini configuration untracked and use GEMINI.md for tracked contributor guidance
+        canonical_path: null
+        action_if_reintroduced: do not reintroduce GEMINI.md or a tracked Gemini runtime; keep any machine-local .gemini directory untracked
       - path: .idea
         current_live_state: present_local_only_root_surface
         canonical_path: configs/ide/pycharm

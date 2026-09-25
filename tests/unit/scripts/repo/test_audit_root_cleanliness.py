@@ -260,7 +260,6 @@ def test_collect_tracked_policy_violations_allows_current_canonical_root_files()
     violations = module._collect_tracked_policy_violations(
         [
             "CHANGELOG.md",
-            "GEMINI.md",
             "README.md",
             "best_practices.md",
             "pyproject.toml",

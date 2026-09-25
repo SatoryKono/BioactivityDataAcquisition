@@ -196,7 +196,6 @@ AI_RULES_MIRROR_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     ),
 }
 AI_GEMINI_RUNTIME_CLAIM_GUARD_PATHS: tuple[Path, ...] = (
-    Path("GEMINI.md"),
     Path(".github/copilot-instructions.md"),
     Path(".cursor/rules/05-agent-workflow.mdc"),
     Path("docs/00-project/ai/rules/cursor/05-agent-workflow.mdc"),
@@ -317,11 +316,6 @@ AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         RULES_DOC_TOKEN,
         REQUIREMENTS_DOC_TOKEN,
         ADR_DIR_DOC_TOKEN,
-    ),
-    Path("GEMINI.md"): (
-        *RUNTIME_DOC_TOKENS,
-        RUNTIME_AGENT_MEMORY_PATH,
-        *NORMATIVE_STACK_TOKENS,
     ),
     Path(".github/copilot-instructions.md"): (
         *RUNTIME_DOC_TOKENS,

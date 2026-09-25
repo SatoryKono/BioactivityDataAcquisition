@@ -11,8 +11,6 @@ For AI runtime behavior and workflow conflicts, use this priority:
    - `.codex/agents/CODEX-RUNTIME.md`
    - `.junie/agents/JUNIE-RUNTIME.md`
    - `.devin/agents/DEVIN-RUNTIME.md` for Devin sessions
-   - a matching tracked `.gemini/**` runtime surface only when that tree exists
-     in the current checkout and is verified in the same change
 1. runtime profiles and skills in the matching runtime tree
    (`.codex/agents/py-*.md`, `.codex/skills/**`, `.junie/agents/py-*.md`,
    `.junie/skills/**`, `.devin/agents/*/AGENT.md`, `.devin/skills/**`)
@@ -122,7 +120,7 @@ Minimum expectation:
 - **Root scratch ban (RH5/RH6):** do not create root-level `_tmp_*.py`, `/_cr_*.py`,
   `/_publish_*.py`, ad-hoc `test_*.py`, or Windows device-name files such as
   `nul` / `NUL`. Prefer `scripts/**` or `reports/**`. Tracked root must stay
-  ≡ `.github/root-allowlist.txt` (38 files). Local clutter: registry +
+  ≡ `.github/root-allowlist.txt` (37 files). Local clutter: registry +
   `scripts/engineering/repo/cleanup_root_local_clutter.py`. See
   `docs/00-project/governance/root-local-clutter-cleanup.md`.
 - BioETL remains local-only by default; do not introduce Docker, Redis, or
@@ -136,13 +134,10 @@ Minimum expectation:
   runtime sources. Devin-specific behavior starts there and remains subordinate
   to the repository-wide governance stack; it MUST NOT be silently replaced by
   a Codex-only profile.
-- `.gemini/settings.json` may exist as a machine-local Gemini config surface,
-  but the current `main` checkout does not contain a tracked Gemini
-  `agents/` or `skills/` runtime tree.
-- Treat `docs/00-project/ai/**` Gemini references as mirrors or historical
-  guidance unless a future task adds and verifies tracked `.gemini/agents/**`
-  or `.gemini/skills/**` surfaces on `main`.
-- `.claude/**` is not an active runtime source for Codex/Junie/Gemini behavior in
+- Gemini is not a project runtime. Do not add root `GEMINI.md` or a tracked
+  `.gemini/agents/**` or `.gemini/skills/**` tree. A machine-local `.gemini/`
+  directory is not a BioETL source of truth.
+- `.claude/**` is not an active runtime source for Codex/Junie behavior in
   this change program and is treated as unavailable until a local checkout
   proves otherwise.
 - `docs/00-project/ai/memory/mcp-memory.json` and

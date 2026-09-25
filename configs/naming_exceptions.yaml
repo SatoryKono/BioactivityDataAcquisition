@@ -21,7 +21,6 @@ documentation_exceptions:
   - ORCHESTRATION.md # Runtime orchestration docs
   - TOOLS.md # Tool reference docs
   - CODEX.md # Codex runtime docs
-  - GEMINI.md # Gemini runtime docs
   # Governance-approved legacy docs retained without bulk rename churn.
   - docs/DOCKER_QUICKSTART.md # Legacy root setup/troubleshooting entrypoint
   - docs/DOCKER_SETUP.md # Legacy root setup/troubleshooting entrypoint

@@ -44,7 +44,6 @@ uv.lock
 # Only .env.example is allowed as a template.
 AGENTS.md
 CHANGELOG.md
-GEMINI.md
 skills-lock.json
 
 # Vendor-documented repo-wide review configuration and guidance retained at

@@ -60,7 +60,6 @@ catalog -> graph -> rag -> source
    - `.codex/agents/CODEX-RUNTIME.md` + `.codex/agents/py-*.md` + `.codex/skills/**`
    - `.junie/agents/JUNIE-RUNTIME.md` + `.junie/guidelines.md` + `.junie/agents/py-*.md` + `.junie/skills/**`
    - `.devin/agents/**` + `.devin/skills/**` (для Devin sessions)
-   - Tracked `.gemini/**` (только если существует в checkout)
 2. `docs/00-project/NORMATIVE_SOURCES.md`
 3. `docs/00-project/RULES.md`
 4. `docs/01-requirements/REQUIREMENTS.md`
