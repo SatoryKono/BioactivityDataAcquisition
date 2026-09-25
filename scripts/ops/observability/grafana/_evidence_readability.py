@@ -607,6 +607,8 @@ _REASON_MAPPINGS = {
     "run_dq_threshold_evaluation": {"text": "Data quality checks"},
     "run_preflight_provider_observation": {"text": "Provider preflight check"},
     "run_gold_schema_validation": {"text": "Gold schema validation"},
+    "run_observation_missing": {"text": "Result not recorded"},
+    "no_gold_candidates": {"text": "No Gold candidates"},
     "Archive missing": {"text": "No verified archive"},
     "archive_evidence_not_recorded": {"text": "No verified archive"},
 }
@@ -618,7 +620,7 @@ def _bind_selected_run_envelope(summary: dict, source: dict) -> None:
     summary["datasource"] = deepcopy(source["datasource"])
     summary["targets"] = deepcopy(source["targets"])
     summary["targets"][0]["root_selector"] = (
-        '[$merge([presentation_summary[0], {"reason_display": '
+        '[$merge([presentation_summary[0], {"saved_trust": presentation_trust[0].trust_status, "reason_display": '
         "presentation_trust[0].reasons_display ? "
         "presentation_trust[0].reasons_display : presentation_summary[0].reason}])]"
     )
@@ -636,6 +638,7 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
         "($s := presentation_summary[0]; $r := presentation_trust[0].reasons_display; "
         "$map(presentation_domains, function($d) { $merge([$d, {"
         "'run_execution': $s.execution_state, 'run_verdict': $s.verdict, "
+        "'saved_trust': presentation_trust[0].trust_status, "
         "'run_reason': $r ? $r : $s.reason}]) }))"
     )
     source_target["parser"] = "uql"
@@ -646,9 +649,9 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
     for transform in summary["transformations"]:
         if transform["id"] == "organize":
             transform["options"]["renameByName"].update(
-                run_execution="Result", run_verdict="Status", run_reason="Reason"
+                run_execution="Result", run_verdict="Status", run_reason="Reason", saved_trust="Trust"
             )
-    return ["run_execution", "run_verdict", "run_reason"]
+    return ["run_execution", "run_verdict", "saved_trust", "run_reason"]
 
 
 def _apply_reason_columns(panel: dict, fields: list[str]) -> None:
@@ -660,6 +663,7 @@ def _apply_reason_columns(panel: dict, fields: list[str]) -> None:
                 name: index for index, name in enumerate(fields)
             }
             transform["options"]["renameByName"]["reason_display"] = "Reason"
+            transform["options"]["renameByName"]["saved_trust"] = "Trust"
     _override(panel, "Reason", _WRAP, True)
     _override(panel, "Reason", _CELL, {"type": "auto", "wrapText": True})
     _override(panel, "Reason", "displayName", "Reason")
@@ -719,7 +723,7 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
     )
     source = p[9002] if overview else p[9451]
     _bind_selected_run_envelope(summary, source)
-    summary_fields = ["execution_state", "verdict", "reason_display"]
+    summary_fields = ["execution_state", "verdict", "saved_trust", "reason_display"]
     if overview:
         summary_fields = _overview_share_envelope(summary, source)
     views = [(summary, summary_fields)]

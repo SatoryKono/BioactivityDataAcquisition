@@ -1310,6 +1310,12 @@
                       "run_gold_schema_validation": {
                         "text": "Gold schema validation"
                       },
+                      "run_observation_missing": {
+                        "text": "Result not recorded"
+                      },
+                      "no_gold_candidates": {
+                        "text": "No Gold candidates"
+                      },
                       "Archive missing": {
                         "text": "No verified archive"
                       },
@@ -1338,13 +1344,13 @@
           "source": "url",
           "parser": "uql",
           "format": "table",
-          "root_selector": "[$merge([presentation_summary[0], {\"reason_display\": presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason}])]",
+          "root_selector": "[$merge([presentation_summary[0], {\"saved_trust\": presentation_trust[0].trust_status, \"reason_display\": presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason}])]",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"[$merge([presentation_summary[0], {'reason_display': presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason}])]\""
+          "uql": "parse-json | jsonata \"[$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason}])]\""
         }
       ],
       "transformations": [
@@ -1361,6 +1367,7 @@
               "names": [
                 "execution_state",
                 "verdict",
+                "saved_trust",
                 "reason_display"
               ]
             }
@@ -1372,7 +1379,8 @@
             "indexByName": {
               "execution_state": 0,
               "verdict": 1,
-              "reason_display": 2
+              "saved_trust": 2,
+              "reason_display": 3
             },
             "renameByName": {
               "domain": "Domain",
@@ -1380,7 +1388,8 @@
               "execution_state": "Result",
               "evidence_completeness": "Evidence",
               "rules_version": "Rules",
-              "reason_display": "Reason"
+              "reason_display": "Reason",
+              "saved_trust": "Trust"
             }
           }
         }

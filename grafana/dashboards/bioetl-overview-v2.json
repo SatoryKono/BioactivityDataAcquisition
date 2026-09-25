@@ -570,6 +570,12 @@
                       "run_gold_schema_validation": {
                         "text": "Gold schema validation"
                       },
+                      "run_observation_missing": {
+                        "text": "Result not recorded"
+                      },
+                      "no_gold_candidates": {
+                        "text": "No Gold candidates"
+                      },
                       "Archive missing": {
                         "text": "No verified archive"
                       },
@@ -612,6 +618,7 @@
               "names": [
                 "run_execution",
                 "run_verdict",
+                "saved_trust",
                 "run_reason"
               ]
             }
@@ -623,7 +630,8 @@
             "indexByName": {
               "run_execution": 0,
               "run_verdict": 1,
-              "run_reason": 2
+              "saved_trust": 2,
+              "run_reason": 3
             },
             "renameByName": {
               "domain": "Domain",
@@ -634,6 +642,7 @@
               "run_verdict": "Status",
               "run_execution": "Result",
               "run_reason": "Reason",
+              "saved_trust": "Trust",
               "reason_display": "Reason"
             },
             "excludeByName": {
@@ -1545,6 +1554,12 @@
                       "run_gold_schema_validation": {
                         "text": "Gold schema validation"
                       },
+                      "run_observation_missing": {
+                        "text": "Result not recorded"
+                      },
+                      "no_gold_candidates": {
+                        "text": "No Gold candidates"
+                      },
                       "Archive missing": {
                         "text": "No verified archive"
                       },
@@ -1613,13 +1628,13 @@
           "source": "url",
           "parser": "uql",
           "format": "table",
-          "root_selector": "($s := presentation_summary[0]; $r := presentation_trust[0].reasons_display; $map(presentation_domains, function($d) { $merge([$d, {'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'run_reason': $r ? $r : $s.reason}]) }))",
+          "root_selector": "($s := presentation_summary[0]; $r := presentation_trust[0].reasons_display; $map(presentation_domains, function($d) { $merge([$d, {'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': presentation_trust[0].trust_status, 'run_reason': $r ? $r : $s.reason}]) }))",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $r := presentation_trust[0].reasons_display; $map(presentation_domains, function($d) { $merge([$d, {'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'run_reason': $r ? $r : $s.reason}]) }))\""
+          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $r := presentation_trust[0].reasons_display; $map(presentation_domains, function($d) { $merge([$d, {'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': presentation_trust[0].trust_status, 'run_reason': $r ? $r : $s.reason}]) }))\""
         }
       ],
       "options": {
@@ -1662,7 +1677,8 @@
               "execution_state": "Result",
               "evidence_completeness": "Evidence",
               "rules_version": "Rules",
-              "reason_display": "Reason"
+              "reason_display": "Reason",
+              "saved_trust": "Trust"
             }
           }
         }
