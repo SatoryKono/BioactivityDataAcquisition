@@ -44,6 +44,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -89,6 +91,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
         with:
           # Keep smoke free of Git LFS so an exhausted LFS data pack cannot
           # block the entire Tests matrix. VCR content checks live in vcr-preflight.
@@ -139,6 +143,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
+        with:
           # Cassettes are git blobs. Keep lfs: false so an exhausted GitHub
           # LFS budget cannot block checkout; pointer stubs fail below.
           lfs: false
@@ -188,6 +194,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
         with:
           # PubChem VCR smoke uses git-stored cassettes. Fail closed when a
           # leftover Git LFS pointer is present (#7493).
@@ -249,6 +257,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -308,6 +318,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -360,6 +372,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
         with:
           lfs: false
 
@@ -568,6 +582,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -623,6 +639,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -681,6 +699,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -714,6 +734,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -735,6 +757,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -826,6 +850,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -879,6 +905,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -948,6 +976,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1009,6 +1039,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1068,6 +1100,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1162,6 +1196,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1224,6 +1260,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1259,6 +1297,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1338,6 +1378,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1411,6 +1453,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1498,6 +1542,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Download trusted coverage report
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -1567,6 +1613,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1881,6 +1929,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
+        with:
           lfs: false
 
       - name: Setup Python + uv
@@ -1923,13 +1973,20 @@ jobs:
         run: |
           set +e
           mkdir -p "reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream"
-          {
-            uv run --frozen --no-build python -m scripts.docs verify --skip-build
-            bash scripts/ai/junie/check_junie_mirror.sh --check
-          } > "reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream/docs-runtime.log" 2>&1
-          rc=$?
+          log="reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream/docs-runtime.log"
+          uv run --frozen --no-build python -m scripts.docs verify --skip-build > "$log" 2>&1
+          verify_rc=$?
+          bash scripts/ai/junie/check_junie_mirror.sh --check >> "$log" 2>&1
+          mirror_rc=$?
+          set -e
+          rc=0
+          if [[ "$verify_rc" != "0" ]]; then
+            rc="$verify_rc"
+          elif [[ "$mirror_rc" != "0" ]]; then
+            rc="$mirror_rc"
+          fi
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
-          exit 0
+          exit "$rc"
 
       - name: Run adversarial Proof-or-Stop pilot
         run: >-
@@ -1937,6 +1994,7 @@ jobs:
           proof-or-stop pilot --repo-root "$GITHUB_WORKSPACE"
 
       - name: Normalize required producer receipts
+        if: ${{ always() && !cancelled() }}
         shell: bash
         env:
           GOVERNANCE_RESULT: ${{ needs.governance-preflight.result }}
@@ -2011,7 +2069,7 @@ jobs:
           fi
           capture_receipt \
             docs_runtime_checks docs_runtime \
-            "python -m scripts.docs verify" \
+            "python -m scripts.docs verify --skip-build" \
             "$docs_result" "$docs_path"
 
       - name: Assemble and verify the closeout bundle

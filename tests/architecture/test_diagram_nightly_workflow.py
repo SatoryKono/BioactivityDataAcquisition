@@ -25,9 +25,11 @@ def test_nightly_workflow_exists_and_is_scheduled() -> None:
     assert workflow_path.exists(), "diagram-nightly workflow file must exist"
 
     workflow = workflow_path.read_text(encoding="utf-8")
-    assert "schedule:" in workflow
+    assert "KEEP-DISABLED (#11196)" in workflow
+    assert "cron:" not in workflow
     assert "workflow_dispatch:" in workflow
     assert "run_diagram_nightly_suite.py" in workflow
+    assert "if: ${{ false }}" in workflow
 
 
 def test_nightly_workflow_includes_mermaid_canary_matrix() -> None:

@@ -73,13 +73,19 @@ def test_diagram_router_commands_bootstrap_repository_imports(command: str) -> N
 
 
 def test_docs_workflow_includes_quality_gates_step() -> None:
-    workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
+    import yaml
 
-    assert "check_diagram_quality_gates.py" in workflow
-    assert "diagrams/manifests/quality-gates.txt" in workflow
-    assert "diagram-quality-report.json" in workflow
-    assert "diagrams-quality-report" in workflow
-    assert "diagram-visual-smoke.json" in workflow
+    document = yaml.safe_load(Path(".github/workflows/docs.yml").read_text(encoding="utf-8"))
+    job = document["jobs"]["render-diagrams"]
+    assert str(job.get("if", "")).replace(" ", "") == "${{false}}"
+    rendered = "\n".join(
+        str(step.get("run", "")) for step in job.get("steps", []) if isinstance(step, dict)
+    )
+    assert "check_diagram_quality_gates.py" in rendered
+    assert "diagrams/manifests/quality-gates.txt" in rendered
+    assert "diagram-quality-report.json" in rendered
+    assert "diagrams-quality-report" in rendered
+    assert "diagram-visual-smoke.json" in rendered
 
 
 def test_docs_workflow_includes_artifact_validation_step() -> None:
