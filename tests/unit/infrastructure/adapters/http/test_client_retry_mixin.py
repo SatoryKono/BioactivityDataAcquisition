@@ -34,6 +34,7 @@ import httpx
 import pytest
 
 from bioetl.domain.resilience import RetryConfig
+import bioetl.infrastructure.adapters.http._client_retry_policy as retry_policy_module
 import bioetl.infrastructure.adapters.http.client_retry_mixin as retry_mixin_module
 
 from bioetl.infrastructure.adapters.http.client_retry_mixin import HTTPClientRetryMixin
@@ -208,7 +209,12 @@ async def test_retry_after_supports_seconds_and_http_date_deterministically(
         jitter_range=(0.0, 0.0),
     )
     sleep = AsyncMock()
-    monkeypatch.setattr(retry_mixin_module.time, "time", lambda: now.timestamp())
+
+    class _FrozenClock:
+        def now(self) -> datetime:
+            return now
+
+    monkeypatch.setattr(retry_policy_module, "SystemClock", lambda: _FrozenClock())
     monkeypatch.setattr(retry_mixin_module.asyncio, "sleep", sleep)
     request = httpx.Request("GET", "https://api.test.example/paper/search")
     response = httpx.Response(
