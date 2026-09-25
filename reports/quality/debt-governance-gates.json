@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940",
-      "limit": "f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940",
+      "current": "b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6",
+      "limit": "b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,14 +56,14 @@
     },
     {
       "current": {
-        "source_module_count": 2499,
-        "source_tree_sha256": "f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940",
+        "source_module_count": 2494,
+        "source_tree_sha256": "b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2499,
-        "source_tree_sha256": "f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940",
+        "source_module_count": 2494,
+        "source_tree_sha256": "b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "91be52dfb8a6fa112767bfce2578d85a74fee698b190d587da87796fbed2442b",
+      "current": "77d602fc5f5c64f7330bcd5794264f3ad0517ce2011f10869913a4d96e53bd13",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -472,8 +472,8 @@
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 9.47,
-    "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
+    "architecture_quality_scorecard_integral_score": 10.0,
+    "architecture_quality_scorecard_interpretation": "excellent",
     "fail_count": 0,
     "failing_gates": [],
     "gate_count": 46,
