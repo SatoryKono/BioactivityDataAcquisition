@@ -8,6 +8,9 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_text,
+)
 from bioetl.domain.schemas.chembl.target_protein_classification import (
     TargetProteinClassificationSchema,
 )
@@ -58,6 +61,12 @@ _TITLE_FIELDS = frozenset(
     }
 )
 
+_PATH_LIST_FIELDS = ("path_ids", "path_names", "path_labels")
+_PATH_LIST_RULES = {
+    field_name: (normalize_profile_text, _TRIM_COLLAPSE_JSON_PIPE_NOTE)
+    for field_name in _PATH_LIST_FIELDS
+}
+
 CHEMBL_TARGET_PROTEIN_CLASSIFICATION_PROFILE = build_standard_profile(
     profile_name="chembl.target_protein_classification",
     description=(
@@ -68,21 +77,9 @@ CHEMBL_TARGET_PROTEIN_CLASSIFICATION_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
+    set_like_fields=_PATH_LIST_FIELDS,
+    special_rules=_PATH_LIST_RULES,
     null_fields=chembl_pseudo_null_fields("target_protein_classification"),
-    field_rule_overrides={
-        "path_ids": {
-            "notes": _TRIM_COLLAPSE_JSON_PIPE_NOTE,
-            "set_like": True,
-        },
-        "path_names": {
-            "notes": _TRIM_COLLAPSE_JSON_PIPE_NOTE,
-            "set_like": True,
-        },
-        "path_labels": {
-            "notes": _TRIM_COLLAPSE_JSON_PIPE_NOTE,
-            "set_like": True,
-        },
-    },
 )
 
 CHEMBL_TARGET_PROTEIN_CLASSIFICATION_PROFILE.assert_covers_schema(
