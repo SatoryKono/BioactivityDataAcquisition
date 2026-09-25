@@ -212,19 +212,13 @@ kubectl get pods -l app=bioetl -w
 
 ______________________________________________________________________
 
-## Step 5: Deploy Monitoring Stack
+## Step 5: Monitoring manifest
+
+`k8s-monitoring.yaml` is UNSUPPORTED. This procedure does not pass it to `kubectl apply`. ADR-010 remains Local-Only. Inspect an existing cluster only when it was created outside this guide:
 
 ```bash
-# Deploy Prometheus and Grafana
-kubectl apply -f k8s-monitoring.yaml
-
-# Verify monitoring deployment
 kubectl get deployments prometheus grafana
 kubectl get svc prometheus grafana
-
-# Check logs
-kubectl logs -f deployment/prometheus
-kubectl logs -f deployment/grafana
 ```
 
 ______________________________________________________________________
@@ -267,11 +261,7 @@ Update hostnames in `k8s-networking.yaml`:
             number: 3000
 ```
 
-Deploy ingress:
-
-```bash
-kubectl apply -f k8s-networking.yaml
-```
+`k8s-networking.yaml` is UNSUPPORTED. This procedure does not pass it to `kubectl apply`. ADR-010 remains Local-Only.
 
 Get ingress IP:
 
