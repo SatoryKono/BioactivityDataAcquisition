@@ -184,11 +184,7 @@ LEGACY_INTERNAL_AI_LAUNCHERS: Final[frozenset[str]] = frozenset(
         "scripts/ai/literature-researcher.sh",
     }
 )
-LEGACY_NAMED_SCRIPTS: Final[frozenset[str]] = frozenset(
-    {
-        "scripts/engineering/diagnostics/_tmp_inspect_vcr.py",
-    }
-)
+LEGACY_NAMED_SCRIPTS: Final[frozenset[str]] = frozenset()
 LEGACY_SRC_TOOLS_WRAPPERS: Final[frozenset[str]] = frozenset(set())
 DEPRECATED_LEGACY_PATHS: Final[frozenset[str]] = frozenset(
     {
