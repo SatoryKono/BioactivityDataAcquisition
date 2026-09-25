@@ -221,10 +221,11 @@ def test_runtime_dq_outcomes_project_warning_flags(monkeypatch) -> None:
 @pytest.mark.unit
 def test_runtime_dq_outcomes_raise_for_blocking_disposition(monkeypatch) -> None:
     outcome = DQRuleOutcome(
-        rule_id="fail-rule",
+        rule_id="field.units.pattern",
         violation_kind="business_rule_violation",
         severity="error",
         disposition=DQDisposition.FAIL,
+        affected_fields=("units",),
     )
     monkeypatch.setattr(
         "bioetl.domain.behavior.dq_rule_evaluator.evaluate_dq_rules_for_record",
@@ -233,12 +234,14 @@ def test_runtime_dq_outcomes_raise_for_blocking_disposition(monkeypatch) -> None
 
     with pytest.raises(
         DataQualityError,
-        match=r"disposition=fail; rules=\[fail-rule\]",
-    ):
+        match=r"disposition=fail; rules=\[field\.units\.pattern\]",
+    ) as caught:
         _apply_runtime_dq_outcomes(
             silver_record={"entity_id": "1"},
             dq_config=MagicMock(),
         )
+    assert caught.value.field == "units"
+    assert caught.value.reason_code == "INVALID_DATA:units"
 
 
 @pytest.mark.unit
