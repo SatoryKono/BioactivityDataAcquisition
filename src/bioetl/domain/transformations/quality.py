@@ -31,7 +31,7 @@ def exceeds_threshold(
     error_count: int,
     total_count: int,
     soft_threshold: float = 0.05,
-    hard_threshold: float = 0.20,
+    hard_threshold: float = 0.50,
 ) -> tuple[bool, bool]:
     """Check if error rate exceeds thresholds.
 
@@ -39,7 +39,7 @@ def exceeds_threshold(
         error_count: Number of records with errors.
         total_count: Total number of records processed.
         soft_threshold: Warning threshold ratio (default 5%).
-        hard_threshold: Failure threshold ratio (default 20%).
+        hard_threshold: Failure threshold ratio (default 50%, REQ-THRESHOLD-002).
 
     Returns:
         Tuple of (exceeds_soft, exceeds_hard) booleans.

@@ -172,7 +172,7 @@ _Связанные документы: diagram-modernization-program.md, diagra
 1. DIAG-T024..T030 не запускаются в GitHub Actions: `diagram-nightly.yml` keep-disabled, billing не вернётся. Локально их по-прежнему запускает `--profile nightly`.
 1. DIAG-T025 реализован эвристикой (aspect/text parity), без pixel-level visual diff.
 1. DIAG-T026 использует git-baseline drift; отдельное baseline storage still pending.
-1. DIAG-T030 в файле остаётся pin `10.6.1`. Canary `11.4.0` нет. Job не запускается, пока workflow disabled.
+1. Для DIAG-T030 canary-матрица в `mermaid-minor-canary` содержит только pin `10.6.1`. Ветка 11.x отложена, пока нет lockfile pin; незакреплённый `npm install` не используется.
 
 ## 11. Как запускать проверки
 

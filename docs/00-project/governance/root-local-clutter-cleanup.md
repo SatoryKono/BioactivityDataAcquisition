@@ -9,8 +9,7 @@ redefine runtime behavior. Canonical policy remains
 `docs/00-project/governance/03-file-policy.md` §0 and
 `.github/root-allowlist.txt`.
 
-Tracked root is allowlist-minimal (**38 ≡ allowlist** after `opencode.json`
-2026-09-17 / #10971; RH-01 / #6876 closed at 37, re-verified RH5 / #7016).
+Tracked root is allowlist-minimal (**37 ≡ allowlist**; RH-01 / #6876 closed at 37, re-verified RH5 / #7016).
 Most live root noise is **recreated by normal tooling**
 (coverage, logs, test dumps). Use the recurring checklist below instead of
 inventing new allowlist entries.
@@ -32,7 +31,7 @@ inventing new allowlist entries.
 
 1. **Never** create, edit, delete, rename, or move `.env` / `.env.local` / real
    `.env*` without **explicit per-task user approval**.
-2. Confirm tracked root still matches allowlist (expect **38** files):
+2. Confirm tracked root still matches allowlist (expect **37** files):
    ```bash
    git ls-files | python -c "import sys; xs=sorted(f.strip() for f in sys.stdin if f.strip() and '/' not in f.strip()); print(len(xs)); print('\\n'.join(xs))"
    ```
@@ -175,7 +174,7 @@ so future runs do not recreate root `logs/` by default.
 
 - Removed unexpected tracked root file `_a.txt` (not on allowlist).
 - Gitignore now blocks reintroduction of `_a.txt`.
-- Tracked root restored to 37 at RH-01 (2026-07-28); live allowlist is **38**.
+- Tracked root restored to 37 at RH-01 (2026-07-28); live allowlist is **37**.
 
 ## RH-05 retention decisions (2026-07-28 / #6878)
 
@@ -197,7 +196,7 @@ Campaign branch: `grok-260807-root-hygiene-5cycle` (5 full Stage1–3 cycles).
 | C5 | #8310 | FINAL report + no-op gate verification (`reports/root-hygiene/cycle-5loop-20260807/FINAL_REPORT.md`) |
 
 **Strict gate after RH7 C1–C5:** `check-cleanliness --strict-untracked` OK;
-tracked root was 37 then. Live allowlist is **38** (`opencode.json`, #10971).
+tracked root was 37 then. Live allowlist is **37**.
 
 **Tooling notes (RH7):**
 

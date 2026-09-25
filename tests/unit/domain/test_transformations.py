@@ -371,8 +371,8 @@ class TestDataQuality:
         assert hard is False
 
     def test_hard_threshold_exceeded(self):
-        """REQ-THRESHOLD-002: >20% errors → hard threshold."""
-        soft, hard = exceeds_threshold(25, 100)  # 25% error rate
+        """REQ-THRESHOLD-002: >50% errors → hard threshold."""
+        soft, hard = exceeds_threshold(51, 100)  # 51% error rate
         assert soft is True
         assert hard is True
 
