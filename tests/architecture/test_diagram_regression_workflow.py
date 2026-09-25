@@ -78,9 +78,7 @@ def test_docs_workflow_includes_quality_gates_step() -> None:
     document = yaml.safe_load(Path(".github/workflows/docs.yml").read_text(encoding="utf-8"))
     job = document["jobs"]["render-diagrams"]
     assert str(job.get("if", "")).replace(" ", "") == "${{false}}"
-    rendered = "\n".join(
-        str(step.get("run", "")) for step in job.get("steps", []) if isinstance(step, dict)
-    )
+    rendered = yaml.dump(job)
     assert "check_diagram_quality_gates.py" in rendered
     assert "diagrams/manifests/quality-gates.txt" in rendered
     assert "diagram-quality-report.json" in rendered
