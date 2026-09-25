@@ -9,14 +9,16 @@ concurrency:
 on:
     pull_request:
       paths:
-        - 'assets/javascripts/mermaid*'
-        - 'assets/stylesheets/mermaid*'
+        - 'docs/assets/javascripts/mermaid-init.js'
+        - 'docs/assets/stylesheets/mermaid-responsive.css'
+        - 'mkdocs.yml'
         - '.github/workflows/validate-vendored-mermaid-assets.yml'
     push:
       branches: [ main ]
       paths:
-        - 'assets/javascripts/mermaid*'
-        - 'assets/stylesheets/mermaid*'
+        - 'docs/assets/javascripts/mermaid-init.js'
+        - 'docs/assets/stylesheets/mermaid-responsive.css'
+        - 'mkdocs.yml'
         - '.github/workflows/validate-vendored-mermaid-assets.yml'
 
 jobs:
@@ -29,19 +31,22 @@ jobs:
                 with:
                   persist-credentials: false
 
-            -   name: Run mermaid check (warn, don't fail)
+            -   name: Fail if mkdocs mermaid assets are missing
                 run: |
-                    set -e
-                    files=("assets/javascripts/mermaid.min.js" "assets/javascripts/mermaid.esm.min.mjs" "assets/stylesheets/mermaid.css")
-                    missing=0
+                    set -euo pipefail
+                    files=(
+                      "docs/assets/javascripts/mermaid-init.js"
+                      "docs/assets/stylesheets/mermaid-responsive.css"
+                    )
                     for f in "${files[@]}"; do
                       if [ ! -f "$f" ]; then
                         echo "MISSING: $f"
-                        missing=1
+                        exit 1
+                      fi
+                      rel="${f#docs/}"
+                      if ! grep -F -q "$rel" mkdocs.yml; then
+                        echo "mkdocs.yml does not reference $rel"
+                        exit 1
                       fi
                     done
-                    if [ $missing -eq 1 ]; then
-                      echo "::warning ::Mermaid vendored assets missing; builds will fall back to CDN at runtime. To vendor locally: run 'make vendor-mermaid' and include the files in your PR."
-                    else
-                      echo "Mermaid vendored assets present."
-                    fi
+                    echo "MkDocs mermaid assets present."

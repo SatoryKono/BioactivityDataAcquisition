@@ -168,3 +168,9 @@ def test_project_test_health_summary_has_machine_readable_metadata() -> None:
         "semanticscholar-environment-limited-frequency",
         "environment-limited-threshold",
     } <= resolved_shards
+
+
+def test_evidence_age_uses_utc_date() -> None:
+    text = _read("scripts/docs/checks/check_drift.py")
+    assert "datetime.now(UTC).date()" in text
+    assert "date.today()" not in text
