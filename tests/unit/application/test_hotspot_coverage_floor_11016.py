@@ -15,6 +15,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.persistence_
 from bioetl.application.services.control_plane.manifest.diagnostics.persistence_profile_support_build_composite_resume_reconstructability import (
     build_composite_resume_reconstructability,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
+    sorted_text_items,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.summary_support_build_exact_replay_anchors import (
     build_exact_replay_anchors,
 )
@@ -82,6 +85,7 @@ def test_extracted_control_plane_helpers_cover_both_branches() -> None:
         },
         artifact_refs=[{"dataset_ref": "ds", "artifact_path": "path"}],
         lineage_fragment_ids={"frag"},
+        sorted_text_items=sorted_text_items,
     )
     assert anchors["dependency_lock_hash"] == "lock"
     assert anchors["published_artifact_ids"] == ["ds"]

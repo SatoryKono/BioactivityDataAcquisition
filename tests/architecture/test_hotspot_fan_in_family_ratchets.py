@@ -279,10 +279,10 @@ def test_hotspot_family_fan_in_census_matches_live_ast_graph() -> None:
 
     control_plane = by_name["application_services_control_plane"]
     runtime_builders = by_name["composition_runtime_builders"]
-    assert control_plane["files"] == 113
+    assert control_plane["files"] == 124
     assert control_plane["internal_fan_in_census"]["distribution"] == {
         "0": 20,
-        "1": 93,
+        "1": 104,
     }
     assert control_plane["at_budget_module_count"] == 0
     assert runtime_builders["files"] == 56

@@ -190,6 +190,39 @@ def _collect_budget_numbers(
     return numbers
 
 
+def _lookup_number(payload: object, path: str) -> int | float | None:
+    node: object = payload
+    for part in path.split("."):
+        if not isinstance(node, dict) or part not in node:
+            return None
+        node = node[part]
+    if isinstance(node, bool) or not isinstance(node, int | float):
+        return None
+    return node
+
+
+def _new_max_count_freezes_recorded_current(
+    path: str,
+    *,
+    baseline_payload: dict[str, Any],
+    current_payload: dict[str, Any],
+    current_value: int | float,
+) -> bool:
+    """A new max_count is a freeze when it does not exceed the recorded current."""
+    if not path.endswith(".max_count"):
+        return False
+    parent = path[: -len(".max_count")]
+    current_count_path = f"{parent}.current_count"
+    recorded = _lookup_number(baseline_payload, current_count_path)
+    live_current = _lookup_number(current_payload, current_count_path)
+    return (
+        recorded is not None
+        and live_current is not None
+        and current_value <= recorded
+        and live_current <= recorded
+    )
+
+
 def _budget_growth_increases(
     *,
     baseline_payload: dict[str, Any],
@@ -201,7 +234,12 @@ def _budget_growth_increases(
     for path, current_value in sorted(current.items()):
         baseline_value = baseline.get(path)
         if baseline_value is None:
-            if current_value > 0:
+            if current_value > 0 and not _new_max_count_freezes_recorded_current(
+                path,
+                baseline_payload=baseline_payload,
+                current_payload=current_payload,
+                current_value=current_value,
+            ):
                 increases[path] = {"from": None, "to": current_value}
             continue
         if current_value > baseline_value:
@@ -921,11 +959,23 @@ def _module_coverage_residual_gates(
     ]
 
 
+def _stored_shrink_only_max_count(scorecard: dict[str, Any], metric_name: str) -> int:
+    """Return a stored max_count, independent of the live census value."""
+    governance = scorecard["sanctioned_public_entrypoint_governance"]
+    metrics = governance["metrics"]
+    metric = metrics[metric_name]
+    limit = metric["max_count"]
+    if isinstance(limit, bool) or not isinstance(limit, int):
+        raise TypeError(f"{metric_name}.max_count must be an int")
+    return limit
+
+
 def _hotspot_and_compatibility_gates(
     *,
     hotspot_family: dict[str, Any],
     compatibility: dict[str, Any],
     architecture_scorecard: dict[str, Any],
+    debt_scorecard: dict[str, Any],
 ) -> list[Gate]:
     """Build hotspot-family and compatibility importer gates."""
     hotspot_summary = hotspot_family["summary"]
@@ -957,13 +1007,34 @@ def _hotspot_and_compatibility_gates(
             name="retained_public_export_facade_growth",
             metric="retained_public_export_facade_count",
             current=compatibility_summary["retained_public_export_facade_count"],
-            limit=architecture_scorecard["metrics"][
-                "retained_public_export_facade_count"
-            ],
-            source_artifact=COMPATIBILITY_IMPORTER_CENSUS_JSON,
+            limit=_stored_shrink_only_max_count(
+                debt_scorecard, "public_export_facade_count"
+            ),
+            source_artifact=(
+                "configs/quality/debt_scorecard.yaml#"
+                "sanctioned_public_entrypoint_governance.metrics."
+                "public_export_facade_count.max_count"
+            ),
             remediation=(
-                "Remove facade exports or update the scorecard only after "
-                "approved reduction evidence."
+                "Remove facade exports before lowering max_count. "
+                "The limit is the stored max_count, not the live census."
+            ),
+        ),
+        _hard_limit_gate(
+            name="sanctioned_public_entrypoint_growth",
+            metric="retained_entrypoint_count",
+            current=compatibility_summary["retained_entrypoint_count"],
+            limit=_stored_shrink_only_max_count(
+                debt_scorecard, "public_entrypoint_count"
+            ),
+            source_artifact=(
+                "configs/quality/debt_scorecard.yaml#"
+                "sanctioned_public_entrypoint_governance.metrics."
+                "public_entrypoint_count.max_count"
+            ),
+            remediation=(
+                "Remove sanctioned public entrypoints before lowering max_count. "
+                "The limit is the stored max_count, not the live census."
             ),
         ),
         _compatibility_scorecard_coherence_gate(

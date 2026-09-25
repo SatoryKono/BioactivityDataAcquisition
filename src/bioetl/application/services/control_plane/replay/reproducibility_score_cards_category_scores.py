@@ -36,6 +36,19 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
     supported_boundary_block_reason as supported_boundary_block_reason,
 )
 
+from .reproducibility_score_cards_category_scores_score_lineage_completeness import (
+    score_lineage_completeness as _score_lineage_completeness_impl,
+)
+
+
+def score_lineage_completeness(summary: JsonDict) -> ScoreCardRecord:
+    """Score lineage completeness without a second core importer."""
+    return _score_lineage_completeness_impl(
+        summary,
+        build_score_card_record=build_score_card_record,
+    )
+
+
 # Shared public scorer export names — also consumed by run-manifest score-card
 # facade so the export roster is defined once (R0801 residual, issue #7398).
 CATEGORY_SCORER_EXPORTS: tuple[str, ...] = (

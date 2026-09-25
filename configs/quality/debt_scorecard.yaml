@@ -130,6 +130,7 @@ sanctioned_public_entrypoint_governance:
   metrics:
     public_entrypoint_count:
       current_count: 12
+      max_count: 12
       owner: '@bioetl-architecture'
       linked_issue: '4565'
       rationale: Permanent public entrypoints remain governed as sanctioned public API seams with explicit
@@ -158,6 +159,7 @@ sanctioned_public_entrypoint_governance:
         modules hidden behind the sanctioned public seam.
     public_export_facade_count:
       current_count: 3
+      max_count: 3
       owner: '@bioetl-architecture'
       linked_issue: '10597'
       rationale: Reviewed public export facades remain sanctioned public API seams and stay visible as
@@ -459,7 +461,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 196
-      total_loc: 24077
+      total_loc: 24085
       files_ge_250_loc: 0
       helper_function_ratio: 0.384
       max_internal_fan_in: 5
@@ -487,9 +489,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 50
-      total_loc: 6049
+      total_loc: 6160
       files_ge_250_loc: 0
-      helper_function_ratio: 0.326
+      helper_function_ratio: 0.323
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
@@ -541,9 +543,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 124
-      total_loc: 14514
+      total_loc: 14660
       files_ge_250_loc: 0
-      helper_function_ratio: 0.375
+      helper_function_ratio: 0.374
       max_internal_fan_in: 1
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
@@ -569,9 +571,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 56
-      total_loc: 7379
+      total_loc: 7398
       files_ge_250_loc: 0
-      helper_function_ratio: 0.382
+      helper_function_ratio: 0.386
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.runtime_builders.runner_inputs
     trend:
@@ -767,7 +769,7 @@ removable_complexity_family_ratchets:
     path_prefixes:
     - src/bioetl/infrastructure/adapters/
     family_budgets:
-      files_ge_250_loc: 2
+      files_ge_250_loc: 0
       max_internal_fan_in: 19
     tracked_seams:
     - path: src/bioetl/infrastructure/adapters/http/_health_monitor_support.py
@@ -781,7 +783,7 @@ removable_complexity_family_ratchets:
     path_prefixes:
     - src/bioetl/application/composite/
     family_budgets:
-      files_ge_250_loc: 1
+      files_ge_250_loc: 0
       max_internal_fan_in: 17
     tracked_seams:
     - path: src/bioetl/application/composite/runner_pkg/runner_summary_helpers.py

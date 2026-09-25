@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
+from collections.abc import Callable
 
-from bioetl.domain.control_plane.reproducibility_policy import (
-    assess_reproducibility_policy,
-)
+from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
 
 
 def resolve_composite_replay_capability(
@@ -14,6 +12,7 @@ def resolve_composite_replay_capability(
     source_refs: tuple[RunSourceRef, ...],
     required_persistence_profile: str,
     resume_requested: bool,
+    assess_reproducibility_policy: Callable[..., object],
 ) -> ReplayCapability:
     """Return rebuild/resume capability for composite runs, never strict replay."""
     replay_capability = (

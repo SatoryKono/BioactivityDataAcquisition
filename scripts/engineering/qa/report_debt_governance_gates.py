@@ -374,6 +374,7 @@ def build_payload(
             hotspot_family=hotspot_family,
             compatibility=compatibility,
             architecture_scorecard=architecture_scorecard,
+            debt_scorecard=scorecard,
         )
     )
     gates.extend(

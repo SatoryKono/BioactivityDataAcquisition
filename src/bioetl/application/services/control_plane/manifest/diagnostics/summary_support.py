@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
     apply_artifact_publication_closure_policy,
     build_produced_artifact_trace,
+    sorted_text_items,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.persistence_alerts import (
     build_alert_signals,
@@ -16,11 +17,12 @@ from bioetl.application.services.control_plane.manifest.diagnostics.persistence_
     build_persistence_profile,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.summary_support_build_exact_replay_anchors import (
-    build_exact_replay_anchors,
+    build_exact_replay_anchors as _build_exact_replay_anchors_impl,
 )
 from bioetl.application.services.control_plane.manifest.identity_graph_assembly import (
     RunManifestIdentityGraphAssembler,
 )
+from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.execution_context import (
     is_composite_execution_context as _is_composite_execution_context,
 )
@@ -32,6 +34,23 @@ if TYPE_CHECKING:
     )
 
 assemble_identity_graph = RunManifestIdentityGraphAssembler.build
+
+
+def build_exact_replay_anchors(
+    *,
+    manifest: RunManifest,
+    summary: dict[str, object],
+    artifact_refs: list[dict[str, object]],
+    lineage_fragment_ids: set[str] | frozenset[str],
+) -> dict[str, object]:
+    """Return semantic replay anchors without a second artifact_support importer."""
+    return _build_exact_replay_anchors_impl(
+        manifest=manifest,
+        summary=summary,
+        artifact_refs=artifact_refs,
+        lineage_fragment_ids=lineage_fragment_ids,
+        sorted_text_items=sorted_text_items,
+    )
 
 
 def _resolve_policy_value(values: set[str]) -> str | None:

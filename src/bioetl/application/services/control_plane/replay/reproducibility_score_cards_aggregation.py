@@ -38,6 +38,10 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
     score_run_identity as score_run_identity,
 )
 
+from .reproducibility_score_cards_aggregation_evaluate_threshold_failures import (
+    evaluate_threshold_failures as evaluate_threshold_failures,
+)
+
 _BLOCKER_PRIORITY_ORDER: tuple[str, ...] = (
     "dependency_lock_hash_missing",
     "dependency_lock_provenance",
