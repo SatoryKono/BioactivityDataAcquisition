@@ -2,6 +2,7 @@ import json, os, subprocess, sys, tempfile, time
 
 REPO = "/mnt/e/github/BioactivityDataAcquisition"
 OUT = os.path.join(REPO, "reports/quality/coderabbit/20260925_085141")
+RUN = os.path.expanduser("~/cr-audit-20260925_085141")
 BASE = open(os.path.join(OUT, "baseline_sha.txt")).read().strip()
 CONTEXT = [
     os.path.join(REPO, "AGENTS.md"),
@@ -11,6 +12,8 @@ CONTEXT = [
 BACKOFF = [1800, 1800, 1800]
 LEAF_TIMEOUT = 3600
 
+os.makedirs(RUN, exist_ok=True)
+
 
 def materialize(leaf_id, files, workdir):
     subprocess.run(["git", "init", "-q", "-b", "main", workdir], check=True)
@@ -18,16 +21,11 @@ def materialize(leaf_id, files, workdir):
                     "-c", "user.name=audit", "commit", "-qm", "base",
                     "--allow-empty"], check=True)
     subprocess.run(["git", "-C", workdir, "checkout", "-qb", "review"], check=True)
-    lst = os.path.join(workdir, "_paths.txt")
-    with open(lst, "w") as f:
-        f.write("\n".join(files))
     arc = subprocess.run(
-        ["git", "-C", REPO, "archive", BASE, "--format=tar",
-         "--pathspec-from-file=" + lst],
+        ["git", "-C", REPO, "archive", BASE, "--format=tar", "--"] + list(files),
         capture_output=True)
     if arc.returncode != 0:
         raise RuntimeError("git archive failed: " + arc.stderr.decode()[:500])
-    os.remove(lst)
     tar_path = os.path.join(workdir, "_leaf.tar")
     with open(tar_path, "wb") as f:
         f.write(arc.stdout)
@@ -75,8 +73,8 @@ def classify(log, err, rc):
 
 
 def run_leaf(leaf_id, files):
-    log = os.path.join(OUT, "review_" + leaf_id + ".jsonl")
-    err = os.path.join(OUT, "review_" + leaf_id + ".stderr.txt")
+    log = os.path.join(RUN, "review_" + leaf_id + ".jsonl")
+    err = os.path.join(RUN, "review_" + leaf_id + ".stderr.txt")
     workdir = tempfile.mkdtemp(prefix="cr_" + leaf_id + "_")
     try:
         materialize(leaf_id, files, workdir)
@@ -108,14 +106,14 @@ def run_leaf(leaf_id, files):
 
 def main():
     matrix = json.load(open(os.path.join(OUT, "scope_matrix.json")))
-    plog = open(os.path.join(OUT, "progress.log"), "a")
+    plog = open(os.path.join(RUN, "progress.log"), "a")
 
     def logp(m):
         plog.write(m + "\n")
         plog.flush()
         print(m, flush=True)
 
-    state_p = os.path.join(OUT, "state.json")
+    state_p = os.path.join(RUN, "state.json")
     done = set()
     if os.path.exists(state_p):
         done = set(json.load(open(state_p)).get("ok", []))
@@ -135,6 +133,10 @@ def main():
         time.sleep(30)
     logp("=== campaign finished ===")
     plog.close()
+    # sync artifacts back to repo campaign dir
+    import shutil
+    for name in os.listdir(RUN):
+        shutil.copy2(os.path.join(RUN, name), os.path.join(OUT, name))
 
 
 if __name__ == "__main__":
