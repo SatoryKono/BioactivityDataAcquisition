@@ -4,27 +4,13 @@
 
 - evidence_source: `remote_main_git_tree`
 - remote_main_ref: `refs/heads/main`
-<<<<<<< Updated upstream
-- baseline_artifact_fingerprint: `b39a5919872bbb933192300e12f97a2992a42161128ccb5ba44408f2d4067ea2`
-||||||| Stash base
-- baseline_artifact_fingerprint: `342e340dfdca2f7a0d59a3e28c3578e378099e49dc2c7d1a11c3d84a8b5d3c5c`
-=======
 - baseline_artifact_fingerprint: `5c0f94cdf4c3f89993a1e123b33b1cbd51ce96928bc868042ef6a8d040fab9bc`
->>>>>>> Stashed changes
 - local_tracking_ref_matches_remote: `True`
 
 | artifact | blob_sha256 | available | required_on_remote | introduced_after_remote_main |
 | --- | --- | --- | --- | --- |
-<<<<<<< Updated upstream
-| `reports/quality/architecture-quality-scorecard.json` | `0d6763f81e8ca97a0be7989d999b8e25706d5a0619f567444e4e958fddf042bc` | `True` | `True` | `False` |
-| `reports/quality/module-coverage-inventory.json` | `32e42ff170976bea0e130a25b3ff0e0795138ba578d5d46818d625fafeb00a3c` | `True` | `True` | `False` |
-||||||| Stash base
-| `reports/quality/architecture-quality-scorecard.json` | `1d1b5d9d9e48f74d70135c49f6cec1c84f6ca2a9a5ae7722b68e0b9414100f3a` | `True` | `True` | `False` |
-| `reports/quality/module-coverage-inventory.json` | `dd6ea6929f4a0d376648d83fc7e6c65c0b2eaeaeded309b93115d901d2c24297` | `True` | `True` | `False` |
-=======
 | `reports/quality/architecture-quality-scorecard.json` | `8e8192543cd14d66760b92ede09412135f627967b8433cc1f0e37418885fe877` | `True` | `True` | `False` |
 | `reports/quality/module-coverage-inventory.json` | `9d82ddd0b4761f971994eaf7bea10907820c382bfb5e1f9eab82a4d1392988ff` | `True` | `True` | `False` |
->>>>>>> Stashed changes
 | `reports/quality/compatibility-importer-census.json` | `f73536c0f78b2d22b54e285a43611268d13793368ce105c525d24ccb61350cb2` | `True` | `True` | `False` |
 | `reports/quality/dead-code-inventory.json` | `ea50c6cc501f1060a0c0227edf5e5681265fe88bfe8f5ce3a668c4fe084344fd` | `True` | `True` | `False` |
 | `reports/quality/contract-registry-diagnostics.json` | `691ae784ed4f90f7835fed4706fbb586e7d7184b8ddc965a7fd5cab6ef3a2dce` | `True` | `True` | `False` |
