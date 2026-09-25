@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import lru_cache
@@ -10,6 +11,7 @@ from typing import Any
 
 REASON_CATALOG_VERSION = "reason_catalog_v1"
 UNKNOWN_REASON = "UNKNOWN_REASON"
+_FIELD_REASON_TOKEN = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
 # Built-in fallback when YAML is unavailable (tests / offline).
 _BUILTIN_REASONS: dict[str, dict[str, str]] = {
@@ -49,6 +51,36 @@ _BUILTIN_REASONS: dict[str, dict[str, str]] = {
         "layer": "silver",
     },
     "gold_filter_exclusion": {
+        "family": "semantic",
+        "default_outcome": "excluded_by_contract",
+        "layer": "gold",
+    },
+    "required_field_missing": {
+        "family": "semantic",
+        "default_outcome": "excluded_by_contract",
+        "layer": "gold",
+    },
+    "exclude_if_present": {
+        "family": "semantic",
+        "default_outcome": "excluded_by_contract",
+        "layer": "gold",
+    },
+    "column_filter_mismatch": {
+        "family": "semantic",
+        "default_outcome": "excluded_by_contract",
+        "layer": "gold",
+    },
+    "range_filter_mismatch": {
+        "family": "semantic",
+        "default_outcome": "excluded_by_contract",
+        "layer": "gold",
+    },
+    "list_length_filter_mismatch": {
+        "family": "semantic",
+        "default_outcome": "excluded_by_contract",
+        "layer": "gold",
+    },
+    "list_contains_filter_mismatch": {
         "family": "semantic",
         "default_outcome": "excluded_by_contract",
         "layer": "gold",
@@ -137,7 +169,16 @@ def normalize_reason_code(
     stripped = "" if code is None else str(code).strip()
     if not stripped:
         return active.unknown_code
-    return stripped if stripped in active.entries else active.unknown_code
+    if stripped in active.entries:
+        return stripped
+    base, separator, field = stripped.partition(":")
+    if (
+        separator
+        and base in active.entries
+        and _FIELD_REASON_TOKEN.fullmatch(field) is not None
+    ):
+        return stripped
+    return active.unknown_code
 
 
 def _active_catalog(catalog: ReasonCatalog | None) -> ReasonCatalog:
