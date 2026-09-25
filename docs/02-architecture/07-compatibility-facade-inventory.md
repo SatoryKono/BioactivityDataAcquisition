@@ -187,6 +187,9 @@ operational; do not copy generated snapshot counters back into it by hand.
   implementation-module paths and have not yet been promoted to permanent public status.
 - `public-entrypoint` rows are permanent sanctioned import and patch targets, even though their
   implementations remain partitioned behind internal owner modules.
+- The 90-day deprecation window for the retained public entrypoints in
+  `configs/quality/compatibility_facade_inventory.yaml` is specified in the
+  [Compatibility Entrypoint Migration Guide](../03-guides/compatibility-entrypoint-migration-guide.md).
 - Public-entrypoint governance is no longer count-only. Each sanctioned seam must
   carry an explicit `phase`, `target_state`, and `completion_gate` in the YAML
   burn-down plan so quarterly review can distinguish stable API from caller-narrowing
