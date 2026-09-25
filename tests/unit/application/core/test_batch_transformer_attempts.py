@@ -521,6 +521,20 @@ async def test_transform_attempt_returns_empty_outcome_for_none_result() -> None
 
 
 @pytest.mark.unit
+def test_gold_exclusion_metric_without_reasons_is_an_error() -> None:
+    from bioetl.application.services.execution._pipeline_runner_support import (
+        _seed_gold_removals_from_metrics,
+    )
+    from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
+
+    with pytest.raises(ValueError, match="per-record reason"):
+        _seed_gold_removals_from_metrics(
+            StageAccountingAccumulator(),
+            {"records_gold_excluded_by_contract": 2},
+        )
+
+
+@pytest.mark.unit
 def test_gold_exclusion_records_bounded_rule_details_without_record_values() -> None:
     from bioetl.application.core.batch_transformer_attempt_success import (
         _build_gold_record,
@@ -550,3 +564,7 @@ def test_gold_exclusion_records_bounded_rule_details_without_record_values() -> 
     assert rows[0]["field"] == "organism_class"
     assert "must-not-leak" not in str(rows)
     assert "actual" not in rows[0]
+    assert accounting.sum_outcome("gold", "excluded_by_contract") == 3
+    assert accounting._stages["gold"].removals[
+        ("excluded_by_contract", "required_field_missing:organism_class")
+    ] == 3
