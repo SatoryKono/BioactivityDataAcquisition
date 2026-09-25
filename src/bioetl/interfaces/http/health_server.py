@@ -214,6 +214,8 @@ class HealthServer(
         self._forensic_endpoint_limiter = asyncio.Semaphore(
             FORENSIC_ENDPOINT_CONCURRENCY
         )
+        # Selector reads must remain available while evidence panels are busy.
+        self._selector_endpoint_limiter = asyncio.Semaphore(4)
         self._start_time: float | None = None
         self._request_error_allowlist = (
             UnicodeDecodeError,
