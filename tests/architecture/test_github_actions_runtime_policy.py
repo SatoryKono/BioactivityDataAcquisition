@@ -1202,9 +1202,23 @@ def test_opencode_phase1_jobs_have_timeout() -> None:
         ".github/workflows/opencode-pr-review.yml",
         ".github/workflows/opencode-triage.yml",
     ):
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        assert "anomalyco/opencode" not in text
+        assert "id-token:" not in text
+        assert "secrets." not in text
         document = _load_yaml(ROOT / relative)
+        assert set(document["on"]) == {"workflow_dispatch"}
         for name, job in document["jobs"].items():
             if "runs-on" not in job:
                 continue
             timeout = int(job.get("timeout-minutes", 0))
             assert timeout >= 15, f"{relative}::{name} timeout-minutes={timeout}"
+    assert "anomalyco/opencode/github" not in policy.ALLOWED_USES
+
+
+def test_diagram_nightly_phase2_has_timeout() -> None:
+    """#11043: the write-capable nightly job keeps a bound before if:false is lifted."""
+    job = _load_yaml(ROOT / ".github/workflows/diagram-nightly.yml")["jobs"][
+        "nightly-phase2"
+    ]
+    assert int(job.get("timeout-minutes", 0)) >= 15
