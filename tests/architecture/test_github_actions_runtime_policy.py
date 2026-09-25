@@ -1194,3 +1194,17 @@ def test_build_provenance_binds_release_files_and_published_ghcr_digest() -> Non
         if name != "docker-push":
             assert job.get("permissions", {}).get("id-token") != "write"
             assert job.get("permissions", {}).get("attestations") != "write"
+
+
+def test_opencode_phase1_jobs_have_timeout() -> None:
+    """#11042: review and triage must not inherit the 360-minute runner default."""
+    for relative in (
+        ".github/workflows/opencode-pr-review.yml",
+        ".github/workflows/opencode-triage.yml",
+    ):
+        document = _load_yaml(ROOT / relative)
+        for name, job in document["jobs"].items():
+            if "runs-on" not in job:
+                continue
+            timeout = int(job.get("timeout-minutes", 0))
+            assert timeout >= 15, f"{relative}::{name} timeout-minutes={timeout}"
