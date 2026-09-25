@@ -36,7 +36,6 @@ from bioetl.domain.run_reports.pipeline_builder import (
     PipelineRunReportOptionalBlocks,
     build_pipeline_run_report,
 )
-from bioetl.domain.run_reports.reason_catalog import UNKNOWN_REASON
 from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
