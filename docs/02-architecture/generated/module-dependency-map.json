@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2490,
-    "total_internal_imports": 7840,
+    "scanned_modules": 2491,
+    "total_internal_imports": 7857,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 330,
+    "cross_layer_group_edges_total": 331,
     "violations": 0,
-    "source_fingerprint": "6ed3c69879eb8c09d1f83e8ec368ca9fd25461aeacb593fd14acc3872bec0075"
+    "source_fingerprint": "3cface0ed7396a1fe44213212cca06f94874ae97f85b3da773913a0c48f7744e"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1563,
+      "imports": 1565,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1042,
+      "imports": 1046,
       "allowed": true
     },
     {
@@ -30,7 +30,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 630,
+      "imports": 631,
       "allowed": true
     },
     {
@@ -48,7 +48,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1253,
+      "imports": 1257,
       "allowed": true
     },
     {
@@ -66,7 +66,7 @@
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 61,
+      "imports": 62,
       "allowed": true
     },
     {
@@ -78,13 +78,13 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 73,
+      "imports": 75,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 420,
+      "imports": 423,
       "allowed": true
     }
   ],
@@ -107,7 +107,7 @@
     {
       "source": "application.core",
       "target": "domain.types",
-      "imports": 89
+      "imports": 90
     },
     {
       "source": "application.services",
@@ -240,6 +240,11 @@
       "imports": 22
     },
     {
+      "source": "interfaces.http",
+      "target": "domain.control_plane",
+      "imports": 22
+    },
+    {
       "source": "composition.bootstrap",
       "target": "application.composite",
       "imports": 21
@@ -257,11 +262,6 @@
     {
       "source": "interfaces.cli",
       "target": "composition.control_plane_service_access",
-      "imports": 21
-    },
-    {
-      "source": "interfaces.http",
-      "target": "domain.control_plane",
       "imports": 21
     },
     {
