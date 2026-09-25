@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-09-14T06:13:47Z",
+  "generated_at_utc": "2026-09-25T08:51:03Z",
   "status": "not_run",
-  "reason": "docs-kpi-weekly.yml is KEEP-DISABLED (#10263); this audit did not execute check-kpi. Do not treat the 2026-08-27 snapshot as current.",
+  "reason": "Этот аудит не запускал check-kpi. docs-kpi-weekly.yml не входил в разрешённые check-only команды карточки.",
   "workflow": ".github/workflows/docs-kpi-weekly.yml"
 }

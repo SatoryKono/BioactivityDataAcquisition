@@ -6,7 +6,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-  Last verified: '2026-08-09'
+  Last verified: '2026-09-25'
 
 ______________________________________________________________________
 
@@ -16,13 +16,13 @@ ______________________________________________________________________
 
 ## Описание
 
-Диаграмма ChEMBL API Integration Flow показывает процесс интеграции с ChEMBL API на уровне System и использует нотацию flowchart. Материал помогает понять последовательность шагов интеграции, обработку ошибок, пагинацию и rate limiting в рамках сценария ChEMBL API integration. В исходном файле прямо зафиксирован контекст: API integration flow diagram for ChEMBL provider showing authentication, request construction, pagination handling, rate limiting, and response parsing. Covers ChEMBL-specific API integration patterns. Это описание задает ожидаемую интерпретацию схемы при техническом ревью и синхронизации документации с кодовой базой. Ключевые контейнеры/подграфы включают: Authentication Setup, Request Construction, Pagination Setup, Rate Limit Check, HTTP Request Execution, Response Parsing, Error Handling. Именно через эти блоки визуализированы этапы интеграции и маршруты передачи управления. Примеры узлов, отражающих доменную модель и инфраструктуру: Initialize ChEMBL Adapter, Configure API Key, Activity Endpoint, Cursor Pagination, Execute HTTP Request, Parse Response, Create ChEMBL Domain Entity. По этим сущностям можно проверить согласованность терминов, портов и адаптеров между диаграммой и реализацией. В метаданных указана оценка плотности (@nodes=46), что полезно для контроля читаемости, декомпозиции view-слоев и стабильного рендеринга в CI-пайплайне.
+Диаграмма показывает публичный ChEMBL API. Адаптер собирает запрос с `offset` и `limit`. ChEMBL нет в `PROVIDER_AUTH_REQUIREMENTS`, отдельной ветки API key нет. Cursor и scroll пагинация не используются. Дальше идут rate limit, HTTP, разбор JSON и переход на следующую страницу по `page_meta.next`.
 
 ## Метаданные
 
 - Тип: `flowchart`
 - Уровень: `system`
-- Дата метаданных: `2026-07-24`
+- Дата метаданных: `2026-09-24`
 
 ## ADR References
 
@@ -32,17 +32,16 @@ ______________________________________________________________________
 
 ## Компоненты
 
-### Authentication Setup
-- Проверка наличия API ключа
-- Конфигурация API ключа или режим без аутентификации
+### Public API
+- Публичный ChEMBL API без ветки API key
 
 ### Request Construction
-- Выбор типа endpoint (Activity, Target, Compound, Assay)
-- Построение параметров запроса
+- Выбор endpoint: Activity, Target, Compound, Assay
+- Параметры запроса `offset` и `limit`
 
-### Pagination Setup
-- Поддержка различных типов пагинации (Cursor, Offset, Scroll)
-- Управление переходом между страницами
+### Pagination
+- Только offset/limit
+- Следующая страница, если ответ содержит продолжение
 
 ### Rate Limit Check
 - Проверка rate limit перед выполнением запроса

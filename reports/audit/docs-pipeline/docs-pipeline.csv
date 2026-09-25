@@ -1,9 +1,5 @@
 id,priority,status,path,requirement_id,observation
-DOCS-PIPE-001,P2,PROVEN,mkdocs.yml:7,REQ-DOC-001,"Канонический MkDocs `site_dir` пишет в корневой `site/`, тогда как упакованный `build-site` и publication policy используют `docs/site/`."
-DOCS-PIPE-002,P2,PROVEN,scripts/docs/checks/verify.py:99-112,REQ-DOC-001,"Каноническая цепочка `python -m scripts.docs verify` требует extra `docs` (mkdocs); в `.venv-win` mkdocs отсутствует, shell-adapter ищет `.venv`, не `.venv-win`."
-DOCS-PIPE-003,P2,PROVEN,scripts/generate_adr_registry.py:801,REQ-DOC-001,Tracked published ADR registry встраивает wall-clock `datetime.now()`; генератор вне `python -m scripts.docs` и не входит в `scripts.docs verify`.
-DOCS-PIPE-004,P2,PROVEN,scripts/docs/checks/verify.py:39-92,REQ-DOC-001,"Tracked `pipeline_normalization_field_matrix` имеет `--check`, но каноническая цепочка verify/docs.yml его не вызывает; шаг живёт в provider-contract-drift.yml."
-DOCS-PIPE-005,P2,PROVEN,.github/workflows/docs.yml:87-90,REQ-DOC-001,Шаг package-family `--check` отключён `if: ${{ false }}`; architecture-тест проверяет только наличие строки команды в YAML.
-DOCS-PIPE-006,P2,PROVEN,scripts/docs/checks/documentation_cleanup_inventory.py:1326-1338,REQ-DOC-001,"`generate-cleanup-inventory --update` пишет tracked JSON/MD через `Path.write_text`, без temp → os.replace."
-DOCS-PIPE-007,P3,PROVEN,pyproject.toml:177,REQ-DOC-001,"optional-dependencies.docs включает mkdocs-mermaid2-plugin, но mkdocs.yml не регистрирует mermaid2 plugin (client-side pymdown fence + mermaid-init.js)."
-DOCS-PIPE-008,P3,PROVEN,scripts/docs/README.md:79,REQ-DOC-001,scripts/docs/README.md утверждает weekly KPI schedule; docs-kpi-weekly.yml помечен KEEP-DISABLED (#10263) и keep-disabled в inventory.
+DOCS-PIPE-001,P2,PROVEN,.github/workflows/tests.yml:647-654,REQ-DOC-001,"Workbook xlsx gitignored и отсутствует; CI sync --check при отсутствии файла делает exit 0."
+DOCS-PIPE-002,P2,PROVEN,scripts/docs/matrix/build_matrix_dicts.py:285-290,REQ-DOC-001,"Dictionaries заявлены tracked curated, но gitignored, без --check в verify, с datetime.now и абсолютным source_workbook."
+DOCS-PIPE-003,P3,NOT_PROVEN,scripts/docs/checks/verify.py:74-88,GAP,"verify не передаёт --ai-surfaces; чекер вызывается отдельным pytest в docs-governance."
+DOCS-PIPE-004,P3,NOT_PROVEN,scripts/docs/checks/documentation_cleanup_inventory.py:1573-1582,GAP,"Без --check/--update generate-cleanup-inventory пишет inventory. Этот прогон передал --check."
