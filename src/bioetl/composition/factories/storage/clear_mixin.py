@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.composition.factories.storage._blocking import run_storage_blocking
+from bioetl.composition.factories.storage import run_storage_blocking
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.gold_writer import GoldWriter

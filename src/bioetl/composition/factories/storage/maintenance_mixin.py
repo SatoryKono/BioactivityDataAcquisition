@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.composition.factories.storage._blocking import run_storage_blocking
+from bioetl.composition.factories.storage import run_storage_blocking
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter

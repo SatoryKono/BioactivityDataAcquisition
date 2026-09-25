@@ -21,16 +21,25 @@ from bioetl.application.core.wiring.runtime import (
     CheckpointRuntimeService,
     RecordProcessorConfig,
 )
-from bioetl.composition.factories.batch_id_generator import UuidBatchIdGenerator
 from bioetl.composition.factories.services.common_service_wiring import resolve_tracer
+from bioetl.composition.occurrence_identity import create_runtime_occurrence_batch_id
 from bioetl.domain.config import MemoryConfig
+from bioetl.domain.types import BatchID
 from bioetl.domain.ports import (
     BatchIdGeneratorPort,
     MemoryMonitorPort,
     TracingPort,
 )
 
-__all__ = ["build_runtime_managers"]
+__all__ = ["UuidBatchIdGenerator", "build_runtime_managers"]
+
+
+class UuidBatchIdGenerator:
+    """Default BatchID generator for operational runtime occurrences."""
+
+    def create(self) -> BatchID:
+        """Create a UUID-backed batch identifier without random UUID generation."""
+        return create_runtime_occurrence_batch_id("batch_id")
 
 
 def _resolve_memory_runtime_inputs(
