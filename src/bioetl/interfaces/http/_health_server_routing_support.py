@@ -53,6 +53,7 @@ from bioetl.interfaces.http.control_plane_selector_context import (
 
 _NOT_FOUND_MESSAGE = "Not Found"
 _FILTER_OPTIONS_TIMEOUT_SECONDS = 20.0
+_FILTER_OPTIONS_QUEUE_TIMEOUT_SECONDS = 5.0
 _CONTROL_PLANE_CLIENT_ERRORS = (ValueError, RuntimeError, OSError, ConnectionError)
 
 
@@ -198,6 +199,7 @@ async def handle_control_plane_filter_options(
             limiter=host._selector_endpoint_limiter,
             operation_factory=lambda: _filter_options_payload(host, query),
             timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
+            queue_timeout_seconds=_FILTER_OPTIONS_QUEUE_TIMEOUT_SECONDS,
             endpoint="/ops/control-plane/filter-options",
         )
     except ForensicEndpointUnavailable as exc:
