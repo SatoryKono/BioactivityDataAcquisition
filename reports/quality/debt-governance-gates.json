@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "61876dbe1592add9497c6aca41aac8b5aea7e7f85e7e45ba70021c89d66de795",
+      "current": "342e340dfdca2f7a0d59a3e28c3578e378099e49dc2c7d1a11c3d84a8b5d3c5c",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -425,18 +425,15 @@
     },
     {
       "current": {
-        "artifacts": [
-          "hotspot_family_baseline",
-          "remote_main_baseline"
-        ],
-        "count": 2
+        "artifacts": [],
+        "count": 0
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: hotspot_family_baseline, remote_main_baseline",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -465,25 +462,23 @@
     "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
-    "hotspot_family_baseline": true,
+    "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": true
+    "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 1,
-    "pass": 45,
+    "fail": 0,
+    "pass": 46,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 10.0,
     "architecture_quality_scorecard_interpretation": "excellent",
-    "fail_count": 1,
-    "failing_gates": [
-      "generated_artifact_drift"
-    ],
+    "fail_count": 0,
+    "failing_gates": [],
     "gate_count": 46,
-    "pass_count": 45,
-    "release_gate_status": "failing",
+    "pass_count": 46,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }
