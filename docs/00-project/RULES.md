@@ -853,8 +853,9 @@ pmid → pmid → pubmed-id
 
 Паттерн защиты от каскадных сбоев. См. [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md).
 
-- **Trigger**: 5 последовательных ошибок соединения/таймаута.
-- **Open Duration**: 5 минут (configurable: `circuit-breaker.recovery-timeout`).
+- **Trigger**: код-дефолт схемы — 5 последовательных ошибок соединения/таймаута.
+- **Open Duration**: код-дефолт — 300 с (5 минут; `circuit-breaker.recovery-timeout`).
+- **ChEMBL override**: `configs/providers/chembl.yaml` задаёт `failure_threshold: 3` и `recovery_timeout: 3000` (50 минут). Это shipped profile, не дефолт схемы.
 - **Recovery**: Half-Open → 1 пробный запрос. Success → Closed, Failure → Open +5 мин.
 - **Observability**: Метрики `bioetl_circuit_breaker_state` (0=Closed, 1=Half-Open, 2=Open), `bioetl_circuit_breaker_trips_total`. Алерт при зависании в Open > 10 мин.
 

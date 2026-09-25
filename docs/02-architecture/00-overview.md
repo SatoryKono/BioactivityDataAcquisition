@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Architecture Overview
 
-*Synced with RULES.md v6.1.11 (2026-08-25)*
+*Synced with RULES.md v6.1.13 (2026-09-25)*
 
 ## Architecture health scores (do not collapse)
 
@@ -70,7 +70,7 @@ architecture section focuses on structure, boundaries, and design rationale.
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-Accepted ADRs documenting key architectural decisions (through ADR-059):
+Accepted ADRs documenting key architectural decisions (through ADR-061):
 
 | ADR                                                                | Topic                                     | RULES.md Reference |
 | ------------------------------------------------------------------ | ----------------------------------------- | ------------------ |
@@ -133,6 +133,8 @@ Accepted ADRs documenting key architectural decisions (through ADR-059):
 | [ADR-057](decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md) | Deterministic runtime config authority and identity | §1, ADR-032/044/046/052 |
 | [ADR-058](decisions/ADR-058-layered-port-registries.md) | Layered port registries (domain / application / composition contracts) | §1, ADR-005/048 |
 | [ADR-059](decisions/ADR-059-package-cohesion-budgets.md) | Package cohesion budgets (shrink-only) | §1, ADR-049/041 |
+| [ADR-060](decisions/ADR-060-prompt-kernel-and-overlay-architecture.md) | Prompt kernel and overlay architecture | §0, prompt kernel |
+| [ADR-061](decisions/ADR-061-persisted-selected-run-assessment.md) | Persisted selected-run assessment | §3.2, ADR-010 |
 
 ______________________________________________________________________
 
