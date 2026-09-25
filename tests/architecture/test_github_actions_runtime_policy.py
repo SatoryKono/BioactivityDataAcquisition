@@ -1194,3 +1194,11 @@ def test_build_provenance_binds_release_files_and_published_ghcr_digest() -> Non
         if name != "docker-push":
             assert job.get("permissions", {}).get("id-token") != "write"
             assert job.get("permissions", {}).get("attestations") != "write"
+
+
+def test_diagram_nightly_phase2_has_timeout() -> None:
+    """#11043: the write-capable nightly job keeps a bound before if:false is lifted."""
+    job = _load_yaml(ROOT / ".github/workflows/diagram-nightly.yml")["jobs"][
+        "nightly-phase2"
+    ]
+    assert int(job.get("timeout-minutes", 0)) >= 15

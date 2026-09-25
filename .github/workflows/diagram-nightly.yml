@@ -17,6 +17,7 @@ jobs:
       contents: read
       issues: write
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     if: ${{ false }} # Full-corpus render/regression gates are disabled.
     steps:
       - name: Checkout code
