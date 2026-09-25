@@ -85,7 +85,7 @@ class TestMetricsServerAdapter:
             assert result is True
             mock_start.assert_called_once_with(
                 port=9000,
-                addr="0.0.0.0",
+                addr="127.0.0.1",
                 started_at=None,
                 fail_fast=False,
                 retry_count=3,
@@ -112,7 +112,7 @@ class TestMetricsServerAdapter:
             assert result is True
             mock_start.assert_called_once_with(
                 port=8080,
-                addr="0.0.0.0",
+                addr="127.0.0.1",
                 started_at=None,
                 fail_fast=True,
                 retry_count=5,

@@ -45,6 +45,12 @@ OBSERVABILITY_LEGACY_TO_CANONICAL: Final[dict[str, str]] = {
 _ALLOWED_SEVERITY_VALUES: Final[frozenset[str]] = frozenset(
     {"debug", "info", "warning", "error"}
 )
+_SEVERITY_ALIASES: Final[dict[str, str]] = {
+    "warn": "warning",
+    "fatal": "error",
+    "critical": "error",
+    "exception": "error",
+}
 _DIAGNOSTIC_FAMILY: Final[str] = "diagnostic"
 _PIPELINE_LIFECYCLE_FAMILY: Final[str] = "pipeline.lifecycle"
 _PIPELINE_PHASE_FAMILY: Final[str] = "pipeline.phase"
@@ -83,6 +89,7 @@ def coerce_non_empty(value: object | None, *, fallback: str) -> str:
 def normalize_severity(value: object | None, *, fallback: str) -> str:
     """Normalize severity into the bounded observability vocabulary."""
     normalized = coerce_non_empty(value, fallback=fallback).lower()
+    normalized = _SEVERITY_ALIASES.get(normalized, normalized)
     return normalized if normalized in _ALLOWED_SEVERITY_VALUES else "info"
 
 
