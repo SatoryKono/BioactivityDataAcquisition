@@ -1,4 +1,6 @@
 name: Diagram Nightly Regression
+# KEEP-DISABLED (#11196): Actions billing will not return. Do not re-enable.
+# nightly-phase2 stays if:false. PR diagram lint stays in docs.yml.
 permissions:
   contents: read
 
@@ -7,8 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  schedule:
-    - cron: '20 2 * * *'
+  # schedule removed (#11196). The mermaid canary must not spend daily minutes.
   workflow_dispatch:
 
 jobs:
