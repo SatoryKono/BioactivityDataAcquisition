@@ -164,8 +164,8 @@ def _resolve_service_bundle_dependencies(
 
 
 def _extract_entity_type(pipeline_name: str) -> str | None:
-    """Extract the trailing entity from `<provider>_<entity>` pipeline names."""
-    return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
+    """Preserve the complete entity suffix in `<provider>_<entity>` names."""
+    return pipeline_name.split("_", 1)[1] if "_" in pipeline_name else None
 
 
 def _create_data_source(
