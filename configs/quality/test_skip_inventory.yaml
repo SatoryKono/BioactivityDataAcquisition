@@ -61,6 +61,30 @@ architecture_platform_skips:
     rationale: >
       NTFS/WSL mermaid/docs scan times out locally. CI Linux remains
       merge-truth; do not expand this skip.
+  - path: tests/architecture/test_fix_mermaid_operators.py
+    suite: architecture
+    category: conditional_environment_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#10418"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-09-25"
+    rationale: >
+      NTFS/WSL mermaid operator regression walk times out locally. CI Linux
+      remains merge-truth; do not expand this skip.
+  - path: tests/architecture/test_issue_10597_export_facade_shrink.py
+    suite: architecture
+    category: conditional_environment_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#10418"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-09-25"
+    rationale: >
+      NTFS/WSL public-export facade census times out locally. CI Linux remains
+      merge-truth; do not expand this skip.
 allowed_categories:
   - conditional_environment_guard
   - git_diff_scope_guard

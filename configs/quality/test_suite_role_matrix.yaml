@@ -25,7 +25,9 @@ roles:
       - tests/e2e/
     required_stages: [bronze, silver, gold_when_enabled, control_plane]
   e2e_smoke:
-    purpose: Bounded PR-blocking completeness subset.
+    purpose: >-
+      Advisory/satellite completeness subset. Not a GitHub-required merge
+      check and not a pr-gate-complete owner (GHA-017 / #10412 / #11054).
     marker: e2e_smoke
     required_stages: [bronze, silver, control_plane]
 

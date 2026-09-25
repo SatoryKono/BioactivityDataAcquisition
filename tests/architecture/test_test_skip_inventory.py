@@ -208,18 +208,33 @@ def test_unit_and_architecture_forbid_unconditional_skip_marker() -> None:
     )
 
 
+def _architecture_mounted_worktree_call_sites() -> set[str]:
+    """Every architecture file that calls the helper, excluding the helper itself."""
+    found: set[str] = set()
+    excluded = {
+        "_platform_skip_support.py",
+        "test_test_skip_inventory.py",
+    }
+    for path in sorted((ROOT / "tests" / "architecture").rglob("*.py")):
+        if path.name in excluded:
+            continue
+        source = path.read_text(encoding="utf-8")
+        if "mounted_worktree_skip_reason" in source:
+            found.add(path.relative_to(ROOT).as_posix())
+    return found
+
+
 def test_architecture_platform_skips_are_reviewed() -> None:
-    """Windows/WSL FS-heavy architecture skips stay inventoried (#10418)."""
+    """Windows/WSL FS-heavy architecture skips stay inventoried (#10418, #11056)."""
     payload = _load_inventory()
     entries = payload["architecture_platform_skips"]
-    expected = {
-        "tests/architecture/test_public_surface_importer_census_governance.py",
-        "tests/architecture/test_public_facade_inventory.py",
-        "tests/architecture/test_domain_composite_config_importer_map.py",
-        "tests/architecture/test_diagram_drift_and_embed_guards.py",
-    }
+    expected = _architecture_mounted_worktree_call_sites()
     tracked = {entry["path"]: entry for entry in entries}
-    assert set(tracked) == expected
+    assert set(tracked) == expected, (
+        "architecture_platform_skips must match mounted_worktree_skip_reason "
+        f"call sites: missing={sorted(expected - set(tracked))} "
+        f"extra={sorted(set(tracked) - expected)}"
+    )
     allowed_categories = set(payload["allowed_categories"])
     for path, entry in tracked.items():
         source = (ROOT / path).read_text(encoding="utf-8")
