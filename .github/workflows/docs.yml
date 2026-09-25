@@ -151,7 +151,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -213,7 +212,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          persist-credentials: false
           fetch-depth: 0
 
       - name: Check for diagram file changes
@@ -274,7 +272,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
           persist-credentials: false
 
       - name: Setup Mermaid CLI
@@ -399,7 +396,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          persist-credentials: false
 
       - name: Setup Mermaid CLI
         uses: ./.github/actions/setup-mermaid
@@ -489,7 +485,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
           persist-credentials: false
 
       - name: Setup Mermaid CLI
