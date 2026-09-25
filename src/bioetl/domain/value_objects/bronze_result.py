@@ -31,14 +31,19 @@ def _clean_path_segments(normalized: str) -> list[str]:
     return parts
 
 
+def _is_drive_prefixed(normalized: str) -> bool:
+    return len(normalized) >= 2 and normalized[0].isalpha() and normalized[1] == ":"
+
+
+def _reject_absolute_path(normalized: str) -> None:
+    if normalized.startswith("/") or _is_drive_prefixed(normalized):
+        raise ValueError("relative_path must be relative")
+
+
 def _normalized_path_parts(relative_path: str) -> list[str]:
     """Return cleaned path segments without empty/dot/parent parts."""
     normalized = relative_path.replace("\\", "/")
-    drive_prefixed = (
-        len(normalized) >= 2 and normalized[0].isalpha() and normalized[1] == ":"
-    )
-    if normalized.startswith("/") or drive_prefixed:
-        raise ValueError("relative_path must be relative")
+    _reject_absolute_path(normalized)
     normalized = normalized.strip("/")
     if not normalized:
         raise ValueError("relative_path must include provider/entity segments")

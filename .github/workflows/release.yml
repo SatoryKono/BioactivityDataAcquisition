@@ -1,4 +1,6 @@
 name: Release
+# KEEP-DISABLED (#11182): Actions billing will not return. Do not re-enable.
+# Publish stays outside GitHub Actions. workflow_dispatch is not a substitute.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # Deploy/publish path: do not cancel mid-flight OIDC publish or asset upload.
@@ -8,9 +10,8 @@ permissions:
   contents: read
 
 on:
-  release:
-    types: [published]
-  # Allow manual triggers for testing the build process
+  # release: published removed (#11182). Re-adding it would spend Actions
+  # minutes that are not coming back.
   workflow_dispatch:
     inputs:
       dry_run:

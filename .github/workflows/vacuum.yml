@@ -1,4 +1,6 @@
 name: Weekly VACUUM
+# KEEP-DISABLED (#11189): Actions billing will not return. Do not re-enable.
+# Local vacuum remains docs/05-operations/vacuum-retention.md.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -7,10 +9,8 @@ permissions:
   contents: read
 
 on:
-  # Run every Sunday at 02:00 UTC
-  schedule:
-    - cron: '0 2 * * 0'
-  # Allow manual triggering
+  # schedule removed (#11189). A cron here would spend minutes if the
+  # workflow were enabled again.
   workflow_dispatch:
     inputs:
       retention_days:

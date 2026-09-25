@@ -397,15 +397,10 @@ async def handle_selected_run_status(
         if result.get("reason") == "run_not_found":
             active = active_run_diagnostics(host, pipeline, run_id)
             if active is not None:
-                result = _merge_active_diagnostics(
-                    active, pipeline=pipeline, run_id=run_id
-                )
-        if result.get("execution_state") not in {None, "UNKNOWN"} and not scope_matches(
-            result, query
-        ):
-            return unavailable_status(
-                pipeline, run_id, "ERROR", "selector_context_mismatch"
-            )
+                result = _merge_active_diagnostics(active, pipeline=pipeline, run_id=run_id)
+        state = result.get("execution_state")
+        if state not in {None, "UNKNOWN"} and not scope_matches(result, query):
+            return unavailable_status(pipeline, run_id, "ERROR", "selector_context_mismatch")
         return result
 
     try:

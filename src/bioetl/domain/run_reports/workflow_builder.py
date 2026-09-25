@@ -285,8 +285,10 @@ def _append_index_row(
 def build_workflow_run_report(
     *,
     identity: Mapping[str, Any],  # Any: report/json payload shape is dynamic
-    plan_steps: Sequence[Mapping[str, Any]],
-    execution_steps: Sequence[Mapping[str, Any] | object],
+    plan_steps: Sequence[Mapping[str, Any]],  # Any: dynamic workflow plan payload
+    execution_steps: Sequence[
+        Mapping[str, Any] | object
+    ],  # Any: external workflow result payload
 ) -> WorkflowRunReport:
     """Project a deterministic workflow report with extraction rollups."""
     plan = tuple(_normalize_plan_step(step) for step in plan_steps)
