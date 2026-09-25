@@ -58,8 +58,8 @@ jobs:
       - name: Checkout base ref for gate code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
           persist-credentials: false
+          fetch-depth: 0
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Set up Python + uv
@@ -327,8 +327,8 @@ jobs:
       - name: Checkout base ref for gate code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
           persist-credentials: false
+          fetch-depth: 0
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Set up Python + uv

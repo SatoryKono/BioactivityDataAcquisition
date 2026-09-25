@@ -36,7 +36,7 @@ class TestContractTestingGovernance:
         live_api_baseline = contract_testing.get("live_api_minimum_baseline", {})
 
         assert contract_testing.get("workflow_present") is True
-        assert contract_testing.get("live_api_gate_mode") == "scheduled"
+        assert contract_testing.get("live_api_gate_mode") == "keep-disabled"
         assert contract_testing.get("network_opt_in_required") is True
         assert live_api_baseline == {
             "enforced_providers": [
@@ -62,7 +62,9 @@ class TestContractTestingGovernance:
         assert 'BIOETL_LIVE_API_TESTS: "true"' in workflow
         assert 'BIOETL_NETWORK_TESTS: "true"' in workflow
         assert "tests/contract/ -v --tb=short --network" in workflow
-        assert "cron: '0 2 1 * *'" in workflow
+        assert "KEEP-DISABLED (#11190)" in workflow
+        assert "cron:" not in workflow
+        assert '"${args[@]}"' in workflow
         assert "Create Issue on Failure" in workflow
 
     def test_contract_workflow_preserves_pytest_failure_and_fails_job_closed(

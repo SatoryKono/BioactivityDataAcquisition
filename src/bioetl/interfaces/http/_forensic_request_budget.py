@@ -6,9 +6,9 @@ import asyncio
 import logging
 from collections.abc import Callable, Coroutine, Mapping
 from functools import partial
+from secrets import token_hex
 from time import perf_counter
 from typing import Any
-from uuid import uuid4
 
 from bioetl.application.observability.control_plane_evidence.timing import (
     observe_evidence_stages,
@@ -124,7 +124,7 @@ async def run_bounded_forensic_operation[ResultT](
     slot therefore remains occupied until the underlying task really finishes,
     preventing timed-out requests from creating an unbounded worker backlog.
     """
-    request_id = uuid4().hex
+    request_id = token_hex(16)
     queued_at = perf_counter()
     try:
         await asyncio.wait_for(

@@ -112,6 +112,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Verify static native discovery and MCP matrices
         run: python3 scripts/ai/codex/doctor.py static --no-write
@@ -126,6 +128,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Generate runtime skill drift report
         run: >-
@@ -148,6 +152,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Run approved one-way runtime skill sync
         run: >-
@@ -174,6 +180,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Verify Codex–Junie runtime parity
         run: bash scripts/ai/junie/check_junie_mirror.sh --check
@@ -184,6 +192,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Verify docs mirror and Codex-Devin parity
         run: bash scripts/ops/support/skills/check_skills_mirror.sh --check

@@ -12,7 +12,7 @@ Reviewers:
 ______________________________________________________________________
 
 _Дата: 2026-02-27_
-_Статус: Phase 1 + Phase 2 Nightly implemented (2026-02-27)_
+_Статус: Phase 1 в PR (`docs.yml`). Phase 2 Nightly выключен: Actions billing не вернётся (#11196)._
 _Связанные документы: diagram-modernization-program.md, diagrams/governance/policy.md, ADR-040_
 
 ## 1. Цель
@@ -165,14 +165,11 @@ _Связанные документы: diagram-modernization-program.md, diagra
 1. Добавлены архитектурные тесты `tests/architecture/test_diagram_quality_gates.py`.
 1. Добавлены архитектурные тесты `tests/architecture/test_diagram_artifact_check.py` и workflow wiring test.
 1. DIAG-T014/T015 переведены из planned в implemented через `check_svg_text_visibility.py`.
-1. Добавлен nightly pipeline `.github/workflows/diagram-nightly.yml`:
-   - `run_diagram_nightly_suite.py` (DIAG-T024..T029);
-   - mermaid minor canary matrix (DIAG-T030);
-   - nightly artifacts + step summary.
+1. Файл `.github/workflows/diagram-nightly.yml` сохранён, но schedule снят и workflow keep-disabled (#11196). `nightly-phase2` остаётся `if: false`. PR lint диаграмм живёт в `docs.yml`.
 
 ## 10. Текущие ограничения и follow-up
 
-1. DIAG-T024..T030 переведены в nightly workflow `.github/workflows/diagram-nightly.yml`, но пока не являются PR hard-gate.
+1. DIAG-T024..T030 не запускаются в GitHub Actions: `diagram-nightly.yml` keep-disabled, billing не вернётся. Локально их по-прежнему запускает `--profile nightly`.
 1. DIAG-T025 реализован эвристикой (aspect/text parity), без pixel-level visual diff.
 1. DIAG-T026 использует git-baseline drift; отдельное baseline storage still pending.
 1. Для DIAG-T030 canary-матрица в `mermaid-minor-canary` содержит только pin `10.6.1`. Ветка 11.x отложена, пока нет lockfile pin; незакреплённый `npm install` не используется.

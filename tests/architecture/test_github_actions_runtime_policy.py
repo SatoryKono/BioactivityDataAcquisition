@@ -729,6 +729,38 @@ def _job_has_write_permission(workflow: dict[str, Any], job: dict[str, Any]) -> 
     )
 
 
+def test_checkouts_without_git_push_disable_credentials() -> None:
+    missing: list[str] = []
+    for workflow_path in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+        workflow = _load_yaml(workflow_path)
+        jobs = workflow.get("jobs")
+        if not isinstance(jobs, dict):
+            continue
+        for job_name, job in jobs.items():
+            if not isinstance(job, dict):
+                continue
+            job_text = "\n".join(
+                str(step.get("run", ""))
+                for step in (job.get("steps") or [])
+                if isinstance(step, dict)
+            )
+            if "git push" in job_text:
+                continue
+            for step in job.get("steps") or []:
+                if not isinstance(step, dict):
+                    continue
+                uses = str(step.get("uses", ""))
+                if not uses.startswith("actions/checkout@"):
+                    continue
+                persist = (step.get("with") or {}).get("persist-credentials")
+                if persist is not False:
+                    missing.append(f"{workflow_path.name}:{job_name}")
+    assert not missing, (
+        "checkout steps without git push must set persist-credentials: false:\n"
+        + "\n".join(missing)
+    )
+
+
 def test_write_capable_jobs_disable_checkout_credentials() -> None:
     missing: list[str] = []
     for workflow_path in sorted((ROOT / ".github" / "workflows").glob("*.yml")):

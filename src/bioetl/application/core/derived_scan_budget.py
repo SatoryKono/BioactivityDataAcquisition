@@ -54,13 +54,39 @@ def resolve_derived_upstream_limit(
     return scaled + 1
 
 
+def iter_derived_source[T](
+    source: AsyncIterator[T],
+    *,
+    output_limit: int | None,
+    scan_limit: int,
+) -> AsyncGenerator[T, None]:
+    """Bound one derived upstream scan.
+
+    An explicit output limit stops when ``scan_limit`` source rows have been
+    seen and returns those rows. An unlimited scan still fails once the default
+    record ceiling is passed, so a full extract cannot certify a truncated
+    source as complete.
+    """
+    if output_limit is None:
+        return bounded_source_records(source)
+    return bounded_source_records(
+        source,
+        max_records=scan_limit,
+        stop_on_exhaustion=True,
+    )
+
+
 async def bounded_source_records[T](
     source: AsyncIterator[T],
     *,
     max_records: int = DEFAULT_SCAN_RECORDS,
     timeout_seconds: float = DEFAULT_SCAN_SECONDS,
+    stop_on_exhaustion: bool = False,
 ) -> AsyncGenerator[T, None]:
     """Fail explicitly on record-budget exhaustion; close the iterator on every exit.
+
+    ``stop_on_exhaustion`` ends the sample instead of raising when the record
+    ceiling is passed. A stalled upstream read still raises.
 
     ``timeout_seconds`` is hang detection for a single upstream ``anext``, not a
     cumulative I/O cap. A progressing paginated scan may run until ``max_records``
@@ -89,6 +115,8 @@ async def bounded_source_records[T](
                 ) from exc
             consumed += 1
             if consumed > max_records:
+                if stop_on_exhaustion:
+                    return
                 raise InvalidStateError(
                     f"derived_scan_budget_exceeded: scanned {max_records} source rows; "
                     "narrow the input selection before retrying.",

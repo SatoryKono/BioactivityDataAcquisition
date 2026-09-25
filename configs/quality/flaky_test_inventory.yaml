@@ -56,6 +56,7 @@ reviewed_flaky_tests: []
 
 review_notes:
   - The curated residual flaky-test inventory is empty at this review point.
+  - "tests.yml flaky-telemetry N=3 (seeds 17, 73, 113) covers only tests/contract/test_semanticscholar_contract.py and tests/architecture/test_determinism_identity_policy.py (#11187). An empty reviewed_flaky_tests list is not proof that no other test flakes. Do not widen this shard."
   - SWARM-001 flakiness-database.json reports total_flaky=0 with empty flaky_tests.
   - Current suite size and source identity are derived from test-governance-current.json.
   - Repeated-run CI telemetry remains the authority for discovering intermittent outcomes.
