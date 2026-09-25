@@ -1,5 +1,7 @@
 # Анализ обоснованности переноса docs/reports/ в reports/
 
+> Архивный снимок от 2026-08-08. Не нормативный. Граница curated surface: `docs/05-operations/runbooks/retention-sensitive-cleanup.md`.
+
 **Дата:** 2026-08-08  
 **Цель:** Проверить обоснованность переноса содержимого docs/reports/ в reports/ для консолидации
 

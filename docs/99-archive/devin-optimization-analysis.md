@@ -1,5 +1,7 @@
 # Devin Configuration Optimization Analysis
 
+> Archived snapshot from 2026-08-08. Not normative. Canonical runtime is `.devin/agents/DEVIN-RUNTIME.md`.
+
 **Date:** 2026-08-08  
 **Purpose:** Analyze current Devin configuration and propose efficiency/usability improvements
 

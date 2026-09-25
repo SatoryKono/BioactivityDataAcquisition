@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3720 |
-| Tracked doc-like files | 3720 |
+| Doc-like files | 3719 |
+| Tracked doc-like files | 3719 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3720 |
+| tracked | 3719 |
 
 ## Lifecycle Counts
 
@@ -57,22 +57,20 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 754 |
-| Archived | 292 |
+| Active | 750 |
+| Archived | 295 |
 | Canonical | 74 |
-| Deprecated | 2 |
-| Generated | 1046 |
+| Generated | 1048 |
 | Working | 1552 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 754 |
-| archive | 292 |
+| active | 750 |
+| archive | 295 |
 | canonical | 74 |
-| duplicate | 2 |
-| generated | 1046 |
+| generated | 1048 |
 | working | 1552 |
 
 ## Recommended Actions
@@ -81,18 +79,15 @@
 | --- | --- |
 | archive-after-github-state-check | 338 |
 | archive-after-migration | 1033 |
-| generate-automatically | 1046 |
-| keep | 1293 |
+| generate-automatically | 1048 |
+| keep | 1292 |
 | reconcile-with-github-state | 8 |
-| replace-with-link | 2 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
 | `docs/00-project/ai/grok/personas/closeout-table.toml` | Working | 0 | archive-after-migration |
-| `docs/00-project/ai/prompts/library/audit/cyclic-pack.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/grok-audit-cycle.md` | Deprecated | 0 | replace-with-link |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md` | Working | 1 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-first-screen-inventory.json` | Working | 2 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-residual-contracts.md` | Working | 5 | archive-after-migration |
@@ -170,6 +165,8 @@
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-budget.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-lint.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -232,6 +229,7 @@
 | `docs/00-project/ai/prompts/library/audit/architecture-review.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/cyclic-pack.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/dashboard.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/debug.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/diagrams.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
@@ -242,6 +240,7 @@
 | `docs/00-project/ai/prompts/library/audit/grafana-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/grafana-regression.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/grafana-visual.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/grok-audit-cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/observability-sequential.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/orchestrator.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/repo-tree.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
@@ -253,8 +252,6 @@
 | `docs/00-project/ai/prompts/library/doc/pipeline.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/doc/planning.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/plan/agent-efficiency.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/library/plan/scoped.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/library/session/bootstrap.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 

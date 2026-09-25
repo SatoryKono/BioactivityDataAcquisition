@@ -86,10 +86,10 @@ ______________________________________________________________________
   `docs/plans/**`, `docs/reports/**`, `reports/**`
 - Retained governance working plan:
   [documentation-update-plan.md](governance/documentation-update-plan.md)
-- Retained repo-only analyses:
-  [devin-optimization-analysis.md](../devin-optimization-analysis.md),
-  [docs-folder-analysis.md](../docs-folder-analysis.md), and
-  [reports-migration-analysis.md](../reports-migration-analysis.md)
+- Archived analyses (snapshots dated 2026-08-08):
+  [devin-optimization-analysis.md](../99-archive/devin-optimization-analysis.md),
+  [docs-folder-analysis.md](../99-archive/docs-folder-analysis.md), and
+  [reports-migration-analysis.md](../99-archive/reports-migration-analysis.md)
 - Historical material: repository path `docs/99-archive/**`
 - Code-navigation-only package maps: `src/**/README.md`
 
