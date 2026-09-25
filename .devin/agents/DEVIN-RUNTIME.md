@@ -139,7 +139,7 @@ Logical `py-*` profiles → Devin custom subagent profiles:
 | `py-debug-bot` | `py-debug-bot` | Parent model | Read-only (reproduce/isolate/guidance; no `src/` or `tests/` writes) | Foreground |
 | `py-config-bot` | `py-config-bot` | Default subagent model | Read + write (`configs/`) | Foreground |
 | `py-doc-bot` | `py-doc-bot` | Default subagent model | Read + write (`docs/`) | Foreground |
-| `py-test-bot` | `py-test-bot` | Default subagent model | Read + exec (`pytest`/`python`); profile denies `write`/`edit` — test file edits stay with orchestrator | Foreground/background |
+| `py-test-bot` | `py-test-bot` | Default subagent model | Read + exec (`pytest`/`python`) + `Write(tests/**)`; deny `Write(src/**)`, `Write(configs/**)`, `Write(docs/**)` | Foreground/background |
 
 ## Devin Subagent Invocation
 
@@ -185,7 +185,8 @@ Use the smallest existing skill that matches the request:
 | Diagnose without fixing | read-only | `py-debug-bot` (foreground) | reproduction and evidence only |
 | Implement a focused fix | write in requested scope | direct implementation; `py-config-bot` when configs change | targeted lint/tests |
 | Review the current diff | read-only | `py-audit-bot` (background) or `code-review` skill | diff inspection; no external writes |
-| Investigate and fix CI | write only after root cause | GitHub CI workflow / `py-debug-bot` | failed checks plus targeted regression |
+| Diagnose CI failure | read-only | `py-debug-bot` (foreground) | reproduction, root cause, remediation guidance |
+| Implement diagnosed CI remediation | write in requested scope | parent / orchestrator | failed checks plus targeted regression |
 | Prepare a PR | branch/commit/push authorized by request | `create-pr` skill | repository quality gates for touched scope |
 | Audit architecture debt | read-only | `py-audit-bot` (foreground) | architecture/debt gates; budgets MUST NOT increase |
 
