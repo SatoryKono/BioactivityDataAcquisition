@@ -1,4 +1,4 @@
-import json, os, subprocess, sys, tempfile, time
+import json, os, re, subprocess, sys, tempfile, time
 
 REPO = "/mnt/e/github/BioactivityDataAcquisition"
 OUT = os.path.join(REPO, "reports/quality/coderabbit/20260925_085141")
@@ -78,6 +78,33 @@ def classify(log, err, rc):
     return n_find, complete, skipped, rate, errtxt
 
 
+def quota_remaining():
+    """Return included-review slots remaining, or None if unknown."""
+    try:
+        p = subprocess.run(["coderabbit", "usage"], capture_output=True,
+                           text=True, timeout=60)
+    except Exception:
+        return None
+    m = re.search(r"Remaining\s*:\s*(\d+)\s*of\s*(\d+)", p.stdout)
+    if not m:
+        return None
+    return int(m.group(1))
+
+
+def wait_for_quota(logp):
+    """Block until at least one included review slot is free."""
+    waited = 0
+    while True:
+        rem = quota_remaining()
+        if rem is None or rem > 0:
+            return rem
+        logp("quota exhausted; waiting 300s (waited=%ds)" % waited)
+        time.sleep(300)
+        waited += 300
+        if waited > 5400:
+            return rem
+
+
 def run_leaf(leaf_id, files):
     log = os.path.join(RUN, "review_" + leaf_id + ".jsonl")
     err = os.path.join(RUN, "review_" + leaf_id + ".stderr.txt")
@@ -100,7 +127,14 @@ def run_leaf(leaf_id, files):
         if complete and not skipped:
             return ("ok", "findings=%d" % n_find)
         if rate and attempt < len(BACKOFF):
-            time.sleep(BACKOFF[attempt])
+            # poll quota window instead of fixed blind backoff
+            waited = 0
+            while True:
+                rem = quota_remaining()
+                if rem is None or rem > 0 or waited >= BACKOFF[attempt]:
+                    break
+                time.sleep(120)
+                waited += 120
             continue
         if rc == -9:
             return ("timeout", errtxt)
@@ -128,8 +162,9 @@ def main():
         if lid in done:
             logp("=== skip %s (already ok) ===" % lid)
             continue
-        logp("=== start %s files=%d %s ==="
-             % (lid, len(leaf["files"]), time.strftime("%H:%M:%S")))
+        rem = wait_for_quota(logp)
+        logp("=== start %s files=%d quota=%s %s ==="
+             % (lid, len(leaf["files"]), rem, time.strftime("%H:%M:%S")))
         st, info = run_leaf(lid, leaf["files"])
         logp("=== end %s status=%s %s %s ==="
              % (lid, st, info, time.strftime("%H:%M:%S")))
