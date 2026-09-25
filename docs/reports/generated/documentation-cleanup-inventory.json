@@ -17715,7 +17715,7 @@
       "github_issue_url": null,
       "inbound_links": 12,
       "lifecycle": null,
-      "outbound_links": 4,
+      "outbound_links": 5,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
       "recommended_action": "keep",
@@ -45657,7 +45657,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 0,
+      "inbound_links": 1,
       "lifecycle": null,
       "outbound_links": 2,
       "owner": "BioETL Team",
@@ -69185,34 +69185,6 @@
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "DOCKER_SETUP.md",
-      "status": "Active",
-      "surface_family": "active",
-      "tracking_state": "tracked"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": null,
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "current",
-      "generated_route": null,
-      "generated_route_exception": null,
-      "generator": null,
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": null,
-      "outbound_links": 0,
-      "owner": "BioETL Team",
-      "path": "docs/INDEX.md",
-      "recommended_action": "keep",
-      "root_doc_kind": null,
-      "section": "INDEX.md",
       "status": "Active",
       "surface_family": "active",
       "tracking_state": "tracked"
@@ -104978,7 +104950,7 @@
       "archive-after-github-state-check": 338,
       "archive-after-migration": 1033,
       "generate-automatically": 1048,
-      "keep": 1293,
+      "keep": 1292,
       "reconcile-with-github-state": 8
     },
     "by_section": {
@@ -104998,7 +104970,6 @@
       "DOCKER_QUICKSTART.md": 1,
       "DOCKER_SETUP.md": 1,
       "GEMINI.md": 1,
-      "INDEX.md": 1,
       "README.md": 1,
       "best_practices.md": 1,
       "doc.json": 1,
@@ -105009,21 +104980,21 @@
       "security": 2
     },
     "by_status": {
-      "Active": 751,
+      "Active": 750,
       "Archived": 295,
       "Canonical": 74,
       "Generated": 1048,
       "Working": 1552
     },
     "by_surface_family": {
-      "active": 751,
+      "active": 750,
       "archive": 295,
       "canonical": 74,
       "generated": 1048,
       "working": 1552
     },
     "by_tracking_state": {
-      "tracked": 3720
+      "tracked": 3719
     },
     "docs_reports_local_count": 55,
     "duplicate_group_count": 7,
@@ -105039,8 +105010,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3720,
+    "total_doc_like": 3719,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3720
+    "total_doc_like_tracked": 3719
   }
 }
