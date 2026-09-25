@@ -64,11 +64,11 @@ def test_issue_5954_memory_workflow_smoke_is_bounded_and_wired() -> None:
 def test_issue_5955_debt_governance_rollup_blocks_budget_growth() -> None:
     tests_workflow = TESTS_WORKFLOW.read_text(encoding="utf-8")
 
-    # Skip release gate status check for local development with uncommitted changes
-    # assert gates["summary"]["release_gate_status"] == "passing"
-    # assert _gate(gates, "debt_scorecard_budget_violations")["status"] == "pass"
-    # assert _gate(gates, "debt_budget_growth_policy")["status"] == "pass"
-    # assert _gate(gates, "debt_scorecard_budget_no_growth")["status"] == "pass"
+    gates = _load_json(DEBT_GATES)
+    assert gates["summary"]["release_gate_status"] == "passing"
+    assert _gate(gates, "debt_scorecard_budget_violations")["status"] == "pass"
+    assert _gate(gates, "debt_budget_growth_policy")["status"] == "pass"
+    assert _gate(gates, "debt_scorecard_budget_no_growth")["status"] == "pass"
     assert (
         "report-debt-governance-gates --check --changed-from-ref refs/remotes/origin/main"
         in tests_workflow

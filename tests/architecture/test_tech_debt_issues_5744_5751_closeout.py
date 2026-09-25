@@ -73,11 +73,10 @@ def _family_row(payload: dict[str, Any], family_name: str) -> dict[str, Any]:
 
 def test_issue_5744_architecture_audit_freshness_gates_are_passing() -> None:
     scorecard = _load_json(SCORECARD)
-
-    # Skip release gate status check for local development with uncommitted changes
-    # assert gates["summary"]["release_gate_status"] == outcome["release_gate_status"]
-    # assert gates["summary"]["fail_count"] == outcome["fail_count"] == 0
-    # assert gates["summary"]["warn_count"] == outcome["warn_count"] == 0
+    gates = _load_json(ROOT / "reports" / "quality" / "debt-governance-gates.json")
+    assert gates["summary"]["release_gate_status"] == "passing"
+    assert gates["summary"]["fail_count"] == 0
+    assert gates["summary"]["warn_count"] == 0
 
     # Skip source tree hash check for local development
     # expected_hash = outcome["module_coverage_source_tree_sha256"]

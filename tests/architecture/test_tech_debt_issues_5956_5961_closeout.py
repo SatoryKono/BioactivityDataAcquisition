@@ -228,6 +228,5 @@ def test_scripts_and_root_hygiene_burndown_for_5959_and_5960() -> None:
         _gate(gates, "supporting_scripts_zero_reference_count")["current"]
         == closeout["ratchets"]["zero_reference_supporting_scripts"]["current"]
     )
-    # Skip release gate status check for local development with uncommitted changes
-    # assert gates["summary"]["release_gate_status"] == "passing"
-    # assert gates["summary"]["fail_count"] == 0
+    assert gates["summary"]["release_gate_status"] == "passing"
+    assert gates["summary"]["fail_count"] == 0

@@ -109,16 +109,13 @@ def _under_coverage_floor(
 
 def test_issue_5707_governance_artifacts_are_current_and_passing() -> None:
     scorecard = _load_json(SCORECARD)
-
-    # Skip release gate status check for local development with uncommitted changes
-    # assert gates["summary"]["release_gate_status"] == outcome["release_gate_status"]
-    # assert gates["summary"]["fail_count"] == outcome["fail_count"] == 0
-    # assert gates["summary"]["warn_count"] == outcome["warn_count"] == 0
-    # Skip stale artifacts check for local development with uncommitted changes
-    # assert gates["stale_artifacts"] == outcome["stale_artifacts"]
-    # assert not any(gates["stale_artifacts"].values())
-    # assert _gate(gates, "generated_artifact_drift")["current"] == 0
-    # assert _gate(gates, "generated_artifact_drift")["status"] == "pass"
+    gates = _load_json(DEBT_GATES)
+    assert gates["summary"]["release_gate_status"] == "passing"
+    assert gates["summary"]["fail_count"] == 0
+    assert gates["summary"]["warn_count"] == 0
+    assert not any(gates["stale_artifacts"].values())
+    assert _gate(gates, "generated_artifact_drift")["status"] == "pass"
+    assert _gate(gates, "generated_artifact_drift")["current"]["count"] == 0
 
     # Skip source tree hash check for local development with uncommitted changes
     # expected_hash = outcome["module_coverage_source_tree_sha256"]

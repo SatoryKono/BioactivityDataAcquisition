@@ -124,14 +124,11 @@ def test_issue_5671_governance_artifact_references_are_backed_by_live_evidence()
 
     assert REMOTE_MAIN_BASELINE.exists()
 
-    # Skip release gate status check for local development with uncommitted changes
-    # assert gates["summary"]["release_gate_status"] == "passing"
-    # assert gates["summary"]["fail_count"] == 0
-    # assert gates["summary"]["warn_count"] == 0
-    # Skip stale artifacts check for local development with uncommitted changes
-    # assert all(stale is False for stale in gates["stale_artifacts"].values())
-    # Skip generated_artifact_drift check for local development with uncommitted changes
-    # assert _gate(gates, "generated_artifact_drift")["status"] == "pass"
+    assert gates["summary"]["release_gate_status"] == "passing"
+    assert gates["summary"]["fail_count"] == 0
+    assert gates["summary"]["warn_count"] == 0
+    assert all(stale is False for stale in gates["stale_artifacts"].values())
+    assert _gate(gates, "generated_artifact_drift")["status"] == "pass"
     assert _gate(gates, "dq_contract_registry_blocking_drift")["status"] == "pass"
     assert (
         _gate(gates, "dq_contract_registry_blocking_drift")["source_artifact"]
