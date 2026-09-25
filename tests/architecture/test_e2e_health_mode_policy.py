@@ -111,11 +111,7 @@ def test_e2e_smoke_marker_is_advisory_satellite() -> None:
     role_matrix = Path("configs/quality/test_suite_role_matrix.yaml").read_text(
         encoding="utf-8"
     )
-    purpose = role_matrix.split("  e2e_smoke:", 1)[1].split("  e2e:", 1)[0]
-    if "  e2e:" not in role_matrix.split("  e2e_smoke:", 1)[1]:
-        purpose = role_matrix.split("  e2e_smoke:", 1)[1].split("provider_ownership:", 1)[
-            0
-        ]
+    purpose = role_matrix.split("  e2e_smoke:", 1)[1].split("provider_ownership:", 1)[0]
     assert "PR-blocking" not in purpose
     assert "Advisory/satellite" in purpose
 
