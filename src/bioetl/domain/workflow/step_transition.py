@@ -64,13 +64,22 @@ def resolve_step_transition_policy(
     *,
     failed_step_id: str | None,
     completed_step_ids: frozenset[str] | None,
+    blocked_step_ids: frozenset[str] | None = None,
 ) -> WorkflowStepTransitionPolicy:
-    """Resolve whether a step should run or be skipped by workflow state."""
+    """Resolve whether a step should run or be skipped by workflow state.
+
+    A failed step blocks only steps that declare it (or another blocked step)
+    in ``depends_on``. Independent later steps still run.
+    """
+    blocked = set(blocked_step_ids or ())
     if failed_step_id is not None:
+        blocked.add(failed_step_id)
+    blocking = next((dep for dep in step.depends_on if dep in blocked), None)
+    if blocking is not None:
         policy = WorkflowStepTransitionPolicy(
             disposition=_DISPOSITION_SKIP_FAILED,
             stores_output=False,
-            failed_step_id=failed_step_id,
+            failed_step_id=blocking,
         )
         policy.ensure_runnable()
         return policy

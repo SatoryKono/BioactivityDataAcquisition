@@ -170,7 +170,7 @@ the fix invalidates their Gold).
 | --- | --- | --- |
 | 12 | `chembl_publication_similarity` | API scan from documents. |
 | 13 | `chembl_publication_term` | Input filter: `data/input/publication.csv`. `/document_term` is retired; terms come from publication records. `--limit N` caps the CSV ID window to N publications (not `N * 50`) so the 180s derived-scan I/O budget is not exhausted when MeSH/keywords are absent. |
-| 14 | `chembl_subcellular_fraction` | Derived from assays; sparse. Upstream scan uses `ASSAY_LIMIT_MULTIPLIER=200`. Hang timeout is per upstream `anext`, not a 180s sum across pages. |
+| 14 | `chembl_subcellular_fraction` | Derived from assays; sparse. Upstream scan uses `ASSAY_LIMIT_MULTIPLIER=200`, capped at 50_000 source rows. A `--limit` window that hits that cap returns the unique fractions found and does not raise `derived_scan_budget_exceeded`. Hang timeout is per upstream `anext`, not a 180s sum across pages. |
 | 15 | `chembl_target_protein_classification` | Local Gold snapshots of `chembl_target`, `chembl_target_component`, `chembl_protein_class`. Fail-closed if those snapshots are missing. |
 
 ### Wave D — enrichers (standalone CSV, not composite)

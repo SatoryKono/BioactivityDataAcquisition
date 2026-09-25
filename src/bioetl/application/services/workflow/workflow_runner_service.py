@@ -65,6 +65,19 @@ __all__ = [
 ]
 
 
+def _blocked_step_ids(state: WorkflowExecutionState) -> frozenset[str]:
+    """Return steps whose failure or failure-skip must block dependents."""
+    blocked = {
+        result.step_id
+        for result in state.step_results
+        if result.status == "failed"
+        or (result.status == "skipped" and result.error_type == "UpstreamStepFailed")
+    }
+    if state.failed_step_id is not None:
+        blocked.add(state.failed_step_id)
+    return frozenset(blocked)
+
+
 def _require_workflow_result(value: object) -> WorkflowRunExecutionResult:
     """Return a concrete workflow result after validating replacement output."""
     if not isinstance(value, WorkflowRunExecutionResult):
@@ -207,6 +220,7 @@ class WorkflowRunnerService:
             step,
             failed_step_id=state.failed_step_id,
             completed_step_ids=completed_step_ids,
+            blocked_step_ids=_blocked_step_ids(state),
         )
         if policy.disposition == "skip_failed":
             return ResolvedWorkflowStepTransitionRecord(

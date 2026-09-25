@@ -76,6 +76,43 @@ def test_resolve_step_transition_policy_skips_after_upstream_failure() -> None:
     assert policy.should_run is False
 
 
+def test_independent_step_runs_after_unrelated_failure() -> None:
+    step = WorkflowStepConfig(step_id="run_chembl_target", pipeline_name="chembl_target")
+
+    policy = resolve_step_transition_policy(
+        step,
+        failed_step_id="run_chembl_subcellular_fraction",
+        completed_step_ids=None,
+        blocked_step_ids=frozenset({"run_chembl_subcellular_fraction"}),
+    )
+
+    assert policy.disposition == "run"
+    assert policy.should_run is True
+
+
+def test_transitive_skipped_dependency_blocks_later_step() -> None:
+    step = WorkflowStepConfig(
+        step_id="run_chembl_target_protein_classification",
+        pipeline_name="chembl_target_protein_classification",
+        depends_on=("run_chembl_target_component",),
+    )
+
+    policy = resolve_step_transition_policy(
+        step,
+        failed_step_id="run_chembl_subcellular_fraction",
+        completed_step_ids=None,
+        blocked_step_ids=frozenset(
+            {
+                "run_chembl_subcellular_fraction",
+                "run_chembl_target_component",
+            }
+        ),
+    )
+
+    assert policy.disposition == "skip_failed"
+    assert policy.failed_step_id == "run_chembl_target_component"
+
+
 def test_resolve_step_transition_policy_skips_completed_step_on_resume() -> None:
     step = WorkflowStepConfig(step_id="extract", pipeline_name="chembl_activity")
 

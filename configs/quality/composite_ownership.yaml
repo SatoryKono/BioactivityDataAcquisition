@@ -156,6 +156,7 @@ areas:
       - src/bioetl/application/composite/column_renamer.py
       - src/bioetl/application/composite/column_service.py
       - src/bioetl/application/composite/column_service_priority.py
+      - src/bioetl/application/composite/column_service_stage_delegates.py
       - src/bioetl/application/composite/column_service_support.py
       - src/bioetl/application/composite/helpers/column_service_layer_filter.py
   - name: conflict

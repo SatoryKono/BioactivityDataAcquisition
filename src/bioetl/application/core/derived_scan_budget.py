@@ -29,8 +29,11 @@ def resolve_derived_upstream_limit(
 
     Filtered ID lists size the upstream window directly. Output ``limit`` scales
     through ``multiplier`` (same pattern as publication_term) and is capped by
-    ``max_records``. Unlimited output keeps the full scan ceiling. The returned
-    value includes the look-ahead slot used by :func:`bounded_source_records`.
+    ``max_records``. Unlimited output keeps the full scan ceiling plus the
+    look-ahead slot used by :func:`bounded_source_records`. A limited window
+    that already sits on ``max_records`` does not add that slot: the extra row
+    would be reported as an incomplete scan even though the caller asked only
+    for a bounded sample.
     """
     if multiplier < 1:
         raise ValueError("multiplier must be >= 1")
@@ -45,7 +48,10 @@ def resolve_derived_upstream_limit(
         return max_records + 1
     if output_limit < 1:
         return look_ahead_budget(output_limit, max_records)
-    return min(output_limit * multiplier, max_records) + 1
+    scaled = output_limit * multiplier
+    if scaled >= max_records:
+        return max_records
+    return scaled + 1
 
 
 async def bounded_source_records[T](
