@@ -310,3 +310,31 @@ row, and CLI `bioetl quarantine inspect` respectively.
 Six domains use saved exact-run evidence; CURRENT remains separate. See the
 UX check `docs/reports/dashboard-ux-checks/2026-09-16.md` for observed checks
 and open boundaries.
+
+## CURRENT scope explanation — 2026-09-25
+
+Overview and Incident Workspace identify one worst workflow and domain beside
+the CURRENT verdict. Run ID does not filter this card; the selected-run tables
+remain persisted historical evidence. A workflow-wide failure can affect its
+planned pipeline scope even when that step was skipped, and must not be read as
+a failure of the selected pipeline run. Tied worst domains may exist.
+
+Click the card to inspect the responsible workflow and gateway publication time.
+The metric does not expose the exception message: Reason unavailable is honest,
+and the stored workflow/pipeline reports provide the detailed failure. Critical
+workflow actions rank above DQ warnings and route to current workflow evidence.
+
+Validation receipt: `docs/reports/dashboard-ux-checks/2026-09-25.md`.
+
+## Global alert pipeline labels
+
+The compact and full Incident Workspace alert tables use English presentation
+labels: N/A — Docker infrastructure for BioETLDockerRuntimeProbeMissing without
+a pipeline label, and Not provided for other missing pipeline attributes. Real
+pipeline labels, severity and FIRING/PENDING states are preserved. Alert names
+link to the Docker stability runbook for that alert and the incident response
+runbook otherwise; pipeline presentation labels are not navigation filters.
+
+Live Prometheus query verified Docker, generic missing-pipeline, and real-pipeline
+rows. Required readability/no-scroll checks passed. The broader state-followup
+test has an unrelated Overview idempotence failure.

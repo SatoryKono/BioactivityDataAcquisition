@@ -699,6 +699,33 @@ class TestTrackQuarantinedRecords:
         assert quarantine_calls
         assert quarantine_calls[0].args[2]["reason"] == ErrorType.DATA_QUALITY.value
 
+    def test_quarantine_reason_is_catalog_code_not_unknown(
+        self, recorder: BatchMetricsRecorderService
+    ) -> None:
+        """Schema and DQ quarantine must keep ErrorType codes in stage accounting."""
+        from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
+        from bioetl.domain.run_reports.context import (
+            bind_stage_accounting,
+            reset_stage_accounting,
+        )
+
+        accounting = StageAccountingAccumulator()
+        token = bind_stage_accounting(accounting)
+        try:
+            recorder.track_quarantined_records(
+                error_type=ErrorType.DATA_QUALITY, count=1
+            )
+            recorder.track_quarantined_records(
+                error_type=ErrorType.SCHEMA_VIOLATION, count=2, stage="gold"
+            )
+        finally:
+            reset_stage_accounting(token)
+        codes = {str(item["reason_code"]) for item in accounting.top_reasons()}
+        assert codes == {"SCHEMA_VIOLATION", "DATA_QUALITY"}
+        assert "UNKNOWN_REASON" not in codes
+        assert accounting.sum_outcome("gold", "quarantined") == 2
+        assert accounting.sum_outcome("silver", "quarantined") == 1
+
     def test_includes_run_type_label_in_counter(
         self,
         mock_metrics: MagicMock,

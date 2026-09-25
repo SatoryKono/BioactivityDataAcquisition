@@ -6,6 +6,21 @@ _WIDTH = "custom.width"
 _NOT_PROVIDED = "Not provided"
 
 
+def _alert_provider_rows() -> str:
+    """Enrich only missing providers with an unambiguous configured mapping."""
+    metric = "bioetl_incident_alert_priority"
+    infrastructure = f'{metric}{{provider="",pipeline="",alertname="BioETLDockerRuntimeProbeMissing"}}'
+    missing = f'({metric}{{provider=""}} unless {infrastructure})'
+    mapping = 'group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!="",provider!="",provider!="unknown"} > 0)'
+    unique = f'({mapping} and on(pipeline) (count by(pipeline)({mapping}) == 1))'
+    return (
+        f'({metric}{{provider!=""}} or '
+        f'({missing} * on(pipeline) group_left(provider) {unique}) or '
+        f'({missing} unless on(pipeline) {unique}) or '
+        f'label_replace({infrastructure},"provider","N/A — Infrastructure","",""))'
+    )
+
+
 def explain_incident(panels: dict[int, dict], override) -> None:
     """Keep global evidence and row navigation independent of selected history."""
     panels[9400]["options"]["content"] = (
@@ -103,21 +118,50 @@ def _explain_global_alerts(panels: dict[int, dict], override) -> None:
         # Query-local presentation label also creates a field when every row
         # lacks provider; original ALERTS labels remain untouched.
         if pid == 2005:
+            # A temporary label guards the presentation rewrite on both name
+            # and empty pipeline; provider identifiers remain unchanged.
+            scoped = f'label_join({_alert_provider_rows()},"pipeline_context",";","alertname","pipeline")'
+            scoped = f'label_replace({scoped},"pipeline","N/A — Docker infrastructure","pipeline_context","BioETLDockerRuntimeProbeMissing;")'
             panel["targets"][0]["expr"] = (
-                'label_replace(bioetl_incident_alert_priority,"provider",'
+                f'label_replace(label_replace(({scoped}),"pipeline",'
+                f'"{_NOT_PROVIDED}","pipeline","^$"),"provider",'
                 f'"{_NOT_PROVIDED}","provider","^$")'
+            )
+            expr = panel["targets"][0]["expr"]
+            panel["targets"][0]["expr"] = (
+                f'label_replace(label_replace({expr},"alert_runbook",'
+                '"incident-response","",""),"alert_runbook","docker-stability",'
+                '"alertname","BioETLDockerRuntimeProbeMissing")'
             )
         else:
             panel["targets"][0].pop("expr", None)
         panel["description"] = (
             "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. "
-            "Not provided means the alert has no provider attribute, not unknown provider health. "
+            "Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. "
+            "Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. "
             "FIRING and PENDING retain their original alert state."
         )
         override(panel, "provider", "noValue", _NOT_PROVIDED)
         override(panel, "provider", _WIDTH, 130)
         override(panel, "provider", "displayName", "Provider")
+        override(panel, "provider", "mappings", [{"type": "value", "options": {"chembl": {"text": "ChEMBL"}}}])
+        override(panel, "pipeline_context", "custom.hidden", True)
         override(panel, "pipeline", "displayName", "Pipeline")
+        override(panel, "pipeline", "noValue", _NOT_PROVIDED)
+        override(panel, "pipeline", "links", [])
+        override(panel, "alert_runbook", "custom.hidden", True)
+        override(
+            panel,
+            "alertname",
+            "links",
+            [
+                {
+                    "title": "Open alert runbook",
+                    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/${__data.fields.alert_runbook}.md",
+                    "targetBlank": True,
+                }
+            ],
+        )
         override(panel, "severity", "displayName", "Severity")
 
 

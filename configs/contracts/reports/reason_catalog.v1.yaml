@@ -62,6 +62,30 @@ reasons:
     layer: silver
     description: DQ threshold hard-fail quarantine
 
+  - code: SCHEMA_VIOLATION
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Record failed schema validation and was quarantined
+
+  - code: INVALID_DATA
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Record failed with invalid data and was quarantined
+
+  - code: MISSING_REQUIRED_FIELD
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Record failed with a missing required field and was quarantined
+
+  - code: DATA_QUALITY
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Record failed a data-quality check and was quarantined
+
   - code: DEDUP_KEY_COLLISION
     family: dedup
     default_outcome: deduplicated

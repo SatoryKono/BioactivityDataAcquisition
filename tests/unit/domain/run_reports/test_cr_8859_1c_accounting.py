@@ -77,6 +77,20 @@ def test_custom_catalog_does_not_accept_omitted_builtin_codes() -> None:
     assert normalize_reason_code("FILTERED_OUT_SILVER", catalog) == UNKNOWN_REASON
 
 
+def test_error_type_quarantine_codes_stay_mapped() -> None:
+    """DQ ErrorType values must not collapse to UNKNOWN_REASON."""
+    for code in (
+        "SCHEMA_VIOLATION",
+        "INVALID_DATA",
+        "MISSING_REQUIRED_FIELD",
+        "DATA_QUALITY",
+    ):
+        assert normalize_reason_code(code) == code
+    assert normalize_reason_code(None) == UNKNOWN_REASON
+    assert normalize_reason_code("") == UNKNOWN_REASON
+    assert normalize_reason_code("not-a-catalog-code") == UNKNOWN_REASON
+
+
 def test_measured_zero_extracted_is_not_replaced_by_payload() -> None:
     report = build_workflow_run_report(
         identity={"workflow_id": "wf"},

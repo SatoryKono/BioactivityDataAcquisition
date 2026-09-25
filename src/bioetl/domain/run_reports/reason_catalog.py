@@ -55,6 +55,26 @@ _BUILTIN_REASONS: dict[str, dict[str, str]] = {
         "default_outcome": "quarantined",
         "layer": "silver",
     },
+    "SCHEMA_VIOLATION": {
+        "family": "dq",
+        "default_outcome": "quarantined",
+        "layer": "silver",
+    },
+    "INVALID_DATA": {
+        "family": "dq",
+        "default_outcome": "quarantined",
+        "layer": "silver",
+    },
+    "MISSING_REQUIRED_FIELD": {
+        "family": "dq",
+        "default_outcome": "quarantined",
+        "layer": "silver",
+    },
+    "DATA_QUALITY": {
+        "family": "dq",
+        "default_outcome": "quarantined",
+        "layer": "silver",
+    },
     "DEDUP_KEY_COLLISION": {
         "family": "dedup",
         "default_outcome": "deduplicated",
