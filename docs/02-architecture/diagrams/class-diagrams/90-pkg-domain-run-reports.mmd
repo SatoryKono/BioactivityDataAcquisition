@@ -1,11 +1,11 @@
 %% Title: Package Family: domain/run_reports
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/run_reports; modules: models, reason_catalog, _stage_bucket, accounting, accounting_snapshots, pipeline_builder.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/run_reports; modules: models, reason_catalog, workflow_builder, _stage_bucket, accounting, accounting_snapshots.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-09-25
 %% @level   Package Family / Inventory Slice
-%% @nodes   17
+%% @nodes   18
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -27,6 +27,11 @@ classDiagram
         class ReasonCatalogEntry
     }
 
+    namespace workflow_builder {
+        class _NormalizedExecution
+        class _RowFaults
+    }
+
     namespace stage_bucket {
         class _StageBucket
     }
@@ -41,10 +46,6 @@ classDiagram
 
     namespace pipeline_builder {
         class PipelineRunReportOptionalBlocks
-    }
-
-    namespace workflow_builder {
-        class _NormalizedExecution
     }
 
     StageAccountingSnapshotsMixin <|-- StageAccountingAccumulator

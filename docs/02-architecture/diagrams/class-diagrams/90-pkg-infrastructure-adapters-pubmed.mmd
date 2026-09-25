@@ -1,11 +1,11 @@
 %% Title: Package Family: infrastructure/adapters/pubmed
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/pubmed; modules: _article_components, _search_models, _client_fallback_policy, _extended_record, _fetch, _filter_fetch_support.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/pubmed; modules: _article_components, _filter_fetch_support, _search_models, _client_fallback_policy, _extended_record, _fetch.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-09-25
 %% @level   Package Family / Inventory Slice
-%% @nodes   22
+%% @nodes   23
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -18,6 +18,11 @@ classDiagram
         class PubMedMeshHeading
         class PubMedPubDate
         class PubMedReference
+    }
+
+    namespace filter_fetch_support {
+        class PubMedAdapterFilterFetchHost
+        class _EmptyBronzeAsyncIterator
     }
 
     namespace search_models {
@@ -35,10 +40,6 @@ classDiagram
 
     namespace fetch {
         class PubMedFetchMixin
-    }
-
-    namespace filter_fetch_support {
-        class PubMedAdapterFilterFetchHost
     }
 
     namespace health {

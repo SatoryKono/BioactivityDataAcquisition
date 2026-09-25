@@ -1,11 +1,11 @@
 %% Title: Package Family: composition/runtime_builders
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/runtime_builders; modules: runner_builder_wiring, _manifest_publication_context_support, _runner_input_preparation, _run_manifest_builder_policy, _run_manifest_context_updates, _run_manifest_creation_support_helpers.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/runtime_builders; modules: runner_builder_wiring, _manifest_publication_context_support, _runner_input_preparation, inputs_extraction_preflight, _run_manifest_builder_policy, _run_manifest_context_updates.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-09-25
 %% @level   Package Family / Inventory Slice
-%% @nodes   22
+%% @nodes   24
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -24,6 +24,11 @@ classDiagram
     namespace runner_input_preparation {
         class PreparedRunnerContext
         class ResolvedRunnerDerivedInputs
+    }
+
+    namespace inputs_extraction_preflight {
+        class ExtractionInputError
+        class ExtractionInputProvenance
     }
 
     namespace run_manifest_builder_policy {

@@ -1,9 +1,9 @@
 %% Title: Package Family: infrastructure/adapters/uniprot (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/uniprot; part 2/2; modules: _idmapping_retry, _idmapping_transport, client, fallback_policy, fasta_parser, feature_sequence_adapter_mixin.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/uniprot; part 2/2; modules: _idmapping_retry, _idmapping_transport, feature_sequence_adapter_mixin, client, fallback_policy, fasta_parser.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-09-25
 %% @level   Package Family / Inventory Slice
 %% @nodes   12
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
@@ -19,6 +19,11 @@ classDiagram
         class IDMappingTransportMixin
     }
 
+    namespace feature_sequence_adapter_mixin {
+        class UniProtAdapterMetadataMixin
+        class UniProtFeatureSequenceAdapterMixin
+    }
+
     namespace client {
         class UniProtAdapter
     }
@@ -31,20 +36,12 @@ classDiagram
         class FastaParser
     }
 
-    namespace feature_sequence_adapter_mixin {
-        class UniProtFeatureSequenceAdapterMixin
-    }
-
     namespace filtering_adapter_mixin {
         class UniProtFilteringAdapterMixin
     }
 
     namespace idmapping_client {
         class UniProtIDMappingClient
-    }
-
-    namespace metadata_adapter_mixin {
-        class UniProtAdapterMetadataMixin
     }
 
     namespace protein_fetch_adapter_mixin {

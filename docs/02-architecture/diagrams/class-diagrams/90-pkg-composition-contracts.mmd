@@ -1,11 +1,11 @@
 %% Title: Package Family: composition/contracts
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/contracts; modules: factories, structural, resources, health, providers, runtime.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/contracts; modules: factories, structural, resources, health, providers.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-09-25
 %% @level   Package Family / Inventory Slice
-%% @nodes   28
+%% @nodes   26
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -48,11 +48,6 @@ classDiagram
         class SupportsDefaultRegistry
         class SupportsProviderRegistryStore
         class SupportsProviderStore
-    }
-
-    namespace runtime {
-        class ManifestLaunchContextBuilder
-        class ManifestSourceRefBuilder
     }
 
     SupportsDefaultRegistry <|-- SupportsProviderRegistryStore

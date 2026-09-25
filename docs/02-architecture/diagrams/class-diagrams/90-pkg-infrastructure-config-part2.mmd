@@ -1,13 +1,17 @@
 %% Title: Package Family: infrastructure/config (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/config; part 2/2; modules: publication_type_classification_loader, semantic_field_registry_loader.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/config; part 2/2; modules: publication_controlled_vocabulary_loader, publication_type_classification_loader, semantic_field_registry_loader, source_config_loader.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-09-25
 %% @level   Package Family / Inventory Slice
-%% @nodes   2
+%% @nodes   4
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
+
+    namespace publication_controlled_vocabulary_loader {
+        class PublicationControlledVocabularyLoader
+    }
 
     namespace publication_type_classification_loader {
         class PublicationTypeClassificationLoader
@@ -15,5 +19,9 @@ classDiagram
 
     namespace semantic_field_registry_loader {
         class SemanticFieldRegistryLoader
+    }
+
+    namespace source_config_loader {
+        class _CachedSourceConfigLoader
     }
 

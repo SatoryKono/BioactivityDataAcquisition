@@ -3,7 +3,7 @@
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-09-25
 %% @level   Package Family / Inventory Slice
 %% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
@@ -84,16 +84,16 @@ classDiagram
         class _ScopeIndexStore
     }
 
+    namespace file_archive_store {
+        class FileArchiveStore
+    }
+
     namespace file_artifact_lifecycle_store {
         class FileControlPlaneArtifactLifecycleStore
     }
 
     namespace file_artifact_lifecycle_types {
         class _ProtectedRefs
-    }
-
-    namespace file_contract_evidence_recorder {
-        class FileContractEvidenceRecorder
     }
 
     RawRunManifestInspectionMixin <|-- FileRunManifestStore

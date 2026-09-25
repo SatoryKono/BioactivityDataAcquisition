@@ -1,0 +1,4 @@
+{"type":"review_context","reviewType":"all","currentBranch":"review","baseBranch":"main","workingDirectory":"/tmp/cr_S08b-docs-decisions_szh7kqi2"}
+{"type":"status","phase":"connecting","status":"connecting_to_review_service"}
+{"type":"status","phase":"setup","status":"setting_up"}
+{"type":"error","errorType":"review","message":"Review failed: All files are ignored\nPrevious local review has no stored findings.","recoverable":false,"details":{}}

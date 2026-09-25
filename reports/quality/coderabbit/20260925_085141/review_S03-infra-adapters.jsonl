@@ -1,0 +1,5 @@
+{"type":"review_context","reviewType":"all","currentBranch":"review","baseBranch":"main","workingDirectory":"/tmp/cr_S03-infra-adapters_wtqta64b"}
+{"type":"status","phase":"connecting","status":"connecting_to_review_service"}
+{"type":"status","phase":"setup","status":"setting_up"}
+{"type":"status","phase":"analyzing","status":"summarizing"}
+{"type":"error","errorType":"connection","message":"Connection failed: WebSocket closed","recoverable":true,"details":{"cause":{"name":"TRPCWebSocketClosedError"},"name":"TRPCClientError"}}

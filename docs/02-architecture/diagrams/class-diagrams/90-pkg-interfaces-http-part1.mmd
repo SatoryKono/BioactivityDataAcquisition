@@ -1,9 +1,9 @@
 %% Title: Package Family: interfaces/http (Part 1/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/interfaces/http; part 1/2; modules: _health_server_control_plane_scope, _health_server_observability_routing, health_server, _control_plane_selector_records, _health_server_checkpoint_lookup, _health_server_quarantine_routing.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/interfaces/http; part 1/2; modules: _health_server_control_plane_scope, _health_server_observability_protocols, health_server, _control_plane_selector_records, _health_server_checkpoint_lookup, _health_server_quarantine_routing.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-09-25
 %% @level   Package Family / Inventory Slice
 %% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
@@ -15,9 +15,9 @@ classDiagram
         class _RunManifestLookupPort
     }
 
-    namespace health_server_observability_routing {
+    namespace health_server_observability_protocols {
         class _HealthObservabilityRoutingHost
-        class health_server_observability_routing__HealthResponseSupport
+        class health_server_observability_protocols__HealthResponseSupport
         class _RunLedgerLookup
     }
 
@@ -57,6 +57,11 @@ classDiagram
         class _RouteRequestSupport
     }
 
+    namespace selected_run_status {
+        class _IdentityMismatchError
+        class _RevisionMissingError
+    }
+
     namespace forensic_request_budget {
         class ForensicEndpointUnavailable
     }
@@ -85,16 +90,6 @@ classDiagram
         class ProcessedRecordRowSpec
     }
 
-    namespace health_server_routing_mixin {
-        class HealthServerRoutingMixin
-    }
-
-    namespace health_server_state_mixin {
-        class HealthServerStateMixin
-    }
-
     EvidenceScopeHost <|-- _EvidenceRoutingHost
     HealthServerHTTPMixin <|-- HealthServer
-    HealthServerRoutingMixin <|-- HealthServer
-    HealthServerStateMixin <|-- HealthServer
 

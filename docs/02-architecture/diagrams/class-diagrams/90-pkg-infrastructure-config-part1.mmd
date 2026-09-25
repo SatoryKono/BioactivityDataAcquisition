@@ -3,7 +3,7 @@
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-09-25
 %% @level   Package Family / Inventory Slice
 %% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
@@ -88,6 +88,10 @@ classDiagram
         class FilterConfigLoader
     }
 
+    namespace pipeline_config_api {
+        class _CachedPipelineConfigLoader
+    }
+
     namespace pipeline_config_loader {
         class PipelineConfigLoader
     }
@@ -102,10 +106,6 @@ classDiagram
 
     namespace protein_class_target_type_loader {
         class ProteinClassTargetTypeMappingLoader
-    }
-
-    namespace publication_controlled_vocabulary_loader {
-        class PublicationControlledVocabularyLoader
     }
 
     BaseConfigLoader <|-- FilterConfigLoader

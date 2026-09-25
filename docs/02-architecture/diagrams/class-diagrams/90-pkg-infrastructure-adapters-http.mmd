@@ -3,9 +3,9 @@
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-09-25
 %% @level   Package Family / Inventory Slice
-%% @nodes   27
+%% @nodes   28
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -46,6 +46,10 @@ classDiagram
         class ProviderHealthState
     }
 
+    namespace client_retry_request_flow {
+        class HTTPClientRetryRequestFlow
+    }
+
     namespace health_monitor_transitions {
         class ProviderHealthStateLike
     }
@@ -81,4 +85,5 @@ classDiagram
     HTTPClientContextMixin <|-- UnifiedHTTPClient
     HTTPClientRequestMethodsMixin <|-- UnifiedHTTPClient
     HTTPClientRetryMixin <|-- UnifiedHTTPClient
+    HTTPClientRetryRequestFlow <|-- HTTPClientRetryMixin
 

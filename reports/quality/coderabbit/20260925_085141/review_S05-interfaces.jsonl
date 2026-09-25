@@ -1,0 +1,4 @@
+{"type":"review_context","reviewType":"all","currentBranch":"review","baseBranch":"main","workingDirectory":"/tmp/cr_S05-interfaces_2ajnqelz"}
+{"type":"status","phase":"connecting","status":"connecting_to_review_service"}
+{"type":"status","phase":"setup","status":"setting_up"}
+{"type":"action_required","status":"awaiting_confirmation","action":"rerun_with_use_credits","command":"coderabbit review --use-credits","billableFilesCount":167,"maximumCostCents":0,"promotionTerms":"On-demand reviews are free for the next 15 days. After that, they cost $0.25 per reviewed file.","confirmationHeadCommitId":"8ec85962af70370c60e60d0ad9c0f2715b3a30d0"}
