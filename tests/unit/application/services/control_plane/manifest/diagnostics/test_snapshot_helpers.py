@@ -77,11 +77,12 @@ def _ledger_entry(
     content_hash: str = "sha256:abc",
     immutable_uri: str = "file:///bronze/snap-1",
     materialization_mode: str | None = None,
+    run_id: RunID | None = None,
 ) -> RunLedgerEntry:
     return RunLedgerEntry(
         entry_id=entry_id,
         manifest_id="manifest-1",
-        run_id=_run_id(),
+        run_id=run_id or _run_id(),
         event_type=INPUT_SNAPSHOT_PUBLISHED_EVENT,
         occurred_at=datetime(2026, 6, 16, tzinfo=UTC),
         details={
@@ -142,6 +143,23 @@ def test_collect_ledger_input_snapshot_refs_filters_invalid_and_dedupes() -> Non
             "source_event_id": "entry-a",
         }
     ]
+
+
+def test_collect_ledger_input_snapshot_refs_keeps_first_entry_from_another_run() -> (
+    None
+):
+    first = _ledger_entry("entry-b", snapshot_id="snap-b", content_hash="sha256:abc")
+    other_run = _ledger_entry(
+        "entry-z",
+        snapshot_id="snap-b",
+        content_hash="sha256:other-run",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000456")),
+    )
+
+    refs = collect_ledger_input_snapshot_refs((first, other_run))
+
+    assert refs[0]["content_hash"] == "sha256:abc"
+    assert refs[0]["source_event_id"] == "entry-b"
 
 
 def test_materialization_mode_summary_handles_empty_single_and_mixed_modes() -> None:

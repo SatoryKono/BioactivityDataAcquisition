@@ -162,7 +162,9 @@ async def test_clear_delta_with_table_name() -> None:
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_clear_delta_without_table_name() -> None:
-    """clear_delta returns 0 when no table_name given."""
+    """clear_delta returns 0 and touches no table when no name is given."""
     mixin = _make_mixin()
     result = await mixin.clear_delta(None)
     assert result == 0
+    mixin.silver.clear.assert_not_called()
+    mixin.gold.clear.assert_not_called()

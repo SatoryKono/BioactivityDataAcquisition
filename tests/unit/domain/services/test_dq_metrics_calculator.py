@@ -259,3 +259,10 @@ class TestDQMetricsInput:
         assert input_data.existing_schema_fields == existing_fields
         assert input_data.quarantined_count == 5
         assert input_data.validation_errors == validation_errors
+
+
+def test_batch_dq_metrics_rejects_negative_counts() -> None:
+    from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+
+    with pytest.raises(ValueError, match="DQ record counts must be non-negative"):
+        BatchDQMetrics(total_records=-1)

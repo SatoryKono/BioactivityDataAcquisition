@@ -50,7 +50,7 @@ class MetricsServerAdapter:
     def start(
         self,
         port: int = 8000,
-        addr: str = "0.0.0.0",
+        addr: str = "127.0.0.1",
         *,
         started_at: datetime | None = None,
         fail_fast: bool = False,

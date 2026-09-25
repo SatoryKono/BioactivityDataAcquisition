@@ -41,7 +41,7 @@ class ObservabilityApiModule(Protocol):
     def start_metrics_server(
         self,
         port: int = 8000,
-        addr: str = "0.0.0.0",
+        addr: str = "127.0.0.1",
         *,
         fail_fast: bool = False,
         retry_count: int = 3,

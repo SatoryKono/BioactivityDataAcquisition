@@ -206,7 +206,9 @@ def record_input_snapshot_published(
     if query_fingerprint is not None:
         payload["query_fingerprint"] = str(query_fingerprint)
     if details:
-        payload.update(dict(details))
+        extra = dict(details)
+        extra.pop("snapshot_id", None)
+        payload.update(extra)
     return appender._append(
         event_type=INPUT_SNAPSHOT_PUBLISHED_EVENT,
         status="published",

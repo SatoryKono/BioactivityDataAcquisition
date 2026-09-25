@@ -153,7 +153,8 @@ class StorageMaintenancePort(Protocol):
         """Clear Delta tables for Silver and Gold layers.
 
         Args:
-            table_name: If provided, clears only this Delta table. Defaults to None (clears all).
+            table_name: If provided, clears only this Delta table.
+                ``None`` clears nothing and returns 0.
 
         Returns:
             Number of Delta tables cleared.

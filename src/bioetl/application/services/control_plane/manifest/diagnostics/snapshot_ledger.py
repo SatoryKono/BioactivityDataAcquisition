@@ -16,6 +16,7 @@ def collect_ledger_input_snapshot_refs(
 ) -> list[dict[str, object]]:
     """Return input snapshots materialized after manifest creation via ledger."""
     refs: dict[str, dict[str, object]] = {}
+    owners: dict[str, str] = {}
     for entry in ledger_entries:
         if entry.event_type != INPUT_SNAPSHOT_PUBLISHED_EVENT:
             continue
@@ -25,6 +26,11 @@ def collect_ledger_input_snapshot_refs(
         immutable_uri = _snapshot_required_text(details.get("immutable_uri"))
         if snapshot_id is None or content_hash is None or immutable_uri is None:
             continue
+        owner = str(entry.run_id)
+        previous_owner = owners.get(snapshot_id)
+        if previous_owner is not None and previous_owner != owner:
+            continue
+        owners[snapshot_id] = owner
         refs[snapshot_id] = {
             "provider": _snapshot_required_text(details.get("provider")),
             "entity": _snapshot_required_text(details.get("entity")),

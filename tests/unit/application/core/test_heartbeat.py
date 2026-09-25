@@ -310,3 +310,89 @@ class TestHeartbeatTask:
         await asyncio.wait_for(heartbeat_task._task, timeout=1.0)
         await heartbeat_task.stop()
         assert not heartbeat_task.is_running
+
+    async def test_heartbeat_loop_exception_requests_shutdown_without_raising(
+        self,
+        mock_lock_port: AsyncMock,
+        mock_shutdown_signal: Mock,
+        mock_logger: Mock,
+    ) -> None:
+        """An exception from heartbeat requests shutdown and completes the loop."""
+        call_count = 0
+
+        async def heartbeat(*args: object, **kwargs: object) -> bool:
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return True
+            raise RuntimeError("lock backend down")
+
+        mock_lock_port.heartbeat.side_effect = heartbeat
+        mock_shutdown_signal.is_requested = False
+
+        def _request() -> None:
+            mock_shutdown_signal.is_requested = True
+
+        mock_shutdown_signal.request.side_effect = _request
+
+        heartbeat_task = HeartbeatTask(
+            lock_port=mock_lock_port,
+            lock_key="lock:test_pipeline",
+            owner_id=TEST_RUN_ID,
+            exclusive=False,
+            interval=0,
+            shutdown_signal=mock_shutdown_signal,
+            logger=mock_logger,
+        )
+
+        await heartbeat_task.start()
+        assert heartbeat_task._task is not None
+        await asyncio.wait_for(heartbeat_task._task, timeout=1.0)
+
+        mock_shutdown_signal.request.assert_called()
+        mock_logger.error.assert_called()
+        assert heartbeat_task._task.exception() is None
+        await heartbeat_task.stop()
+
+    async def test_heartbeat_loop_exception_requests_shutdown_without_raising(
+        self,
+        mock_lock_port: AsyncMock,
+        mock_shutdown_signal: Mock,
+        mock_logger: Mock,
+    ) -> None:
+        """A heartbeat exception requests shutdown and completes the loop."""
+        call_count = 0
+
+        async def heartbeat(*args: object, **kwargs: object) -> bool:
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return True
+            raise ConnectionError("lock backend down")
+
+        mock_lock_port.heartbeat.side_effect = heartbeat
+        mock_shutdown_signal.is_requested = False
+
+        def _request() -> None:
+            mock_shutdown_signal.is_requested = True
+
+        mock_shutdown_signal.request.side_effect = _request
+
+        heartbeat_task = HeartbeatTask(
+            lock_port=mock_lock_port,
+            lock_key="lock:test_pipeline",
+            owner_id=TEST_RUN_ID,
+            exclusive=False,
+            interval=0,
+            shutdown_signal=mock_shutdown_signal,
+            logger=mock_logger,
+        )
+
+        await heartbeat_task.start()
+        assert heartbeat_task._task is not None
+        await asyncio.wait_for(heartbeat_task._task, timeout=1.0)
+
+        mock_shutdown_signal.request.assert_called()
+        mock_logger.error.assert_called()
+        assert heartbeat_task._task.exception() is None
+        await heartbeat_task.stop()

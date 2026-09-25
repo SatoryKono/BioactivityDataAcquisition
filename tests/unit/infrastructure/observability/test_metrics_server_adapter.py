@@ -172,6 +172,7 @@ class TestMetricsServerAdapter:
             obs_server.start_metrics_server(port=9999, started_at=_STARTED_AT)
 
         assert adapter.is_running() is True
+        assert adapter.get_runtime_status().addr == "127.0.0.1"
 
     def test_get_runtime_status_reads_live_server_state(self) -> None:
         """Test runtime status reads the current snapshot from the server module."""

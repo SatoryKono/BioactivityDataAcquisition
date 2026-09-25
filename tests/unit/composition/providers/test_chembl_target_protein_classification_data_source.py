@@ -260,9 +260,10 @@ async def test_relation_data_source_health_check_requires_snapshot_tables(
 
 
 @pytest.mark.asyncio
-async def test_relation_data_source_context_offset_and_close(
+async def test_relation_data_source_offset_and_limit_count_relation_rows(
     data_source: TargetProteinClassificationSnapshotDataSource,
 ) -> None:
+    """offset and limit both count emitted relation rows, not target ids."""
     async with data_source as loaded:
         assert loaded is data_source
 

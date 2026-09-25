@@ -120,6 +120,20 @@ class TestBronzeWriteResultValidation:
         with pytest.raises(ValueError, match="checksum_blake2 cannot be empty"):
             _make_valid_result(checksum_blake2="")
 
+    def test_absolute_relative_path_is_rejected_before_normalization(self) -> None:
+        """Absolute paths must not become relative by stripping the root."""
+        with pytest.raises(ValueError, match="relative_path must be relative"):
+            _make_valid_result(relative_path="/chembl/activity/batch.jsonl.zst")
+        with pytest.raises(ValueError, match="relative_path must be relative"):
+            _make_valid_result(relative_path=r"C:\chembl\activity\batch.jsonl.zst")
+
+    def test_absolute_relative_path_is_rejected(self) -> None:
+        """Absolute paths are rejected before slash-stripping."""
+        with pytest.raises(ValueError, match="relative_path must be relative"):
+            _make_valid_result(relative_path="/chembl/activity/batch.jsonl.zst")
+        with pytest.raises(ValueError, match="relative_path must be relative"):
+            _make_valid_result(relative_path=r"C:\chembl\activity\batch.jsonl.zst")
+
 
 @pytest.mark.unit
 class TestBronzeWriteResultProperties:

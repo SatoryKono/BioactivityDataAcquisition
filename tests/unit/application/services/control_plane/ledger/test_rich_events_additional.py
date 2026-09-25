@@ -145,3 +145,21 @@ def test_record_input_snapshot_published_includes_query_fingerprint_and_extra_de
         "row_count": 5,
         "published_by": "worker-1",
     }
+
+
+@pytest.mark.unit
+def test_record_input_snapshot_published_keeps_argument_snapshot_id() -> None:
+    entry = record_input_snapshot_published(
+        _FakeAppender(),
+        provider="chembl",
+        entity="activity",
+        pipeline_name="chembl_activity",
+        snapshot_id="sha256:def",
+        content_hash="def",
+        immutable_uri="vcr://chembl/activity",
+        bronze_batch_ref="bronze-batch-2",
+        details={"snapshot_id": "overwritten", "row_count": 5},
+    )
+
+    assert entry.details["snapshot_id"] == "sha256:def"
+    assert entry.details["row_count"] == 5

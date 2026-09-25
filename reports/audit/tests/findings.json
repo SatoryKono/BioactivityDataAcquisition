@@ -1,174 +1,27 @@
 {
-  "domain_id": "tests-system",
-  "prompt_id": "prompt.audit.tests-system",
+  "audit_id": "prompt.audit.tests-system",
+  "scope": "tests/",
+  "mode": "propose-patches",
+  "audit_mode": "full",
+  "require_gh_tracking": false,
   "surface_score": 2,
-  "head": "32d77a51e556de60d6dc0daf871a442becc709c5",
+  "full_suite_ran": false,
+  "flaky_labeled": false,
   "findings": [
     {
-      "id": "TST-001",
-      "finding_id": "TST-001",
-      "fingerprint": "8453294a8cbfd7f06d99cad9f4ea46636d0ec3ae78bdced4eeb92a6af9d8ddf4",
-      "requirement_id": "QG-TEST-001",
-      "path": "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py:219-224",
-      "observation": "В 16 модулях tests/architecture/test_tech_debt_issues_*.py закомментирована 71 строка assert, включая release_gate_status, fail_count и generated_artifact_drift; комментарии называют причиной local uncommitted changes. test_tech_debt_issues_5752_5755_closeout.py:140-142 принимает release_gate_status passing и failing и fail_count >= 0.",
-      "method": "AST/text census tests/architecture/test_tech_debt_issues_*.py @ 2026-09-25; inspection RULES.md §4.5 QG-TEST-001",
-      "expected": "Проверки наблюдаемого поведения остаются исполняемыми assert. Ослабление exact equality до permissive check требует явного contract-based обоснования.",
-      "actual": "Часть closeout-проверок лежит в комментариях. Соседний test_issue_5564_debt_governance_gates_remain_passing по-прежнему требует fail_count == 0 и release_gate_status == passing на том же debt-governance-gates.json. Ratchet refined_assertless смотрит AST и комментарии не видит.",
-      "impact": "Эти closeout-модули больше не ловят регрессию закомментированных условий. Merge по сводке debt gates пока держит test 5564. Паттерн может расширяться без срабатывания assertless-бюджета.",
-      "confidence": "high",
-      "confidence_score": 0.92,
-      "status": "PROVEN",
-      "evidence_class": "FACT",
+      "id": "TESTS-UNIT-SKIP-001",
       "priority": "P2",
-      "severity": "Medium",
-      "category": "assertion-integrity",
-      "claim": "Architecture closeout tests disable release-gate assertions via comments and a tautology while the AST assertless ratchet cannot see comments.",
-      "broken_invariant": "QG-TEST-001: assertions MUST NOT be weakened to keep the suite green.",
-      "root_cause": "Commented and tautological release-gate asserts in architecture closeout tests are invisible to the AST assertless ratchet",
-      "affected_paths": [
-        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5564_5603_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5570_5578_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5670_5675_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5700_5706_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5707_5715_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5744_5751_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5752_5755_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5861_5864_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5866_5872_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5954_5955_5962_5963_closeout.py",
-        "tests/architecture/test_tech_debt_issues_5956_5961_closeout.py",
-        "tests/architecture/test_tech_debt_issues_6022_6028_closeout.py"
-      ],
-      "evidence": [
-        {
-          "path": "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py",
-          "line": 219,
-          "observation": "Five release-gate asserts are commented with a local-development skip note."
-        },
-        {
-          "path": "tests/architecture/test_tech_debt_issues_5752_5755_closeout.py",
-          "line": 140,
-          "observation": "Live assert accepts release_gate_status passing or failing; fail_count >= 0."
-        }
-      ],
-      "acceptance": "Закомментированные assert либо восстановлены, либо удалены с заменой живой проверкой; permissive release_gate_status сужен до passing, если сводка обязана быть зелёной.",
-      "validation": [
-        "rg -n \"^\\s*#\\s*assert\" tests/architecture/test_tech_debt_issues_*.py"
-      ],
-      "validation_commands": [
-        "rg -n \"^\\s*#\\s*assert\" tests/architecture/test_tech_debt_issues_*.py"
-      ],
-      "rollback": "Вернуть предыдущие строки assert в тех же closeout-модулях.",
-      "owner_surface": "docs",
-      "remediation": "Вернуть исполняемые assert для release gate и drift там, где test 5564 их не дублирует; сузить строку 140 в test_tech_debt_issues_5752_5755_closeout.py до passing. Добавить в governance scan запрет закомментированного assert в tests/architecture.",
-      "effort": "M",
-      "automation": "Расширить report_test_governance_audit: fail на закомментированный assert в tests/architecture.",
-      "automated_fix_possible": false,
-      "dependencies": []
-    },
-    {
-      "id": "TST-002",
-      "finding_id": "TST-002",
-      "fingerprint": "7b3ec836d4bdf1605124fba361f38a027eae0316d1d034ed2bbfe962ff164779",
-      "requirement_id": "QG-TSTDET-001",
-      "path": "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py:217",
-      "observation": "test_issue_5684_governance_freshness_gates_are_passing сравнивает generated_at runtime_cardinality_review.json с datetime.now(UTC) и требует возраст не больше 21 дня. В модуле уже задан неиспользуемый этим тестом REFERENCE_NOW = 2026-07-06.",
-      "method": "inspection tests/architecture/test_tech_debt_issues_5677_5685_closeout.py:28,217,236; json generated_at reports/observability/runtime_cardinality_review.json @ 2026-09-25",
-      "expected": "Тест контролирует время: fixed/frozen clock или явная injected reference, без неконтролируемых wall-clock.",
-      "actual": "Возраст считается от datetime.now(UTC). generated_at = 2026-09-16T16:48:20Z; на 2026-09-25 возраст 9 дней при окне 21.",
-      "impact": "Около 2026-10-07 architecture-тест упадёт из-за календаря, без регрессии продукта, либо потребует внепланового refresh артефакта.",
-      "confidence": "high",
-      "confidence_score": 0.95,
       "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "determinism",
-      "claim": "The cardinality-review freshness test depends on wall-clock datetime.now and a 21-day window.",
-      "broken_invariant": "QG-TSTDET-001: tests MUST control time and MUST NOT depend on uncontrolled wall-clock.",
-      "root_cause": "Freshness test uses wall-clock datetime.now despite a frozen REFERENCE_NOW in the same module",
-      "affected_paths": [
-        "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py",
-        "reports/observability/runtime_cardinality_review.json"
+      "confidence": "medium",
+      "title": "Unit skip/xfail mentions sit outside the reviewed skip inventory",
+      "paths": [
+        "configs/quality/test_skip_inventory.yaml",
+        "tests/unit"
       ],
-      "evidence": [
-        {
-          "path": "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py",
-          "line": 217,
-          "observation": "age_days = (datetime.now(UTC) - generated_at).days; assert 0 <= age_days <= 21"
-        },
-        {
-          "path": "reports/observability/runtime_cardinality_review.json",
-          "observation": "generated_at is 2026-09-16T16:48:20Z"
-        }
-      ],
-      "acceptance": "Тест читает фиксированную или внедрённую дату; падение возможно только при смене контракта свежести в том же changeset, что и артефакт.",
-      "validation": [
-        "pytest tests/architecture/test_tech_debt_issues_5677_5685_closeout.py::test_issue_5684_governance_freshness_gates_are_passing -q --tb=short"
-      ],
-      "validation_commands": [
-        "pytest tests/architecture/test_tech_debt_issues_5677_5685_closeout.py::test_issue_5684_governance_freshness_gates_are_passing -q --tb=short"
-      ],
-      "rollback": "Вернуть расчёт age_days от datetime.now, если injected clock окажется неверным.",
-      "owner_surface": "docs",
-      "remediation": "Считать возраст от явной reference date, обновляемой вместе с generated_at, либо проверять поле generated_at на равенство зафиксированному значению без окна от wall-clock.",
-      "effort": "S",
-      "automation": "Architecture guard: datetime.now в tests/architecture только из reviewed allowlist.",
-      "automated_fix_possible": false,
-      "dependencies": []
-    },
-    {
-      "id": "TST-003",
-      "finding_id": "TST-003",
-      "fingerprint": "34a838273fe5be356b203be9eab0a6ae852c9025188bb03a244f7e990846ac17",
-      "requirement_id": "REQ-TEST-001",
-      "path": "tests/conftest.py:1273-1288",
-      "observation": "Autouse-фикстура _bioetl_test_silver_validator импортирует Silver/Delta/pyarrow на каждом тесте. Чистый domain-unit node дважды завершился timeout в setup и не исполнил тело.",
-      "method": "pytest N=2 node tests/unit/domain/services/test_author_normalization_service.py::TestHelperFunctions::test_hash_author_name_consistency; timeout_method=thread; exit 1 оба раза; завершение до 2026-09-25T08:47:48Z",
-      "expected": "Unit проверяет доменную логику и не тянет infrastructure storage import, если тест Silver writer не касается (RULES.md §4.2, traceability REQ-TEST-001).",
-      "actual": "Оба прогона exit 1 по pytest timeout=60 в setup. Первый стек: conftest.py:1284 → pyarrow._dataset _path_stat. Второй: тот же импорт, стек до pandas/__init__.py. Тело теста не запускалось.",
-      "impact": "На этом Windows venv локальный unit-узел не даёт сигнала регрессии: падает setup импорта Delta, не assertion домена. Linux CI этим прогоном не подтверждён и не опровергнут.",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "isolation",
-      "claim": "Every test, including pure domain unit tests, imports the Silver/Delta stack through an autouse fixture, and on this Windows checkout that import exceeds the 60s test timeout.",
-      "broken_invariant": "RULES.md §4.2 Unit: только доменная логика; traceability REQ-TEST-001.",
-      "root_cause": "Autouse silver-validator fixture imports Delta and pyarrow for every test, including pure domain unit nodes",
-      "affected_paths": [
-        "tests/conftest.py",
-        "pyproject.toml"
-      ],
-      "evidence": [
-        {
-          "path": "tests/conftest.py",
-          "line": 1273,
-          "command": "python -m pytest tests/unit/domain/services/test_author_normalization_service.py::TestHelperFunctions::test_hash_author_name_consistency -q --tb=line -p no:cacheprovider",
-          "observation": "N=2 @ 2026-09-25 before 08:47:48Z, both exit 1, timeout during setup import of bioetl.infrastructure.storage.silver.runtime_helpers"
-        }
-      ],
-      "acceptance": "Тот же node завершается exit 0 без импорта deltalake в setup, либо фикстура не autouse для тестов без SilverWriter.",
-      "validation": [
-        "python -m pytest tests/unit/domain/services/test_author_normalization_service.py::TestHelperFunctions::test_hash_author_name_consistency -q --tb=short"
-      ],
-      "validation_commands": [
-        "python -m pytest tests/unit/domain/services/test_author_normalization_service.py::TestHelperFunctions::test_hash_author_name_consistency -q --tb=short"
-      ],
-      "rollback": "Вернуть autouse=True и прямой import в _bioetl_test_silver_validator.",
-      "owner_surface": "codex",
-      "remediation": "Не импортировать Silver/Delta в autouse для тестов без маркера или использования SilverWriter. Оставить monkeypatch только на пути, которые реально конструируют writer.",
-      "effort": "M",
-      "automation": "Architecture test: domain unit modules не импортируют deltalake через tests/conftest.py autouse.",
-      "automated_fix_possible": false,
-      "dependencies": []
+      "evidence": "Inventory source_of_truth comment says unit suppressions are not in this census. Walk of tests/unit *.py: 2182 files, 120 pytest.mark.skip or pytest.skip( mentions, 0 pytest.mark.xfail mentions. Not classified as unconditional skips.",
+      "impact": "A unit test can stay skipped without the contract/integration/e2e inventory owner and expiry review.",
+      "proposed_patch": "Extend tests/architecture/test_test_skip_inventory.py so tests/unit unconditional pytest.mark.skip and pytest.skip( calls must be listed, while skipif stays allowed. Do not apply until approved.",
+      "patches_applied": false
     }
   ]
 }
