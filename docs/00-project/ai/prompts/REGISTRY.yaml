@@ -381,8 +381,8 @@ entries:
     and cyclic-pack
 - id: prompt.audit.cyclic-pack
   path: library/audit/cyclic-pack.md
-  status: deprecated
-  class: operator-paste
+  status: archived
+  class: historical
   tags:
   - audit
   - cycle
@@ -508,13 +508,13 @@ entries:
   summary: Grafana visual audit — palette, WCAG contrast, typography, encoding
 - id: prompt.audit.grok-cycle
   path: library/audit/grok-audit-cycle.md
-  status: deprecated
-  class: operator-paste
+  status: archived
+  class: historical
   tags:
   - audit
   - grok
   - operator
-  summary: One-cycle audit paste with severity, stop conditions, Windows/memory gates
+  summary: Archived pointer — use prompt.audit.cycle
   successor: prompt.audit.cycle
 - id: prompt.observability.sequential-run
   path: library/audit/observability-sequential.md

@@ -1,9 +1,9 @@
 ---
 id: prompt.audit.cyclic-pack
 version: 1.1.0
-status: deprecated
+status: archived
 successor: prompt.audit.cycle
-class: operator-paste
+class: historical
 owner: BioETL Team
 runtimes:
 - any
