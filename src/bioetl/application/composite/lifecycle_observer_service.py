@@ -10,10 +10,9 @@ import time
 from dataclasses import dataclass, field
 
 from bioetl.application.composite._lifecycle_observer_tracing_helpers import (
+    CompositeLifecycleEventMetricsMixin,
+    CompositeLifecycleSpanManagementMixin,
     _CompositeSpanHandleProtocol,
-)
-from bioetl.application.composite._lifecycle_observer_tracing_mixin import (
-    CompositeLifecycleTracingMixin,
 )
 from bioetl.application.composite.helpers.lifecycle_observer_terminal_emit import (
     emit_run_failed,
@@ -23,6 +22,13 @@ from bioetl.domain.events import PipelineEvent
 from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
 __all__ = ["CompositeLifecycleObserverService"]
+
+
+class CompositeLifecycleTracingMixin(
+    CompositeLifecycleEventMetricsMixin,
+    CompositeLifecycleSpanManagementMixin,
+):
+    """Tracing facade composed from focused event and span helpers."""
 
 
 @dataclass(slots=True)

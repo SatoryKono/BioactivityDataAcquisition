@@ -23,7 +23,7 @@ from bioetl.domain.normalization.profiles._standard_profile_spec import (
 )
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.bronze_result import _normalized_path_parts
-from bioetl.domain.value_objects.dq_metrics import DQMetrics
+from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.run_context import RunContext
 
 
@@ -64,9 +64,9 @@ def test_started_at_accepts_any_aware_offset_and_rejects_naive() -> None:
 
 def test_negative_dq_counters_are_rejected() -> None:
     with pytest.raises(ValueError, match="DQ record counts must be non-negative"):
-        DQMetrics(total_records=2, error_records=-1)
+        BatchDQMetrics(total_records=2, error_records=-1)
     with pytest.raises(ValueError, match="error_records cannot exceed total_records"):
-        DQMetrics(total_records=1, error_records=2)
+        BatchDQMetrics(total_records=1, error_records=2)
 
 
 def test_absolute_relative_path_is_rejected_before_segment_cleanup() -> None:

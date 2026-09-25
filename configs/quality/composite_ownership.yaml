@@ -190,7 +190,6 @@ areas:
       - src/bioetl/application/composite/_lifecycle_observer_event_metrics.py
       - src/bioetl/application/composite/_lifecycle_observer_span_management.py
       - src/bioetl/application/composite/_lifecycle_observer_tracing_helpers.py
-      - src/bioetl/application/composite/_lifecycle_observer_tracing_mixin.py
       - src/bioetl/application/composite/_lifecycle_observer_tracing_types.py
       - src/bioetl/application/composite/helpers/lifecycle_observer_terminal_emit.py
   - name: preflight
