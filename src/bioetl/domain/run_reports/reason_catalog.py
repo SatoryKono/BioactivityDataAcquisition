@@ -191,6 +191,26 @@ class ReasonCatalog:
         return self.resolve(code).default_outcome
 
 
+def compose_field_reason_code(base: str, field: str | None) -> str:
+    """Attach a field suffix when the token is a valid catalog field identifier.
+
+    Catalog entries keep the bare base code; reports may show ``BASE:field``
+    (for example ``INVALID_DATA:units``) without expanding the YAML catalog.
+    Invalid or empty field tokens leave ``base`` unchanged.
+    """
+    stripped_base = str(base).strip()
+    if not stripped_base:
+        return UNKNOWN_REASON
+    if field is None:
+        return stripped_base
+    stripped_field = str(field).strip()
+    if not stripped_field or _FIELD_REASON_TOKEN.fullmatch(stripped_field) is None:
+        return stripped_base
+    if ":" in stripped_base:
+        return stripped_base
+    return f"{stripped_base}:{stripped_field}"
+
+
 def normalize_reason_code(
     code: str | None, catalog: ReasonCatalog | None = None
 ) -> str:

@@ -54,6 +54,12 @@ class ValidationError(DataQualityError):
         # Always present so callers can access without AttributeError.
         self.record_id = record_id
         self.field = field
+        if reason_code is None and field:
+            from bioetl.domain.run_reports.reason_catalog import (
+                compose_field_reason_code,
+            )
+
+            reason_code = compose_field_reason_code(ErrorType.INVALID_DATA.value, field)
         self.reason_code = reason_code
 
 

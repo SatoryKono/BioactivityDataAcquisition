@@ -12,7 +12,9 @@ from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.services.dq.gold_filter_diagnostics import (
     resolve_gold_filter_details as _resolve_gold_filter_details,
 )
-from bioetl.domain.exceptions import DataQualityError
+from bioetl.domain.exceptions.validation import ValidationError
+from bioetl.domain.run_reports.reason_catalog import compose_field_reason_code
+from bioetl.domain.types import ErrorType
 
 if TYPE_CHECKING:
     from bioetl.application.core.protocols import (
@@ -106,9 +108,13 @@ def _apply_runtime_dq_outcomes(
         DQDisposition.FAIL,
     ):
         violated_rules = ", ".join(outcome.rule_id for outcome in outcomes)
-        raise DataQualityError(
+        field = _primary_dq_affected_field(outcomes, strongest_disposition)
+        reason_code = compose_field_reason_code(ErrorType.INVALID_DATA.value, field)
+        raise ValidationError(
             "Runtime DQ validation failed: "
-            f"disposition={strongest_disposition.value}; rules=[{violated_rules}]"
+            f"disposition={strongest_disposition.value}; rules=[{violated_rules}]",
+            field=field,
+            reason_code=reason_code,
         )
     projected = dict(silver_record)
     if any(outcome.disposition == DQDisposition.WARN for outcome in outcomes):

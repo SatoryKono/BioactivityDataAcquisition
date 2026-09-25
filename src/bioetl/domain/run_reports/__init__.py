@@ -23,6 +23,7 @@ from bioetl.domain.run_reports.reason_catalog import (
     REASON_CATALOG_VERSION,
     ReasonCatalog,
     default_reason_catalog,
+    compose_field_reason_code,
     normalize_reason_code,
 )
 from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
@@ -42,6 +43,7 @@ __all__ = [
     "bind_stage_accounting",
     "build_pipeline_run_report",
     "build_workflow_run_report",
+    "compose_field_reason_code",
     "default_reason_catalog",
     "get_stage_accounting",
     "normalize_reason_code",
