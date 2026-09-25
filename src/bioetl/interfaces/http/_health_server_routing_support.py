@@ -43,13 +43,13 @@ from bioetl.interfaces.http._report_selector_options import (
     load_report_selector_entries,
     supplement_report_options,
 )
+from bioetl.interfaces.http._selector_catalog import SelectorCatalog
 from bioetl.interfaces.http.control_plane_selector_context import (
     RUN_ID_NO_SELECTION,
     RunIdOptionPolicy,
     build_selector_context_payload,
     build_selector_filter_options_payload,
 )
-from bioetl.interfaces.http._selector_catalog import SelectorCatalog
 
 _NOT_FOUND_MESSAGE = "Not Found"
 _FILTER_OPTIONS_TIMEOUT_SECONDS = 20.0

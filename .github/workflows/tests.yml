@@ -93,7 +93,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-        with:
           # Keep smoke free of Git LFS so an exhausted LFS data pack cannot
           # block the entire Tests matrix. VCR content checks live in vcr-preflight.
           lfs: false
@@ -144,7 +143,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-        with:
           # Cassettes are git blobs. Keep lfs: false so an exhausted GitHub
           # LFS budget cannot block checkout; pointer stubs fail below.
           lfs: false
@@ -196,7 +194,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-        with:
           # PubChem VCR smoke uses git-stored cassettes. Fail closed when a
           # leftover Git LFS pointer is present (#7493).
           lfs: false
@@ -374,7 +371,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-        with:
           lfs: false
 
       - name: Reject Git LFS pointer cassettes
@@ -1930,7 +1926,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-        with:
           lfs: false
 
       - name: Setup Python + uv

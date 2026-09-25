@@ -27,8 +27,7 @@ jobs:
             -   name: Checkout
                 uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
                 with:
-                  persist-credentials: false
-                with:
+                    persist-credentials: false
                     fetch-depth: 0
 
             -   name: Setup Python + uv
@@ -214,8 +213,7 @@ jobs:
             -   name: Checkout
                 uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
                 with:
-                  persist-credentials: false
-                with:
+                    persist-credentials: false
                     # Current ref only. fetch-depth: 0 also fetches every remote
                     # branch and blows the architecture 210s budget.
                     fetch-depth: 1
@@ -281,8 +279,7 @@ jobs:
             -   name: Checkout
                 uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
                 with:
-                  persist-credentials: false
-                with:
+                    persist-credentials: false
                     fetch-depth: 1
 
             -   name: Unshallow current-ref history for ancestor gates

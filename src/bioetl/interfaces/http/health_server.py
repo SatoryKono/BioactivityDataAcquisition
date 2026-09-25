@@ -35,11 +35,11 @@ from bioetl.interfaces.http._health_server_control_plane_metrics_refresh import 
     run_periodic_control_plane_metrics_refresh,
     stop_control_plane_metrics_refresh,
 )
-from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixin
 from bioetl.interfaces.http._selector_catalog import (
     SELECTOR_ENDPOINT_CONCURRENCY,
     SelectorCatalog,
 )
+from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixin
 from bioetl.interfaces.http.health_server_routing_mixin import (
     HealthServerRoutingMixin,
 )
