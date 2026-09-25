@@ -575,7 +575,6 @@ nav:
           - "Grok Closeout Skill": 00-project/ai/grok/skills/bioetl-closeout/SKILL.md
           - "Grok Bootstrap Prompt": 00-project/ai/prompts/library/session/bootstrap.md
       - "Project Architecture Index": 00-project/architecture-index.md
-      - "Legacy Documentation Index": INDEX.md
       - "Architecture Extras":
           - "Compatibility Facade Inventory": 02-architecture/07-compatibility-facade-inventory.md
           - "Compatibility Facade Snapshot": 02-architecture/07-compatibility-facade-snapshot.md

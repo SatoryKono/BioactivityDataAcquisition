@@ -1,5 +1,7 @@
 # Анализ папок docs/ на предмет необходимости
 
+> Архивный снимок от 2026-08-08. Не нормативный. Актуальная карта: `docs/00-project/00-map.md`.
+
 **Дата:** 2026-08-08  
 **Цель:** Определить нужны ли проекту папки docs/data, docs/filters, docs/plans, docs/plugins, docs/reports, docs/ru и docs/security
 
