@@ -104,6 +104,9 @@ def _record_stage_outcome_accounting(stage: str, outcome: str, count: int) -> No
     stage_l = stage.lower()
     outcome_l = outcome.lower()
     if stage_l == "gold":
+        # Per-record Gold filter decisions own excluded_by_contract reasons.
+        if outcome_l == "excluded_by_contract":
+            return
         if outcome_l in _GOLD_REMOVAL_REASONS:
             accounting.record_removal(
                 StageId.GOLD.value,

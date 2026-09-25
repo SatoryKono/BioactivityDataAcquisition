@@ -62,6 +62,42 @@ reasons:
     layer: gold
     description: Record excluded by configured Gold eligibility filter
 
+  - code: required_field_missing
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold required field is empty. Field-specific code is required_field_missing:<field>.
+
+  - code: exclude_if_present
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold exclude_if_present field is populated. Field-specific code is exclude_if_present:<field>.
+
+  - code: column_filter_mismatch
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold column filter rejected the record.
+
+  - code: range_filter_mismatch
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold range filter rejected the record.
+
+  - code: list_length_filter_mismatch
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold list-length filter rejected the record.
+
+  - code: list_contains_filter_mismatch
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold list-contains filter rejected the record.
+
   - code: gold_contract_schema_failure
     family: contract
     default_outcome: excluded_by_contract

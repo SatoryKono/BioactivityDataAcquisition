@@ -78,17 +78,15 @@ def _seed_gold_removals_from_metrics(
     accounting: StageAccountingAccumulator,
     metrics: dict[str, Any],  # Any: report/json payload shape is dynamic
 ) -> None:
-    """Backfill gold removals from coarse metrics when hooks did not fire."""
+    """Fail when Gold exclusions were counted without a per-record reason."""
     excluded = int(metrics.get("records_gold_excluded_by_contract", 0) or 0)
-    if (
-        excluded > 0
-        and accounting.sum_outcome(StageId.GOLD.value, "excluded_by_contract") == 0
-    ):
-        accounting.record_removal(
-            StageId.GOLD.value,
-            outcome="excluded_by_contract",
-            reason_code=UNKNOWN_REASON,
-            count=excluded,
+    if excluded <= 0:
+        return
+    accounted = accounting.sum_outcome(StageId.GOLD.value, "excluded_by_contract")
+    if accounted != excluded:
+        raise ValueError(
+            "gold exclusions lack a per-record reason: "
+            f"records_gold_excluded_by_contract={excluded} accounted={accounted}"
         )
 
 
