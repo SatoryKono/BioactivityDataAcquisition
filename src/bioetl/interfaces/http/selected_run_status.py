@@ -412,9 +412,12 @@ async def handle_selected_run_status(
         payload = await run_bounded_forensic_operation(
             limiter=host._forensic_endpoint_limiter,
             operation_factory=lambda: asyncio.to_thread(load),
+            endpoint="selected-run-status",
         )
     except ForensicEndpointUnavailable as exc:
         payload = unavailable_status(pipeline, run_id, _QUERY_ERROR, exc.reason)
+        if exc.request_id is not None:
+            payload["request_id"] = exc.request_id
     except (OSError, RuntimeError, ValueError):
         payload = unavailable_status(pipeline, run_id, _QUERY_ERROR, "request_failed")
     await host._send_payload_response(writer, 200, payload)

@@ -6,7 +6,9 @@ from contextvars import ContextVar
 from time import perf_counter
 
 StageObserver = Callable[[str, float], None]
-_observer: ContextVar[StageObserver | None] = ContextVar("evidence_stage_observer", default=None)
+_observer: ContextVar[StageObserver | None] = ContextVar(
+    "evidence_stage_observer", default=None
+)
 
 
 @contextmanager
