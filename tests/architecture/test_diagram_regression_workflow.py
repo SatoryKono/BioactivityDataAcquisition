@@ -234,6 +234,19 @@ def test_vendored_mermaid_workflow_renamed_and_references_are_current() -> None:
     assert stale_hits == []
 
 
+def test_mkdocs_mermaid_extra_assets_exist() -> None:
+    mkdocs = Path("mkdocs.yml").read_text(encoding="utf-8")
+    assert "assets/javascripts/mermaid-init.js" in mkdocs
+    assert "assets/stylesheets/mermaid-responsive.css" in mkdocs
+    assert Path("docs/assets/javascripts/mermaid-init.js").is_file()
+    assert Path("docs/assets/stylesheets/mermaid-responsive.css").is_file()
+    workflow = Path(".github/workflows/validate-vendored-mermaid-assets.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "docs/assets/javascripts/mermaid-init.js" in workflow
+    assert "exit 1" in workflow
+
+
 def test_windows_render_wrapper_delegates_to_canonical_renderer() -> None:
     wrapper = Path("scripts/diagrams/render.ps1")
 

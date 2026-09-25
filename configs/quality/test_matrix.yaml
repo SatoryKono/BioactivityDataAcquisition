@@ -857,7 +857,7 @@ entity_test_ownership:
   composite.activity:
     - tests/unit/application/composite/test_composite_activity.py
   composite.assay:
-    - tests/e2e/test_chembl_assay_e2e.py
+    - tests/unit/application/composite/test_composite_assay.py
   composite.molecule:
     - tests/integration/composite/test_molecule_pipeline.py
   composite.publication:

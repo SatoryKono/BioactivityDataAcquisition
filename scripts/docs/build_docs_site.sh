@@ -33,6 +33,8 @@ elif command -v python3 >/dev/null 2>&1 && python3 -c "import mkdocs" >/dev/null
   run_router python3 "$@"
 elif [[ -x "./.venv/bin/python" ]]; then
   run_router ./.venv/bin/python "$@"
+elif [[ -x "./.venv-win/Scripts/python.exe" ]] && ./.venv-win/Scripts/python.exe -c "import mkdocs" >/dev/null 2>&1; then
+  run_router ./.venv-win/Scripts/python.exe "$@"
 elif [[ -x "./.venv/Scripts/python.exe" ]]; then
   # WSL can fail executing Windows binaries directly depending on interop policy.
   if command -v cmd.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
