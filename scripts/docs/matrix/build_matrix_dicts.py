@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import zipfile
 from collections import Counter
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Final
 from xml.etree import ElementTree as ET
@@ -282,10 +282,9 @@ def _column_dictionary(
     return dictionaries, review_queue
 
 
-def _base_payload(generated_at: str, workbook: Path) -> dict[str, object]:
+def _base_payload(workbook: Path) -> dict[str, object]:
     return {
-        "generated_at_utc": generated_at,
-        "source_workbook": str(workbook),
+        "source_workbook": workbook.name,
         "target_columns": list(TARGET_COLUMNS),
     }
 
@@ -451,19 +450,20 @@ def _detail_id_dictionary(
 
 def _write_yaml(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
         yaml.safe_dump(payload, allow_unicode=True, sort_keys=False),
         encoding="utf-8",
     )
+    os.replace(temporary, path)
 
 
 def _inventory_payload(
-    generated_at: str,
     workbook: Path,
     workbook_rows: dict[str, list[dict[str, str]]],
 ) -> dict[str, object]:
     return {
-        **_base_payload(generated_at, workbook),
+        **_base_payload(workbook),
         "sheets": {
             sheet_name: {
                 "row_count": len(rows),
@@ -476,12 +476,11 @@ def _inventory_payload(
 
 
 def _sheet_dictionary_payload(
-    generated_at: str,
     workbook: Path,
     workbook_rows: dict[str, list[dict[str, str]]],
 ) -> dict[str, object]:
     return {
-        **_base_payload(generated_at, workbook),
+        **_base_payload(workbook),
         "sheets": {
             sheet_name: _sheet_dictionary(rows)
             for sheet_name, rows in workbook_rows.items()
@@ -490,12 +489,11 @@ def _sheet_dictionary_payload(
 
 
 def _detail_id_payload(
-    generated_at: str,
     workbook: Path,
     detail_id_dictionary: dict[str, object],
 ) -> dict[str, object]:
     return {
-        **_base_payload(generated_at, workbook),
+        **_base_payload(workbook),
         "detail_column": DETAIL_COLUMN,
         "detail_id_column": DETAIL_ID_COLUMN,
         **detail_id_dictionary,
@@ -507,19 +505,18 @@ def main() -> int:
     workbook = args.workbook.resolve()
     output_dir = args.output_dir.resolve()
     workbook_rows = _read_workbook(workbook)
-    generated_at = datetime.now(UTC).isoformat()
     column_dictionaries, review_queue = _column_dictionary(workbook_rows)
     detail_id_dictionary = _detail_id_dictionary(workbook_rows)
-    base_payload = _base_payload(generated_at, workbook)
+    base_payload = _base_payload(workbook)
     output_paths = _output_paths(output_dir, workbook.stem)
 
     _write_yaml(
         output_paths["inventory"],
-        _inventory_payload(generated_at, workbook, workbook_rows),
+        _inventory_payload(workbook, workbook_rows),
     )
     _write_yaml(
         output_paths["sheet_dictionaries"],
-        _sheet_dictionary_payload(generated_at, workbook, workbook_rows),
+        _sheet_dictionary_payload(workbook, workbook_rows),
     )
     _write_yaml(
         output_paths["column_dictionaries"],
@@ -531,7 +528,7 @@ def main() -> int:
     )
     _write_yaml(
         output_paths["detail_id_dictionary"],
-        _detail_id_payload(generated_at, workbook, detail_id_dictionary),
+        _detail_id_payload(workbook, detail_id_dictionary),
     )
 
     print(

@@ -27,10 +27,12 @@ This policy applies to all script files in the `scripts/**` directory, including
 
 ## Current State Analysis
 
+File totals are the 2026-09-25 census in `script-naming-conventions.md` (456 Python scripts). The test-coverage split below is the 2026-08-09 slice and is not a live recount.
+
 ### Python Scripts
-- **Total:** 406 scripts
-- **With tests:** 109 scripts (26.8%)
-- **Without tests:** 297 scripts (73.2%)
+- **Total:** 406 scripts (2026-08-09 slice)
+- **With tests:** 109 scripts (26.8% of that slice)
+- **Without tests:** 297 scripts (73.2% of that slice)
 
 ### Test Coverage
 - **Total test files:** 111 test files

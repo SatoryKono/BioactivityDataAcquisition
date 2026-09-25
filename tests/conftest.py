@@ -1281,6 +1281,11 @@ def _bioetl_test_silver_validator(
     """
     if request.node.get_closest_marker("require_silver_validator") is not None:
         return
+    module_path = getattr(getattr(request.node, "module", None), "__file__", None)
+    if isinstance(module_path, str):
+        module_text = Path(module_path).read_text(encoding="utf-8", errors="replace")
+        if "SilverWriter" not in module_text and "silver_writer" not in module_text:
+            return
     from bioetl.infrastructure.storage.silver.runtime_helpers import (
         SilverWriterRuntimeServicesRequest,
     )

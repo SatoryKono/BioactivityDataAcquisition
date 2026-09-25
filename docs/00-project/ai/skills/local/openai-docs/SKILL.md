@@ -1,5 +1,5 @@
 > Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source: `.codex/skills/openai-docs/SKILL.md`
+> Canonical runtime source: none. This published overlay has no `.codex/skills` runtime file.
 > Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
 > Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
@@ -36,8 +36,7 @@ Provide authoritative, current guidance from OpenAI developer docs using the dev
 If MCP tools fail or no OpenAI docs resources are available:
 
 1. Run the install command yourself: `codex mcp add openaiDeveloperDocs --url https://developers.openai.com/mcp`
-1. If it fails due to permissions/sandboxing, immediately retry the same command with escalated permissions and include a 1-sentence justification for approval. Do not ask the user to run it yet.
-1. Only if the escalated attempt fails, ask the user to run the install command.
+1. If it fails, ask the user to run the install command. Do not request escalated permissions.
 1. Ask the user to restart Codex.
 1. Re-run the doc search/fetch after restart.
 

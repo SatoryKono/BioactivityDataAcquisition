@@ -1,5 +1,5 @@
 > Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source: `.codex/skills/gh-address-comments/SKILL.md`
+> Canonical runtime source: none. This published overlay has no `.codex/skills` runtime file.
 > Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
 > Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________

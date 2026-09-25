@@ -27,15 +27,17 @@ This policy applies to all script files in the `scripts/**` directory, including
 
 ## Current State Analysis
 
+File totals are the 2026-09-25 census in `script-naming-conventions.md` (456 Python scripts; 211 shell/PowerShell/batch scripts). The docstring split below is the 2026-08-09 slice and is not a live recount.
+
 ### Python Scripts
-- **Total:** 406 scripts
-- **With docstrings:** 360 scripts (88.7%)
-- **Without docstrings:** 46 scripts (11.3%)
+- **Total:** 406 scripts (2026-08-09 slice)
+- **With docstrings:** 360 scripts (88.7% of that slice)
+- **Without docstrings:** 46 scripts (11.3% of that slice)
 
 ### Shell Scripts
-- **Total:** 111 scripts
-- **With header comments:** 106 scripts (95.5%)
-- **Without header comments:** 5 scripts (4.5%)
+- **Total:** 111 scripts (2026-08-09 `.sh` slice)
+- **With header comments:** 106 scripts (95.5% of that slice)
+- **Without header comments:** 5 scripts (4.5% of that slice)
 
 **Overall compliance:** 90% (466 compliant out of 517 total scripts)
 
