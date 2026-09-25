@@ -10,7 +10,7 @@ from bioetl.application.core.data_source_mixins import (
     _WrappedDataSourceDelegationMixin,
 )
 from bioetl.application.core.derived_scan_budget import (
-    bounded_source_records,
+    iter_derived_source,
     resolve_derived_upstream_limit,
 )
 from bioetl.application.core.target_data_source_mixins import (
@@ -90,14 +90,18 @@ class SubcellularFractionDataSource(
         filter_ids: list[str] | None,
         filter_field: str | None,
     ) -> AsyncIterator[JsonDict]:
+        scan_limit = self._upstream_limit(limit, filter_ids)
         assays = self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
-            limit=self._upstream_limit(limit, filter_ids),
+            limit=scan_limit,
             query=query,
             filter_ids=filter_ids,
             filter_field=filter_field,
         )
-        async for record in self._extract_unique_fractions(assays, limit):
+        async for record in self._extract_unique_fractions(
+            iter_derived_source(assays, output_limit=limit, scan_limit=scan_limit),
+            limit,
+        ):
             yield record
 
     @staticmethod
@@ -124,12 +128,17 @@ class SubcellularFractionDataSource(
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[JsonDict]:
+        scan_limit = self._upstream_limit(limit, filter_ids)
         async for record in self._fetch_filtered_fractions(
-            filterable.fetch_filtered(
-                entity_type=self.SOURCE_ENTITY_TYPE,
-                filter_ids=filter_ids,
-                filter_field=filter_field,
-                limit=self._upstream_limit(limit, filter_ids),
+            iter_derived_source(
+                filterable.fetch_filtered(
+                    entity_type=self.SOURCE_ENTITY_TYPE,
+                    filter_ids=filter_ids,
+                    filter_field=filter_field,
+                    limit=scan_limit,
+                ),
+                output_limit=limit,
+                scan_limit=scan_limit,
             ),
             limit,
         ):
@@ -142,15 +151,20 @@ class SubcellularFractionDataSource(
         limit: int | None = None,
     ) -> AsyncIterator[JsonDict]:
         id_count = sum(len(values) for values in filters.values())
+        scan_limit = resolve_derived_upstream_limit(
+            limit,
+            multiplier=self.ASSAY_LIMIT_MULTIPLIER,
+            filter_id_count=id_count,
+        )
         async for record in self._fetch_filtered_fractions(
-            filterable.fetch_multi_filtered(
-                entity_type=self.SOURCE_ENTITY_TYPE,
-                filters=filters,
-                limit=resolve_derived_upstream_limit(
-                    limit,
-                    multiplier=self.ASSAY_LIMIT_MULTIPLIER,
-                    filter_id_count=id_count,
+            iter_derived_source(
+                filterable.fetch_multi_filtered(
+                    entity_type=self.SOURCE_ENTITY_TYPE,
+                    filters=filters,
+                    limit=scan_limit,
                 ),
+                output_limit=limit,
+                scan_limit=scan_limit,
             ),
             limit,
         ):
@@ -169,7 +183,15 @@ class SubcellularFractionDataSource(
         ],  # object: fallback source stream forwards raw upstream records before normalization.
         limit: int | None,
     ) -> AsyncIterator[JsonDict]:
-        return self._fetch_filtered_fractions(source_records, limit)
+        scan_limit = self._upstream_limit(limit)
+        return self._fetch_filtered_fractions(
+            iter_derived_source(
+                source_records,
+                output_limit=limit,
+                scan_limit=scan_limit,
+            ),
+            limit,
+        )
 
     async def _fetch_filtered_fractions(
         self,
@@ -196,7 +218,7 @@ class SubcellularFractionDataSource(
         limit: int | None,
     ) -> AsyncIterator[JsonDict]:
         async for record in support.extract_unique_fraction_records(
-            bounded_source_records(assays),
+            assays,
             limit,
             self._seen_fractions,
             # Limited runs stop once the unique quota is filled so upstream I/O

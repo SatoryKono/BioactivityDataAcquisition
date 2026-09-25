@@ -10,7 +10,7 @@ from bioetl.application.core.data_source_mixins import (
     _WrappedDataSourceDelegationMixin,
 )
 from bioetl.application.core.derived_scan_budget import (
-    bounded_source_records,
+    iter_derived_source,
     resolve_derived_upstream_limit,
 )
 from bioetl.application.core.target_data_source_mixins import (
@@ -67,15 +67,18 @@ class AssayParametersDataSource(
     ) -> AsyncIterator[JsonDict]:
         if limit is not None and limit <= 0:
             return
+        scan_limit = self._upstream_limit(limit, filter_ids)
         source = self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
-            limit=self._upstream_limit(limit, filter_ids),
+            limit=scan_limit,
             query=query,
             filter_ids=filter_ids,
             filter_field=filter_field,
         )
         async for parameter in self._expand_parameters(
-            bounded_source_records(source),
+            iter_derived_source(
+                source, output_limit=limit, scan_limit=scan_limit
+            ),
             limit=limit,
             offset=offset,
         ):
@@ -88,14 +91,17 @@ class AssayParametersDataSource(
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[JsonDict]:
+        scan_limit = self._upstream_limit(limit, filter_ids)
         async for parameter in self._expand_parameters(
-            bounded_source_records(
+            iter_derived_source(
                 filterable.fetch_filtered(
                     entity_type=self.SOURCE_ENTITY_TYPE,
                     filter_ids=filter_ids,
                     filter_field=filter_field,
-                    limit=self._upstream_limit(limit, filter_ids),
-                )
+                    limit=scan_limit,
+                ),
+                output_limit=limit,
+                scan_limit=scan_limit,
             ),
             limit=limit,
         ):
@@ -108,17 +114,20 @@ class AssayParametersDataSource(
         limit: int | None = None,
     ) -> AsyncIterator[JsonDict]:
         id_count = sum(len(values) for values in filters.values())
+        scan_limit = resolve_derived_upstream_limit(
+            limit,
+            multiplier=self.ASSAY_LIMIT_MULTIPLIER,
+            filter_id_count=id_count,
+        )
         async for parameter in self._expand_parameters(
-            bounded_source_records(
+            iter_derived_source(
                 filterable.fetch_multi_filtered(
                     entity_type=self.SOURCE_ENTITY_TYPE,
                     filters=filters,
-                    limit=resolve_derived_upstream_limit(
-                        limit,
-                        multiplier=self.ASSAY_LIMIT_MULTIPLIER,
-                        filter_id_count=id_count,
-                    ),
-                )
+                    limit=scan_limit,
+                ),
+                output_limit=limit,
+                scan_limit=scan_limit,
             ),
             limit=limit,
         ):
