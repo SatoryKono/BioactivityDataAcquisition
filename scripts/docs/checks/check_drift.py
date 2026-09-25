@@ -38,7 +38,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import yaml
@@ -1224,7 +1224,7 @@ def _check_active_non_canonical_evidence_summary(
         )
         return
 
-    age_days = (date.today() - last_verified).days
+    age_days = (datetime.now(UTC).date() - last_verified).days
     if age_days > freshness_window_days:
         report.add(
             "freshness",
