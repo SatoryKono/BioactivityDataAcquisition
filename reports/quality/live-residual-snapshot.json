@@ -3,7 +3,7 @@
   "linked_issue": "#6891",
   "follow_up_issue": "#7464",
   "parent_epic": "#6890",
-  "snapshot_date": "2026-09-23",
+  "snapshot_date": "2026-09-26",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
   "policy": {
     "direction": "shrink_only",
@@ -12,20 +12,20 @@
   },
   "hotspot_families": {
     "application_core": {
-      "files_ge_250_loc": 0,
-      "max_internal_fan_in": 5,
-      "helper_function_ratio": 0.384,
+      "files_ge_250_loc": 2,
+      "max_internal_fan_in": 6,
+      "helper_function_ratio": 0.385,
       "files": 196,
-      "total_loc": 24078,
+      "total_loc": 24264,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
     "composition_bootstrap_runtime": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.326,
-      "files": 45,
-      "total_loc": 6051,
+      "helper_function_ratio": 0.323,
+      "files": 50,
+      "total_loc": 6160,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -41,18 +41,18 @@
     "application_services_control_plane": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 1,
-      "helper_function_ratio": 0.375,
-      "files": 113,
-      "total_loc": 14514,
+      "helper_function_ratio": 0.378,
+      "files": 124,
+      "total_loc": 14703,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
     "composition_runtime_builders": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.382,
+      "helper_function_ratio": 0.386,
       "files": 56,
-      "total_loc": 7379,
+      "total_loc": 7398,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }
@@ -72,8 +72,8 @@
   },
   "closeout_program": {
     "tech_debt_closeout_test_file_count": 51,
-    "tech_debt_closeout_test_function_count": 262,
-    "tech_debt_closeout_test_loc": 10485,
+    "tech_debt_closeout_test_function_count": 263,
+    "tech_debt_closeout_test_loc": 10507,
     "closeout_files_using_live_residual_helpers": 8,
     "fold_into_generic_inventory_count": 60,
     "retained_public_entrypoint_count": 12,

@@ -981,7 +981,26 @@
     }
   },
   "assertless_total_candidates": 83,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 1,
+      "budget": "duplicate_test_names_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_names"
+    },
+    {
+      "actual": 2,
+      "budget": "duplicate_test_name_occurrences_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_name_occurrences"
+    },
+    {
+      "actual": 5,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1126,16 +1145,30 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [],
+  "duplicate_test_name_inventory": [
+    {
+      "classification": "same_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_heartbeat.py:314",
+        "tests/unit/application/core/test_heartbeat.py:357"
+      ],
+      "name": "test_heartbeat_loop_exception_requests_shutdown_without_raising",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    }
+  ],
   "duplicate_test_name_inventory_summary": {
     "cross_file_groups": 0,
-    "duplicate_occurrences": 0,
+    "duplicate_occurrences": 2,
     "mixed_groups": 0,
-    "same_file_groups": 0,
-    "total_duplicate_names": 0
+    "same_file_groups": 1,
+    "total_duplicate_names": 1
   },
-  "duplicate_test_name_occurrences": 0,
-  "duplicate_test_names": 0,
+  "duplicate_test_name_occurrences": 2,
+  "duplicate_test_names": 1,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1155,8 +1188,14 @@
     ]
   },
   "intentional_no_exception_contract": 83,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/unit/application/composite/test_composite_assay.py:20",
+    "tests/unit/application/composite/test_composite_assay.py:26",
+    "tests/unit/domain/services/test_dq_metrics_calculator.py:264",
+    "tests/unit/scripts/docs/test_check_drift_evidence_age.py:10",
+    "tests/unit/scripts/docs/test_check_drift_evidence_age.py:14"
+  ],
+  "markerless_test_functions": 5,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1963,16 +2002,30 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [],
+    "duplicate_test_name_inventory": [
+      {
+        "classification": "same_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_heartbeat.py:314",
+          "tests/unit/application/core/test_heartbeat.py:357"
+        ],
+        "name": "test_heartbeat_loop_exception_requests_shutdown_without_raising",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      }
+    ],
     "duplicate_test_name_inventory_summary": {
       "cross_file_groups": 0,
-      "duplicate_occurrences": 0,
+      "duplicate_occurrences": 2,
       "mixed_groups": 0,
-      "same_file_groups": 0,
-      "total_duplicate_names": 0
+      "same_file_groups": 1,
+      "total_duplicate_names": 1
     },
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 2,
+    "duplicate_test_names": 1,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -1991,8 +2044,14 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/application/composite/test_composite_assay.py:20",
+      "tests/unit/application/composite/test_composite_assay.py:26",
+      "tests/unit/domain/services/test_dq_metrics_calculator.py:264",
+      "tests/unit/scripts/docs/test_check_drift_evidence_age.py:10",
+      "tests/unit/scripts/docs/test_check_drift_evidence_age.py:14"
+    ],
+    "markerless_test_functions": 5,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2010,8 +2069,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2915,
-      "test_python_file_count": 3149,
+      "test_glob_file_count": 2928,
+      "test_python_file_count": 3162,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2051,24 +2110,39 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [],
-    "total_test_files": 2915,
-    "total_test_functions": 28721,
+    "top_duplicate_test_names": [
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/core/test_heartbeat.py:314",
+          "tests/unit/application/core/test_heartbeat.py:357"
+        ],
+        "name": "test_heartbeat_loop_exception_requests_shutdown_without_raising"
+      }
+    ],
+    "total_test_files": 2928,
+    "total_test_functions": 28805,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "8bc5f87f3a398916a41ed4e552d7d45061609fe2d0814b628947fe3ff823a378",
+  "source_tree_sha256": "14b7b3c21f742fd7c11f1eabcddd7c9b2740cc49084f4a885d2cfa9c47185e84",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 83,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 2,
+    "duplicate_test_names": 1,
     "intentional_no_exception_contract": 83,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/application/composite/test_composite_assay.py:20",
+      "tests/unit/application/composite/test_composite_assay.py:26",
+      "tests/unit/domain/services/test_dq_metrics_calculator.py:264",
+      "tests/unit/scripts/docs/test_check_drift_evidence_age.py:10",
+      "tests/unit/scripts/docs/test_check_drift_evidence_age.py:14"
+    ],
+    "markerless_test_functions": 5,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2078,8 +2152,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2915,
-    "test_python_file_count": 3149,
+    "test_glob_file_count": 2928,
+    "test_python_file_count": 3162,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2119,9 +2193,18 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [],
-  "total_test_files": 2915,
-  "total_test_functions": 28721,
+  "top_duplicate_test_names": [
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/core/test_heartbeat.py:314",
+        "tests/unit/application/core/test_heartbeat.py:357"
+      ],
+      "name": "test_heartbeat_loop_exception_requests_shutdown_without_raising"
+    }
+  ],
+  "total_test_files": 2928,
+  "total_test_functions": 28805,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

@@ -1574,7 +1574,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/03-guides/running-pipelines.md",
       "occurrence_count": 15,
-      "first_line": 622,
+      "first_line": 618,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1706,7 +1706,7 @@
       "symbol": "silver_filter_rejects",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 4,
-      "first_line": 939,
+      "first_line": 942,
       "role": "Operator summary alias for Silver rejects",
       "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
       "notes": ""
@@ -1772,7 +1772,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "docs/03-guides/metrics-monitoring.md",
       "occurrence_count": 1,
-      "first_line": 313,
+      "first_line": 312,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1805,7 +1805,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/dashboards/bioetl-dq-v2.json",
       "occurrence_count": 2,
-      "first_line": 2905,
+      "first_line": 2918,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1816,7 +1816,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 3,
-      "first_line": 884,
+      "first_line": 887,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1882,7 +1882,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 2,
-      "first_line": 1052,
+      "first_line": 1055,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""

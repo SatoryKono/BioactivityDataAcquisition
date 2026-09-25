@@ -22,8 +22,8 @@ from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
 from bioetl.domain.run_reports.reason_catalog import (
     REASON_CATALOG_VERSION,
     ReasonCatalog,
-    default_reason_catalog,
     compose_field_reason_code,
+    default_reason_catalog,
     normalize_reason_code,
 )
 from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
