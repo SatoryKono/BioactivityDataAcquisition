@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only optional Neo4j memory backend.
-  Last verified: '2026-07-20'
+  Last verified: '2026-09-25'
 
 ______________________________________________________________________
 
