@@ -775,12 +775,20 @@ layers:
     unit: SHOULD
     integration: SHOULD
     e2e: MUST
-    description: "DI wiring, factories, bootstrap."
+    description: >
+      DI wiring, factories, bootstrap. The full cassette replay
+      (e2e-nightly-full) is nightly-only: job e2e-nightly-full-replay
+      runs on schedule and workflow_dispatch and is skipped on pull_request.
+      The PR satellite is e2e_smoke and is not a required merge check.
 
   interfaces:
     unit: SHOULD
     e2e: MUST
-    description: "CLI commands, entry points."
+    description: >
+      CLI commands, entry points. The full cassette replay
+      (e2e-nightly-full) is nightly-only: job e2e-nightly-full-replay
+      runs on schedule and workflow_dispatch and is skipped on pull_request.
+      The PR satellite is e2e_smoke and is not a required merge check.
 
 # ── Provider-level requirements ──────────────────────────────
 
