@@ -58,7 +58,8 @@
 - [90-pkg-application-services-export-lineage — Package Family: application/services/export_lineage](#90-pkg-application-services-export-lineage)
 - [90-pkg-application-services-lineage — Package Family: application/services/lineage](#90-pkg-application-services-lineage)
 - [90-pkg-application-services-medallion — Package Family: application/services/medallion](#90-pkg-application-services-medallion)
-- [90-pkg-application-services-ops — Package Family: application/services/ops](#90-pkg-application-services-ops)
+- [90-pkg-application-services-ops-part1 — Package Family: application/services/ops (Part 1/2)](#90-pkg-application-services-ops-part1)
+- [90-pkg-application-services-ops-part2 — Package Family: application/services/ops (Part 2/2)](#90-pkg-application-services-ops-part2)
 - [90-pkg-application-services-protein — Package Family: application/services/protein](#90-pkg-application-services-protein)
 - [90-pkg-application-services-quality — Package Family: application/services/quality](#90-pkg-application-services-quality)
 - [90-pkg-application-services-run-reports — Package Family: application/services/run_reports](#90-pkg-application-services-run-reports)
@@ -1159,20 +1160,39 @@
 
 <div style="page-break-before: always;"></div>
 
-## 90-pkg-application-services-ops
+## 90-pkg-application-services-ops-part1
 
-**Package Family: application/services/ops**
+**Package Family: application/services/ops (Part 1/2)**
 
-![90-pkg-application-services-ops](../class-diagrams/svg/90-pkg-application-services-ops.svg)
+![90-pkg-application-services-ops-part1](../class-diagrams/svg/90-pkg-application-services-ops-part1.svg)
 
 ### Описание
-Диаграмма «Package Family: application/services/ops» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/ops; modules: metrics_service, _metrics_service_gateway_support, config_service, health_service, vacuum_service, bronze_cleanup_service.. Схема имеет плотность порядка 26 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: metrics service, metrics service gateway support, config service, health service, vacuum service, bronze cleanup service. Показательные узлы для быстрого чтения: MetricsService, _MetricsLifecycleMixin, _MetricsStartHost, _MetricsStartMixin, _MetricsStatusHost, _MetricsGatewayHost. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: application/services/ops (Part 1/2)» — AST-срез `src/bioetl/application/services/ops`, часть 1/2. Модули: observability_backend_startup_types, metrics_service, _metrics_service_gateway_support. Узлов: 27.
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
-- Узлы (metadata): `26`
+- Дата: `2026-09-25`
+- Узлы (metadata): `27`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 90-pkg-application-services-ops-part2
+
+**Package Family: application/services/ops (Part 2/2)**
+
+![90-pkg-application-services-ops-part2](../class-diagrams/svg/90-pkg-application-services-ops-part2.svg)
+
+### Описание
+Диаграмма «Package Family: application/services/ops (Part 2/2)» — AST-срез `src/bioetl/application/services/ops`, часть 2/2. Модули: config_service, health_service, vacuum_service, bronze_cleanup_service, lock_service, error_handler. Узлов: 17.
+
+### Метаданные
+- Тип: `classDiagram`
+- Уровень: `Package Family / Inventory Slice`
+- Дата: `2026-09-25`
+- Узлы (metadata): `17`
 
 \newpage
 
