@@ -50,6 +50,7 @@ class HealthServerRoutingMixin:
     _runtime_source_id: str | None = None
     _prometheus_base_url: str
     _forensic_endpoint_limiter: asyncio.Semaphore
+    _selector_endpoint_limiter: asyncio.Semaphore
 
     if TYPE_CHECKING:
         # Supplied by sibling mixins in the concrete HealthServer MRO.

@@ -81,6 +81,9 @@ class _HealthRoutingHost(_HealthResponseSupport, Protocol):
     def _forensic_endpoint_limiter(self) -> asyncio.Semaphore: ...
 
     @property
+    def _selector_endpoint_limiter(self) -> asyncio.Semaphore: ...
+
+    @property
     def _checkpoint_port(self) -> CheckpointPort | None: ...
 
     @property
@@ -188,9 +191,10 @@ async def handle_control_plane_filter_options(
     """Handle control-plane-backed selector options for Grafana variables."""
     try:
         payload = await run_bounded_forensic_operation(
-            limiter=host._forensic_endpoint_limiter,
+            limiter=host._selector_endpoint_limiter,
             operation_factory=lambda: _filter_options_payload(host, query),
             timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
+            endpoint="/ops/control-plane/filter-options",
         )
     except ForensicEndpointUnavailable as exc:
         await host._send_payload_response(
