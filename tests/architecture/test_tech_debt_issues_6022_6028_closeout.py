@@ -67,10 +67,9 @@ def test_issue_6022_generated_artifact_coherence_gates_pass() -> None:
     scorecard = _load_json(SCORECARD)
     gates = _load_json(GATES)
 
-    # Updated to allow 3 failing gates temporarily during baseline refresh
-    assert gates["summary"]["fail_count"] <= 3
-    # Temporarily allow 1 stale artifact during baseline refresh
-    # assert _gate(gates, "generated_artifact_drift")["current"] == 0
+    assert gates["summary"]["fail_count"] == 0
+    assert _gate(gates, "generated_artifact_drift")["status"] == "pass"
+    assert _gate(gates, "generated_artifact_drift")["current"]["count"] == 0
     assert _gate(gates, "module_coverage_source_tree_hash_current")["status"] == "pass"
     # Temporarily allow fail while refreshing baselines
     # assert _gate(gates, "module_coverage_scorecard_coherence")["status"] == "pass"

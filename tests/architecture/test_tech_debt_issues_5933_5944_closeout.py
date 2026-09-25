@@ -97,11 +97,10 @@ def test_issue_5933_governance_artifacts_are_rebaselined() -> None:
     remote = _load_json(REMOTE_BASELINE)
     debt_scorecard = _load_yaml(DEBT_SCORECARD)
 
-    # Skip release gate status check for local development with uncommitted changes
-    # assert gates["summary"]["release_gate_status"] == "passing"
-    # assert gates["summary"]["fail_count"] == 0
-    # assert gates["summary"]["warn_count"] == 0
-    # assert all(stale is False for stale in gates["stale_artifacts"].values())
+    assert gates["summary"]["release_gate_status"] == "passing"
+    assert gates["summary"]["fail_count"] == 0
+    assert gates["summary"]["warn_count"] == 0
+    assert all(stale is False for stale in gates["stale_artifacts"].values())
 
     coverage_summary = coverage["summary"]
     assert (
