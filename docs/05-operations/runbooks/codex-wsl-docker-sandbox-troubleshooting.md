@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010); Docker/MCP are optional adjunct tooling.
-  Last verified: '2026-07-16'
+  Last verified: '2026-09-25'
 
 ______________________________________________________________________
 
