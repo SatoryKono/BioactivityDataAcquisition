@@ -981,6 +981,10 @@
                         "text": "VERIFY",
                         "color": "#8e8e8e"
                       },
+                      "60": {
+                        "text": "CRIT",
+                        "color": "red"
+                      },
                       "control_plane": {
                         "text": "Trust",
                         "color": "text"
@@ -1116,6 +1120,10 @@
                         "text": "VERIFY",
                         "color": "#8e8e8e"
                       },
+                      "60": {
+                        "text": "CRIT",
+                        "color": "red"
+                      },
                       "control_plane_guardrail_active": {
                         "text": "Replay guardrail active"
                       },
@@ -1160,6 +1168,9 @@
                       },
                       "provider_scope_degradation": {
                         "text": "Provider degraded"
+                      },
+                      "workflow_scope_critical": {
+                        "text": "Workflow CRIT"
                       }
                     }
                   },
@@ -5091,6 +5102,9 @@
                           },
                           "provider_scope_degradation": {
                             "text": "Provider degraded"
+                          },
+                          "workflow_scope_critical": {
+                            "text": "Workflow CRIT"
                           }
                         }
                       }

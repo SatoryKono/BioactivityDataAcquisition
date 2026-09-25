@@ -248,6 +248,9 @@ def apply_workflow_scope(payload: dict) -> None:
                                 mapping["options"]["provider_scope_degradation"] = {
                                     "text": "Provider degraded"
                                 }
+                                mapping["options"]["workflow_scope_critical"] = {
+                                    "text": "Workflow CRIT"
+                                }
                     if prop["id"] == "links":
                         for link in prop["value"]:
                             if "${__data.fields.action_scope" in link.get("url", ""):

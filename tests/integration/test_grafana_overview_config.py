@@ -322,13 +322,13 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
         if mapping.get("type") == "value":
             action_maps.update(mapping.get("options") or {})
     for key, text in {
-        "runtime": "Diagnostics",
+        "runtime": "Diagnose",
         "control_plane": "Trust",
         "dq": "Data Quality",
         "provider": "Provider Health",
         "monitor": "Monitor",
         "no_route": "No route",
-        "workflow": "Diagnostics",
+        "workflow": "Diagnose",
     }.items():
         assert key in action_maps, f"missing Action map for {key}"
         assert action_maps[key].get("text") == text

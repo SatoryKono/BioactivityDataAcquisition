@@ -103,8 +103,13 @@ groups:
       action_target: workflow
       action_reason: workflow_scope_requires_review
       action_dashboard_uid: bioetl-runtime
-    expr: label_replace(((bioetl_workflow_scope_input_status{input="workflow"} == bool 2) * 60 + (bioetl_workflow_scope_input_status{input="workflow"}
-      == bool 1) * 10), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="workflow"} == bool 1) * 10), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+  - record: bioetl_workflow_scope_action
+    labels:
+      action_target: workflow
+      action_reason: workflow_scope_critical
+      action_dashboard_uid: bioetl-overview-v2
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="workflow"} == bool 2) * 60), "action_scope", "var-pipeline=$1&viewPanel=9701", "pipeline", "([A-Za-z0-9_]+)")
   - record: bioetl_workflow_scope_action
     labels:
       action_target: monitor

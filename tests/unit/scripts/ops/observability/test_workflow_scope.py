@@ -28,6 +28,11 @@ def test_scope_is_idempotent_and_does_not_rewrite_saved_run(uid):
     expr = card["targets"][0]["expr"]
     assert 'workflow=~"$workflow"' in expr
     assert "$run_id" not in expr
+    assert "topk(1, bioetl_workflow_scope_priority_by_input" in expr
+    assert card["targets"][0]["legendFormat"] == "{{workflow}} · {{input}}"
+    assert card["options"]["textMode"] == "value_and_name"
+    assert "displayName" not in card["fieldConfig"]["defaults"]
+    assert "viewPanel=9701" in card["fieldConfig"]["defaults"]["links"][0]["url"]
     assert (
         card["fieldConfig"]["defaults"]["mappings"][0]["options"]["3"]["text"] == "CRIT"
     )
