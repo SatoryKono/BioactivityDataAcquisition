@@ -338,7 +338,7 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">CURRENT card: ${workflow:text} / ${pipeline:text} / ${run_type:text}.<br>Open First Action; VERIFY means evidence is missing. SELECTED RUN is persisted history.</div>",
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">CURRENT: ${workflow:text} / ${pipeline:text} / ${run_type:text}; Run ID does not filter this card.<br>Open First Action; VERIFY means evidence is missing. SELECTED RUN is persisted history.</div>",
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence"
       },
@@ -658,7 +658,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Selected workflow, pipeline and run type; not Selected Run. Inspect Current Workflow Evidence below for the source and publication clock.",
+      "description": "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -717,8 +717,14 @@
             ]
           },
           "unit": "none",
-          "links": [],
-          "displayName": "Monitor Scope Health"
+          "links": [
+            {
+              "title": "Inspect current workflow evidence and publication time",
+              "url": "/d/bioetl-overview-v2/?viewPanel=9701&var-workflow=${__field.labels.workflow:percentencode}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ]
         },
         "overrides": []
       },
@@ -741,7 +747,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value",
+        "textMode": "value_and_name",
         "dataLinks": [
           {
             "title": "Open Runtime",
@@ -770,14 +776,15 @@
         ],
         "text": {
           "valueSize": 20,
-          "titleSize": 14
+          "titleSize": 12
         }
       },
       "targets": [
         {
           "refId": "A",
           "instant": true,
-          "expr": "max(bioetl_workflow_scope_priority{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
+          "expr": "topk(1, bioetl_workflow_scope_priority_by_input{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+          "legendFormat": "{{workflow}} · {{input}}"
         }
       ],
       "title": "Monitor Scope Health",
@@ -851,6 +858,10 @@
                 "15": {
                   "text": "VERIFY",
                   "color": "#8e8e8e"
+                },
+                "60": {
+                  "text": "CRIT",
+                  "color": "red"
                 }
               }
             },
@@ -4849,6 +4860,10 @@
                     "15": {
                       "text": "VERIFY",
                       "color": "#8e8e8e"
+                    },
+                    "60": {
+                      "text": "CRIT",
+                      "color": "red"
                     }
                   }
                 },

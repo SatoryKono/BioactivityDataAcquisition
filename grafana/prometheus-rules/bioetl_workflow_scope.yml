@@ -61,6 +61,8 @@ groups:
   - record: bioetl_workflow_scope_priority
     expr: "max by (workflow, pipeline, run_type) (\n  (bioetl_workflow_scope_input_status == bool 2) * 3\n  + (bioetl_workflow_scope_input_status\
       \ == bool 1) * 2\n  + (bioetl_workflow_scope_input_status == bool 3))"
+  - record: bioetl_workflow_scope_priority_by_input
+    expr: (bioetl_workflow_scope_input_status == bool 2) * 3 + (bioetl_workflow_scope_input_status == bool 1) * 2 + (bioetl_workflow_scope_input_status == bool 3)
   - record: bioetl_workflow_scope_action
     labels:
       action_target: runtime
@@ -101,8 +103,8 @@ groups:
       action_target: workflow
       action_reason: workflow_scope_requires_review
       action_dashboard_uid: bioetl-runtime
-    expr: label_replace((((bioetl_workflow_scope_input_status{input="workflow"} >= bool 1) * (bioetl_workflow_scope_input_status{input="workflow"}
-      < bool 3)) * 10), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="workflow"} == bool 2) * 60 + (bioetl_workflow_scope_input_status{input="workflow"}
+      == bool 1) * 10), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
   - record: bioetl_workflow_scope_action
     labels:
       action_target: monitor

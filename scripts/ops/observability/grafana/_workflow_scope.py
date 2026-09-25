@@ -156,7 +156,7 @@ def apply_workflow_scope(payload: dict) -> None:
             panel["options"]["content"] = (
                 '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
                 'font-size:16px;line-height:1.2;overflow-wrap:anywhere">'
-                "CURRENT card: ${workflow:text} / ${pipeline:text} / ${run_type:text}.<br>"
+                "CURRENT: ${workflow:text} / ${pipeline:text} / ${run_type:text}; Run ID does not filter this card.<br>"
                 + suffix
                 + "</div>"
             )
@@ -165,12 +165,26 @@ def apply_workflow_scope(payload: dict) -> None:
                 {
                     "refId": "A",
                     "instant": True,
-                    "expr": f"max(bioetl_workflow_scope_priority{{{_SCOPE}}})",
+                    "expr": f"topk(1, bioetl_workflow_scope_priority_by_input{{{_SCOPE}}})",
+                    "legendFormat": "{{workflow}} · {{input}}",
                 }
             ]
             panel["description"] = (
-                "CURRENT · Selected workflow, pipeline and run type; not Selected Run. Inspect Current Workflow Evidence below for the source and publication clock."
+                "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed."
             )
+            panel["options"]["textMode"] = "value_and_name"
+            panel["options"]["text"] = {"valueSize": 20, "titleSize": 12}
+            defaults = panel["fieldConfig"]["defaults"]
+            defaults.pop("displayName", None)
+            defaults["links"] = [
+                {
+                    "title": "Inspect current workflow evidence and publication time",
+                    "url": "/d/"
+                    + payload["uid"]
+                    + "/?viewPanel=9701&var-workflow=${__field.labels.workflow:percentencode}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                    "targetBlank": False,
+                }
+            ]
             panel["fieldConfig"]["defaults"]["mappings"] = [
                 {"type": "value", "options": deepcopy(_PRIORITIES)},
                 {
@@ -185,6 +199,9 @@ def apply_workflow_scope(payload: dict) -> None:
                     'bioetl_workflow_scope_action{workflow=~"$workflow",',
                 )
         if panel.get("id") in {215, 20215}:
+            for mapping in panel["fieldConfig"]["defaults"].get("mappings", []):
+                if mapping.get("type") == "value":
+                    mapping["options"]["60"] = {"text": "CRIT", "color": "red"}
             panel.setdefault("options", {})["cellHeight"] = "lg"
             for override in panel.get("fieldConfig", {}).get("overrides", []):
                 if override["matcher"].get("options") == "Priority":

@@ -63,7 +63,7 @@ tests:
     eval_time: 16m
     exp_samples:
     - labels: '{}'
-      value: 10
+      value: 60
   - expr: max(bioetl_workflow_scope_published_seconds{workflow="chembl_publication"})
     eval_time: 16m
     exp_samples:
@@ -331,3 +331,40 @@ tests:
     exp_samples:
     - labels: '{}'
       value: 1
+- name: Critical workflow outranks DQ warning and cause label identifies responsible
+    domain
+  interval: 1m
+  input_series:
+  - series: bioetl_workflow_pipeline_expected{workflow="chembl_publication",pipeline="chembl_publication",run_type="backfill"}
+    values: 1+0x30
+  - series: bioetl_workflow_pipeline_expected{workflow="chembl_reference_pack",pipeline="chembl_publication",run_type="backfill"}
+    values: 1+0x30
+  - series: bioetl_workflow_current_status{workflow="chembl_publication",job="bioetl_workflow_chembl_publication"}
+    values: 0+0x30
+  - series: bioetl_workflow_current_status{workflow="chembl_reference_pack",job="bioetl_workflow_chembl_reference_pack"}
+    values: 2+0x30
+  - series: push_time_seconds{job="bioetl_workflow_chembl_publication"}
+    values: 1+0x30
+  - series: push_time_seconds{job="bioetl_workflow_chembl_reference_pack"}
+    values: 1+0x30
+  - series: bioetl_l0_input_status_selected{input="runtime",pipeline="chembl_publication",run_type="backfill"}
+    values: 0+0x30
+  - series: bioetl_l0_input_status_selected{input="dq",pipeline="chembl_publication",run_type="backfill"}
+    values: 1+0x30
+  - series: bioetl_l0_input_status_selected{input="provider",pipeline="chembl_publication",run_type="backfill"}
+    values: 0+0x30
+  - series: bioetl_l0_input_status_selected{input="gold",pipeline="chembl_publication",run_type="backfill"}
+    values: 0+0x30
+  - series: bioetl_l0_input_status_selected{input="control_plane",pipeline="chembl_publication",run_type="backfill"}
+    values: 0+0x30
+  promql_expr_test:
+  - expr: max(bioetl_workflow_scope_action{action_target="workflow"}) > max(bioetl_workflow_scope_action{action_target="dq"})
+    eval_time: 16m
+    exp_samples:
+    - labels: '{}'
+      value: 60
+  - expr: topk(1, bioetl_workflow_scope_priority_by_input)
+    eval_time: 16m
+    exp_samples:
+    - labels: bioetl_workflow_scope_priority_by_input{input="workflow",pipeline="chembl_publication",run_type="backfill",workflow="chembl_reference_pack"}
+      value: 3
