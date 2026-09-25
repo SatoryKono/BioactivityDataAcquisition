@@ -67,7 +67,7 @@ Default **`CYCLE_COUNT=1`**. Пустые циклы «для формы» за�
 
 | Card | Когда |
 | --- | --- |
-| `prompt.tests.fix-retest` | узкий run→fix→run без multi-cycle reporting |
+| `prompt.tests.fix-retest` | план, аудит, правка issue, затем узкий run→fix→run и закрытие |
 | `prompt.tests.speed-optimization` | ускорение suite без ослабления coverage |
 | `prompt.audit.tests-system` | аудит тестовой системы (не run loop) |
 | `prompt.closeout.grok` | закрытие issues после merge evidence |

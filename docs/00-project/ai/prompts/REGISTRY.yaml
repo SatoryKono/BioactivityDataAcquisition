@@ -102,7 +102,7 @@ scenarios:
   deps:
   - prompt.fragment.git-safety
 - id: test-fix-retest
-  scenario: Run-fix-retest loop
+  scenario: Plan, audit, implement, then run-fix-retest and close
   role: py-test-bot
   prompt: prompt.tests.fix-retest
   inputs:
