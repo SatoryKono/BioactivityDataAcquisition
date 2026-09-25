@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **GitHub Actions billing stay-off:** ruleset `13643213` stays disabled, scheduled Release/VACUUM/contract-tests/diagram-nightly triggers are removed, `pr-gate` checks out the base ref, and checkout steps set `persist-credentials: false`.
+
 - **`chembl_reference_pack` limited subcellular scan:** a `--limit` whose
   assay window reaches the 50_000 derived-scan ceiling no longer adds a
   look-ahead row, so `chembl_subcellular_fraction` does not fail with

@@ -40,7 +40,6 @@ jobs:
           persist-credentials: false
           # Passport provenance resolves the latest commit touching fact owners.
           fetch-depth: 0
-          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv

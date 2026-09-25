@@ -28,7 +28,6 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-          persist-credentials: false
 
       - name: Install CodeRabbit CLI
         env:

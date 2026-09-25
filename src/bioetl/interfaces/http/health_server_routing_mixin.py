@@ -28,6 +28,7 @@ from bioetl.interfaces.http._health_server_routing_support import (
     dispatch_quarantine_request,
 )
 from bioetl.interfaces.http._processed_records_value_support import _is_all_scope
+from bioetl.interfaces.http._selector_catalog import SelectorCatalog
 from bioetl.interfaces.http.types import HealthResponse
 
 _NOT_FOUND_MESSAGE = "Not Found"
@@ -51,6 +52,7 @@ class HealthServerRoutingMixin:
     _prometheus_base_url: str
     _forensic_endpoint_limiter: asyncio.Semaphore
     _selector_endpoint_limiter: asyncio.Semaphore
+    _selector_catalog: SelectorCatalog
 
     if TYPE_CHECKING:
         # Supplied by sibling mixins in the concrete HealthServer MRO.
