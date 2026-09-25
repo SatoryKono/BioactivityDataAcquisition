@@ -1164,6 +1164,12 @@ def _check_runtime_mirror_section(
         )
 
 
+def _utc_evidence_age_days(last_verified: date, *, today: date | None = None) -> int:
+    """Return whole-day age using UTC when the caller does not pin today."""
+    current_day = today if today is not None else datetime.now(UTC).date()
+    return (current_day - last_verified).days
+
+
 def _check_active_non_canonical_evidence_summary(
     report: DriftReport,
     relative_path: Path,
@@ -1224,7 +1230,7 @@ def _check_active_non_canonical_evidence_summary(
         )
         return
 
-    age_days = (datetime.now(UTC).date() - last_verified).days
+    age_days = _utc_evidence_age_days(last_verified)
     if age_days > freshness_window_days:
         report.add(
             "freshness",

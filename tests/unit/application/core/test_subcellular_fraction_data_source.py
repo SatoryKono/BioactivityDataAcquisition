@@ -269,6 +269,26 @@ class TestSubcellularFractionDataSourceFetch:
         assert source.fetch_calls[-1]["limit"] == 1 * wrapper.ASSAY_LIMIT_MULTIPLIER + 1
 
     @pytest.mark.asyncio
+    async def test_limited_fetch_stops_when_upstream_scan_cap_is_passed(self) -> None:
+        scan_limit = 1 * SubcellularFractionDataSource.ASSAY_LIMIT_MULTIPLIER + 1
+        assays = [
+            {
+                "assay_id": f"CHEMBL{index}",
+                "assay_subcellular_fraction": "Microsomes" if index == 0 else None,
+            }
+            for index in range(scan_limit + 5)
+        ]
+        source = MockDataSource(assays=assays)
+        wrapper = SubcellularFractionDataSource(data_source=source)
+
+        records = [
+            record async for record in wrapper.fetch("subcellular_fraction", limit=1)
+        ]
+
+        assert len(records) == 1
+        assert records[0]["subcellular_fraction"] == "Microsomes"
+
+    @pytest.mark.asyncio
     async def test_data_source_fetch__applies_offset_before_limit(self) -> None:
         source = MockDataSource(assays=[ASSAY_WITH_FRACTION, ASSAY_WITH_FRACTION_2])
         wrapper = SubcellularFractionDataSource(data_source=source)

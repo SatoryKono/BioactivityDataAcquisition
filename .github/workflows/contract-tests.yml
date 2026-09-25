@@ -68,8 +68,7 @@ jobs:
           BIOETL_PUBMED_API_KEY: ${{ secrets.PUBMED_API_KEY }}
           BIOETL_UNIPROT_API_KEY: ${{ secrets.UNIPROT_API_KEY }}
         run: |
-          # Build pytest arguments
-          # -k is one argv element (#11191).
+          # Build pytest argv. -k must be one argument (#11191).
           args=(tests/contract/ -v --tb=short --network)
 
           if [ "$PROVIDERS" != "all" ]; then

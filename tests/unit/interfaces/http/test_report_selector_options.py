@@ -248,7 +248,10 @@ async def test_filter_catalog_reads_overlap_without_losing_options(monkeypatch) 
         return []
 
     host = HealthServerRoutingMixin()
-    host._forensic_endpoint_limiter = asyncio.Semaphore(4)
+    from bioetl.interfaces.http._selector_catalog import SelectorCatalog
+
+    host._selector_endpoint_limiter = asyncio.Semaphore(4)
+    host._selector_catalog = SelectorCatalog()
     host._run_manifest_port = Mock()
     host._run_manifest_port.list_all.side_effect = manifests
     host._run_ledger_port = None
@@ -327,7 +330,10 @@ async def test_http_handler_merges_report_only_options(
     host = HealthServerRoutingMixin()
     import asyncio
 
-    host._forensic_endpoint_limiter = asyncio.Semaphore(4)
+    from bioetl.interfaces.http._selector_catalog import SelectorCatalog
+
+    host._selector_endpoint_limiter = asyncio.Semaphore(4)
+    host._selector_catalog = SelectorCatalog()
     host._run_manifest_port = Mock()
     host._run_manifest_port.list_all.return_value = ()
     host._run_ledger_port = None

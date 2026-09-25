@@ -7,6 +7,7 @@ import pytest
 from bioetl.application.core.derived_scan_budget import (
     DEFAULT_SCAN_RECORDS,
     bounded_source_records,
+    iter_derived_source,
     resolve_derived_upstream_limit,
 )
 from bioetl.domain.exceptions.internal_state import InvalidStateError
@@ -20,9 +21,7 @@ def test_resolve_derived_upstream_limit_scales_output_and_filters() -> None:
     )
     assert resolve_derived_upstream_limit(10, multiplier=20) == 201
     assert resolve_derived_upstream_limit(10, multiplier=200) == 2001
-    assert (
-        resolve_derived_upstream_limit(1_000, multiplier=200) == DEFAULT_SCAN_RECORDS
-    )
+    assert resolve_derived_upstream_limit(1_000, multiplier=200) == DEFAULT_SCAN_RECORDS
     assert resolve_derived_upstream_limit(250, multiplier=200) == DEFAULT_SCAN_RECORDS
     assert (
         resolve_derived_upstream_limit(10, multiplier=20, filter_ids=["a", "b", "c"])
@@ -55,6 +54,48 @@ async def test_natural_eof_vs_scan_exhaustion(size):
         rows = [row async for row in bounded_source_records(source(), max_records=2)]
     assert rows == list(range(min(size, 2)))
     assert closed == [True]
+
+
+@pytest.mark.asyncio
+async def test_stop_on_exhaustion_returns_the_bounded_sample():
+    closed = []
+
+    async def source():
+        try:
+            for row in range(5):
+                yield row
+        finally:
+            closed.append(True)
+
+    rows = [
+        row
+        async for row in bounded_source_records(
+            source(), max_records=2, stop_on_exhaustion=True
+        )
+    ]
+    assert rows == [0, 1]
+    assert closed == [True]
+
+
+@pytest.mark.asyncio
+async def test_iter_derived_source_stops_for_limited_output_and_fails_when_unlimited():
+    async def source(size: int):
+        for row in range(size):
+            yield row
+
+    limited = [
+        row
+        async for row in iter_derived_source(source(4), output_limit=1, scan_limit=2)
+    ]
+    assert limited == [0, 1]
+
+    with pytest.raises(InvalidStateError, match="derived_scan_budget_exceeded"):
+        async for _row in iter_derived_source(
+            source(DEFAULT_SCAN_RECORDS + 1),
+            output_limit=None,
+            scan_limit=DEFAULT_SCAN_RECORDS + 1,
+        ):
+            pass
 
 
 @pytest.mark.asyncio

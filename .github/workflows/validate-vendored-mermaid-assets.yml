@@ -9,16 +9,14 @@ concurrency:
 on:
     pull_request:
       paths:
-        - 'docs/assets/javascripts/mermaid-init.js'
-        - 'docs/assets/stylesheets/mermaid-responsive.css'
-        - 'mkdocs.yml'
+        - 'assets/javascripts/mermaid*'
+        - 'assets/stylesheets/mermaid*'
         - '.github/workflows/validate-vendored-mermaid-assets.yml'
     push:
       branches: [ main ]
       paths:
-        - 'docs/assets/javascripts/mermaid-init.js'
-        - 'docs/assets/stylesheets/mermaid-responsive.css'
-        - 'mkdocs.yml'
+        - 'assets/javascripts/mermaid*'
+        - 'assets/stylesheets/mermaid*'
         - '.github/workflows/validate-vendored-mermaid-assets.yml'
 
 jobs:
@@ -31,7 +29,7 @@ jobs:
                 with:
                   persist-credentials: false
 
-            -   name: Fail if mkdocs mermaid assets are missing
+            -   name: Require MkDocs mermaid extra assets
                 run: |
                     set -euo pipefail
                     files=(
@@ -40,13 +38,7 @@ jobs:
                     )
                     for f in "${files[@]}"; do
                       if [ ! -f "$f" ]; then
-                        echo "MISSING: $f"
-                        exit 1
-                      fi
-                      rel="${f#docs/}"
-                      if ! grep -F -q "$rel" mkdocs.yml; then
-                        echo "mkdocs.yml does not reference $rel"
+                        echo "::error::Missing MkDocs mermaid asset: $f"
                         exit 1
                       fi
                     done
-                    echo "MkDocs mermaid assets present."

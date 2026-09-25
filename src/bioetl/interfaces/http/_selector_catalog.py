@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from time import monotonic
 
+from bioetl.application.services.run_reports.query import ReportIndexEntry
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
 from bioetl.domain.ports import RunManifestPort, WorkflowManifestPort
 
@@ -24,6 +26,46 @@ class SelectorCatalog:
         self._task: asyncio.Task[SelectorCatalogSnapshot] | None = None
         self._snapshot: SelectorCatalogSnapshot | None = None
         self._expires_at = 0.0
+        self._report_tasks: dict[
+            tuple[str, ...], asyncio.Task[list[ReportIndexEntry]]
+        ] = {}
+        self._report_snapshot: (
+            tuple[tuple[str, ...], list[ReportIndexEntry], float] | None
+        ) = None
+
+    async def read_reports(
+        self,
+        scopes: dict[str, tuple[str, ...]],
+        loader: Callable[[dict[str, tuple[str, ...]]], list[ReportIndexEntry]],
+    ) -> list[ReportIndexEntry]:
+        """Share report index reads for the same owner scope; retain one snapshot.
+
+        The loader enumerates owners only. Workflow, run ID, type and status
+        filtering still happens after this read against checked identities.
+        """
+        key = tuple(
+            sorted(set(scopes.get("pipeline", ())) - {"", "All", "all", "$__all", ".*"})
+        )
+        snapshot = self._report_snapshot
+        if snapshot is not None and snapshot[0] == key and monotonic() < snapshot[2]:
+            return snapshot[1]
+        if key not in self._report_tasks:
+            self._report_snapshot = None
+            task = asyncio.create_task(asyncio.to_thread(loader, {"pipeline": key}))
+            self._report_tasks[key] = task
+            task.add_done_callback(lambda result: self._complete_reports(key, result))
+        return await asyncio.shield(self._report_tasks[key])
+
+    def _complete_reports(
+        self, key: tuple[str, ...], task: asyncio.Task[list[ReportIndexEntry]]
+    ) -> None:
+        self._report_tasks.pop(key)
+        if not task.cancelled() and task.exception() is None:
+            self._report_snapshot = (
+                key,
+                task.result(),
+                monotonic() + SELECTOR_CATALOG_TTL_SECONDS,
+            )
 
     async def read(
         self, manifests: RunManifestPort, workflows: WorkflowManifestPort | None

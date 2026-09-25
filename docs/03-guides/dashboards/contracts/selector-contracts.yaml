@@ -670,6 +670,8 @@ control_plane_selector_context_contract:
     pool: independent_of_forensic_evidence_panels
     catalog_scan: one_in_flight_per_health_server
     catalog_ttl_seconds: 5
+    report_index_scan: one_in_flight_per_pipeline_scope
+    report_index_cached_scopes: 1
     cache_errors: false
     cache_ledger_evidence: false
     timeout_policy: retain_slot_until_background_operation_finishes
