@@ -276,11 +276,8 @@ filters:
   metadata:
     target_filter_policy:
       scope: source_specific
-      description:
-        SOURCE-SPECIFIC ChEMBL target filter policy. Silver and Gold filters intentionally constrain this
-        pipeline to reviewed single-protein target records and do not apply publication-specific fields.
-
-    # - This is pipeline scope, not global publication type truth.
+      # Pipeline scope, not global publication type truth. Silver and Gold filters
+      # constrain this pipeline to reviewed single-protein target records.
 
 contracts:
   primary_key:
