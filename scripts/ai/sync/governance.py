@@ -338,8 +338,17 @@ def sync_docs_skill_mirrors(
     check_only: bool,
     docs_root: Path | None = None,
     canonical_reference_root: Path = Path(".codex/skills"),
+    canonical_lookup_root: Path | None = None,
 ) -> list[str]:
+    """Refresh docs skill-mirror headers.
+
+    ``root`` is the tree that holds the docs copies being written. Skill-mirror
+    ``--check`` builds that tree under a temp directory, so live
+    ``.codex/skills`` presence is resolved from ``canonical_lookup_root``
+    (the repository root), not from the temp tree.
+    """
     docs_root = docs_root or root / "docs/00-project/ai/skills/local"
+    lookup_root = root if canonical_lookup_root is None else canonical_lookup_root
     issues: list[str] = []
     for path in sorted(docs_root.rglob(SKILL_FILE_NAME)):
         canonical = (
@@ -351,7 +360,7 @@ def sync_docs_skill_mirrors(
         updated = _ensure_docs_skill_mirror_header(
             original,
             canonical,
-            present=(root / canonical).is_file(),
+            present=(lookup_root / canonical).is_file(),
         )
         updated = _ensure_docs_skill_governance(updated)
         updated = updated.rstrip("\r\n") + "\n"
@@ -796,6 +805,7 @@ def _materialize_expected_docs_mirror(
         check_only=False,
         docs_root=expected_docs,
         canonical_reference_root=canonical_reference_root,
+        canonical_lookup_root=root_resolved,
     )
     return expected_docs
 
