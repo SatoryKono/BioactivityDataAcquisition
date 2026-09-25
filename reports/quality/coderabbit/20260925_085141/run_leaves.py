@@ -2,6 +2,7 @@ import json, os, subprocess, sys, tempfile, time
 
 REPO = "/mnt/e/github/BioactivityDataAcquisition"
 OUT = os.path.join(REPO, "reports/quality/coderabbit/20260925_085141")
+RUN = os.path.expanduser("~/cr-audit-20260925_085141")
 BASE = open(os.path.join(OUT, "baseline_sha.txt")).read().strip()
 CONTEXT = [
     os.path.join(REPO, "AGENTS.md"),
@@ -10,6 +11,8 @@ CONTEXT = [
 ]
 BACKOFF = [1800, 1800, 1800]
 LEAF_TIMEOUT = 3600
+
+os.makedirs(RUN, exist_ok=True)
 
 
 def materialize(leaf_id, files, workdir):
@@ -75,8 +78,8 @@ def classify(log, err, rc):
 
 
 def run_leaf(leaf_id, files):
-    log = os.path.join(OUT, "review_" + leaf_id + ".jsonl")
-    err = os.path.join(OUT, "review_" + leaf_id + ".stderr.txt")
+    log = os.path.join(RUN, "review_" + leaf_id + ".jsonl")
+    err = os.path.join(RUN, "review_" + leaf_id + ".stderr.txt")
     workdir = tempfile.mkdtemp(prefix="cr_" + leaf_id + "_")
     try:
         materialize(leaf_id, files, workdir)
@@ -108,14 +111,14 @@ def run_leaf(leaf_id, files):
 
 def main():
     matrix = json.load(open(os.path.join(OUT, "scope_matrix.json")))
-    plog = open(os.path.join(OUT, "progress.log"), "a")
+    plog = open(os.path.join(RUN, "progress.log"), "a")
 
     def logp(m):
         plog.write(m + "\n")
         plog.flush()
         print(m, flush=True)
 
-    state_p = os.path.join(OUT, "state.json")
+    state_p = os.path.join(RUN, "state.json")
     done = set()
     if os.path.exists(state_p):
         done = set(json.load(open(state_p)).get("ok", []))
@@ -135,6 +138,10 @@ def main():
         time.sleep(30)
     logp("=== campaign finished ===")
     plog.close()
+    # sync artifacts back to repo campaign dir
+    import shutil
+    for name in os.listdir(RUN):
+        shutil.copy2(os.path.join(RUN, name), os.path.join(OUT, name))
 
 
 if __name__ == "__main__":
