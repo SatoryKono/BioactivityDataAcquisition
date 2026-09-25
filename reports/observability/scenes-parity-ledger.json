@@ -20,11 +20,11 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "2a61a8450ca9abd1a674ee6593adfe8474bff2078aa1c3554efb283facdaeb53",
-    "bioetl-dq-v2": "2a294966ddd19ceac4383e51e5d9e8b0e0cb4c443127b88be120ea5d19c59fc1",
-    "bioetl-incident-v1": "73c2b20ac62b2a9b76e7c0c9e60c33183743d66d5aea1f56420122cda38eaabf",
-    "bioetl-overview-v2": "229a38af825ddbd8ecbd196729fb60433451aa1590faf3b9e89a11094965dc7a",
-    "bioetl-provider-health-v2": "82af7a267a5dc24650fbd587867117b588407bc8aebb5a05798ac6a6ca73558c",
+    "bioetl-control-plane-v1": "8f4786dd819bd3d15098ce6e021c691a41010e7b3a67e3ab598533e1c7203caa",
+    "bioetl-dq-v2": "887094964e6e2b8223f024f19eaa54b77ce5bf5b8a5ef6f83c1cb014b0352413",
+    "bioetl-incident-v1": "9a2b4bc336cd5db0f44c3ab55b2834ee4f22608d3c12f62894659a921bf9af6c",
+    "bioetl-overview-v2": "15dcf9aad5a7735e85f9d232b40b5bcf5cba62ceb327a9cd8b0e60f7c56656ce",
+    "bioetl-provider-health-v2": "e04be97f61583cff9207e5bedaded22eaf0e45d092be5bd08a9a883a73307892",
     "bioetl-run-explorer-v1": "6593cd9104921368f5681cff2699c21b3222641c446448bb40f62f159999c407",
     "bioetl-runtime": "0f8b10ffbfa52a27f33e113d7ac650f0cb0df57d9fc9b836e42f04a6bd442a32"
   },
@@ -115,10 +115,9 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1",
           "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1"
         ],
-        "target_count": 2
+        "target_count": 1
       }
     },
     {
@@ -1910,7 +1909,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
+          "max(bioetl_workflow_scope_priority{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
         ],
         "target_count": 1
       }
@@ -2176,6 +2175,26 @@
     {
       "basis": "preserved-from-json",
       "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 9701,
+      "panel_title": "Review Current Workflow Evidence",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "label_replace(max by(workflow)(bioetl_workflow_scope_input_status{input=\"workflow\",workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"reason\",\"Reason unavailable\",\"\",\"\")",
+          "bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 1000"
+        ],
+        "target_count": 2
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
       "dashboard_uid": "bioetl-overview-v2",
       "disposition": "fallback-only",
       "empty_semantics": "preserved-from-json",
@@ -2238,7 +2257,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
+          "max(bioetl_workflow_scope_priority{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
         ],
         "target_count": 1
       }
@@ -2257,7 +2276,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max without(run_type)(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0) or on() bioetl_l0_next_action_no_route"
+          "max without(run_type)(bioetl_workflow_scope_action{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0) or on() bioetl_l0_next_action_no_route"
         ],
         "target_count": 1
       }
@@ -2661,6 +2680,26 @@
     {
       "basis": "preserved-from-json",
       "component": "JSON fallback",
+      "dashboard_uid": "bioetl-overview-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-overview-v2",
+      "panel_id": 9701,
+      "panel_title": "Review Current Workflow Evidence",
+      "route": "operations-home",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "label_replace(max by(workflow)(bioetl_workflow_scope_input_status{input=\"workflow\",workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"reason\",\"Reason unavailable\",\"\",\"\")",
+          "bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 1000"
+        ],
+        "target_count": 2
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
       "dashboard_uid": "bioetl-provider-health-v2",
       "disposition": "fallback-only",
       "empty_semantics": "preserved-from-json",
@@ -2706,7 +2745,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max(bioetl_provider_current_status{provider=~\"$provider\"})"
+          "max(bioetl_provider_current_status{provider=~\"$provider\"} == 2) or max(bioetl_provider_current_status{provider=~\"$provider\"} == 1) or max(bioetl_provider_current_status{provider=~\"$provider\"} == 3) or max(bioetl_provider_current_status{provider=~\"$provider\"} == 0)"
         ],
         "target_count": 1
       }
@@ -2742,7 +2781,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(3, max by (provider) (bioetl_provider_current_status{provider!~\"^(test|synthetic)$\"}))"
+          "max by (provider) (bioetl_provider_current_status{provider!~\"^(test|synthetic)$\"})"
         ],
         "target_count": 1
       }
@@ -2761,7 +2800,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(3, max by (provider, reason, source_state) (bioetl_provider_current_status_info))"
+          "max by (provider, reason, source_state) (bioetl_provider_current_status_info)"
         ],
         "target_count": 1
       }
@@ -4199,7 +4238,7 @@
     "dashboard_uid_count": 7,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 221,
+    "panel_disposition_count": 223,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],

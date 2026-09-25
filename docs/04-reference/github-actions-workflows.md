@@ -101,8 +101,8 @@ new spend/safety decision.
 | --- | --- | --- | --- | --- | --- |
 | `architecture-docs-nightly.yml` | `Architecture Docs Nightly` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Regenerates architecture dependency-doc artifacts |
 | `architecture.yml` | `Architecture Metrics` | `schedule`, `workflow_dispatch` | `active` | `active` | Heavy architecture metrics and periodic boundary baselines |
-| `contract-tests.yml` | `Monthly Contract Tests` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Live API lane stays local; schedule removed (#11190) |
-| `diagram-nightly.yml` | `Diagram Nightly Regression` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Nightly canary and phase2 stay off; PR lint is docs.yml (#11196) |
+| `contract-tests.yml` | `Monthly Contract Tests` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Scheduled full contract-test lane |
+| `diagram-nightly.yml` | `Diagram Nightly Regression` | `schedule`, `workflow_dispatch` | `active` | `active` | Diagram regression/nightly canary |
 | `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly docs KPI plus calendar runtime-mirror/freshness drift |
 | `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `schedule`, `workflow_dispatch` | `active` | `active` | Read-only quarterly GitHub settings review |
 | `memory-freshness.yml` | `Memory freshness` | `pull_request`, `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Repository memory freshness and contract checks |
@@ -114,7 +114,7 @@ new spend/safety decision.
 | `quality-debt-weekly.yml` | `Quality Debt Weekly` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly quality-debt scorecard/report lane |
 | `scorecard.yml` | `OpenSSF Scorecard` | `schedule`, `workflow_dispatch`, `push` | `active` | `active` | Weekly non-blocking OpenSSF Scorecard baseline |
 | `stale.yml` | `Stale` | `schedule` | `disabled_manually` | `keep-disabled` | Issue/PR staleness automation |
-| `vacuum.yml` | `Weekly VACUUM` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Schedule removed; local vacuum only (#11189) |
+| `vacuum.yml` | `Weekly VACUUM` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Scheduled Delta VACUUM maintenance |
 
 ### Release, packaging, and repository automation
 
@@ -123,7 +123,7 @@ new spend/safety decision.
 | `dashboard-render-host.yml` | `Dashboard render release evidence (host-only)` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Dashboard rendering and release evidence generation on self-hosted runner |
 | `docker.yml` | `Docker Build & Compose Validation` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Optional helper-image and compose validation |
 | `labeler.yml` | `Labeler` | `pull_request_target` | `disabled_manually` | `keep-disabled` | Applies repository labels to PRs |
-| `release.yml` | `Release` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Publish stays outside Actions (#11182) |
+| `release.yml` | `Release` | `release`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Build, publish, and release-asset workflow |
 
 ### Reusable / compatibility-only helpers
 
@@ -144,9 +144,8 @@ enable heavy nightlies without Actions spend evidence. Do not reopen #9975 or
 | `chembl-baseline-smoke.yml` | Optional smoke; not a `pr-required.yml` owner |
 | `coderabbit.yml` | Third-party CLI review; extra Actions spend |
 | `contract-governance-fast-check.yml` | Overlaps `schema-governance.yml`; not a `pr-required.yml` owner |
-| `contract-tests.yml` | Monthly live-API lane; extra spend. Schedule removed (#11190) |
+| `contract-tests.yml` | Monthly live-API lane; extra spend |
 | `dashboard-render-host.yml` | Self-hosted dispatch-only; enable only when the observability host is required |
-| `diagram-nightly.yml` | Nightly canary and full-corpus phase2. Actions billing will not return. PR diagram lint stays in `docs.yml` (#11196) |
 | `docs-kpi-weekly.yml` | Optional weekly KPI; do not change KPI thresholds to justify enable |
 | `labeler.yml` | `pull_request_target`; re-enable only after live GitHub labels match `.github/labeler.yml` and `docs/00-project/governance/github-label-taxonomy.md` |
 | `memory-freshness.yml` | Optional memory lane; not a `pr-required.yml` owner |
@@ -158,7 +157,7 @@ enable heavy nightlies without Actions spend evidence. Do not reopen #9975 or
 | `pr-hygiene.yml` | Depends on the `stale` label from `stale.yml`; keep both disabled together |
 | `provider-contract-drift.yml` | Optional drift lane; not a `pr-required.yml` owner |
 | `quality-debt-weekly.yml` | Optional weekly scorecard; do not raise debt budgets to justify enable |
-| `release.yml` | Publish stays outside Actions. Do not restore the `release` trigger (#11182) |
+| `release.yml` | Enable only for an actual release/publish event |
 | `reusable-mermaid-setup.yml` | Deprecated; use `.github/actions/setup-mermaid` |
 | `reusable-setup.yml` | Deprecated; use `.github/actions/setup-python-uv` |
 | `semantic-governance.yml` | Overlaps schema/docs governance; not a `pr-required.yml` owner |

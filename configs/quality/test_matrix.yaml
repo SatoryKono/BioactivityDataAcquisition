@@ -1266,7 +1266,7 @@ fixture_governance:
 contract_testing:
   workflow_present: true
   replay_gate_workflow: .github/workflows/provider-contract-drift.yml
-  live_api_gate_mode: keep-disabled
+  live_api_gate_mode: scheduled
   replay_gate_mode: ci
   network_opt_in_required: true
   live_api_minimum_baseline:
