@@ -21,9 +21,7 @@ def test_resolve_derived_upstream_limit_scales_output_and_filters() -> None:
     )
     assert resolve_derived_upstream_limit(10, multiplier=20) == 201
     assert resolve_derived_upstream_limit(10, multiplier=200) == 2001
-    assert (
-        resolve_derived_upstream_limit(1_000, multiplier=200) == DEFAULT_SCAN_RECORDS
-    )
+    assert resolve_derived_upstream_limit(1_000, multiplier=200) == DEFAULT_SCAN_RECORDS
     assert resolve_derived_upstream_limit(250, multiplier=200) == DEFAULT_SCAN_RECORDS
     assert (
         resolve_derived_upstream_limit(10, multiplier=20, filter_ids=["a", "b", "c"])
@@ -87,9 +85,7 @@ async def test_iter_derived_source_stops_for_limited_output_and_fails_when_unlim
 
     limited = [
         row
-        async for row in iter_derived_source(
-            source(4), output_limit=1, scan_limit=2
-        )
+        async for row in iter_derived_source(source(4), output_limit=1, scan_limit=2)
     ]
     assert limited == [0, 1]
 

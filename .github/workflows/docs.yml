@@ -68,6 +68,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           # Generated provenance uses git log over canonical fact owners.
           # PR merge checkouts must retain both parents and their history.
           fetch-depth: 0
@@ -150,6 +151,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -210,6 +212,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           persist-credentials: false
           fetch-depth: 0
 
@@ -272,6 +275,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          persist-credentials: false
 
       - name: Setup Mermaid CLI
         uses: ./.github/actions/setup-mermaid
@@ -315,6 +319,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
           persist-credentials: false
 
@@ -393,6 +398,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           persist-credentials: false
 
       - name: Setup Mermaid CLI
@@ -483,6 +489,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           persist-credentials: false
 
       - name: Setup Mermaid CLI

@@ -55,9 +55,10 @@ jobs:
       docs-governance: ${{ steps.decide.outputs['docs-governance'] }}
       docs-governance-reason: ${{ steps.decide.outputs['docs-governance-reason'] }}
     steps:
-      - name: Checkout exact event head
+      - name: Checkout base ref for gate code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
           persist-credentials: false
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
@@ -324,9 +325,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Checkout exact event head
+      - name: Checkout base ref for gate code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
           persist-credentials: false
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
