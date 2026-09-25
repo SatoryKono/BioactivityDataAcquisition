@@ -5,18 +5,24 @@ a substitute for the project constitution.
 
 ## 0. Canonical Sources For AI Work
 
-Read these before planning or editing (in precedence order from `AGENTS.md`):
+`AGENTS.md` is the root contract index. It is not a conflict step above the
+active runtime maps. When AI runtime guidance conflicts, use this order:
 
-- `AGENTS.md`
-- active equal-peer runtime maps: `.codex/agents/CODEX-RUNTIME.md` and
-  `.junie/agents/JUNIE-RUNTIME.md` (with `.junie/guidelines.md`); use Devin
-  maps under `.devin/agents/**` only in Devin sessions
-- `docs/00-project/NORMATIVE_SOURCES.md`
-- `docs/00-project/RULES.md`
-- `docs/01-requirements/REQUIREMENTS.md`
-- accepted ADRs in `docs/02-architecture/decisions/`
-- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
-- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+1. active runtime source for the current agent or skill — equal peers:
+   `.codex/agents/CODEX-RUNTIME.md`, `.junie/agents/JUNIE-RUNTIME.md`,
+   `.devin/agents/DEVIN-RUNTIME.md` for Devin sessions, and a matching tracked
+   `.gemini/**` runtime surface only when that tree exists in the checkout and
+   is verified in the same change
+1. runtime profiles and skills in the matching runtime tree
+1. `docs/00-project/NORMATIVE_SOURCES.md`
+1. `docs/00-project/RULES.md`
+1. `docs/01-requirements/REQUIREMENTS.md`
+1. accepted ADRs in `docs/02-architecture/decisions/`
+1. docs mirrors in `docs/00-project/ai/**` for navigation only
+
+Load `docs/00-project/ai/agents/guides/MEMORY_USAGE.md` and
+`docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` when the task
+class in `AGENTS.md` requires them. They do not outrank the runtime maps.
 
 For architecture, Medallion, coding standards, error handling, and testing
 policy, use `docs/00-project/RULES.md` §1–§4 and matching `REQ-*` entries in
@@ -28,8 +34,7 @@ config surface only. Treat tracked Gemini runtime trees (`.gemini/agents/**`,
 `.gemini/skills/**`) as unavailable unless the same change explicitly adds and
 verifies them.
 
-When AI runtime guidance conflicts, use the list above in that order. For
-implementation facts, verify against code, configs, tests, workflows, and
+For implementation facts, verify against code, configs, tests, workflows, and
 accepted ADRs before trusting memory or mirrors.
 
 ## 1. Session Guardrails (AI workflow only)

@@ -3,8 +3,8 @@
 This file is the JetBrains Junie root operating contract for the BioETL
 repository. It is the Junie-native equivalent of `AGENTS.md` and MUST stay in
 lock-step with it. `.junie/**` and `.codex/**` are **equal-peer** tracked AI
-runtime trees; runtime behavior changes MUST be synchronized in both
-directions.
+runtime trees. Behavior edits belong in both trees. Automatic sync writes
+only `.codex` → `.junie` (`never_write_to_codex`).
 
 ## Canonical Precedence
 

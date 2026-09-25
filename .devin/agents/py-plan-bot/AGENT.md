@@ -12,7 +12,6 @@ permissions:
     - Read(**)
     - Exec(git)
     - Exec(find)
-    - Exec(python)
   deny:
     - write
     - edit

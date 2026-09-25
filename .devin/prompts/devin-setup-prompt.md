@@ -5,21 +5,17 @@
 
 ## Обязательный Bootstrap Перед Любой Задачей
 
-### 1. Чтение Нормативных Источников (CRITICAL)
+### 1. Context Tiers, не дамп RULES/ADR
 
-**В следующем порядке:**
+Первый runtime source сессии Devin — `.devin/agents/DEVIN-RUNTIME.md`. Грузи контекст по **Context tiers** этого файла и таблице Required AI Context в `AGENTS.md`, а не списком всех нормативов перед любой задачей.
 
-1. `AGENTS.md` — root AI runtime contract
-2. `docs/00-project/NORMATIVE_SOURCES.md` — индекс нормативного стека
-3. `docs/00-project/RULES.md` — Конституция проекта (архитектура, Medallion, DQ, testing, governance)
-4. `docs/00-project/ai/agents/guides/MEMORY_USAGE.md` — policy для memory surfaces
-5. `docs/00-project/ai/memory/agent-memory.md` — navigation entry point
-6. Релевантные ADR из `docs/02-architecture/decisions/` (согласно NORMATIVE_SOURCES.md)
-7. Role-specific memory sheet (если используется named role): `memory-py-*.md`
+Hash-only rebind, date stamp и remote-main не читают `docs/00-project/RULES.md` и дерево ADR. Для них `BIOETL_AI_MEMORY_MODE=off`, без RAG и без полного `pre-task`. V3/V4 по-прежнему держат полный пакет. Срезы RULES/ADR бери через `docs/00-project/NORMATIVE_SOURCES.md`, только когда задача реально касается этих поверхностей.
 
 ### 2. Memory Workflow (ОБЯЗАТЕЛЬНЫЙ)
 
-**Pre-task (перед существенной работой):**
+Hash-only rebind, date stamp и remote-main этот шаг пропускают (`BIOETL_AI_MEMORY_MODE=off`, без RAG).
+
+**Pre-task (перед существенной работой, кроме hash-only):**
 
 ```bash
 # Используй project venv с PYTHONPATH=src
