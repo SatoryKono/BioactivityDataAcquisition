@@ -231,7 +231,9 @@ class ControlPlaneEvidenceService:
                 self.lineage_store.list_by_manifest_id(scope.manifest.manifest_id)
             )
             if not fragments:
-                fragments = tuple(self.lineage_store.list_by_run_id(scope.manifest.run_id))
+                fragments = tuple(
+                    self.lineage_store.list_by_run_id(scope.manifest.run_id)
+                )
         run_ledger_entries = (
             ledger_snapshot
             if ledger_snapshot is not None

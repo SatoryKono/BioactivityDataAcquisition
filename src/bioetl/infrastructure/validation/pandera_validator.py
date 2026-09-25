@@ -268,9 +268,7 @@ class PanderaSilverValidator(BasePanderaValidator):
     def _seed_missing_nullable_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         if not hasattr(self._schema, "columns"):
             return df
-        missing = [
-            name for name in self._schema.columns if name not in df.columns
-        ]
+        missing = [name for name in self._schema.columns if name not in df.columns]
         if not missing:
             return df
         seeded = df.copy()

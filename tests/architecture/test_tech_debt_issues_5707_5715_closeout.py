@@ -128,9 +128,7 @@ def test_issue_5707_governance_artifacts_are_current_and_passing() -> None:
     expected_hash = coverage["source_tree_sha256"]
     assert coverage["source_tree_sha256"] == expected_hash
     assert (
-        scorecard["source_artifacts"]["module_coverage_inventory"][
-            "source_tree_sha256"
-        ]
+        scorecard["source_artifacts"]["module_coverage_inventory"]["source_tree_sha256"]
         == expected_hash
     )
     # Skip source tree hash check for local development with uncommitted changes
@@ -250,7 +248,9 @@ def test_issue_5711_coverage_tail_is_zero_unmeasured_and_owner_anchored() -> Non
     # Skip source tree hash check for local development
     assert (
         coverage["source_tree_sha256"]
-        == scorecard["source_artifacts"]["module_coverage_inventory"]["source_tree_sha256"]
+        == scorecard["source_artifacts"]["module_coverage_inventory"][
+            "source_tree_sha256"
+        ]
     )
     under_70 = _under_coverage_floor(coverage, threshold=70.0)
     assert outcome["under70_module_count_before"] == 18

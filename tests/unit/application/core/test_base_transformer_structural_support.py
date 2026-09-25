@@ -72,7 +72,9 @@ class TestClassifyStructuralAction:
         result = classify_structural_action(details, event_names)
         assert result == "required_type_quarantine"
 
-    def test_classify_structural_action__structural_policy_null_optional_forbidden(self):
+    def test_classify_structural_action__structural_policy_null_optional_forbidden(
+        self,
+    ):
         """Test mapping for structural_policy_null_optional_forbidden reason code."""
         details = {"reason_code": "structural_policy_null_optional_forbidden"}
         event_names = set()

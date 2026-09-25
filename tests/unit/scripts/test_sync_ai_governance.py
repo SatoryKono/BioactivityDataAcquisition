@@ -117,8 +117,9 @@ def test_skill_mirror_check_keeps_live_canonical_skill_header(tmp_path: Path) ->
     assert "Canonical runtime source: none" not in header
 
     assert sync_ai_governance.sync_skill_mirrors(tmp_path, check_only=True) == []
-    assert "Canonical runtime source: `.codex/skills/demo/SKILL.md`" in mirror.read_text(
-        encoding="utf-8"
+    assert (
+        "Canonical runtime source: `.codex/skills/demo/SKILL.md`"
+        in mirror.read_text(encoding="utf-8")
     )
 
 

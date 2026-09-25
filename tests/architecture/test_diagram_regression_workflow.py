@@ -75,7 +75,9 @@ def test_diagram_router_commands_bootstrap_repository_imports(command: str) -> N
 def test_docs_workflow_includes_quality_gates_step() -> None:
     import yaml
 
-    document = yaml.safe_load(Path(".github/workflows/docs.yml").read_text(encoding="utf-8"))
+    document = yaml.safe_load(
+        Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
+    )
     job = document["jobs"]["render-diagrams"]
     assert str(job.get("if", "")).replace(" ", "") == "${{false}}"
     rendered = yaml.dump(job)

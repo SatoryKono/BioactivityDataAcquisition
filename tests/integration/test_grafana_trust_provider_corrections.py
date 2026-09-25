@@ -23,8 +23,7 @@ def test_retention_does_not_repeat_hash_verification_for_header():
     assert panel["targets"][0]["root_selector"] == "rows"
     assert "error_as_row=1" in panel["targets"][0]["url"]
     assert not any(
-        t.get("options", {}).get("configRefId") == "B"
-        for t in panel["transformations"]
+        t.get("options", {}).get("configRefId") == "B" for t in panel["transformations"]
     )
 
 

@@ -77,7 +77,9 @@ def test_resolve_step_transition_policy_skips_after_upstream_failure() -> None:
 
 
 def test_independent_step_runs_after_unrelated_failure() -> None:
-    step = WorkflowStepConfig(step_id="run_chembl_target", pipeline_name="chembl_target")
+    step = WorkflowStepConfig(
+        step_id="run_chembl_target", pipeline_name="chembl_target"
+    )
 
     policy = resolve_step_transition_policy(
         step,

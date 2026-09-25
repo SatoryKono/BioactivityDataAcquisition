@@ -565,6 +565,9 @@ def test_gold_exclusion_records_bounded_rule_details_without_record_values() -> 
     assert "must-not-leak" not in str(rows)
     assert "actual" not in rows[0]
     assert accounting.sum_outcome("gold", "excluded_by_contract") == 3
-    assert accounting._stages["gold"].removals[
-        ("excluded_by_contract", "required_field_missing:organism_class")
-    ] == 3
+    assert (
+        accounting._stages["gold"].removals[
+            ("excluded_by_contract", "required_field_missing:organism_class")
+        ]
+        == 3
+    )

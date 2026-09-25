@@ -238,10 +238,15 @@ def test_architecture_closeout_does_not_comment_out_release_gates() -> None:
     """Commented release-gate and drift asserts must not hide a red scorecard."""
     offenders: list[str] = []
     for path in sorted((ROOT / "tests" / "architecture").glob("test_*.py")):
-        for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        for line_no, line in enumerate(
+            path.read_text(encoding="utf-8").splitlines(), 1
+        ):
             stripped = line.lstrip()
             if not stripped.startswith("#") or "assert" not in stripped:
                 continue
-            if "release_gate_status" in stripped or "generated_artifact_drift" in stripped:
+            if (
+                "release_gate_status" in stripped
+                or "generated_artifact_drift" in stripped
+            ):
                 offenders.append(f"{path.relative_to(ROOT).as_posix()}:{line_no}")
     assert not offenders, "commented release-gate asserts:\n" + "\n".join(offenders)

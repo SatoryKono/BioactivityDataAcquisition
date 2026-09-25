@@ -920,14 +920,10 @@ def test_observability_touched_metric_review_gate_fails_for_degraded_review() ->
 def test_new_max_count_freezes_recorded_current_without_raising_it() -> None:
     baseline = {"metrics": {"public_export_facade_count": {"current_count": 3}}}
     frozen = {
-        "metrics": {
-            "public_export_facade_count": {"current_count": 3, "max_count": 3}
-        }
+        "metrics": {"public_export_facade_count": {"current_count": 3, "max_count": 3}}
     }
     raised = {
-        "metrics": {
-            "public_export_facade_count": {"current_count": 4, "max_count": 4}
-        }
+        "metrics": {"public_export_facade_count": {"current_count": 4, "max_count": 4}}
     }
     path = "metrics.public_export_facade_count.max_count"
     assert gate_evaluators._new_max_count_freezes_recorded_current(

@@ -307,9 +307,7 @@ def test_test_matrix_wording_keeps_gate_always_required() -> None:
         line for line in policy.splitlines() if "job `test-matrix`" in line
     )
     coverage_row = next(
-        line
-        for line in policy.splitlines()
-        if line.startswith("| `coverage-verify` |")
+        line for line in policy.splitlines() if line.startswith("| `coverage-verify` |")
     )
     for row in (matrix_row, coverage_row):
         assert "Not a leaf required check" in row
