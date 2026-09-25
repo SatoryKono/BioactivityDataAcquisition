@@ -12,6 +12,7 @@ from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,
     FilteredQuarantineEntry,
 )
+from bioetl.domain.run_reports.reason_catalog import compose_field_reason_code
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
@@ -163,6 +164,21 @@ def handle_transform_processing_error(
     )
 
 
+def _resolve_quarantine_reason_code(
+    error: Exception,
+    *,
+    error_type: ErrorType,
+) -> str | None:
+    """Prefer an explicit catalog reason, else compose ``TYPE:field``."""
+    reason_code = getattr(error, "reason_code", None)
+    if isinstance(reason_code, str) and reason_code.strip():
+        return reason_code.strip()
+    field = getattr(error, "field", None)
+    if isinstance(field, str) and field.strip():
+        return compose_field_reason_code(error_type.value, field.strip())
+    return None
+
+
 def handle_data_quality_transform_error(
     error: Exception,
     *,
@@ -176,9 +192,7 @@ def handle_data_quality_transform_error(
     """Apply invalid-record policy to a data-quality transform error."""
     batch_metrics.track_error("transform", error_type)
     policy = _resolve_invalid_record_policy(dq_config)
-    reason_code = getattr(error, "reason_code", None)
-    if not isinstance(reason_code, str) or not reason_code.strip():
-        reason_code = None
+    reason_code = _resolve_quarantine_reason_code(error, error_type=error_type)
     if debug_export_service is not None:
         debug_export_service.record_data_quality_failure(
             raw_record=raw_record,

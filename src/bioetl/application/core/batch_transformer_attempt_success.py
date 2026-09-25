@@ -84,6 +84,32 @@ def _build_gold_record(
     return gold_record, False, None
 
 
+def _primary_dq_affected_field(
+    outcomes: list[object],
+    disposition: object,
+) -> str | None:
+    """Pick a deterministic field name from blocking DQ rule outcomes."""
+    fields: set[str] = set()
+    for outcome in outcomes:
+        if getattr(outcome, "disposition", None) != disposition:
+            continue
+        contributed = False
+        for field in getattr(outcome, "affected_fields", ()) or ():
+            token = str(field).strip()
+            if token:
+                fields.add(token)
+                contributed = True
+        if contributed:
+            continue
+        rule_id = str(getattr(outcome, "rule_id", "") or "")
+        parts = rule_id.split(".")
+        if len(parts) >= 3 and parts[0] == "field" and parts[1]:
+            fields.add(parts[1])
+    if not fields:
+        return None
+    return sorted(fields)[0]
+
+
 def _apply_runtime_dq_outcomes(
     *,
     silver_record: dict[str, object],
