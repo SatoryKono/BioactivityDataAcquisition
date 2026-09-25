@@ -623,6 +623,8 @@ test_lanes:
         Full offline cassette-replay E2E suite. Canonical CI owner:
         .github/workflows/e2e-matrix-health.yml job e2e-nightly-full-replay;
         e2e-nightly-complete joins it with the separate live and prompt sublanes.
+        That job runs only for schedule and workflow_dispatch and is skipped on
+        pull_request.
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:

@@ -77,8 +77,8 @@ new spend/safety decision.
 | `duplication-complexity.yml` | `Duplication and Complexity Checks` | `workflow_call`, `push` | `active` | `active` | Duplication, constructor-args, and complexity gates |
 | `e2e-matrix-health.yml` | `E2E Matrix Health` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | `active` | `active` | Blocking and nightly E2E matrix smoke lanes |
 | `import-linter.yml` | `Lint and Architecture Gates` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Ruff/import-linter/architecture fast gates |
-| `opencode-pr-review.yml` | `opencode-pr-review` | `pull_request` | `active` | `active` | OpenCode review agent (Muse Spark): read-only PR review comments, never approves or merges |
-| `opencode-triage.yml` | `opencode-triage` | `issues` | `active` | `active` | OpenCode triage agent: classifies and labels new issues, never closes |
+| `opencode-pr-review.yml` | `opencode-pr-review` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
+| `opencode-triage.yml` | `opencode-triage` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
 | `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; GitHub required context is job `pr-gate-complete` (ruleset 13643213) |
 | `port-contracts.yml` | `Port Contract Tests` | `push`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Port-protocol and hypothesis contract tests |
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `push`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Provider contract replay/drift gate |

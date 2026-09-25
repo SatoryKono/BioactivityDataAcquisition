@@ -146,6 +146,18 @@ def test_docs_workflow_diagram_drift_uses_pr_base_ref() -> None:
     drift_block = workflow.split("check-diagram-drift:", maxsplit=1)[1]
     assert "origin/main...HEAD" not in drift_block
     assert "docs/02-architecture/diagrams/providers/**/*.mmd" in drift_block
+    assert "docs/02-architecture/diagrams/sequence/*.mmd" in drift_block
+    assert "docs/02-architecture/diagrams/state-machines/*.mmd" in drift_block
+    assert "uses: ./.github/actions/setup-mermaid" in drift_block
+    assert "bash docs/02-architecture/diagrams/tooling/render.sh" in drift_block
+    assert "--svg-only" in drift_block
+    assert "--puppeteer /tmp/puppeteer-config.json" in drift_block
+    assert 'REQUIRE_SVGO: "1"' in drift_block
+    assert "git diff --exit-code" in drift_block
+    assert "npx -y" not in drift_block
+    detect_block = workflow.split("check-diagram-drift:", maxsplit=1)[0]
+    assert "docs/02-architecture/diagrams/sequence/*.mmd" not in detect_block
+    assert "docs/02-architecture/diagrams/state-machines/*.mmd" not in detect_block
     assert "generate_description_indexes.py --check" in workflow
     assert "generate_all_bundles.py --check" in workflow
 

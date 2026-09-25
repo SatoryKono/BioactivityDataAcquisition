@@ -314,7 +314,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Run repeated and seeded-order determinism telemetry
+      # determinism-critical shard: N=3, seeds 17, 73, and 113, exactly
+      # tests/contract/test_semanticscholar_contract.py and
+      # tests/architecture/test_determinism_identity_policy.py.
+      # An empty curated flaky inventory is not proof of no flakes.
+      - name: Run determinism-critical shard telemetry
         shell: bash
         run: |
           mkdir -p reports/test-telemetry/flaky-runs
@@ -1122,9 +1126,11 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  # Coverage-bound shards on CPython 3.13 only. Not a GitHub required check
-  # (path-scoped; see 05-github-policy.md §3). Version split vs test-fast (3.12)
-  # is intentional compatibility vs coverage (#9740). Do not drop coverage-verify.
+  # Coverage-bound shards on CPython 3.13 only. Not a leaf GitHub required
+  # check. Gate tests is always_required, so this job runs on every PR that
+  # materializes pr-gate-complete, including docs-only
+  # (05-github-policy.md). Version split vs test-fast (3.12) is intentional
+  # compatibility vs coverage (#9740). Do not drop coverage-verify.
   test-matrix:
     runs-on: ubuntu-latest
     timeout-minutes: 15

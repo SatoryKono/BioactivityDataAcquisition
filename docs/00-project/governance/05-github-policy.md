@@ -291,7 +291,9 @@ or `configs/quality/github_required_checks.yaml`.
 | `zizmor.yml` | Static Actions audit; keep enabled, not a required context |
 
 `e2e-smoke` remains a serial test-matrix lane. It is not PR-blocking and must
-not be added to the merge wall.
+not be added to the merge wall. `e2e-nightly-full-replay` runs only on
+`schedule` and `workflow_dispatch`; pull requests skip it, and it is not a
+`pr-gate-complete` owner.
 
 Legacy contexts `checks-complete` and `root-hygiene` remain saved only on disabled
 ruleset `15730586`. Leaf workflows no longer own direct PR triggers after the
@@ -361,9 +363,9 @@ independent unconditional GitHub required checks; their results are consumed by 
 | IDE daily | `pytest-architecture` | `architecture and not slow and not benchmark and not memory` | No |
 | IDE / local slow | `pytest-architecture-slow-governance` | `architecture and not benchmark and not memory` (includes slow) | No |
 | `test_matrix` slow lane | `architecture-slow-governance` | same as IDE slow | No (nightly / full audit; not PR `arch-tests`) |
-| `tests.yml` job `test-matrix` | 6 path groups on Python **3.13** | not architecture | No (path-scoped; not always-on) |
+| `tests.yml` job `test-matrix` | 6 path groups on Python **3.13** | not architecture | Not a leaf required check. Gate `tests` is `always_required`, so this job runs on every PR that materializes `pr-gate-complete`, including docs-only |
 | `tests.yml` job `test-fast` | unit-fast on Python **3.12** | fail-fast compatibility, no coverage | No |
-| `coverage-verify` | combined 85% | `tests.yml` | Path-scoped only (§3 path-scoped table) |
+| `coverage-verify` | combined 85% | `tests.yml` | Not a leaf required check. Gate `tests` is `always_required`, so this job runs on every PR that materializes `pr-gate-complete`, including docs-only |
 
 `test-fast` (3.12, no coverage) and `test-matrix` unit shards (3.13, coverage)
 share unit **paths** on purpose as a version split, not as two copies of the
