@@ -62,15 +62,23 @@ def _snapshot_ref(
         "etag": _snapshot_required_text(details.get("etag")),
         "last_modified": _snapshot_required_text(details.get("last_modified")),
         "captured_at": _snapshot_required_text(details.get("captured_at")),
-        "materialization_mode": _snapshot_required_text(details.get("materialization_mode"))
+        "materialization_mode": _snapshot_required_text(
+            details.get("materialization_mode")
+        )
         or LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
-        "certification_scope": _snapshot_required_text(details.get("certification_scope")),
-        "certification_basis": _snapshot_required_text(details.get("certification_basis")),
+        "certification_scope": _snapshot_required_text(
+            details.get("certification_scope")
+        ),
+        "certification_basis": _snapshot_required_text(
+            details.get("certification_basis")
+        ),
         "certification_artifact_ref": _snapshot_required_text(
             details.get("certification_artifact_ref")
         ),
         "upstream_run_id": _snapshot_required_text(details.get("upstream_run_id")),
-        "upstream_manifest_id": _snapshot_required_text(details.get("upstream_manifest_id")),
+        "upstream_manifest_id": _snapshot_required_text(
+            details.get("upstream_manifest_id")
+        ),
         "source_event_id": source_event_id,
     }
 

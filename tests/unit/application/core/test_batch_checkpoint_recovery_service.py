@@ -143,7 +143,9 @@ async def test_resume_checkpoint_uses_fetched_offset_not_bronze_count(
     )
     await service.save_checkpoint_on_shutdown(records_fetched=10, resume_offset=7)
 
-    assert [call.args for call in checkpoint_manager.save_checkpoint.await_args_list] == [
+    assert [
+        call.args for call in checkpoint_manager.save_checkpoint.await_args_list
+    ] == [
         (17,),
         (17,),
         (17,),

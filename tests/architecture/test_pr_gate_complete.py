@@ -140,7 +140,9 @@ def test_policy_doc_mentions_shadow_aggregator() -> None:
 
 def test_classify_and_aggregate_checkout_base_ref() -> None:
     text = COORDINATOR.read_text(encoding="utf-8")
-    assert text.count("ref: ${{ github.event.pull_request.base.sha || github.sha }}") == 2
+    assert (
+        text.count("ref: ${{ github.event.pull_request.base.sha || github.sha }}") == 2
+    )
     assert "ref: ${{ github.event.pull_request.head.sha" not in text
     assert "Enforcement stays disabled (#11180)" in text
 

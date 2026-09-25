@@ -10,8 +10,7 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 DIAGRAM = (
-    ROOT
-    / "docs/02-architecture/diagrams/providers/chembl/01-api-integration-flow.mmd"
+    ROOT / "docs/02-architecture/diagrams/providers/chembl/01-api-integration-flow.mmd"
 )
 SVG = (
     ROOT

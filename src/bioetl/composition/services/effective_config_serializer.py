@@ -43,9 +43,7 @@ def _to_jsonable(value: object) -> object:
     return value
 
 
-_VOLATILE_SECTION_HASH_KEYS = frozenset(
-    {"timestamp", "config_hash", "effective_hash"}
-)
+_VOLATILE_SECTION_HASH_KEYS = frozenset({"timestamp", "config_hash", "effective_hash"})
 
 
 def _without_volatile_hash_fields(value: object) -> object:

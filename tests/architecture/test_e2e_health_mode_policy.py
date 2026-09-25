@@ -88,8 +88,7 @@ def test_full_nightly_replay_prompt_and_live_owners_are_fail_closed() -> None:
     assert "pull_request" not in str(full["if"])
     assert "pull_request" not in str(prompt["if"])
     assert full["if"] == (
-        "github.event_name == 'schedule' || "
-        "(github.event_name == 'workflow_dispatch')"
+        "github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch')"
     )
 
 
@@ -119,9 +118,9 @@ def test_e2e_smoke_marker_is_advisory_satellite() -> None:
 def test_e2e_nightly_full_replay_is_documented_as_schedule_or_dispatch() -> None:
     """#11055: the full replay job is not a pull_request owner."""
     lane = Path("configs/quality/test_matrix.yaml").read_text(encoding="utf-8")
-    description = lane.split("    e2e-nightly-full:", 1)[1].split(
-        "runner_backend:", 1
-    )[0]
+    description = lane.split("    e2e-nightly-full:", 1)[1].split("runner_backend:", 1)[
+        0
+    ]
     assert "schedule and workflow_dispatch" in description
     assert "skipped on" in description
     assert "pull_request" in description

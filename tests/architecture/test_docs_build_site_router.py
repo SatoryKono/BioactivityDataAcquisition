@@ -26,7 +26,10 @@ def test_build_site_defaults_to_strict_and_allows_opt_out() -> None:
     module = importlib.import_module("scripts.docs.build.mkdocs_build")
 
     assert module._with_default_strict([]) == ["--strict"]
-    assert module._with_default_strict(["--strict", "--clean"]) == ["--strict", "--clean"]
+    assert module._with_default_strict(["--strict", "--clean"]) == [
+        "--strict",
+        "--clean",
+    ]
     assert module._with_default_strict(["--no-strict", "--clean"]) == ["--clean"]
     assert module._with_default_strict(["--help"]) == ["--help"]
 
