@@ -234,14 +234,14 @@
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 126,
+      "line": 233,
       "path": "src/bioetl/domain/run_reports/reason_catalog.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "ReasonCatalog.family_for"
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 129,
+      "line": 236,
       "path": "src/bioetl/domain/run_reports/reason_catalog.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "ReasonCatalog.default_outcome_for"

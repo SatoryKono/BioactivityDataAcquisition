@@ -249,13 +249,13 @@
       "runtime_checkable": true
     },
     {
-      "line": 145,
+      "line": 146,
       "name": "MetricsPublisherPort",
       "path": "src/bioetl/domain/ports/observability/metrics.py",
       "runtime_checkable": true
     },
     {
-      "line": 171,
+      "line": 172,
       "name": "HealthMetricsExpositionPort",
       "path": "src/bioetl/domain/ports/observability/metrics.py",
       "runtime_checkable": true

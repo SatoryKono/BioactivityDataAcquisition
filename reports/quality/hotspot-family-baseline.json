@@ -3,8 +3,8 @@
     "snapshot_date": "2026-09-11",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 0,
-    "budget_review_notes": 0
+    "budget_warnings": 1,
+    "budget_review_notes": 1
   },
   "families": [
     {
@@ -18,11 +18,11 @@
       ],
       "duplication_clusters": 0,
       "files": 196,
-      "total_loc": 24156,
-      "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.384,
-      "max_internal_fan_in": 5,
-      "max_internal_fan_in_module": "bioetl.application.core.target_data_source_mixins",
+      "total_loc": 24264,
+      "files_ge_250_loc": 2,
+      "helper_function_ratio": 0.385,
+      "max_internal_fan_in": 6,
+      "max_internal_fan_in_module": "bioetl.application.core.quarantine_manager",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 7
@@ -31,10 +31,11 @@
         "distribution": {
           "0": 19,
           "1": 103,
-          "2": 41,
-          "3": 16,
+          "2": 40,
+          "3": 17,
           "4": 5,
-          "5": 12
+          "5": 11,
+          "6": 1
         },
         "modules": [
           {
@@ -145,8 +146,9 @@
           },
           {
             "module": "bioetl.application.core._quarantine_metrics_support",
-            "fan_in": 2,
+            "fan_in": 3,
             "runtime_importers": [
+              "bioetl.application.core._quarantine_manager_support",
               "bioetl.application.core._quarantine_request_builders",
               "bioetl.application.core._quarantine_support"
             ]
@@ -1308,9 +1310,10 @@
           },
           {
             "module": "bioetl.application.core.quarantine_manager",
-            "fan_in": 5,
+            "fan_in": 6,
             "runtime_importers": [
               "bioetl.application.core._batch_write_support",
+              "bioetl.application.core._quarantine_metrics_support",
               "bioetl.application.core.batch_transformer_attempt_failures",
               "bioetl.application.core.batch_transformer_quarantine",
               "bioetl.application.core.batch_transformer_state",
@@ -1508,24 +1511,17 @@
             "runtime_importers": []
           }
         ],
-        "max_fan_in": 5,
+        "max_fan_in": 6,
         "max_modules": [
-          "bioetl.application.core.base_transformer._structural_policy_types",
-          "bioetl.application.core.batch_execution.contracts",
-          "bioetl.application.core.batch_pipeline_execution_errors",
-          "bioetl.application.core.batch_processing_runtime",
-          "bioetl.application.core.batch_shared_operation_errors",
-          "bioetl.application.core.batch_transformer_state",
-          "bioetl.application.core.data_source_mixins",
-          "bioetl.application.core.lifecycle.shutdown",
-          "bioetl.application.core.pipeline_span_lifecycle",
-          "bioetl.application.core.quarantine_manager",
-          "bioetl.application.core.record_processor_config",
-          "bioetl.application.core.target_data_source_mixins"
+          "bioetl.application.core.quarantine_manager"
         ]
       },
-      "budget_warnings": [],
-      "budget_review_notes": [],
+      "budget_warnings": [
+        "over_budget:files_ge_250_loc=2/0"
+      ],
+      "budget_review_notes": [
+        "near_budget:max_internal_fan_in=6/7"
+      ],
       "at_budget_modules": [],
       "at_budget_module_count": 0
     },
@@ -2220,7 +2216,7 @@
       ],
       "duplication_clusters": 0,
       "files": 124,
-      "total_loc": 14695,
+      "total_loc": 14703,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.378,
       "max_internal_fan_in": 1,
