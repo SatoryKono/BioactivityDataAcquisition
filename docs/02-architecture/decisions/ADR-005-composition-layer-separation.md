@@ -34,10 +34,14 @@ src/bioetl/
 │   ├── bootstrap/    # Bootstrap package (assembly, CLI, runtime)
 │   ├── factories/
 │   └── ...
-└── interfaces/       # Driving Adapters (CLI, API, Orchestration)
-    ├── cli/main.py   # canonical entrypoint (historical shim: cli.py)
-    └── orchestration/
+└── interfaces/       # Driving Adapters (CLI, API)
+    └── cli/main.py   # canonical entrypoint (historical shim: cli.py)
 ```
+
+The removed package seam `interfaces/orchestration/` is not part of this tree.
+Current CLI orchestration is the command modules documented in
+[04-interfaces-layer.md](../04-interfaces-layer.md) §2.3 (`run.py`, `run_all.py`,
+`run_composite.py`).
 
 ## Justification
 

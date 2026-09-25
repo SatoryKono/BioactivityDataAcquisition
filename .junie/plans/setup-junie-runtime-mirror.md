@@ -2,11 +2,18 @@
 sessionId: session-260730-085154-1e84
 ---
 
+> Historical setup record. The live Junie profile set is the six tracked
+> `.junie/agents/py-*-bot.md` files (`py-audit-bot`, `py-config-bot`,
+> `py-debug-bot`, `py-doc-bot`, `py-plan-bot`, `py-test-bot`). Do not treat
+> this plan as a requirement to create additional profiles. Retired identifiers
+> stay only in `scripts/ai/junie/junie-mirror-contract.json`
+> (`forbidden_identifiers`).
+
 # Requirements
 
 ### Overview & Goals
 
-Настроить `.junie/**` как полноценный tracked runtime surface JetBrains Junie в проекте BioETL по аналогии с уже существующим `.codex/**`. Junie и Codex становятся **равноправными canonical runtime trees** для своих агентов; изменения runtime-поведения синхронизируются в обе стороны через parity-контракт.
+Настроить `.junie/**` как полноценный tracked runtime surface JetBrains Junie в проекте BioETL по аналогии с уже существующим `.codex/**`. Junie и Codex становятся **равноправными canonical runtime trees** для своих агентов. Parity обязательна в обоих деревьях; запись `--sync` только `.codex` → `.junie`.
 
 ### Scope
 
@@ -15,7 +22,7 @@ sessionId: session-260730-085154-1e84
 - Создание tracked дерева `.junie/`:
   - `.junie/guidelines.md` — JetBrains-native корневой контракт (аналог `AGENTS.md`), содержащий Canonical Precedence, Required AI Context, Response Language, Post-Change Validation, Guardrails.
   - `.junie/agents/{JUNIE-RUNTIME,README,ORCHESTRATION}.md` — runtime-карта, каталог, оркестрация (mirrors of `.codex/agents/**`).
-  - `.junie/agents/py-{plan,audit,architecture-debt,test,test-swarm,config,debug,doc,review-orchestrator}-bot.md` — 9 профилей, зеркальных активному набору Codex.
+  - `.junie/agents/py-{audit,config,debug,doc,plan,test}-bot.md` — шесть профилей, зеркальных живому набору Codex.
   - `.junie/skills/**` — mirror всех active skills из `.codex/skills/**` c `SKILLS-CATALOG.md` и `agents/openai.yaml` метаданными (либо аналогом для Junie).
 - Parity-контракт и проверочный скрипт `scripts/ai/junie/check_junie_mirror.sh` (`--check` / `--sync`) + JSON контракт `scripts/ai/junie/junie-mirror-contract.json`.
 - Обновление precedence chain в `AGENTS.md` и `.codex/agents/CODEX-RUNTIME.md`: `.junie/agents/JUNIE-RUNTIME.md` добавляется как active runtime source наравне с `.codex/agents/CODEX-RUNTIME.md`.
@@ -38,7 +45,7 @@ sessionId: session-260730-085154-1e84
 ### Functional Requirements
 
 1. `.junie/guidelines.md` существует, отслеживается git, и его Canonical Precedence секция перечисляет: `.codex/agents/CODEX-RUNTIME.md`, `.junie/agents/JUNIE-RUNTIME.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`, `REQUIREMENTS.md`, ADRs, docs mirrors.
-2. Для каждого активного Codex-агента из `.codex/agents/README.md` таблицы (9 профилей) существует зеркальный `.junie/agents/<agent>.md`.
+2. Для каждого активного Codex-агента из `.codex/agents/README.md` таблицы (шесть профилей) существует зеркальный `.junie/agents/<agent>.md`.
 3. Для каждого active skill из `.codex/skills/SKILLS-CATALOG.md` существует `.junie/skills/<skill>/SKILL.md`. Shared `references/**` идентичны байт-в-байт (кроме runtime-specific frontmatter).
 4. `scripts/ai/junie/check_junie_mirror.sh --check` возвращает non-zero при расхождении списка агентов/скиллов или содержимого shared references; `--sync` регенерирует зеркало без затирания Codex-стороны.
 5. `AGENTS.md` §Canonical Precedence перечисляет `.junie/agents/JUNIE-RUNTIME.md` как active runtime source; §Guardrails и §Related Files обновлены.
@@ -72,7 +79,7 @@ sessionId: session-260730-085154-1e84
 
 1. **Junie = equal peer of Codex.** `.junie/agents/JUNIE-RUNTIME.md` добавляется как active runtime source в precedence chain наравне с `.codex/agents/CODEX-RUNTIME.md`. Двусторонний parity-контракт (изменения в любую сторону обязаны синхронизироваться).
 2. **JetBrains-native root file — `.junie/guidelines.md`.** Это стандартный контракт Junie (аналог `AGENTS.md`). Он повторяет структуру `AGENTS.md`, но с приоритетным упоминанием `.junie/**` как «своей» runtime tree.
-3. **Полное зеркало 9 активных `py-*` профилей + всех active skills.** Deprecated `py-code-bot` не зеркалируется (уже tombstone). Docs-only `sp-*` профили в Junie не переносятся — их место в `docs/00-project/ai/agents/agents/**` неизменно.
+3. **Полное зеркало шести активных `py-*` профилей + всех active skills.** Deprecated `py-code-bot` не зеркалируется (уже tombstone). Docs-only `sp-*` профили в Junie не переносятся — их место в `docs/00-project/ai/agents/agents/**` неизменно. Retired identifiers не создавать.
 4. **Shared references остаются в `.codex/skills/**/references/**` как источник, `.junie/skills/**/references/**` — байт-в-байт mirror.** Это минимизирует drift и облегчает `check_junie_mirror.sh` diff.
 5. **`.gitignore` реклассификация через селективное un-ignore.** Оставляем `.junie/` в списке, но добавляем негативные правила `!.junie/guidelines.md`, `!.junie/agents/`, `!.junie/agents/**`, `!.junie/skills/`, `!.junie/skills/**`; machine-local (`/.junie/history/`, `/.junie/state/`, `/.junie/cache/`) продолжает игнорироваться явно.
 6. **`AI_RUNTIME_MIRROR_OWNERSHIP.md`** получает новый раздел «Junie ownership» с описанием: кто владеет `.junie/**`, каким скриптом синхронизируется, какая политика на расхождения.
@@ -83,9 +90,9 @@ sessionId: session-260730-085154-1e84
 
 - `.junie/guidelines.md` — корневой контракт Junie.
 - `.junie/agents/JUNIE-RUNTIME.md` — runtime-карта (mirror `CODEX-RUNTIME.md` с поправкой на Junie precedence).
-- `.junie/agents/README.md` — каталог 9 активных агентов + `Surface Note`, что это tracked runtime (не мирроr).
+- `.junie/agents/README.md` — каталог шести активных агентов + `Surface Note`, что это tracked runtime (не мирроr).
 - `.junie/agents/ORCHESTRATION.md` — оркестрация (mirror содержимого Codex-версии).
-- `.junie/agents/py-{plan,audit,architecture-debt,test,test-swarm,config,debug,doc,review-orchestrator}-bot.md` — 9 файлов.
+- `.junie/agents/py-{audit,config,debug,doc,plan,test}-bot.md` — шесть файлов.
 - `.junie/skills/SKILLS-CATALOG.md` + `.junie/skills/<skill>/SKILL.md` + shared `references/**` + `agents/openai.yaml` (или Junie-эквивалент, если требуется — при отсутствии Junie-native формата используется тот же `openai.yaml` для совместимости с capability-discovery).
 - `scripts/ai/junie/check_junie_mirror.sh` — bash-скрипт с флагами `--check` и `--sync`; проверяет: (a) parity списка агентов между `.codex/agents/py-*.md` и `.junie/agents/py-*.md`; (b) parity списка скиллов; (c) идентичность shared references (SHA-256).
 - `scripts/ai/junie/junie-mirror-contract.json` — декларативный контракт: mapping файлов, allow-list runtime-specific метаданных, entry-point rules.
@@ -150,15 +157,12 @@ sessionId: session-260730-085154-1e84
 │   ├── JUNIE-RUNTIME.md                   [NEW]
 │   ├── README.md                          [NEW]
 │   ├── ORCHESTRATION.md                   [NEW]
-│   ├── py-plan-bot.md                     [NEW, mirror]
 │   ├── py-audit-bot.md                    [NEW, mirror]
-│   ├── py-architecture-debt-bot.md        [NEW, mirror]
-│   ├── py-test-bot.md                     [NEW, mirror]
-│   ├── py-test-swarm.md                   [NEW, mirror]
 │   ├── py-config-bot.md                   [NEW, mirror]
 │   ├── py-debug-bot.md                    [NEW, mirror]
 │   ├── py-doc-bot.md                      [NEW, mirror]
-│   └── py-review-orchestrator.md          [NEW, mirror]
+│   ├── py-plan-bot.md                     [NEW, mirror]
+│   └── py-test-bot.md                     [NEW, mirror]
 └── skills/
     ├── SKILLS-CATALOG.md                  [NEW]
     ├── <each active skill>/               [NEW, mirror of .codex/skills/<skill>/]
@@ -272,13 +276,13 @@ JetBrains Junie получает свой корневой контракт и r
 
 - Создать `.junie/guidelines.md` со всеми секциями `AGENTS.md`: Canonical Precedence, Required AI Context, Response Language (RU по умолчанию), Post-Change Validation, Guardrails (RH5, local-only default, tech-debt guardrail, env-file guardrail), Dashboard Skill Routing, Related Files. В Canonical Precedence перечислить оба runtime tree как equal peers: `.codex/agents/CODEX-RUNTIME.md` и `.junie/agents/JUNIE-RUNTIME.md`.
 - Создать `.junie/agents/JUNIE-RUNTIME.md` (структурно как `.codex/agents/CODEX-RUNTIME.md`): Canonical Sources, Purpose, Response Language, Technical Debt Guardrail, Recommended Mapping (для Junie ролей: default/worker или Junie-native), Related Runtime Surfaces (ссылки на `.codex/agents/**` + `.junie/**`), Env File Guardrail.
-- Создать `.junie/agents/README.md` — каталог 9 активных агентов + Surface Note, помечающий `.junie/**` как tracked runtime (не мирроr) с двусторонним parity к `.codex/**`.
+- Создать `.junie/agents/README.md` — каталог шести активных агентов + Surface Note, помечающий `.junie/**` как tracked runtime (не мирроr). Parity обязательна; `--sync` пишет только `.codex` → `.junie`.
 - Создать `.junie/agents/ORCHESTRATION.md` как зеркало Codex-версии.
 
-###   Step 3: Stage 3: Зеркалирование 9 активных `py-*` профилей агентов в `.junie/agents/`
+###   Step 3: Stage 3: Зеркалирование шести активных `py-*` профилей агентов в `.junie/agents/`
 Каждый активный Codex `py-*` профиль имеет полный tracked mirror в `.junie/agents/`.
 
-- Создать 9 файлов, зеркальных `.codex/agents/py-*.md`: `py-plan-bot.md`, `py-audit-bot.md`, `py-architecture-debt-bot.md`, `py-test-bot.md`, `py-test-swarm.md`, `py-config-bot.md`, `py-debug-bot.md`, `py-doc-bot.md`, `py-review-orchestrator.md`.
+- Создать шесть файлов, зеркальных `.codex/agents/py-*.md`: `py-audit-bot.md`, `py-config-bot.md`, `py-debug-bot.md`, `py-plan-bot.md`, `py-test-bot.md`, `py-doc-bot.md`.
 - Контент идентичен Codex-версии; runtime-specific метаданные (model hint, runtime pool) допускается заменять на Junie-эквивалент — фиксируется в `junie-mirror-contract.json` как allow-list.
 - Deprecated `py-code-bot` в mirror **не включать** (уже tombstone в Codex).
 - Docs-only `sp-*` профили из `docs/00-project/ai/agents/agents/**` не мирятся.

@@ -45,14 +45,14 @@ The `interfaces` layer should be infrastructure-agnostic:
 ```
 ┌──────────────────────────────────────────────────┐
 │                   interfaces                      │
-│  cli/main.py (historical shim: cli.py), signals.py│
+│  cli/main.py (historical shim: cli.py)           │
 │  Uses: LoggerPort (not structlog)                │
 └───────────────────────┬──────────────────────────┘
                         │ depends on
                         ▼
 ┌──────────────────────────────────────────────────┐
 │                   composition                     │
-│  bootstrap.py (creates structlog adapter)        │
+│  bootstrap/ (creates structlog adapter)          │
 └───────────────────────┬──────────────────────────┘
                         │ creates
                         ▼

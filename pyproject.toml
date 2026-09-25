@@ -233,7 +233,7 @@ markers = [
     "docker_integration: Opt-in Docker lifecycle tests; requires explicit local scheduling",
     "relaxed_dq: Integration tests that explicitly opt in to relaxed DQ thresholds for replay stability",
     "e2e: End-to-end tests (slow, Local-Only runtime; maintenance paths intentionally carved out)",
-    "e2e_smoke: PR-blocking E2E smoke subset (bootstrap + representative entity path; see test_matrix e2e-smoke lane)",
+    "e2e_smoke: Advisory/satellite E2E smoke subset (not a GitHub-required merge check and not a pr-gate-complete owner; see test_matrix e2e-smoke lane and 05-github-policy GHA-017)",
     "asyncio: Async IO tests powered by pytest-asyncio",
     "slow: Slow tests (hypothesis, long-running)",
     "network: Tests requiring outbound network access",

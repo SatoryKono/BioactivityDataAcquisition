@@ -16,7 +16,6 @@ permissions:
     - Exec(make lint)
     - Exec(mypy)
     - Exec(pytest)
-    - Exec(python)
   deny:
     - write
     - edit
