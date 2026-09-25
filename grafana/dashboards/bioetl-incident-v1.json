@@ -1171,7 +1171,7 @@
       "id": 2005,
       "type": "table",
       "title": "Monitor Global Alerts",
-      "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Not provided means the alert has no provider attribute, not unknown provider health. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
+      "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -1184,7 +1184,7 @@
       },
       "targets": [
         {
-          "expr": "label_replace(label_replace(label_replace(label_replace((label_replace(bioetl_incident_alert_priority{pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"},\"pipeline\",\"N/A — Docker infrastructure\",\"\",\"\") or (bioetl_incident_alert_priority unless bioetl_incident_alert_priority{pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"})),\"pipeline\",\"Not provided\",\"pipeline\",\"^$\"),\"provider\",\"Not provided\",\"provider\",\"^$\"),\"alert_runbook\",\"incident-response\",\"\",\"\"),\"alert_runbook\",\"docker-stability\",\"alertname\",\"BioETLDockerRuntimeProbeMissing\")",
+          "expr": "label_replace(label_replace(label_replace(label_replace((label_replace(label_join((bioetl_incident_alert_priority{provider!=\"\"} or ((bioetl_incident_alert_priority{provider=\"\"} unless bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"}) * on(pipeline) group_left(provider) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0)) == 1))) or ((bioetl_incident_alert_priority{provider=\"\"} unless bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"}) unless on(pipeline) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0)) == 1))) or label_replace(bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"},\"provider\",\"N/A — Infrastructure\",\"\",\"\")),\"pipeline_context\",\";\",\"alertname\",\"pipeline\"),\"pipeline\",\"N/A — Docker infrastructure\",\"pipeline_context\",\"BioETLDockerRuntimeProbeMissing;\")),\"pipeline\",\"Not provided\",\"pipeline\",\"^$\"),\"provider\",\"Not provided\",\"provider\",\"^$\"),\"alert_runbook\",\"incident-response\",\"\",\"\"),\"alert_runbook\",\"docker-stability\",\"alertname\",\"BioETLDockerRuntimeProbeMissing\")",
           "format": "table",
           "instant": true,
           "refId": "A"
@@ -1381,11 +1381,24 @@
               },
               {
                 "id": "custom.width",
-                "value": 130
+                "value": 190
               },
               {
                 "id": "displayName",
                 "value": "Provider"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "chembl": {
+                        "text": "ChEMBL"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -1413,6 +1426,18 @@
             "matcher": {
               "id": "byName",
               "options": "alert_runbook"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline_context"
             },
             "properties": [
               {
@@ -3376,7 +3401,7 @@
           "id": 22005,
           "type": "table",
           "title": "Monitor Global Alerts (Full)",
-          "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Not provided means the alert has no provider attribute, not unknown provider health. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
+          "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
           "gridPos": {
             "x": 0,
             "y": 22,
@@ -3593,11 +3618,24 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 130
+                    "value": 190
                   },
                   {
                     "id": "displayName",
                     "value": "Provider"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "chembl": {
+                            "text": "ChEMBL"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -3625,6 +3663,18 @@
                 "matcher": {
                   "id": "byName",
                   "options": "alert_runbook"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "pipeline_context"
                 },
                 "properties": [
                   {

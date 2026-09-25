@@ -12,11 +12,11 @@ def _alert_provider_rows() -> str:
     infrastructure = f'{metric}{{provider="",pipeline="",alertname="BioETLDockerRuntimeProbeMissing"}}'
     missing = f'({metric}{{provider=""}} unless {infrastructure})'
     mapping = 'group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!="",provider!="",provider!="unknown"} > 0)'
-    unique = f'({mapping} and on(pipeline) (count by(pipeline)({mapping}) == 1))'
+    unique = f"({mapping} and on(pipeline) (count by(pipeline)({mapping}) == 1))"
     return (
         f'({metric}{{provider!=""}} or '
-        f'({missing} * on(pipeline) group_left(provider) {unique}) or '
-        f'({missing} unless on(pipeline) {unique}) or '
+        f"({missing} * on(pipeline) group_left(provider) {unique}) or "
+        f"({missing} unless on(pipeline) {unique}) or "
         f'label_replace({infrastructure},"provider","N/A — Infrastructure","",""))'
     )
 
@@ -142,9 +142,14 @@ def _explain_global_alerts(panels: dict[int, dict], override) -> None:
             "FIRING and PENDING retain their original alert state."
         )
         override(panel, "provider", "noValue", _NOT_PROVIDED)
-        override(panel, "provider", _WIDTH, 130)
+        override(panel, "provider", _WIDTH, 190)
         override(panel, "provider", "displayName", "Provider")
-        override(panel, "provider", "mappings", [{"type": "value", "options": {"chembl": {"text": "ChEMBL"}}}])
+        override(
+            panel,
+            "provider",
+            "mappings",
+            [{"type": "value", "options": {"chembl": {"text": "ChEMBL"}}}],
+        )
         override(panel, "pipeline_context", "custom.hidden", True)
         override(panel, "pipeline", "displayName", "Pipeline")
         override(panel, "pipeline", "noValue", _NOT_PROVIDED)

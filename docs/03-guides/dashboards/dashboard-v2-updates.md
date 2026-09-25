@@ -338,3 +338,15 @@ runbook otherwise; pipeline presentation labels are not navigation filters.
 Live Prometheus query verified Docker, generic missing-pipeline, and real-pipeline
 rows. Required readability/no-scroll checks passed. The broader state-followup
 test has an unrelated Overview idempotence failure.
+
+## Provider attribution in global alerts
+
+Missing alert providers are enriched from positive bioetl_workflow_pipeline_expected
+series only when exactly one distinct provider exists for the pipeline. Explicit
+alert providers take precedence. Ambiguous or absent mappings remain Not provided.
+The Docker runtime probe without a pipeline/provider uses N/A — Infrastructure.
+Provider identifiers remain unchanged; chembl is displayed as ChEMBL.
+
+Promtool verified five cases: explicit provider, unique mapping, missing mapping,
+ambiguous mapping and infrastructure. The live query preserved all seven alert
+rows and their severity/state. Required readability/no-scroll checks: 19 passed.
