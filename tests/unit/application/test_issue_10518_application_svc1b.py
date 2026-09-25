@@ -1415,9 +1415,17 @@ class TestResolveBroaderHistoricalExactReplayState:
     def test_within_post_capture_boundary(self):
         assert (
             self._state(
-                [{"materialization_mode": LIVE_CAPTURE_SNAPSHOT_MATERIALIZED}], False
+                [{"materialization_mode": LIVE_CAPTURE_SNAPSHOT_MATERIALIZED}], True
             )
             == "within_post_capture_parent_boundary"
+        )
+
+    def test_live_capture_without_full_envelope_is_not_within_boundary(self):
+        assert (
+            self._state(
+                [{"materialization_mode": LIVE_CAPTURE_SNAPSHOT_MATERIALIZED}], False
+            )
+            == "awaiting_historical_snapshot_certification"
         )
 
     def test_within_launch_time_boundary(self):

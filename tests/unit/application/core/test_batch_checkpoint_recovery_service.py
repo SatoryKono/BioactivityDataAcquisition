@@ -126,6 +126,31 @@ async def test_save_periodic_checkpoint_skips_nonpositive_interval(
 
 
 @pytest.mark.asyncio
+async def test_resume_checkpoint_uses_fetched_offset_not_bronze_count(
+    service: BatchCheckpointRecoveryService,
+    checkpoint_manager: AsyncMock,
+) -> None:
+    """Resume offset is records_fetched + resume_offset (#11168)."""
+    await service.save_periodic_checkpoint(
+        records_fetched=10,
+        resume_offset=7,
+        checkpoint_interval=5,
+    )
+    await service.save_checkpoint_on_exception(
+        records_fetched=10,
+        resume_offset=7,
+        error=RuntimeError("boom"),
+    )
+    await service.save_checkpoint_on_shutdown(records_fetched=10, resume_offset=7)
+
+    assert [call.args for call in checkpoint_manager.save_checkpoint.await_args_list] == [
+        (17,),
+        (17,),
+        (17,),
+    ]
+
+
+@pytest.mark.asyncio
 async def test_save_periodic_checkpoint_persists_total_processed(
     service: BatchCheckpointRecoveryService,
     checkpoint_manager: AsyncMock,
