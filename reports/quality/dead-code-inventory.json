@@ -312,7 +312,7 @@
       "disposition": "retain_active",
       "module_path": "src/bioetl/application/composite/runtime_models.py",
       "module_name": "bioetl.application.composite.runtime_models",
-      "src_importer_count": 37,
+      "src_importer_count": 38,
       "test_importer_count": 13,
       "min_src_importers": 3,
       "verification_status": "satisfied",
