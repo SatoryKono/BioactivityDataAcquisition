@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any, cast
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
@@ -15,10 +16,52 @@ from bioetl.composition.factories.services._bundle_support import (
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.parametrize("entity", ["activity", "assay_parameters", "target_protein_classification"])
+@pytest.mark.parametrize(
+    "entity", ["activity", "assay_parameters", "target_protein_classification"]
+)
 def test_bundle_preserves_bronze_entity_identity(entity: str) -> None:
     """Metadata must use the same full entity as Bronze storage references."""
-    assert bundle._extract_entity_type(f"chembl_{entity}") == entity
+    from bioetl.application.services.lineage.metadata_lineage_dataset_nodes import (
+        bronze_batch_node_from_input,
+        _bronze_batch_node_from_result,
+    )
+    from bioetl.application.observability.control_plane_evidence.lineage_graph_validation import (
+        conflicting_node_ids,
+    )
+    from bioetl.domain.lineage import LineageGraphFragment
+    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from uuid import UUID
+
+    batch_id = UUID("1023cd85-da3c-5297-858e-04dc5a3c74d9")
+    context = SimpleNamespace(
+        provider="chembl", entity=bundle._extract_entity_type(f"chembl_{entity}")
+    )
+    bronze = bronze_batch_node_from_input(
+        run_context=context,
+        input_data=SimpleNamespace(
+            batch_id=batch_id,
+            output_path="2026-09-25/batch.jsonl.zst",
+            record_count=1000,
+            compressed_size=19675,
+        ),
+    )
+    silver_ref = _bronze_batch_node_from_result(
+        BronzeWriteResult(
+            batch_id=batch_id,
+            relative_path=f"chembl/{entity}/2026-09-25/batch.jsonl.zst",
+            absolute_path=f"/bronze/chembl/{entity}/2026-09-25/batch.jsonl.zst",
+            record_count=1000,
+            compressed_size=19675,
+            uncompressed_size=40000,
+            checksum_blake2="abc",
+        )
+    )
+    fragments = (
+        LineageGraphFragment(fragment_id="bronze", nodes=(bronze,)),
+        LineageGraphFragment(fragment_id="silver", nodes=(silver_ref,)),
+    )
+    assert bronze.attributes["entity"] == entity
+    assert conflicting_node_ids(fragments) == []
 
 
 def test_base_services_proxy_resolves_factory_for_each_operation(
