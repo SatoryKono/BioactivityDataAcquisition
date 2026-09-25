@@ -673,10 +673,11 @@ groups:
             or label_replace(
               (
                 (bioetl_runtime_pipeline_run_type_universe_scoped > bool 0)
-                * on() group_left() (bioetl_runtime_trust_gap_active_10m * 3)
+                * on() group_left()
+                  ((max(absent_over_time(bioetl_pipeline_runs_total[10m])) or vector(0)) * 3)
               ),
               "runtime_status_source",
-              "telemetry_incomplete",
+              "pipeline_metrics_missing",
               "",
               ""
             )

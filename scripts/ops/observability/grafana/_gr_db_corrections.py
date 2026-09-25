@@ -83,8 +83,8 @@ _TABLE_TARGETS = {
 
 _SCOPE_COPY = {
     "bioetl-runtime": (
-        "CURRENT · Pipeline / Run Type. Missing stages: INCOMPLETE / UNKNOWN. "
-        "SCRAPING is not an active blocker; no blockers do not prove completeness."
+        "CURRENT · Pipeline / Run Type. INCOMPLETE means missing pipeline evidence. "
+        "Monitor Coverage shows separate monitoring quality (10m); SCRAPING does not prove completeness."
     ),
     "bioetl-incident-v1": (
         "GLOBAL · Signals are not verified causes. Telemetry gaps remain UNKNOWN. "
@@ -462,9 +462,7 @@ def _correct_control_plane(uid: object, panels: dict[int, dict]) -> None:
     ]
     for item in retention["fieldConfig"]["overrides"]:
         if item["matcher"].get("options") in ("Check", "Status"):
-            item["properties"] = [
-                p for p in item["properties"] if p["id"] != _WIDTH
-            ]
+            item["properties"] = [p for p in item["properties"] if p["id"] != _WIDTH]
     _override(retention, "check", _WIDTH, 125)
     _override(retention, "status", _WIDTH, 110)
     for field in ("check", "Check", "reason", "Reason"):
@@ -744,9 +742,7 @@ def _correct_control_plane_trust(uid: object, panels: dict[int, dict]) -> None:
         _override(trust, field, _WIDTH, width)
     for item in trust["fieldConfig"]["overrides"]:
         if item["matcher"].get("options") == "Observed":
-            item["properties"] = [
-                p for p in item["properties"] if p["id"] != _WIDTH
-            ]
+            item["properties"] = [p for p in item["properties"] if p["id"] != _WIDTH]
     _override(trust, "Reasons", _CELL, {"type": "auto"})
     _override(trust, "Reasons", _HIDDEN, False)
     _override(trust, "Reasons", "noValue", "Inspect")
@@ -796,6 +792,35 @@ def _strip_named_widths(panel: dict, names: tuple[str, ...]) -> None:
 def _correct_runtime(uid: object, panels: dict[int, dict]) -> None:
     if uid != "bioetl-runtime" or 2460 not in panels:
         return
+    coverage = panels[9102]
+    coverage["targets"] = [t for t in coverage["targets"] if t.get("refId") != "D"] + [
+        {
+            "refId": "D",
+            "expr": "bioetl_runtime_trust_gap_active_10m",
+            "instant": True,
+            "legendFormat": "Monitoring quality (10m)",
+        }
+    ]
+    _override(
+        coverage,
+        "Monitoring quality (10m)",
+        "mappings",
+        [
+            {
+                "type": "value",
+                "options": {
+                    "0": {"text": "OK", "color": "green"},
+                    "1": {"text": "DEGRADED", "color": "orange"},
+                },
+            }
+        ],
+    )
+    coverage["description"] = (
+        "CURRENT · Endpoint is scrape availability; expected stage signals measure presence, not freshness. "
+        "Rule age is evaluation age, not event freshness. Monitoring quality (10m) reports missing telemetry, "
+        "rule failures or missed evaluations in the last 10 minutes, including recovered events. "
+        "DEGRADED is a monitoring warning, not proof that the selected pipeline has incomplete stage evidence."
+    )
     _override(panels[243], "Expected", "noValue", "N/A: not declared")
     _override(panels[243], "Expected", _WIDTH, 150)
     _override(panels[243], "Observed Records", _WIDTH, 150)

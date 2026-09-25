@@ -402,7 +402,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Pipeline Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">CURRENT · Pipeline / Run Type. Missing stages: INCOMPLETE / UNKNOWN. SCRAPING is not an active blocker; no blockers do not prove completeness.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">CURRENT · Pipeline / Run Type. INCOMPLETE means missing pipeline evidence. Monitor Coverage shows separate monitoring quality (10m); SCRAPING does not prove completeness.</div>"
       },
       "links": []
     },
@@ -971,7 +971,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Endpoint is scrape availability. Expected stage signals is presence of lag/backlog for every expected pipeline/run_type stage. Missing stage definitions remain UNKNOWN. Rule age is evaluation age, not event freshness. Presence alone does not prove a live process. Missing signals make evidence confidence inconclusive. Rule age is the oldest required group; missing groups return UNKNOWN.",
+      "description": "CURRENT · Endpoint is scrape availability; expected stage signals measure presence, not freshness. Rule age is evaluation age, not event freshness. Monitoring quality (10m) reports missing telemetry, rule failures or missed evaluations in the last 10 minutes, including recovered events. DEGRADED is a monitoring warning, not proof that the selected pipeline has incomplete stage evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1110,6 +1110,42 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Monitoring quality (10m)"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "OK",
+                        "color": "green"
+                      },
+                      "1": {
+                        "text": "DEGRADED",
+                        "color": "orange"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "text"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -1157,6 +1193,12 @@
           "refId": "C",
           "instant": true,
           "legendFormat": "Rule age"
+        },
+        {
+          "refId": "D",
+          "expr": "bioetl_runtime_trust_gap_active_10m",
+          "instant": true,
+          "legendFormat": "Monitoring quality (10m)"
         }
       ],
       "title": "Monitor Coverage",
