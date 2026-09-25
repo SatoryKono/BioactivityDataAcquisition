@@ -225,6 +225,11 @@ def check_runtime_semantics(contract: JsonObject, issues: list[str]) -> None:
         runtime_map_rel: runtime_text,
         guidelines_rel: guidelines_text,
     }
+    plans_root = REPO_ROOT / ".junie" / "plans"
+    if plans_root.is_dir():
+        for plan_path in sorted(plans_root.rglob("*.md")):
+            rel = plan_path.relative_to(REPO_ROOT).as_posix()
+            governed_texts[rel] = plan_path.read_text(encoding="utf-8")
     for identifier in scope.get("forbidden_identifiers", []):
         for path_str, content in governed_texts.items():
             if identifier in content:

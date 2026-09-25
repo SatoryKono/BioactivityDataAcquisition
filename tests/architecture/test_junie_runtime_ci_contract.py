@@ -72,9 +72,15 @@ def test_junie_dashboard_routing_uses_active_observability_skills() -> None:
 
     for skill_name in semantics["required_dashboard_skills"]:
         assert f".junie/skills/{skill_name}/" in guidelines
+    plan_texts = [
+        path.read_text(encoding="utf-8")
+        for path in sorted((ROOT / ".junie" / "plans").rglob("*.md"))
+    ]
     for identifier in semantics["forbidden_identifiers"]:
         assert identifier not in runtime
         assert identifier not in guidelines
+        for plan_text in plan_texts:
+            assert identifier not in plan_text
 
 
 def test_junie_guidelines_include_environment_configuration() -> None:
