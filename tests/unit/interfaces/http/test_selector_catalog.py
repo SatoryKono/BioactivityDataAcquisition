@@ -161,6 +161,30 @@ async def test_filter_options_remain_available_with_all_forensic_slots_occupied(
 
 
 @pytest.mark.asyncio
+async def test_selector_waits_for_short_navigation_burst_instead_of_rejecting(
+    monkeypatch,
+):
+    host = HealthServer()
+    host._selector_endpoint_limiter = asyncio.Semaphore(1)
+    host._send_payload_response = AsyncMock()
+    monkeypatch.setattr(
+        routing, "_filter_options_payload", AsyncMock(return_value={"items": []})
+    )
+    await host._selector_endpoint_limiter.acquire()
+    pending = asyncio.create_task(
+        routing.handle_control_plane_filter_options(host, None, {})
+    )
+    try:
+        # Longer than the forensic 250 ms admission limit, within selector budget.
+        await asyncio.sleep(0.35)
+        assert not pending.done()
+    finally:
+        host._selector_endpoint_limiter.release()
+        await asyncio.wait_for(pending, 1)
+    host._send_payload_response.assert_awaited_once_with(None, 200, {"items": []})
+
+
+@pytest.mark.asyncio
 async def test_selector_timeout_retains_slot_until_operation_finishes(monkeypatch):
     host = HealthServer()
     host._selector_endpoint_limiter = asyncio.Semaphore(1)

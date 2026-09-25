@@ -667,7 +667,6 @@ control_plane_selector_context_contract:
   filter_options_endpoint: /ops/control-plane/filter-options
   availability:
     concurrency: 4
-    queue_timeout_seconds: 5
     pool: independent_of_forensic_evidence_panels
     catalog_scan: one_in_flight_per_health_server
     catalog_ttl_seconds: 5
