@@ -275,13 +275,53 @@ def test_tests_workflow_publishes_empirical_flaky_telemetry() -> None:
     workflow = _read_workflow(".github/workflows/tests.yml")
     block = _workflow_job_block(workflow, "flaky-telemetry")
 
+    assert "Run determinism-critical shard telemetry" in block
+    assert "N=3" in block
+    assert "empty curated flaky inventory is not proof of no flakes" in block
     assert "for seed in 17 73 113" in block
+    pytest_argv = block.split("uv run --frozen --no-build pytest", 1)[1].split(
+        "-m ", 1
+    )[0]
+    assert pytest_argv.split() == [
+        "tests/contract/test_semanticscholar_contract.py",
+        "tests/architecture/test_determinism_identity_policy.py",
+        "\\",
+    ]
     assert "BIOETL_RANDOM_ORDER_SEED" in block
     assert "VCR_RECORD_MODE=none" in block
     assert "flaky-test-empirical.json" in block
     assert "source_sha" in block and "shard_id" in block
     assert "compute_replay_tree_sha256" in block
     assert "replay_tree_sha256" in block
+
+
+def test_test_matrix_wording_keeps_gate_always_required() -> None:
+    """#11058: test-matrix is not a leaf check, and gate tests is always_required."""
+    policy = Path("docs/00-project/governance/05-github-policy.md").read_text(
+        encoding="utf-8"
+    )
+    workflow = _read_workflow(".github/workflows/tests.yml")
+    for line in policy.splitlines():
+        if "test-matrix" in line:
+            assert "not always-on" not in line, line
+    matrix_row = next(
+        line for line in policy.splitlines() if "job `test-matrix`" in line
+    )
+    coverage_row = next(
+        line
+        for line in policy.splitlines()
+        if line.startswith("| `coverage-verify` |")
+    )
+    for row in (matrix_row, coverage_row):
+        assert "Not a leaf required check" in row
+        assert "always_required" in row
+        assert "pr-gate-complete" in row
+        assert "docs-only" in row
+    comment = workflow.split("  test-matrix:", 1)[0].rsplit("\n\n", 1)[-1]
+    assert "always_required" in comment
+    assert "pr-gate-complete" in comment
+    assert "not always-on" not in comment
+    assert "path-scoped" not in comment
 
 
 def test_neo4j_live_audit_uses_cached_image_and_compose_wait() -> None:

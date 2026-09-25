@@ -87,6 +87,10 @@ def test_full_nightly_replay_prompt_and_live_owners_are_fail_closed() -> None:
     assert "Manual nightly requires blocking smoke" in complete_runs
     assert "pull_request" not in str(full["if"])
     assert "pull_request" not in str(prompt["if"])
+    assert full["if"] == (
+        "github.event_name == 'schedule' || "
+        "(github.event_name == 'workflow_dispatch')"
+    )
 
 
 def test_e2e_nightly_dispatch_is_not_cancelled_by_main_push() -> None:
