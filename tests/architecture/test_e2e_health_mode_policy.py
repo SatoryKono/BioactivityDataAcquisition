@@ -93,6 +93,29 @@ def test_full_nightly_replay_prompt_and_live_owners_are_fail_closed() -> None:
     )
 
 
+def test_e2e_nightly_full_replay_is_documented_as_schedule_or_dispatch() -> None:
+    """#11055: the full replay job is not a pull_request owner."""
+    lane = Path("configs/quality/test_matrix.yaml").read_text(encoding="utf-8")
+    description = lane.split("    e2e-nightly-full:", 1)[1].split(
+        "runner_backend:", 1
+    )[0]
+    assert "schedule and workflow_dispatch" in description
+    assert "skipped on" in description
+    assert "pull_request" in description
+    policy_text = Path("docs/00-project/governance/05-github-policy.md").read_text(
+        encoding="utf-8"
+    )
+    assert (
+        "`e2e-smoke` remains a serial test-matrix lane. It is not PR-blocking and must\n"
+        "not be added to the merge wall."
+    ) in policy_text
+    assert (
+        "`e2e-nightly-full-replay` runs only on\n"
+        "`schedule` and `workflow_dispatch`; pull requests skip it, and it is not a\n"
+        "`pr-gate-complete` owner."
+    ) in policy_text
+
+
 def test_e2e_nightly_dispatch_is_not_cancelled_by_main_push() -> None:
     """Main merge-train push must not cancel schedule/manual nightly (#9976)."""
     workflow = Path(".github/workflows/e2e-matrix-health.yml").read_text(

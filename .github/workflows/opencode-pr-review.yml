@@ -1,6 +1,6 @@
-# Disabled (#11012): anomalyco/opencode/github still installs from releases/latest
-# and pipes a remote script to bash. Do not restore that action, id-token: write,
-# or secret env until the installer is digest-pinned.
+# Disabled (#11012): the remote installer still downloads releases/latest and
+# pipes a remote script to bash. Do not restore that installer, id-token: write,
+# or a secret environment until the installer is digest-pinned.
 name: opencode-pr-review
 
 on:

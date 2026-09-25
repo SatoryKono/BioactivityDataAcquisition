@@ -282,10 +282,9 @@ def test_tests_workflow_publishes_empirical_flaky_telemetry() -> None:
     pytest_argv = block.split("uv run --frozen --no-build pytest", 1)[1].split(
         "-m ", 1
     )[0]
-    assert pytest_argv.split() == [
+    assert [token for token in pytest_argv.split() if token != "\\"] == [
         "tests/contract/test_semanticscholar_contract.py",
         "tests/architecture/test_determinism_identity_policy.py",
-        "\\",
     ]
     assert "BIOETL_RANDOM_ORDER_SEED" in block
     assert "VCR_RECORD_MODE=none" in block
@@ -317,7 +316,14 @@ def test_test_matrix_wording_keeps_gate_always_required() -> None:
         assert "always_required" in row
         assert "pr-gate-complete" in row
         assert "docs-only" in row
-    comment = workflow.split("  test-matrix:", 1)[0].rsplit("\n\n", 1)[-1]
+    comment_lines: list[str] = []
+    for line in reversed(workflow.split("  test-matrix:", 1)[0].splitlines()):
+        if line.startswith("  #"):
+            comment_lines.append(line)
+            continue
+        if comment_lines:
+            break
+    comment = "\n".join(reversed(comment_lines))
     assert "always_required" in comment
     assert "pr-gate-complete" in comment
     assert "not always-on" not in comment

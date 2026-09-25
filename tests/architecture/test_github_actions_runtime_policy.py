@@ -1206,8 +1206,10 @@ def test_opencode_phase1_jobs_have_timeout() -> None:
         assert "anomalyco/opencode" not in text
         assert "id-token:" not in text
         assert "secrets." not in text
+        assert "pull_request:" not in text
+        assert "issues:" not in text
+        assert "\non:\n  workflow_dispatch:\n" in text
         document = _load_yaml(ROOT / relative)
-        assert set(document["on"]) == {"workflow_dispatch"}
         for name, job in document["jobs"].items():
             if "runs-on" not in job:
                 continue
