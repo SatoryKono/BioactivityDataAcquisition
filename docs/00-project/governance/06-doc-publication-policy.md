@@ -265,11 +265,12 @@ generated local publication-helper output per
 later enabled, update `mkdocs.yml`, the deployment workflow, and this policy in
 one changeset.
 
-Link-check boundary: `python -m scripts.docs check-links` does not follow
-`.png`/`.svg` hrefs. MkDocs `validation.links.not_found` is `info` (not fail)
-because nav-published raster/vector assets are gated separately: tracked SVG
-baselines by diagram CI, untracked PNG by DOC-GOV-02 / gitignore. Do not treat
-`not_found: info` as permission to ship broken Markdown links.
+Link-check boundary: `python -m scripts.docs check-links` checks that a local
+`.png` or `.svg` target exists and does not download remote image targets.
+MkDocs `validation.links.not_found: info` does not cover Markdown links.
+`check_broken_links` still reports a missing local Markdown target, including
+a missing local image. Do not treat `not_found: info` as permission to ship
+broken Markdown links.
 
 ## Freshness Protocol
 

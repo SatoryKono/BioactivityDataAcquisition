@@ -857,7 +857,7 @@ entity_test_ownership:
   composite.activity:
     - tests/unit/application/composite/test_composite_activity.py
   composite.assay:
-    - tests/e2e/test_chembl_assay_e2e.py
+    - tests/unit/application/composite/test_composite_assay.py
   composite.molecule:
     - tests/integration/composite/test_molecule_pipeline.py
   composite.publication:
@@ -1266,7 +1266,7 @@ fixture_governance:
 contract_testing:
   workflow_present: true
   replay_gate_workflow: .github/workflows/provider-contract-drift.yml
-  live_api_gate_mode: scheduled
+  live_api_gate_mode: keep-disabled
   replay_gate_mode: ci
   network_opt_in_required: true
   live_api_minimum_baseline:

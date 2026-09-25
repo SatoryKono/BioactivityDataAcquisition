@@ -26,20 +26,19 @@ jobs:
         steps:
             -   name: Checkout repository
                 uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+                with:
+                  persist-credentials: false
 
-            -   name: Run mermaid check (warn, don't fail)
+            -   name: Require MkDocs mermaid extra assets
                 run: |
-                    set -e
-                    files=("assets/javascripts/mermaid.min.js" "assets/javascripts/mermaid.esm.min.mjs" "assets/stylesheets/mermaid.css")
-                    missing=0
+                    set -euo pipefail
+                    files=(
+                      "docs/assets/javascripts/mermaid-init.js"
+                      "docs/assets/stylesheets/mermaid-responsive.css"
+                    )
                     for f in "${files[@]}"; do
                       if [ ! -f "$f" ]; then
-                        echo "MISSING: $f"
-                        missing=1
+                        echo "::error::Missing MkDocs mermaid asset: $f"
+                        exit 1
                       fi
                     done
-                    if [ $missing -eq 1 ]; then
-                      echo "::warning ::Mermaid vendored assets missing; builds will fall back to CDN at runtime. To vendor locally: run 'make vendor-mermaid' and include the files in your PR."
-                    else
-                      echo "Mermaid vendored assets present."
-                    fi

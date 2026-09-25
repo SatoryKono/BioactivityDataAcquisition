@@ -73,13 +73,17 @@ def test_diagram_router_commands_bootstrap_repository_imports(command: str) -> N
 
 
 def test_docs_workflow_includes_quality_gates_step() -> None:
-    workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
+    import yaml
 
-    assert "check_diagram_quality_gates.py" in workflow
-    assert "diagrams/manifests/quality-gates.txt" in workflow
-    assert "diagram-quality-report.json" in workflow
-    assert "diagrams-quality-report" in workflow
-    assert "diagram-visual-smoke.json" in workflow
+    document = yaml.safe_load(Path(".github/workflows/docs.yml").read_text(encoding="utf-8"))
+    job = document["jobs"]["render-diagrams"]
+    assert str(job.get("if", "")).replace(" ", "") == "${{false}}"
+    rendered = yaml.dump(job)
+    assert "check_diagram_quality_gates.py" in rendered
+    assert "diagrams/manifests/quality-gates.txt" in rendered
+    assert "diagram-quality-report.json" in rendered
+    assert "diagrams-quality-report" in rendered
+    assert "diagram-visual-smoke.json" in rendered
 
 
 def test_docs_workflow_includes_artifact_validation_step() -> None:
@@ -209,6 +213,11 @@ def test_vendored_mermaid_workflow_renamed_and_references_are_current() -> None:
 
     assert not old_workflow.exists()
     assert new_workflow.exists()
+    workflow_text = new_workflow.read_text(encoding="utf-8")
+    assert "docs/assets/javascripts/mermaid-init.js" in workflow_text
+    assert "docs/assets/stylesheets/mermaid-responsive.css" in workflow_text
+    assert "exit 1" in workflow_text
+    assert "vendor-mermaid" not in workflow_text
 
     active_paths = [
         Path(".github/workflows"),
@@ -228,6 +237,19 @@ def test_vendored_mermaid_workflow_renamed_and_references_are_current() -> None:
                 stale_hits.append(path.as_posix())
 
     assert stale_hits == []
+
+
+def test_mkdocs_mermaid_extra_assets_exist() -> None:
+    mkdocs = Path("mkdocs.yml").read_text(encoding="utf-8")
+    assert "assets/javascripts/mermaid-init.js" in mkdocs
+    assert "assets/stylesheets/mermaid-responsive.css" in mkdocs
+    assert Path("docs/assets/javascripts/mermaid-init.js").is_file()
+    assert Path("docs/assets/stylesheets/mermaid-responsive.css").is_file()
+    workflow = Path(".github/workflows/validate-vendored-mermaid-assets.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "docs/assets/javascripts/mermaid-init.js" in workflow
+    assert "exit 1" in workflow
 
 
 def test_windows_render_wrapper_delegates_to_canonical_renderer() -> None:

@@ -58,6 +58,11 @@ class TestEntityOwnershipCoverage:
                     f"Declared ownership path for '{entity_key}' is missing: "
                     f"{owned_path.relative_to(ROOT)}"
                 )
+            if entity_key == "composite.assay":
+                pipeline_name = "composite_assay"
+                assert any(pipeline_name in path.as_posix() for path in owned_paths), (
+                    "composite.assay owner must name composite_assay, not chembl_assay"
+                )
 
     def test_must_contract_providers_have_owned_contract_or_provider_regression_suite(
         self,

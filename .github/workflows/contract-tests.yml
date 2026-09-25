@@ -1,4 +1,6 @@
 name: Monthly Contract Tests
+# KEEP-DISABLED (#11190): Actions billing will not return. Do not re-enable.
+# Live API contract runs stay local. workflow_dispatch is not a substitute.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -7,9 +9,8 @@ concurrency:
 # Also allows manual triggering for ad-hoc verification
 
 on:
-  schedule:
-    # Run at 02:00 UTC on the 1st of every month
-    - cron: '0 2 1 * *'
+  # schedule removed (#11190). A monthly cron would spend minutes if the
+  # workflow were enabled again.
   workflow_dispatch:
     inputs:
       providers:
@@ -67,23 +68,23 @@ jobs:
           BIOETL_PUBMED_API_KEY: ${{ secrets.PUBMED_API_KEY }}
           BIOETL_UNIPROT_API_KEY: ${{ secrets.UNIPROT_API_KEY }}
         run: |
-          # Build pytest arguments
-          PYTEST_ARGS="tests/contract/ -v --tb=short --network"
+          # Build pytest argv. -k must be one argument (#11191).
+          args=(tests/contract/ -v --tb=short --network)
 
           if [ "$PROVIDERS" != "all" ]; then
-            # Filter by provider marker
-            PYTEST_ARGS="$PYTEST_ARGS -k '${PROVIDERS//,/ or }'"
+            k_expr="${PROVIDERS//,/ or }"
+            args+=(-k "$k_expr")
           fi
 
           if [ "$SKIP_SLOW" = "true" ]; then
-            PYTEST_ARGS="$PYTEST_ARGS -m 'not slow'"
+            args+=(-m "not slow")
           fi
 
           # Preserve pytest's exact exit code while allowing diagnostics and
           # failure notification to run before the job fails closed.
           mkdir -p reports/junit
           set +e
-          uv run --frozen --no-build pytest $PYTEST_ARGS --junit-xml=reports/junit/contract-results.xml
+          uv run --frozen --no-build pytest "${args[@]}" --junit-xml=reports/junit/contract-results.xml
           pytest_rc=$?
           set -e
           echo "pytest_rc=$pytest_rc" >> "$GITHUB_OUTPUT"
