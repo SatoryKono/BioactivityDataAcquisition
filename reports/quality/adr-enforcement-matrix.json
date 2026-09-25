@@ -92,6 +92,7 @@
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
       "manual_exception": null,
@@ -154,6 +155,7 @@
         "docs/00-project/ai/prompts/library/audit/architecture.md",
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/04-reference/api/domain/ports.md",
         "tests/architecture/test_no_structlog_in_application_interfaces.py",
         "tests/architecture/test_port_contracts.py"
@@ -538,6 +540,7 @@
         "docs/00-project/ai/agents/guides/AGENT.md",
         "docs/00-project/index.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/03-guides/pipeline-lifecycle.md",
         "docs/05-operations/README.md",
         "docs/05-operations/lock-contention-resolution.md",
@@ -563,6 +566,7 @@
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
       "manual_exception": null,
@@ -589,6 +593,7 @@
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/docs-verification.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/03-guides/metrics-monitoring.md",
         "docs/03-guides/observability-guide.md",
         "docs/03-guides/prometheus-metrics-export.md",
@@ -639,6 +644,7 @@
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/03-guides/silver-schema-testing-guide.md",
         "docs/03-guides/tutorials/create-new-pipeline-15min.md",
         "docs/03-guides/tutorials/debug-medallion-layers.md",
@@ -725,6 +731,7 @@
         "docs/00-project/ai/prompts/domains.yaml",
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/03-guides/metrics-monitoring.md",
         "docs/03-guides/tutorials/monitoring-alerts-setup.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
@@ -747,6 +754,7 @@
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "src/bioetl/application/core/pipeline_services.py",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
@@ -769,6 +777,7 @@
         "docs/00-project/RULES.md",
         "docs/00-project/ai/agents/guides/CLAUDE.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/04-reference/domain/aggregates.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
@@ -791,6 +800,7 @@
         "docs/00-project/RULES.md",
         "docs/00-project/ai/prompts/domains.yaml",
         "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "grafana/README.md",
         "src/bioetl/infrastructure/observability/tracing.py",
         "tests/architecture/test_adr_enforcement_matrix.py"
@@ -812,6 +822,7 @@
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
       "manual_exception": null,
@@ -845,6 +856,7 @@
         "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/governance/02-naming-policy.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/03-guides/silver-schema-testing-guide.md",
         "scripts/engineering/qa/naming_audit.py",
         "src/bioetl/application/pipelines/chembl/pipeline_types.py",
@@ -945,6 +957,7 @@
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/03-guides/pipeline-configuration.md",
         "docs/03-guides/pipeline-lifecycle.md",
         "docs/04-reference/api/application.md",
@@ -1021,6 +1034,7 @@
         "docs/03-guides/cheatsheets/data-quality-rules.md",
         "docs/03-guides/cheatsheets/pipeline-config.md",
         "docs/03-guides/dq-configuration.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/03-guides/pipeline-configuration.md",
         "docs/03-guides/silver-schema-testing-guide.md",
         "docs/04-reference/contracts/dq-contracts.md",
@@ -1065,6 +1079,7 @@
         "docs/00-project/ai/memory/gh-issues-documentation-update.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/03-guides/pipeline-configuration.md",
         "docs/04-reference/pipelines/README.md",
         "scripts/docs/checks/check_links.py",
@@ -1113,6 +1128,7 @@
         "docs/00-project/glossary.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/03-guides/pipeline-configuration.md",
         "scripts/schema/analysis/config_gap_analysis.py",
         "scripts/schema/validation/lint_config_paths.py",
@@ -1148,6 +1164,7 @@
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "src/bioetl/application/pipelines/chembl/pipeline_types.py",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
@@ -1179,6 +1196,7 @@
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/cheatsheets/pipeline-config.md",
         "docs/03-guides/config-merge-strategy.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "src/bioetl/application/core/lifecycle/checkpoint_manager.py",
         "src/bioetl/domain/config/pipeline.py",
         "src/bioetl/infrastructure/schemas/pipeline_config.py",
@@ -1240,6 +1258,7 @@
         "docs/00-project/RULES.md",
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/01-requirements/traceability/requirements-traceability-crosswalk.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/03-guides/publication-validation-guide.md",
         "docs/04-reference/publication-validation-index.md",
         "docs/05-operations/runbooks/publication-validation-runbook.md",
@@ -1388,6 +1407,7 @@
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/04-reference/pipelines/chembl/05-activity-spec.md",
         "docs/05-operations/troubleshooting/common-errors.md"
       ],
@@ -1443,6 +1463,7 @@
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/freshness-hold-2026-09-25.md",
         "docs/03-guides/local-storage-layout.md",
         "docs/03-guides/pipeline-configuration.md",
         "docs/04-reference/contracts/canonical-field-registry.md",

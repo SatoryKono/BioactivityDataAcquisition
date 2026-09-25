@@ -7,8 +7,8 @@
 - warn_count: 0
 - fail_count: 0
 - release_gate_status: `passing`
-- architecture_quality_scorecard_integral_score: `9.47`
-- architecture_quality_scorecard_interpretation: `good_targeted_improvements`
+- architecture_quality_scorecard_integral_score: `10.0`
+- architecture_quality_scorecard_interpretation: `excellent`
 
 | gate | status | metric | current | limit | source |
 | --- | --- | --- | ---: | ---: | --- |
@@ -17,8 +17,8 @@
 | `debt_budget_growth_policy` | `pass` | `budget_growth_allowed` | `False` | `False` | `configs/quality/debt_scorecard.yaml` |
 | `flaky_test_review_input_preflight` | `pass` | `required_json_input` | `available_valid_object` | `available_valid_object` | `reports/quality/flaky-test-burndown-review.json` |
 | `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940` | `f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940` | `reports/quality/module-coverage-inventory.json` |
-| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2499, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940'}` | `{'source_module_count': 2499, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
+| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6` | `b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6` | `reports/quality/module-coverage-inventory.json` |
+| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2494, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6'}` | `{'source_module_count': 2494, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `hotspot_family_baseline_budget_warnings` | `pass` | `budget_warnings` | `0` | `0` | `reports/quality/hotspot-family-baseline.json` |
@@ -56,5 +56,5 @@
 | `observability_touched_metric_inventory_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_touched_metric_review_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_review.json` |
 | `adr_enforcement_blocking_gaps` | `pass` | `blocking_gap_count` | `0` | `0` | `reports/quality/adr-enforcement-matrix.json` |
-| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `91be52dfb8a6fa112767bfce2578d85a74fee698b190d587da87796fbed2442b` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
+| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `77d602fc5f5c64f7330bcd5794264f3ad0517ce2011f10869913a4d96e53bd13` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
 | `generated_artifact_drift` | `pass` | `stale_artifact_count` | `{'count': 0, 'artifacts': []}` | `0` | `reports/quality/*.json` |

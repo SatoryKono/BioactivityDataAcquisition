@@ -1011,7 +1011,7 @@ def test_multi_pipeline_push_failure_preserves_success_and_report(
     import json
     from importlib import import_module
     from structlog.testing import capture_logs
-    from bioetl.composition.bootstrap.assembly.metrics_service import (
+    from bioetl.composition.bootstrap.cli.metrics import (
         create_metrics_service,
     )
     from bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration import (

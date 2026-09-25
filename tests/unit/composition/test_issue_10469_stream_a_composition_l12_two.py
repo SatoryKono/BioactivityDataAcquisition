@@ -11,7 +11,9 @@ import pytest
 
 from bioetl.composition.bootstrap.runtime import observability_assembly as observability
 from bioetl.composition.bootstrap.runtime import pipeline as pipeline_runtime
-from bioetl.composition.factories.batch_id_generator import UuidBatchIdGenerator
+from bioetl.composition.factories.services.runtime_managers import (
+    UuidBatchIdGenerator,
+)
 from bioetl.composition.factories.pipeline import _runner_assembly_support as assembly
 from bioetl.composition.factories.pipeline import runner_constructor as constructor
 from bioetl.composition.factories.pipeline.runner_constructor import (
