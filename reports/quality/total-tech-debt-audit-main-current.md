@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `d0c9e331353ce60dc2e50f9510fbcffa5199aa5b9d9ab54074a4593c591db049`
+Evidence surface SHA-256: `29c7c438a2094779400a438cfed6b93cfc5ce6f81316760417feff6bb2d4c331`
 
 Evidence metadata refresh (2026-09-23): the canonical registry digest was
 recomputed after S2 transformer split, test-governance unique-name/marker
@@ -67,22 +67,22 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "d0c9e331353ce60dc2e50f9510fbcffa5199aa5b9d9ab54074a4593c591db049",
+  "evidence_surface_sha256": "29c7c438a2094779400a438cfed6b93cfc5ce6f81316760417feff6bb2d4c331",
   "metrics": {
-    "architecture_integral_score": 10.0,
-    "architecture_interpretation": "excellent",
+    "architecture_integral_score": 9.47,
+    "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
-    "debt_gate_count": 45,
+    "debt_gate_count": 46,
     "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 45,
+    "debt_gate_pass_count": 46,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 2471,
+    "fully_covered_module_count": 2491,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 1,
     "partially_covered_module_count": 7,
-    "source_module_count": 2479,
+    "source_module_count": 2499,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -93,21 +93,21 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: Reconcile the current evidence surface and semantic summary with the canonical generated artifacts while preserving the accepted audited commit. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
+Refresh reason: Reconcile the current evidence surface and semantic summary with the canonical generated artifacts while preserving the accepted audited commit. The generated debt-governance evidence records 46/46 passing gates. No budget growth.
 
 ## Executive summary
 
-1. Debt-governance gates: **45 pass / 0 fail** (45 debt-governance gates).
+1. Debt-governance gates: **46 pass / 0 fail** (46 debt-governance gates).
 1. Release status: **debt-governance gates passing**; no blocking gaps remain.
 1. Architecture quality integral score: **9.47** (`good_targeted_improvements`). Integral score `9.47`.
 1. Module inventory (from module-coverage-inventory.json only):
-   - source_module_count: **2493**
-   - fully_covered: **2485**
+   - source_module_count: **2499**
+   - fully_covered: **2491**
    - partially_covered: **7**
    - no_executable_lines: **1**
    - uncovered: **0**
    - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2493 == source_module_count
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2499 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.

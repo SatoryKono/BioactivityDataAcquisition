@@ -52,20 +52,21 @@ make devin-workflows
 
 ## Tiered MCP Startup
 
-For different task types, use tiered MCP startup profiles:
+`start-shared.sh` accepts `--daily` (default) and `--all`. It does not accept
+`--minimal` or `--standard`. `health-shared.sh` accepts `daily` and `all`.
 
 ```bash
-# Minimal MCP plane (memory, filesystem, fetch) - ~30 seconds
-make devin-mcp-start-minimal
+# Daily shared plane (servers flagged daily in shared-servers.json)
+make devin-mcp-start
 
-# Standard MCP plane (essential + github, docker, search) - ~1 minute
-make devin-mcp-start-standard
-
-# Full MCP plane (all 18 servers) - ~2 minutes
+# Every catalogued shared server
 make devin-mcp-start-full
 ```
 
-**Note:** `make devin-mcp-start` now defaults to the standard profile for balanced performance.
+`make devin-mcp-start-minimal` and `make devin-mcp-start-standard` start the
+same daily plane. They are not separate server profiles.
+
+**Note:** `make devin-mcp-start` starts `--daily`.
 
 ## Quick Reference
 

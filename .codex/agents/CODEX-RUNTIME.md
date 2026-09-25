@@ -67,10 +67,10 @@ identity to repository, commit, branch, worktree, task, and source references.
   profile, skill, and memory sheet; the parent model is inherited.
 - `.codex/skills/**` is the sole project-local skill discovery and behavioral
   source.
-- Validate these surfaces with
-  `python -m` is not used here; on Windows use
-  `.\.venv-win\Scripts\python.exe scripts/ai/codex/doctor.py static --no-write`,
-  elsewhere `python scripts/ai/codex/doctor.py static --no-write`.
+- Validate these surfaces with `scripts/ai/codex/doctor.py static --no-write`.
+  On Windows use
+  `.\.venv-win\Scripts\python.exe scripts/ai/codex/doctor.py static --no-write`.
+  Elsewhere use `python scripts/ai/codex/doctor.py static --no-write`.
 
 ## Common Task Routing
 

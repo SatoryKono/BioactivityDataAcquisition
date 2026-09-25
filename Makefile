@@ -46,9 +46,9 @@ help:
 	@echo "  make devin-audit-config    Quick config audit"
 	@echo "  make devin-workflows       List available Devin workflows"
 	@echo "  make devin-select-profile  Interactive profile selection guide"
-	@echo "  make devin-mcp-start-minimal Start minimal MCP plane (memory, filesystem, fetch)"
-	@echo "  make devin-mcp-start-standard Start standard MCP plane (essential + github, docker, search)"
-	@echo "  make devin-mcp-start-full   Start full MCP plane (all 18 servers)"
+	@echo "  make devin-mcp-start-minimal Not a separate plane; starts the daily shared MCP plane"
+	@echo "  make devin-mcp-start-standard Not a separate plane; starts the daily shared MCP plane"
+	@echo "  make devin-mcp-start-full   Start every catalogued shared MCP server (--all)"
 	@echo ""
 	@echo "DeepWiki management:"
 	@echo "  make deepwiki-backup       Backup wiki files before regeneration"
@@ -234,19 +234,19 @@ devin-select-profile:
 
 # Tiered MCP startup profiles
 devin-mcp-start-minimal:
-	@echo "Starting minimal MCP plane (memory, filesystem, fetch) - ~30 seconds"
-	@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --minimal
-	@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh minimal
-
-devin-mcp-start-standard:
-	@echo "Starting standard MCP plane (essential + github, docker, brave-search) - ~1 minute"
-	@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --standard
-	@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh standard
-
-devin-mcp-start-full:
-	@echo "Starting full MCP plane (all 18 servers) - ~2 minutes"
+	@echo "minimal is not a launcher mode; starting the daily shared MCP plane"
 	@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily
 	@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily
+
+devin-mcp-start-standard:
+	@echo "standard is not a launcher mode; starting the daily shared MCP plane"
+	@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily
+	@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily
+
+devin-mcp-start-full:
+	@echo "Starting every catalogued shared MCP server (--all)"
+	@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --all
+	@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh all
 
 devin: devin-setup
 	$(DEVIN) $(DEVIN_ARGS)

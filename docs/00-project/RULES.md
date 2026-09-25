@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
-Version: 6.1.11
-Last verified: 2026-08-25
+Version: 6.1.13
+Last verified: 2026-09-25
 Status: active
 Class: published
 Owner: BioETL Team
@@ -2164,7 +2164,7 @@ fields:
 ## История Изменений (Changelog)
 
 - **6.1.13** (2026-09-16): синхронизирован индекс решений с ADR-061
-  (persisted selected-run assessment; Proposed).
+  (persisted selected-run assessment; Accepted).
 - **6.1.12** (2026-08-31): синхронизирован индекс принятых решений с
   ADR-060 (prompt kernel and overlay architecture).
 - **6.1.11** (2026-08-25): синхронизирован индекс принятых решений с

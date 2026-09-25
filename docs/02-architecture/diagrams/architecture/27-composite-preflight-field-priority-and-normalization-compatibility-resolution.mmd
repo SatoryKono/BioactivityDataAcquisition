@@ -19,7 +19,9 @@ sequenceDiagram
     CLI->>Runner: validate composite config
     Runner->>Validator: validate(config)
     Validator->>Schema: collect schema / profile refs
-    Schema-->>Validator: profile_refs + source_profiles
+    Schema-->>Validator: schema field refs
+    Validator->>Profiles: load source profiles
+    Profiles-->>Validator: profile identities
     Validator->>Validator: _get_valid_sources(config)
     Validator->>Validator: _validate_field_priority(...)
     alt field priority source missing

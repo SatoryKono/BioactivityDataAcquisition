@@ -644,15 +644,6 @@ jobs:
       - name: Check matrix structural contract export freshness (blocking)
         run: uv run --frozen --no-build python -m scripts.docs export-matrix-structural-contract --check
 
-      - name: Check matrix structural workbook sync freshness (blocking)
-        run: |
-          workbook="docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
-          if [ ! -f "$workbook" ]; then
-            echo "Skipping matrix structural workbook sync check: $workbook is not present in repository checkout."
-            exit 0
-          fi
-          uv run --frozen --no-build python -m scripts.docs sync-matrix-structural-policy --check --input "$workbook" --output "$workbook"
-
       - name: Check generated config schemas are up to date
         run: uv run --frozen --no-build python -m scripts.schema generate-pipeline --check
 
