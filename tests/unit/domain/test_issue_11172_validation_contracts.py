@@ -21,6 +21,7 @@ from bioetl.domain.normalization._chembl_units import normalize_standard_unit
 from bioetl.domain.normalization.profiles._standard_profile_spec import (
     coerce_standard_profile_spec,
 )
+from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.bronze_result import _normalized_path_parts
 from bioetl.domain.value_objects.dq_metrics import DQMetrics
 from bioetl.domain.value_objects.run_context import RunContext
@@ -39,8 +40,8 @@ _PROFILE_OVERRIDES = {
 def test_started_at_accepts_any_aware_offset_and_rejects_naive() -> None:
     """Aware offsets are accepted. Only naive datetimes are rejected (#11172)."""
     context = RunContext(
-        run_id="run-1",
-        run_type="incremental",
+        run_id=RunID("run-1"),
+        run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 9, 25, 12, 0, tzinfo=timezone(timedelta(hours=3))),
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -51,8 +52,8 @@ def test_started_at_accepts_any_aware_offset_and_rejects_naive() -> None:
 
     with pytest.raises(ValueError, match="timezone-aware"):
         RunContext(
-            run_id="run-1",
-            run_type="incremental",
+            run_id=RunID("run-1"),
+            run_type=RunType.INCREMENTAL,
             started_at=datetime(2026, 9, 25, 12, 0),
             pipeline_name="chembl_activity",
             provider="chembl",
@@ -61,9 +62,9 @@ def test_started_at_accepts_any_aware_offset_and_rejects_naive() -> None:
     _ = UTC
 
 
-def test_negative_dq_counters_are_allowed_until_they_exceed_total() -> None:
-    metrics = DQMetrics(total_records=2, error_records=-1)
-    assert metrics.error_records == -1
+def test_negative_dq_counters_are_rejected() -> None:
+    with pytest.raises(ValueError, match="DQ record counts must be non-negative"):
+        DQMetrics(total_records=2, error_records=-1)
     with pytest.raises(ValueError, match="error_records cannot exceed total_records"):
         DQMetrics(total_records=1, error_records=2)
 
