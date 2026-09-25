@@ -2,8 +2,10 @@
 
 `AGENTS.md` owns repository-wide runtime rules. This subordinate surface keeps
 Phase 1 limited to review comments and issue triage; repository contents are
-read-only. `opencode-pr-review.yml` selects only `review`, and
-`opencode-triage.yml` selects only `triage`, both with `contents: read`.
+read-only. `opencode-pr-review.yml` and `opencode-triage.yml` are
+`workflow_dispatch` stubs with `contents: read` (#11012). They do not call
+`anomalyco/opencode/github`, do not request `id-token: write`, and do not pass
+`MUSE_API_KEY` or `GITHUB_TOKEN`.
 
 ## Phase 1: automated fixes disabled
 

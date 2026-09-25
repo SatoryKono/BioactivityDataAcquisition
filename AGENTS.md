@@ -171,9 +171,10 @@ Minimum expectation:
   discovery surface, wired to the Meta Model API (`model_api/muse-spark-1.3-contributor`,
   key from `MUSE_API_KEY` (GitHub secret in CI, `.env` locally — значение
   никогда не копируется в репозиторий).
-- `.github/workflows/opencode-pr-review.yml`, `opencode-triage.yml` — Phase 1
-  only (read-only review + triage). Write paths (`/oc`, `agent-fix`) stay
-  disabled until Phase 1 is validated on real PRs/issues.
+- `.github/workflows/opencode-pr-review.yml`, `opencode-triage.yml` — `workflow_dispatch`
+  stubs only (#11012). They do not call `anomalyco/opencode/github`: that pin still
+  downloads `releases/latest` and runs `curl | bash`. Write paths (`/oc`, `agent-fix`)
+  stay disabled. Restore a review or triage step only with a digest-pinned installer.
 - This surface is subordinate to the canonical precedence above; it MUST NOT
   redefine runtime behavior. BioETL guardrails (`.env` untouched, no Docker/Redis,
   tech-debt budgets only down, root hygiene) apply to every OpenCode agent.
