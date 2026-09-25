@@ -1,6 +1,6 @@
 # Observability Dashboard And Export Rollout Contracts
 
-Last verified: 2026-06-30
+Last verified: 2026-09-25
 
 This contract narrows the dashboard/export rollout to existing BioETL
 control-plane and observability surfaces. It does not introduce a new SQL event

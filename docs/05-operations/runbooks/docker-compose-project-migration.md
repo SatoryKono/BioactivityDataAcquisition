@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P1
   Runtime profile: Local-Only optional Docker adjunct (ADR-010).
-  Last verified: '2026-07-21'
+  Last verified: '2026-09-25'
 
 ______________________________________________________________________
 

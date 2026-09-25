@@ -21,16 +21,11 @@ def materialize(leaf_id, files, workdir):
                     "-c", "user.name=audit", "commit", "-qm", "base",
                     "--allow-empty"], check=True)
     subprocess.run(["git", "-C", workdir, "checkout", "-qb", "review"], check=True)
-    lst = os.path.join(workdir, "_paths.txt")
-    with open(lst, "w") as f:
-        f.write("\n".join(files))
     arc = subprocess.run(
-        ["git", "-C", REPO, "archive", BASE, "--format=tar",
-         "--pathspec-from-file=" + lst],
+        ["git", "-C", REPO, "archive", BASE, "--format=tar", "--"] + list(files),
         capture_output=True)
     if arc.returncode != 0:
         raise RuntimeError("git archive failed: " + arc.stderr.decode()[:500])
-    os.remove(lst)
     tar_path = os.path.join(workdir, "_leaf.tar")
     with open(tar_path, "wb") as f:
         f.write(arc.stdout)
