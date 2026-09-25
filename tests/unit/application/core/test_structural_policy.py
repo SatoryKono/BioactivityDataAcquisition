@@ -105,7 +105,7 @@ def test_structural_policy_quarantines_required_type_mismatch() -> None:
 
     assert outcome.should_quarantine is True
     assert outcome.details is not None
-    assert outcome.details["reason_code"] == "required_field_type_mismatch"
+    assert outcome.details["reason_code"] == "structural_policy_type_mismatch"
     assert outcome.details["field"] == "src_id"
 
 
@@ -157,7 +157,7 @@ def test_structural_policy_quarantines_optional_nonnullable_type_mismatch() -> N
 
     assert outcome.should_quarantine is True
     assert outcome.details is not None
-    assert outcome.details["reason_code"] == "optional_nonnullable_field_type_mismatch"
+    assert outcome.details["reason_code"] == "structural_policy_null_optional_forbidden"
     assert outcome.details["field"] == "record_id"
     assert outcome.details["optional_sources"] == ["default_optional"]
     assert outcome.details["proposed_normalized_outcome"] is None
@@ -220,7 +220,7 @@ def test_structural_policy_respects_no_string_coercion_override() -> None:
     assert outcome.details is not None
     assert outcome.details["field"] == "src_id"
     assert outcome.details["coercion_policy"] == "no_string_coercion"
-    assert outcome.details["reason_code"] == "required_field_type_mismatch"
+    assert outcome.details["reason_code"] == "structural_policy_type_mismatch"
 
 
 @pytest.mark.unit

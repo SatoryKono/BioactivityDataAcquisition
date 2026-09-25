@@ -16,8 +16,10 @@ _ALLOWED_SILVER_FILTER_REASON_CODE_LABELS = frozenset(
         "range_filter_mismatch",
         "list_length_filter_mismatch",
         "list_contains_filter_mismatch",
-        "required_field_type_mismatch",
-        "optional_nonnullable_field_type_mismatch",
+        "structural_policy_type_mismatch",
+        "structural_policy_null_optional_forbidden",
+        "missing_publication_primary_id",
+        "missing_compound_identifier",
         "nullable_field_type_coerced_to_null",
         "other",
     }

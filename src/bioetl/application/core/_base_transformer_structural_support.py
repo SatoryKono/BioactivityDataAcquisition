@@ -17,8 +17,8 @@ if TYPE_CHECKING:
 
 _STRUCTURAL_ACTION_BY_REASON_CODE: dict[str, str] = {
     "required_field_missing": "presence_quarantine",
-    "required_field_type_mismatch": "required_type_quarantine",
-    "optional_nonnullable_field_type_mismatch": "optional_nonnullable_quarantine",
+    "structural_policy_type_mismatch": "required_type_quarantine",
+    "structural_policy_null_optional_forbidden": "optional_nonnullable_quarantine",
 }
 _STRUCTURAL_ACTION_BY_EVENT: dict[str, str] = {
     "silver_structural_type_coerced_to_null": "nullable_type_to_null",

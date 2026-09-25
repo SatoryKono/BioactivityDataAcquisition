@@ -621,7 +621,7 @@ class TestTemplateMethodPattern:
                 record={"id": "123", "value": "bad"},
                 quarantine_reason="bad structural record",
                 details={
-                    "reason_code": "required_field_type_mismatch",
+                    "reason_code": "structural_policy_type_mismatch",
                     "field": "src_id",
                     "action_taken": "quarantine_original_record",
                 },

@@ -35,6 +35,16 @@ _BUILTIN_REASONS: dict[str, dict[str, str]] = {
         "default_outcome": "filtered_out",
         "layer": "silver",
     },
+    "missing_publication_primary_id": {
+        "family": "structural",
+        "default_outcome": "filtered_out",
+        "layer": "silver",
+    },
+    "missing_compound_identifier": {
+        "family": "structural",
+        "default_outcome": "filtered_out",
+        "layer": "silver",
+    },
     "SCHEMA_VALIDATION_FAILURE": {
         "family": "dq",
         "default_outcome": "quarantined",

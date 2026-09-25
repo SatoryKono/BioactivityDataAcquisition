@@ -485,7 +485,7 @@ class TestTrackSilverFilterRejection:
         """Structural rejects should map missing rule_type to structural_policy."""
         recorder.track_silver_filter_rejection(
             {
-                "reason_code": "optional_nonnullable_field_type_mismatch",
+                "reason_code": "structural_policy_null_optional_forbidden",
                 "field": "title",
                 "policy_stage": "structural",
             }
@@ -497,7 +497,7 @@ class TestTrackSilverFilterRejection:
             {
                 "pipeline": "test_pipeline",
                 "run_type": "incremental",
-                "reason_code": "optional_nonnullable_field_type_mismatch",
+                "reason_code": "structural_policy_null_optional_forbidden",
                 "rule_type": "structural_policy",
                 "field": "title",
             },

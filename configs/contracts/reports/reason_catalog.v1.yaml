@@ -38,6 +38,18 @@ reasons:
     layer: silver
     description: Structural policy type mismatch
 
+  - code: missing_publication_primary_id
+    family: structural
+    default_outcome: filtered_out
+    layer: silver
+    description: Publication record has no primary identifier
+
+  - code: missing_compound_identifier
+    family: structural
+    default_outcome: filtered_out
+    layer: silver
+    description: PubChem compound record has no compound identifier
+
   - code: SCHEMA_VALIDATION_FAILURE
     family: dq
     default_outcome: quarantined

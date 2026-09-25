@@ -191,6 +191,10 @@ def test_pipeline_builder_reasons_contract_tracking_and_build() -> None:
         "quarantined",
         "excluded_by_contract",
     }
+    gold_fallback = next(
+        item for item in reasons if item["outcome"] == "excluded_by_contract"
+    )
+    assert gold_fallback["reason_code"] == "gold_filter_exclusion"
     assert _is_contract_reason({"reason_family": "contract"}) is True
     assert _has_contract_activity(0, []) is False
     summary = _resolve_contract_summary(None, reasons, layers)

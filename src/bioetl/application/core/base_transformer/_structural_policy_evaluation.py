@@ -100,7 +100,7 @@ def evaluate_null_value(
     if not contract.optional:
         return None
     details = build_structural_details(
-        reason_code="optional_nonnullable_field_type_mismatch",
+        reason_code="structural_policy_null_optional_forbidden",
         contract=contract,
         actual_value=None,
         action_taken="propose_null_warn_error_then_quarantine",
@@ -135,9 +135,9 @@ def evaluate_invalid_value(
         return None
     details = build_structural_details(
         reason_code=(
-            "optional_nonnullable_field_type_mismatch"
+            "structural_policy_null_optional_forbidden"
             if contract.optional
-            else "required_field_type_mismatch"
+            else "structural_policy_type_mismatch"
         ),
         contract=contract,
         actual_value=value,

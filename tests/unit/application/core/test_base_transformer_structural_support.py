@@ -65,16 +65,16 @@ class TestClassifyStructuralAction:
         result = classify_structural_action(details, event_names)
         assert result == "presence_quarantine"
 
-    def test_classify_structural_action__required_field_type_mismatch(self):
-        """Test mapping for required_field_type_mismatch reason code."""
-        details = {"reason_code": "required_field_type_mismatch"}
+    def test_classify_structural_action__structural_policy_type_mismatch(self):
+        """Test mapping for structural_policy_type_mismatch reason code."""
+        details = {"reason_code": "structural_policy_type_mismatch"}
         event_names = set()
         result = classify_structural_action(details, event_names)
         assert result == "required_type_quarantine"
 
-    def test_classify_structural_action__optional_nonnullable_field_type_mismatch(self):
-        """Test mapping for optional_nonnullable_field_type_mismatch reason code."""
-        details = {"reason_code": "optional_nonnullable_field_type_mismatch"}
+    def test_classify_structural_action__structural_policy_null_optional_forbidden(self):
+        """Test mapping for structural_policy_null_optional_forbidden reason code."""
+        details = {"reason_code": "structural_policy_null_optional_forbidden"}
         event_names = set()
         result = classify_structural_action(details, event_names)
         assert result == "optional_nonnullable_quarantine"
