@@ -17,6 +17,54 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
+async def test_report_index_scan_is_shared_scoped_and_expires_without_caching_errors(monkeypatch):
+    clock = [0.0]
+    monkeypatch.setattr(catalog_module, "monotonic", lambda: clock[0])
+    catalog = SelectorCatalog()
+    loader = MagicMock(return_value=[])
+    scopes = {"pipeline": ("chembl_activity",), "workflow": ("workflow_a",)}
+    await asyncio.gather(*(catalog.read_reports(scopes, loader) for _ in range(8)))
+    loader.assert_called_once_with({"pipeline": ("chembl_activity",)})
+    await catalog.read_reports({**scopes, "workflow": ("workflow_b",)}, loader)
+    assert loader.call_count == 1
+    await catalog.read_reports({"pipeline": ("chembl_assay",)}, loader)
+    assert loader.call_count == 2
+    clock[0] = 5.0
+    loader.side_effect = OSError("unreadable report index")
+    with pytest.raises(OSError, match="unreadable report index"):
+        await catalog.read_reports({"pipeline": ("chembl_assay",)}, loader)
+    loader.side_effect = None
+    assert await catalog.read_reports({"pipeline": ("chembl_assay",)}, loader) == []
+    assert loader.call_count == 4
+
+
+@pytest.mark.asyncio
+async def test_report_index_scan_survives_cancelled_waiter():
+    catalog = SelectorCatalog()
+    started, release = Event(), Event()
+
+    def load(scopes):
+        started.set()
+        assert release.wait(5)
+        return []
+
+    loader = MagicMock(side_effect=load)
+    first = asyncio.create_task(catalog.read_reports({}, loader))
+    try:
+        assert await asyncio.to_thread(started.wait, 5)
+        first.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await first
+        second = asyncio.create_task(catalog.read_reports({}, loader))
+        await asyncio.sleep(0)
+        release.set()
+        assert await second == []
+        loader.assert_called_once()
+    finally:
+        release.set()
+
+
+@pytest.mark.asyncio
 async def test_concurrent_readers_share_scan_and_cancelled_waiter_does_not_cancel_it():
     catalog = SelectorCatalog()
     started, release = Event(), Event()
