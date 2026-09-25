@@ -144,6 +144,9 @@ def coerce_standard_profile_spec(
     overrides: dict[str, object],
 ) -> StandardProfileSpec:
     """Build a fully-populated standard profile spec from explicit args/overrides."""
+    unknown = sorted(set(overrides) - set(_STANDARD_PROFILE_FIELD_NAMES))
+    if unknown:
+        raise ValueError("unknown standard profile fields: " + ", ".join(unknown))
     _require_standard_profile_fields(spec, overrides)
     resolved_values: dict[str, object] = {
         field_name: _resolve_standard_profile_value(
