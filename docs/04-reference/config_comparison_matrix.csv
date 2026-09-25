@@ -300,7 +300,6 @@ filters.gold_filters.ranges.max_tani,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.pchembl_value,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.publication_year,—,—,—,—,—,(dict),—,—,—,—,—,—,(dict),—,—,—,—,—,—,—,(dict),(dict),—,(dict),(dict),—,—
 filters.gold_filters.ranges.standard_value,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-filters.metadata.target_filter_policy.description,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,SOURCE-SPECIFIC ChEMBL target filter policy. Silver and Gold filters intentionally constrain this pipeline to reviewed single-protein target records and do not apply publication-specific fields.,—,—,—,—,—,—,—,—,—,—
 filters.metadata.target_filter_policy.scope,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,source_specific,—,—,—,—,—,—,—,—,—,—
 hash_policy.hash_policy.normalization.dates,—,—,—,—,—,(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict)
 hash_policy.hash_policy.normalization.null_handling,—,—,—,—,—,(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict)

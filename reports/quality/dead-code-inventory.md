@@ -5,14 +5,14 @@
 - last_reviewed: 2026-09-11
 - next_review_by: 2026-12-10
 - review_cycle_days: 90
-- triaged_entry_count: 18
+- triaged_entry_count: 17
 - repo_wide_zero_import_candidate_count: 2
 - repo_wide_classified_zero_import_candidate_count: 2
 - repo_wide_untriaged_zero_import_candidate_count: 0
 - repo_wide_owner_test_anchored_candidate_count: 2
 - repo_wide_candidates_without_owner_tests_count: 0
 - repo_wide_non_static_reachability_candidate_count: 1
-- triaged_retained_owner_test_anchored_count: 14
+- triaged_retained_owner_test_anchored_count: 13
 - triaged_retained_without_owner_tests_count: 0
 - note: zero static importer count is a review signal, not automatic removal proof
 - guardrail: Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths.
@@ -30,7 +30,6 @@
 | `checkpoint_state_codec_removed` | `removed` | 0 | `not_applicable` |
 | `fsm_helper_active` | `retain_active` | 9 | `satisfied` |
 | `runner_merge_stage_flow_removed` | `removed` | 0 | `not_applicable` |
-| `column_priority_orderer_active` | `retain_active` | 2 | `satisfied` |
 | `merger_input_mixin_active` | `retain_active` | 2 | `satisfied` |
 | `runner_support_flow_active` | `retain_active` | 2 | `satisfied` |
 | `runner_support_mixin_active` | `retain_active` | 1 | `satisfied` |
@@ -56,7 +55,6 @@
 | `triaged_retained` | `src/bioetl/infrastructure/adapters/_health_check_observability.py` | `retained_module_owner_suite` | `tests/architecture/test_wave3_adapter_facade_closeout.py` |
 | `triaged_retained` | `src/bioetl/infrastructure/adapters/_health_check_policy.py` | `retained_module_owner_suite` | `tests/architecture/test_wave3_adapter_facade_closeout.py` |
 | `triaged_retained` | `src/bioetl/application/composite/fsm_helper.py` | `retained_module_owner_suite` | `tests/unit/application/composite/test_fsm_helper.py`, `tests/unit/application/composite/test_runner_fsm.py` |
-| `triaged_retained` | `src/bioetl/application/composite/column_priority_orderer.py` | `retained_module_owner_suite` | `tests/unit/application/composite/test_column_priority_orderer.py` |
 | `triaged_retained` | `src/bioetl/application/composite/merger_input_mixin.py` | `retained_module_owner_suite` | `tests/unit/application/composite/test_merger_input_mixin.py` |
 | `triaged_retained` | `src/bioetl/application/composite/runner_pkg/runner_support_flow.py` | `retained_module_owner_suite` | `tests/architecture/test_tracing_enforcement.py`, `tests/unit/application/composite/test_runner.py` |
 | `triaged_retained` | `src/bioetl/application/composite/runner_pkg/runner_support_mixin.py` | `retained_module_owner_suite` | `tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py` |

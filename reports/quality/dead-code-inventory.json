@@ -13,7 +13,7 @@
     "guardrail_note": "Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths."
   },
   "summary": {
-    "triaged_entry_count": 18,
+    "triaged_entry_count": 17,
     "triaged_entries_below_min_importers": 0,
     "repo_wide_zero_import_candidate_count": 2,
     "repo_wide_classified_zero_import_candidate_count": 2,
@@ -29,10 +29,10 @@
       "canonical_owner_contract": 1,
       "compatibility_facade_contract": 1
     },
-    "triaged_retained_owner_test_anchored_count": 14,
+    "triaged_retained_owner_test_anchored_count": 13,
     "triaged_retained_without_owner_tests_count": 0,
     "triaged_retained_evidence_lane_counts": {
-      "retained_module_owner_suite": 14
+      "retained_module_owner_suite": 13
     }
   },
   "triaged_entries": [
@@ -182,23 +182,6 @@
       "owner_tests": [],
       "owner_test_count": 0,
       "owner_test_paths_exist_count": 0
-    },
-    {
-      "family": "composite_layer",
-      "entry_id": "column_priority_orderer_active",
-      "disposition": "retain_active",
-      "module_path": "src/bioetl/application/composite/column_priority_orderer.py",
-      "module_name": "bioetl.application.composite.column_priority_orderer",
-      "src_importer_count": 2,
-      "test_importer_count": 3,
-      "min_src_importers": 1,
-      "verification_status": "satisfied",
-      "evidence_lane": "retained_module_owner_suite",
-      "owner_tests": [
-        "tests/unit/application/composite/test_column_priority_orderer.py"
-      ],
-      "owner_test_count": 1,
-      "owner_test_paths_exist_count": 1
     },
     {
       "family": "composite_layer",
