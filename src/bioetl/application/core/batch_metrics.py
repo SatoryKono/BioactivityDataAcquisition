@@ -220,8 +220,7 @@ class BatchMetricsRecorderService:
             )
         _record_silver_removal_accounting(
             outcome="quarantined",
-            reason_code=reason_code
-            or getattr(error_type, "value", str(error_type)),
+            reason_code=reason_code or getattr(error_type, "value", str(error_type)),
             count=count,
             stage=stage,
         )

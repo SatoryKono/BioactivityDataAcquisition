@@ -231,12 +231,18 @@ async def _quarantine_schema_violation(
         logger=logger,
     )
     logger.warning("schema_violation_quarantined", layer=layer, errors=error.errors)
+    reason_code = (
+        "gold_contract_schema_failure"
+        if layer == "gold"
+        else ErrorType.SCHEMA_VIOLATION.value
+    )
     await quarantine_manager.quarantine_records(
         [
             DQQuarantineEntry(
                 record=record,
                 error_type=ErrorType.SCHEMA_VIOLATION,
                 error_details=f"Schema violation in {layer}: {error.errors}",
+                reason_code=reason_code,
             )
             for record in records
         ],

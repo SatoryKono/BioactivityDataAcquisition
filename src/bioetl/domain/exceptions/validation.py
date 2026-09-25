@@ -90,4 +90,5 @@ class SchemaViolationError(ValidationError):
         super().__init__(
             f"Schema validation failed for '{table}': {errors}",
             record_id=record_id,
+            reason_code=ErrorType.SCHEMA_VIOLATION.value,
         )

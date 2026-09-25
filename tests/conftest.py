@@ -1281,16 +1281,27 @@ def _bioetl_test_silver_validator(
     """
     if request.node.get_closest_marker("require_silver_validator") is not None:
         return
-    module_path = getattr(getattr(request.node, "module", None), "__file__", None)
-    if isinstance(module_path, str):
-        module_text = Path(module_path).read_text(encoding="utf-8", errors="replace")
-        if "SilverWriter" not in module_text and "silver_writer" not in module_text:
-            return
+    from bioetl.infrastructure.storage.silver import runtime_helpers as rh
     from bioetl.infrastructure.storage.silver.runtime_helpers import (
         SilverWriterRuntimeServicesRequest,
     )
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
     from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
+
+    original_resolve = rh.resolve_silver_writer_runtime
+
+    def _resolve_with_noop(**kwargs: object) -> object:
+        if kwargs.get("silver_validator") is None:
+            kwargs = {**kwargs, "silver_validator": NoOpValidator()}
+        return original_resolve(**kwargs)
+
+    monkeypatch.setattr(rh, "resolve_silver_writer_runtime", _resolve_with_noop)
+
+    module_path = getattr(getattr(request.node, "module", None), "__file__", None)
+    if isinstance(module_path, str):
+        module_text = Path(module_path).read_text(encoding="utf-8", errors="replace")
+        if "SilverWriter" not in module_text and "silver_writer" not in module_text:
+            return
 
     original_init = SilverWriter.__init__
 

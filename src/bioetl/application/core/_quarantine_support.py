@@ -100,6 +100,7 @@ async def persist_dq_quarantine_request(
         error_type=error_type,
         count=1,
         stage=ports.stage,
+        reason_code=error_type.value,
     )
     # Flat records_quarantined feeds bronze_partitioned (silver-side). Gold-layer
     # schema quarantine must stay on the gold bucket only (#10579).

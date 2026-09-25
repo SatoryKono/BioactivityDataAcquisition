@@ -13,6 +13,7 @@ from bioetl.domain.ports import RunManifestPort, WorkflowManifestPort
 SelectorCatalogSnapshot = tuple[tuple[RunManifest, ...], tuple[WorkflowManifest, ...]]
 SELECTOR_ENDPOINT_CONCURRENCY = 4
 SELECTOR_CATALOG_TTL_SECONDS = 5.0
+SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS = 2.0
 
 
 class SelectorCatalog:

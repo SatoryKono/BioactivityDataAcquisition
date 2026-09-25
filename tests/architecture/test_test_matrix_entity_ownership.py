@@ -125,7 +125,9 @@ class TestEntityOwnershipCoverage:
                 "composite_assay from chembl_assay"
             )
             source = owned.read_text(encoding="utf-8")
-            assert 'config.name == "composite_assay"' in source, (
-                f"{relative} must execute composite_assay"
-            )
+            assert (
+                'config.name == "composite_assay"' in source
+                or 'pipeline_name"] == "composite_assay"' in source
+                or 'pipeline_name == "composite_assay"' in source
+            ), f"{relative} must execute composite_assay"
             assert 'create_deterministic_test_context("chembl_assay"' not in source

@@ -55,6 +55,7 @@ from bioetl.interfaces.http import (
 )
 from bioetl.interfaces.http import _health_server_routing_support as routing_support
 from bioetl.interfaces.http import health_server_routing_mixin as routing_mixin_module
+from bioetl.interfaces.http._selector_catalog import SelectorCatalog
 from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixin
 from bioetl.interfaces.http.health_server_routing_mixin import HealthServerRoutingMixin
 from bioetl.interfaces.http.types import HealthResponse
@@ -143,6 +144,8 @@ class _RoutingHost(HealthServerRoutingMixin):
         self._clock: object | None = _Clock()
         self._prometheus_base_url = "http://prometheus.test"
         self._forensic_endpoint_limiter = asyncio.Semaphore(4)
+        self._selector_endpoint_limiter = asyncio.Semaphore(4)
+        self._selector_catalog = SelectorCatalog()
         self.provider_statuses: dict[str, dict[str, object]] = {}
         self.overall_status = HealthStatus.HEALTHY
 

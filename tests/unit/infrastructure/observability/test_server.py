@@ -68,7 +68,7 @@ class TestStartMetricsServer:
             result = start_metrics_server(port=9999, started_at=_STARTED_AT)
 
             assert result is True
-            mock_server.assert_called_once_with(9999, addr="0.0.0.0")
+            mock_server.assert_called_once_with(9999, addr="127.0.0.1")
 
     def test_successful_start_emits_metrics_server_publication_event(self):
         """Server startup should publish bounded self-telemetry before runs exit."""

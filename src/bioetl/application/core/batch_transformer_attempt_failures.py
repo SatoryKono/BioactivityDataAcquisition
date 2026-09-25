@@ -196,9 +196,7 @@ def handle_data_quality_transform_error(
     return RecordTransformOutcome(
         silver_record=None,
         gold_record=None,
-        dq_entry=DQQuarantineEntry(
-            raw_record, error_type, str(error), reason_code
-        ),
+        dq_entry=DQQuarantineEntry(raw_record, error_type, str(error), reason_code),
     )
 
 
