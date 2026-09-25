@@ -109,7 +109,7 @@ class RunContext:
         if self.started_at.tzinfo is None:
             raise ValueError(
                 "started_at must be timezone-aware. "
-                "Any aware offset is accepted; prefer datetime.now(UTC)."
+                "A timezone-aware offset is accepted; prefer datetime.now(UTC)."
             )
 
         if not self.pipeline_name:

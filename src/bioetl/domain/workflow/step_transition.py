@@ -59,6 +59,38 @@ class WorkflowStepTransitionPolicy:
             )
 
 
+def _blocked_step_ids(
+    failed_step_id: str | None,
+    blocked_step_ids: frozenset[str] | None,
+) -> set[str]:
+    blocked = set(blocked_step_ids or ())
+    if failed_step_id is not None:
+        blocked.add(failed_step_id)
+    return blocked
+
+
+def _is_completed_step(
+    step: WorkflowStepDefinition,
+    completed_step_ids: frozenset[str] | None,
+) -> bool:
+    return bool(completed_step_ids and step.step_id in completed_step_ids)
+
+
+def _policy(
+    disposition: str,
+    *,
+    stores_output: bool,
+    failed_step_id: str | None = None,
+) -> WorkflowStepTransitionPolicy:
+    policy = WorkflowStepTransitionPolicy(
+        disposition=disposition,
+        stores_output=stores_output,
+        failed_step_id=failed_step_id,
+    )
+    policy.ensure_runnable()
+    return policy
+
+
 def resolve_step_transition_policy(
     step: WorkflowStepDefinition,
     *,
@@ -71,31 +103,17 @@ def resolve_step_transition_policy(
     A failed step blocks only steps that declare it (or another blocked step)
     in ``depends_on``. Independent later steps still run.
     """
-    blocked = set(blocked_step_ids or ())
-    if failed_step_id is not None:
-        blocked.add(failed_step_id)
+    blocked = _blocked_step_ids(failed_step_id, blocked_step_ids)
     blocking = next((dep for dep in step.depends_on if dep in blocked), None)
     if blocking is not None:
-        policy = WorkflowStepTransitionPolicy(
-            disposition=_DISPOSITION_SKIP_FAILED,
+        return _policy(
+            _DISPOSITION_SKIP_FAILED,
             stores_output=False,
             failed_step_id=blocking,
         )
-        policy.ensure_runnable()
-        return policy
-    if completed_step_ids and step.step_id in completed_step_ids:
-        policy = WorkflowStepTransitionPolicy(
-            disposition=_DISPOSITION_SKIP_COMPLETED,
-            stores_output=False,
-        )
-        policy.ensure_runnable()
-        return policy
-    policy = WorkflowStepTransitionPolicy(
-        disposition=_DISPOSITION_RUN,
-        stores_output=True,
-    )
-    policy.ensure_runnable()
-    return policy
+    if _is_completed_step(step, completed_step_ids):
+        return _policy(_DISPOSITION_SKIP_COMPLETED, stores_output=False)
+    return _policy(_DISPOSITION_RUN, stores_output=True)
 
 
 def apply_step_result_transition(
