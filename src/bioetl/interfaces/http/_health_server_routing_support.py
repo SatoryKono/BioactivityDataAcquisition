@@ -43,6 +43,7 @@ from bioetl.interfaces.http._report_selector_options import (
     load_report_selector_entries,
     supplement_report_options,
 )
+from bioetl.interfaces.http._selector_catalog import SelectorCatalog
 from bioetl.interfaces.http.control_plane_selector_context import (
     RUN_ID_NO_SELECTION,
     RunIdOptionPolicy,
@@ -79,6 +80,12 @@ class _HealthRoutingHost(_HealthResponseSupport, Protocol):
 
     @property
     def _forensic_endpoint_limiter(self) -> asyncio.Semaphore: ...
+
+    @property
+    def _selector_endpoint_limiter(self) -> asyncio.Semaphore: ...
+
+    @property
+    def _selector_catalog(self) -> SelectorCatalog: ...
 
     @property
     def _checkpoint_port(self) -> CheckpointPort | None: ...
@@ -188,9 +195,10 @@ async def handle_control_plane_filter_options(
     """Handle control-plane-backed selector options for Grafana variables."""
     try:
         payload = await run_bounded_forensic_operation(
-            limiter=host._forensic_endpoint_limiter,
+            limiter=host._selector_endpoint_limiter,
             operation_factory=lambda: _filter_options_payload(host, query),
             timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
+            endpoint="/ops/control-plane/filter-options",
         )
     except ForensicEndpointUnavailable as exc:
         await host._send_payload_response(
@@ -236,9 +244,9 @@ async def _filter_options_payload(
     include_reports = not exact_run_only or selected_run_id is not None
 
     async def manifest_options() -> dict[str, object]:
-        manifests, workflow_manifests = await asyncio.gather(
-            asyncio.to_thread(host._run_manifest_port.list_all),
-            _list_workflow_manifests(host),
+        manifests, workflow_manifests = await host._selector_catalog.read(
+            host._run_manifest_port,
+            host._workflow_manifest_port,
         )
         return await asyncio.to_thread(
             build_selector_filter_options_payload,

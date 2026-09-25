@@ -76,9 +76,7 @@ class AssayParametersDataSource(
             filter_field=filter_field,
         )
         async for parameter in self._expand_parameters(
-            iter_derived_source(
-                source, output_limit=limit, scan_limit=scan_limit
-            ),
+            iter_derived_source(source, output_limit=limit, scan_limit=scan_limit),
             limit=limit,
             offset=offset,
         ):

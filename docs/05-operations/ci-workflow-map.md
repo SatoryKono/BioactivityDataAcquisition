@@ -44,7 +44,6 @@ Orphan temp / dynamic hosted workflows are out of scope here (#10265, #10268).
 | `consolidation-gates.yml` | consolidation-gates | Consolidation / cleanup governance gates |
 | `dashboard-first-window-noscroll.yml` | Dashboard first-window no-scroll | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
 | `dependency-review.yml` | Dependency review | PR-time HIGH/CRITICAL lockfile/manifest review |
-| `diagram-nightly.yml` | Diagram Nightly Regression | Mermaid canary; full-corpus render/regression job disabled |
 | `docker.yml` | Docker Build & Compose Validation | Optional Docker contract (ADR-010 adjunct), reproducible Trivy/SBOM baseline, blocking CRITICAL+HIGH+MEDIUM image gate, and no-rebuild promotion of the scanned image |
 | `docs.yml` | Docs & Diagrams | MkDocs, links, Mermaid lint, targeted ChEMBL render, drift; `pr-required.yml` owner (re-enabled #10263) |
 | `duplication-complexity.yml` | Duplication and Complexity Checks | Dup/complexity quality gates |
@@ -76,6 +75,7 @@ not operator routing targets. Reasons live in
 | `contract-governance-fast-check.yml` | Contract Governance Fast Check | `keep-disabled` |
 | `contract-tests.yml` | Monthly Contract Tests | `keep-disabled` |
 | `dashboard-render-host.yml` | Dashboard render release evidence | `keep-disabled` |
+| `diagram-nightly.yml` | Diagram Nightly Regression | `keep-disabled` |
 | `docs-kpi-weekly.yml` | Docs KPI Weekly | `keep-disabled` |
 | `labeler.yml` | Labeler | `keep-disabled` |
 | `memory-freshness.yml` | Memory freshness | `keep-disabled` |

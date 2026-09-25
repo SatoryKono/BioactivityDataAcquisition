@@ -108,6 +108,20 @@ def test_skill_overlay_redirect_keeps_archive_target_after_sync(tmp_path: Path) 
     assert sync_ai_governance.sync_skill_mirrors(tmp_path, check_only=True) == []
 
 
+def test_skill_mirror_check_keeps_live_canonical_skill_header(tmp_path: Path) -> None:
+    """``--check`` resolves live ``.codex/skills/*/SKILL.md`` from the repo root."""
+    _seed_skills_mirror_fixture(tmp_path)
+    mirror = tmp_path / "docs/00-project/ai/skills/local/demo/SKILL.md"
+    header = "\n".join(mirror.read_text(encoding="utf-8").splitlines()[:8])
+    assert "Canonical runtime source: `.codex/skills/demo/SKILL.md`" in header
+    assert "Canonical runtime source: none" not in header
+
+    assert sync_ai_governance.sync_skill_mirrors(tmp_path, check_only=True) == []
+    assert "Canonical runtime source: `.codex/skills/demo/SKILL.md`" in mirror.read_text(
+        encoding="utf-8"
+    )
+
+
 def test_normalize_codex_agents_strips_mirror_header(tmp_path: Path) -> None:
     agents = tmp_path / ".codex" / "agents"
     agents.mkdir(parents=True)
@@ -258,7 +272,8 @@ def test_sync_docs_skill_mirrors_adds_runtime_header_and_tokens(
     text = path.read_text(encoding="utf-8")
     assert text.startswith("> Mirror status:")
     assert "not a canonical runtime surface" in "\n".join(text.splitlines()[:40])
-    assert ".codex/skills/public/architecture-guardian/SKILL.md" in "\n".join(
+    assert "Canonical runtime source: none" in "\n".join(text.splitlines()[:40])
+    assert ".codex/skills/public/architecture-guardian/SKILL.md" not in "\n".join(
         text.splitlines()[:40]
     )
     assert "AI_RUNTIME_MIRROR_OWNERSHIP.md" in "\n".join(text.splitlines()[:40])
