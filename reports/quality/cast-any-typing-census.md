@@ -4,9 +4,9 @@ Linked issue: #10596 (AUD-006). Schema: `cast-any-typing-census-v1`.
 
 Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`, `Any: JSON`, `as_mixin_host(`.
 
-- total_cast_any_count: 382
-- justified_count: 240
-- unjustified_count: 142
+- total_cast_any_count: 374
+- justified_count: 243
+- unjustified_count: 131
 - file_count: 117
 
 ## By category
@@ -15,18 +15,18 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | --- | ---: |
 | `pd3_host_attr_default` | 131 |
 | `pd6_host_attr_default` | 90 |
-| `type_002_policy` | 0 |
+| `type_002_policy` | 3 |
 | `any_mixin_host` | 3 |
 | `any_host_attr` | 16 |
 | `any_json` | 0 |
 | `as_mixin_host_call` | 0 |
-| `unjustified` | 142 |
+| `unjustified` | 131 |
 
 ## By layer
 
 | Layer | Total | Unjustified |
 | --- | ---: | ---: |
-| `application` | 189 | 67 |
+| `application` | 181 | 56 |
 | `composition` | 22 | 8 |
 | `domain` | 12 | 2 |
 | `infrastructure` | 156 | 64 |
@@ -36,7 +36,7 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 
 | Sub-bucket | Count |
 | --- | ---: |
-| `pd4_host_default_pending_protocol` | 71 |
+| `pd4_host_default_pending_protocol` | 60 |
 | `free_form_reason` | 70 |
 | `no_reason_tag` | 1 |
 
@@ -44,7 +44,6 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 
 | Path | Total | Justified | Unjustified |
 | --- | ---: | ---: | ---: |
-| `src/bioetl/application/services/quality/data_quality_anomalies.py` | 11 | 0 | 11 |
 | `src/bioetl/infrastructure/storage/gold/metadata_mixin.py` | 11 | 0 | 11 |
 | `src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py` | 8 | 0 | 8 |
 | `src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py` | 8 | 0 | 8 |
@@ -69,12 +68,13 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | `src/bioetl/infrastructure/export/debug_export_ops.py` | 2 | 0 | 2 |
 | `src/bioetl/infrastructure/storage/gold/writer_metrics.py` | 2 | 0 | 2 |
 | `src/bioetl/infrastructure/storage/lineage_persistence.py` | 2 | 0 | 2 |
+| `src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py` | 2 | 0 | 2 |
 
 ## Unjustified free-form reason tags
 
 | Reason | Count |
 | --- | ---: |
-| `host default (PD4)` | 71 |
+| `host default (PD4)` | 60 |
 | `dynamic compat patch target` | 4 |
 | `Windows STARTUPINFO duck-type` | 3 |
 | `export port accepts Arrow/table duck-type` | 3 |

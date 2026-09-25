@@ -17,23 +17,23 @@
     "ratchet_policy": "shrink_only"
   },
   "summary": {
-    "total_cast_any_count": 382,
-    "justified_count": 240,
-    "unjustified_count": 142,
+    "total_cast_any_count": 374,
+    "justified_count": 243,
+    "unjustified_count": 131,
     "by_category": {
       "pd3_host_attr_default": 131,
       "pd6_host_attr_default": 90,
-      "type_002_policy": 0,
+      "type_002_policy": 3,
       "any_mixin_host": 3,
       "any_host_attr": 16,
       "any_json": 0,
       "as_mixin_host_call": 0,
-      "unjustified": 142
+      "unjustified": 131
     },
     "by_layer": {
       "application": {
-        "total": 189,
-        "unjustified": 67
+        "total": 181,
+        "unjustified": 56
       },
       "composition": {
         "total": 22,
@@ -53,19 +53,13 @@
       }
     },
     "unjustified_by_subcategory": {
-      "pd4_host_default_pending_protocol": 71,
+      "pd4_host_default_pending_protocol": 60,
       "free_form_reason": 70,
       "no_reason_tag": 1
     },
     "file_count": 117
   },
   "top_files": [
-    {
-      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py",
-      "total": 11,
-      "unjustified": 11,
-      "justified": 0
-    },
     {
       "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
       "total": 11,
@@ -209,12 +203,18 @@
       "total": 2,
       "unjustified": 2,
       "justified": 0
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
     }
   ],
   "unjustified_reason_tags": [
     {
       "reason": "host default (PD4)",
-      "count": 71
+      "count": 60
     },
     {
       "reason": "dynamic compat patch target",
@@ -532,7 +532,7 @@
     },
     {
       "path": "src/bioetl/application/composite/merger_input_mixin.py",
-      "line": 150,
+      "line": 153,
       "layer": "application",
       "category": "unjustified",
       "justified": false,
@@ -1082,7 +1082,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 48,
+      "line": 47,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1092,7 +1092,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 49,
+      "line": 48,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1102,7 +1102,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 50,
+      "line": 49,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1112,7 +1112,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 53,
+      "line": 52,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1122,7 +1122,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 54,
+      "line": 53,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1132,7 +1132,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 57,
+      "line": 56,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1142,7 +1142,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 60,
+      "line": 59,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1721,6 +1721,36 @@
       "snippet": "cast(Any, assay_count)  # Any: cast for nullable numeric coercion"
     },
     {
+      "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
+      "line": 48,
+      "layer": "application",
+      "category": "type_002_policy",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "TYPE-002 kwargs bridge",
+      "snippet": "transformer, provider, **cast(Any, dict(kwargs))"
+    },
+    {
+      "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
+      "line": 60,
+      "layer": "application",
+      "category": "type_002_policy",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "TYPE-002 MRO host",
+      "snippet": "super(cast(Any, owner_type), transformer).__init__(  # Any: TYPE-002 MRO host"
+    },
+    {
+      "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
+      "line": 62,
+      "layer": "application",
+      "category": "type_002_policy",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "TYPE-002 kwargs bridge",
+      "snippet": "**cast(Any, dict(kwargs)),  # Any: TYPE-002 kwargs bridge"
+    },
+    {
       "path": "src/bioetl/application/services/control_plane/manifest/_service_hydration.py",
       "line": 41,
       "layer": "application",
@@ -2069,116 +2099,6 @@
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD5)",
       "snippet": "clock: ClockPort = cast(Any, None)  # Any: host attr default (PD5)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py",
-      "line": 21,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_dq_monitor: DQMonitorPort | None = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py",
-      "line": 22,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py",
-      "line": 23,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py",
-      "line": 24,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_pipeline_name: str = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py",
-      "line": 25,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_entity_type: str = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py",
-      "line": 26,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_pipeline_metrics: PipelineMetricsRecorder = cast("
-    },
-    {
-      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py",
-      "line": 29,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_run_type: str = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py",
-      "line": 160,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_dq_monitor: DQMonitorPort | None = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py",
-      "line": 161,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py",
-      "line": 162,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py",
-      "line": 163,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_pipeline_name: str = cast(Any, None)  # Any: host default (PD4)"
     },
     {
       "path": "src/bioetl/application/services/quality/data_quality_thresholds.py",
@@ -3342,7 +3262,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/observability/observability_backend_process.py",
-      "line": 226,
+      "line": 225,
       "layer": "infrastructure",
       "category": "unjustified",
       "justified": false,
@@ -3352,7 +3272,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/observability/observability_backend_process.py",
-      "line": 231,
+      "line": 230,
       "layer": "infrastructure",
       "category": "unjustified",
       "justified": false,
@@ -3362,7 +3282,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/observability/observability_backend_process.py",
-      "line": 235,
+      "line": 234,
       "layer": "infrastructure",
       "category": "unjustified",
       "justified": false,

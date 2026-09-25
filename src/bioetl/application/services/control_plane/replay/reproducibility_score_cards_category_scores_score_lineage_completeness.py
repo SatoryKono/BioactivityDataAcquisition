@@ -2,18 +2,14 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
-    JsonDict as JsonDict,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
-    ScoreCardRecord as ScoreCardRecord,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
-    build_score_card_record as build_score_card_record,
-)
+from collections.abc import Callable
 
 
-def score_lineage_completeness(summary: JsonDict) -> ScoreCardRecord:
+def score_lineage_completeness(
+    summary: dict[str, object],
+    *,
+    build_score_card_record: Callable[..., object],
+) -> object:
     evidence = []
     blockers = []
     refs = [

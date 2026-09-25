@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import time
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.domain.value_objects.dq_anomaly import DQAnomaly
@@ -15,18 +15,30 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort
 
 
+class DataQualityMetricsHost(Protocol):
+    """Concrete service surface that owns DQ monitor, logger, and metrics."""
+
+    _dq_monitor: DQMonitorPort | None
+    _logger: LoggerPort
+    _metrics: MetricsPort | None
+    _pipeline_name: str
+    _entity_type: str
+    _pipeline_metrics: PipelineMetricsRecorder
+    _run_type: str
+
+    def _record_check_duration(self, duration_ms: float) -> None: ...
+
+    def _update_baseline_metrics(
+        self, metrics: dict[str, float], has_critical: bool
+    ) -> None: ...
+
+    def _process_anomalies(self, anomalies: list[DQAnomaly]) -> bool: ...
+
+    def _process_single_anomaly(self, anomaly: DQAnomaly) -> None: ...
+
+
 class DataQualityMetricsMixin:
     """Freshness, DQ timing, and baseline metric helpers."""
-
-    _dq_monitor: DQMonitorPort | None = cast(Any, None)  # Any: host default (PD4)
-    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
-    _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
-    _pipeline_name: str = cast(Any, None)  # Any: host default (PD4)
-    _entity_type: str = cast(Any, None)  # Any: host default (PD4)
-    _pipeline_metrics: PipelineMetricsRecorder = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _run_type: str = cast(Any, None)  # Any: host default (PD4)
 
     @staticmethod
     def _resolve_freshness_anchor_timestamp(
@@ -47,7 +59,9 @@ class DataQualityMetricsMixin:
             return None
         return datetime.fromtimestamp(freshness_anchor_timestamp, UTC)
 
-    def _record_check_duration(self, duration_ms: float) -> None:
+    def _record_check_duration(
+        self: DataQualityMetricsHost, duration_ms: float
+    ) -> None:
         """Record DQ check duration metric."""
         if self._metrics:
             self._metrics.observe_histogram(
@@ -57,7 +71,7 @@ class DataQualityMetricsMixin:
             )
 
     def _update_baseline_metrics(
-        self, metrics: dict[str, float], has_critical: bool
+        self: DataQualityMetricsHost, metrics: dict[str, float], has_critical: bool
     ) -> None:
         """Update baseline metrics counters."""
         if not self._metrics or has_critical:
@@ -85,7 +99,7 @@ class DataQualityMetricsMixin:
                 {"pipeline": self._pipeline_name, "metric": metric_name},
             )
 
-    def _emit_dq_monitor_disabled_signal(self) -> None:
+    def _emit_dq_monitor_disabled_signal(self: DataQualityMetricsHost) -> None:
         """Emit an explicit signal when anomaly detection is unavailable."""
         self._logger.warning(
             "dq_monitor_disabled",
@@ -102,7 +116,7 @@ class DataQualityMetricsMixin:
         )
 
     def _emit_validation_stage_metrics(
-        self,
+        self: DataQualityMetricsHost,
         *,
         record_count: int,
     ) -> None:
@@ -115,7 +129,7 @@ class DataQualityMetricsMixin:
         )
 
     def _emit_validation_gauges(
-        self,
+        self: DataQualityMetricsHost,
         *,
         monitor_enabled: bool,
         error_rate: float,
@@ -157,13 +171,8 @@ class DataQualityMetricsMixin:
 class DataQualityAnomalyMixin(DataQualityMetricsMixin):
     """Anomaly detection and anomaly logging helpers."""
 
-    _dq_monitor: DQMonitorPort | None = cast(Any, None)  # Any: host default (PD4)
-    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
-    _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
-    _pipeline_name: str = cast(Any, None)  # Any: host default (PD4)
-
     def _run_anomaly_detection(
-        self,
+        self: DataQualityMetricsHost,
         metrics: dict[str, float],
         error_rate: float,
         status: DQEvaluationStatus,
@@ -197,7 +206,7 @@ class DataQualityAnomalyMixin(DataQualityMetricsMixin):
         )
 
     def _process_anomalies(
-        self,
+        self: DataQualityMetricsHost,
         anomalies: list[DQAnomaly],
     ) -> bool:
         """Process detected anomalies and check for critical ones."""
@@ -209,7 +218,7 @@ class DataQualityAnomalyMixin(DataQualityMetricsMixin):
         return has_critical
 
     def _process_single_anomaly(
-        self,
+        self: DataQualityMetricsHost,
         anomaly: DQAnomaly,
     ) -> None:
         """Log and track a single anomaly."""

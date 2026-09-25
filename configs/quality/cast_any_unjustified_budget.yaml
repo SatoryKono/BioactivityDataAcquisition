@@ -12,8 +12,8 @@ rationale: >-
   PD4 ``host default`` class-level defaults that still await a Protocol host surface) is
   counted as unjustified and MUST only decrease. Increasing this budget is forbidden.
 baseline:
-  recorded_on: "2026-09-22"
-  total_cast_any_count: 382
-  justified_count: 240
-  unjustified_count: 142
-max_unjustified_count: 142
+  recorded_on: "2026-09-24"
+  total_cast_any_count: 374
+  justified_count: 243
+  unjustified_count: 131
+max_unjustified_count: 131

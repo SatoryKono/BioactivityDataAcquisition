@@ -17,7 +17,14 @@ from bioetl.composition.runtime_builders._run_manifest_refs import (
 from bioetl.composition.snapshot_serialization import (
     to_serializable_mapping as _shared_to_serializable_mapping,
 )
-from bioetl.domain.control_plane import RunSourceRef
+from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
+from bioetl.domain.control_plane.reproducibility_policy import (
+    assess_reproducibility_policy as assess_reproducibility_policy,
+)
+
+from ._composite_control_plane_support_resolve_composite_replay_capability import (
+    resolve_composite_replay_capability as _resolve_composite_replay_capability_impl,
+)
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunLedgerStore
@@ -96,6 +103,21 @@ def control_plane_root(settings: Settings, leaf: str) -> Path:
 def normalize_object(value: object) -> dict[str, object]:
     """Convert dataclasses/models into stable JSON-safe mappings."""
     return _shared_to_serializable_mapping(value)
+
+
+def resolve_composite_replay_capability(
+    *,
+    source_refs: tuple[RunSourceRef, ...],
+    required_persistence_profile: str,
+    resume_requested: bool,
+) -> ReplayCapability:
+    """Resolve composite replay capability through the owner policy binding."""
+    return _resolve_composite_replay_capability_impl(
+        source_refs=source_refs,
+        required_persistence_profile=required_persistence_profile,
+        resume_requested=resume_requested,
+        assess_reproducibility_policy=assess_reproducibility_policy,
+    )
 
 
 def bind_manifest_logger(logger: LoggerPort, manifest_id: str | None) -> LoggerPort:
