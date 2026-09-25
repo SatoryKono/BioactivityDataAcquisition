@@ -213,6 +213,11 @@ def test_vendored_mermaid_workflow_renamed_and_references_are_current() -> None:
 
     assert not old_workflow.exists()
     assert new_workflow.exists()
+    workflow_text = new_workflow.read_text(encoding="utf-8")
+    assert "docs/assets/javascripts/mermaid-init.js" in workflow_text
+    assert "docs/assets/stylesheets/mermaid-responsive.css" in workflow_text
+    assert "exit 1" in workflow_text
+    assert "vendor-mermaid" not in workflow_text
 
     active_paths = [
         Path(".github/workflows"),
