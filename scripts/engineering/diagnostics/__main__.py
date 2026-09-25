@@ -12,7 +12,6 @@ Commands:
     ast-inventory      AST-based code inventory
     debug-pandera      Debug Pandera schema validation
     debug-storage      Debug storage health checks
-    inspect-vcr        Temporary VCR cassette inspector
 """
 
 from __future__ import annotations
@@ -28,7 +27,6 @@ COMMANDS = {
     "ast-inventory": "ast_inventory.py",
     "debug-pandera": "debug_pandera.py",
     "debug-storage": "debug_storage_health.py",
-    "inspect-vcr": "_tmp_inspect_vcr.py",
 }
 COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
 

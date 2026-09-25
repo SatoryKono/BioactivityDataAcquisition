@@ -19,7 +19,6 @@ python -m scripts.engineering.diagnostics <command> [args...]
 | `ast-inventory`   | `scripts/engineering/diagnostics/ast_inventory.py`        | AST-based code inventory                       |
 | `debug-pandera`   | `scripts/engineering/diagnostics/debug_pandera.py`        | Debug Pandera schema validation                |
 | `debug-storage`   | `scripts/engineering/diagnostics/debug_storage_health.py` | Debug storage health checks                    |
-| `inspect-vcr`     | `scripts/engineering/diagnostics/_tmp_inspect_vcr.py`     | Temporary VCR cassette inspector               |
 
 ## When to Use
 
@@ -31,12 +30,6 @@ python -m scripts.engineering.diagnostics <command> [args...]
 | `ast-inventory`   | When you need a complete inventory of classes, functions, and constants by layer; generates JSON report in `reports/inventory/`                                              | Manual, code analysis        |
 | `debug-pandera`   | When Pandera DataFrame validation fails unexpectedly; helps isolate schema vs data issues                                                                                    | Manual, troubleshooting      |
 | `debug-storage`   | When storage operations fail; checks writability of data storage directories                                                                                                 | Manual, troubleshooting      |
-| `inspect-vcr`     | When VCR cassette contents need examination for debugging test failures                                                                                                      | Manual, troubleshooting      |
-
-`inspect-vcr` is intentionally a temporary diagnostic surface backed by
-`_tmp_inspect_vcr.py`; repository-local references to it should be treated as
-legacy troubleshooting evidence rather than as proof of a stable long-term
-workflow command.
 
 ## Other Files
 
