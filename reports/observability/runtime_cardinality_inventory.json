@@ -126,7 +126,6 @@
     "bioetl_runtime_pipeline_run_type_universe_scoped",
     "bioetl_runtime_stage_evidence_status",
     "bioetl_runtime_stage_progress",
-    "bioetl_runtime_trust_gap_active_10m",
     "bioetl_runtime_trust_gap_status_10m",
     "bioetl_scope_publication_status",
     "bioetl_silver_filter_reject_total_mismatch_15m",
@@ -143,7 +142,11 @@
     "bioetl_workflow_publication_scope_status",
     "bioetl_workflow_runs_total"
   ],
-  "alerted_without_declaration": [],
+  "alerted_without_declaration": [
+    "bioetl_workflow_scope_input_status",
+    "bioetl_workflow_scope_qualified_status",
+    "bioetl_workflow_scope_status"
+  ],
   "alerted_without_emission": [],
   "alias_emitters": {},
   "canonical_runtime_observability_emitters": [
@@ -374,6 +377,7 @@
     "bioetl_runtime_stage_evidence_present_ratio",
     "bioetl_runtime_stage_progress_by_scope",
     "bioetl_runtime_status",
+    "bioetl_runtime_trust_gap_active_10m",
     "bioetl_runtime_trust_gap_status_10m",
     "bioetl_shutdown_completed_total",
     "bioetl_shutdown_initiated_total",
@@ -422,7 +426,10 @@
     "bioetl_workflow_step_events_total",
     "bioetl_workflow_universe"
   ],
-  "dashboarded_without_declaration": [],
+  "dashboarded_without_declaration": [
+    "bioetl_workflow_scope_input_status",
+    "bioetl_workflow_scope_published_seconds"
+  ],
   "dashboarded_without_emission": [],
   "dead_metrics": [],
   "declared_label_contract_metrics": [
@@ -1586,6 +1593,7 @@
       "docs/03-guides/dashboards/operator-scenarios-s1-s6.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
+      "docs/03-guides/freshness-hold-2026-09-25.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/03-guides/running-pipelines.md",
       "docs/04-reference/contracts/observability.md",
@@ -1760,9 +1768,7 @@
       "docs/03-guides/dashboards/verdict-ontology.md",
       "docs/04-reference/observability/alerting-guide.md",
       "docs/04-reference/observability/metrics-catalog.md",
-      "grafana/README.md",
-      "grafana/dashboards/bioetl-incident-v1.json",
-      "grafana/dashboards/bioetl-overview-v2.json"
+      "grafana/README.md"
     ],
     "bioetl_l1_control_plane_current_status": [
       "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
@@ -2320,6 +2326,9 @@
     "bioetl_runtime_status": [
       "docs/04-reference/observability/metrics-catalog.md"
     ],
+    "bioetl_runtime_trust_gap_active_10m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
     "bioetl_runtime_trust_gap_status_10m": [
       "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
@@ -2482,8 +2491,10 @@
     ],
     "bioetl_workflow_pipeline_expected": [
       "docs/03-guides/dashboards/contracts/selector-contracts.yaml",
+      "docs/03-guides/dashboards/dashboard-v2-updates.md",
       "docs/03-guides/metrics-monitoring.md",
-      "docs/04-reference/observability/metrics-catalog.md"
+      "docs/04-reference/observability/metrics-catalog.md",
+      "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_workflow_pipeline_verdict_status": [
       "docs/03-guides/metrics-monitoring.md",
@@ -2518,6 +2529,14 @@
       "grafana/README.md",
       "grafana/dashboards/bioetl-runtime.json"
     ],
+    "bioetl_workflow_scope_input_status": [
+      "grafana/dashboards/bioetl-incident-v1.json",
+      "grafana/dashboards/bioetl-overview-v2.json"
+    ],
+    "bioetl_workflow_scope_published_seconds": [
+      "grafana/dashboards/bioetl-incident-v1.json",
+      "grafana/dashboards/bioetl-overview-v2.json"
+    ],
     "bioetl_workflow_status": [
       "docs/04-reference/observability/metrics-catalog.md"
     ],
@@ -2543,7 +2562,10 @@
     ]
   },
   "documented_only_metrics": [],
-  "documented_without_registry": [],
+  "documented_without_registry": [
+    "bioetl_workflow_scope_input_status",
+    "bioetl_workflow_scope_published_seconds"
+  ],
   "documented_without_runtime": [],
   "domain_event_emitters": [
     "src/bioetl/application/core/_batch_write_support.py",
@@ -3570,7 +3592,8 @@
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_l0_input_status_selected": [
-      "grafana/prometheus-rules/bioetl_observability.yml"
+      "grafana/prometheus-rules/bioetl_observability.yml",
+      "grafana/prometheus-rules/bioetl_workflow_scope.yml"
     ],
     "bioetl_l0_status": [
       "grafana/prometheus-rules/bioetl_observability.yml"
@@ -3834,9 +3857,6 @@
     "bioetl_runtime_stage_progress": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
-    "bioetl_runtime_trust_gap_active_10m": [
-      "grafana/prometheus-rules/bioetl_observability.yml"
-    ],
     "bioetl_runtime_trust_gap_status_10m": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
@@ -3870,7 +3890,8 @@
     ],
     "bioetl_workflow_current_status": [
       "grafana/prometheus-rules/bioetl_observability.yml",
-      "grafana/prometheus-rules/bioetl_publication_freshness.yml"
+      "grafana/prometheus-rules/bioetl_publication_freshness.yml",
+      "grafana/prometheus-rules/bioetl_workflow_scope.yml"
     ],
     "bioetl_workflow_expected": [
       "grafana/prometheus-rules/bioetl_observability.yml"
@@ -3878,16 +3899,30 @@
     "bioetl_workflow_pipeline_expected": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
       "grafana/prometheus-rules/bioetl_observability.yml",
-      "grafana/prometheus-rules/bioetl_publication_freshness.yml"
+      "grafana/prometheus-rules/bioetl_publication_freshness.yml",
+      "grafana/prometheus-rules/bioetl_workflow_scope.yml"
     ],
     "bioetl_workflow_publication_scope_status": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_workflow_runs_total": [
       "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_workflow_scope_input_status": [
+      "grafana/prometheus-rules/bioetl_workflow_scope.yml"
+    ],
+    "bioetl_workflow_scope_qualified_status": [
+      "grafana/prometheus-rules/bioetl_workflow_scope.yml"
+    ],
+    "bioetl_workflow_scope_status": [
+      "grafana/prometheus-rules/bioetl_workflow_scope.yml"
     ]
   },
-  "rules_without_registry": [],
+  "rules_without_registry": [
+    "bioetl_workflow_scope_input_status",
+    "bioetl_workflow_scope_qualified_status",
+    "bioetl_workflow_scope_status"
+  ],
   "runtime_cardinality_evidence": {
     "bioetl_checkpoint_load_events_total": [
       "observed_series_count=0",
