@@ -93,6 +93,33 @@ def test_full_nightly_replay_prompt_and_live_owners_are_fail_closed() -> None:
     )
 
 
+def test_e2e_smoke_marker_is_advisory_satellite() -> None:
+    """#11054: the pytest marker must not claim a GitHub-required merge check."""
+    pyproject = Path("pyproject.toml").read_text(encoding="utf-8")
+    marker = next(
+        line
+        for line in pyproject.splitlines()
+        if line.lstrip().startswith('"e2e_smoke:')
+    )
+    assert "PR-blocking" not in marker
+    assert "Advisory/satellite" in marker
+    assert "pr-gate-complete" in marker
+    checks = Path("configs/quality/github_required_checks.yaml").read_text(
+        encoding="utf-8"
+    )
+    assert "e2e-matrix-health" not in checks
+    role_matrix = Path("configs/quality/test_suite_role_matrix.yaml").read_text(
+        encoding="utf-8"
+    )
+    purpose = role_matrix.split("  e2e_smoke:", 1)[1].split("  e2e:", 1)[0]
+    if "  e2e:" not in role_matrix.split("  e2e_smoke:", 1)[1]:
+        purpose = role_matrix.split("  e2e_smoke:", 1)[1].split("provider_ownership:", 1)[
+            0
+        ]
+    assert "PR-blocking" not in purpose
+    assert "Advisory/satellite" in purpose
+
+
 def test_e2e_nightly_full_replay_is_documented_as_schedule_or_dispatch() -> None:
     """#11055: the full replay job is not a pull_request owner."""
     lane = Path("configs/quality/test_matrix.yaml").read_text(encoding="utf-8")
