@@ -39,6 +39,15 @@ GitHub cleanup requests for these surfaces MUST use
 `.github/ISSUE_TEMPLATE/retention_sensitive_cleanup.yml` or provide the same
 evidence fields in a PR description.
 
+`configs/quality/repo_structure_catalog.yaml` marks `reports/` as
+`bounded_cleanup_only`, `docs/reports` as `curated_cleanup_only`, and
+`docs/99-archive` as `retain_for_traceability`. A cleanup-inventory action
+such as `archive-after-migration` or `archive-after-github-state-check` is
+not an order to move those trees. Live quality baselines under
+`reports/quality/` stay where debt-governance gates read them. Duplicate
+pairs inside `docs/99-archive/` stay until a separate retention review says
+otherwise.
+
 ## Impact
 
 - Priority: P1.

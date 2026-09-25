@@ -387,6 +387,7 @@ Run this checklist for recurring documentation maintenance:
 
 ## Related Documents
 
+- [Freshness hold 2026-09-25](freshness-hold-2026-09-25.md)
 - [Getting Started](getting-started.md)
 - [Quick Start](quick-start.md)
 - [Running Pipelines](running-pipelines.md)
