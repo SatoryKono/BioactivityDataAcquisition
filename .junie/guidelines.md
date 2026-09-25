@@ -14,8 +14,6 @@ For AI runtime behavior and workflow conflicts, use this priority:
    - `.codex/agents/CODEX-RUNTIME.md`
    - `.junie/agents/JUNIE-RUNTIME.md`
    - `.devin/agents/DEVIN-RUNTIME.md` for Devin sessions
-   - a matching tracked `.gemini/**` runtime surface only when that tree exists
-     in the current checkout and is verified in the same change
 1. runtime profiles and skills in the matching runtime tree
    (`.codex/agents/py-*.md`, `.codex/skills/**`, `.junie/agents/py-*.md`,
    `.junie/skills/**`, `.devin/agents/*/AGENT.md`, `.devin/skills/**`)

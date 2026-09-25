@@ -26,7 +26,6 @@ CANONICAL_ROOT_TEXT_FILES: frozenset[str] = frozenset(
         "AGENTS.md",
         "CHANGELOG.md",
         "CONTRIBUTING.md",
-        "GEMINI.md",
         "README.md",
         # Qodo documents this exact root filename for repo-level guidance.
         "best_practices.md",

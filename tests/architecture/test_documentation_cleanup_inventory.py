@@ -185,7 +185,6 @@ def test_documentation_cleanup_inventory_covers_root_entrypoints() -> None:
     rows = _rows_by_path()
     expected = {
         "CONTRIBUTING.md": "contributor_entrypoint",
-        "GEMINI.md": "ai_runtime_mirror",
         "best_practices.md": "vendor_review_guidance",
     }
     for path, kind in expected.items():

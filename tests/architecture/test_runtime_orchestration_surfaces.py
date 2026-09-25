@@ -73,16 +73,10 @@ def test_devin_role_skills_point_team_orchestration_at_devin_runtime() -> None:
     )
 
 
-def test_gemini_md_does_not_document_retired_make_ai_targets() -> None:
-    """#9294: GEMINI.md must use live py-* routes, not missing make ai-* targets."""
+def test_root_gemini_md_is_not_a_project_runtime() -> None:
+    """Gemini is excluded: no root GEMINI.md runtime entrypoint."""
     root = Path(__file__).resolve().parents[2]
-    text = (root / "GEMINI.md").read_text(encoding="utf-8")
-    assert "**make ai-review:**" not in text
-    assert "**make ai-test:**" not in text
-    assert "**make ai-docs:**" not in text
-    assert "py-audit-bot" in text
-    assert "py-test-bot" in text
-    assert "py-doc-bot" in text
+    assert not (root / "GEMINI.md").exists()
 
 
 def test_devin_py_test_bot_does_not_invent_domain_coverage_gate() -> None:

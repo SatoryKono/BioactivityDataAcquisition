@@ -85,7 +85,6 @@ def test_runtime_guides_start_at_agents_and_runtime_maps() -> None:
         "docs/00-project/ai/agents/guides/CODEX.md",
         "docs/00-project/ai/agents/guides/GEMINI.md",
         "docs/00-project/ai/agents/guides/AGENT.md",
-        "GEMINI.md",
     ):
         text = (ROOT / rel).read_text(encoding="utf-8")
         agents_at = text.find("`AGENTS.md`")
@@ -109,7 +108,7 @@ def test_junie_runtime_and_all_agent_language_contracts() -> None:
     review_surfaces = (
         "AGENTS.md .codex/agents/CODEX-RUNTIME.md .junie/guidelines.md "
         ".junie/agents/JUNIE-RUNTIME.md .devin/agents/DEVIN-RUNTIME.md "
-        ".devin/workflows/review.md .github/copilot-instructions.md GEMINI.md "
+        ".devin/workflows/review.md .github/copilot-instructions.md "
         "docs/00-project/ai/rules/cursor/05-agent-workflow.mdc "
         "docs/00-project/ai/rules/windsurf/rules/05-agent-workflow.md "
         "docs/00-project/ai/rules/windsurf/workflows/review.md"
