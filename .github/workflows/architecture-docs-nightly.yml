@@ -35,7 +35,13 @@ jobs:
             tests/unit/scripts/docs/passports \
             tests/architecture/test_passport_documentation_projections.py
 
+<<<<<<< Updated upstream
       - if: ${{ false }} # Full-corpus package-family generation is disabled.
+||||||| Stash base
+      - name: Check supplemental package-family class diagrams
+=======
+      - name: Check package-family class diagrams
+>>>>>>> Stashed changes
         run: uv run --frozen --no-build python scripts/diagrams/render/generate_package_family_class_diagrams.py --check
 
       - name: Regenerate architecture dependency map

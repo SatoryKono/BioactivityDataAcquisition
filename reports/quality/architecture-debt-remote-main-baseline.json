@@ -1,33 +1,45 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "26984360ce97b6ecc4cfe0d555de3ed9510ddab536645a6eca681bf60f3a72a5",
+      "blob_sha256": "58326d2fff6842b4a2d0c0d219f989edbe2ff8e424ace9d7e2648c214881ed6f",
       "introduced_after_remote_main": false,
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
       "required_on_remote": true,
+<<<<<<< Updated upstream
       "source_revision": "e11fc20b37a1f01da1277d5a53f0f8df0810179b",
+||||||| Stash base
+      "source_revision": "8782029cbfffd291a668c1af465512462801c10c",
+=======
+      "source_revision": "15b33982a2fd018e97e84f8c41eeee7c8c962dc1",
+>>>>>>> Stashed changes
       "summary": {
         "available": true,
-        "integral_score": 9.47,
+        "integral_score": 10.0,
         "schema_version": 2,
         "weights_sum": 1.0
       }
     },
     {
-      "blob_sha256": "3e4314384807554b4cd8a8ec608481eb71422345ac76685835e950db9759223d",
+      "blob_sha256": "164efe1f1c224234ab87e5e30abf8cc7fdb1bb95c18ce450801d9645049594b3",
       "introduced_after_remote_main": false,
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
       "required_on_remote": true,
+<<<<<<< Updated upstream
       "source_revision": "e11fc20b37a1f01da1277d5a53f0f8df0810179b",
+||||||| Stash base
+      "source_revision": "8782029cbfffd291a668c1af465512462801c10c",
+=======
+      "source_revision": "15b33982a2fd018e97e84f8c41eeee7c8c962dc1",
+>>>>>>> Stashed changes
       "summary": {
         "available": true,
         "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
         "schema_version": 1,
         "snapshot_date": "2026-09-18",
-        "source_module_count": 2499,
-        "source_tree_sha256": "f43d32f6084b9f278038a6ed7eccc08505d990ce7c94d010844700e4382b7940",
+        "source_module_count": 2494,
+        "source_tree_sha256": "b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6",
         "unmeasured_module_count": 0
       }
     },
@@ -37,7 +49,13 @@
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
       "required_on_remote": true,
+<<<<<<< Updated upstream
       "source_revision": "e11fc20b37a1f01da1277d5a53f0f8df0810179b",
+||||||| Stash base
+      "source_revision": "8782029cbfffd291a668c1af465512462801c10c",
+=======
+      "source_revision": "15b33982a2fd018e97e84f8c41eeee7c8c962dc1",
+>>>>>>> Stashed changes
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -50,7 +68,13 @@
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
       "required_on_remote": true,
+<<<<<<< Updated upstream
       "source_revision": "e11fc20b37a1f01da1277d5a53f0f8df0810179b",
+||||||| Stash base
+      "source_revision": "8782029cbfffd291a668c1af465512462801c10c",
+=======
+      "source_revision": "15b33982a2fd018e97e84f8c41eeee7c8c962dc1",
+>>>>>>> Stashed changes
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -63,7 +87,13 @@
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
       "required_on_remote": true,
+<<<<<<< Updated upstream
       "source_revision": "e11fc20b37a1f01da1277d5a53f0f8df0810179b",
+||||||| Stash base
+      "source_revision": "8782029cbfffd291a668c1af465512462801c10c",
+=======
+      "source_revision": "15b33982a2fd018e97e84f8c41eeee7c8c962dc1",
+>>>>>>> Stashed changes
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -76,13 +106,25 @@
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
       "required_on_remote": false,
+<<<<<<< Updated upstream
       "source_revision": "e11fc20b37a1f01da1277d5a53f0f8df0810179b",
+||||||| Stash base
+      "source_revision": "8782029cbfffd291a668c1af465512462801c10c",
+=======
+      "source_revision": "15b33982a2fd018e97e84f8c41eeee7c8c962dc1",
+>>>>>>> Stashed changes
       "summary": {
         "available": true
       }
     }
   ],
+<<<<<<< Updated upstream
   "baseline_artifact_fingerprint": "91be52dfb8a6fa112767bfce2578d85a74fee698b190d587da87796fbed2442b",
+||||||| Stash base
+  "baseline_artifact_fingerprint": "77d602fc5f5c64f7330bcd5794264f3ad0517ce2011f10869913a4d96e53bd13",
+=======
+  "baseline_artifact_fingerprint": "61876dbe1592add9497c6aca41aac8b5aea7e7f85e7e45ba70021c89d66de795",
+>>>>>>> Stashed changes
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
@@ -102,9 +144,21 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
+<<<<<<< Updated upstream
   "local_tracking_ref_sha": "e11fc20b37a1f01da1277d5a53f0f8df0810179b",
+||||||| Stash base
+  "local_tracking_ref_sha": "8782029cbfffd291a668c1af465512462801c10c",
+=======
+  "local_tracking_ref_sha": "15b33982a2fd018e97e84f8c41eeee7c8c962dc1",
+>>>>>>> Stashed changes
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
+<<<<<<< Updated upstream
   "remote_main_sha": "e11fc20b37a1f01da1277d5a53f0f8df0810179b",
+||||||| Stash base
+  "remote_main_sha": "8782029cbfffd291a668c1af465512462801c10c",
+=======
+  "remote_main_sha": "15b33982a2fd018e97e84f8c41eeee7c8c962dc1",
+>>>>>>> Stashed changes
   "schema_version": 1
 }
