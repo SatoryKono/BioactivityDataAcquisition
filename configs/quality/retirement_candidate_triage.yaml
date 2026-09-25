@@ -185,23 +185,6 @@ families:
           label: module_surface
           name: src/bioetl/application/composite/runner_pkg/runner_merge_stage_flow.py
           module_path: src/bioetl/application/composite/runner_pkg/runner_merge_stage_flow.py
-      - id: column_priority_orderer_active
-        disposition: retain_active
-        rationale:
-          Column priority ordering remains an intentionally retained extracted
-          seam, but first-party usage is now funneled through column_service instead of
-          multiple direct importers. The zero-anchor signal was stale triage, not removable
-          dead code.
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2909"
-        target:
-          label: module_surface
-          name: src/bioetl/application/composite/column_priority_orderer.py
-          module_path: src/bioetl/application/composite/column_priority_orderer.py
-          module_name: bioetl.application.composite.column_priority_orderer
-        verification:
-          min_src_importers: 1
       - id: merger_input_mixin_active
         disposition: retain_active
         rationale:
