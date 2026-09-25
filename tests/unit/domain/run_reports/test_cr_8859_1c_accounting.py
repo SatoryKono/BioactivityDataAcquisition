@@ -79,6 +79,8 @@ def test_custom_catalog_does_not_accept_omitted_builtin_codes() -> None:
 
 def test_error_type_quarantine_codes_stay_mapped() -> None:
     """DQ ErrorType values must not collapse to UNKNOWN_REASON."""
+    from bioetl.domain.run_reports.reason_catalog import compose_field_reason_code
+
     for code in (
         "SCHEMA_VIOLATION",
         "INVALID_DATA",
@@ -86,9 +88,18 @@ def test_error_type_quarantine_codes_stay_mapped() -> None:
         "DATA_QUALITY",
     ):
         assert normalize_reason_code(code) == code
+    assert normalize_reason_code("INVALID_DATA:units") == "INVALID_DATA:units"
+    assert normalize_reason_code("INVALID_DATA:max_phase") == "INVALID_DATA:max_phase"
     assert normalize_reason_code(None) == UNKNOWN_REASON
     assert normalize_reason_code("") == UNKNOWN_REASON
     assert normalize_reason_code("not-a-catalog-code") == UNKNOWN_REASON
+    assert compose_field_reason_code("INVALID_DATA", "units") == "INVALID_DATA:units"
+    assert compose_field_reason_code("INVALID_DATA", None) == "INVALID_DATA"
+    assert compose_field_reason_code("INVALID_DATA", "bad-field!") == "INVALID_DATA"
+    assert (
+        compose_field_reason_code("INVALID_DATA:max_phase", "units")
+        == "INVALID_DATA:max_phase"
+    )
 
 
 def test_measured_zero_extracted_is_not_replaced_by_payload() -> None:

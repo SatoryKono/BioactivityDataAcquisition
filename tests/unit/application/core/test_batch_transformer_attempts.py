@@ -501,6 +501,60 @@ async def test_transform_attempt_keeps_validation_reason_code() -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
+async def test_transform_attempt_composes_invalid_data_field_reason() -> None:
+    """Bare ValidationError.field becomes INVALID_DATA:<field> in quarantine."""
+    from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.exceptions.validation import ValidationError
+
+    async def transform(_ctx, _record, _index):
+        raise ValidationError("units failed pattern", field="units")
+
+    outcome = await transform_record_attempt(
+        context=_attempt_context(),
+        error_classifier=ErrorClassifier(),
+        batch_metrics=MagicMock(),
+        transform=transform,
+        gold_filter=lambda _ctx, _rec: True,
+        gold_transform=lambda _ctx, rec: rec,
+        dq_config=None,
+        normalization_processor=None,
+        debug_export_service=None,
+        raw_record={"units": "bogus"},
+        batch_id=deterministic_batch_uuid_from_callsite(
+            "test_transform_attempt_composes_invalid_data_field_reason"
+        ),
+        index=5,
+    )
+
+    assert outcome.dq_entry is not None
+    assert outcome.dq_entry.reason_code == "INVALID_DATA:units"
+    assert outcome.dq_entry.error_type == ErrorType.INVALID_DATA
+
+
+@pytest.mark.unit
+def test_runtime_dq_outcomes_infer_field_from_rule_id(monkeypatch) -> None:
+    outcome = DQRuleOutcome(
+        rule_id="field.canonical_smiles.pattern",
+        violation_kind="business_rule_violation",
+        severity="error",
+        disposition=DQDisposition.QUARANTINE,
+    )
+    monkeypatch.setattr(
+        "bioetl.domain.behavior.dq_rule_evaluator.evaluate_dq_rules_for_record",
+        lambda _record, _config: [outcome],
+    )
+
+    with pytest.raises(DataQualityError) as caught:
+        _apply_runtime_dq_outcomes(
+            silver_record={"entity_id": "1"},
+            dq_config=MagicMock(),
+        )
+    assert caught.value.field == "canonical_smiles"
+    assert caught.value.reason_code == "INVALID_DATA:canonical_smiles"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
 async def test_transform_attempt_projects_runtime_dq_warning_flags(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
