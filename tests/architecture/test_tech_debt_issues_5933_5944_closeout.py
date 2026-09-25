@@ -310,7 +310,7 @@ def test_issue_5943_config_compatibility_and_contracts_are_clean() -> None:
 
     metrics = discrepancy["metrics"]
     assert metrics["config_count"] == 27
-    assert metrics["unique_parameter_count"] == 419
+    assert metrics["unique_parameter_count"] == 418
     assert metrics["inconsistent_parameter_count"] == 0
     assert metrics["raw_inconsistent_parameter_count"] == 0
     assert metrics["sanctioned_partial_parameter_count"] == 0

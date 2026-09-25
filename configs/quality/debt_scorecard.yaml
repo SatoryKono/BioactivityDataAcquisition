@@ -265,8 +265,8 @@ config_surface_ratchet:
       rationale: Entity/composite config surface must stay bounded while contract drift is burned down.
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates the budget.
     unique_parameter_count:
-      current_count: 419
-      max_count: 419
+      current_count: 418
+      max_count: 418
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary must not expand silently across the unified config matrix.
@@ -307,8 +307,8 @@ config_surface_ratchet:
           rationale: Effective entity pipeline surface after base defaults merge.
           ratchet_policy: Non-growth fail-fast for governed entity configs.
         unique_parameter_count:
-          current_count: 262
-          max_count: 262
+          current_count: 261
+          max_count: 261
           rationale: Effective flattened vocabulary for entity configs only.
           ratchet_policy: Non-growth fail-fast unless reviewed schema expansion updates budget.
         inconsistent_parameter_count:
@@ -899,8 +899,8 @@ retirement_governance_metrics:
     tracked retirement debt or any untriaged zero-import candidate requires an explicit reviewed rebaseline.
   metrics:
     triaged_entry_count:
-      current_count: 18
-      max_count: 18
+      current_count: 17
+      max_count: 17
       linked_issue: '#4820'
       owner: '@bioetl-architecture'
       rationale: Reviewed retirement/dead-code entries are explicit governed residual debt and must not
@@ -960,8 +960,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh intentionally
         expands the classified non-static residue.
     triaged_retained_owner_test_anchored_count:
-      current_count: 14
-      max_count: 14
+      current_count: 13
+      max_count: 13
       linked_issue: '#4654'
       owner: '@bioetl-architecture'
       rationale: Every retained retirement-triage entry must stay anchored by explicit owner-test evidence
