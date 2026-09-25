@@ -270,7 +270,7 @@ async def _filter_options_payload(
 
     payload, report_entries = await asyncio.gather(
         manifest_options(),
-        asyncio.to_thread(load_report_selector_entries, scopes)
+        host._selector_catalog.read_reports(scopes, load_report_selector_entries)
         if include_reports
         else asyncio.sleep(0, result=[]),
     )
