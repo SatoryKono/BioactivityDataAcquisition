@@ -8101,16 +8101,6 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 16,
-      "executable_lines": 16,
-      "missing_lines": 0,
-      "module": "bioetl.composition.bootstrap.cli.config_helpers",
-      "path": "src/bioetl/composition/bootstrap/cli/config_helpers.py",
-      "source_lines": 32
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
       "covered_lines": 23,
       "executable_lines": 23,
       "missing_lines": 0,
@@ -8787,16 +8777,6 @@
       "module": "bioetl.composition.contracts.health",
       "path": "src/bioetl/composition/contracts/health.py",
       "source_lines": 49
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 14,
-      "executable_lines": 14,
-      "missing_lines": 0,
-      "module": "bioetl.composition.contracts.providers",
-      "path": "src/bioetl/composition/contracts/providers.py",
-      "source_lines": 30
     },
     {
       "coverage_percent": 100.0,
@@ -33043,16 +33023,6 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 16,
-      "executable_lines": 16,
-      "missing_lines": 0,
-      "module": "bioetl.composition.bootstrap.cli.config_helpers",
-      "path": "src/bioetl/composition/bootstrap/cli/config_helpers.py",
-      "source_lines": 32
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
       "covered_lines": 23,
       "executable_lines": 23,
       "missing_lines": 0,
@@ -33729,16 +33699,6 @@
       "module": "bioetl.composition.contracts.health",
       "path": "src/bioetl/composition/contracts/health.py",
       "source_lines": 49
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 14,
-      "executable_lines": 14,
-      "missing_lines": 0,
-      "module": "bioetl.composition.contracts.providers",
-      "path": "src/bioetl/composition/contracts/providers.py",
-      "source_lines": 30
     },
     {
       "coverage_percent": 100.0,
@@ -49893,7 +49853,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "b5df9441d6412e1ecc65d006cc50ed7e5533caf2f297538580d67e71246e9ff6",
+  "source_tree_sha256": "b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -50048,10 +50008,10 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2494,
+    "source_module_count": 2492,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 2486,
+      "fully_covered": 2484,
       "no_executable_lines": 1,
       "partially_covered": 7,
       "uncovered": 0,

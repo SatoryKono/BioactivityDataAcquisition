@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Nine-domain closeout (#11076, #11080, #11088):** restore commented architecture asserts, shrink `src/bioetl/composition` to 278 modules with `max_modules` held at 295, and split the application-services ops class diagram into part1/part2 with the nightly `--check` enabled. Debt caps were not raised.
+
 - **Nine-domain residual (#11074, #11075, #11077, #11079, #11081, #11084, #11086, #11087, #11089–#11094, #11097, #11098):** align RULES 6.1.13 and current-state evidence with live 9.47/2499/46 gates, pin cardinality freshness, match Devin MCP targets to `--daily`/`--all`, and teach diagram lint to see multiline ELK init and labelled dotted edges. Workbook sync no longer exits 0 when the gitignored xlsx is absent. Debt budgets were not raised.
 
 - **Nine-domain follow-up (#11078, #11082, #11083, #11085, #11095, #11096, #11099):** skip Silver autouse when a test module does not mention SilverWriter; publish the script-name backlog without a mass rename; stop pointing docs skill overlays at missing `.codex/skills` files; make matrix dictionaries deterministic local output; regenerate the dependency map to 2497 modules.

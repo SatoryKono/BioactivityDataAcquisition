@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2497,
-    "total_internal_imports": 7853,
+    "scanned_modules": 2490,
+    "total_internal_imports": 7840,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "92a69b3f3a238ee825c4096797065b18c5a24c339507d3cb1ccb432eae66f5c8"
+    "source_fingerprint": "6ed3c69879eb8c09d1f83e8ec368ca9fd25461aeacb593fd14acc3872bec0075"
   },
   "layer_edges": [
     {
@@ -24,25 +24,25 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 208,
+      "imports": 207,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 639,
+      "imports": 630,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 289,
+      "imports": 288,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 260,
+      "imports": 258,
       "allowed": true
     },
     {
@@ -152,12 +152,12 @@
     {
       "source": "composition.bootstrap",
       "target": "application.services",
-      "imports": 40
+      "imports": 39
     },
     {
       "source": "composition.factories",
       "target": "domain.ports",
-      "imports": 36
+      "imports": 35
     },
     {
       "source": "application.composite",
@@ -202,7 +202,7 @@
     {
       "source": "composition.factories",
       "target": "infrastructure.adapters",
-      "imports": 27
+      "imports": 26
     },
     {
       "source": "application.services",
@@ -210,14 +210,14 @@
       "imports": 25
     },
     {
-      "source": "composition.factories",
-      "target": "infrastructure.config",
-      "imports": 25
-    },
-    {
       "source": "infrastructure.config",
       "target": "domain.types",
       "imports": 25
+    },
+    {
+      "source": "composition.factories",
+      "target": "infrastructure.config",
+      "imports": 24
     },
     {
       "source": "infrastructure.adapters",
