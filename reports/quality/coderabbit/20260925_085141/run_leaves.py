@@ -17,9 +17,15 @@ os.makedirs(RUN, exist_ok=True)
 
 def materialize(leaf_id, files, workdir):
     subprocess.run(["git", "init", "-q", "-b", "main", workdir], check=True)
+    # .coderabbit.yaml must live inside the synthetic repo (not just -c):
+    # default CLI filters ignore tests/, configs/, docs/ without it.
+    import shutil
+    shutil.copyfile(os.path.join(REPO, ".coderabbit.yaml"),
+                    os.path.join(workdir, ".coderabbit.yaml"))
+    subprocess.run(["git", "-C", workdir, "add", ".coderabbit.yaml"], check=True)
     subprocess.run(["git", "-C", workdir, "-c", "user.email=audit@local",
-                    "-c", "user.name=audit", "commit", "-qm", "base",
-                    "--allow-empty"], check=True)
+                    "-c", "user.name=audit", "commit", "-qm", "base"],
+                   check=True)
     subprocess.run(["git", "-C", workdir, "checkout", "-qb", "review"], check=True)
     arc = subprocess.run(
         ["git", "-C", REPO, "archive", BASE, "--format=tar", "--"] + list(files),
