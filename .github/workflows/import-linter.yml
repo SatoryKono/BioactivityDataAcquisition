@@ -25,7 +25,7 @@ jobs:
 
         steps:
             -   name: Checkout
-                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
                 with:
                     fetch-depth: 0
 
@@ -140,7 +140,7 @@ jobs:
 
         steps:
             -   name: Checkout
-                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -168,7 +168,7 @@ jobs:
 
         steps:
             -   name: Checkout
-                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -206,7 +206,7 @@ jobs:
 
         steps:
             -   name: Checkout
-                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
                 with:
                     # Current ref only. fetch-depth: 0 also fetches every remote
                     # branch and blows the architecture 210s budget.
@@ -253,7 +253,7 @@ jobs:
 
             -   name: Upload architecture JUnit artifact
                 if: ${{ always() && !cancelled() }}
-                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
                 with:
                     name: architecture-junit-${{ matrix.shard }}-${{ github.sha }}
                     path: reports/quality/test-runs/junit/architecture/${{ matrix.shard }}/*.xml
@@ -271,7 +271,7 @@ jobs:
             BIOETL_REQUIRE_TEST_CAPABILITIES: "1"
         steps:
             -   name: Checkout
-                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
                 with:
                     fetch-depth: 1
 
@@ -303,7 +303,7 @@ jobs:
 
             -   name: Upload slow architecture JUnit artifact
                 if: ${{ always() && !cancelled() }}
-                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
                 with:
                     name: architecture-junit-slow-${{ github.sha }}
                     path: reports/quality/test-runs/junit/architecture/slow/*.xml

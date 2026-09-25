@@ -1203,11 +1203,12 @@ def test_opencode_phase1_jobs_have_timeout() -> None:
         ".github/workflows/opencode-triage.yml",
     ):
         text = (ROOT / relative).read_text(encoding="utf-8")
-        assert "anomalyco/opencode" not in text
-        assert "id-token:" not in text
-        assert "secrets." not in text
-        assert "pull_request:" not in text
-        assert "issues:" not in text
+        live = "\n".join(line.split("#", 1)[0] for line in text.splitlines())
+        assert "anomalyco/opencode" not in live
+        assert "id-token:" not in live
+        assert "secrets." not in live
+        assert "pull_request:" not in live
+        assert "issues:" not in live
         assert "\non:\n  workflow_dispatch:\n" in text
         document = _load_yaml(ROOT / relative)
         for name, job in document["jobs"].items():

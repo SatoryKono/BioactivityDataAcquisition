@@ -42,8 +42,8 @@ ALLOWED_USES: dict[str, set[str]] = {
         "5fda3b95a4ea91299a34e894583c3862153e4b97",  # v7.0.0
     },
     "actions/cache": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},  # v5.0.5
-    "actions/cache/restore": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},
-    "actions/cache/save": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},
+    "actions/cache/restore": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},  # v5.0.5
+    "actions/cache/save": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},  # v5.0.5
     "actions/upload-artifact": {"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"},  # v7.0.1
     "actions/setup-node": {
         "48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e",  # v6.4.0
@@ -74,8 +74,8 @@ ALLOWED_USES: dict[str, set[str]] = {
         "57a97c7e7821a5776cebc9bb87c984fa69cba8f1",  # v0.35.0
         "ed142fd0673e97e23eac54620cfb913e5ce36c25",  # v0.36.0
     },
-    "docker/build-push-action": {"ca052bb54ab0790a636c9b5f226502c73d547a25"},
-    "docker/login-action": {"dbcb813823bdd20940b903addbd779551569679f"},
+    "docker/build-push-action": {"ca052bb54ab0790a636c9b5f226502c73d547a25"},  # v5.4.0
+    "docker/login-action": {"dbcb813823bdd20940b903addbd779551569679f"},  # v4.6.0
     "docker/setup-buildx-action": {
         "bb05f3f5519dd87d3ba754cc423b652a5edd6d2c",  # v4.2.0
         "f87e5991a6d7451dcb8d9637bfbc97413f497069",  # v4.4.1
@@ -110,13 +110,13 @@ ALLOWED_USES: dict[str, set[str]] = {
         "2d1146689b8cda280b9bc96326124645441f03bc",  # v2.4.4
     },
     "pypa/gh-action-pypi-publish": {
-        "dc37677b2e1c63e2034f94d8a5b11f265b73ba33",
+        "dc37677b2e1c63e2034f94d8a5b11f265b73ba33",  # v1.14.2
     },
     "softprops/action-gh-release": {
         "efb35369e0ad2afab669f228072c1b0d510eae64",  # v3.0.3
     },
     "wagoid/commitlint-github-action": {
-        "f133a0d95090ef2609192b4a21f54e20af819ea9",
+        "f133a0d95090ef2609192b4a21f54e20af819ea9",  # v6
     },
     "zizmorcore/zizmor-action": {
         "cc914d7f3750a2d13d75c7f184a1060aa0e9d482",  # v0.6.4
@@ -157,6 +157,12 @@ def selected_actions_patterns(
 
 
 USES_PATTERN = re.compile(r"^\s*(?:-\s*)?uses:\s*([^\s#]+)")
+_USES_VERSION_COMMENT = re.compile(
+    r"uses:\s*\S+@(?P<sha>[0-9a-f]{40})\s*#\s*(?P<comment>\S+)"
+)
+_ALLOWLIST_VERSION_COMMENT = re.compile(
+    r"['\"](?P<sha>[0-9a-f]{40})['\"].*?#\s*(?P<comment>\S+)"
+)
 FULL_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 FULL_SHA256_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 SHA256_HEX_PATTERN = re.compile(r"^[0-9a-f]{64}$")
@@ -241,6 +247,52 @@ def _uses_violations_in_file(file_path: Path) -> list[str]:
         if violation is None:
             continue
         violations.append(f"{rel_path}:{line_no}: {violation}")
+    return violations
+
+
+def _allowlist_sha_version_comments() -> dict[str, set[str]]:
+    """Read version comments from this module source. Runtime sets drop them."""
+    comments: dict[str, set[str]] = {}
+    for line in Path(__file__).read_text(encoding="utf-8").splitlines():
+        match = _ALLOWLIST_VERSION_COMMENT.search(line)
+        if match is None:
+            continue
+        comments.setdefault(match.group("sha"), set()).add(match.group("comment"))
+    return comments
+
+
+def collect_version_comment_mismatches() -> list[str]:
+    """Fail when a workflow version comment disagrees with ALLOWED_USES."""
+    allowlist = _allowlist_sha_version_comments()
+    violations: list[str] = []
+    for sha, comments in sorted(allowlist.items()):
+        if len(comments) > 1:
+            violations.append(
+                f"ALLOWED_USES SHA {sha} has conflicting version comments "
+                f"{sorted(comments)}"
+            )
+    for file_path in iter_yaml_files():
+        rel_path = file_path.relative_to(ROOT)
+        for line_no, line in enumerate(
+            file_path.read_text(encoding="utf-8").splitlines(), 1
+        ):
+            match = _USES_VERSION_COMMENT.search(line)
+            if match is None:
+                continue
+            sha = match.group("sha")
+            comment = match.group("comment")
+            expected = allowlist.get(sha)
+            if expected is None:
+                violations.append(
+                    f"{rel_path}:{line_no}: SHA {sha} comment {comment} has no "
+                    "ALLOWED_USES version comment"
+                )
+                continue
+            if comment not in expected or len(expected) != 1:
+                violations.append(
+                    f"{rel_path}:{line_no}: SHA {sha} comment {comment} != "
+                    f"ALLOWED_USES {sorted(expected)}"
+                )
     return violations
 
 
@@ -555,7 +607,11 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         return gate_osv_json(Path(args[1]))
     return _report_violations(
-        [*_collect_uses_violations(), *_collect_remote_download_violations()]
+        [
+            *_collect_uses_violations(),
+            *_collect_remote_download_violations(),
+            *collect_version_comment_mismatches(),
+        ]
     )
 
 

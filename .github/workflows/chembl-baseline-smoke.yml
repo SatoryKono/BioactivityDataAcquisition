@@ -74,7 +74,7 @@ jobs:
         python-version: ["3.13"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -99,7 +99,7 @@ jobs:
 
       - name: Upload ChemblBaseline CLI + runner artifacts
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: chembl-baseline-cli-runner-${{ matrix.python-version }}
           path: reports/junit/chembl-baseline-cli-runner-${{ matrix.python-version }}.xml
@@ -122,7 +122,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -139,7 +139,7 @@ jobs:
 
       - name: Upload ChemblBaseline reconciliation artifacts
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: chembl-baseline-reconciliation
           path: reports/junit/chembl-baseline-reconciliation.xml
@@ -161,7 +161,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -180,7 +180,7 @@ jobs:
 
       - name: Upload ChemblBaseline architecture artifacts
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: chembl-baseline-architecture
           path: reports/junit/chembl-baseline-architecture.xml

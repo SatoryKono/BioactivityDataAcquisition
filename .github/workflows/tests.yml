@@ -43,7 +43,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -64,7 +64,7 @@ jobs:
 
       - name: Upload dependency preflight diagnostics
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dependency-preflight
           path: reports/ci/dependency-preflight.log
@@ -88,7 +88,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Keep smoke free of Git LFS so an exhausted LFS data pack cannot
           # block the entire Tests matrix. VCR content checks live in vcr-preflight.
@@ -120,7 +120,7 @@ jobs:
 
       - name: Upload smoke coverage shard
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-data-smoke
           path: reports/coverage/.coverage.smoke
@@ -137,7 +137,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Cassettes are git blobs. Keep lfs: false so an exhausted GitHub
           # LFS budget cannot block checkout; pointer stubs fail below.
@@ -187,7 +187,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # PubChem VCR smoke uses git-stored cassettes. Fail closed when a
           # leftover Git LFS pointer is present (#7493).
@@ -228,7 +228,7 @@ jobs:
             --junitxml=reports/e2e/control-plane-completeness.xml
 
       - name: Upload control-plane completeness artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() && !cancelled() }}
         with:
           name: control-plane-completeness
@@ -248,7 +248,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -281,7 +281,7 @@ jobs:
 
       - name: Upload contract confidence telemetry
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-telemetry-contract-confidence
           path: reports/test-telemetry/junit-contract-confidence.xml
@@ -290,7 +290,7 @@ jobs:
 
       - name: Upload contract confidence coverage shard
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-data-contract-confidence
           path: reports/coverage/.coverage.contract-confidence
@@ -307,7 +307,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -341,7 +341,7 @@ jobs:
 
       - name: Upload empirical flaky telemetry
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: flaky-test-empirical
           path: |
@@ -359,7 +359,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           lfs: false
 
@@ -523,7 +523,7 @@ jobs:
         # junit/json were not materialised (#7519 / CI-C1-007). The gate step
         # above remains the blocking status signal.
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dashboard-semantic-policy
           path: |
@@ -567,7 +567,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -575,7 +575,7 @@ jobs:
           python-version: "3.12"
 
       - name: Cache Neo4j image
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: /tmp/neo4j-community.tar
           key: neo4j-5.15-community-d9e2fb1ba398536e50d22ebc3d5d585baa086c1c0cf8e5b96bdc9e11e87e002a
@@ -622,7 +622,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -689,7 +689,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -706,7 +706,7 @@ jobs:
 
       - name: Upload Track D telemetry
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-telemetry-track-d
           path: reports/test-telemetry/junit-track-d.xml
@@ -722,7 +722,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -743,7 +743,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -782,7 +782,7 @@ jobs:
 
       - name: Upload quality metrics artifact
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ci-quality-metrics
           path: reports/quality/ci-quality-metrics.json
@@ -790,7 +790,7 @@ jobs:
 
       - name: Upload Silver/Gold filter parity artifact
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: silver-gold-filter-parity-report
           path: reports/quality/silver-gold-filter-parity-report.json
@@ -799,7 +799,7 @@ jobs:
 
       - name: Upload observability review artifacts
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: observability-runtime-cardinality-review
           path: |
@@ -834,7 +834,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -859,7 +859,7 @@ jobs:
 
       - name: Upload fast test telemetry
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-telemetry-fast-${{ matrix.test-group.name }}
           path: reports/test-telemetry/junit-fast.${{ matrix.test-group.name }}.xml
@@ -887,7 +887,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -918,7 +918,7 @@ jobs:
 
       - name: Upload repo-backed unit telemetry
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-telemetry-repo-backed-unit-${{ matrix.test-group.name }}
           path: reports/test-telemetry/junit-repo-backed-unit.${{ matrix.test-group.name }}.xml
@@ -927,7 +927,7 @@ jobs:
 
       - name: Upload repo-backed unit coverage shard
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-data-repo-backed-unit-${{ matrix.test-group.name }}
           path: reports/coverage/.coverage.repo-backed-unit-${{ matrix.test-group.name }}
@@ -956,7 +956,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -988,7 +988,7 @@ jobs:
 
       - name: Upload unit-scripts-tooling telemetry
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-telemetry-unit-scripts-tooling-${{ matrix.test-group.name }}
           path: reports/test-telemetry/junit-unit-scripts-tooling.${{ matrix.test-group.name }}.xml
@@ -997,7 +997,7 @@ jobs:
 
       - name: Upload unit scripts tooling coverage shard
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-data-unit-scripts-tooling-${{ matrix.test-group.name }}
           path: reports/coverage/.coverage.unit-scripts-tooling-${{ matrix.test-group.name }}
@@ -1017,7 +1017,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1048,7 +1048,7 @@ jobs:
 
       - name: Upload unit-filesystem-contracts telemetry
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-telemetry-unit-filesystem-contracts
           path: reports/test-telemetry/junit-unit-filesystem-contracts.xml
@@ -1057,7 +1057,7 @@ jobs:
 
       - name: Upload unit filesystem-contracts coverage shard
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-data-unit-filesystem-contracts
           path: reports/coverage/.coverage.unit-filesystem-contracts
@@ -1076,7 +1076,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1109,7 +1109,7 @@ jobs:
 
       - name: Upload unit-subprocess-backed telemetry
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-telemetry-unit-subprocess-backed
           path: reports/test-telemetry/junit-unit-subprocess-backed.xml
@@ -1118,7 +1118,7 @@ jobs:
 
       - name: Upload unit subprocess-backed coverage shard
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-data-unit-subprocess-backed
           path: reports/coverage/.coverage.unit-subprocess-backed
@@ -1170,7 +1170,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1206,7 +1206,7 @@ jobs:
 
       - name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.13)
         if: ${{ always() && !cancelled() && matrix.python-version == '3.13' && steps.run-tests.outcome != 'skipped' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-data-${{ matrix.test-group.name }}
           path: reports/coverage/.coverage.${{ matrix.test-group.name }}
@@ -1216,7 +1216,7 @@ jobs:
 
       - name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.13)
         if: ${{ always() && !cancelled() && matrix.python-version == '3.13' && steps.run-tests.outcome != 'skipped' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-telemetry-${{ matrix.test-group.name }}
           path: reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml
@@ -1232,7 +1232,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1251,7 +1251,7 @@ jobs:
 
       - name: Upload memory test telemetry
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-telemetry-memory
           path: reports/test-telemetry/junit-memory.xml
@@ -1267,7 +1267,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1324,7 +1324,7 @@ jobs:
           "
 
       - name: Upload performance budget report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() && !cancelled() }}
         with:
           name: performance-hotspot-budgets
@@ -1346,7 +1346,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1382,7 +1382,7 @@ jobs:
 
       - name: Upload serial coverage telemetry
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-telemetry-serial-coverage
           path: reports/test-telemetry/junit-serial-coverage.xml
@@ -1391,7 +1391,7 @@ jobs:
 
       - name: Upload serial coverage shard
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-data-serial
           path: reports/coverage/.coverage.serial
@@ -1419,7 +1419,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1429,7 +1429,7 @@ jobs:
           pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
       - name: Download coverage shards
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: coverage-data-*
           path: reports/coverage
@@ -1485,7 +1485,7 @@ jobs:
             --min-percent 85
 
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() && !cancelled() }}
         with:
           name: coverage-report
@@ -1506,10 +1506,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download trusted coverage report
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: coverage-report
           path: reports
@@ -1575,7 +1575,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -1583,7 +1583,7 @@ jobs:
           python-version: "3.12"
 
       - name: Download JUnit telemetry shards
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         continue-on-error: true
         with:
           pattern: test-telemetry-*
@@ -1842,7 +1842,7 @@ jobs:
 
       - name: Upload slow-test telemetry
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-duration-telemetry
           path: |
@@ -1853,7 +1853,7 @@ jobs:
 
       - name: Upload test-health telemetry
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-health-telemetry
           path: reports/quality/test-runs/
@@ -1888,7 +1888,7 @@ jobs:
       PROOF_OR_STOP_CI_RUN_ID: ${{ github.run_id }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           lfs: false
 
@@ -1899,21 +1899,21 @@ jobs:
 
       - name: Download existing test-health evidence
         continue-on-error: true
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: test-health-telemetry
           path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/upstream/test-health
 
       - name: Download existing quality evidence
         continue-on-error: true
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: ci-quality-metrics
           path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/upstream/quality
 
       - name: Download existing coverage evidence
         continue-on-error: true
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: coverage-report
           path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/upstream/coverage
@@ -2069,7 +2069,7 @@ jobs:
 
       - name: Upload Proof-or-Stop bundle
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: proof-or-stop-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/

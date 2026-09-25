@@ -46,7 +46,7 @@ jobs:
     permissions: { contents: read }
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Critical playback cassettes are a bounded non-LFS set.
           lfs: false
@@ -124,7 +124,7 @@ jobs:
           fi
 
       - name: Upload E2E matrix health artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() && !cancelled() }}
         with:
           name: e2e-matrix-health-blocking
@@ -151,7 +151,7 @@ jobs:
     permissions: { contents: read }
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -207,7 +207,7 @@ jobs:
             --markdown-out reports/e2e/matrix-smoke-live-summary.md
 
       - name: Upload E2E nightly artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() && !cancelled() }}
         with:
           name: e2e-matrix-health-nightly-live-${{ github.sha }}
@@ -227,7 +227,7 @@ jobs:
     permissions: { contents: read }
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           lfs: false
 
@@ -256,7 +256,7 @@ jobs:
             --junitxml=reports/e2e/e2e-nightly-full.xml
 
       - name: Upload full E2E replay artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() && !cancelled() }}
         with:
           name: e2e-nightly-full-replay-${{ github.sha }}
@@ -271,7 +271,7 @@ jobs:
     permissions: { contents: read }
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -289,7 +289,7 @@ jobs:
 
       - name: Upload prompt test artifacts
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: prompt-tests-nightly-${{ github.sha }}
           path: reports/e2e/prompt-tests-nightly.xml

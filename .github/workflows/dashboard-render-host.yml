@@ -40,7 +40,7 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: Checkout exact revision
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -95,7 +95,7 @@ jobs:
 
       - name: Upload semantic gate source
         if: ${{ always() && !cancelled() && !inputs.regression_acceptance }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dashboard-semantic-gate-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/observability/grafana/live-panel-audit.json
@@ -104,7 +104,7 @@ jobs:
 
       - name: Upload render gate source
         if: ${{ always() && !cancelled() && !inputs.regression_acceptance }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dashboard-render-gate-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
@@ -115,7 +115,7 @@ jobs:
 
       - name: Upload regression reviewer bundle
         if: ${{ always() && !cancelled() && inputs.regression_acceptance && steps.acceptance_bundle.outputs.path != '' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dashboard-regression-bundle-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ steps.acceptance_bundle.outputs.path }}
@@ -124,7 +124,7 @@ jobs:
 
       - name: Upload combined occurrence receipt
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dashboard-release-receipt-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/observability/grafana/dashboard-release-gates.json
