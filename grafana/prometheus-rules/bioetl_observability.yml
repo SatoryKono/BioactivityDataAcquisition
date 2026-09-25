@@ -658,6 +658,8 @@ groups:
       - record: bioetl_incident_alert_priority
         expr: (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity="critical",alertstate="firing"}) * 0 + 60) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity="critical",alertstate="pending"}) * 0 + 50) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity="warning",alertstate="firing"}) * 0 + 40) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity="warning",alertstate="pending"}) * 0 + 30) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity!~"critical|warning",alertstate="firing"}) * 0 + 20) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity!~"critical|warning",alertstate="pending"}) * 0 + 10)
 
+      # Completeness is scoped to pipeline evidence. Historical rule-scheduling
+      # gaps remain visible separately as monitoring quality, not missing stages.
       - record: bioetl_runtime_current_status_trusted
         expr: >-
           max by (pipeline, run_type) (

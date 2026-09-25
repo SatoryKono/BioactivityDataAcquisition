@@ -350,3 +350,26 @@ Provider identifiers remain unchanged; chembl is displayed as ChEMBL.
 Promtool verified five cases: explicit provider, unique mapping, missing mapping,
 ambiguous mapping and infrastructure. The live query preserved all seven alert
 rows and their severity/state. Required readability/no-scroll checks: 19 passed.
+
+
+## Runtime completeness and monitoring quality
+
+Pipeline Diagnostics separates pipeline evidence completeness from monitoring
+quality. Historical rule failures or missed evaluations no longer force a
+complete pipeline to INCOMPLETE for the remainder of the ten-minute window.
+Monitor Coverage exposes these warnings as Monitoring quality (10m): DEGRADED.
+Missing stage evidence, invalid/missing publication and missing pipeline metrics
+still fail closed. Endpoint SCRAPING and 100% stage presence do not prove freshness.
+
+Regression coverage includes a recovered scheduling miss with complete stage
+signals: monitoring remains degraded while pipeline status is OK. Live Prometheus
+confirmed chembl_target/backfill status 0 with monitoring gap 1 after rule reload.
+Rule syntax validation passed (234 rules); 63 rules-config/readability/no-scroll
+checks passed. Broader metric semantics: 57 passed, one unrelated Provider Health
+copy-contract failure. Full promtool has two existing provider-fixture failures
+caused by additional generated infrastructure-alert rows.
+
+Final targeted promtool runtime/recovered-rule suite: SUCCESS. Live browser
+confirmed Pipeline Status OK, stage coverage 100%, and separate orange DEGRADED
+monitoring quality, with all four coverage values visible without panel scrolling.
+Runtime mirrors and src/bioetl were not modified; full repository tests were not run.
