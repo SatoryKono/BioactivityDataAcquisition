@@ -1,76 +1,167 @@
 {
+  "domain_id": "docs-pipeline",
+  "prompt_id": "prompt.audit.docs-pipeline",
+  "surface_score": 2,
+  "head": "32d77a51e556de60d6dc0daf871a442becc709c5",
   "findings": [
     {
       "id": "DOCS-PIPE-001",
       "requirement_id": "REQ-DOC-001",
-      "path": "docs/02-architecture/diagrams/descriptions/INDEX.md:3",
-      "observation": "Tracked generated description index stores a local wall-clock stamp, and its generator is not a docs CI drift check.",
-      "method": "inspection of docs/02-architecture/diagrams/descriptions/INDEX.md:3, scripts/diagrams/render/generate_description_indexes.py:55-56 and :206-207, scripts/diagrams/render/generate_all_bundles.py:586 and :679; workflow search for those script names",
-      "expected": "Tracked generated docs are deterministic (no local now()) and regenerated output is checked in CI.",
-      "actual": "INDEX.md line 3 is `_Автогенерация: 2026-07-18T17:33:44+03:00_`. Generator uses `datetime.now().astimezone()` and `Path.write_text`. Sibling `docs/02-architecture/diagrams/bundles/architecture.bundle.md:3` is `Generated: 2026-07-18T18:29:11` from naive `datetime.now().strftime`. Neither script is invoked by `.github/workflows/docs.yml`.",
-      "impact": "Repeating the generator on an unchanged corpus rewrites tracked Markdown; CI will not fail that drift.",
+      "path": ".github/workflows/tests.yml:647-654",
+      "observation": "Канонический workbook матрицы отсутствует в checkout и gitignored, а CI-шаг sync --check при отсутствии файла завершается с exit 0.",
+      "method": "git check-ignore -v и Test-Path @ 2026-09-25T08:43Z; inspection tests.yml:647-654, .gitignore:577, scripts/docs/README.md:99-108, scripts/docs/matrix/sync_structural_policy.py:58-61",
+      "expected": "Выделенная generated-doc проверка workbook sync либо выполняется на чистом checkout и падает при drift, либо workbook не описан как единственный канонический артефакт.",
+      "actual": "git check-ignore: .gitignore:577 игнорирует docs/reports/chembl_pipeline_silver_matrices_v12.xlsx. Test-Path=False, git ls-files пуст, glob 0. tests.yml:650-653 печатает skip и exit 0, если файла нет. README.md:99-101 называет этот xlsx единственным каноническим workbook.",
+      "impact": "На чистом checkout свежесть workbook относительно structural contract не проверяется, хотя шаг помечен blocking. Оператор не может повторить documented matrix workflow из git.",
+      "confidence": "high",
+      "confidence_score": 0.93,
       "status": "PROVEN",
       "priority": "P2",
       "severity": "Medium",
-      "confidence": "high",
-      "remediation": "Stamp from a fixed source (git commit date or SOURCE_DATE_EPOCH), normalize the stamp in `--check`, write via temp+os.replace, and call that check from docs CI.",
+      "remediation": "Либо добавить workbook в gitignore allowlist и убрать skip-exit-0, либо убрать его из канонического README и оставить SoT на export-matrix-structural-contract --check.",
       "effort": "M",
-      "automation": "CI check that regenerates indexes/bundles and diffs them with calendar stamps normalized",
-      "automated_fix_possible": true
+      "automation": "CI: fail closed, если commit_policy требует workbook, а файла нет",
+      "automated_fix_possible": false,
+      "fingerprint": "3b5d52f49210480d80454b14f6f73a857942e96ca095e0a8d871628ce937ad11",
+      "evidence_class": "FACT",
+      "claim": "CI matrix workbook sync exits 0 when the documented canonical xlsx is absent.",
+      "broken_invariant": "REQ-DOC-001 generated-doc checks must actually run in CI",
+      "root_cause": "canonical workbook gitignored and absent so CI sync check exits 0",
+      "affected_paths": [
+        ".github/workflows/tests.yml",
+        ".gitignore",
+        "scripts/docs/README.md"
+      ],
+      "evidence": [
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 650,
+          "command": "inspection",
+          "observation": "if [ ! -f \"$workbook\" ]; then echo Skipping...; exit 0; fi"
+        },
+        {
+          "path": ".gitignore",
+          "line": 577,
+          "command": "git check-ignore -v -- docs/reports/chembl_pipeline_silver_matrices_v12.xlsx",
+          "observation": ".gitignore:577:/docs/reports/* matches; Test-Path False"
+        }
+      ]
     },
     {
       "id": "DOCS-PIPE-002",
       "requirement_id": "REQ-DOC-001",
-      "path": "scripts/docs/checks/check_links.py:669",
-      "observation": "The canonical link gate and strict MkDocs build both ignore missing PNG/SVG targets.",
-      "method": "inspection of scripts/docs/checks/check_links.py:669-672, mkdocs.yml:97-100, .github/workflows/docs.yml:379-384",
-      "expected": "Broken published image links fail `python -m scripts.docs verify` or the strict MkDocs build.",
-      "actual": "check-links continues when the target endswith `.png` or `.svg`. mkdocs `validation.links.not_found` is `info`. Job `render-diagrams` is `if: ${{ false }}`.",
-      "impact": "A Markdown href to a missing PNG/SVG can pass the docs verify chain. Bundle image existence is a separate architecture test, not this command.",
+      "path": "scripts/docs/matrix/build_matrix_dicts.py:285-290",
+      "observation": "Маршрут matrix-dictionaries объявлен tracked curated, но каталог gitignored и пуст, генератор пишет wall-clock и абсолютный путь и не входит в verify.",
+      "method": "git check-ignore -v @ 2026-09-25T08:43Z; inspection generated_artifact_routing.yaml:180-186, build_matrix_dicts.py:33-36,285-290,452-457,505-510; rg build-matrix-dicts в .github/workflows и verify.py — нет совпадений",
+      "expected": "tracked_curated_generated_doc имеет repo-relative детерминированный вывод, --check и вызов из verify либо docs CI.",
+      "actual": "commit_policy tracked_curated_generated_doc на docs/reports/dictionaries/. git check-ignore: .gitignore:577. Test-Path dictionaries=False. generated_at_utc=datetime.now(UTC) (строка 510). source_workbook=str(workbook.resolve()) (строки 507 и 288). _write_yaml использует path.write_text. verify.py этот генератор не вызывает.",
+      "impact": "Заявленный curated dictionary нельзя воспроизвести из checkout и нельзя поймать drift в docs CI. Повторный запуск вшил бы абсолютный путь машины и текущее время.",
+      "confidence": "high",
+      "confidence_score": 0.91,
       "status": "PROVEN",
       "priority": "P2",
       "severity": "Medium",
-      "confidence": "high",
-      "remediation": "Fail check-links on missing local `.png`/`.svg` targets, or raise MkDocs `not_found` above info and keep a CI render/existence job that actually runs.",
+      "remediation": "Согласовать routing и gitignore. Убрать generated_at_utc и absolute source_workbook, писать через temp+os.replace, добавить --check в verify, либо сменить commit_policy на ignored_local_output.",
       "effort": "M",
-      "automation": "extend scripts.docs check-links and keep it in docs.yml validate-mkdocs",
-      "automated_fix_possible": false
+      "automation": "python -m scripts.docs build-matrix-dicts --check в verify, после детерминизации",
+      "automated_fix_possible": false,
+      "fingerprint": "c40bb14cdcfe6bba5311cb0466b73b6d0f076827eaeec6399831b3cea70d5299",
+      "evidence_class": "FACT",
+      "claim": "Dictionary artifacts declared tracked are gitignored, nondeterministic, and outside the verify chain.",
+      "broken_invariant": "REQ-DOC-001 generated docs must pass a real CI check",
+      "root_cause": "dictionary route claims tracked curated output but generator is nondeterministic and gitignored without --check",
+      "affected_paths": [
+        ".gitignore",
+        "configs/quality/generated_artifact_routing.yaml",
+        "scripts/docs/checks/verify.py",
+        "scripts/docs/matrix/build_matrix_dicts.py"
+      ],
+      "evidence": [
+        {
+          "path": "configs/quality/generated_artifact_routing.yaml",
+          "line": 180,
+          "observation": "id matrix-dictionaries-curated-docs commit_policy tracked_curated_generated_doc"
+        },
+        {
+          "path": "scripts/docs/matrix/build_matrix_dicts.py",
+          "line": 510,
+          "observation": "generated_at = datetime.now(UTC).isoformat(); workbook = args.workbook.resolve()"
+        }
+      ]
     },
     {
       "id": "DOCS-PIPE-003",
       "requirement_id": "GAP",
-      "path": "scripts/docs/build/mkdocs_build.py:29",
-      "observation": "Packaged site build does not pass `--strict`, while the CI verification chain does.",
-      "method": "inspection of scripts/docs/build/mkdocs_build.py:29-31, scripts/docs/checks/verify.py:137-149, scripts/docs/README.md:76, .github/workflows/docs.yml:177-178",
-      "expected": "`python -m scripts.docs build-site` matches the strict build used by `python -m scripts.docs verify` in CI.",
-      "actual": "`_mkdocs_build` runs `mkdocs build` plus caller args and does not add `--strict`. CI job `validate-mkdocs` runs `verify`, which adds `--strict --clean` into a temp site dir. README calls `build-site` a CI-style local smoke.",
-      "impact": "A local build-site success can hide warnings that fail the CI strict build.",
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
+      "path": "scripts/docs/checks/verify.py:74-88",
+      "observation": "verify не передаёт --ai-surfaces, хотя README относит AI-surface regression к этому CI-гейту.",
+      "method": "inspection verify.py:74-88 и scripts/docs/README.md:77; rg ai-surfaces в .github — нет флага; docs.yml:123 вызывает tests/architecture/test_ai_runtime_governance_links.py, который зовёт check_ai_surfaces",
+      "expected": "Либо verify передаёт --ai-surfaces, либо README не приписывает эту проверку команде verify.",
+      "actual": "Флаги verify: --ports --classes --runtime-mirrors --freshness --modules. --ai-surfaces нет, поэтому run_all=false и check_ai_surfaces в verify не выполняется. Тот же чекер вызывается pytest-ом в path-scoped job docs-governance.",
+      "impact": "Локальный python -m scripts.docs verify не покрывает AI-surface. В CI покрытие есть только когда docs-governance required. Отдельного REQ, что флаг обязан быть внутри verify, нет.",
       "confidence": "high",
-      "remediation": "Default `build-site` to `mkdocs build --strict` unless the caller opts out.",
+      "confidence_score": 0.84,
+      "status": "NOT_PROVEN",
+      "priority": "P3",
+      "severity": "Low",
+      "remediation": "Добавить --ai-surfaces в verify или поправить README: гейт — architecture test, не флаги verify.",
       "effort": "S",
-      "automation": "unit test that the default argv contains --strict",
-      "automated_fix_possible": true
+      "automation": "тест, что argv verify содержит --ai-surfaces, если README остаётся источником",
+      "automated_fix_possible": true,
+      "fingerprint": "93d9b10c34b04abe673709dc5b37c80cf135fc46b64c979ef7119b8629cfabf6",
+      "evidence_class": "GAP",
+      "claim": "README attributes AI-surface checks to verify, but verify omits --ai-surfaces.",
+      "broken_invariant": "unspecified; no REQ-* requires this flag inside verify",
+      "root_cause": "verify drift flags omit ai-surfaces while README attributes that regression check to the verify CI gate",
+      "affected_paths": [
+        "scripts/docs/README.md",
+        "scripts/docs/checks/verify.py"
+      ],
+      "evidence": [
+        {
+          "path": "scripts/docs/checks/verify.py",
+          "line": 81,
+          "observation": "check-drift argv has no --ai-surfaces"
+        },
+        {
+          "path": ".github/workflows/docs.yml",
+          "line": 123,
+          "observation": "pytest tests/architecture/test_ai_runtime_governance_links.py calls check_ai_surfaces"
+        }
+      ]
     },
     {
       "id": "DOCS-PIPE-004",
       "requirement_id": "GAP",
-      "path": "mkdocs.yml:125",
-      "observation": "mkdocstrings is enabled, but no docs page has a directive, so the strict build does not render the public API.",
-      "method": "inspection of mkdocs.yml:125-134; search of docs/**/*.md for mkdocstrings directives; tests/architecture/test_api_reference_public_facades.py:15-18 and :43-46; docs.yml docs-governance pytest list",
-      "expected": "CI either builds API reference from src via mkdocstrings or an equivalent check covers the published API surface.",
-      "actual": "Plugin paths point at `src`, and no `:::` handler directive exists under docs/. CI test `test_api_reference_public_facades.py` only checks backtick symbols in package-structure tables of application.md, composition.md, and infrastructure.md, and forbids an autogen claim.",
-      "impact": "API drift outside those three tables does not fail `mkdocs build --strict`.",
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
+      "path": "scripts/docs/checks/documentation_cleanup_inventory.py:1573-1582",
+      "observation": "Без --check и без --update generate-cleanup-inventory пишет tracked inventory.",
+      "method": "inspection documentation_cleanup_inventory.py:1356-1362 и 1562-1582. Этот аудит вызывал только --check (exit 0, inventory is synchronized, 2026-09-25T08:43:14Z–08:43:16Z).",
+      "expected": "Команда без явного режима не перезаписывает tracked JSON/MD.",
+      "actual": "if args.check: _run_check_mode; иначе _run_update_mode. Группа флагов не обязательна. CI и этот прогон передают --check.",
+      "impact": "Голый вызов может изменить docs/reports/generated/documentation-cleanup-inventory.{json,md}. Отдельного REQ на default=check нет.",
       "confidence": "high",
-      "remediation": "Add mkdocstrings directives for the published public surface, or drop the unused plugin and widen the facade test beyond the three tables.",
-      "effort": "M",
-      "automation": "architecture test that every nav API page is either mkdocstrings-backed or listed in the facade allowlist",
-      "automated_fix_possible": false
+      "confidence_score": 0.88,
+      "status": "NOT_PROVEN",
+      "priority": "P3",
+      "severity": "Low",
+      "remediation": "Сделать режим обязательным: без --check/--update выходить с ошибкой.",
+      "effort": "S",
+      "automation": "unit test: argv [] не пишет default JSON/MD",
+      "automated_fix_possible": true,
+      "fingerprint": "0bd6ea80c24c7b28d7ccffb2b5a94643d176e1550dbbba5f78af485dbed72d25",
+      "evidence_class": "GAP",
+      "claim": "Bare generate-cleanup-inventory takes the update path.",
+      "broken_invariant": "unspecified; no REQ-* forbids the write default",
+      "root_cause": "generate-cleanup-inventory writes inventories when neither --check nor --update is passed",
+      "affected_paths": [
+        "scripts/docs/checks/documentation_cleanup_inventory.py"
+      ],
+      "evidence": [
+        {
+          "path": "scripts/docs/checks/documentation_cleanup_inventory.py",
+          "line": 1573,
+          "observation": "only args.check selects _run_check_mode; else _run_update_mode"
+        }
+      ]
     }
   ]
 }

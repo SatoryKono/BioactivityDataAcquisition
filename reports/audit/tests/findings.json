@@ -1,94 +1,174 @@
 {
+  "domain_id": "tests-system",
+  "prompt_id": "prompt.audit.tests-system",
+  "surface_score": 2,
+  "head": "32d77a51e556de60d6dc0daf871a442becc709c5",
   "findings": [
     {
       "id": "TST-001",
-      "requirement_id": "GAP",
-      "path": "pyproject.toml:236",
-      "observation": "Маркер e2e_smoke описан как PR-blocking, тогда как каталог required checks и политика не включают e2e-matrix-health в pr-gate-complete.",
-      "method": "Сверка pyproject.toml:236, configs/quality/test_matrix.yaml:595-597, configs/quality/github_required_checks.yaml:125-136, docs/00-project/governance/05-github-policy.md:289-294",
-      "expected": "Текст маркера совпадает с merge wall: e2e-smoke либо входит в github_required_checks.yaml, либо явно назван неблокирующим спутником.",
-      "actual": "Маркер: «PR-blocking E2E smoke subset». test_matrix и 05-github-policy: не GitHub-required и не owner pr-gate-complete (#10412). В gates.tests нет e2e-matrix-health.",
-      "impact": "Красный e2e-matrix-health на PR не валит pr-gate-complete; оператор по маркеру может счесть representative entity path защищённым merge wall.",
+      "finding_id": "TST-001",
+      "fingerprint": "8453294a8cbfd7f06d99cad9f4ea46636d0ec3ae78bdced4eeb92a6af9d8ddf4",
+      "requirement_id": "QG-TEST-001",
+      "path": "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py:219-224",
+      "observation": "В 16 модулях tests/architecture/test_tech_debt_issues_*.py закомментирована 71 строка assert, включая release_gate_status, fail_count и generated_artifact_drift; комментарии называют причиной local uncommitted changes. test_tech_debt_issues_5752_5755_closeout.py:140-142 принимает release_gate_status passing и failing и fail_count >= 0.",
+      "method": "AST/text census tests/architecture/test_tech_debt_issues_*.py @ 2026-09-25; inspection RULES.md §4.5 QG-TEST-001",
+      "expected": "Проверки наблюдаемого поведения остаются исполняемыми assert. Ослабление exact equality до permissive check требует явного contract-based обоснования.",
+      "actual": "Часть closeout-проверок лежит в комментариях. Соседний test_issue_5564_debt_governance_gates_remain_passing по-прежнему требует fail_count == 0 и release_gate_status == passing на том же debt-governance-gates.json. Ratchet refined_assertless смотрит AST и комментарии не видит.",
+      "impact": "Эти closeout-модули больше не ловят регрессию закомментированных условий. Merge по сводке debt gates пока держит test 5564. Паттерн может расширяться без срабатывания assertless-бюджета.",
+      "confidence": "high",
+      "confidence_score": 0.92,
       "status": "PROVEN",
+      "evidence_class": "FACT",
       "priority": "P2",
       "severity": "Medium",
-      "confidence": "high",
-      "remediation": "Заменить описание маркера e2e_smoke на формулировку test_matrix (advisory/satellite) либо добавить workflow в каталог required checks отдельным решением.",
-      "effort": "S",
-      "automation": "Тест на паритет текста маркера e2e_smoke и статуса e2e-matrix-health в github_required_checks.yaml",
-      "automated_fix_possible": false
+      "category": "assertion-integrity",
+      "claim": "Architecture closeout tests disable release-gate assertions via comments and a tautology while the AST assertless ratchet cannot see comments.",
+      "broken_invariant": "QG-TEST-001: assertions MUST NOT be weakened to keep the suite green.",
+      "root_cause": "Commented and tautological release-gate asserts in architecture closeout tests are invisible to the AST assertless ratchet",
+      "affected_paths": [
+        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5564_5603_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5570_5578_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5670_5675_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5700_5706_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5707_5715_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5744_5751_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5752_5755_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5861_5864_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5866_5872_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5954_5955_5962_5963_closeout.py",
+        "tests/architecture/test_tech_debt_issues_5956_5961_closeout.py",
+        "tests/architecture/test_tech_debt_issues_6022_6028_closeout.py"
+      ],
+      "evidence": [
+        {
+          "path": "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py",
+          "line": 219,
+          "observation": "Five release-gate asserts are commented with a local-development skip note."
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_issues_5752_5755_closeout.py",
+          "line": 140,
+          "observation": "Live assert accepts release_gate_status passing or failing; fail_count >= 0."
+        }
+      ],
+      "acceptance": "Закомментированные assert либо восстановлены, либо удалены с заменой живой проверкой; permissive release_gate_status сужен до passing, если сводка обязана быть зелёной.",
+      "validation": [
+        "rg -n \"^\\s*#\\s*assert\" tests/architecture/test_tech_debt_issues_*.py"
+      ],
+      "validation_commands": [
+        "rg -n \"^\\s*#\\s*assert\" tests/architecture/test_tech_debt_issues_*.py"
+      ],
+      "rollback": "Вернуть предыдущие строки assert в тех же closeout-модулях.",
+      "owner_surface": "docs",
+      "remediation": "Вернуть исполняемые assert для release gate и drift там, где test 5564 их не дублирует; сузить строку 140 в test_tech_debt_issues_5752_5755_closeout.py до passing. Добавить в governance scan запрет закомментированного assert в tests/architecture.",
+      "effort": "M",
+      "automation": "Расширить report_test_governance_audit: fail на закомментированный assert в tests/architecture.",
+      "automated_fix_possible": false,
+      "dependencies": []
     },
     {
       "id": "TST-002",
-      "requirement_id": "GAP",
-      "path": ".github/workflows/e2e-matrix-health.yml:221",
-      "observation": "Полный offline e2e replay не исполняется на pull_request: job e2e-nightly-full-replay ограничен schedule и workflow_dispatch.",
-      "method": "Чтение if job e2e-nightly-full-replay и on.pull_request в e2e-matrix-health.yml; слой composition/interfaces e2e MUST в configs/quality/test_matrix.yaml:771-781",
-      "expected": "Если слой требует e2e MUST, полный replay либо входит в блокирующий/явный PR-контур, либо в той же матрице помечен nightly-only.",
-      "actual": "На PR выполняется matrix-smoke-blocking (спутник, не required). Полный маркер «e2e and not e2e_smoke» запускается только по расписанию или вручную. Шестнадцать pipeline исключены из PR smoke списком e2e_matrix_replay_deferred (test_skip_inventory.yaml:406-429) с владельцем.",
-      "impact": "Регрессия полного cassette-replay e2e не блокирует merge; окно до nightly.",
+      "finding_id": "TST-002",
+      "fingerprint": "7b3ec836d4bdf1605124fba361f38a027eae0316d1d034ed2bbfe962ff164779",
+      "requirement_id": "QG-TSTDET-001",
+      "path": "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py:217",
+      "observation": "test_issue_5684_governance_freshness_gates_are_passing сравнивает generated_at runtime_cardinality_review.json с datetime.now(UTC) и требует возраст не больше 21 дня. В модуле уже задан неиспользуемый этим тестом REFERENCE_NOW = 2026-07-06.",
+      "method": "inspection tests/architecture/test_tech_debt_issues_5677_5685_closeout.py:28,217,236; json generated_at reports/observability/runtime_cardinality_review.json @ 2026-09-25",
+      "expected": "Тест контролирует время: fixed/frozen clock или явная injected reference, без неконтролируемых wall-clock.",
+      "actual": "Возраст считается от datetime.now(UTC). generated_at = 2026-09-16T16:48:20Z; на 2026-09-25 возраст 9 дней при окне 21.",
+      "impact": "Около 2026-10-07 architecture-тест упадёт из-за календаря, без регрессии продукта, либо потребует внепланового refresh артефакта.",
+      "confidence": "high",
+      "confidence_score": 0.95,
       "status": "PROVEN",
+      "evidence_class": "FACT",
       "priority": "P2",
       "severity": "Medium",
-      "confidence": "high",
-      "remediation": "В test_matrix у composition/interfaces явно зафиксировать nightly-only для полного e2e либо выделить узкий блокирующий replay в гейт tests.",
-      "effort": "M",
-      "automation": "n/a",
-      "automated_fix_possible": false
+      "category": "determinism",
+      "claim": "The cardinality-review freshness test depends on wall-clock datetime.now and a 21-day window.",
+      "broken_invariant": "QG-TSTDET-001: tests MUST control time and MUST NOT depend on uncontrolled wall-clock.",
+      "root_cause": "Freshness test uses wall-clock datetime.now despite a frozen REFERENCE_NOW in the same module",
+      "affected_paths": [
+        "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py",
+        "reports/observability/runtime_cardinality_review.json"
+      ],
+      "evidence": [
+        {
+          "path": "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py",
+          "line": 217,
+          "observation": "age_days = (datetime.now(UTC) - generated_at).days; assert 0 <= age_days <= 21"
+        },
+        {
+          "path": "reports/observability/runtime_cardinality_review.json",
+          "observation": "generated_at is 2026-09-16T16:48:20Z"
+        }
+      ],
+      "acceptance": "Тест читает фиксированную или внедрённую дату; падение возможно только при смене контракта свежести в том же changeset, что и артефакт.",
+      "validation": [
+        "pytest tests/architecture/test_tech_debt_issues_5677_5685_closeout.py::test_issue_5684_governance_freshness_gates_are_passing -q --tb=short"
+      ],
+      "validation_commands": [
+        "pytest tests/architecture/test_tech_debt_issues_5677_5685_closeout.py::test_issue_5684_governance_freshness_gates_are_passing -q --tb=short"
+      ],
+      "rollback": "Вернуть расчёт age_days от datetime.now, если injected clock окажется неверным.",
+      "owner_surface": "docs",
+      "remediation": "Считать возраст от явной reference date, обновляемой вместе с generated_at, либо проверять поле generated_at на равенство зафиксированному значению без окна от wall-clock.",
+      "effort": "S",
+      "automation": "Architecture guard: datetime.now в tests/architecture только из reviewed allowlist.",
+      "automated_fix_possible": false,
+      "dependencies": []
     },
     {
       "id": "TST-003",
-      "requirement_id": "GAP",
-      "path": "tests/architecture/test_fix_mermaid_operators.py:161",
-      "observation": "Два вызова mounted_worktree_skip_reason не входят в architecture_platform_skips, а guard сравнивает инвентарь только с жёстким набором из четырёх путей.",
-      "method": "Поиск mounted_worktree_skip_reason; сверка с configs/quality/test_skip_inventory.yaml:15-64 и tests/architecture/test_test_skip_inventory.py:215-222",
-      "expected": "Каждый Windows/WSL skip архитектуры есть в architecture_platform_skips, и тест падает при новом call site.",
-      "actual": "Вне ценза: test_fix_mermaid_operators.py:161-163 и test_issue_10597_export_facade_shrink.py:119-121 (pytest.skip). Инвентарь и expected set держат ровно четыре файла. На Linux CI эти тесты не скипаются.",
-      "impact": "Локальный Windows/WSL прогон молча пропускает mermaid-регрессию и live census фасадов; merge-truth остаётся Linux.",
+      "finding_id": "TST-003",
+      "fingerprint": "34a838273fe5be356b203be9eab0a6ae852c9025188bb03a244f7e990846ac17",
+      "requirement_id": "REQ-TEST-001",
+      "path": "tests/conftest.py:1273-1288",
+      "observation": "Autouse-фикстура _bioetl_test_silver_validator импортирует Silver/Delta/pyarrow на каждом тесте. Чистый domain-unit node дважды завершился timeout в setup и не исполнил тело.",
+      "method": "pytest N=2 node tests/unit/domain/services/test_author_normalization_service.py::TestHelperFunctions::test_hash_author_name_consistency; timeout_method=thread; exit 1 оба раза; завершение до 2026-09-25T08:47:48Z",
+      "expected": "Unit проверяет доменную логику и не тянет infrastructure storage import, если тест Silver writer не касается (RULES.md §4.2, traceability REQ-TEST-001).",
+      "actual": "Оба прогона exit 1 по pytest timeout=60 в setup. Первый стек: conftest.py:1284 → pyarrow._dataset _path_stat. Второй: тот же импорт, стек до pandas/__init__.py. Тело теста не запускалось.",
+      "impact": "На этом Windows venv локальный unit-узел не даёт сигнала регрессии: падает setup импорта Delta, не assertion домена. Linux CI этим прогоном не подтверждён и не опровергнут.",
+      "confidence": "high",
+      "confidence_score": 0.9,
       "status": "PROVEN",
+      "evidence_class": "FACT",
       "priority": "P2",
       "severity": "Medium",
-      "confidence": "high",
-      "remediation": "Добавить оба пути в architecture_platform_skips с owner и заменить equality-набор на скан всех mounted_worktree_skip_reason.",
-      "effort": "S",
-      "automation": "Расширить test_architecture_platform_skips_are_reviewed сканом call site",
-      "automated_fix_possible": false
-    },
-    {
-      "id": "TST-004",
-      "requirement_id": "GAP",
-      "path": ".github/workflows/tests.yml:321",
-      "observation": "Блокирующий flaky-telemetry повторяет только два модуля на трёх seed и не даёт repeat-count по остальному suite.",
-      "method": "Чтение цикла seed 17/73/113 и списка pytest-путей в tests.yml:321-329; curated список configs/quality/flaky_test_inventory.yaml:55",
-      "expected": "Эмпирический flaky-гейт либо покрывает заявленный determinism-контур и так подписан, либо повторяет критические lane с записанным N.",
-      "actual": "N=3 только для tests/contract/test_semanticscholar_contract.py и tests/architecture/test_determinism_identity_policy.py. reviewed_flaky_tests пуст (reviewed_on 2026-08-03). Иных repeat-count в этом аудите нет; флаки вне среза не утверждаются.",
-      "impact": "tests-complete падает лишь на этом срезе; перемежающиеся падения остальных lane не ловятся повторным прогоном.",
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "remediation": "Подписать job как determinism-critical shard и расширять список только с новым N и junit; не считать пустой curated inventory доказательством отсутствия флаки.",
+      "category": "isolation",
+      "claim": "Every test, including pure domain unit tests, imports the Silver/Delta stack through an autouse fixture, and on this Windows checkout that import exceeds the 60s test timeout.",
+      "broken_invariant": "RULES.md §4.2 Unit: только доменная логика; traceability REQ-TEST-001.",
+      "root_cause": "Autouse silver-validator fixture imports Delta and pyarrow for every test, including pure domain unit nodes",
+      "affected_paths": [
+        "tests/conftest.py",
+        "pyproject.toml"
+      ],
+      "evidence": [
+        {
+          "path": "tests/conftest.py",
+          "line": 1273,
+          "command": "python -m pytest tests/unit/domain/services/test_author_normalization_service.py::TestHelperFunctions::test_hash_author_name_consistency -q --tb=line -p no:cacheprovider",
+          "observation": "N=2 @ 2026-09-25 before 08:47:48Z, both exit 1, timeout during setup import of bioetl.infrastructure.storage.silver.runtime_helpers"
+        }
+      ],
+      "acceptance": "Тот же node завершается exit 0 без импорта deltalake в setup, либо фикстура не autouse для тестов без SilverWriter.",
+      "validation": [
+        "python -m pytest tests/unit/domain/services/test_author_normalization_service.py::TestHelperFunctions::test_hash_author_name_consistency -q --tb=short"
+      ],
+      "validation_commands": [
+        "python -m pytest tests/unit/domain/services/test_author_normalization_service.py::TestHelperFunctions::test_hash_author_name_consistency -q --tb=short"
+      ],
+      "rollback": "Вернуть autouse=True и прямой import в _bioetl_test_silver_validator.",
+      "owner_surface": "codex",
+      "remediation": "Не импортировать Silver/Delta в autouse для тестов без маркера или использования SilverWriter. Оставить monkeypatch только на пути, которые реально конструируют writer.",
       "effort": "M",
-      "automation": "Оставить report-flaky-test-burndown-review --check и не расширять срез без repeat-count",
-      "automated_fix_possible": false
-    },
-    {
-      "id": "TST-005",
-      "requirement_id": "REQ-TEST-005",
-      "path": "docs/00-project/governance/05-github-policy.md:364",
-      "observation": "Политика и комментарий tests.yml называют job test-matrix path-scoped и not always-on, хотя гейт tests в каталоге always_required и на каждом PR вызывает весь tests.yml.",
-      "method": "Сверка 05-github-policy.md:364, .github/workflows/tests.yml:1125-1127, configs/quality/github_required_checks.yaml:125-129, scripts/engineering/ci/pr_gate.py:184-187, .github/workflows/pr-required.yml:117-120",
-      "expected": "Описание CI-команды pytest совпадает с классификатором: leaf context не required, но job на PR всегда исполняется внутри гейта tests.",
-      "actual": "Таблица помечает test-matrix и coverage-verify как path-scoped/not always-on. pr_gate для always_required ставит REQUIRED без фильтра путей и вызывает tests.yml, включая test-matrix и coverage-verify.",
-      "impact": "Оператор может пропустить 3.13 matrix и порог 85 как необязательные на PR, хотя агрегатор их ждёт.",
-      "status": "PROVEN",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "remediation": "В 05-github-policy.md:364 и tests.yml:1125 заменить «path-scoped; not always-on» на «не leaf required context; на PR всегда внутри гейта tests».",
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": false
+      "automation": "Architecture test: domain unit modules не импортируют deltalake через tests/conftest.py autouse.",
+      "automated_fix_possible": false,
+      "dependencies": []
     }
   ]
 }

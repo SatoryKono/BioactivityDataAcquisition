@@ -1,148 +1,263 @@
 {
+  "domain_id": "docs-content",
+  "prompt_id": "prompt.docs.audit",
+  "surface_score": 2,
   "findings": [
     {
       "id": "DOCS-001",
-      "requirement_id": "REQ-THRESHOLD-002",
-      "path": "README.md:297",
-      "observation": "README задаёт BIOETL_DQ_HARD_THRESHOLD со значением по умолчанию 0.20 как порог остановки батча, но это имя не читается кодом.",
-      "method": "Сверка README.md:296-297 с src/bioetl/infrastructure/config/_base.py:64-67 (extra=ignore, поля нет), поиском BIOETL_DQ_HARD_THRESHOLD по src (0 совпадений) и configs/base/quality.yaml:8-9 плюс docs/00-project/RULES.md:835.",
-      "expected": "Документированная ручка порога либо соответствует полю Settings, либо отсутствует; активный иерархический hard_fail равен 0.50.",
-      "actual": "Имя есть только в README.md:297 и в ConfigMap docs/05-operations/deployment/k8s-deployment.yaml:158. Settings его отбрасывает. Канонический hierarchical hard_fail — 0.50.",
-      "impact": "Оператор считает, что выставил отказ батча на 20%, а прогон продолжает использовать YAML-порог 0.50. Полоса 20–50% ошибок не останавливает hierarchical DQ.",
-      "status": "PROVEN",
-      "priority": "P1",
-      "severity": "High",
+      "finding_id": "DOCS-001",
+      "fingerprint": "2a3af9831e29d3f63cceda72831fbdee1f78e47a3b6fa7647235d81c235d51f1",
+      "requirement_id": "REQ-GOV-006",
+      "path": "docs/00-project/RULES.md:3",
+      "observation": "Шапка RULES.md фиксирует Version 6.1.11 и Last verified 2026-08-25, тогда как changelog того же файла уже содержит записи 6.1.12 и 6.1.13.",
+      "claim": "Поле Version в RULES.md не равно голове changelog.",
+      "method": "Чтение docs/00-project/RULES.md:3-4 и :2164-2172; сверка зеркал docs/01-requirements/REQUIREMENTS.md:3, docs/00-project/00-map.md:16, docs/00-project/rules-summary.md:16; тест test_docs_version_sync.py извлекает версию только из шапки.",
+      "expected": "Version, Last verified и голова changelog описывают одну и ту же актуальную ревизию RULES.md; зеркала ссылаются на неё.",
+      "actual": "Version: 6.1.11 (2026-08-25). Changelog: 6.1.12 (2026-08-31, ADR-060) и 6.1.13 (2026-09-16, ADR-061). Зеркала повторяют 6.1.11.",
+      "impact": "Нормативная версия, на которую опираются requirements и навигатор, отстаёт на два пункта от записанных изменений индекса ADR.",
       "confidence": "high",
-      "remediation": "Удалить BIOETL_DQ_SOFT_THRESHOLD и BIOETL_DQ_HARD_THRESHOLD из README и k8s ConfigMap либо завести реальные поля и выровнять дефолт с configs/base/quality.yaml hard_fail 0.50.",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "evidence_class": "FACT",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "version-stamp",
+      "root_cause": "Version frontmatter was not advanced when changelog entries 6.1.12 and 6.1.13 were added",
+      "broken_invariant": "REQ-GOV-006: changelog и version в одном changeset должны совпадать.",
+      "affected_paths": [
+        "docs/00-project/RULES.md"
+      ],
+      "evidence": [
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 3,
+          "observation": "Version: 6.1.11; Last verified: 2026-08-25"
+        },
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 2166,
+          "observation": "Changelog entries 6.1.13 and 6.1.12 are present below the 6.1.11 entry"
+        }
+      ],
+      "remediation": "Либо поднять Version и Last verified до 6.1.13 и синхронизировать зеркала, либо убрать из changelog пункты, которых нет в шапке. Один changeset.",
+      "acceptance": "Шапка RULES.md и первая запись changelog имеют один номер; exact-mirror документы ссылаются только на него.",
+      "validation": [
+        "pytest tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_normative_mirrors_match_exact_rules_patch_version"
+      ],
       "effort": "S",
-      "automation": "Проверка scripts.docs check-drift: каждое BIOETL_* из README должно быть полем Settings или os.getenv в src.",
-      "automated_fix_possible": false
+      "automation": "Сейчас test_docs_version_sync.py сравнивает зеркала с шапкой и не сравнивает шапку с первой записью changelog.",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "rollback": "Вернуть прежние строки Version и changelog.",
+      "owner_surface": "docs"
     },
     {
       "id": "DOCS-002",
-      "requirement_id": "GAP",
-      "path": "docs/03-guides/cheatsheets/data-quality-rules.md:107",
-      "observation": "Активные шпаргалки и troubleshooting предписывают удалённый CLI bioetl dq validate --entity --show-rules и bioetl diagnostics --pipeline --quarantine.",
-      "method": "Сверка docs/03-guides/cheatsheets/data-quality-rules.md:107-116, docs/03-guides/cheatsheets/pipeline-config.md:142 и docs/05-operations/troubleshooting/common-errors.md:95 с docs/04-reference/cli.md:1066-1068 и src/bioetl/interfaces/cli/commands/config_dq.py:100-106, src/bioetl/interfaces/cli/commands/diagnostics.py:306.",
-      "expected": "Диагностика DQ вызывает bioetl dq validate <PIPELINE> и bioetl diagnostics quarantine --pipeline <NAME>.",
-      "actual": "Шпаргалки передают --entity, --show-rules и --strict. cli.md фиксирует, что эти флаги удалены. diagnostics — группа; карантин — подкоманда quarantine с обязательным --pipeline, флага --quarantine на корне нет.",
-      "impact": "При DQ-инциденте оператор получает Click usage error вместо валидации правил и статистики карантина.",
-      "status": "PROVEN",
-      "priority": "P1",
-      "severity": "High",
+      "finding_id": "DOCS-002",
+      "fingerprint": "8869c65947706f51beab2cf845f91d67425e87e781bc0b7cee71156cb33c8bbd",
+      "requirement_id": "REQ-GOV-006",
+      "path": "docs/00-project/RULES.md:2166-2167",
+      "observation": "Запись changelog 6.1.13 называет ADR-061 Proposed, хотя ADR-061 и приложение F помечают его Accepted.",
+      "claim": "Changelog RULES.md приписывает ADR-061 статус Proposed.",
+      "method": "Чтение RULES.md:2162 и :2166-2167 рядом с ADR-061-persisted-selected-run-assessment.md:14.",
+      "expected": "Статус ADR-061 в changelog совпадает со статусом в ADR и в приложении F.",
+      "actual": "Changelog: Proposed. ADR-061:14 Status Accepted (implemented by PR #10490). Приложение F:2162 Accepted, дата 2026-09-16.",
+      "impact": "Читатель истории версий может счесть ADR-061 ещё не принятым.",
       "confidence": "high",
-      "remediation": "Заменить примеры на bioetl dq validate chembl_activity и bioetl diagnostics quarantine --pipeline chembl_activity в трёх перечисленных файлах.",
+      "confidence_score": 0.93,
+      "status": "PROVEN",
+      "evidence_class": "CONTRADICTION",
+      "priority": "P3",
+      "severity": "Low",
+      "category": "changelog",
+      "root_cause": "Changelog 6.1.13 still labels ADR-061 Proposed after the ADR and appendix mark it Accepted",
+      "broken_invariant": "REQ-GOV-006: changelog не должен противоречить статусу принятого ADR в том же документе.",
+      "affected_paths": [
+        "docs/00-project/RULES.md",
+        "docs/02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md"
+      ],
+      "evidence": [
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 2167,
+          "observation": "Parenthetical status Proposed"
+        },
+        {
+          "path": "docs/02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md",
+          "line": 14,
+          "observation": "Status Accepted"
+        }
+      ],
+      "remediation": "Заменить Proposed в записи 6.1.13 на Accepted, сохранив ссылку на дату 2026-09-16.",
+      "acceptance": "В changelog нет слова Proposed для ADR-061.",
+      "validation": [
+        "rg -n \"Proposed\" docs/00-project/RULES.md"
+      ],
       "effort": "S",
-      "automation": "Контракт-тест: выдержки CLI из docs/03-guides/cheatsheets сверять с click-командами src/bioetl/interfaces/cli.",
-      "automated_fix_possible": false
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "rollback": "Вернуть скобку Proposed в записи 6.1.13.",
+      "owner_surface": "docs"
     },
     {
       "id": "DOCS-003",
+      "finding_id": "DOCS-003",
+      "fingerprint": "2e53a29a4b17f9f30217d4cfd8830d46a6d7af11a3883e6b81a2235d336d66c3",
       "requirement_id": "GAP",
-      "path": "docs/05-operations/deployment/deployment-guide.md:117",
-      "observation": "Активный deployment-guide шаг 2 выполняет kubectl apply -f k8s-deployment.yaml, тогда как сам манифест запрещает apply.",
-      "method": "Чтение docs/05-operations/deployment/deployment-guide.md:16-21 и :117 против шапки docs/05-operations/deployment/k8s-deployment.yaml:1-4, runAsNonRoot: false на строке 30 и stringData BIOETL_PII_SALT_CURRENT на строке 185.",
-      "expected": "Экспериментальный манифест не входит в исполняемую процедуру; секрет соли не публикуется как apply-ready значение.",
-      "actual": "Guide со Status active даёт kubectl apply -f k8s-deployment.yaml. Манифест помечен UNSUPPORTED и «Do not apply», содержит известную строку соли change_me_to_random_64_char_string_abc123xyz789 и runAsNonRoot: false.",
-      "impact": "Следование нумерованному шагу поднимает неподдерживаемый профиль с опубликованной солью PII до ручного kubectl edit secret.",
-      "status": "PROVEN",
-      "priority": "P1",
-      "severity": "High",
+      "path": "docs/01-requirements/REQUIREMENTS.md:86",
+      "observation": "Активные обзоры ограничивают покрытие ADR номерами 052 или 059, хотя decisions/README.md и RULES приложение F включают Accepted ADR-060 и ADR-061.",
+      "claim": "REQUIREMENTS.md, 00-overview.md и rules-summary.md публикуют потолок ADR ниже канонического индекса.",
+      "method": "Чтение REQUIREMENTS.md:86-99, 00-overview.md:73, rules-summary.md:16, decisions/README.md:81-82, RULES.md:2159-2162. Тест test_adr_registry_governance_sync.py не читает эти три абзаца.",
+      "expected": "Если абзац утверждает потолок принятых ADR, он совпадает с decisions/README.md и приложением F.",
+      "actual": "REQUIREMENTS.md:86 — through ADR-052, при этом список в том же разделе доходит до ADR-057 и не упоминает ADR-058…061. 00-overview.md:73 — through ADR-059. rules-summary.md:16 — ADR-053–059.",
+      "impact": "Навигатор требований и архитектурный обзор не показывают два последних принятых ADR.",
       "confidence": "high",
-      "remediation": "Убрать kubectl apply из deployment-guide либо заменить манифест на явно неисполняемый пример без секрета и согласовать баннер файла с текстом процедуры.",
-      "effort": "M",
-      "automation": "Запрет в docs-check строк kubectl apply рядом с баннером UNSUPPORTED в docs/05-operations/deployment/.",
-      "automated_fix_possible": false
+      "confidence_score": 0.9,
+      "status": "NOT_PROVEN",
+      "evidence_class": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "adr-index",
+      "root_cause": "Narrative ADR ceilings were left behind ADR-060 and ADR-061",
+      "broken_invariant": "Нет REQ-* с проверкой потолка ADR в REQUIREMENTS.md и 00-overview.md.",
+      "affected_paths": [
+        "docs/00-project/rules-summary.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/02-architecture/00-overview.md"
+      ],
+      "evidence": [
+        {
+          "path": "docs/01-requirements/REQUIREMENTS.md",
+          "line": 86,
+          "observation": "through ADR-052 while later bullets name ADR-057"
+        },
+        {
+          "path": "docs/02-architecture/00-overview.md",
+          "line": 73,
+          "observation": "through ADR-059"
+        },
+        {
+          "path": "docs/02-architecture/decisions/README.md",
+          "line": 81,
+          "observation": "ADR-060 and ADR-061 listed Accepted"
+        }
+      ],
+      "remediation": "Обновить три потолка до ADR-061 либо явно назвать страницы выборочными и сослаться на decisions/README.md как на полный индекс.",
+      "acceptance": "Ни один активный абзац не называет потолок ниже последнего Accepted ADR без пометки, что список выборочный.",
+      "validation": [
+        "pytest tests/architecture/test_adr_registry_governance_sync.py::test_rules_and_requirements_do_not_publish_stale_adr_ceiling"
+      ],
+      "effort": "S",
+      "automation": "Тест имени requirements не сканирует REQUIREMENTS.md и 00-overview.md.",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "rollback": "Вернуть прежние фразы потолка.",
+      "owner_surface": "docs"
     },
     {
       "id": "DOCS-004",
+      "finding_id": "DOCS-004",
+      "fingerprint": "9b780dbcc7c273215ed7c65385cac87112f5b3009f907e6f49fd99f1c4e8ca41",
       "requirement_id": "GAP",
-      "path": "docs/03-guides/running-pipelines.md:446",
-      "observation": "Инструкция export BIOETL_LOG_LEVEL=DEBUG не меняет уровень логов: код эту переменную не читает.",
-      "method": "Поиск BIOETL_LOG_LEVEL по репозиторию (только docs и k8s ConfigMap) против src/bioetl/composition/bootstrap_logger.py:63 и src/bioetl/application/services/execution/cli_run_orchestration_service.py:144.",
-      "expected": "Документированный способ включить DEBUG реально выставляет log_level.",
-      "actual": "bootstrap вызывает configure_logging(..., log_level=\"INFO\"). DEBUG включается флагом --debug (log_level=\"DEBUG\" if request.debug). BIOETL_LOG_LEVEL также указан в README.md:288, docs/04-reference/environment-variables.md:14 и docs/04-reference/cli.md:1575.",
-      "impact": "Оператор при разборе сбоя экспортирует BIOETL_LOG_LEVEL и остаётся на INFO, считая, что включил DEBUG.",
-      "status": "PROVEN",
+      "path": "README.md:288",
+      "observation": "README задаёт BIOETL_LOG_FORMAT как переключатель json/text, но исходники эту переменную не читают.",
+      "claim": "BIOETL_LOG_FORMAT из README не подключён к configure_logging.",
+      "method": "Чтение README.md:288. Поиск BIOETL_LOG_FORMAT по src/ — нет совпадений. Чтение bootstrap_logger.py:63 и logging_config.py:220-228.",
+      "expected": "Документированная переменная читается при старте логирования, либо строка удалена из таблицы README.",
+      "actual": "bootstrap_logger.py:63 всегда передаёт json_format=True. BIOETL_LOG_FILE читается; BIOETL_LOG_FORMAT — нет.",
+      "impact": "Значение text не переключает консольный рендерер. Оператор считает формат настраиваемым.",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "NOT_PROVEN",
+      "evidence_class": "GAP",
       "priority": "P2",
       "severity": "Medium",
-      "confidence": "high",
-      "remediation": "Оставить в running-pipelines только bioetl run --debug; удалить BIOETL_LOG_LEVEL из справочников, пока Settings или configure_logging его не читают.",
+      "category": "env-docs",
+      "root_cause": "README documents BIOETL_LOG_FORMAT but runtime never reads it",
+      "broken_invariant": "Нет REQ-* про соответствие каждой строки таблицы env в README полям Settings.",
+      "affected_paths": [
+        "README.md",
+        "src/bioetl/composition/bootstrap_logger.py"
+      ],
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 288,
+          "observation": "BIOETL_LOG_FORMAT documented as json or text"
+        },
+        {
+          "path": "src/bioetl/composition/bootstrap_logger.py",
+          "line": 63,
+          "observation": "configure_logging(json_format=True, log_level=INFO)"
+        }
+      ],
+      "remediation": "Убрать BIOETL_LOG_FORMAT из README или читать её в bootstrap и передавать в configure_logging. Не смешивать с правкой продукта в этом аудите.",
+      "acceptance": "Либо rg по src находит чтение BIOETL_LOG_FORMAT, либо строки нет в README.",
+      "validation": [
+        "rg -n BIOETL_LOG_FORMAT README.md src"
+      ],
       "effort": "S",
-      "automation": "Тот же drift-check BIOETL_* против src.",
-      "automated_fix_possible": false
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "rollback": "Вернуть строку таблицы или прежний вызов configure_logging.",
+      "owner_surface": "docs"
     },
     {
       "id": "DOCS-005",
+      "finding_id": "DOCS-005",
+      "fingerprint": "3173c6c3c7fd72421fbe57765eb790a2cdba99a20bb94126ee29f823eaeb8ce5",
       "requirement_id": "GAP",
-      "path": "README.md:299",
-      "observation": "Таблица README для circuit breaker, retry, Delta vacuum и quarantine retention называет переменные, которых нет в Settings и в src.",
-      "method": "Поиск BIOETL_CB_FAILURE_THRESHOLD, BIOETL_RETRY_MAX_ATTEMPTS, BIOETL_DELTA_VACUUM_RETENTION, BIOETL_QUARANTINE_RETENTION_DAYS в src (0 совпадений) против README.md:299-308 и Settings extra=ignore в _base.py:67.",
-      "expected": "Каждая операционная переменная из таблицы Installation либо поле Settings/os.getenv, либо не публикуется как действующая.",
-      "actual": "Эти имена встречаются в README и в неподдерживаемом k8s ConfigMap (k8s-deployment.yaml:162-175). Код их не читает, extra=ignore их отбрасывает.",
-      "impact": "Смена retention vacuum, порога circuit breaker или срока карантина через окружение не влияет на рантайм.",
-      "status": "PROVEN",
+      "path": "docs/04-reference/environment-variables.md:36",
+      "observation": "Документы говорят, что пустой BIOETL_PUBMED_EMAIL даёт None без фиктивного адреса. Код не читает эту переменную и при пустом pipeline email возвращает placeholder из Settings.default_email.",
+      "claim": "Контракт unset PubMed email в environment-variables.md не совпадает с _resolve_biblio_contact_email.",
+      "method": "Чтение environment-variables.md:36 и endpoint-validation-checklist.md:450. Поиск BIOETL_PUBMED_EMAIL в src/ — нет совпадений. Чтение _base.py:161-164 и _registration_biblio_profiles.py:48-55. Поиск email: в configs/**/*.yaml — нет совпадений. .env.example:74 публикует пустой BIOETL_PUBMED_EMAIL.",
+      "expected": "Незаданный контакт PubMed не подставляет фиктивный адрес, а документированная переменная реально читается.",
+      "actual": "default_email имеет placeholder-default. Резолвер возвращает pipeline email или settings.default_email. BIOETL_PUBMED_EMAIL в src не читается. В YAML нет source email.",
+      "impact": "Оператор задаёт BIOETL_PUBMED_EMAIL и считает идентификацию NCBI настроенной. Unset-путь использует placeholder из Settings, вопреки тексту справочника.",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "NOT_PROVEN",
+      "evidence_class": "GAP",
       "priority": "P2",
       "severity": "Medium",
-      "confidence": "high",
-      "remediation": "Удалить несвязанные строки из README и k8s ConfigMap; для живых ручек сослаться на YAML source circuit_breaker и quality/maintenance config.",
-      "effort": "S",
-      "automation": "Drift-check имён BIOETL_* из README против полей Settings.",
-      "automated_fix_possible": false
-    },
-    {
-      "id": "DOCS-006",
-      "requirement_id": "GAP",
-      "path": "README.md:294",
-      "observation": "README указывает дефолт BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED=false, код инициализирует dq_monitor_enabled=True.",
-      "method": "Сверка README.md:294 с src/bioetl/infrastructure/config/_observability_settings.py:46-47 и .env.example:69.",
-      "expected": "Опубликованный дефолт совпадает с Field(default=...) при отсутствии переменной.",
-      "actual": "Поле ObservabilitySettings.dq_monitor_enabled по умолчанию True. .env.example задаёт true. README пишет false.",
-      "impact": "Оператор ожидает выключенный DQ-monitor и не отключает его явно; монитор остаётся включённым.",
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "remediation": "Поставить в README дефолт true в соответствии с ObservabilitySettings.",
-      "effort": "S",
-      "automation": "Сверка колонки Default в README с Field(default) вложенных Settings.",
-      "automated_fix_possible": false
-    },
-    {
-      "id": "DOCS-007",
-      "requirement_id": "GAP",
-      "path": "docs/04-reference/cli.md:1578",
-      "observation": "Справочник CLI называет ручку трейсинга BIOETL_TRACING_ENABLED, рабочее имя — BIOETL_OBSERVABILITY__TRACING_ENABLED.",
-      "method": "Сверка docs/04-reference/cli.md:1578 с src/bioetl/infrastructure/observability/tracing.py:24, README.md:293 и docs/04-reference/environment-variables.md:51. Поиск BIOETL_TRACING_ENABLED в src: 0 совпадений.",
-      "expected": "Имя переменной в CLI reference совпадает с вложенным полем observability.tracing_enabled.",
-      "actual": "Короткое имя не является полем Settings и отбрасывается extra=ignore. Включение трейсинга описано как BIOETL_OBSERVABILITY__TRACING_ENABLED=true.",
-      "impact": "export BIOETL_TRACING_ENABLED=true из таблицы CLI не включает OpenTelemetry.",
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "remediation": "Заменить строку в docs/04-reference/cli.md:1578 на BIOETL_OBSERVABILITY__TRACING_ENABLED.",
-      "effort": "S",
-      "automation": "Тот же drift-check BIOETL_* .",
-      "automated_fix_possible": false
-    },
-    {
-      "id": "DOCS-008",
-      "requirement_id": "GAP",
-      "path": "docs/00-project/RULES.md:1146",
-      "observation": "RULES §4.2.1 фиксирует нижние границы pytest, pytest-asyncio и vcrpy ниже, чем extra tests в pyproject.toml.",
-      "method": "Сверка docs/00-project/RULES.md:1146-1149 с pyproject.toml:82, pyproject.toml:84 и pyproject.toml:101.",
-      "expected": "Нормативная таблица тестовых зависимостей повторяет нижние границы extra tests.",
-      "actual": "RULES: pytest>=8.0, pytest-asyncio>=0.23, vcrpy>=6.0. pyproject tests: pytest>=9.0.3, pytest-asyncio>=1.4, vcrpy>=8.2.1.",
-      "impact": "Ручная установка по RULES может поставить pytest 8 и vcrpy 6, которых текущий extra tests уже не принимает.",
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "remediation": "Обновить таблицу RULES §4.2.1 до границ pyproject.toml extra tests и не дублировать пины вручную.",
-      "effort": "S",
-      "automation": "Генерация таблицы зависимостей RULES из [project.optional-dependencies].tests.",
-      "automated_fix_possible": false
+      "category": "env-docs",
+      "root_cause": "Documented PubMed email unset path claims None while Settings falls back to a placeholder address",
+      "broken_invariant": "Нет REQ-* на отказ от placeholder email и на чтение BIOETL_PUBMED_EMAIL.",
+      "affected_paths": [
+        "docs/04-reference/environment-variables.md",
+        "src/bioetl/composition/providers/_registration_biblio_profiles.py",
+        "src/bioetl/infrastructure/config/_base.py"
+      ],
+      "evidence": [
+        {
+          "path": "docs/04-reference/environment-variables.md",
+          "line": 36,
+          "observation": "Unset BIOETL_PUBMED_EMAIL documented as None and no fake identity"
+        },
+        {
+          "path": "src/bioetl/infrastructure/config/_base.py",
+          "line": 161,
+          "observation": "default_email Field has a placeholder default"
+        },
+        {
+          "path": "src/bioetl/composition/providers/_registration_biblio_profiles.py",
+          "line": 55,
+          "observation": "returns configured_email or settings.default_email"
+        }
+      ],
+      "remediation": "Согласовать справочник, .env.example и резолвер: либо читать BIOETL_PUBMED_EMAIL и при пустом значении возвращать None, либо документировать фактический fallback. Значение placeholder в отчёт не дублировать сверх имени поля.",
+      "acceptance": "Текст environment-variables.md описывает ту же ветку, которую выполняет _resolve_biblio_contact_email при пустом source.email.",
+      "validation": [
+        "rg -n BIOETL_PUBMED_EMAIL src docs/04-reference/environment-variables.md .env.example"
+      ],
+      "effort": "M",
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "rollback": "Вернуть прежний текст справочника и прежний default поля.",
+      "owner_surface": "docs"
     }
   ]
 }
