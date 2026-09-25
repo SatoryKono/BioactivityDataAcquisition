@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.run_reports.observations import record_run_observation
-
 from collections.abc import Awaitable
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, cast
@@ -16,6 +14,7 @@ from bioetl.application.core.batch_shared_operation_errors import (
     OPERATION_ERRORS as _OPERATION_ERRORS,
 )
 from bioetl.application.core.batch_transformer import TransformResult
+from bioetl.application.services.run_reports.observations import record_run_observation
 from bioetl.domain.types import BatchID, RunID
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 

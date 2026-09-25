@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+from bioetl.domain.exceptions.validation import ValidationError
 from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
     chembl_reference_identifier_rules,
+)
+from bioetl.domain.normalization.profiles._profile_governed_value_normalizers import (
+    coerce_profile_quasi_enum_numeric,
 )
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
@@ -87,11 +91,17 @@ _REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("molecule")
 
 
 def normalize_molecule_max_phase(value: object) -> object:
-    """Normalize max_phase against the reviewed quasi-enum numeric universe."""
-    return normalize_profile_quasi_enum_numeric(
-        value,
-        allowed_values=MAX_PHASE_VALUES,
-    )
+    """Reject max_phase values outside the reviewed quasi-enum universe."""
+    numeric = coerce_profile_quasi_enum_numeric(value)
+    if numeric is None:
+        return None
+    if numeric not in MAX_PHASE_VALUES:
+        raise ValidationError(
+            f"max_phase must be one of {MAX_PHASE_VALUES}, got {value}",
+            field="max_phase",
+            reason_code="INVALID_DATA:max_phase",
+        )
+    return int(numeric) if numeric.is_integer() else numeric
 
 
 def normalize_molecule_availability_type(value: object) -> object:
@@ -123,8 +133,8 @@ _SPECIAL_RULES = {
     "max_phase": (
         normalize_molecule_max_phase,
         "Normalize max_phase as a reviewed quasi-enum numeric provider code; "
-        "preserve canonical values including 0.5 and collapse out-of-universe "
-        "inputs to None.",
+        "preserve canonical values including 0.5 and reject out-of-universe "
+        "inputs as INVALID_DATA:max_phase.",
     ),
     "availability_type": (
         normalize_molecule_availability_type,

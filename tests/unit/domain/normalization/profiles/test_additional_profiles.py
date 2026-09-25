@@ -35,6 +35,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from bioetl.domain.exceptions.validation import ValidationError
+
 from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ASSAY_PARAMETERS_PROFILE,
@@ -627,7 +629,9 @@ def test_chembl_molecule_max_phase_preserves_quasi_enum_numeric_codes() -> None:
     assert max_phase_rule is not None
     assert max_phase_rule.apply(" 0.5 ") == pytest.approx(0.5)
     assert max_phase_rule.apply("4.0") == 4
-    assert max_phase_rule.apply("5") is None
+    with pytest.raises(ValidationError, match="max_phase") as caught:
+        max_phase_rule.apply("5")
+    assert caught.value.reason_code == "INVALID_DATA:max_phase"
     assert "quasi-enum" in (max_phase_rule.notes or "")
 
 

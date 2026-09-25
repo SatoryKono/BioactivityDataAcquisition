@@ -153,6 +153,19 @@ def test_late_assessment_time_is_separate_from_completion(tmp_path):
     assert result["completed_at"] == "2026-01-01T00:01:00+00:00"
 
 
+def test_missing_validation_is_explained_without_changing_saved_trust(tmp_path):
+    original = report()
+    observations = dict(original.observations)
+    observations.pop("Data Validation")
+    persisted = persist(tmp_path, replace(original, observations=observations))
+    before = persisted.json_path.read_bytes()
+    result = read(tmp_path)
+    assert result["verdict"] == "INCOMPLETE"
+    assert result["trust"][0]["trust_status"] == "OK"
+    assert "Data Validation" in result["summary"][0]["reason"]
+    assert persisted.json_path.read_bytes() == before
+
+
 @pytest.mark.parametrize("age", [300, 899, 900, 901, 86400, 604800])
 @pytest.mark.parametrize(
     "chart_range",

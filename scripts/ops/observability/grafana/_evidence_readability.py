@@ -622,7 +622,9 @@ def _bind_selected_run_envelope(summary: dict, source: dict) -> None:
     summary["targets"][0]["root_selector"] = (
         '[$merge([presentation_summary[0], {"saved_trust": presentation_trust[0].trust_status, "reason_display": '
         "presentation_trust[0].reasons_display ? "
-        "presentation_trust[0].reasons_display : presentation_summary[0].reason}])]"
+        "presentation_trust[0].reasons_display : ($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; "
+        "$count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & "
+        "($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : presentation_summary[0].reason)}])]"
     )
     target = summary["targets"][0]
     target["parser"] = "uql"
@@ -635,11 +637,14 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
     # Share one envelope; never substitute the first domain verdict for trust.
     source_target = source["targets"][0]
     projection = (
-        "($s := presentation_summary[0]; $r := presentation_trust[0].reasons_display; "
+        "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; "
+        "$issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; "
         "$map(presentation_domains, function($d) { $merge([$d, {"
         "'run_execution': $s.execution_state, 'run_verdict': $s.verdict, "
-        "'saved_trust': presentation_trust[0].trust_status, "
-        "'run_reason': $r ? $r : $s.reason}]) }))"
+        "'saved_trust': $t, "
+        "'run_reason': $r ? $r : ("
+        "$count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & "
+        "($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))"
     )
     source_target["parser"] = "uql"
     source_target["root_selector"] = projection
