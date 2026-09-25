@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from typing import Protocol
-from bioetl.application.observability.control_plane_evidence.timing import evidence_stage
 
 from bioetl.application.observability.control_plane_evidence.checks import (
     EvidenceCheckResult,
@@ -12,6 +11,9 @@ from bioetl.application.observability.control_plane_evidence.checks import (
 )
 from bioetl.application.observability.control_plane_evidence.retention_checks import (
     retention_evidence_checks,
+)
+from bioetl.application.observability.control_plane_evidence.timing import (
+    evidence_stage,
 )
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePlan,

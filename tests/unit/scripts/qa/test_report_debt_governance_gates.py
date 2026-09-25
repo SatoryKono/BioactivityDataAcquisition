@@ -915,3 +915,53 @@ def test_observability_touched_metric_review_gate_fails_for_degraded_review() ->
 
     assert gate.status == "fail"
     assert gate.current == 1
+
+
+def test_new_max_count_freezes_recorded_current_without_raising_it() -> None:
+    baseline = {"metrics": {"public_export_facade_count": {"current_count": 3}}}
+    frozen = {
+        "metrics": {
+            "public_export_facade_count": {"current_count": 3, "max_count": 3}
+        }
+    }
+    raised = {
+        "metrics": {
+            "public_export_facade_count": {"current_count": 4, "max_count": 4}
+        }
+    }
+    path = "metrics.public_export_facade_count.max_count"
+    assert gate_evaluators._new_max_count_freezes_recorded_current(
+        path,
+        baseline_payload=baseline,
+        current_payload=frozen,
+        current_value=3,
+    )
+    assert not gate_evaluators._new_max_count_freezes_recorded_current(
+        path,
+        baseline_payload=baseline,
+        current_payload=raised,
+        current_value=4,
+    )
+
+
+def test_stored_public_surface_max_count_is_independent_of_live_census() -> None:
+    scorecard = {
+        "sanctioned_public_entrypoint_governance": {
+            "metrics": {
+                "public_export_facade_count": {"current_count": 9, "max_count": 3},
+                "public_entrypoint_count": {"current_count": 20, "max_count": 12},
+            }
+        }
+    }
+    assert (
+        gate_evaluators._stored_shrink_only_max_count(
+            scorecard, "public_export_facade_count"
+        )
+        == 3
+    )
+    assert (
+        gate_evaluators._stored_shrink_only_max_count(
+            scorecard, "public_entrypoint_count"
+        )
+        == 12
+    )

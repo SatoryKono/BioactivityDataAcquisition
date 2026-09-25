@@ -382,6 +382,17 @@ the active requests finish. `deadline_exceeded` means the operation exceeded its
 existing twelve-second execution budget. Record both the HTTP status and the
 payload contract when diagnosing either result.
 
+For control-plane and Selected Run timeout responses, record `request_id` and
+match it to `forensic_deadline_exceeded` or `forensic_capacity_exhausted` in the
+service log. `queue_seconds` measures admission; `operation_seconds` measures
+execution. `forensic_stage` identifies manifest resolution, ledger reads,
+lineage reads, retention planning and archive verification. Stages lasting at
+least one second are logged at WARNING; shorter stages at INFO. A later
+`forensic_deferred_completion` with the same ID means the underlying work has
+finally released its slot, not that the earlier failed response became valid.
+An archive verification timeout does not prove archive corruption. Preserve the
+original error and the subsequent verification result as separate observations.
+
 Grafana can request `error_as_row=1`, which returns HTTP 200 with a
 `forensic_endpoint_error_v1` error envelope and an ERROR table row. HTTP 200 and a
 nonempty rows array do not establish successful evidence retrieval. The live

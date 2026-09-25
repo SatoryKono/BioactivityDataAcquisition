@@ -6,35 +6,35 @@ max_composition_declarations_outside_contracts: 0
 protocols:
 - name: ObservabilityApiModule
   path: src/bioetl/composition/contracts/factories.py
-  line: 28
+  line: 38
   target_tier: composition_contracts
 - name: ServiceBundleDeps
   path: src/bioetl/composition/contracts/factories.py
-  line: 43
+  line: 55
   target_tier: composition_contracts
 - name: BuildPipelineServicesFn
   path: src/bioetl/composition/contracts/factories.py
-  line: 58
+  line: 76
   target_tier: composition_contracts
 - name: FactoryLike
   path: src/bioetl/composition/contracts/factories.py
-  line: 78
+  line: 96
   target_tier: composition_contracts
 - name: LoggerBindableObservability
   path: src/bioetl/composition/contracts/factories.py
-  line: 103
+  line: 135
   target_tier: composition_contracts
 - name: QuarantineServiceFactoryProtocol
   path: src/bioetl/composition/contracts/factories.py
-  line: 117
+  line: 139
   target_tier: composition_contracts
 - name: PipelineRunnerServiceFactoryProtocol
   path: src/bioetl/composition/contracts/factories.py
-  line: 127
+  line: 149
   target_tier: composition_contracts
 - name: HealthServerDependenciesFactoryProtocol
   path: src/bioetl/composition/contracts/factories.py
-  line: 136
+  line: 158
   target_tier: composition_contracts
 - name: HealthServerDependenciesProtocol
   path: src/bioetl/composition/contracts/health.py
@@ -110,183 +110,183 @@ protocols:
   target_tier: composition_contracts
 - name: ControlPlaneArtifactLifecycleStoreProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 15
+  line: 48
   target_tier: application
 - name: ForensicRunDiffServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 63
+  line: 68
   target_tier: application
 - name: HistoricalReplayClosureServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 73
+  line: 80
   target_tier: application
 - name: HistoricalReplayCorpusServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 88
+  line: 97
   target_tier: application
 - name: HistoricalReplayUniverseServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 102
+  line: 115
   target_tier: application
 - name: LineageInspectionServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 112
+  line: 127
   target_tier: application
 - name: RunManifestInspectionServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 127
+  line: 148
   target_tier: application
 - name: WorkflowInspectionServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 145
+  line: 172
   target_tier: application
 - name: DQDetectorConfig
   path: src/bioetl/application/ports/dq.py
-  line: 13
+  line: 14
   target_tier: application
 - name: ConfigurableDQMonitor
   path: src/bioetl/application/ports/dq.py
-  line: 27
+  line: 31
   target_tier: application
 - name: DQReportServiceFactoryProtocol
   path: src/bioetl/application/ports/dq.py
-  line: 33
+  line: 38
   target_tier: application
 - name: HealthServiceProtocol
   path: src/bioetl/application/ports/health.py
-  line: 11
+  line: 12
   target_tier: application
 - name: WorkflowMetricsFactoryProtocol
   path: src/bioetl/application/ports/metrics.py
-  line: 15
+  line: 16
   target_tier: application
 - name: MetricsFactoryProtocol
   path: src/bioetl/application/ports/metrics.py
-  line: 21
+  line: 23
   target_tier: application
 - name: MetricsService
   path: src/bioetl/application/ports/metrics.py
-  line: 26
+  line: 73
   target_tier: application
 - name: ObservabilitySettingsProtocol
   path: src/bioetl/application/ports/observability.py
-  line: 8
+  line: 9
   target_tier: application
 - name: CheckpointServiceProtocol
   path: src/bioetl/application/ports/operations.py
-  line: 41
+  line: 44
   target_tier: application
 - name: AuditInspectionServiceProtocol
   path: src/bioetl/application/ports/operations.py
-  line: 65
+  line: 80
   target_tier: application
 - name: VacuumServiceProtocol
   path: src/bioetl/application/ports/operations.py
-  line: 97
+  line: 120
   target_tier: application
 - name: ContractMigrationServiceProtocol
   path: src/bioetl/application/ports/operations.py
-  line: 118
+  line: 147
   target_tier: application
 - name: ObservabilityWorkflowServiceProtocol
   path: src/bioetl/application/ports/operations.py
-  line: 124
+  line: 155
   target_tier: application
 - name: ConfigServiceProtocol
   path: src/bioetl/application/ports/operations.py
-  line: 158
+  line: 197
   target_tier: application
 - name: ExportServiceProtocol
   path: src/bioetl/application/ports/operations.py
-  line: 188
+  line: 245
   target_tier: application
 - name: LockServiceProtocol
   path: src/bioetl/application/ports/operations.py
-  line: 208
+  line: 271
   target_tier: application
 - name: ContractPolicyLoaderProtocol
   path: src/bioetl/application/ports/pipeline.py
-  line: 28
+  line: 44
   target_tier: application
 - name: SchemaBuilderProtocol
   path: src/bioetl/application/ports/pipeline.py
-  line: 34
+  line: 51
   target_tier: application
 - name: RegistryEntryProtocol
   path: src/bioetl/application/ports/pipeline.py
-  line: 41
+  line: 61
   target_tier: application
 - name: BaseServicesFactoryProtocol
   path: src/bioetl/application/ports/pipeline.py
-  line: 52
+  line: 73
   target_tier: application
 - name: PipelineRunnerProtocol
   path: src/bioetl/application/ports/pipeline.py
-  line: 73
+  line: 97
   target_tier: application
 - name: PipelineRegistryProtocol
   path: src/bioetl/application/ports/pipeline_registry.py
-  line: 11
+  line: 12
   target_tier: application
 - name: SecretValueProviderProtocol
   path: src/bioetl/application/ports/providers.py
-  line: 19
+  line: 28
   target_tier: application
 - name: ProviderSettingsProtocol
   path: src/bioetl/application/ports/providers.py
-  line: 27
+  line: 37
   target_tier: application
 - name: AdapterCreatorProtocol
   path: src/bioetl/application/ports/providers.py
-  line: 52
+  line: 82
   target_tier: application
 - name: DataSourceCreatorProtocol
   path: src/bioetl/application/ports/providers.py
-  line: 64
+  line: 95
   target_tier: application
 - name: ProviderHttpClientFactoryProtocol
   path: src/bioetl/application/ports/providers.py
-  line: 78
+  line: 110
   target_tier: application
 - name: ProviderAdapterFactoryProtocol
   path: src/bioetl/application/ports/providers.py
-  line: 91
+  line: 124
   target_tier: application
 - name: SupportAwareDataSourceCreatorProtocol
   path: src/bioetl/application/ports/providers.py
-  line: 104
+  line: 138
   target_tier: application
 - name: ProviderRegistrarProtocol
   path: src/bioetl/application/ports/providers.py
-  line: 120
+  line: 155
   target_tier: application
 - name: ProviderDataSourceAccessProtocol
   path: src/bioetl/application/ports/providers.py
-  line: 132
+  line: 176
   target_tier: application
 - name: CompositeRuntimeStorageProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 28
+  line: 29
   target_tier: application
 - name: CompositeMergeStorageProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 32
+  line: 34
   target_tier: application
 - name: SilverMergedWriteProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 36
+  line: 39
   target_tier: application
 - name: GoldMergedWriteProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 52
+  line: 59
   target_tier: application
 - name: StorageContextProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 69
+  line: 79
   target_tier: application
 - name: StorageFactoryProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 76
+  line: 89
   target_tier: application
 - name: EntityTypeExtractor
   path: src/bioetl/domain/ports/entity_type.py

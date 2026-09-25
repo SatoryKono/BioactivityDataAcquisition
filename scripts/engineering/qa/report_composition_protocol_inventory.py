@@ -100,6 +100,22 @@ def evaluate(config: dict[str, Any], live: list[dict[str, Any]]) -> list[str]:
         errors.append(
             f"yaml protocols={len(configured)} expected_total={expected_total}"
         )
+    if isinstance(configured, list):
+        live_lines = {
+            (str(row["name"]), str(row["path"])): int(row["line"]) for row in live
+        }
+        for row in configured:
+            if not isinstance(row, dict):
+                continue
+            key = (str(row.get("name")), str(row.get("path")))
+            expected_line = live_lines.get(key)
+            if expected_line is None:
+                errors.append(f"yaml protocol {key[0]} at {key[1]} is not in the live set")
+                continue
+            if int(row.get("line", -1)) != expected_line:
+                errors.append(
+                    f"{key[0]} yaml line {row.get('line')} != class line {expected_line}"
+                )
     return errors
 
 

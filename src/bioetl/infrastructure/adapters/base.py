@@ -44,7 +44,9 @@ from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
-from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProviderMixin
+from bioetl.infrastructure.adapters.health_check_provider_mixin import (
+    HealthCheckProviderMixin,
+)
 
 if TYPE_CHECKING:
     from types import TracebackType

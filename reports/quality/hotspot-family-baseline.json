@@ -1539,10 +1539,10 @@
         "src/bioetl/composition/bootstrap/runtime/"
       ],
       "duplication_clusters": 0,
-      "files": 45,
-      "total_loc": 6049,
+      "files": 50,
+      "total_loc": 6160,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.326,
+      "helper_function_ratio": 0.323,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
       "bounded_growth_budgets": {
@@ -1552,7 +1552,7 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 3,
-          "1": 29,
+          "1": 34,
           "2": 13
         },
         "modules": [
@@ -1576,6 +1576,13 @@
             ]
           },
           {
+            "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_payloads_build_composite_launch_context_snapshot",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._composite_control_plane_payloads"
+            ]
+          },
+          {
             "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_support",
             "fan_in": 2,
             "runtime_importers": [
@@ -1584,10 +1591,24 @@
             ]
           },
           {
+            "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_support_resolve_composite_replay_capability",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._composite_control_plane_support"
+            ]
+          },
+          {
             "module": "bioetl.composition.bootstrap.runtime._composite_plan_runtime_support",
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.composition.bootstrap.runtime._composite_plan_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime._composite_plan_runtime_support_coerce_named_runtime_bundle",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._composite_plan_runtime_support"
             ]
           },
           {
@@ -1633,6 +1654,13 @@
             "runtime_importers": [
               "bioetl.composition.bootstrap.runtime.pipeline",
               "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.assembly_assemble_runtime_config",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.assembly"
             ]
           },
           {
@@ -1799,6 +1827,13 @@
             "runtime_importers": [
               "bioetl.composition.bootstrap.runtime.observability",
               "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.observability_validate_observability_preflight",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.observability"
             ]
           },
           {
@@ -2184,10 +2219,10 @@
         "src/bioetl/application/services/control_plane/"
       ],
       "duplication_clusters": 0,
-      "files": 113,
-      "total_loc": 14514,
+      "files": 124,
+      "total_loc": 14660,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.375,
+      "helper_function_ratio": 0.374,
       "max_internal_fan_in": 1,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
@@ -2197,7 +2232,7 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 20,
-          "1": 93
+          "1": 104
         },
         "modules": [
           {
@@ -2450,6 +2485,13 @@
             ]
           },
           {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.main_helpers_build_unified_reproducibility_diagnostics_policy_payload",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.main_helpers"
+            ]
+          },
+          {
             "module": "bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode",
             "fan_in": 1,
             "runtime_importers": [
@@ -2469,10 +2511,24 @@
             ]
           },
           {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.persistence_alerts_build_alert_signals",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.persistence_alerts"
+            ]
+          },
+          {
             "module": "bioetl.application.services.control_plane.manifest.diagnostics.persistence_profile_support",
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.application.services.control_plane.manifest.diagnostics.persistence_profiles"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.persistence_profile_support_build_composite_resume_reconstructability",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.persistence_profile_support"
             ]
           },
           {
@@ -2519,6 +2575,13 @@
             ]
           },
           {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context_build_replay_family_contract_payload",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context"
+            ]
+          },
+          {
             "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage",
             "fan_in": 1,
             "runtime_importers": [
@@ -2547,6 +2610,13 @@
             ]
           },
           {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_build_operator_replay_projection",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection"
+            ]
+          },
+          {
             "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload",
             "fan_in": 1,
             "runtime_importers": [
@@ -2565,6 +2635,13 @@
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support_refresh_replay_summary_build_policy_assessment",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support"
             ]
           },
           {
@@ -2593,6 +2670,13 @@
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.resume_contract_resolve_resume_guarantee",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.resume_contract"
             ]
           },
           {
@@ -2640,6 +2724,13 @@
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.application.services.control_plane.manifest.diagnostics.summary"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.summary_support_build_exact_replay_anchors",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.summary_support"
             ]
           },
           {
@@ -2777,6 +2868,13 @@
             ]
           },
           {
+            "module": "bioetl.application.services.control_plane.replay._bundle_descriptor_payloads_build_code_provenance_dict",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay._bundle_descriptor_payloads"
+            ]
+          },
+          {
             "module": "bioetl.application.services.control_plane.replay._historical_certification_support",
             "fan_in": 1,
             "runtime_importers": [
@@ -2883,6 +2981,13 @@
             ]
           },
           {
+            "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation_evaluate_threshold_failures",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation"
+            ]
+          },
+          {
             "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores",
             "fan_in": 1,
             "runtime_importers": [
@@ -2891,6 +2996,13 @@
           },
           {
             "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_score_lineage_completeness",
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores"
@@ -2986,30 +3098,38 @@
           "bioetl.application.services.control_plane.manifest.diagnostics.finalization",
           "bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing",
           "bioetl.application.services.control_plane.manifest.diagnostics.main_helpers",
+          "bioetl.application.services.control_plane.manifest.diagnostics.main_helpers_build_unified_reproducibility_diagnostics_policy_payload",
           "bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode",
           "bioetl.application.services.control_plane.manifest.diagnostics.persistence_alerts",
+          "bioetl.application.services.control_plane.manifest.diagnostics.persistence_alerts_build_alert_signals",
           "bioetl.application.services.control_plane.manifest.diagnostics.persistence_profile_support",
+          "bioetl.application.services.control_plane.manifest.diagnostics.persistence_profile_support_build_composite_resume_reconstructability",
           "bioetl.application.services.control_plane.manifest.diagnostics.persistence_profiles",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context_build_replay_family_contract_payload",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.required_persistence_profile",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.snapshot_envelope",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_build_operator_replay_projection",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support_refresh_replay_summary_build_policy_assessment",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_types",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_state",
           "bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment",
           "bioetl.application.services.control_plane.manifest.diagnostics.resume_contract",
+          "bioetl.application.services.control_plane.manifest.diagnostics.resume_contract_resolve_resume_guarantee",
           "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ledger",
           "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary",
           "bioetl.application.services.control_plane.manifest.diagnostics.source_posture",
           "bioetl.application.services.control_plane.manifest.diagnostics.source_refs",
           "bioetl.application.services.control_plane.manifest.diagnostics.summary",
           "bioetl.application.services.control_plane.manifest.diagnostics.summary_support",
+          "bioetl.application.services.control_plane.manifest.diagnostics.summary_support_build_exact_replay_anchors",
           "bioetl.application.services.control_plane.manifest.execution_identity_support",
           "bioetl.application.services.control_plane.manifest.identity_graph_assembly",
           "bioetl.application.services.control_plane.manifest.inspection_artifact_refs",
@@ -3027,6 +3147,7 @@
           "bioetl.application.services.control_plane.manifest.validation",
           "bioetl.application.services.control_plane.manifest.validation_provenance",
           "bioetl.application.services.control_plane.replay._bundle_descriptor_payloads",
+          "bioetl.application.services.control_plane.replay._bundle_descriptor_payloads_build_code_provenance_dict",
           "bioetl.application.services.control_plane.replay._historical_certification_support",
           "bioetl.application.services.control_plane.replay._historical_certification_upstream",
           "bioetl.application.services.control_plane.replay._historical_claim_reason",
@@ -3040,8 +3161,10 @@
           "bioetl.application.services.control_plane.replay.historical_identity_models",
           "bioetl.application.services.control_plane.replay.historical_universe_policy",
           "bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation",
+          "bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation_evaluate_threshold_failures",
           "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores",
           "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core",
+          "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_score_lineage_completeness",
           "bioetl.application.services.control_plane.run_manifest_exact_replay_blockers",
           "bioetl.application.services.control_plane.run_manifest_reproducibility_claims",
           "bioetl.application.services.control_plane.run_manifest_reproducibility_score_cards",

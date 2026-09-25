@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from typing import cast
-from bioetl.application.observability.control_plane_evidence.timing import evidence_stage
 
 from bioetl.application.observability.control_plane_evidence.checkpoint_validation import (
     build_checkpoint_checks,
@@ -39,6 +38,9 @@ from bioetl.application.observability.control_plane_evidence.service_support imp
     ledger_entries,
     sanitized_manifest_payload_scope,
     service_payload,
+)
+from bioetl.application.observability.control_plane_evidence.timing import (
+    evidence_stage,
 )
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePlan,

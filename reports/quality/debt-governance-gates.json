@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "a48e30fb04969685bf2d2ab91f811193c1aff4805cd401b561970e8e2937b5fa",
-      "limit": "a48e30fb04969685bf2d2ab91f811193c1aff4805cd401b561970e8e2937b5fa",
+      "current": "7b7003e008bae5714376ba4ff31b63855f6be745b947fe4b1d4d4e54be4c3321",
+      "limit": "7b7003e008bae5714376ba4ff31b63855f6be745b947fe4b1d4d4e54be4c3321",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,14 +56,14 @@
     },
     {
       "current": {
-        "source_module_count": 2479,
-        "source_tree_sha256": "a48e30fb04969685bf2d2ab91f811193c1aff4805cd401b561970e8e2937b5fa",
+        "source_module_count": 2496,
+        "source_tree_sha256": "7b7003e008bae5714376ba4ff31b63855f6be745b947fe4b1d4d4e54be4c3321",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2479,
-        "source_tree_sha256": "a48e30fb04969685bf2d2ab91f811193c1aff4805cd401b561970e8e2937b5fa",
+        "source_module_count": 2496,
+        "source_tree_sha256": "7b7003e008bae5714376ba4ff31b63855f6be745b947fe4b1d4d4e54be4c3321",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -114,8 +114,17 @@
       "limit": 3,
       "metric": "retained_public_export_facade_count",
       "name": "retained_public_export_facade_growth",
-      "remediation": "Remove facade exports or update the scorecard only after approved reduction evidence.",
-      "source_artifact": "reports/quality/compatibility-importer-census.json",
+      "remediation": "Remove facade exports before lowering max_count. The limit is the stored max_count, not the live census.",
+      "source_artifact": "configs/quality/debt_scorecard.yaml#sanctioned_public_entrypoint_governance.metrics.public_export_facade_count.max_count",
+      "status": "pass"
+    },
+    {
+      "current": 12,
+      "limit": 12,
+      "metric": "retained_entrypoint_count",
+      "name": "sanctioned_public_entrypoint_growth",
+      "remediation": "Remove sanctioned public entrypoints before lowering max_count. The limit is the stored max_count, not the live census.",
+      "source_artifact": "configs/quality/debt_scorecard.yaml#sanctioned_public_entrypoint_governance.metrics.public_entrypoint_count.max_count",
       "status": "pass"
     },
     {
@@ -370,7 +379,7 @@
       "status": "pass"
     },
     {
-      "current": 7,
+      "current": 8,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -406,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "50b155fc5f4a0de23c828ea329d14446cdd52c438c4d8950c4f574fb6f6242b7",
+      "current": "7d83e01abe096eba4466a818221bfc5e3b200f4ff9e149617cea51502279a0d7",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -459,16 +468,16 @@
   },
   "status_counts": {
     "fail": 0,
-    "pass": 45,
+    "pass": 46,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 10.0,
-    "architecture_quality_scorecard_interpretation": "excellent",
+    "architecture_quality_scorecard_integral_score": 9.47,
+    "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
     "fail_count": 0,
     "failing_gates": [],
-    "gate_count": 45,
-    "pass_count": 45,
+    "gate_count": 46,
+    "pass_count": 46,
     "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []

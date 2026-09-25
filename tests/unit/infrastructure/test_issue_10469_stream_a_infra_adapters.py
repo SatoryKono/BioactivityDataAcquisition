@@ -74,7 +74,9 @@ from bioetl.infrastructure.adapters.decorators._retry_support import (
 from bioetl.infrastructure.adapters.decorators.circuit_breaker import (
     CircuitBreakerDataSourceDecorator,
 )
-from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProviderMixin
+from bioetl.infrastructure.adapters.health_check_provider_mixin import (
+    HealthCheckProviderMixin,
+)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client_retry_observability import (
     finalize_request_observability,

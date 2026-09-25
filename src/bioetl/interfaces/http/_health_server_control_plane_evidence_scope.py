@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from typing import Protocol
-from bioetl.application.observability.control_plane_evidence.timing import evidence_stage
 
 from bioetl.application.observability.control_plane_evidence import (
     EvidenceCheckResult,
@@ -13,6 +12,9 @@ from bioetl.application.observability.control_plane_evidence import (
 from bioetl.application.observability.control_plane_evidence.service_support import (
     service_payload,
     source_error_payload,
+)
+from bioetl.application.observability.control_plane_evidence.timing import (
+    evidence_stage,
 )
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import RunManifestPort
