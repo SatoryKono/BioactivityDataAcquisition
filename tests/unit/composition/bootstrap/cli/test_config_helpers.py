@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.composition.bootstrap.cli.config_helpers import get_pipeline_yaml_for_dq
+from bioetl.composition.bootstrap.cli.config import get_pipeline_yaml_for_dq
 
 pytestmark = pytest.mark.unit
 

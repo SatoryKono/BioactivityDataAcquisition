@@ -109,7 +109,7 @@ async def test_record_processor_span_tracks_baseexception() -> None:
 
 
 def test_config_helpers_reject_non_mapping_model_dump() -> None:
-    from bioetl.composition.bootstrap.cli.config_helpers import get_pipeline_yaml_for_dq
+    from bioetl.composition.bootstrap.cli.config import get_pipeline_yaml_for_dq
 
     class _BadDump:
         def model_dump(self) -> list[str]:

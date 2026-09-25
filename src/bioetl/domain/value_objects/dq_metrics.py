@@ -141,6 +141,14 @@ class BatchDQMetrics:
             "column_stats",
             MappingProxyType(dict(self.column_stats)),
         )
+        counts = (
+            self.total_records,
+            self.valid_records,
+            self.error_records,
+            self.warning_records,
+        )
+        if any(count < 0 for count in counts):
+            raise ValueError("DQ record counts must be non-negative")
         if self.error_records > self.total_records:
             raise ValueError("error_records cannot exceed total_records")
 

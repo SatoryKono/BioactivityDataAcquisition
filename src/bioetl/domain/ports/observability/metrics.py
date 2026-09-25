@@ -105,7 +105,7 @@ class MetricsServerPort(Protocol):
     def start(
         self,
         port: int,
-        addr: str = "0.0.0.0",
+        addr: str = "127.0.0.1",
         *,
         started_at: datetime | None = None,
         fail_fast: bool = False,
@@ -116,7 +116,8 @@ class MetricsServerPort(Protocol):
 
         Args:
             port: TCP port to bind the server to.
-            addr: Bind address for the HTTP server. Defaults to ``0.0.0.0``.
+            addr: Bind address for the HTTP server. Defaults to ``127.0.0.1``.
+                Pass ``0.0.0.0`` explicitly when the server must listen on all interfaces.
             started_at: Explicit application-owned startup timestamp for runtime
                 status bookkeeping.
             fail_fast: If True, raise immediately on bind failure instead of retrying.

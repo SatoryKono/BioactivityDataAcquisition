@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from functools import partial
 from pathlib import Path
 from typing import cast
@@ -10,7 +11,6 @@ from bioetl.application.services.ops.config_service import ConfigService
 from bioetl.application.services.control_plane.effective_config.service import (
     create_effective_config_service,
 )
-from bioetl.composition.bootstrap.cli.config_helpers import get_pipeline_yaml_for_dq
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.bootstrap.cli.service_builders import build_cli_config_service
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
@@ -26,9 +26,28 @@ from bioetl.domain.ports import (
     PipelineConfigLoaderPort,
     SettingsLoaderPort,
 )
+from bioetl.composition.contracts.structural import ModelDumpProvider
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 
 from bioetl.application.services.quality.config_dq_service import DQConfigLoaderProtocol
+
+
+def get_pipeline_yaml_for_dq(
+    pipeline_name: str,
+    *,
+    pipeline_config_loader: Callable[[str], object],
+) -> JsonDict:
+    """Return pipeline config as mapping data for DQ config services."""
+    config = pipeline_config_loader(pipeline_name)
+    if isinstance(config, ModelDumpProvider):
+        payload = config.model_dump()
+        if not isinstance(payload, Mapping):
+            raise TypeError("Pipeline model_dump() must return a mapping")
+        return cast("JsonDict", dict(payload))
+    if isinstance(config, Mapping):
+        return dict(config)
+    raise TypeError("Pipeline YAML config must provide model_dump() or be a mapping")
 
 
 def create_registered_pipeline_registry(

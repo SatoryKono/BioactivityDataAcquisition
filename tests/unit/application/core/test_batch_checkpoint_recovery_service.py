@@ -378,3 +378,61 @@ async def test_shutdown_checkpoint_failure_is_recorded(
     assert logger.warning.call_args.kwargs["error_type"] == "OSError"
     metrics.increment_counter.assert_called_once()
     metrics.observe_histogram.assert_called_once()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_resume_checkpoints_use_fetched_count_plus_offset(
+    checkpoint_manager: AsyncMock,
+    logger: MagicMock,
+) -> None:
+    """Shutdown, exception, and periodic checkpoints share the fetched-count contract."""
+    recovery_service = BatchCheckpointRecoveryService(
+        checkpoint_manager=checkpoint_manager,
+        logger=logger,
+        pipeline_name="chembl_activity",
+    )
+
+    await recovery_service.save_checkpoint_on_shutdown(
+        records_fetched=4,
+        resume_offset=10,
+    )
+    await recovery_service.save_checkpoint_on_exception(
+        records_fetched=4,
+        resume_offset=10,
+        error=RuntimeError("extract failed"),
+    )
+    await recovery_service.save_periodic_checkpoint(
+        records_fetched=4,
+        resume_offset=10,
+        checkpoint_interval=2,
+    )
+
+    assert checkpoint_manager.save_checkpoint.await_count == 3
+    assert [
+        call.args[0] for call in checkpoint_manager.save_checkpoint.await_args_list
+    ] == [14, 14, 14]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_resume_checkpoint_uses_fetched_count_plus_offset(
+    service: BatchCheckpointRecoveryService,
+    checkpoint_manager: AsyncMock,
+) -> None:
+    """Resume stores fetched records plus the prior offset, not a Bronze count."""
+    await service.save_periodic_checkpoint(
+        records_fetched=4,
+        resume_offset=10,
+        checkpoint_interval=2,
+    )
+    await service.save_checkpoint_on_exception(
+        records_fetched=4,
+        resume_offset=10,
+        error=RuntimeError("boom"),
+    )
+    await service.save_checkpoint_on_shutdown(records_fetched=4, resume_offset=10)
+
+    assert checkpoint_manager.save_checkpoint.await_count == 3
+    for call in checkpoint_manager.save_checkpoint.await_args_list:
+        assert call.args == (14,)

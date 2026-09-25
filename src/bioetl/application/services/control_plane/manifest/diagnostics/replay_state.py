@@ -192,8 +192,9 @@ def _resolve_broader_historical_exact_replay_state(
             return "historical_source_replay_certified"
         return "historical_source_certification_incomplete"
     if _has_live_capture_materialized_snapshots(input_snapshots):
-        return "within_post_capture_parent_boundary"
-    if policy_assessment.snapshot_envelope.full_snapshot_envelope:
+        if policy_assessment.snapshot_envelope.full_snapshot_envelope:
+            return "within_post_capture_parent_boundary"
+    elif policy_assessment.snapshot_envelope.full_snapshot_envelope:
         return "within_launch_time_snapshot_boundary"
     if _is_composite_execution_context(manifest):
         return "awaiting_certified_source_lineage"

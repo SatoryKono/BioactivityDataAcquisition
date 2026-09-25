@@ -7,29 +7,47 @@ from __future__ import annotations
 from collections.abc import Callable
 from functools import wraps
 from importlib import import_module
-from typing import TYPE_CHECKING, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Protocol, Self, TypeVar, cast, overload
 
 if TYPE_CHECKING:
     from bioetl.composition.providers._models import ProviderConfig
 
-from bioetl.composition.contracts.providers import (
-    SupportsDefaultRegistry as _SupportsDefaultRegistry,
-)
-from bioetl.composition.contracts.providers import (
-    SupportsProviderRegistryStore as _SupportsProviderRegistryStore,
-)
+ProviderConfigRuntime = object
+
+
+class SupportsDefaultRegistry(Protocol):
+    @classmethod
+    def _get_default(cls) -> Self:
+        """Return the lazy default registry instance."""
+        ...
+
+
+class SupportsProviderStore(Protocol):
+    _providers: dict[str, ProviderConfigRuntime]
+
+
+class SupportsProviderRegistryStore(SupportsDefaultRegistry, Protocol):
+    _store: SupportsProviderStore
+
+    def register(self, name: str, config: ProviderConfigRuntime) -> None: ...
+
+    def is_registered(self, name: str) -> bool: ...
+
+    def list_providers(self) -> list[str]: ...
+
+    def clear(self) -> None: ...
 
 
 R = TypeVar("R")
 
 
-RegistryT = TypeVar("RegistryT", bound=_SupportsDefaultRegistry)
-ProviderRegistryT = TypeVar("ProviderRegistryT", bound=_SupportsProviderRegistryStore)
+RegistryT = TypeVar("RegistryT", bound=SupportsDefaultRegistry)
+ProviderRegistryT = TypeVar("ProviderRegistryT", bound=SupportsProviderRegistryStore)
 
 # Compatibility note: architecture guardrails expect the historical singleton
 # ownership seam to remain explicit in this private helper.
 # _default_provider_registry: ProviderRegistry | None = None
-_default_provider_registry: _SupportsProviderRegistryStore | None = None
+_default_provider_registry: SupportsProviderRegistryStore | None = None
 
 
 class DefaultRegistryMethod[R]:
@@ -75,7 +93,7 @@ class DefaultRegistryMethod[R]:
         return bound
 
 
-class ProvidersDescriptor[ProviderRegistryT: _SupportsProviderRegistryStore]:
+class ProvidersDescriptor[ProviderRegistryT: SupportsProviderRegistryStore]:
     """Expose the default singleton store on class access for compatibility."""
 
     def __get__(
@@ -87,12 +105,12 @@ class ProvidersDescriptor[ProviderRegistryT: _SupportsProviderRegistryStore]:
         return cast("dict[str, ProviderConfig]", target._store._providers)
 
 
-def get_default_provider_registry() -> _SupportsProviderRegistryStore:
+def get_default_provider_registry() -> SupportsProviderRegistryStore:
     """Return the lazily-created default provider registry singleton."""
     global _default_provider_registry
     if _default_provider_registry is None:
         module = import_module("bioetl.composition.providers.provider_registry")
-        registry = cast(_SupportsProviderRegistryStore, module.ProviderRegistry())
+        registry = cast(SupportsProviderRegistryStore, module.ProviderRegistry())
         _default_provider_registry = registry
         return registry
     return _default_provider_registry

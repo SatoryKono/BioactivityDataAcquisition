@@ -167,12 +167,14 @@ class TargetProteinClassificationSnapshotDataSource:
             target_component_ids=self._target_component_ids,
             target_ids_by_component=self._target_ids_by_component,
         )
-        if offset is not None and offset > 0:
-            target_ids = target_ids[offset:]
-
         emitted = 0
+        skipped = 0
+        row_offset = 0 if offset is None or offset < 0 else offset
         for target_id in target_ids:
             for row in self._relation_rows_for_target(target_id):
+                if skipped < row_offset:
+                    skipped += 1
+                    continue
                 yield row
                 emitted += 1
                 if limit is not None and emitted >= limit:

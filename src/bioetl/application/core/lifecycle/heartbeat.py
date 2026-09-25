@@ -104,9 +104,17 @@ class HeartbeatTask:
         """
         while not self._shutdown_signal.is_requested:
             await asyncio.sleep(self._interval)
-            success = await self._lock_port.heartbeat(
-                self._lock_key, self._owner_id, exclusive=self._exclusive
-            )
+            try:
+                success = await self._lock_port.heartbeat(
+                    self._lock_key, self._owner_id, exclusive=self._exclusive
+                )
+            except Exception as exc:
+                self._logger.error(
+                    "Heartbeat failed during execution: "
+                    f"{type(exc).__name__}"
+                )
+                self._shutdown_signal.request()
+                return
             if not success:
                 self._logger.error("Lost lock during execution!")
                 self._shutdown_signal.request()

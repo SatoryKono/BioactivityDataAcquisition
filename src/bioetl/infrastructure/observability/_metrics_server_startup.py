@@ -121,7 +121,7 @@ def start_metrics_server_runtime(
     sleep_fn: Callable[[float], object],
     publication_metric: _PublicationMetric,
     port: int = 8000,
-    addr: str = "0.0.0.0",
+    addr: str = "127.0.0.1",
     started_at: datetime | None = None,
     fail_fast: bool = False,
     retry_count: int = 3,

@@ -776,3 +776,20 @@ class TestHashDeterminism:
             source_fingerprint=f"source_{artifact_id}",
             created_at=fixed_timestamp,
         )
+
+    def test_section_hash_ignores_timestamp_and_nested_hash_fields(self) -> None:
+        """Section identity stays stable when only bookkeeping fields change."""
+        base = {
+            "pipeline": "chembl",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "nested": {"config_hash": "aaa", "effective_hash": "bbb", "limit": 10},
+        }
+        changed = {
+            "pipeline": "chembl",
+            "timestamp": "2026-09-25T00:00:00Z",
+            "nested": {"config_hash": "ccc", "effective_hash": "ddd", "limit": 10},
+        }
+
+        assert self.serializer._compute_section_hash(base) == (
+            self.serializer._compute_section_hash(changed)
+        )

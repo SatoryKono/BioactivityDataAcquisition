@@ -275,7 +275,11 @@ def _extract_uniprot_mapping_seed_ids(
     filter_config: InputFilterConfig | None,
 ) -> list[str] | None:
     """Extract optional seed IDs from input filter config."""
-    if filter_config and filter_config.direct_filter_ids:
+    if (
+        filter_config is not None
+        and filter_config.enabled
+        and filter_config.direct_filter_ids
+    ):
         return list(filter_config.direct_filter_ids)
     return None
 

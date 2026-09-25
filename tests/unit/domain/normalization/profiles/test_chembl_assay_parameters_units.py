@@ -71,3 +71,13 @@ def test_assay_parameters_profile_publishes_optional_uo_and_qudt_companion_field
         "qudt_unit_mapping_status",
         "qudt_ontology_version",
     }
+
+
+def test_molar_alias_collapses_m_and_uppercase_m() -> None:
+    """``m`` and ``M`` both mean molar; millimolar stays ``mm`` / ``mM``."""
+    from bioetl.domain.normalization._chembl_units import normalize_standard_unit
+
+    assert normalize_standard_unit("m") == "M"
+    assert normalize_standard_unit("M") == "M"
+    assert normalize_standard_unit("mm") == "mM"
+    assert normalize_standard_unit("mM") == "mM"

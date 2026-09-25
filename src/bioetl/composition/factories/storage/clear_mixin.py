@@ -99,7 +99,7 @@ class StorageBundleClearMixin:
 
         Args:
             table_name: If provided, only clear Delta table for this table.
-                       If None, clear all Delta tables.
+                       If None, clear nothing and return 0.
 
         Returns:
             Number of tables cleared.

@@ -283,10 +283,10 @@ def test_issue_5575_hotspot_coverage_tails_have_owner_tests() -> None:
         family = row["family"]
         assert family in family_coverage
         # Skip coverage percent check for local development with uncommitted changes
-        # assert (
-        #     family_coverage[family]["coverage_percent_min"]
-        #     == row["current_min_coverage_percent"]
-        # )
+        assert (
+            family_coverage[family]["coverage_percent_min"]
+            >= row["current_min_coverage_percent"]
+        )
         assert (ROOT / row["tail_path"]).is_file()
         for owner_test in row["owner_tests"]:
             assert _test_path_exists(owner_test), owner_test

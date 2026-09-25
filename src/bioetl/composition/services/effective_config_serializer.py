@@ -43,6 +43,24 @@ def _to_jsonable(value: object) -> object:
     return value
 
 
+_VOLATILE_SECTION_HASH_KEYS = frozenset(
+    {"timestamp", "config_hash", "effective_hash"}
+)
+
+
+def _without_volatile_hash_fields(value: object) -> object:
+    """Drop bookkeeping fields so section hashes stay stable."""
+    if isinstance(value, dict):
+        return {
+            str(key): _without_volatile_hash_fields(item)
+            for key, item in value.items()
+            if str(key) not in _VOLATILE_SECTION_HASH_KEYS
+        }
+    if isinstance(value, list):
+        return [_without_volatile_hash_fields(item) for item in value]
+    return value
+
+
 def _stable_hash(value: object) -> str:
     serialized = json.dumps(_to_jsonable(value), sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
@@ -78,7 +96,8 @@ class EffectiveConfigSerializer:
         )
 
     def _compute_section_hash(self, section: object) -> str:
-        return _stable_hash(self._normalize_section(section))
+        normalized = _without_volatile_hash_fields(self._normalize_section(section))
+        return _stable_hash(normalized)
 
     def _compute_source_fingerprint(self, source_refs: list[ConfigSourceRef]) -> str:
         if not source_refs:

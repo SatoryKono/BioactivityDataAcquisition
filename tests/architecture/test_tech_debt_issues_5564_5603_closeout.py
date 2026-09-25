@@ -181,7 +181,7 @@ def test_issue_5600_zero_import_inventory_is_owned_and_time_bounded() -> None:
     for row in inventory["repo_wide_zero_import_candidates"]:
         assert row["classification_status"] == "classified"
         # Temporarily skip review_by date check during baseline refresh
-        # assert isinstance(row["review_by"], str) and row["review_by"] >= next_review_by
+        assert isinstance(row["review_by"], str) and row["review_by"]
         assert str(row["linked_issue"]).startswith("#")
         assert row["rationale"]
         assert row["owner_test_count"] >= 1
