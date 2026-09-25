@@ -396,31 +396,9 @@ ______________________________________________________________________
 
 ## Backup & Recovery
 
-### Backup Persistent Data
+Backup and restore follow [data-recovery.md](../runbooks/data-recovery.md).
 
-```bash
-# Create a snapshot of data PVC (EBS example)
-aws ec2 create-snapshot \
-  --volume-id vol-xxxxx \
-  --description "BioETL data backup"
-
-# For file-based backup
-kubectl exec deployment/bioetl -- tar czf /tmp/backup.tar.gz /data
-kubectl cp default/$(kubectl get pod -l app=bioetl -o jsonpath='{.items[0].metadata.name}'):/tmp/backup.tar.gz ./backup.tar.gz
-```
-
-### Restore from Backup
-
-```bash
-# Delete old PVC
-kubectl delete pvc bioetl-data
-
-# Do not recreate workloads from k8s-deployment.yaml. The manifest is unsupported.
-
-# Restore data
-kubectl cp ./backup.tar.gz default/$(kubectl get pod -l app=bioetl -o jsonpath='{.items[0].metadata.name}'):/tmp/
-kubectl exec deployment/bioetl -- tar xzf /tmp/backup.tar.gz -C /
-```
+Do not delete PersistentVolumeClaims and do not open a shell in a bioetl Deployment. `k8s-deployment.yaml` is unsupported and must not be used to recreate the workload.
 
 ______________________________________________________________________
 
@@ -438,7 +416,7 @@ ______________________________________________________________________
 - [ ] Configure alerting rules in Prometheus
 - [ ] Test backup/recovery procedures
 - [ ] Document runbooks for common operations
-- [ ] Set up log aggregation (ELK, Loki, etc.)
+- [ ] Keep logs local-only; do not add Loki or ELK (ADR-010)
 - [ ] Configure RBAC policies for team access
 - [ ] Enable pod security policies
 - [ ] Set up CI/CD pipeline for automated deployments

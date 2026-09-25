@@ -141,12 +141,11 @@ ______________________________________________________________________
 
 ### Rate Limiting
 
-CrossRef API предоставляет "polite pool" с повышенными лимитами:
+BioETL держит один runtime-бюджет, равный `configs/providers/crossref.yaml`: `requests_per_second: 50`.
 
-| Режим             | Лимит      | Условие                   |
-| ----------------- | ---------- | ------------------------- |
-| Без идентификации | 50 req/sec | Базовый доступ            |
-| С `mailto`        | 50 req/sec | Указан email в User-Agent |
+| Источник | Бюджет | Где задан |
+| -------- | ------ | --------- |
+| BioETL runtime | 50 req/sec | `configs/providers/crossref.yaml` |
 
 ### Batch DOI Resolution
 
@@ -340,7 +339,7 @@ ______________________________________________________________________
 
 ### Rate limits & retries
 
-Crossref documents three pools for the REST API: public `5 requests/second` with `1 concurrent request`, polite `10 requests/second` with `3 concurrent requests`, and `Plus` `150 requests/second` with no concurrency limit. Clients SHOULD send a descriptive `User-Agent`, SHOULD include `mailto`, and SHOULD back off exponentially if response times rise or blocks occur.
+Crossref публикует три пула REST API. Это цитаты вендора, не runtime-бюджет BioETL: public `5 requests/second` (`1` concurrent request), polite `10 requests/second` (`3` concurrent requests), `Plus` `150 requests/second` (без лимита конкурентности). Действующий бюджет пайплайна — `requests_per_second: 50` в `configs/providers/crossref.yaml`. Клиент SHOULD слать описательный `User-Agent`, SHOULD включать `mailto` и SHOULD откатываться экспоненциально, если растёт время ответа или появляются блокировки.
 
 ### 429 handling policy
 
