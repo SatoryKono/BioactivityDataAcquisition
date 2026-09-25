@@ -63,12 +63,10 @@ def _local_tcp_socket_available() -> bool:
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
-    if _local_tcp_socket_available():
-        return
-
-    skip_local_socket = pytest.mark.skip(
-        reason="Local TCP sockets are unavailable in this test environment."
-    )
-    for item in items:
-        if Path(str(item.path)).name in _SOCKET_BACKED_TEST_MODULES:
-            item.add_marker(skip_local_socket)
+    if not _local_tcp_socket_available():
+        skip_local_socket = pytest.mark.skip(
+            reason="Local TCP sockets are unavailable in this test environment."
+        )
+        for item in items:
+            if Path(str(item.path)).name in _SOCKET_BACKED_TEST_MODULES:
+                item.add_marker(skip_local_socket)

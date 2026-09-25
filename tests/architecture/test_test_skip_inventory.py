@@ -182,6 +182,102 @@ def test_replay_critical_gates_cannot_be_suppressed(gate_path: Path) -> None:
     assert "replay_runtime_root" in source
 
 
+_GUARD_ANCESTORS = (ast.If, ast.IfExp, ast.ExceptHandler, ast.Assert)
+_UNCONDITIONAL_SKIP_NAMES = frozenset({"pytest.skip", "pytest.mark.skip"})
+
+
+def _parent_map(tree: ast.AST) -> dict[ast.AST, ast.AST]:
+    parents: dict[ast.AST, ast.AST] = {}
+    for parent in ast.walk(tree):
+        for child in ast.iter_child_nodes(parent):
+            parents[child] = parent
+    return parents
+
+
+def _has_guard_ancestor(node: ast.AST, parents: dict[ast.AST, ast.AST]) -> bool:
+    current = node
+    while current in parents:
+        current = parents[current]
+        if isinstance(current, _GUARD_ANCESTORS):
+            return True
+    return False
+
+
+def _unconditional_skip_lines(source: str) -> list[int]:
+    """Line numbers of pytest.skip / pytest.mark.skip that are not guarded."""
+    tree = ast.parse(source)
+    parents = _parent_map(tree)
+    lines: list[int] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if _qualified_name(node.func) not in _UNCONDITIONAL_SKIP_NAMES:
+            continue
+        if _has_guard_ancestor(node, parents):
+            continue
+        lines.append(node.lineno)
+    return lines
+
+
+def _unit_unconditional_skip_paths() -> set[str]:
+    found: set[str] = set()
+    for path in sorted((ROOT / "tests" / "unit").rglob("*.py")):
+        if _unconditional_skip_lines(path.read_text(encoding="utf-8")):
+            found.add(path.relative_to(ROOT).as_posix())
+    return found
+
+
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("pytest.skip('always')\n", [1]),
+        ("if False:\n    pytest.skip('guarded')\n", []),
+        ("@pytest.mark.skip(reason='retired')\ndef test_x():\n    pass\n", [1]),
+        ("@pytest.mark.skipif(True, reason='platform')\ndef test_x():\n    pass\n", []),
+        ("def test_x():\n    pytest.skip('always')\n", [2]),
+        ("def test_x():\n    if False:\n        pytest.skip('guarded')\n", []),
+        (
+            "def test_x():\n"
+            "    try:\n"
+            "        pass\n"
+            "    except OSError:\n"
+            "        pytest.skip('guarded')\n",
+            [],
+        ),
+        ("pytestmark = pytest.mark.skip(reason='module')\n", [1]),
+    ],
+)
+def test_unconditional_skip_classifier_ignores_skipif_and_guards(
+    source: str,
+    expected: list[int],
+) -> None:
+    assert _unconditional_skip_lines(source) == expected
+
+
+def test_unit_unconditional_skips_match_inventory() -> None:
+    """Unconditional unit skips fail closed unless listed (#11173)."""
+    payload = _load_inventory()
+    entries = payload["unit_unconditional_skips"]
+    assert isinstance(entries, list)
+    tracked = {str(entry["path"]) for entry in entries}
+    live = _unit_unconditional_skip_paths()
+    assert live == tracked, (
+        "Unconditional pytest.skip / pytest.mark.skip in tests/unit must be "
+        "listed in unit_unconditional_skips. skipif stays unlisted. "
+        f"missing={sorted(live - tracked)} extra={sorted(tracked - live)}"
+    )
+    allowed_categories = set(payload["allowed_categories"])
+    for entry in entries:
+        path = str(entry["path"])
+        assert path.startswith("tests/unit/"), path
+        assert entry["suite"] == "unit", path
+        assert entry["category"] in allowed_categories, path
+        assert str(entry["owner"]).startswith("@bioetl-"), path
+        assert str(entry["linked_issue"]).startswith("#"), path
+        assert entry["lifecycle"] in {"permanent_policy", "temporary_debt"}, path
+        assert str(entry["rationale"]).strip(), path
+
+
 def _unconditional_skip_marker_paths() -> list[str]:
     """Return unit/architecture files that use bare @pytest.mark.skip(."""
     offenders: list[str] = []

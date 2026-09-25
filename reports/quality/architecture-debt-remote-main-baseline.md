@@ -4,13 +4,7 @@
 
 - evidence_source: `remote_main_git_tree`
 - remote_main_ref: `refs/heads/main`
-<<<<<<< HEAD
 - baseline_artifact_fingerprint: `61876dbe1592add9497c6aca41aac8b5aea7e7f85e7e45ba70021c89d66de795`
-||||||| c9a64bb879a6
-- baseline_artifact_fingerprint: `91be52dfb8a6fa112767bfce2578d85a74fee698b190d587da87796fbed2442b`
-=======
-- baseline_artifact_fingerprint: `72d124a7a4b0a74e9e5645f2b65c530d66553114c091ce2a2d2727a05614f0bf`
->>>>>>> master20260925-6
 - local_tracking_ref_matches_remote: `True`
 
 | artifact | blob_sha256 | available | required_on_remote | introduced_after_remote_main |

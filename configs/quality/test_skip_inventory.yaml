@@ -7,11 +7,15 @@ source_of_truth:
   contract_root: tests/contract/
   integration_root: tests/integration/
   e2e_root: tests/e2e/
-  # Unit suppressions are not in this census.
+  # Conditional skips in tests/unit (skipif, or pytest.skip / pytest.mark.skip
+  # nested under If, IfExp, ExceptHandler, or Assert) are not in this census.
+  # Unconditional pytest.skip and pytest.mark.skip in tests/unit are listed in
+  # unit_unconditional_skips (#11173). An empty list means none.
   # Architecture Windows/WSL filesystem skips are inventoried in
   # architecture_platform_skips (#10418). They use runtime skip/skipif, not
-  # unconditional @pytest.mark.skip. Unconditional skip remains forbidden by
-  # tests/architecture/test_test_skip_inventory.py (#9130).
+  # unconditional @pytest.mark.skip. Unconditional @pytest.mark.skip remains
+  # forbidden by tests/architecture/test_test_skip_inventory.py (#9130).
+unit_unconditional_skips: []
 architecture_platform_skips:
   - path: tests/architecture/test_public_surface_importer_census_governance.py
     suite: architecture
