@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Nine-domain residual (#11074, #11075, #11077, #11079, #11081, #11084, #11086, #11087, #11089–#11094, #11097, #11098):** align RULES 6.1.13 and current-state evidence with live 9.47/2499/46 gates, pin cardinality freshness, match Devin MCP targets to `--daily`/`--all`, and teach diagram lint to see multiline ELK init and labelled dotted edges. Workbook sync no longer exits 0 when the gitignored xlsx is absent. Debt budgets were not raised.
+
 - **SonarCloud residual SNR-R4 (#10988–#10994):** clear remaining OPEN
   code smells without `sonar.*exclusions` or mass `NOSONAR` — typed
   `replace`/unused params, Grafana script S1192+S3776 splits with

@@ -40,6 +40,7 @@ import json
 import math
 import re
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -62,6 +63,10 @@ _EDGE_ROUTING_VALUE_RE = re.compile(
 _NON_FLOW_RE = re.compile(
     r"^(classDiagram|sequenceDiagram|stateDiagram|erDiagram|mindmap|gantt|pie)",
     re.IGNORECASE,
+)
+_INIT_DIRECTIVE_RE = re.compile(r"%%\{init\b", re.IGNORECASE)
+_ELK_LAYOUT_VALUE_RE = re.compile(
+    r"""(?i)(?P<key>['"])layout(?P=key)\s*:\s*(?P<val>['"])elk(?P=val)"""
 )
 _CLASS_DIAGRAM_RE = re.compile(r"^\s*classDiagram\b", re.IGNORECASE)
 _UNESCAPED_DUNDER_METHOD_RE = re.compile(r"^\s*[+\-#~][^\n]*?(?<!\\)__\w+__(?=\s*\()")
@@ -173,9 +178,57 @@ class LintResult:
         return any(i.severity == "ERROR" for i in self.issues)
 
 
+def _iter_init_blocks(lines: list[str]) -> list[str]:
+    """Return each ``%%{init: ...}%%`` directive, joining multiline blocks."""
+    blocks: list[str] = []
+    collecting: list[str] = []
+    in_block = False
+    for line in lines:
+        if not in_block:
+            if _INIT_DIRECTIVE_RE.search(line) is None:
+                continue
+            if "}%%" in line:
+                blocks.append(line)
+                continue
+            collecting = [line]
+            in_block = True
+            continue
+        collecting.append(line)
+        if "}%%" in line:
+            blocks.append("\n".join(collecting))
+            collecting = []
+            in_block = False
+    if collecting:
+        blocks.append("\n".join(collecting))
+    return blocks
+
+
+def _iter_lines_outside_init_blocks(lines: list[str]) -> Iterator[str]:
+    """Yield source lines that are not inside a ``%%{init: ...}%%`` block."""
+    in_block = False
+    for line in lines:
+        if in_block:
+            if "}%%" in line:
+                in_block = False
+            continue
+        if _INIT_DIRECTIVE_RE.search(line) is not None:
+            if "}%%" not in line:
+                in_block = True
+            continue
+        yield line
+
+
+def _diagram_has_elk_layout(lines: list[str]) -> bool:
+    """Return whether any init directive sets ``layout`` to ``elk``."""
+    return any(
+        _ELK_LAYOUT_VALUE_RE.search(block) is not None
+        for block in _iter_init_blocks(lines)
+    )
+
+
 def _is_flowchart(lines: list[str]) -> bool:
     """Detect whether diagram body is flowchart/graph (vs class/sequence/state)."""
-    for ln in lines:
+    for ln in _iter_lines_outside_init_blocks(lines):
         s = ln.strip()
         if not s:
             continue
@@ -587,12 +640,8 @@ def _has_decomposed_siblings(path: Path) -> bool:
 
 
 def _uses_flowchart_layout_policy(lines: list[str]) -> bool:
-    for line in lines:
-        stripped = line.strip()
-        if not stripped or stripped.startswith("%%"):
-            continue
-        return bool(_GRAPH_LINE_RE.match(stripped))
-    return False
+    """Return whether layout policy applies after multiline init blocks are skipped."""
+    return _is_flowchart(lines)
 
 
 def _extract_layout_nodes(lines: list[str]) -> int | None:
@@ -631,7 +680,7 @@ def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
     if nodes is None:
         return issues
 
-    has_elk = any(_has_elk_layout_init(ln) for ln in lines)
+    has_elk = _diagram_has_elk_layout(lines)
     edge_routing = _extract_edge_routing(lines)
     allow_polyline = any(
         "@allow-polyline-routing" in ln or "@allow-polyline" in ln for ln in lines
@@ -1030,11 +1079,6 @@ def check_class_method_render_safety(path: Path, lines: list[str]) -> list[Issue
     return issues
 
 
-def _has_elk_layout_init(line: str) -> bool:
-    lowered = line.lower()
-    return "%%{init" in lowered and "layout" in lowered and "elk" in lowered
-
-
 def _parse_link_style_line(line: str) -> tuple[str, str] | None:
     stripped = line.strip()
     if not stripped.startswith("linkStyle "):
@@ -1056,7 +1100,9 @@ def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:
     """
     import sys as _sys
 
-    _sys.path.insert(0, str(Path(__file__).parent))
+    repo_root = str(Path(__file__).resolve().parents[3])
+    if repo_root not in _sys.path:
+        _sys.path.insert(0, repo_root)
     try:
         from scripts.diagrams.fix.prune_orphan_nodes import (
             detect_diagram_type,
@@ -1064,8 +1110,18 @@ def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:
             parse_keep_orphans,
             parse_sequence_orphans,
         )
-    except ImportError:
-        return []
+    except ImportError as exc:
+        return [
+            Issue(
+                file=str(path),
+                severity="ERROR",
+                rule="GRAPH-002",
+                message=(
+                    "Orphan parser could not be imported from "
+                    f"scripts.diagrams.fix.prune_orphan_nodes: {exc}"
+                ),
+            )
+        ]
 
     issues: list[Issue] = []
     fname = str(path)

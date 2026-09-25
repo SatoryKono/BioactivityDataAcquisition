@@ -24,6 +24,7 @@ import os
 import re
 import sys
 import tempfile
+from collections.abc import Iterator
 from pathlib import Path
 
 if isinstance(sys.stdout, io.TextIOWrapper):
@@ -73,6 +74,10 @@ _DIAGRAM_TYPE_RE = re.compile(
     r"^(classDiagram|sequenceDiagram|stateDiagram|erDiagram|mindmap|gantt|pie|xychart)",
     re.IGNORECASE,
 )
+_INIT_DIRECTIVE_RE = re.compile(r"%%\{init\b", re.IGNORECASE)
+_ELK_LAYOUT_VALUE_RE = re.compile(
+    r"""(?i)(?P<key>['"])layout(?P=key)\s*:\s*(?P<val>['"])elk(?P=val)"""
+)
 
 
 # ── Core logic ────────────────────────────────────────────────────────────────
@@ -86,8 +91,48 @@ def parse_nodes(lines: list[str]) -> int | None:
     return None
 
 
+def _iter_init_blocks(lines: list[str]) -> list[str]:
+    """Return each ``%%{init: ...}%%`` directive, joining multiline blocks."""
+    blocks: list[str] = []
+    collecting: list[str] = []
+    in_block = False
+    for line in lines:
+        if not in_block:
+            if _INIT_DIRECTIVE_RE.search(line) is None:
+                continue
+            if "}%%" in line:
+                blocks.append(line)
+                continue
+            collecting = [line]
+            in_block = True
+            continue
+        collecting.append(line)
+        if "}%%" in line:
+            blocks.append("\n".join(collecting))
+            collecting = []
+            in_block = False
+    if collecting:
+        blocks.append("\n".join(collecting))
+    return blocks
+
+
+def _iter_lines_outside_init_blocks(lines: list[str]) -> Iterator[str]:
+    """Yield source lines that are not inside a ``%%{init: ...}%%`` block."""
+    in_block = False
+    for line in lines:
+        if in_block:
+            if "}%%" in line:
+                in_block = False
+            continue
+        if _INIT_DIRECTIVE_RE.search(line) is not None:
+            if "}%%" not in line:
+                in_block = True
+            continue
+        yield line
+
+
 def is_flowchart(lines: list[str]) -> bool:
-    for ln in lines:
+    for ln in _iter_lines_outside_init_blocks(lines):
         s = ln.strip()
         if not s or s.startswith("%%"):
             continue
@@ -99,12 +144,11 @@ def is_flowchart(lines: list[str]) -> bool:
 
 
 def has_elk_init(lines: list[str]) -> bool:
-    return any(_line_has_elk_init(line) for line in lines)
-
-
-def _line_has_elk_init(line: str) -> bool:
-    lowered = line.lower()
-    return "%%{init:" in lowered and "layout" in lowered and "elk" in lowered
+    """Return whether an init directive already sets ``layout`` to ``elk``."""
+    return any(
+        _ELK_LAYOUT_VALUE_RE.search(block) is not None
+        for block in _iter_init_blocks(lines)
+    )
 
 
 def find_graph_line_index(lines: list[str]) -> int | None:

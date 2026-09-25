@@ -94,12 +94,14 @@ def _write_repo_text(relative_path: Path, content: str) -> None:
 _NID = r"[A-Za-z_]\w*"
 
 # Edge arrow / connector variants (Mermaid flowchart).
-# Covers: --> -.-> -..- -.- --- --o --x <--> <-- ==> ~~~ and labelled forms.
+# Covers: --> -.-> -..- -.- --- --o --x <--> <-- ==> ~~~ and labelled forms,
+# including the spaced dotted label form `-. text .->`.
 # IMPORTANT: longer / more-specific patterns MUST come before shorter ones
 # so that -.-  never matches the first 3 chars of  -.->  (which would leave
 # a stray  >  before the target node ID and break ID extraction).
 _ARROW_RE = re.compile(
-    r"-\.\.->"  # -..->   double-dotted forward arrow
+    r"-\.[ \t]+(?:(?!\.->).)+?\.->"  # -. text .->  labelled dotted arrow
+    r"|-\.\.->"  # -..->   double-dotted forward arrow
     r"|-\.->"  # -.->    dotted forward arrow   ← must precede  -.-
     r"|-\.\.-"  # -..-    double-dotted undirected
     r"|-\.-"  # -.-     dotted undirected

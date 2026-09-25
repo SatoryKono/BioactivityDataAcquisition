@@ -137,9 +137,10 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
         gates["summary"]["architecture_quality_scorecard_integral_score"]
         == scorecard["integral_score"]
     )
-    assert gates["summary"]["release_gate_status"] in ("passing", "failing")
-    assert gates["summary"]["gate_count"] == 45
-    assert gates["summary"]["fail_count"] >= 0
+    assert gates["summary"]["release_gate_status"] == "passing"
+    assert gates["summary"]["fail_count"] == 0
+    assert gates["summary"]["gate_count"] == gates["summary"]["pass_count"]
+    assert gates["summary"]["warn_count"] == 0
 
     retained_by_path = {
         row["path"]: row

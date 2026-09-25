@@ -375,7 +375,7 @@ pytest tests/architecture/ -v
 pytest --cov=src/bioetl --cov-fail-under=85
 
 # Security scan
-make security
+make security-check
 ```
 
 ## Env File Guardrail
