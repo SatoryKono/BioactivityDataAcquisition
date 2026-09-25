@@ -15,6 +15,12 @@ from bioetl.composition.factories.services._bundle_support import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("entity", ["activity", "assay_parameters", "target_protein_classification"])
+def test_bundle_preserves_bronze_entity_identity(entity: str) -> None:
+    """Metadata must use the same full entity as Bronze storage references."""
+    assert bundle._extract_entity_type(f"chembl_{entity}") == entity
+
+
 def test_base_services_proxy_resolves_factory_for_each_operation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
