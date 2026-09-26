@@ -1,36 +1,52 @@
 # docs-pipeline
 
-- prompt: `prompt.audit.docs-pipeline`
-- HEAD: `32d77a51e556de60d6dc0daf871a442becc709c5`
-- surface_score: **2**
-- proven: 2; P0/P1: 0; blocked: нет
+- **prompt:** `prompt.audit.docs-pipeline`
+- **HEAD:** `e1c184857e460461bbb3e20829e60ab8bb262e2f` (origin/main)
+- **surface_score:** **1**
+- **proven:** 9; **P0/P1:** 0; **blocked:** нет
 
-Основная цепочка на этом checkout живая: `check-links` exit 0 (2026-09-25T08:43:16Z–08:43:21Z), полный `check-drift` exit 0 (0 errors / 0 warnings), `generate-cleanup-inventory --check` синхронен, `mkdocs build --strict --clean` exit 0 за 96.97s (site во временном каталоге, не в дереве). CI: `docs.yml` → `python -m scripts.docs verify`; pin `uv.lock` mkdocs 1.6.1, `--frozen`. GitHub Pages не публикуется (`site_url` нет). Score 2: сборка и link/drift/inventory воспроизводимы, а workbook/dictionary — скрытый local-only контур со skip exit 0.
+## Резюме
 
-## Checks
+Каноническая команда `python -m scripts.docs verify` на чистом checkout **не проходит** на этом HEAD: ломаются `check-links` (workflow inventory triggers), `check-drift` (freshness RULES), `generate-cleanup-inventory --check` и `generate-pipeline-normalization-matrix --check`. При этом `mkdocs build --strict --clean` в temp site dir завершается **exit 0** (~56s). Toolchain закреплён через `uv.lock` (mkdocs `>=1.6,<2.0`). Публикация GitHub Pages отключена (`mkdocs.yml`: `site_url` omitted).
+
+Score **1**: pipeline частично воспроизводим, но blocking verify chain красная; не score 0, потому что strict-сборка и link-check (кроме inventory claims) не «сломан build tool».
+
+## Проверки (worktree nine-domain-audit, 2026-09-26)
 
 | Команда | Результат |
 | --- | --- |
-| `python -m scripts.docs check-links --report-json reports/audit/docs-pipeline/link-report.json` | exit 0, violations 0 |
-| `python -m scripts.docs check-drift --json` | exit 0, `drift-report.json` status PASS |
-| `python -m scripts.docs generate-cleanup-inventory --check` | exit 0, inventory synchronized |
-| `python -m mkdocs build --strict --clean --site-dir $TEMP` | exit 0, Documentation built in 96.97 seconds |
+| `python -m scripts.docs verify --skip-build` | **exit 1** (останов на check-links) |
+| `python -m scripts.docs check-links --workflow-inventory` | **exit 1**, 4 trigger mismatches |
+| `python -m scripts.docs check-drift --ports --classes --runtime-mirrors --freshness --modules` | **exit 1**, 1 freshness ERROR |
+| `python -m scripts.docs generate-cleanup-inventory --check` | **exit 1**, drift + coderabbit paths |
+| `python -m scripts.docs generate-pipeline-normalization-matrix --check` | **exit 1**, без stdout |
+| `python -m scripts.docs check-docstrings --summary` | exit 0 |
+| `python -m mkdocs build --strict --clean --site-dir $TEMP` | exit 0 |
 
-`--update` не использовался. Секретов в логе сборки нет.
+Секретов в выводе команд не обнаружено. Режим audit: без publish/push.
 
-## Findings
+## Findings (кратко)
 
-- **DOCS-PIPE-001** P2 PROVEN `REQ-DOC-001` `.github/workflows/tests.yml:647-654` — xlsx `docs/reports/chembl_pipeline_silver_matrices_v12.xlsx` gitignored и отсутствует; CI sync `--check` делает skip и exit 0.
-- **DOCS-PIPE-002** P2 PROVEN `REQ-DOC-001` `scripts/docs/matrix/build_matrix_dicts.py:285-290` — dictionaries заявлены tracked, но gitignored, без `--check` в verify, со штампом `datetime.now` и абсолютным `source_workbook`.
-- **DOCS-PIPE-003** P3 NOT_PROVEN `GAP` `scripts/docs/checks/verify.py:74-88` — verify без `--ai-surfaces`; чекер всё же вызывается pytest-ом в docs-governance.
-- **DOCS-PIPE-004** P3 NOT_PROVEN `GAP` `scripts/docs/checks/documentation_cleanup_inventory.py:1573-1582` — голый вызов идёт в update. Этот прогон передал `--check`.
+| ID | P | Status | Суть |
+| --- | --- | --- | --- |
+| DOCS-PIPE-001 | P2 | PROVEN | Workflow inventory triggers ≠ YAML после #11234 |
+| DOCS-PIPE-002 | P2 | PROVEN | documentation-cleanup-inventory drift (coderabbit reports) |
+| DOCS-PIPE-003 | P2 | PROVEN | Freshness: ai/rules/README vs RULES 6.1.13 |
+| DOCS-PIPE-004 | P2 | PROVEN | Tracked normalization matrix --check fail |
+| DOCS-PIPE-005 | P3 | PROVEN | Silent --check в normalization matrix |
+| DOCS-PIPE-006 | P2 | PROVEN | proof-or-stop: `verify --skip-build` |
+| DOCS-PIPE-007 | P3 | PROVEN | verify без passports |
+| DOCS-PIPE-008 | P3 | PROVEN | verify drift без --ai-surfaces |
+| DOCS-PIPE-009 | P3 | PROVEN | render-diagrams job `if: false` |
 
-## Не дефекты этого HEAD
+## Не входит в scope / снято с прошлого прогона
 
-`build-site` по умолчанию добавляет `--strict` (`mkdocs_build.py:29-38`). Локальные `.png`/`.svg` в `check-links` проверяются (`check_links.py:693-696`). `mkdocs.yml` plugins: только `search`. API-страницы curated (`test_api_reference_public_facades.py`). `render-diagrams` остаётся `if: false`; description indexes в `validate-mkdocs` идут с `--check` и нормализацией штампа.
+- **Workbook xlsx skip exit 0 в tests.yml:** на e1c184857e46 CI опирается на `export-matrix-structural-contract --check` (tests.yml:658-659); sync workbook не вызывается.
+- **matrix-dictionaries tracked vs gitignore:** routing `ignored_local_output` согласован (generated_artifact_routing.yaml:180-186); `build_matrix_dicts` пишет через temp+`os.replace`, `source_workbook` = имя файла.
 
-## Remediations
+## Top remediations
 
-- Убрать skip-exit-0 для workbook либо перестать называть отсутствующий xlsx каноническим SoT.
-- Согласовать `matrix-dictionaries-curated-docs` с `.gitignore`, убрать wall-clock и absolute path, добавить `--check`.
-- Не публиковать сайт из audit mode.
+1. Обновить `docs/04-reference/github-actions-workflows.md` (Triggers) под фактические `on:`.
+2. `generate-cleanup-inventory --update` или убрать ephemeral tracked coderabbit paths.
+3. Sync версии RULES в `docs/00-project/ai/rules/README.md`.
+4. Перегенерировать pipeline normalization matrix + улучшить сообщения `--check`.

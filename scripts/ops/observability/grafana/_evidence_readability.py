@@ -640,7 +640,7 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
         "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; "
         "$issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; "
         "$map(presentation_domains, function($d) { $merge([$d, {"
-        "'status_display': $d.domain = 'Workflow' and $d.verdict = 'N/A' ? '  ' : $d.verdict, "
+        "'status_display': $d.domain = 'Workflow' and $d.verdict = 'N/A' ? '—' : $d.verdict, "
         "'run_execution': $s.execution_state, 'run_verdict': $s.verdict, "
         "'saved_trust': $t, "
         "'run_reason': $r ? $r : ("
