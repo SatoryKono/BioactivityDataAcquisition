@@ -124,10 +124,10 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 3, 24, 2),
     9422: (0, 5, 24, 3),
-    9418: (0, 8, 12, 7),
-    9416: (12, 8, 12, 7),
+    9418: (0, 8, 12, 9),
+    9416: (12, 8, 12, 9),
 }
-_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 15
+_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
 # Runtime already owns current readiness as 9401 Monitor Pipeline Status.
 _TRUST_DROP_PANEL_IDS = frozenset({9401, 9404, 9452})
 _TRUST_MOVE_PANEL_IDS = frozenset(
@@ -1031,6 +1031,17 @@ def _shift_panel_tree(panel: dict[str, object], *, delta: int) -> None:
             grid["y"] = int(grid["y"]) + delta
 
 
+def _pack_control_plane_rows(root: list[dict[str, object]]) -> None:
+    rows = [panel for panel in root if panel.get("type") == "row"]
+    rows.sort(key=lambda panel: int((panel.get("gridPos") or {}).get("y") or 0))
+    y = _CONTROL_PLANE_FIRST_DETAIL_ROW_Y
+    for row in rows:
+        grid = row.setdefault("gridPos", {})
+        if isinstance(grid, dict):
+            grid["y"] = y
+        y += 1
+
+
 def _shift_control_plane_detail_rows(
     root: list[dict[str, object]], *, first_row_y: int
 ) -> None:
@@ -1666,6 +1677,7 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
     )
     by_id = {panel.get("id"): panel for panel in root}
     _stamp_control_plane_counts(by_id)
+    _pack_control_plane_rows(root)
     _stamp_recovery_copy(by_id)
     _stamp_current_readiness(by_id)
     _stamp_retention_copy(by_id)
@@ -2152,10 +2164,35 @@ def _retain_runtime_selected_run(payload: dict[str, object]) -> None:
             footer["enablePagination"] = True
 
 
+_FLEET_ID_COLLISIONS = frozenset({9401, 9450, 9451, 9452, 1000, 9400, 9402, 9403})
+
+
+def _strip_fleet_id_collisions(panels: list[object]) -> None:
+    row = next(
+        (
+            panel
+            for panel in panels
+            if isinstance(panel, dict) and panel.get("id") == _RUNTIME_FLEET_ROW_ID
+        ),
+        None,
+    )
+    if not isinstance(row, dict):
+        return
+    children = row.get("panels")
+    if not isinstance(children, list):
+        return
+    row["panels"] = [
+        child
+        for child in children
+        if not isinstance(child, dict) or child.get("id") not in _FLEET_ID_COLLISIONS
+    ]
+
+
 def _attach_runtime_fleet_row(payload: dict[str, object]) -> None:
     panels = payload.get("panels")
     if not isinstance(panels, list):
         return
+    _strip_fleet_id_collisions(panels)
     if not _MOVED_RUNTIME_FLEET:
         existing = next(
             (

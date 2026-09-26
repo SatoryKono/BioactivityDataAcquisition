@@ -83,8 +83,8 @@ _TABLE_TARGETS = {
 
 _SCOPE_COPY = {
     "bioetl-runtime": (
-        "CURRENT · Pipeline / Run Type. INCOMPLETE means missing pipeline evidence. "
-        "Monitor Coverage shows separate monitoring quality (10m); SCRAPING does not prove completeness."
+        "SELECTED RUN. Saved pipeline evidence for this Run ID. "
+        "Fleet and time-range charts are on Incident Workspace."
     ),
     "bioetl-incident-v1": (
         "GLOBAL · Signals are not verified causes. Telemetry gaps remain UNKNOWN. "

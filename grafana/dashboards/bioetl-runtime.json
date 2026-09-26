@@ -429,7 +429,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Pipeline Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">CURRENT · Pipeline / Run Type. INCOMPLETE means missing pipeline evidence. Monitor Coverage shows separate monitoring quality (10m); SCRAPING does not prove completeness.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">SELECTED RUN. Saved pipeline evidence for this Run ID. Fleet and time-range charts are on Incident Workspace.</div>"
       },
       "links": []
     },
