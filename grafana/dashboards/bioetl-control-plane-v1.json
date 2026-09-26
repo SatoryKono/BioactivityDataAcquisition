@@ -1840,7 +1840,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Validates checkpoint parse, schema, checksum, and required identity anchors for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2170,7 +2170,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Validates manifest parsing, structure, schema-version support, and contract compatibility for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3044,7 +3044,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Lists missing run, manifest, configuration, contract, snapshot, replay, composite, and checkpoint anchors. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Inspect value opens full identifiers as selectable plain text.",
+          "description": "SELECTED RUN · Anchors missing for this Run ID. A missing anchor is not a pass.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4225,7 +4225,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Compares this run's runtime anchors with anchors stored in the checkpoint. MISMATCH=CRIT; MISSING or PARTIAL=WARN; no data=UNKNOWN. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4838,7 +4838,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Shows additional investigation details such as runtime hashes, artifacts, component runs, checkpoint files, DQ reports, and Bronze batch IDs. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · Extra forensic anchors for this Run ID: hashes, artifacts, component runs, checkpoint files, and DQ reports.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -6241,7 +6241,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Summarizes selected-run failures into the fixed categories api, dq, schema, storage, network, validation, and unknown. Every category row carries bounded status and reason evidence; an UNKNOWN backend verdict must remain visible in the rows and must not look like a healthy zero. Raw exception messages and identifiers are excluded. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · Failure counts for this Run ID in the fixed categories api, dq, schema, storage, network, validation, and unknown. UNKNOWN is not zero failures.",
           "fieldConfig": {
             "defaults": {
               "custom": {
