@@ -1189,7 +1189,7 @@
         "h": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "This is the detail behind Review Provider Check. The provider name is not parsed from the pipeline name. An empty table means provider_checks was not saved. Observed at is the stored observation time. Rows come from provider_checks on the saved report. Columns are Provider, Check result, Evidence, and Observed at. SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
+      "description": "Do not read this table as current fleet status. A missing provider name is not an OK result. The chart time range does not change these saved rows. This is the detail behind Review Provider Check. The provider name is not parsed from the pipeline name. An empty table means provider_checks was not saved. Observed at is the stored observation time. Rows come from provider_checks on the saved report. Columns are Provider, Check result, Evidence, and Observed at. SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
       "options": {
         "showHeader": true,
         "cellHeight": "sm",
