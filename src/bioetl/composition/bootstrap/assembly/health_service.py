@@ -9,10 +9,9 @@ from bioetl.application.services.ops.health_service import HealthResult, HealthS
 from bioetl.composition.runtime_builders import control_plane_root
 from bioetl.infrastructure.control_plane.file_provider_health_evidence import (
     FileProviderHealthEvidenceStore,
-    ProviderHealthEvidenceRecord,
 )
 from bioetl.infrastructure.control_plane.provider_health_evidence import (
-    rehydrate_provider_health_evidence,
+    persist_probe_health_observation,
 )
 from bioetl.composition.bootstrap.assembly.health_server import (
     HealthServerDependencies,
@@ -59,24 +58,20 @@ class _HealthCheckDataSourceFactory:
     settings: Settings
 
     def record_health_result(self, result: HealthResult) -> None:
-        """Persist the measured probe once; rehydration never increments counters."""
-        statuses = {"unhealthy": 0, "degraded": 1, "healthy": 2}
-        status = statuses.get(result.status)
-        if status is None or result.checked_at is None:
-            return
+        """Wire probe persistence; mapping and rehydration live in infrastructure."""
         store = FileProviderHealthEvidenceStore(
             base_path=control_plane_root(self.settings, "provider_health")
         )
-        store.persist(
-            ProviderHealthEvidenceRecord(
-                provider=result.provider,
-                status=status,
-                observed_at=result.checked_at.isoformat(),
-                endpoint=(result.endpoint or "")[:128],
-                reason="probe_error" if result.error else None,
-            )
+        persist_probe_health_observation(
+            store=store,
+            metrics=self.metrics,
+            provider=result.provider,
+            status_name=result.status,
+            checked_at=result.checked_at,
+            endpoint=result.endpoint,
+            error=result.error,
+            now=SystemClock().now(),
         )
-        rehydrate_provider_health_evidence(self.metrics, store, now=SystemClock().now())
 
     @staticmethod
     def list_providers() -> list[str]:

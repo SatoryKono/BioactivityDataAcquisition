@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 from bioetl.application.ports.pipeline import PipelineRunnerProtocol
+from bioetl.application.services.control_plane.ledger.artifact_recording import (
+    canonical_lineage_fragment_id as _canonical_lineage_fragment_id,  # noqa: F401
+    record_input_snapshots_from_artifact as _record_input_snapshots_from_artifact,  # noqa: F401
+    record_published_artifact as _record_artifact,
+)
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -36,93 +41,6 @@ def _empty_attachment_result() -> ArtifactRecorderAttachmentResult:
         missing_attach_method_count=0,
         failed_count=0,
     )
-
-
-def _canonical_lineage_fragment_id(raw: object) -> str | None:
-    """Reject layer aliases such as ``bronze`` as fragment identifiers."""
-    if raw is None:
-        return None
-    value = str(raw).strip()
-    if not value or value.lower() in {"bronze", "silver", "gold"}:
-        return None
-    return value
-
-
-def _record_artifact(
-    service: RunLedgerService,
-    *,
-    layer: str,
-    artifact_path: str,
-    details: dict[str, object] | None,
-) -> object:
-    """Record one published artifact in the control-plane ledger."""
-    dataset_ref = None
-    lineage_fragment_id = None
-    if details is not None:
-        raw_dataset_ref = details.get("dataset_ref")
-        raw_lineage_fragment_id = details.get("lineage_fragment_id")
-        dataset_ref = None if raw_dataset_ref is None else str(raw_dataset_ref)
-        lineage_fragment_id = _canonical_lineage_fragment_id(raw_lineage_fragment_id)
-        artifact_content_hash = str(
-            details.get("artifact_content_hash") or details.get("content_hash") or ""
-        )
-    else:
-        artifact_content_hash = ""
-    entry = service.record_artifact_published(
-        layer=layer,
-        artifact_path=artifact_path,
-        artifact_content_hash=artifact_content_hash,
-        dataset_ref=dataset_ref,
-        lineage_fragment_id=lineage_fragment_id,
-        details=details,
-    )
-    _record_input_snapshots_from_artifact(
-        service,
-        layer=layer,
-        artifact_path=artifact_path,
-        details=details,
-    )
-    return entry
-
-
-def _record_input_snapshots_from_artifact(
-    service: RunLedgerService,
-    *,
-    layer: str,
-    artifact_path: str,
-    details: dict[str, object] | None,
-) -> None:
-    """Record immutable input snapshots published with Bronze metadata."""
-    if layer != "bronze" or not details:
-        return
-    raw_snapshots = details.get("input_snapshots")
-    if not isinstance(raw_snapshots, list):
-        return
-    for snapshot in raw_snapshots:
-        if not isinstance(snapshot, dict):
-            continue
-        immutable_uri = snapshot.get("immutable_uri")
-        if immutable_uri is None:
-            continue
-        service.record_input_snapshot_published(
-            provider=str(details.get("provider") or ""),
-            entity=str(details.get("entity") or ""),
-            pipeline_name=str(details.get("pipeline_name") or ""),
-            snapshot_id=str(snapshot.get("snapshot_id") or ""),
-            content_hash=str(snapshot.get("content_hash") or ""),
-            immutable_uri=str(immutable_uri),
-            bronze_batch_ref=artifact_path,
-            query_fingerprint=(
-                None
-                if snapshot.get("query_fingerprint") is None
-                else str(snapshot.get("query_fingerprint"))
-            ),
-            details={
-                key: value
-                for key, value in snapshot.items()
-                if key not in {"snapshot_id", "content_hash", "immutable_uri"}
-            },
-        )
 
 
 def _attach_artifact_recorder(

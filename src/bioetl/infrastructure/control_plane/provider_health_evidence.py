@@ -21,8 +21,11 @@ if TYPE_CHECKING:
 
 __all__ = [
     "PersistingProviderHealthMonitor",
+    "persist_probe_health_observation",
     "rehydrate_provider_health_evidence",
 ]
+
+_PROBE_STATUS_VALUES = {"unhealthy": 0, "degraded": 1, "healthy": 2}
 
 
 @dataclass(slots=True)
@@ -97,6 +100,33 @@ def rehydrate_provider_health_evidence(
             )
         published += 1
     return published
+
+
+def persist_probe_health_observation(
+    *,
+    store: FileProviderHealthEvidenceStore,
+    metrics: MetricsPort,
+    provider: str,
+    status_name: str,
+    checked_at: datetime | None,
+    endpoint: str | None,
+    error: str | None,
+    now: datetime,
+) -> None:
+    """Persist one probe result and rehydrate gauges without new counters."""
+    status = _PROBE_STATUS_VALUES.get(status_name)
+    if status is None or checked_at is None:
+        return
+    store.persist(
+        ProviderHealthEvidenceRecord(
+            provider=provider,
+            status=status,
+            observed_at=checked_at.isoformat(),
+            endpoint=_bounded_endpoint(endpoint or ""),
+            reason="probe_error" if error else None,
+        )
+    )
+    rehydrate_provider_health_evidence(metrics, store, now=now)
 
 
 def _bounded_endpoint(raw: str) -> str:
