@@ -568,7 +568,7 @@
       "id": 9002,
       "type": "text",
       "title": "",
-      "description": "CURRENT · boundary between the selected provider and the fleet overview.",
+      "description": "This section break shows where the selected provider ends and the fleet list begins. CURRENT · boundary between the selected provider and the fleet overview.",
       "gridPos": {
         "h": 2,
         "w": 24,
@@ -613,7 +613,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · All providers. Not filtered by the selected Provider. Run ID is navigation context.",
+      "description": "This fleet status table shows the current status of every provider. CURRENT · All providers. Not filtered by the selected Provider. Run ID is navigation context.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -891,7 +891,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · All providers. Not filtered by the selected Provider. Run ID is navigation context.",
+      "description": "This fleet evidence table shows the current reason for each provider. CURRENT · All providers. Not filtered by the selected Provider. Run ID is navigation context.",
       "fieldConfig": {
         "defaults": {
           "color": {
