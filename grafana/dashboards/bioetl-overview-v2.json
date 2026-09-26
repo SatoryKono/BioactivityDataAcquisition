@@ -1628,13 +1628,13 @@
           "source": "url",
           "parser": "uql",
           "format": "table",
-          "root_selector": "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))",
+          "root_selector": "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': $d.domain = 'Workflow' and $d.verdict = 'N/A' ? '  ' : $d.verdict, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))\""
+          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': $d.domain = 'Workflow' and $d.verdict = 'N/A' ? '  ' : $d.verdict, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))\""
         }
       ],
       "options": {
@@ -1657,7 +1657,7 @@
             "include": {
               "names": [
                 "domain",
-                "verdict",
+                "status_display",
                 "reason_display"
               ]
             }
@@ -1668,7 +1668,7 @@
           "options": {
             "indexByName": {
               "domain": 0,
-              "verdict": 1,
+              "status_display": 1,
               "reason_display": 2
             },
             "renameByName": {
@@ -1677,6 +1677,7 @@
               "execution_state": "Result",
               "evidence_completeness": "Evidence",
               "rules_version": "Rules",
+              "status_display": "Status",
               "reason_display": "Reason",
               "saved_trust": "Trust"
             }

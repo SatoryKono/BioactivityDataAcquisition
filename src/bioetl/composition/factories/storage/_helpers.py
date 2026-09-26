@@ -8,6 +8,10 @@ from typing import TYPE_CHECKING
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy as _load_pipeline_contract_policy,
 )
+from bioetl.infrastructure.storage.delta.path_layout import (
+    has_provider_entity_suffix,
+    resolve_delta_writer_base_path as resolve_delta_writer_base_path_impl,
+)
 
 from ._bronze import create_bronze_writer
 from ._context_resolution import (
@@ -82,10 +86,11 @@ def _has_provider_entity_suffix(
     entity_type: str,
 ) -> bool:
     """Return True when a path already ends with provider/entity segments."""
-    parts = Path(str(path).replace("\\", "/")).parts
-    if len(parts) < 2:
-        return False
-    return parts[-2:] == (provider, entity_type)
+    return has_provider_entity_suffix(
+        path,
+        provider=provider,
+        entity_type=entity_type,
+    )
 
 
 def resolve_delta_writer_base_path(
@@ -95,23 +100,13 @@ def resolve_delta_writer_base_path(
     entity_type: str,
     flat_structure: bool,
 ) -> Path:
-    """Normalize Delta writer base_path to the layer root when path is entity-scoped.
-
-    Storage contexts still expose the fully resolved per-pipeline target path for
-    observability and report generation. Delta writers, however, must keep a
-    layer-root base path so downstream maintenance helpers can append the logical
-    table id exactly once.
-    """
-    runtime_path = Path(str(resolved_path).replace("\\", "/"))
-    if flat_structure:
-        return runtime_path
-    if _has_provider_entity_suffix(
-        runtime_path,
+    """Normalize Delta writer base_path to the layer root when path is entity-scoped."""
+    return resolve_delta_writer_base_path_impl(
+        resolved_path,
         provider=provider,
         entity_type=entity_type,
-    ):
-        return runtime_path.parent.parent
-    return runtime_path
+        flat_structure=flat_structure,
+    )
 
 
 def resolve_delta_writer_flat_structure(
