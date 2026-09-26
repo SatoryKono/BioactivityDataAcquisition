@@ -124,10 +124,10 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 3, 24, 2),
     9422: (0, 5, 24, 3),
-    9418: (0, 8, 12, 7),
-    9416: (12, 8, 12, 7),
+    9418: (0, 8, 12, 9),
+    9416: (12, 8, 12, 9),
 }
-_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 15
+_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
 # Runtime already owns current readiness as 9401 Monitor Pipeline Status.
 _TRUST_DROP_PANEL_IDS = frozenset({9401, 9404, 9452})
 _TRUST_MOVE_PANEL_IDS = frozenset(
@@ -182,10 +182,10 @@ _RUNTIME_DROP_IDS = frozenset({22460, 9451, 9452, 9460})
 _RUNTIME_FLEET_ID_REMAP = {9401: 18940}
 _RUNTIME_FLEET_ROW_ID = 8808
 _RUNTIME_SELECTED_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 2, 24, 3),
-    9998: (0, 5, 24, 5),
-    9402: (0, 10, 12, 5),
-    9403: (12, 10, 12, 5),
+    9400: (0, 2, 24, 2),
+    9998: (0, 4, 24, 4),
+    9402: (0, 8, 12, 8),
+    9403: (12, 8, 12, 8),
 }
 _INCIDENT_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     2001: (0, 6, 24, 2),
@@ -206,10 +206,10 @@ _DQ_SCOPE_HTML = (
     "</div></div>"
 )
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 2, 24, 3),
-    9406: (0, 5, 24, 5),
-    9402: (0, 10, 12, 5),
-    9403: (12, 10, 12, 5),
+    9400: (0, 2, 24, 2),
+    9406: (0, 4, 24, 4),
+    9402: (0, 8, 12, 8),
+    9403: (12, 8, 12, 8),
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
@@ -1031,6 +1031,17 @@ def _shift_panel_tree(panel: dict[str, object], *, delta: int) -> None:
             grid["y"] = int(grid["y"]) + delta
 
 
+def _pack_control_plane_rows(root: list[dict[str, object]]) -> None:
+    rows = [panel for panel in root if panel.get("type") == "row"]
+    rows.sort(key=lambda panel: int((panel.get("gridPos") or {}).get("y") or 0))
+    y = _CONTROL_PLANE_FIRST_DETAIL_ROW_Y
+    for row in rows:
+        grid = row.setdefault("gridPos", {})
+        if isinstance(grid, dict):
+            grid["y"] = y
+        y += 1
+
+
 def _shift_control_plane_detail_rows(
     root: list[dict[str, object]], *, first_row_y: int
 ) -> None:
@@ -1198,6 +1209,11 @@ def _stamp_retention_override(
         override["properties"] = [
             p for p in override.get("properties", []) if p.get("id") != CUSTOM_WIDTH
         ]
+        _set_override_value(
+            override,
+            "custom.cellOptions",
+            {"type": "auto", "wrapText": False},
+        )
     if field in wrap_fields:
         _set_override_value(
             override,
@@ -1234,7 +1250,7 @@ def _stamp_retention_readability(by_id: dict[object, dict[str, object]]) -> None
             custom["cellOptions"] = cell
         cell["wrapText"] = False
     widths = {"check": 170, "Check": 170, "status": 110, "Status": 110}
-    wrap_fields = {"check", "Check", "reason", "Reason"}
+    wrap_fields = {"check", "Check"}
     overrides = field_config.get("overrides")
     if not isinstance(overrides, list):
         return
@@ -1373,7 +1389,7 @@ def _stamp_trust_override(override: dict[str, object]) -> None:
                     "url": (
                         "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}"
                         "&${pipeline:queryparam}&${run_type:queryparam}"
-                        "&${run_id:queryparam}&viewPanel=9451&${__url_time_range}"
+                        "&${run_id:queryparam}&viewPanel=9418&${__url_time_range}"
                     ),
                     "includeVars": False,
                     "targetBlank": False,
@@ -1566,7 +1582,8 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
         139: _SELECT_RUN_EMPTY,
         9403: (
             "SELECT RUN — no exact Run ID selected. "
-            "Choose this run in Run Explorer."
+            "Choose this run in Run Explorer. "
+            "QUERY ERROR means the status request failed."
         ),
         9409: (
             "SELECT RUN — no exact Run ID selected. Choose a run first. "
@@ -1660,6 +1677,7 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
     )
     by_id = {panel.get("id"): panel for panel in root}
     _stamp_control_plane_counts(by_id)
+    _pack_control_plane_rows(root)
     _stamp_recovery_copy(by_id)
     _stamp_current_readiness(by_id)
     _stamp_retention_copy(by_id)
@@ -2034,6 +2052,11 @@ def _stamp_runtime_fleet_panel(panel: dict[str, object]) -> None:
 
 
 def _stamp_runtime_answer(panel: dict[str, object]) -> None:
+    transforms = panel.setdefault("transformations", [])
+    if isinstance(transforms, list) and not any(
+        isinstance(item, dict) and item.get("id") == "limit" for item in transforms
+    ):
+        transforms.insert(0, {"id": "limit", "options": {"limitField": 1}})
     field_config = panel.setdefault("fieldConfig", {})
     if not isinstance(field_config, dict):
         return
@@ -2105,7 +2128,11 @@ def _retain_runtime_selected_run(payload: dict[str, object]) -> None:
             if isinstance(children, list):
                 collect(children)
             panel_id = panel.get("id")
-            if panel_id in _RUNTIME_DROP_IDS or panel.get("type") == "row":
+            if (
+                panel_id in _RUNTIME_DROP_IDS
+                or panel_id in {9401, 9450, 9451, 9452}
+                or panel.get("type") == "row"
+            ):
                 continue
             if panel_id in _RUNTIME_SELECTED_IDS:
                 if panel_id not in found:
@@ -2131,12 +2158,41 @@ def _retain_runtime_selected_run(payload: dict[str, object]) -> None:
     payload["panels"] = [found[panel_id] for panel_id in _RUNTIME_SELECTED_IDS]
     _stamp_runtime_answer(found[9998])
     _stamp_runtime_scope(found[9400])
+    for panel_id in (9402, 9403):
+        footer = found[panel_id].setdefault("options", {}).setdefault("footer", {})
+        if isinstance(footer, dict):
+            footer["enablePagination"] = True
+
+
+_FLEET_ID_COLLISIONS = frozenset({9401, 9450, 9451, 9452, 1000, 9400, 9402, 9403})
+
+
+def _strip_fleet_id_collisions(panels: list[object]) -> None:
+    row = next(
+        (
+            panel
+            for panel in panels
+            if isinstance(panel, dict) and panel.get("id") == _RUNTIME_FLEET_ROW_ID
+        ),
+        None,
+    )
+    if not isinstance(row, dict):
+        return
+    children = row.get("panels")
+    if not isinstance(children, list):
+        return
+    row["panels"] = [
+        child
+        for child in children
+        if not isinstance(child, dict) or child.get("id") not in _FLEET_ID_COLLISIONS
+    ]
 
 
 def _attach_runtime_fleet_row(payload: dict[str, object]) -> None:
     panels = payload.get("panels")
     if not isinstance(panels, list):
         return
+    _strip_fleet_id_collisions(panels)
     if not _MOVED_RUNTIME_FLEET:
         existing = next(
             (
