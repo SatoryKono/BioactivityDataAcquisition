@@ -249,6 +249,33 @@
         "query": "p50 : 0.50, p95 : 0.95, p99 : 0.99",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "name": "provider_for_pipeline",
+        "label": "Provider for pipeline",
+        "type": "query",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "refresh": 1,
+        "sort": 1,
+        "regex": "",
+        "skipUrlSync": true,
+        "options": [],
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
+        "query": {
+          "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
+          "refId": "StandardVariableQuery"
+        }
       }
     ]
   },
@@ -286,7 +313,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"1. Trust (Trust)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"4. Provider Health (Provider Health). Scope reset: provider=All; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=$__all&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"1. Trust (Trust)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"4. Provider Health (Provider Health). Provider follows the selected pipeline. Explicit All stays global. Preserves time range and pipeline context.\" href=\"/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=${provider_for_pipeline}&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -330,8 +357,8 @@
         },
         {
           "title": "4. Provider Health",
-          "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=$__all&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
-          "tooltip": "4. Provider Health (Provider Health). Scope reset: provider=All; preserves time range, pipeline context.",
+          "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=${provider_for_pipeline}&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
+          "tooltip": "4. Provider Health (Provider Health). Provider follows the selected pipeline. Explicit All stays global. Preserves time range and pipeline context.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -421,7 +448,7 @@
         "y": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence. Processing result is the saved ETL outcome. Saved trust verdict is the historical Trust assessment. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded.",
+      "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence. Observed is the saved completion-time assessment. processing_status success does not imply trust_status OK.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -509,7 +536,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Processing result"
+                "value": "Result"
               },
               {
                 "id": "custom.hidden",
@@ -535,7 +562,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Saved trust verdict"
+                "value": "Trust"
               },
               {
                 "id": "custom.hidden",
@@ -588,15 +615,22 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Reason count"
+                "value": "Reasons"
               },
               {
                 "id": "links",
-                "value": []
+                "value": [
+                  {
+                    "title": "Inspect all trust reasons",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  }
+                ]
               },
               {
                 "id": "custom.hidden",
-                "value": false
+                "value": true
               },
               {
                 "id": "custom.hideFrom",
@@ -605,13 +639,17 @@
                   "legend": true,
                   "tooltip": false
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 80
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Processing result"
+              "options": "Result"
             },
             "properties": [
               {
@@ -660,14 +698,14 @@
               },
               {
                 "id": "custom.width",
-                "value": 150
+                "value": 100
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Saved trust verdict"
+              "options": "Trust"
             },
             "properties": [
               {
@@ -728,21 +766,21 @@
               },
               {
                 "id": "custom.width",
-                "value": 160
+                "value": 105
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Assessed at"
+              "options": "Observed"
             },
             "properties": []
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Reason count"
+              "options": "Reasons"
             },
             "properties": [
               {
@@ -761,46 +799,13 @@
               },
               {
                 "id": "noValue",
-                "value": "—"
-              },
-              {
-                "id": "links",
-                "value": []
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "0": {
-                        "text": "no"
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                "id": "custom.width",
-                "value": 120
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Action"
-            },
-            "properties": [
-              {
-                "id": "noValue",
-                "value": ""
+                "value": "Inspect"
               },
               {
                 "id": "links",
                 "value": [
                   {
-                    "title": "View trust reasons",
+                    "title": "Inspect saved Trust reasons",
                     "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9451&${__url_time_range}",
                     "includeVars": false,
                     "targetBlank": false
@@ -857,8 +862,7 @@
                 "reasons_text",
                 "evidence_observed_at",
                 "reasons_count",
-                "evidence_freshness",
-                "trust_reasons_action"
+                "evidence_freshness"
               ]
             }
           }
@@ -872,15 +876,13 @@
               "reasons_display": 2,
               "evidence_observed_at": 3,
               "reasons_count": 2,
-              "evidence_freshness": 5,
-              "trust_reasons_action": 4
+              "evidence_freshness": 5
             },
             "renameByName": {
-              "processing_status": "Processing result",
-              "trust_status": "Saved trust verdict",
-              "evidence_observed_at": "Assessed at",
-              "reasons_count": "Reason count",
-              "trust_reasons_action": "Action"
+              "processing_status": "Result",
+              "trust_status": "Trust",
+              "evidence_observed_at": "Observed",
+              "reasons_count": "Reasons"
             },
             "excludeByName": {
               "reasons_display": true
@@ -894,7 +896,14 @@
           }
         }
       ],
-      "links": []
+      "links": [
+        {
+          "title": "Inspect manifest checks",
+          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+          "includeVars": false,
+          "targetBlank": false
+        }
+      ]
     },
     {
       "datasource": "BioETL Ops HTTP",
@@ -911,7 +920,14 @@
           },
           "unit": "none",
           "noValue": "No retention-compliance rows. Valid empty if the selected run has no retention checks. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK.",
-          "links": []
+          "links": [
+            {
+              "title": "Retry selected-run retention",
+              "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9416&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ]
         },
         "overrides": [
           {
@@ -1030,7 +1046,7 @@
             "properties": [
               {
                 "id": "custom.inspect",
-                "value": false
+                "value": true
               },
               {
                 "id": "displayName",
@@ -1532,441 +1548,7 @@
             "renameByName": {}
           }
         }
-<<<<<<< HEAD
       ]
-||||||| 2d9509c4d82f
-      ]
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "CURRENT · Replay uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                }
-              }
-            },
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "#555555"
-                }
-              }
-            }
-          ],
-          "noValue": "UNKNOWN",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "short",
-          "displayName": "Monitor Replay"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 5,
-        "y": 19
-      },
-      "id": 891,
-      "options": {
-        "colorMode": "background",
-        "dataLinks": [
-          {
-            "targetBlank": true,
-            "title": "Open Checkpoint Debugging Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-          }
-        ],
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value",
-        "text": {
-          "valueSize": 20,
-          "titleSize": 14
-        }
-      },
-      "pluginVersion": "9.5.0",
-      "targets": [
-        {
-          "expr": "clamp_max(max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Monitor Replay",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "CURRENT · Last checkpoint age, informational only; age does not change readiness. Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "links": [
-            {
-              "targetBlank": true,
-              "title": "Open Checkpoint Debugging Runbook",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
-            }
-          ],
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "#555555"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": null
-              }
-            ]
-          },
-          "unit": "s",
-          "noValue": "UNKNOWN",
-          "displayName": "Track Checkpoint"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 10,
-        "y": 19
-      },
-      "id": 892,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value",
-        "text": {
-          "valueSize": 20,
-          "titleSize": 14
-        }
-      },
-      "pluginVersion": "9.5.0",
-      "targets": [
-        {
-          "expr": "max(bioetl_checkpoint_age_seconds{pipeline=~\"$pipeline\"})",
-          "refId": "A",
-          "instant": true
-        }
-      ],
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "checkpoint_present": true,
-              "checkpoint_run_id": true,
-              "detail": true,
-              "evidence_source": true,
-              "manifest_id": true,
-              "pipeline": true,
-              "resolved_via": true,
-              "saved_at_epoch_seconds": true,
-              "status": true
-            },
-            "indexByName": {
-              "age_seconds": 0
-            },
-            "renameByName": {
-              "age_seconds": "checkpoint_age_seconds"
-            }
-          }
-        }
-      ],
-      "title": "Track Checkpoint",
-      "type": "stat",
-      "transparent": false
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "CURRENT · Ledger uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                }
-              }
-            },
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "#555555"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "short",
-          "noValue": "UNKNOWN",
-          "displayName": "Monitor Ledger"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 15,
-        "y": 19
-      },
-      "id": 893,
-      "options": {
-        "colorMode": "background",
-        "dataLinks": [
-          {
-            "targetBlank": true,
-            "title": "Open Run Manifest Inspection",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-          }
-        ],
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value",
-        "text": {
-          "valueSize": 20,
-          "titleSize": 14
-        }
-      },
-      "pluginVersion": "9.5.0",
-      "targets": [
-        {
-          "expr": "clamp_max(max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Monitor Ledger",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "CURRENT · Required telemetry coverage over 5 minutes, independent of Run ID. CRIT means at least two required groups are missing; it does not count failed runs. Inspect Telemetry Coverage below for manifest, ledger, replay-risk, integrity and publication evidence. An empty Pushgateway after restart requires a genuine new publication or verified backup, never synthetic zero counters. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                }
-              }
-            },
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "#555555"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "short",
-          "noValue": "UNKNOWN",
-          "displayName": "Monitor Telemetry"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 20,
-        "y": 19
-      },
-      "id": 907,
-      "options": {
-        "colorMode": "background",
-        "dataLinks": [
-          {
-            "targetBlank": true,
-            "title": "Open Control-Plane Observability Checklist",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-          }
-        ],
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value",
-        "text": {
-          "valueSize": 20,
-          "titleSize": 14
-        }
-      },
-      "pluginVersion": "9.5.0",
-      "targets": [
-        {
-          "expr": "clamp_max(max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}), 2)",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Monitor Telemetry",
-      "type": "stat"
-    },
-    {
-=======
-      ],
-      "links": []
->>>>>>> main
     },
     {
       "collapsed": true,
@@ -2462,75 +2044,6 @@
               "options": {
                 "excludeByName": {
                   "Time": true
-                }
-              }
-            }
-          ]
-        },
-        {
-          "id": 9423,
-          "type": "table",
-          "title": "Review Exact Replay Checks",
-          "description": "SELECTED RUN · Individual checks behind Replay Readiness. Fail blocks replay; unknown means the check could not be confirmed. Evidence references point into the saved report.",
-          "datasource": "BioETL Ops HTTP",
-          "targets": [
-            {
-              "refId": "A",
-              "type": "json",
-              "source": "url",
-              "parser": "backend",
-              "format": "table",
-              "root_selector": "replay_checks",
-              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-              "url_options": {
-                "method": "GET",
-                "data": ""
-              }
-            }
-          ],
-          "gridPos": {
-            "x": 0,
-            "y": 25,
-            "w": 24,
-            "h": 12
-          },
-          "options": {
-            "showHeader": true,
-            "cellHeight": "lg",
-            "footer": {
-              "show": false,
-              "enablePagination": true
-            }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "—",
-              "custom": {
-                "align": "left",
-                "wrapText": true,
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              }
-            },
-            "overrides": []
-          },
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "indexByName": {
-                  "code": 0,
-                  "result": 1,
-                  "reason": 2,
-                  "evidence_ref": 3
-                },
-                "renameByName": {
-                  "code": "Check",
-                  "result": "Result",
-                  "reason": "Reason",
-                  "evidence_ref": "Evidence reference"
                 }
               }
             }
@@ -7411,8 +6924,8 @@
     },
     {
       "id": 9422,
-      "type": "stat",
-      "title": "Replay Readiness",
+      "type": "table",
+      "title": "Review Exact Replay Readiness",
       "gridPos": {
         "h": 3,
         "w": 6,
@@ -7422,68 +6935,19 @@
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Exact replay readiness of the selected Run ID from saved inputs. READY means required checks passed, not that a replay already ran and not permission to write current tables. BLOCKED is a proven gap. INSUFFICIENT means a required check could not be completed. UNSUPPORTED means this family cannot exact-replay. SELECT RUN and QUERY ERROR are request states. N/A is not zero. CURRENT Prometheus does not change this verdict. Inspect Replay Safety State remains diagnostic, not this answer.",
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "verdict"
-        },
-        "orientation": "horizontal",
-        "textMode": "value",
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "text": {
-          "valueSize": 22
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
         }
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
           "noValue": "QUERY ERROR",
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "READY": {
-                  "text": "READY",
-                  "color": "green"
-                },
-                "BLOCKED": {
-                  "text": "BLOCKED",
-                  "color": "red"
-                },
-                "INSUFFICIENT": {
-                  "text": "INSUFFICIENT",
-                  "color": "orange"
-                },
-                "UNSUPPORTED": {
-                  "text": "UNSUPPORTED",
-                  "color": "#555555"
-                },
-                "SELECT RUN": {
-                  "text": "SELECT RUN",
-                  "color": "#555555"
-                },
-                "QUERY ERROR": {
-                  "text": "QUERY ERROR",
-                  "color": "red"
-                }
-              }
-            }
-          ],
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#555555",
-                "value": null
-              }
-            ]
+          "unit": "none",
+          "custom": {
+            "align": "left",
+            "inspect": true
           }
         },
         "overrides": []
@@ -7509,17 +6973,35 @@
           "options": {
             "include": {
               "names": [
-                "verdict"
+                "verdict",
+                "blockers",
+                "unknown_checks"
               ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "verdict": 0,
+              "blockers": 1,
+              "unknown_checks": 2
+            },
+            "renameByName": {
+              "verdict": "Readiness",
+              "blockers": "Blockers",
+              "unknown_checks": "Unchecked"
             }
           }
         }
       ],
       "links": [
         {
-          "title": "View replay checks",
-          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9423&${__url_time_range}",
-          "targetBlank": false
+          "title": "Inspect Replay Safety State",
+          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9422",
+          "targetBlank": false,
+          "includeVars": false
         }
       ]
     },

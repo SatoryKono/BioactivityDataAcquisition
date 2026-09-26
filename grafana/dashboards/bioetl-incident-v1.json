@@ -248,6 +248,33 @@
         "type": "query",
         "useTags": false,
         "description": "Provider scope: derived from Pipeline when set (first name segment, same heuristic as runtime $provider_hint), else from Workflow when set; fail-closed default is unknown when neither Pipeline nor Workflow is set. Operators may still open handoffs that pass an explicit provider value."
+      },
+      {
+        "name": "provider_for_pipeline",
+        "label": "Provider for pipeline",
+        "type": "query",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "refresh": 1,
+        "sort": 1,
+        "regex": "",
+        "skipUrlSync": true,
+        "options": [],
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
+        "query": {
+          "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
+          "refId": "StandardVariableQuery"
+        }
       }
     ]
   },
