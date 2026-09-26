@@ -3959,7 +3959,7 @@
         "y": 18
       },
       "id": 9404,
-      "description": "Expand for selected-range and debug evidence after current fleet severity, causes, and telemetry presence have been interpreted together.",
+      "description": "This range row shows raw status and range counters when expanded. Expand for selected-range and debug evidence after current fleet severity, causes, and telemetry presence have been interpreted together.",
       "panels": [
         {
           "datasource": {
@@ -4200,7 +4200,7 @@
           ],
           "title": "Inspect Raw Health Status",
           "type": "table",
-          "description": "TIME RANGE / DIAGNOSTIC · 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN. Raw provider health enum evidence: best observed status in the selected range, not the canonical first-screen verdict. When raw status is absent, status is UNKNOWN. A past HEALTHY observation does not establish current freshness. Last check and age describe the latest observation, not necessarily the best status. Use Status Reason / Telemetry Presence for the current verdict.",
+          "description": "This raw status table shows the raw health enum for the chart range. TIME RANGE / DIAGNOSTIC · 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN. Raw provider health enum evidence: best observed status in the selected range, not the canonical first-screen verdict. When raw status is absent, status is UNKNOWN. A past HEALTHY observation does not establish current freshness. Last check and age describe the latest observation, not necessarily the best status. Use Status Reason / Telemetry Presence for the current verdict.",
           "transformations": [
             {
               "id": "joinByField",
@@ -4302,7 +4302,7 @@
           ],
           "title": "Track Health-Check Latency p95",
           "type": "timeseries",
-          "description": "TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
+          "description": "This check latency trend shows health-check latency p95 for the chart range. TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
