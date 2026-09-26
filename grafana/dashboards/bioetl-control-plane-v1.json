@@ -5477,7 +5477,7 @@
         "y": 21
       },
       "id": 9412,
-      "description": "Expand for HTTP-backed run details. Run Explorer remains the canonical exact-run workspace.",
+      "description": "Expand for the identity card, record counts, and failure categories of this Run ID.",
       "panels": [
         {
           "id": 9402,
@@ -5822,7 +5822,7 @@
             "h": 12
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Shows Bronze, Silver, and Gold record counts and outcomes for the selected scope. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Use Run Explorer for full run details. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares). Open Run Explorer for this same Run ID.",
+          "description": "SELECTED RUN · Bronze, Silver, and Gold counts for this Run ID. Counts are not a quality verdict. Open Run Explorer for this same Run ID.",
           "fieldConfig": {
             "defaults": {
               "custom": {

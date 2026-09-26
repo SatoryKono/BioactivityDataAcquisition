@@ -273,10 +273,9 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
         "gridPos": grid,
         "datasource": "BioETL Ops HTTP",
         "description": (
-            "SELECTED RUN · Saved stage rows for the exact Run ID. "
+            "SELECTED RUN · Stage rows for this Run ID. "
             "SUCCESS with missing stage evidence stays INCOMPLETE. "
-            "A recorded zero stays 0. An unknown count is empty, not 0. "
-            "UNFINISHED means no terminal event. Prometheus does not change this table."
+            "A recorded zero stays 0. An unknown count is empty, not 0."
         ),
         "options": {
             "showHeader": True,
@@ -360,8 +359,8 @@ def _append_saved_run_evidence_row(
             "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
         )
         details["description"] = (
-            "SELECTED RUN · Domain trust reasons for this Run ID. "
-            "Open this table from View trust reasons when the reason count is greater than zero."
+            "SELECTED RUN · Domain reasons for this Run ID. "
+            "Open this table from View trust reasons only when the reason count is greater than zero."
         )
         details["fieldConfig"]["defaults"]["noValue"] = empty
         stages["fieldConfig"]["defaults"]["noValue"] = empty

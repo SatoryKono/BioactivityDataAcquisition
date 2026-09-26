@@ -1564,6 +1564,10 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "Review Lineage Validation",
             "Expand to review lineage closure for the selected Run ID.",
         ),
+        9412: (
+            "Inspect Run Details",
+            "Expand for the identity card, record counts, and failure categories of this Run ID.",
+        ),
     }
     for panel_id, (title, description) in row_copy.items():
         row = by_id.get(panel_id)
@@ -1597,12 +1601,10 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             _set_panel_no_value(panel, text)
     processed = by_id.get(9403)
     if isinstance(processed, dict):
-        description = str(processed.get("description") or "")
-        description = description.replace("Inspect Recent Runs", "Run Explorer")
-        note = " Open Run Explorer for this same Run ID."
-        if note.strip() not in description:
-            description += note
-        processed["description"] = description
+        processed["description"] = (
+            "SELECTED RUN · Bronze, Silver, and Gold counts for this Run ID. "
+            "Counts are not a quality verdict. Open Run Explorer for this same Run ID."
+        )
         processed["links"] = [
             {
                 "title": "Open Run Explorer",
