@@ -2189,7 +2189,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "This full severity table shows the complete current severity matrix. CURRENT · TIME RANGE · Complete GLOBAL provider severity matrix. First-screen Monitor Fleet Severity is the four-row summary. TELEMETRY MISSING is a blind spot, not a healthy fleet. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
+          "description": "This full severity table is not the short first-screen table. This full severity table shows the complete current severity matrix. CURRENT · TIME RANGE · Complete GLOBAL provider severity matrix. First-screen Monitor Fleet Severity is the four-row summary. TELEMETRY MISSING is a blind spot, not a healthy fleet. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "gridPos": {
             "x": 0,
             "y": 20,
@@ -2386,7 +2386,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "This full non-OK table shows every provider that is not OK. GLOBAL · Current fleet, independent of the selected Provider. VALID EMPTY requires every observed provider to have health evidence and current status OK. Missing coverage remains UNKNOWN; query failure is not a healthy empty fleet.",
+          "description": "This full non-OK table is not a four-row preview. This full non-OK table shows every provider that is not OK. GLOBAL · Current fleet, independent of the selected Provider. VALID EMPTY requires every observed provider to have health evidence and current status OK. Missing coverage remains UNKNOWN; query failure is not a healthy empty fleet.",
           "gridPos": {
             "x": 0,
             "y": 25,
@@ -2622,7 +2622,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "This full causes table shows the complete current cause list. TIME RANGE · Complete current cause evidence, unbounded copy of Inspect Top Provider Causes. Same one-state rule: active-cause rows, or a single FLEET verdict row. VALID EMPTY needs proven coverage — recorded status for every provider, no provider above OK, present health telemetry, present cause series, and no active cause. Unproven coverage stays UNKNOWN and means restore provider telemetry. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
+          "description": "This full causes table is not the three-row preview. This full causes table shows the complete current cause list. TIME RANGE · Complete current cause evidence, unbounded copy of Inspect Top Provider Causes. Same one-state rule: active-cause rows, or a single FLEET verdict row. VALID EMPTY needs proven coverage — recorded status for every provider, no provider above OK, present health telemetry, present cause series, and no active cause. Unproven coverage stays UNKNOWN and means restore provider telemetry. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "gridPos": {
             "x": 0,
             "y": 30,
