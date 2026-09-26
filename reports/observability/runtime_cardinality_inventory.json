@@ -1405,6 +1405,7 @@
     ],
     "bioetl_control_plane_run_type_universe": [
       "docs/03-guides/dashboards/contracts/selector-contracts.yaml",
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/README.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
@@ -1750,7 +1751,6 @@
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l0_next_action_no_route": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md"
     ],
     "bioetl_l0_next_action_route": [
@@ -1839,6 +1839,7 @@
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_manifest_ledger_integrity_ratio": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -2152,6 +2153,7 @@
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_replay_duplicate_overwrite_risk_total": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
