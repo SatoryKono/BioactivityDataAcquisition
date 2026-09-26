@@ -14,8 +14,8 @@ def compact_replay_first_window(payload: dict) -> None:
     )
     panels[9400]["gridPos"].update(x=0, y=2, w=16, h=3)
     panels[9422]["gridPos"].update(x=16, y=2, w=8, h=3)
-    for pid, x in ((9418, 0), (9416, 12)):
-        panels[pid]["gridPos"].update(x=x, y=5, w=12, h=7)
+    for pid, x, width in ((9418, 0, 15), (9416, 15, 9)):
+        panels[pid]["gridPos"].update(x=x, y=5, w=width, h=7)
     shift = 12 - old_bottom
 
     def move(panel: dict) -> None:
