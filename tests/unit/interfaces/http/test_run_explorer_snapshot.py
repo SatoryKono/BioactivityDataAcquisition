@@ -96,92 +96,6 @@ async def test_refresh_strips_cached_age_and_materialize_uses_request_clock(
     assert seen[0]["limit"] == 10
     assert seen[0]["pipeline"] == ".*"
     assert seen[0]["selected_run_id"] == "-"
-<<<<<<< Updated upstream
-    stored_row = cache._stored["items"][0]
-    assert "event_age_display" not in stored_row
-
-    body = cache.materialize(now=_COMPLETED + timedelta(seconds=90))
-    assert body is not None
-    assert body["items"][0]["event_age_display"] == "1 m 30 s"
-    assert body["items"][0]["last_event_age_seconds"] == 90
-    later = cache.materialize(now=_COMPLETED + timedelta(seconds=120))
-    assert later is not None
-    assert later["items"][0]["event_age_display"] == "2 m"
-    assert len(seen) == 1
-
-
-@pytest.mark.asyncio
-async def test_failed_refresh_keeps_the_last_page(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    calls = {"count": 0}
-
-    def _scan(**_kwargs: object) -> dict[str, object]:
-        calls["count"] += 1
-        if calls["count"] > 1:
-            raise RuntimeError("scan failed")
-        return _page()
-
-    monkeypatch.setattr(snapshot_module, "list_recent_pipeline_runs", _scan)
-    cache = RunExplorerSnapshotCache()
-    source = SimpleNamespace(_run_manifest_port=object(), _run_ledger_port=object())
-    await cache.refresh_once(source)
-    await cache.refresh_once(source)
-    body = cache.materialize(now=_COMPLETED + timedelta(seconds=90))
-    assert body is not None
-    assert body["items"][0]["run_id"] == "kept"
-    assert body["items"][0]["event_age_display"] == "1 m 30 s"
-
-
-@pytest.mark.asyncio
-async def test_periodic_scan_waits_out_the_interval(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    entered = 0
-
-    def _scan(**_kwargs: object) -> dict[str, object]:
-        nonlocal entered
-        entered += 1
-        return _page()
-
-    monkeypatch.setattr(snapshot_module, "list_recent_pipeline_runs", _scan)
-    cache = RunExplorerSnapshotCache()
-    source = SimpleNamespace(_run_manifest_port=object(), _run_ledger_port=object())
-    task = asyncio.create_task(
-        run_periodic_run_explorer_snapshot(cache, source, interval_seconds=30)
-    )
-    for _ in range(50):
-        if cache.materialize(now=_COMPLETED) is not None:
-            break
-        await asyncio.sleep(0.01)
-    await asyncio.sleep(0.05)
-    assert entered == 1
-    await stop_run_explorer_snapshot(task)
-    assert task.done()
-
-
-@pytest.mark.asyncio
-async def test_default_request_uses_snapshot_without_another_scan(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    catalog = Mock(side_effect=AssertionError("live catalog scan"))
-    monkeypatch.setattr(routing, "list_recent_pipeline_runs", catalog)
-    monkeypatch.setattr(
-        snapshot_module,
-        "current_utc_time",
-        lambda: _COMPLETED + timedelta(seconds=90),
-    )
-    cache = RunExplorerSnapshotCache()
-    cache._stored = {
-        "order_by": "started_at_desc",
-        "index_state": "ok",
-        "count": 1,
-        "items": [_row()],
-    }
-    # Stored rows keep a stale label only until materialize refreshes them.
-    cache._stored = snapshot_module._without_timing(cache._stored)
-||||||| Stash base
-=======
     stored = cache._stored
     assert stored is not None
     stored_items = stored["items"]
@@ -275,7 +189,6 @@ async def test_default_request_uses_snapshot_without_another_scan(
     )
     cache = RunExplorerSnapshotCache()
     cache._stored = snapshot_module._without_timing(_page())
->>>>>>> Stashed changes
     host = SimpleNamespace(
         _read_optional_param=HealthServerRoutingMixin._read_optional_param,
         _run_manifest_port=Mock(),
