@@ -391,7 +391,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
+      "description": "SELECTED RUN · This table is the saved status verdict for the Run ID. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -906,7 +906,7 @@
           }
         }
       ],
-      "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
+      "description": "SELECTED RUN · These rows are domain verdicts for the Run ID, not the page status. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
       "links": [
         {
           "title": "Open Runtime",
@@ -945,7 +945,7 @@
         "y": 11
       },
       "id": 9602,
-      "description": "Expand only for compact HTTP-backed selected-run context. Run Explorer remains the exact-run workspace.",
+      "description": "Collapsed detail. Inside: Review Run Identity and Review Processed Records. The page verdict stays on the first screen.",
       "panels": [
         {
           "id": 9300,
@@ -1211,7 +1211,7 @@
             "w": 12,
             "h": 6
           },
-          "description": "SELECTED RUN · TIME RANGE · Shows HTTP-backed Bronze, Silver, and Gold record counts and outcomes. Zero is a recorded count. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live. Open Run Explorer for complete accounting. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
+          "description": "SELECTED RUN · Shows HTTP-backed Bronze, Silver, and Gold record counts and outcomes. Zero is a recorded count. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live. Open Run Explorer for complete accounting. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {
