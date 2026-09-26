@@ -7722,7 +7722,7 @@
           ],
           "title": "Track Failed Workflow Runs",
           "type": "stat",
-          "description": "TIME RANGE · Workflow only, not a single Run ID. Counts failed Workflow runs in the selected range for Workflow and Pipeline. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not current Workflow or Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "TIME RANGE · Workflow only, not a single Run ID. Counts failed Workflow runs in the selected range for Workflow. Pipeline does not filter this count. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not current Workflow or Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {

@@ -73,7 +73,7 @@ dashboards:
         - full_light
         - zoom_200
       '901':
-        title: Inspect Manifest & Ledger Evidence
+        title: Inspect Manifest Validation
         role: row_group
         tier: 4
         scope: selected_run
@@ -88,7 +88,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '902':
-        title: Inspect Replay & Checkpoint Evidence
+        title: Inspect Checkpoint and Replay Checks
         role: row_group
         tier: 4
         scope: global
@@ -198,27 +198,6 @@ dashboards:
         - percentage
         hidden_columns:
         - row_status
-      '9404':
-        title: Review Identity Anchors
-        role: evidence_table
-        tier: 3
-        scope: time_range
-        scope_class: time_range
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
       '9405':
         title: Review Identity Gaps
         role: evidence_table
@@ -551,7 +530,7 @@ dashboards:
         render_profiles: *id002
       '9422':
         title: Review Exact Replay Readiness
-        role: evidence_table
+        role: verdict
         tier: 1
         scope: selected_run
         scope_class: selected_run
@@ -564,6 +543,49 @@ dashboards:
         - UNSUPPORTED
         - SELECT RUN
         - QUERY ERROR
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9423':
+        title: Review Exact Replay Checks
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9460':
+        title: Inspect Selected Run Stages
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -634,51 +656,6 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id003
-      '9452':
-        title: Inspect Selected Run Identity
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id003
-      '9460':
-        title: Inspect Selected Run Stages
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles:
-        - full_dark
-        - full_light
-        - zoom_200
   bioetl-dq-v2:
     panels:
       '1000':
@@ -4214,87 +4191,6 @@ dashboards:
         render_profiles:
         - first_window_dark
         - first_window_light
-      '9450':
-        title: Inspect Saved Run Evidence
-        role: row_group
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id003
-      '9451':
-        title: Inspect Selected Run Domains
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id003
-      '9452':
-        title: Inspect Selected Run Identity
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id003
-      '9460':
-        title: Inspect Selected Run Stages
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles:
-        - full_dark
-        - full_light
-        - zoom_200
   bioetl-runtime:
     panels:
       '1000':
