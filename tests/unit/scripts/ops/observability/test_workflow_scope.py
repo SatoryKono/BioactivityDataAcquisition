@@ -10,10 +10,13 @@ from scripts.ops.observability.grafana._workflow_scope import apply_workflow_sco
 
 pytestmark = pytest.mark.unit
 
+_REPO_ROOT = Path(__file__).resolve().parents[5]
+_DASHBOARDS = _REPO_ROOT / "grafana" / "dashboards"
+
 
 @pytest.mark.parametrize("uid", ["bioetl-overview-v2", "bioetl-incident-v1"])
 def test_scope_is_idempotent_and_does_not_rewrite_saved_run(uid):
-    payload = json.loads(Path(f"grafana/dashboards/{uid}.json").read_text())
+    payload = json.loads((_DASHBOARDS / f"{uid}.json").read_text(encoding="utf-8"))
     saved = deepcopy(next(p for p in payload["panels"] if p["id"] == 9450))
     apply_workflow_scope(payload)
     first = deepcopy(payload)
@@ -39,7 +42,9 @@ def test_scope_is_idempotent_and_does_not_rewrite_saved_run(uid):
 
 
 def test_action_navigation_uses_responsible_workflow_even_when_selector_is_all():
-    payload = json.loads(Path("grafana/dashboards/bioetl-overview-v2.json").read_text())
+    payload = json.loads(
+        (_DASHBOARDS / "bioetl-overview-v2.json").read_text(encoding="utf-8")
+    )
     panel = next(p for p in payload["panels"] if p["id"] == 215)
     links = [
         link

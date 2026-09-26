@@ -155,6 +155,10 @@ policy_alias_metrics:
   - bioetl_silver_filter_reject_field_total
   - bioetl_silver_filter_reject_reason_total
   - bioetl_silver_reject_rate
+  - bioetl_workflow_scope_input_status
+  - bioetl_workflow_scope_published_seconds
+  - bioetl_workflow_scope_qualified_status
+  - bioetl_workflow_scope_status
   - bioetl_workflow_status
 declared_label_contract_metrics:
   - bioetl_adapter_batch_size

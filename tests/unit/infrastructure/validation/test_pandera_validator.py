@@ -320,6 +320,62 @@ class TestPanderaGoldValidator:
         assert result.valid is True
         assert result.errors == []
 
+    def test_pandera_gold_validator__metamodel_exposes_columns__11212(self):
+        """DataFrameModel class is materialized so ``.columns`` is available."""
+        from bioetl.domain.contracts.gold._chembl_target_lookup_schemas import (
+            ChEMBLTargetProteinClassificationGoldSchema,
+        )
+
+        validator = PanderaGoldValidator(
+            schema=ChEMBLTargetProteinClassificationGoldSchema,
+            strict=True,
+        )
+        assert hasattr(validator._schema, "columns")
+        assert "is_leaf" in validator._schema.columns
+
+    def test_pandera_gold_validator__nullable_boolean_none_true_batch__11213(self):
+        """Mixed None/True nullable boolean batch validates on MetaModel bind."""
+        from bioetl.domain.contracts.gold._chembl_target_lookup_schemas import (
+            ChEMBLTargetProteinClassificationGoldSchema,
+        )
+
+        schema_cols = list(
+            ChEMBLTargetProteinClassificationGoldSchema.to_schema().columns.keys()
+        )
+        base = {name: None for name in schema_cols}
+        records = [
+            {
+                **base,
+                "_dq_warn": False,
+                "_dq_error": False,
+                "_index": 0,
+                "entity_id": "a",
+                "content_hash": "0" * 64,
+                "target_id": "CHEMBL1",
+                "classification_status": "missing_classification",
+                "is_leaf": None,
+                "l1_counts_for_target_type": False,
+            },
+            {
+                **base,
+                "_dq_warn": False,
+                "_dq_error": False,
+                "_index": 1,
+                "entity_id": "b",
+                "content_hash": "1" * 64,
+                "target_id": "CHEMBL2",
+                "classification_status": "resolved",
+                "is_leaf": True,
+                "l1_counts_for_target_type": True,
+            },
+        ]
+        validator = PanderaGoldValidator(
+            schema=ChEMBLTargetProteinClassificationGoldSchema,
+            strict=True,
+        )
+        result = validator.validate(records)
+        assert result.valid is True, result.errors
+
 
 
     def test_pandera_gold_validator__metamodel_exposes_columns__11212(self):

@@ -357,6 +357,10 @@ separate from actual `record:` outputs and direct runtime collector families.
 | `bioetl_silver_filter_reject_field_total` | Policy alias |
 | `bioetl_silver_filter_reject_reason_total` | Policy alias |
 | `bioetl_silver_reject_rate` | Policy alias |
+| `bioetl_workflow_scope_input_status` | Policy alias |
+| `bioetl_workflow_scope_published_seconds` | Policy alias |
+| `bioetl_workflow_scope_qualified_status` | Policy alias |
+| `bioetl_workflow_scope_status` | Policy alias |
 | `bioetl_workflow_status` | Policy alias |
 
 ## Governed Recording And Current-State Inventory

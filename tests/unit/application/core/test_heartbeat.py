@@ -354,13 +354,13 @@ class TestHeartbeatTask:
         assert heartbeat_task._task.exception() is None
         await heartbeat_task.stop()
 
-    async def test_heartbeat_loop_exception_requests_shutdown_without_raising(
+    async def test_heartbeat_loop_connection_error_requests_shutdown_without_raising(
         self,
         mock_lock_port: AsyncMock,
         mock_shutdown_signal: Mock,
         mock_logger: Mock,
     ) -> None:
-        """A heartbeat exception requests shutdown and completes the loop."""
+        """A heartbeat ConnectionError requests shutdown and completes the loop."""
         call_count = 0
 
         async def heartbeat(*args: object, **kwargs: object) -> bool:

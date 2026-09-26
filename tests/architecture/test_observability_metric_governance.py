@@ -196,7 +196,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     # and the 2026-08-25 promql-diet additions (fail-severity, first-window,
     # runtime alert counts, trust replay blockers).
     assert len(report["recording_rule_outputs"]) == 135
-    assert len(report["policy_alias_metrics"]) == 15
+    assert len(report["policy_alias_metrics"]) == 19
     assert report["recording_outputs_without_declaration"] == []
     assert report["recording_declarations_without_output"] == []
     assert report["policy_aliases_overlapping_outputs"] == []
@@ -213,7 +213,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert report["direct_alert_inputs"]
 
     http_targets = report["http_targets"]
-    assert len(http_targets) == 43  # Overview summary reuses the saved domain response.
+    assert len(http_targets) == 42  # Overview summary reuses the saved domain response.
     assert any(
         target["dashboard_uid"] == "bioetl-control-plane-v1"
         and target["panel_id"] == 9418
@@ -224,8 +224,8 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
-        "promql": 177,  # Incident panel 22011 Inspect Global Signal Measurements.
-        "http": 43,
+        "promql": 182,  # Workflow-scope panels plus Incident panel 22011.
+        "http": 42,
         "loki": 0,
         "tempo": 0,
         "unknown": 0,
