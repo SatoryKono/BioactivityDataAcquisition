@@ -213,6 +213,16 @@ first_window_summary_tables:
     max_rows: 6
     owner: "@bioetl-observability"
     bind: limit
+  - dashboard: bioetl-overview-v2.json
+    id: 9300
+    max_rows: 5
+    owner: "@bioetl-observability"
+    bind: paginate
+  - dashboard: bioetl-overview-v2.json
+    id: 9301
+    max_rows: 5
+    owner: "@bioetl-observability"
+    bind: paginate
   - dashboard: bioetl-runtime.json
     id: 9998
     max_rows: 1

@@ -1556,6 +1556,10 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         assert identity["gridPos"]["w"] == 12
         assert processed["gridPos"]["w"] == 12
         assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == (5, 5)
+    elif dashboard_name == "bioetl-overview-v2.json":
+        assert identity["gridPos"]["w"] == 12
+        assert processed["gridPos"]["w"] == 12
+        assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == (8, 8)
     else:
         expected_heights = (12, 12) if full_width_evidence else (6, 6)
         if full_width_evidence:
@@ -1569,7 +1573,10 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     processed_no_value = str(
         processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
     )
-    if dashboard_name in {"bioetl-runtime.json", "bioetl-dq-v2.json"}:
+    if dashboard_name == "bioetl-control-plane-v1.json":
+        assert identity_no_value.startswith("SELECT RUN")
+        assert "QUERY ERROR" in processed_no_value
+    elif dashboard_name in {"bioetl-runtime.json", "bioetl-dq-v2.json"}:
         assert identity_no_value.startswith("SELECT RUN")
         assert processed_no_value.startswith("SELECT RUN")
         assert "valid empty" not in identity_no_value.lower()

@@ -163,18 +163,20 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     assert panels["Review Selected Run Status"].get("gridPos", {}).get("y") == 5
     assert panels["Review Run Domains"].get("gridPos", {}).get("y") == 5
     assert panels["Review Run Domains"].get("gridPos", {}).get("w", 0) >= 8
-    lazy = {"Review Run Identity": 9300, "Review Processed Records": 9301}
-    for title, panel_id in lazy.items():
-        panel = panels[title]
-        assert panel.get("id") == panel_id
-    assert any(
-        panel.get("type") == "row"
-        and "Run Context" in str(panel.get("title") or "")
-        and panel.get("collapsed") is True
+    identity = panels["Review Run Identity"]
+    processed = panels["Review Processed Records"]
+    assert identity.get("id") == 9300
+    assert processed.get("id") == 9301
+    assert identity.get("gridPos") == {"h": 8, "w": 12, "x": 0, "y": 9}
+    assert processed.get("gridPos") == {"h": 8, "w": 12, "x": 12, "y": 9}
+    root_ids = {
+        panel.get("id")
         for panel in load_dashboard(
             Path("grafana/dashboards/bioetl-overview-v2.json")
         ).get("panels", [])
-    )
+    }
+    assert {9300, 9301} <= root_ids
+    assert 9602 not in root_ids
 
 
 def test_status_and_next_action_preserve_current_status_semantics() -> None:

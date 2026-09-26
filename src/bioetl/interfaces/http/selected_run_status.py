@@ -177,7 +177,7 @@ def _readiness_state(state: str) -> str:
 
 
 _UNKNOWN_CHECK_LABELS = {
-    "manifest_not_recorded": "manifest этого запуска не найден",
+    "manifest_not_recorded": "manifest for this run was not recorded",
 }
 
 

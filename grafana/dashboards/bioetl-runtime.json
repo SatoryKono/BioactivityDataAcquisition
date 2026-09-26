@@ -1226,7 +1226,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "description": "SELECTED RUN · Stage rows for this Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",

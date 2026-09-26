@@ -302,7 +302,31 @@ def _without_non_run_panels(panels: list[dict]) -> list[dict]:
     return kept
 
 
+def _lift_overview_identity(panels: list[dict]) -> None:
+    """Show run identity on the open first screen, not behind a mid-fold row."""
+    lifted: list[dict] = []
+    for panel in panels:
+        if panel.get("id") != 9602 or not isinstance(panel.get("panels"), list):
+            continue
+        stay: list[dict] = []
+        for child in panel["panels"]:
+            if isinstance(child, dict) and child.get("id") in {9300, 9301}:
+                lifted.append(child)
+            elif isinstance(child, dict):
+                stay.append(child)
+        panel["panels"] = stay
+    if not lifted:
+        return
+    panels[:] = [
+        panel
+        for panel in panels
+        if not (panel.get("id") == 9602 and not panel.get("panels"))
+    ]
+    panels.extend(lifted)
+
+
 def _place_selected_run_window(panels: list[dict]) -> None:
+    _lift_overview_identity(panels)
     by_id = {panel.get("id"): panel for panel in panels}
     nav = by_id.get(1000)
     y = 0
@@ -315,9 +339,19 @@ def _place_selected_run_window(panels: list[dict]) -> None:
     for panel_id, x_pos in ((9603, 0), (9002, 12)):
         panel = by_id.get(panel_id)
         if isinstance(panel, dict):
-            panel["gridPos"] = {"x": x_pos, "y": y, "w": 12, "h": 6}
-    y += 6
-    pinned = {1000, 99, 9603, 9002}
+            panel["gridPos"] = {"x": x_pos, "y": y, "w": 12, "h": 4}
+    y += 4
+    for panel_id, x_pos in ((9300, 0), (9301, 12)):
+        panel = by_id.get(panel_id)
+        if isinstance(panel, dict):
+            panel["gridPos"] = {"x": x_pos, "y": y, "w": 12, "h": 8}
+            options = panel.setdefault("options", {})
+            if isinstance(options, dict):
+                footer = options.setdefault("footer", {})
+                if isinstance(footer, dict):
+                    footer["enablePagination"] = True
+    y += 8
+    pinned = {1000, 99, 9603, 9002, 9300, 9301}
     rest = [panel for panel in panels if panel.get("id") not in pinned]
     rest.sort(key=lambda panel: (panel["gridPos"]["y"], panel["gridPos"]["x"]))
     for panel in rest:
@@ -350,6 +384,7 @@ def _retain_selected_run_overview(payload: dict) -> None:
             'font-size:16px;line-height:1.2;overflow-wrap:anywhere">'
             "SELECTED RUN · ${pipeline:text} / ${run_type:text} / ${run_id}. "
             "This page assesses that run only. "
+            "Identity and processed records are on this screen. "
             "UNKNOWN means saved evidence is missing."
             "</div>"
         )
