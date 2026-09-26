@@ -288,6 +288,8 @@ def _compact_trust_monitors(p: dict[int, dict]) -> None:
 
 
 def _runtime(p: dict[int, dict]) -> None:
+    if 9102 not in p:
+        return
     p[9102]["title"] = "Monitor Coverage"
     for pid, title in {
         230: "Monitor Pipeline Alerts",

@@ -28,6 +28,7 @@ from bioetl.domain.run_reports.selected_status import (
     evidence_digest,
     verify_snapshot,
 )
+from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostics
 from bioetl.interfaces.http import run_report_ops
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
@@ -149,6 +150,9 @@ def unavailable_status(
                 verdict=_readiness_state(state),
                 reason=reason,
             )
+        ),
+        **project_stage_diagnostics(
+            None, request_state=state, request_reason=reason
         ),
     }
 
@@ -582,6 +586,7 @@ def load_selected_run_status(
         "rows": rows,
         "trust": [trust],
         **readiness_fields,
+        **project_stage_diagnostics(report),
     }
 
 

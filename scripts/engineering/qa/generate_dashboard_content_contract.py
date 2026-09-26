@@ -56,6 +56,12 @@ _ALLOWED_STATES = [
     "VALID_EMPTY",
     "TELEMETRY_ABSENT",
     "N/A",
+    "READY",
+    "BLOCKED",
+    "INSUFFICIENT",
+    "UNSUPPORTED",
+    "SELECT RUN",
+    "QUERY ERROR",
 ]
 _RENDER_PROFILES = ["full_dark", "full_light", "zoom_200"]
 _ALLOWED_EMPTY_STATE_CLASSES = [

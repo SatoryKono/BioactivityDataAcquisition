@@ -1536,7 +1536,9 @@ def _pin_collapsed_rows_from(
 
 
 def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
-    if current_uid == "bioetl-runtime":
+    if current_uid == "bioetl-runtime" and any(
+        panel.get("id") == 9101 for panel in _root_panels(panels)
+    ):
         for panel in _root_panels(panels):
             if panel.get("id") == 9401:
                 panel["description"] = (

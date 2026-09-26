@@ -370,9 +370,123 @@ def _apply_overview(
             link for link in p["links"] if not link["title"].startswith(SHOW_ALL_ROWS_PREFIX)
         ]
 
+def strip_runtime_non_run_panels(dashboard: dict[str, Any]) -> None:
+    """Drop Diagnostics panels that do not assess the always-selected Run ID."""
+    if dashboard.get("uid") != "bioetl-runtime":
+        return
+
+    def assesses_run(panel: dict[str, Any]) -> bool:
+        if panel.get("id") in {1000, 9400}:
+            return True
+        if panel.get("type") == "row":
+            return True
+        blob = ""
+        for target in panel.get("targets") or []:
+            if isinstance(target, dict):
+                blob += str(target.get("expr") or "")
+                blob += str(target.get("url") or "")
+        return "run_id" in blob
+
+    def prune(nodes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        kept: list[dict[str, Any]] = []
+        for panel in nodes:
+            if not assesses_run(panel):
+                continue
+            children = panel.get("panels")
+            if isinstance(children, list):
+                panel["panels"] = prune(children)
+            if panel.get("type") == "row" and not panel.get("panels"):
+                continue
+            kept.append(panel)
+        return kept
+
+    dashboard["panels"] = prune(list(dashboard.get("panels") or []))
+    _pack_runtime_selected_run(dashboard)
+    for panel in walk(dashboard["panels"]):
+        if panel.get("id") != 9400:
+            continue
+        grid = panel.setdefault("gridPos", {})
+        grid["w"] = 24
+        grid["x"] = 0
+        note = (
+            " Run ID is always selected on Trust, Overview, Pipeline Diagnostics,"
+            " Provider Health, and Data Quality. Panels that do not assess that run"
+            " are not on this dashboard."
+        )
+        description = str(panel.get("description") or "")
+        if "Run ID is always selected" not in description:
+            panel["description"] = description + note
+
+
+def _pack_runtime_selected_run(dashboard: dict[str, Any]) -> None:
+    """Place the saved-run tables directly under the scope banner."""
+    by_id = {panel["id"]: panel for panel in walk(dashboard["panels"])}
+    placements = {
+        9993: {"x": 0, "y": 5, "w": 24, "h": 1},
+        9998: {"x": 0, "y": 6, "w": 24, "h": 4},
+        9402: {"x": 0, "y": 10, "w": 12, "h": 6},
+        9403: {"x": 12, "y": 10, "w": 12, "h": 6},
+        9450: {"x": 0, "y": 16, "w": 24, "h": 1},
+        9451: {"x": 0, "y": 17, "w": 24, "h": 8},
+        9452: {"x": 0, "y": 25, "w": 24, "h": 8},
+    }
+    for panel_id, grid in placements.items():
+        panel = by_id.get(panel_id)
+        if panel is None:
+            continue
+        panel["gridPos"] = dict(grid)
+        if panel.get("type") == "row":
+            panel["collapsed"] = False
+    _ensure_stage_panel(by_id)
+
+
+def _ensure_stage_panel(by_id: dict[int, dict[str, Any]]) -> None:
+    """Show saved stage rows for the always-selected Run ID."""
+    if 9460 in by_id:
+        return
+    parent = by_id.get(9993)
+    if parent is None:
+        return
+    panel = {
+        "id": 9460,
+        "type": "table",
+        "title": "Inspect Selected Run Stages",
+        "description": (
+            "SELECTED RUN · Saved stage rows for the exact Run ID. "
+            "SUCCESS with missing stage evidence stays INCOMPLETE. "
+            "A recorded zero stays 0. An unknown count is empty, not 0. "
+            "UNFINISHED means no terminal event. Prometheus does not change this table."
+        ),
+        "gridPos": {"x": 0, "y": 33, "w": 24, "h": 8},
+        "datasource": "BioETL Ops HTTP",
+        "targets": [
+            {
+                "refId": "A",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "root_selector": "stage_diagnostics",
+                "url": (
+                    "/ops/observability/selected-run-status?pipeline=${pipeline}"
+                    "&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+                ),
+                "url_options": {"method": "GET", "data": ""},
+            }
+        ],
+        "fieldConfig": {"defaults": {}, "overrides": []},
+        "options": {"showHeader": True, "cellHeight": "sm", "footer": {"show": False}},
+    }
+    parent.setdefault("panels", []).append(panel)
+    by_id[9460] = panel
+
+
 def _apply_runtime(
     dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
 ) -> None:
+        if 9401 not in panels or 2460 not in panels:
+            strip_runtime_non_run_panels(dashboard)
+            return
         panels[9401]["options"]["colorMode"] = "value"
         p = panels[2460]
         p["targets"][0]["expr"] = (
@@ -461,6 +575,7 @@ def _apply_runtime(
             if "oldest required" in panels[9102]["description"]
             else " Rule age is the oldest required group; missing groups return UNKNOWN."
         )
+        strip_runtime_non_run_panels(dashboard)
 
 def _apply_provider_health(
     _dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
