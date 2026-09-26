@@ -403,11 +403,11 @@
         "x": 0,
         "y": 2
       },
-      "description": "SELECTED RUN · Read exact replay readiness first, then the saved Trust verdict, then retention. Those three answers use the selected Run ID. They do not use current Prometheus telemetry.",
+      "description": "SELECTED RUN · Read exact replay readiness first, then the saved Trust verdict, then retention. Blockers for that readiness are in Review Exact Replay Checks. Those three answers use the selected Run ID. They do not use current Prometheus telemetry.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">SELECTED RUN · Read exact replay readiness first, then the saved Trust verdict, then retention.</div>",
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">SELECTED RUN · Read exact replay readiness first, then the saved Trust verdict, then retention. Blockers for that readiness are in <em>Review Exact Replay Checks</em>.</div>",
         "dataLinks": [
           {
             "title": "Open Replay Safety Diagnostics",
@@ -448,7 +448,7 @@
         "y": 7
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Processing result is the saved ETL outcome. Saved trust verdict is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded. The time range does not change these values.",
+      "description": "SELECTED RUN · Processing result is the saved ETL outcome. Saved trust verdict is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -2065,7 +2065,7 @@
           "id": 9423,
           "type": "table",
           "title": "Review Exact Replay Checks",
-          "description": "SELECTED RUN · Individual checks behind Replay Readiness. Fail blocks replay; unknown means the check could not be confirmed. Evidence references point into the saved report.",
+          "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass.",
           "datasource": "BioETL Ops HTTP",
           "targets": [
             {
@@ -2408,7 +2408,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Provides full run IDs, hashes, artifact references, lineage references, snapshots, and checkpoint values for copying. These values come from BioETL Ops HTTP and are never Prometheus labels. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Inspect value opens full identifiers as selectable plain text.",
+          "description": "SELECTED RUN · Full identifiers for this Run ID. Use Inspect to copy a hash or reference. A short cell is not a missing value.",
           "fieldConfig": {
             "defaults": {
               "custom": {
