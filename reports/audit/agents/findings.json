@@ -1,303 +1,404 @@
 {
   "domain_id": "agents-runtime",
   "prompt_id": "prompt.audit.agents-runtime",
-  "surface_score": 1,
-  "head": "32d77a51e556",
-  "audit_mode": "full",
-  "checked_at": "2026-09-25T08:42:45Z",
+  "surface_score": 2,
+  "blocked": false,
+  "proven_count": 10,
+  "p0_p1_count": 0,
+  "audit_date": "2026-09-26",
+  "mode": "audit",
+  "baseline_commit": "e1c184857e46",
+  "read_worktree": ".worktrees/nine-domain-audit-9f71c6444175",
+  "scope": [
+    "AGENTS.md",
+    ".codex/**",
+    ".junie/**",
+    ".devin/**",
+    "docs/00-project/ai/**"
+  ],
+  "summary_ru": "Runtime Codex/Junie/Devin согласован, зеркала и skills parity автоматизированы; Gemini не SSOT. Основные пробелы — битая ссылка в nine-domain pack index, устаревший docs-mirror orchestration policy и упрощённые зоны записи ролей, не совпадающие с ORCHESTRATION.",
+  "top_remediations": [
+    "Исправить путь карты domain 5 в docs/00-project/ai/prompts/library/audit/generic-nine.pack.md на library/audit/github-actions.md.",
+    "Обновить docs/00-project/ai/agents/policy/agent-orchestration-rules.md: версия, Last verified, зоны записи по runtime ORCHESTRATION.",
+    "Документировать gemini-memory.json в memory/README.md и убрать дубликаты матрицы ролей.",
+    "Снять misleading «active runtime source» с docs-mirror ORCHESTRATION при сохранении mirror banner.",
+    "Добавить CI/hygiene проверку существования путей в pack index tables."
+  ],
+  "checks": {
+    "junie_mirror": "OK",
+    "skills_mirror": "OK",
+    "prompts_check": "OK"
+  },
   "findings": [
     {
-      "id": "AGENTS-001",
-      "finding_id": "AGENTS-001",
-      "fingerprint": "410629a92c75dfa945ea5e9da505bcf9023becde13d5685b5449217103ee0f63",
-      "requirement_id": "REQ-GOV-006",
-      "domain": "agents-runtime",
-      "path": ".devin/agents/DEVIN-SETUP-GUIDE.md:57-68",
-      "observation": "Документированные tier-цели Devin MCP не совпадают с флагами, которые реально принимает launcher.",
-      "method": "inspection of Makefile targets, start-shared.sh case, health-shared.sh case, shared-servers.json daily flags",
-      "expected": "make devin-mcp-start и tier-цели minimal/standard/full вызывают режимы, которые start-shared.sh и health-shared.sh принимают, и описание профиля совпадает с набором серверов.",
-      "actual": "start-shared.sh принимает только --all и --daily. Makefile передаёт --minimal и --standard. health-shared.sh отвергает аргументы minimal и standard (exit 2). devin-mcp-start и devin-mcp-start-full оба вызывают --daily. В каталоге 19 серверов, daily=true только у 9. Гайд пишет, что devin-mcp-start по умолчанию standard и что full — это all 18 servers.",
-      "impact": "Оператор, следующий DEVIN-SETUP-GUIDE, запускает цели, которые падают, либо получает daily-плоскость вместо заявленных standard/full. Docker, Grafana, Prometheus и neo4j в daily не входят.",
+      "id": "AGRT-001",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
       "confidence": "high",
-      "confidence_score": 0.93,
+      "confidence_score": 0.98,
       "status": "PROVEN",
-      "evidence_class": "CONTRADICTION",
-      "priority": "P1",
-      "severity": "High",
-      "category": "instruction-conflict",
-      "claim": "Tiered Devin MCP Make targets and DEVIN-SETUP-GUIDE profile text do not match the flags implemented by start-shared.sh and health-shared.sh.",
-      "broken_invariant": "QG-DOC-001: contributor-facing commands must stay synchronized with the executable surface (RULES.md §4.5, projected by REQ-GOV-006).",
-      "root_cause": "Devin MCP tier Make targets invoke launcher flags that start-shared.sh and health-shared.sh do not implement",
-      "affected_paths": [
-        ".devin/agents/DEVIN-SETUP-GUIDE.md",
-        "Makefile",
-        "scripts/ops/runtime/mcp/health-shared.sh",
-        "scripts/ops/runtime/mcp/start-shared.sh"
-      ],
-      "evidence": {
-        "path": ".devin/agents/DEVIN-SETUP-GUIDE.md",
-        "line": 68,
-        "symbol": "make devin-mcp-start defaults to the standard profile",
-        "command": "static compare: Makefile devin-mcp-start* vs start-shared.sh case vs health-shared.sh case vs shared-servers.json",
-        "scope": "E:/github/BioactivityDataAcquisition/.worktrees/nine-domain-20260925",
-        "timestamp": "2026-09-25T08:42:45Z",
-        "exit_code": 0,
-        "output": "SERVER_COUNT 19; DAILY_TRUE 9; DAILY_FALSE 10; SH_MINIMAL False; SH_STANDARD False"
-      },
-      "acceptance": "Каждая цель devin-mcp-start* вызывает существующий режим launcher и health probe, а текст гайда называет тот же набор серверов, что и каталог.",
-      "validation_commands": [
-        "rg -n \"devin-mcp-start\" Makefile .devin/agents/DEVIN-SETUP-GUIDE.md",
-        "rg -n \"--minimal|--standard|--all|--daily\" scripts/ops/runtime/mcp/start-shared.sh scripts/ops/runtime/mcp/health-shared.sh"
-      ],
-      "rollback": "Вернуть прежние строки гайда и Makefile, если новый контракт флагов окажется неверным.",
-      "owner_surface": "devin",
-      "remediation": "Выбрать один контракт профилей. Либо научить start-shared.sh и health-shared.sh режимам minimal/standard/all и поправить счётчик 19, либо переписать DEVIN-SETUP-GUIDE и echo в Makefile на --daily/--all, которые код уже принимает.",
-      "effort": "M",
-      "automation": "Архитектурный тест: разбор флагов Makefile против case в start-shared.sh и health-shared.sh.",
-      "automated_fix_possible": false,
-      "dependencies": [],
-      "validation": [
-        "Флаги Makefile входят в case start-shared.sh и health-shared.sh"
-      ]
-    },
-    {
-      "id": "AGENTS-002",
-      "finding_id": "AGENTS-002",
-      "fingerprint": "ccd532d7327aa404064fab517ad05db75b0340fdc3aa0ce2da7e68947b6dfa40",
-      "requirement_id": "REQ-GOV-006",
-      "domain": "agents-runtime",
-      "path": "docs/00-project/ai/skills/local/openai-docs/SKILL.md:2",
-      "observation": "Четыре skill-зеркала объявляют канонический runtime-файл под .codex/skills, которого в дереве нет.",
-      "method": "rglob SKILL.md under .codex/skills and docs/00-project/ai/skills/local; compare Canonical runtime source header to filesystem",
-      "expected": "Заголовок зеркала указывает на существующий runtime-файл, либо явно называет overlay docs/00-project/ai/skills/_references/local и не предлагает его как Codex SSOT.",
-      "actual": "Нет .codex/skills/{gh-address-comments,gh-fix-ci,openai-docs,public/architecture-guardian}/SKILL.md. Файлы лежат в reference overlay и копируются в docs local. openai-docs/SKILL.md:39 велит сразу повторить команду с escalated permissions. check skill-mirrors проходит, потому что ожидаемое дерево генерируется тем же правилом.",
-      "impact": "Агент может править несуществующий runtime path или выполнить инструкцию эскалации прав из зеркала, которое само помечено как non-canonical.",
-      "confidence": "high",
-      "confidence_score": 0.91,
-      "status": "PROVEN",
-      "evidence_class": "CONTRADICTION",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "mirror-drift",
-      "claim": "Four docs skill mirrors name a .codex/skills canonical path that is absent from the Codex skill tree.",
-      "broken_invariant": "QG-GOV-001: documentation must not contradict AGENTS.md. Docs mirrors are not runtime SSOT and must not point at a missing runtime source.",
-      "root_cause": "Docs skill mirror header stamps a .codex/skills path for overlay-only skills that are not in the Codex skill tree",
-      "affected_paths": [
-        "docs/00-project/ai/skills/_references/local/openai-docs/SKILL.md",
-        "docs/00-project/ai/skills/local/gh-address-comments/SKILL.md",
-        "docs/00-project/ai/skills/local/gh-fix-ci/SKILL.md",
-        "docs/00-project/ai/skills/local/openai-docs/SKILL.md",
-        "docs/00-project/ai/skills/local/public/architecture-guardian/SKILL.md",
-        "scripts/ai/sync/governance.py"
-      ],
-      "evidence": {
-        "path": "docs/00-project/ai/skills/local/openai-docs/SKILL.md",
-        "line": 2,
-        "symbol": "Canonical runtime source: .codex/skills/openai-docs/SKILL.md",
-        "command": "python inventory of SKILL.md canonical headers vs .codex/skills",
-        "scope": ".codex/skills and docs/00-project/ai/skills",
-        "timestamp": "2026-09-25T08:42:45Z",
-        "exit_code": 0,
-        "output": "CODEX_SKILLS 14; OVERLAY 4; MISSING_CANONICAL gh-address-comments, gh-fix-ci, openai-docs, public/architecture-guardian"
-      },
-      "acceptance": "Каждый Canonical runtime source в docs local существует, либо overlay-only skills не получают путь .codex/skills.",
-      "validation_commands": [
-        "python -m scripts.ai.sync.governance --root . --only skill-mirrors --check",
-        "Test-Path .codex/skills/openai-docs/SKILL.md"
-      ],
-      "rollback": "Откатить правку генератора заголовка, если overlay снова должен публиковаться как зеркало Codex.",
-      "owner_surface": "docs",
-      "remediation": "В scripts/ai/sync/governance.py не подставлять .codex/skills для путей, которых нет в canonical root. Для overlay указать реальный источник. Убрать из openai-docs инструкцию немедленной эскалации прав.",
-      "effort": "M",
-      "automation": "Проверка: каждый Canonical runtime source header резолвится в существующий файл.",
-      "automated_fix_possible": false,
-      "dependencies": [],
-      "validation": [
-        "Отсутствующие .codex/skills/*/SKILL.md не числятся canonical runtime source"
-      ]
-    },
-    {
-      "id": "AGENTS-003",
-      "finding_id": "AGENTS-003",
-      "fingerprint": "e06af5506dc3c91e367a86d834c062af95c4936c3e53b79cbe2a53121d1bc056",
-      "requirement_id": "REQ-GOV-006",
-      "domain": "agents-runtime",
-      "path": ".devin/agents/py-audit-bot/AGENT.md:378",
-      "observation": "Блок Verification Commands вызывает make security, такой цели в Makefile нет.",
-      "method": "rg Makefile targets ^security and ^security-check; read AGENT.md verification fence",
-      "expected": "Команда аудита совпадает с целью Makefile security-check.",
-      "actual": "AGENT.md:378 содержит make security. Makefile:380 определяет security-check и не определяет security.",
-      "impact": "Финальный шаг verification у py-audit-bot завершается ошибкой Make, security-тесты не запускаются.",
-      "confidence": "high",
-      "confidence_score": 0.96,
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "wrong-command",
-      "claim": "py-audit-bot tells the operator to run make security, and that target is not defined.",
-      "broken_invariant": "QG-DOC-001: contributor-facing commands must match the executable surface.",
-      "root_cause": "py-audit-bot verification instructions name a Makefile target that does not exist",
-      "affected_paths": [
-        ".devin/agents/py-audit-bot/AGENT.md",
-        "Makefile"
-      ],
-      "evidence": {
-        "path": ".devin/agents/py-audit-bot/AGENT.md",
-        "line": 378,
-        "symbol": "make security"
-      },
-      "acceptance": "В verification block стоит существующая цель security-check.",
-      "validation_commands": [
-        "rg -n \"^security\" Makefile",
-        "rg -n \"make security\" .devin/agents/py-audit-bot/AGENT.md"
-      ],
-      "rollback": "Вернуть прежнюю строку команды, если появится отдельная цель security.",
-      "owner_surface": "devin",
-      "remediation": "Заменить make security на make security-check в .devin/agents/py-audit-bot/AGENT.md и в зеркалах того же блока, если они есть.",
+      "category": "prompts-navigation",
+      "path": "docs/00-project/ai/prompts/library/audit/generic-nine.pack.md:25",
+      "observation": "Nine-domain pack index maps prompt.audit.github-actions to library/tests/cycle.md, which does not exist.",
+      "method": "Read generic-nine.pack.md; Glob library/tests/cycle.md under docs/00-project/ai/prompts",
+      "expected": "Row 5 card path resolves to library/audit/github-actions.md (canonical card prompt.audit.github-actions).",
+      "actual": "Row 5 points at library/tests/cycle.md; file missing. Canonical card exists at library/audit/github-actions.md.",
+      "impact": "Operator nine-domain fan-out and manual routing to domain 5 fail or land on wrong card.",
+      "root_cause": "Stale index row; preflight for run 20260926T084327Z-e1c184857e46-nine already recorded the drift.",
+      "remediation": "Replace library/tests/cycle.md with library/audit/github-actions.md in generic-nine.pack.md row 5.",
       "effort": "S",
-      "automation": "Тест: каждый make <target> в .devin/agents/**/*.md есть среди целей Makefile.",
+      "automation": "Extend scripts.ai.prompts check to validate pack index card paths",
       "automated_fix_possible": true,
-      "dependencies": [],
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/prompts/library/audit/generic-nine.pack.md",
+          "line": 25,
+          "command": "read pack index table",
+          "observation": "library/tests/cycle.md reference"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/library/audit/github-actions.md",
+          "line": 1,
+          "command": "file exists",
+          "observation": "canonical github-actions audit card present"
+        }
+      ],
       "validation": [
-        "rg не находит make security в .devin/agents"
+        "test path exists: docs/00-project/ai/prompts/library/audit/github-actions.md",
+        "python -m scripts.ai.prompts check (after index fix + optional lint extension)"
       ]
     },
     {
-      "id": "AGENTS-004",
-      "finding_id": "AGENTS-004",
-      "fingerprint": "0ac4daa3b096b2e9db0955457772ff745a295b8e0e6d872d48d2994de2e9c48f",
-      "requirement_id": "REQ-GOV-006",
-      "domain": "agents-runtime",
-      "path": ".codex/agents/CODEX-RUNTIME.md:70-73",
-      "observation": "Абзац Native Project Discovery склеивает две инструкции в одну нечитаемую фразу, хотя следующая команда doctor.py существует.",
-      "method": "read .codex/agents/CODEX-RUNTIME.md:70-73; confirm doctor.py mode static and --no-write",
-      "expected": "Отдельное предложение: чем валидировать surfaces, и отдельная команда doctor.py static --no-write.",
-      "actual": "Текст: Validate these surfaces with `python -m` is not used here; затем Windows-команда .venv-win Scripts python.exe scripts/ai/codex/doctor.py static --no-write. Режим static и флаг --no-write в doctor.py есть.",
-      "impact": "Агент может прочитать фразу как запрет python -m и пропустить валидацию discovery surfaces. Сама команда doctor при этом корректна.",
+      "id": "AGRT-002",
+      "requirement_id": "REQ-GOV-*",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "docs-runtime-drift",
+      "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md:31-38",
+      "observation": "Docs mirror lists narrow write zones (e.g. py-config-bot configs/ only) while runtime ORCHESTRATION grants workspace write for schema and contract remediation.",
+      "method": "Compare agent-orchestration-rules.md subagent table vs .codex/agents/ORCHESTRATION.md governed roles",
+      "expected": "Published orchestration mirror matches runtime authority columns or explicitly defers without contradicting them.",
+      "actual": "Mirror table restricts py-config-bot to configs/, py-test-bot to tests/, py-doc-bot to docs/; runtime uses workspace write with broader remediation scopes.",
+      "impact": "Agents reading the docs mirror may under-scope legitimate config/schema/doc fixes or conflict with native descriptors.",
+      "root_cause": "Legacy simplified Russian mirror table not refreshed after ORCHESTRATION workspace-write semantics.",
+      "remediation": "Replace Зона записи column with runtime ORCHESTRATION authority text or mark mirror as historical and link only.",
+      "effort": "S",
+      "automation": "Optional docs drift test comparing mirror tables to .codex/agents/ORCHESTRATION.md",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md",
+          "line": 37,
+          "command": "read subagent table",
+          "observation": "py-config-bot zone configs/"
+        },
+        {
+          "path": ".codex/agents/ORCHESTRATION.md",
+          "line": 32,
+          "command": "read governed roles",
+          "observation": "py-config-bot workspace write for schema and contract remediation"
+        }
+      ],
+      "validation": [
+        "Manual diff agent-orchestration-rules.md vs .codex/agents/ORCHESTRATION.md authority column"
+      ]
+    },
+    {
+      "id": "AGRT-003",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "category": "docs-metadata",
+      "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md:3-18",
+      "observation": "Front matter Version 2.1.0 and Last verified 2026-03-31 contradict in-body Версия 2.2.0 pointer-only contract.",
+      "method": "Read policy header and body version lines",
+      "expected": "Single version stamp and Last verified aligned with runtime ORCHESTRATION and AGENTS.md guardrails.",
+      "actual": "Header Version 2.1.0 / Last verified 2026-03-31 vs body Версия 2.2.0 dated implicitly newer.",
+      "impact": "Contributors cannot trust freshness of orchestration guidance; stale Cursor-specific Agent tool instructions may persist.",
+      "root_cause": "Partial edit updated body pointer without refreshing YAML-style header metadata.",
+      "remediation": "Unify version to 2.2.0 (or bump once), set Last verified to current review date, trim Cursor-only Agent tool wording or label as Cursor-only appendix.",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md",
+          "line": 3,
+          "command": "read header",
+          "observation": "Version: 2.1.0"
+        },
+        {
+          "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md",
+          "line": 18,
+          "command": "read body",
+          "observation": "Версия: 2.2.0 pointer only"
+        }
+      ],
+      "validation": [
+        "grep Version / Версия / Last verified in agent-orchestration-rules.md after edit"
+      ]
+    },
+    {
+      "id": "AGRT-004",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
       "confidence": "high",
       "confidence_score": 0.9,
       "status": "PROVEN",
-      "evidence_class": "FACT",
+      "category": "mirror-discoverability",
+      "path": "docs/00-project/ai/agents/agents/ORCHESTRATION.md:16",
+      "observation": "Docs mirror banner states non-canonical mirror, but body still opens with Status: active runtime source.",
+      "method": "Read mirror banner and status line; compare to AI_RUNTIME_MIRROR_OWNERSHIP unacceptable drift rules",
+      "expected": "Mirror copy avoids claiming runtime SSOT; runtime file .codex/agents/ORCHESTRATION.md holds status.",
+      "actual": "Lines 1-4 declare mirror; line 16 repeats active runtime source wording copied from canonical file.",
+      "impact": "Discoverability risk: operators may edit docs path believing it is authoritative runtime.",
+      "root_cause": "Mirror sync copies runtime header verbatim without normalizing status for published mirror layer.",
+      "remediation": "Replace status line in docs mirror with mirror-specific status or omit; keep edit-runtime-first banner.",
+      "effort": "S",
+      "automation": "Optional mirror lint forbidding 'active runtime source' under docs/00-project/ai/agents/agents/",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/agents/ORCHESTRATION.md",
+          "line": 1,
+          "command": "read banner",
+          "observation": "not a canonical runtime surface"
+        },
+        {
+          "path": "docs/00-project/ai/agents/agents/ORCHESTRATION.md",
+          "line": 16,
+          "command": "read status",
+          "observation": "Status: active runtime source"
+        }
+      ],
+      "validation": [
+        "Body from # BioETL Codex orchestration remains identical to .codex/agents/ORCHESTRATION.md after header tweak"
+      ]
+    },
+    {
+      "id": "AGRT-005",
+      "requirement_id": "GAP",
       "priority": "P3",
       "severity": "Low",
-      "category": "discoverability",
-      "claim": "CODEX-RUNTIME joins the discovery validation lead-in and the doctor command into one ungrammatical instruction.",
-      "broken_invariant": "QG-DOC-001: contributor-facing commands must be unambiguous.",
-      "root_cause": "CODEX-RUNTIME native discovery paragraph joins two sentences into one invalid instruction",
-      "affected_paths": [
-        ".codex/agents/CODEX-RUNTIME.md"
+      "confidence": "high",
+      "confidence_score": 0.97,
+      "status": "PROVEN",
+      "category": "docs-hygiene",
+      "path": "docs/00-project/ai/memory/README.md:32-42",
+      "observation": "Role Memory Coverage Matrix contains duplicate rows for py-audit-bot (three times) and py-test-bot (twice).",
+      "method": "Read Role Memory Coverage Matrix table",
+      "expected": "One row per governed py-* role profile.",
+      "actual": "Duplicates inflate matrix and obscure coverage truth.",
+      "impact": "Navigation noise; operators may assume extra memory sheets exist.",
+      "root_cause": "Copy-paste error during matrix expansion.",
+      "remediation": "Deduplicate table to six unique py-* roles matching runtime profiles.",
+      "effort": "S",
+      "automation": "Optional markdown table uniqueness test",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 34,
+          "command": "read matrix",
+          "observation": "py-audit-bot listed repeatedly"
+        }
       ],
-      "evidence": {
-        "path": ".codex/agents/CODEX-RUNTIME.md",
-        "line": 71,
-        "symbol": "python -m is not used here"
-      },
-      "acceptance": "Абзац содержит одну ясную команду doctor.py static --no-write для Windows и одну для остальных ОС.",
-      "validation_commands": [
-        "rg -n \"python -m . is not used here\" .codex/agents/CODEX-RUNTIME.md"
-      ],
-      "rollback": "Вернуть текущий абзац, если правка разойдётся с doctor CLI.",
-      "owner_surface": "codex",
-      "remediation": "Разделить фразу на два предложения. Команду doctor.py static --no-write оставить. Правку .codex синхронизировать с политикой mirror, не копируя runtime-only файл в Junie.",
+      "validation": [
+        "Count distinct roles in matrix equals six py-* profiles"
+      ]
+    },
+    {
+      "id": "AGRT-006",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "category": "memory-surface",
+      "path": "docs/00-project/ai/memory/README.md:50-53",
+      "observation": "memory/README documents mcp-memory.json as machine-readable artifact but omits gemini-memory.json although AGENTS.md lists both as non-human SSOT.",
+      "method": "Read memory README surface model; read AGENTS.md guardrails; confirm gemini-memory.json tracked",
+      "expected": "All tracked machine-readable memory JSON files listed with not-SSOT classification.",
+      "actual": "Only mcp-memory.json described; gemini-memory.json present under docs/00-project/ai/memory/ without README entry.",
+      "impact": "Operators may treat undocumented JSON as missing or accidentally promote it to human SSOT.",
+      "root_cause": "gemini-memory.json added without mirror README update.",
+      "remediation": "Add gemini-memory.json bullet mirroring AGENTS.md non-SSOT wording next to mcp-memory.json.",
       "effort": "S",
       "automation": "n/a",
       "automated_fix_possible": true,
-      "dependencies": [],
+      "evidence": [
+        {
+          "path": "AGENTS.md",
+          "line": 143,
+          "command": "read guardrails",
+          "observation": "gemini-memory.json machine-readable, not human SSOT"
+        },
+        {
+          "path": "docs/00-project/ai/memory/gemini-memory.json",
+          "line": 1,
+          "command": "file exists",
+          "observation": "tracked JSON present"
+        }
+      ],
       "validation": [
-        "Абзац Native Project Discovery читается как одна команда на платформу"
+        "grep gemini-memory.json docs/00-project/ai/memory/README.md after update"
       ]
     },
     {
-      "id": "AGENTS-005",
-      "finding_id": "AGENTS-005",
-      "fingerprint": "3f89ccc849940c19452cb9e2c297c82c991912981aa6c804edb6e2fe08cb8515",
+      "id": "AGRT-007",
       "requirement_id": "GAP",
-      "domain": "agents-runtime",
-      "path": ".devin/agents/py-test-bot/AGENT.md:16",
-      "observation": "py-test-bot разрешает Exec(make) без ограничения цели, тогда как Write ограничен tests/**.",
-      "method": "read permissions frontmatter; read Makefile clean-all and quarantine-purge",
-      "expected": "Exec-allow не шире заявленного write scope, либо в репозитории есть SSOT, что Exec(make) не обходит Write deny.",
-      "actual": "allow содержит Exec(make), Exec(pytest), Exec(python) и Write(tests/**). deny закрывает Write(src|configs|docs) и Exec(gh). Makefile clean-all (строка 363) вызывает cleanup --apply --purge-logs без обязательного dry-run. Семантика сопоставления Exec(make) с аргументами в Devin CLI в репозитории не зафиксирована.",
-      "impact": "Если CLI трактует Exec(make) как любой рецепт, тестовый профиль может вызвать clean-all, docker-* или quarantine-purge. Это не наблюдалось в запуске.",
-      "confidence": "medium",
-      "confidence_score": 0.55,
-      "status": "NOT_PROVEN",
-      "evidence_class": "INFERENCE",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "least-privilege",
-      "claim": "py-test-bot Exec(make) can invoke destructive Makefile targets despite a tests-only write allow.",
-      "broken_invariant": "Audit card least-privilege separation. No REQ-* states that Exec() grants must be target-scoped.",
-      "root_cause": "py-test-bot grants Exec(make) without limiting targets while write scope is tests only",
-      "affected_paths": [
-        ".devin/agents/py-test-bot/AGENT.md",
-        "Makefile"
-      ],
-      "evidence": {
-        "path": ".devin/agents/py-test-bot/AGENT.md",
-        "line": 16,
-        "symbol": "Exec(make)"
-      },
-      "acceptance": "Либо Exec ограничен тестовыми целями, либо опубликованное правило Devin доказывает, что аргументы Make не покрываются Exec(make).",
-      "validation_commands": [
-        "rg -n \"Exec\\(make\\)\" .devin/agents/py-test-bot/AGENT.md"
-      ],
-      "rollback": "Вернуть широкий Exec(make), если узкий список целей ломает легитимный прогон тестов.",
-      "owner_surface": "devin",
-      "remediation": "Сузить allow до Exec(pytest) и явных test-целей. Не применять, пока нет SSOT о семантике Exec. Сейчас это не основание для Issue.",
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": false,
-      "dependencies": [],
-      "validation": [
-        "Документированная семантика Exec Devin или суженный allow"
-      ]
-    },
-    {
-      "id": "AGENTS-006",
-      "finding_id": "AGENTS-006",
-      "fingerprint": "02e3992ed1863729dcf75541933179cf620678ad0bf33757a218207617e36ba8",
-      "requirement_id": "REQ-GOV-011",
-      "domain": "agents-runtime",
-      "path": ".devin/config.json:3-26",
-      "observation": "Read(**/.env*) стоит и в ask, и в allow; Write(**/.env*) стоит и в ask, и в deny.",
-      "method": "read .devin/config.json permissions; read setup_mcp.py _write_devin_config ask injection; search repo for deny-vs-ask precedence",
-      "expected": "Однозначный класс: чтение .env разрешено политикой, запись запрещена без явного approval, и списки не противоречат друг другу.",
-      "actual": "ask содержит Read и Write. allow содержит Read(**/.env*). deny содержит Write(**/.env*). setup_mcp.py:724-726 только добавляет оба правила в ask. Правило приоритета ask/allow/deny в репозитории не найдено. Ослабление защиты .env не доказано.",
-      "impact": "Неизвестно, спросит ли CLI перед чтением .env и заблокирует ли запись. Секрет в отчёт не копировался.",
-      "confidence": "low",
-      "confidence_score": 0.35,
-      "status": "NOT_PROVEN",
-      "evidence_class": "INFERENCE",
       "priority": "P3",
       "severity": "Low",
-      "category": "permissions",
-      "claim": "Overlapping .env permission classes in .devin/config.json change the effective read or write outcome.",
-      "broken_invariant": "REQ-GOV-011 / QG-SEC-002: .env protections must not be weakened. Effective ACL winner is not evidenced.",
-      "root_cause": "Tracked Devin permissions list .env read and write in more than one class and the repo does not state which class wins",
-      "affected_paths": [
-        ".devin/config.json",
-        "scripts/ai/codex/setup_mcp.py"
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "status": "PROVEN",
+      "category": "prompts-automation-gap",
+      "path": "docs/00-project/ai/prompts/library/audit/generic-nine.pack.md:25",
+      "observation": "python -m scripts.ai.prompts check reports OK while pack index contains a broken card path.",
+      "method": "Run scripts.ai.prompts check; independently verify missing library/tests/cycle.md",
+      "expected": "Prompt hygiene gate fails or warns on non-resolving pack index paths.",
+      "actual": "check exits 0 with zero warnings; broken path remains undetected.",
+      "impact": "Repeatable operator kit misroutes until manual preflight catches drift.",
+      "root_cause": "Prompt check scope covers registry cards but not pack index tables.",
+      "remediation": "Add pack index path validation to scripts.ai.prompts check or dedicated lint.",
+      "effort": "M",
+      "automation": "CI extension on scripts.ai.prompts check",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/prompts/library/audit/generic-nine.pack.md",
+          "line": 25,
+          "command": "missing path",
+          "observation": "library/tests/cycle.md absent"
+        }
       ],
-      "evidence": {
-        "path": ".devin/config.json",
-        "line": 4,
-        "symbol": "permissions.ask Read(**/.env*)"
-      },
-      "acceptance": "В конфиге и в документации Devin один победитель для Read/Write .env, согласованный с env guardrail.",
-      "validation_commands": [
-        "rg -n \"Read\\(\\*\\*/\\.env\" .devin/config.json scripts/ai/codex/setup_mcp.py"
-      ],
-      "rollback": "Не менять permissions, пока семантика CLI не подтверждена.",
-      "owner_surface": "devin",
-      "remediation": "Зафиксировать precedence в DEVIN-RUNTIME и оставить в config.json только согласованные классы. До этого Issue не открывать.",
+      "validation": [
+        "python -m scripts.ai.prompts check (currently passes)",
+        "future: check fails when index path missing"
+      ]
+    },
+    {
+      "id": "AGRT-008",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "medium",
+      "confidence_score": 0.75,
+      "status": "PROVEN",
+      "category": "docs-freshness",
+      "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md:10",
+      "observation": "AI_RUNTIME_MIRROR_OWNERSHIP Last verified 2026-08-06 lags recent runtime parity contract and Junie/Devin ownership edits on main.",
+      "method": "Read Last verified header; compare to junie-mirror-contract.json version 1.1.0 and skills-consistency workflow paths",
+      "expected": "Ownership contract re-verified after material runtime mirror policy changes.",
+      "actual": "Last verified date predates several 2026-09 runtime doc updates (e.g. agents README 2026-09-25).",
+      "impact": "Stale verification stamp weakens trust in ownership matrix during contributor onboarding.",
+      "root_cause": "Policy doc not bumped on adjacent runtime changes.",
+      "remediation": "Re-read ownership matrix against current trees; bump Last verified after review.",
       "effort": "S",
       "automation": "n/a",
       "automated_fix_possible": false,
-      "dependencies": [],
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
+          "line": 10,
+          "command": "read header",
+          "observation": "Last verified: 2026-08-06"
+        },
+        {
+          "path": "docs/00-project/ai/agents/README.md",
+          "line": 10,
+          "command": "read header",
+          "observation": "Last verified: 2026-09-25"
+        }
+      ],
       "validation": [
-        "Один класс на Read .env и один на Write .env"
+        "Update Last verified after manual ownership review"
+      ]
+    },
+    {
+      "id": "AGRT-009",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "runtime-platform-hints",
+      "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md:29",
+      "observation": "Docs mirror instructs use of Cursor-specific Agent tool and subagent_type table though file claims pointer-only to Codex ORCHESTRATION.",
+      "method": "Read agent-orchestration-rules.md; rg Agent tool in .codex/agents",
+      "expected": "Platform-specific invocation lives in Cursor rules or runtime files, not generic orchestration policy mirror.",
+      "actual": "Agent tool guidance present in docs policy; absent from .codex/agents runtime tree.",
+      "impact": "Junie/Codex/Devin sessions may follow inapplicable tooling instructions if they load this mirror first.",
+      "root_cause": "Historical Cursor-centric orchestration doc retained after runtime split.",
+      "remediation": "Move Agent tool section to docs/00-project/ai/rules/cursor/ or label section Cursor-only; keep policy mirror as link-only.",
+      "effort": "M",
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md",
+          "line": 29,
+          "command": "read text",
+          "observation": "используй субагентов через Agent tool"
+        },
+        {
+          "path": ".codex/agents/ORCHESTRATION.md",
+          "line": 23,
+          "command": "rg Agent tool",
+          "observation": "no Agent tool references in runtime ORCHESTRATION"
+        }
+      ],
+      "validation": [
+        "rg 'Agent tool' docs/00-project/ai/agents/policy/agent-orchestration-rules.md after refactor"
+      ]
+    },
+    {
+      "id": "AGRT-010",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.93,
+      "status": "PROVEN",
+      "category": "gemini-ssot-guard",
+      "path": "AGENTS.md:137-139",
+      "observation": "Gemini anti-SSOT guard is present in AGENTS.md and guides/GEMINI.md; tracked helper scripts under scripts/ai/gemini/ exist for local convenience only.",
+      "method": "Glob root GEMINI.md and .gemini/agents; read AGENTS.md Gemini guard; list scripts/ai/gemini",
+      "expected": "No tracked Gemini behavior tree; optional local helpers clearly subordinate to AGENTS.md.",
+      "actual": "No root GEMINI.md or tracked .gemini/agents; scripts/ai/gemini/* present; docs guide GEMINI.md states not a runtime.",
+      "impact": "Low discoverability risk only: helpers could be mistaken for SSOT without reading AGENTS.md (mitigated by guide).",
+      "root_cause": "Intentional local helper surface coexistence with explicit governance ban on tracked Gemini tree.",
+      "remediation": "Add one-line cross-link from scripts/ai/gemini/README (if present) or setup scripts to docs/.../guides/GEMINI.md anti-SSOT notice.",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "AGENTS.md",
+          "line": 137,
+          "command": "read guardrails",
+          "observation": "Gemini is not a project runtime"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/GEMINI.md",
+          "line": 5,
+          "command": "read guide",
+          "observation": "Gemini CLI is not a supported runtime"
+        }
+      ],
+      "validation": [
+        "Confirm no tracked .gemini/agents on main",
+        "bash scripts/ai/junie/check_junie_mirror.sh --check"
       ]
     }
   ]

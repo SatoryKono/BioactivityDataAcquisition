@@ -7,7 +7,7 @@ import time
 from contextlib import AbstractContextManager
 from typing import TYPE_CHECKING, Protocol
 
-from httpx import Response
+from httpx import HTTPStatusError, Response
 
 from bioetl.infrastructure.adapters.common.error_bundles import (
     COMMON_TITLE_FALLBACK_ERRORS,
@@ -53,6 +53,7 @@ CROSSREF_RUNTIME_ERRORS: tuple[type[Exception], ...] = (
     *COMMON_TITLE_FALLBACK_ERRORS,
     ConnectionError,
     TimeoutError,
+    HTTPStatusError,
 )
 CROSSREF_FALLBACK_ERRORS: tuple[type[Exception], ...] = (
     CrossRefApiError,
