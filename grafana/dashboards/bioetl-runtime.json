@@ -1069,7 +1069,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Expected stage signals"
+              "options": "stages"
             },
             "properties": [
               {
@@ -1114,9 +1114,13 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Monitoring quality (10m)"
+              "options": "quality"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Monitoring quality (10m)"
+              },
               {
                 "id": "mappings",
                 "value": [
@@ -1183,22 +1187,16 @@
           "legendFormat": "Endpoint"
         },
         {
-          "expr": "min(bioetl_runtime_stage_evidence_present_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() vector(-1)",
+          "expr": "label_replace(min(bioetl_rt_stage_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() vector(-1),\"k\",\"stages\",\"\",\"\") or label_replace(bioetl_runtime_trust_gap_active_10m,\"k\",\"quality\",\"\",\"\")",
           "refId": "B",
           "instant": true,
-          "legendFormat": "Expected stage signals"
+          "legendFormat": "{{k}}"
         },
         {
           "expr": "bioetl_runtime_required_rule_age_seconds",
           "refId": "C",
           "instant": true,
           "legendFormat": "Rule age"
-        },
-        {
-          "refId": "D",
-          "expr": "bioetl_runtime_trust_gap_active_10m",
-          "instant": true,
-          "legendFormat": "Monitoring quality (10m)"
         }
       ],
       "title": "Monitor Coverage",

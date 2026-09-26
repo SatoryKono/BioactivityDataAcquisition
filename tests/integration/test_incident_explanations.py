@@ -59,7 +59,11 @@ def test_verification_is_presentation_only_and_not_health():
         source = (
             panels[pid] if pid == 2005 else panels[panels[pid]["targets"][0]["panelId"]]
         )
-        assert '"provider","^$"' in source["targets"][0]["expr"]
+        assert source["targets"][0]["expr"] == "bioetl_incident_global_alerts"
+        rules = Path(
+            "grafana/prometheus-rules/bioetl_observability.yml"
+        ).read_text(encoding="utf-8")
+        assert '"provider","^$"' in rules
         if pid == 22005:
             assert "expr" not in panels[pid]["targets"][0]
         assert _properties(panels[pid], "provider")["noValue"] == "Not provided"

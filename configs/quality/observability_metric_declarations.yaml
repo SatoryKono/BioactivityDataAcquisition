@@ -18,6 +18,7 @@ recording_rule_metrics:
   - bioetl_dq_monitor_disabled_current
   - bioetl_gold_terminal_records_15m
   - bioetl_incident_alert_priority
+  - bioetl_incident_global_alerts
   - bioetl_incident_ranked_dq
   - bioetl_incident_ranked_evidence
   - bioetl_incident_ranked_provider
@@ -73,7 +74,9 @@ recording_rule_metrics:
   - bioetl_provider_health_check_total_15m
   - bioetl_provider_health_status_fresh
   - bioetl_provider_range_operational_ok
+  - bioetl_pstatus
   - bioetl_replay_safety_blockers_15m
+  - bioetl_rt_stage_ratio
   - bioetl_runtime_alert_condition_checkpoint_incompatible_30m
   - bioetl_runtime_alert_condition_dq_critical_anomaly_30m
   - bioetl_runtime_alert_condition_dq_hard_fail_15m

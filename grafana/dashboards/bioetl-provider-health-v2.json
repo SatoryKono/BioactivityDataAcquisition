@@ -566,7 +566,7 @@
       },
       "targets": [
         {
-          "expr": "max(bioetl_provider_current_status{provider=~\"$provider\"} == 2) or max(bioetl_provider_current_status{provider=~\"$provider\"} == 1) or max(bioetl_provider_current_status{provider=~\"$provider\"} == 3) or max(bioetl_provider_current_status{provider=~\"$provider\"} == 0)",
+          "expr": "max(bioetl_pstatus{provider=~\"$provider\"} == 2) or max(bioetl_pstatus{provider=~\"$provider\"} == 1) or max(bioetl_pstatus{provider=~\"$provider\"} == 3) or max(bioetl_pstatus{provider=~\"$provider\"} == 0)",
           "refId": "A",
           "instant": true
         }
