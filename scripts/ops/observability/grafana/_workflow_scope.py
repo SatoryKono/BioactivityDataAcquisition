@@ -385,7 +385,7 @@ def apply_workflow_scope(payload: dict) -> None:
     for panel in panels:
         if panel.get("type") == "text" and panel.get("id") in {99, 9400}:
             suffix = (
-                "GLOBAL tables below cover all pipelines; suspects are not verified causes."
+                "GLOBAL tables below cover all pipelines; suspects are not verified causes. VALID_EMPTY is an empty suspect list, not a healthy fleet."
                 if payload["uid"] == "bioetl-incident-v1"
                 else (
                     "Open First Action; VERIFY means evidence is missing. "
@@ -410,7 +410,7 @@ def apply_workflow_scope(payload: dict) -> None:
                 }
             ]
             panel["description"] = (
-                "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed."
+                "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. Mapping: 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed."
             )
             panel["options"]["textMode"] = "value_and_name"
             panel["options"]["text"] = {"valueSize": 20, "titleSize": 12}

@@ -146,30 +146,34 @@ def _saved_run(p: dict[int, dict]) -> None:
         ],
     )
     panel["links"] = []
-    for field in ("Pipeline", "Run ID"):
-        _override(
-            p[9452],
-            field,
-            "mappings",
-            [
-                {
-                    "type": "value",
-                    "options": {
-                        ".*": {"text": "No run selected"},
-                        "-": {"text": "No run selected"},
-                    },
-                }
-            ],
-        )
-    _table(p[9452])
-    # Identity is a single evidence row: retain the full UUID and revision,
-    # including on narrow screens, rather than truncating provenance.
-    identity_custom = p[9452]["fieldConfig"]["defaults"]["custom"]
-    identity_custom["wrapText"] = True
-    identity_custom["cellOptions"]["wrapText"] = True
+    if 9452 in p:
+        for field in ("Pipeline", "Run ID"):
+            _override(
+                p[9452],
+                field,
+                "mappings",
+                [
+                    {
+                        "type": "value",
+                        "options": {
+                            ".*": {"text": "No run selected"},
+                            "-": {"text": "No run selected"},
+                        },
+                    }
+                ],
+            )
+        _table(p[9452])
+        # Identity is a single evidence row: retain the full UUID and revision,
+        # including on narrow screens, rather than truncating provenance.
+        identity_custom = p[9452]["fieldConfig"]["defaults"]["custom"]
+        identity_custom["wrapText"] = True
+        identity_custom["cellOptions"]["wrapText"] = True
+        p[9452]["options"]["footer"]["enablePagination"] = True
     p[9451]["options"]["footer"]["enablePagination"] = False
-    p[9452]["options"]["footer"]["enablePagination"] = True
-    _stack(p[9450], {9451: 12, 9452: 8})
+    heights = {9451: 12}
+    if 9452 in p:
+        heights[9452] = 8
+    _stack(p[9450], heights)
 
 
 def _overview(p: dict[int, dict]) -> None:
@@ -227,6 +231,8 @@ def _trust_select_run_mappings(p: dict[int, dict]) -> None:
 
 
 def _trust_anchors(p: dict[int, dict]) -> None:
+    if 9404 not in p:
+        return
     anchors = p[9404]
     _table(anchors)
     anchors["options"]["cellHeight"] = "lg"
@@ -249,9 +255,9 @@ def _trust(p: dict[int, dict]) -> None:
     _table(
         p[9418],
         {
-            "Processing result": 150,
-            "Saved trust verdict": 160,
-            "Reason count": 120,
+            "Processing result": 110,
+            "Saved trust verdict": 110,
+            "Reason count": 70,
         },
     )
     _trust_anchors(p)
@@ -327,9 +333,9 @@ def _provider(p: dict[int, dict]) -> None:
         if target["expr"].startswith("topk(3, ") and target["expr"].endswith(")"):
             target["expr"] = target["expr"][8:-1]
         p[pid]["title"] = (
-            "Все провайдеры · статус"
+            "Monitor Fleet Status"
             if pid == 9101
-            else "Все провайдеры · evidence"
+            else "Inspect Fleet Evidence"
         )
         p[pid]["description"] = (
             "CURRENT · Все провайдеры. Этот раздел не фильтруется выбранным Provider. "
@@ -550,7 +556,7 @@ def _incident(p: dict[int, dict]) -> None:
         "UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action."
     )
     p[9400]["options"]["content"] = (
-        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">GLOBAL suspects are not verified causes. Telemetry gaps are UNKNOWN.</div>'
+        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">GLOBAL suspects are not verified causes. Telemetry gaps are UNKNOWN. VALID_EMPTY is an empty suspect list, not a healthy fleet.</div>'
     )
     p[2001]["options"]["content"] = (
         '<div style="font-size:16px;line-height:1.2">Open Action for evidence; PENDING has not fired. Use alert history.</div>'
@@ -932,9 +938,9 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
     widths = {
         "bioetl-control-plane-v1": {
             9418: {
-                "Processing result": 150,
-                "Saved trust verdict": 160,
-                "Reason count": 120,
+                "Processing result": 110,
+                "Saved trust verdict": 110,
+                "Reason count": 70,
             }
         },
         "bioetl-overview-v2": {215: {"Priority": 90, "Action": 155}},
@@ -942,11 +948,15 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
         "bioetl-run-explorer-v1": {
             3010: {
                 "selected": 28,
-                "Started": 145,
-                "Duration": 90,
-                "Trust": 120,
-                "Processing": 100,
-                "Report": 80,
+                "2. Overview": 90,
+                "3. Pipeline Diagnostics": 90,
+                "4. Provider Health": 90,
+                "5. Data Quality": 90,
+                "Started": 70,
+                "Duration": 45,
+                "Trust": 50,
+                "Processing": 50,
+                "Report": 40,
             }
         },
     }

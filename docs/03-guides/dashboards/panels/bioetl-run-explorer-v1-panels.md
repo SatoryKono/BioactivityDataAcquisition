@@ -82,13 +82,8 @@ pagination, a line break before Pipeline, and no links to retired detail panels.
 Run dashboard readability and first-window containment tests and verify the
 actual browser table with ten populated rows and working Report links.
 
-## Saved evidence and discovery panels
-
-| ID | Title | Purpose |
-| --- | --- | --- |
-| 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
-| 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
-| 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+Inspect Saved Run Evidence is not on this page. Saved domain and identity
+evidence stays on Trust.
 
 Recent Runs keeps Pipeline, the short Run ID, Processing, Trust and Report
 readable in the 900-pixel view. Trust uses an Open link, never an inferred OK

@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Текущий статус выбранного провайдера. Run ID этот статус не меняет. Общий список — в разделе «Все провайдеры» ниже.",
+  "description": "Current status of the selected provider. Run ID does not change this status. The full list is in the All providers section below.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -361,7 +361,7 @@
         "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Provider Health (Provider Health)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "description": "Move between pages 0-6. This page shows current provider health. Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
@@ -448,18 +448,18 @@
         "x": 0,
         "y": 2
       },
-      "description": "Текущий статус ${provider}. Run ID ${run_id} этот статус не меняет. Общий список — в разделе «Все провайдеры» ниже.",
+      "description": "Read the status card on the right first. The full provider list is below. Current status of ${provider}. Run ID ${run_id} does not change this status. The full list is in the All providers section below.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Current Provider",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2\">Текущий статус ${provider}. Запуск ${run_id} — контекст навигации, не здоровье провайдера сейчас. Общий список ниже.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2\">Current status of ${provider}. Run ${run_id} is navigation context, not current provider health. The full list is below.</div>"
       },
       "links": []
     },
     {
       "id": 9401,
       "type": "stat",
-      "title": "Текущий статус (${provider})",
+      "title": "Monitor Provider Status",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -470,7 +470,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT. UNKNOWN: нет или недостоверно наблюдение. TELEMETRY MISSING: нет серии. QUERY ERROR: сбой запроса. All показывает число провайдеров в каждом статусе, не одну цифру.",
+      "description": "CURRENT. UNKNOWN: missing or unreliable observation. TELEMETRY MISSING: no series. QUERY ERROR: query failed. All shows how many providers are in each status, not one number.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -509,13 +509,13 @@
         "colorMode": "background",
         "dataLinks": [
           {
-            "title": "Все провайдеры · статус",
+            "title": "Monitor Fleet Status",
             "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${provider:queryparam}&viewPanel=9101&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           },
           {
-            "title": "Все провайдеры · evidence",
+            "title": "Inspect Fleet Evidence",
             "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${provider:queryparam}&viewPanel=9107&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
@@ -568,7 +568,7 @@
       "id": 9002,
       "type": "text",
       "title": "",
-      "description": "CURRENT · граница между выбранным провайдером и общим обзором.",
+      "description": "CURRENT · boundary between the selected provider and the fleet overview.",
       "gridPos": {
         "h": 2,
         "w": 24,
@@ -577,7 +577,7 @@
       },
       "options": {
         "bioetlDisplayTitle": "Start Provider Triage",
-        "content": "<div style=\"font-size:16px;line-height:1\">Ниже раздел «Все провайдеры»: общий текущий обзор, не выбранный запуск.</div>",
+        "content": "<div style=\"font-size:16px;line-height:1\">The All providers section below is the current fleet overview, not the selected run.</div>",
         "mode": "html"
       },
       "links": [
@@ -613,7 +613,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Все провайдеры. Не фильтруется выбранным Provider. Run ID — контекст навигации.",
+      "description": "CURRENT · All providers. Not filtered by the selected Provider. Run ID is navigation context.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -820,7 +820,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 20
+        "y": 7
       },
       "id": 9101,
       "options": {
@@ -883,7 +883,7 @@
           }
         }
       ],
-      "title": "Все провайдеры · статус",
+      "title": "Monitor Fleet Status",
       "type": "table"
     },
     {
@@ -891,7 +891,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Все провайдеры. Не фильтруется выбранным Provider. Run ID — контекст навигации.",
+      "description": "CURRENT · All providers. Not filtered by the selected Provider. Run ID is navigation context.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1257,7 +1257,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 20
+        "y": 7
       },
       "id": 9107,
       "options": {
@@ -1289,7 +1289,7 @@
           "refId": "A"
         }
       ],
-      "title": "Все провайдеры · evidence",
+      "title": "Inspect Fleet Evidence",
       "type": "table",
       "transformations": [
         {
@@ -1326,113 +1326,113 @@
       ]
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK (presence color only; PRESENT≠OK for fleet health). Fail-closed UNKNOWN/gray when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy. SELECTED PROVIDER only; it does not summarize the fleet.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "displayName": "Monitor Telemetry Presence",
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "PRESENT",
-                  "color": "green"
-                }
-              }
-            },
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "text"
-                }
-              }
-            }
-          ],
-          "noValue": "UNKNOWN",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 28
-      },
-      "id": 9104,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": false,
-        "text": {
-          "valueSize": 20,
-          "titleSize": 14
-        }
-      },
-      "pluginVersion": "10.4.0",
-      "targets": [
-        {
-          "expr": "max(bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0 + max(bioetl_provider_health_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
-          "format": "time_series",
-          "instant": true,
-          "legendFormat": "Provider status evidence",
-          "refId": "A"
-        }
-      ],
-      "title": "Monitor Telemetry Presence",
-      "type": "stat"
-    },
-    {
       "type": "row",
       "id": 9106,
-      "title": "Все провайдеры",
+      "title": "All providers",
       "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 15
       },
       "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK (presence color only; PRESENT≠OK for fleet health). Fail-closed UNKNOWN/gray when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy. SELECTED PROVIDER only; it does not summarize the fleet.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "displayName": "Monitor Telemetry Presence",
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "PRESENT",
+                      "color": "green"
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "text"
+                    }
+                  }
+                }
+              ],
+              "noValue": "UNKNOWN",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 9104,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value",
+            "wideLayout": false,
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
+          },
+          "pluginVersion": "10.4.0",
+          "targets": [
+            {
+              "expr": "max(bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0 + max(bioetl_provider_health_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
+              "format": "time_series",
+              "instant": true,
+              "legendFormat": "Provider status evidence",
+              "refId": "A"
+            }
+          ],
+          "title": "Monitor Telemetry Presence",
+          "type": "stat"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -2172,15 +2172,15 @@
     },
     {
       "collapsed": true,
-      "description": "Подробный список тех же провайдеров, не второй текущий статус. Complete fleet, non-OK-provider, and cause evidence. First-screen tables stay bounded to four rows; this lane is the unbounded forensic copy. Empty domains are not a healthy-fleet verdict.",
+      "description": "Detailed list of the same providers, not a second current status. Complete fleet, non-OK-provider, and cause evidence. First-screen tables stay bounded to four rows; this lane is the unbounded forensic copy. Empty domains are not a healthy-fleet verdict.",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 16
       },
       "id": 9105,
-      "title": "Все провайдеры · подробности",
+      "title": "All providers · details",
       "type": "row",
       "panels": [
         {
@@ -2811,7 +2811,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 17
       },
       "id": 91,
       "title": "Selected Provider Details",
@@ -3955,7 +3955,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 18
       },
       "id": 9404,
       "description": "Expand for selected-range and debug evidence after current fleet severity, causes, and telemetry presence have been interpreted together.",
@@ -4626,7 +4626,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 19
       },
       "id": 9405,
       "description": "Expand for compact HTTP-backed run context; Run Explorer is the canonical exact-run workspace.",
@@ -5254,11 +5254,11 @@
     {
       "id": 9450,
       "type": "row",
-      "title": "Сохранённый запуск",
+      "title": "Saved run",
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 23,
+        "y": 20,
         "w": 24,
         "h": 1
       },
@@ -5274,7 +5274,7 @@
             "h": 12
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Сохранённые данные этого Run ID. Это не текущий статус провайдера. SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Run ID is navigation context and does not change current provider health. Missing checks are INCOMPLETE; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
+          "description": "Saved data for this Run ID. This is not the current provider status. SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Run ID is navigation context and does not change current provider health. Missing checks are INCOMPLETE; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -5499,7 +5499,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Сохранённые данные этого Run ID. Это не текущий статус провайдера. SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Run ID is navigation context and does not change current provider health. Missing checks are INCOMPLETE; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
+          "description": "Saved data for this Run ID. This is not the current provider status. SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Run ID is navigation context and does not change current provider health. Missing checks are INCOMPLETE; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",

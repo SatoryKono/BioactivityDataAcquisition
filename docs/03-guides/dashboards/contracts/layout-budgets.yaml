@@ -259,6 +259,11 @@ first_window_summary_tables:
     owner: "@bioetl-observability"
     bind: limit
   - dashboard: bioetl-control-plane-v1.json
+    id: 9422
+    max_rows: 1
+    owner: "@bioetl-observability"
+    bind: limit
+  - dashboard: bioetl-control-plane-v1.json
     id: 9418
     max_rows: 1
     owner: "@bioetl-observability"
@@ -301,8 +306,8 @@ answer_panels:
     - id: 9998
       title: Review Selected Run Status
   bioetl-provider-health-v2.json:
-    - id: 9101
-      title: Monitor Fleet Status
+    - id: 9401
+      title: Monitor Provider Status
   bioetl-dq-v2.json:
     - id: 9406
       title: Review Selected Run Status
@@ -368,6 +373,12 @@ allowlists:
       retire_when: Retention can keep h=5 without pushing Recovery Action or KPIs past y+h=17
   # DASH-DENSITY-002 governed exceptions keyed by (dashboard, row id).
   scalar_density:
+    - dashboard: bioetl-provider-health-v2.json
+      id: 9106
+      owner: "@bioetl-observability"
+      rationale: >-
+        Collapsed fleet-provider row is below-fold diagnostics, not a first-screen scalar group.
+      retire_when: fleet provider scalars move into first-window cards denser than the fold
     - dashboard: bioetl-provider-health-v2.json
       id: 91
       owner: "@bioetl-observability"

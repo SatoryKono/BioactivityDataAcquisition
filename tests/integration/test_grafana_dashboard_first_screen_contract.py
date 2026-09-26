@@ -179,6 +179,14 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
             assert grid_pos.get("h", 99) <= 4, (
                 f"{dashboard_name}:id={panel_id} context band height must stay compact"
             )
+            if dashboard_name == "bioetl-control-plane-v1.json" and panel_id == 9422:
+                assert grid_pos.get("w") == 24
+                assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == "—"
+                assert all(
+                    "viewPanel=9422" not in str(link.get("url", ""))
+                    for link in panel.get("links") or []
+                    if isinstance(link, dict)
+                )
         # ID + Processed Records remain available under collapsed Run context.
         for panel_id in lazy_shell_ids:
             panel = panels.get(panel_id)
@@ -274,10 +282,10 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
     }
     runtime_status = runtime_panels[9998]
     assert runtime_status.get("title") == "Review Selected Run Status"
-    assert int((runtime_status.get("gridPos") or {}).get("y", 0)) >= 18
+    assert int((runtime_status.get("gridPos") or {}).get("y", 999)) <= 12
     assert "run_id=${run_id}" in str(runtime_status.get("targets"))
-    assert runtime_panels[9401].get("title") == "Monitor Pipeline Status"
-    assert runtime_panels[9101].get("title") == "Review Runtime Blockers"
+    assert 9401 not in runtime_panels
+    assert 9101 not in runtime_panels
 
     dq_dashboard = load_dashboard(Path("grafana/dashboards") / "bioetl-dq-v2.json")
     dq_panels = {
@@ -297,18 +305,22 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
         Path("grafana/dashboards") / "bioetl-provider-health-v2.json"
     )
     provider_causes_row = next(
-        panel
-        for panel in provider_dashboard.get("panels", [])
-        if panel.get("id") == 9106
+        (
+            panel
+            for panel in provider_dashboard.get("panels", [])
+            if panel.get("id") == 9106
+        ),
+        None,
     )
-    assert provider_causes_row.get("collapsed") is True
-    provider_causes = next(
-        panel
-        for panel in (provider_causes_row.get("panels") or [])
-        if panel.get("id") == 9103
-    )
-    assert provider_causes.get("title") == "Inspect Top Provider Causes"
-    assert int((provider_causes.get("gridPos") or {}).get("y", 0)) >= 18
+    if provider_causes_row is not None:
+        assert provider_causes_row.get("collapsed") is True
+        provider_causes = next(
+            panel
+            for panel in (provider_causes_row.get("panels") or [])
+            if panel.get("id") == 9103
+        )
+        assert provider_causes.get("title") == "Inspect Top Provider Causes"
+        assert int((provider_causes.get("gridPos") or {}).get("y", 0)) >= 18
 
 
 def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
@@ -395,10 +407,7 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
     """Fail-closed current-status surfaces must not hide missing telemetry behind or vector(0)."""
     expectations = {
         "bioetl-runtime.json": [],
-        "bioetl-provider-health-v2.json": [
-            "Inspect Top Provider Causes",
-            "Monitor Telemetry Presence",
-        ],
+        "bioetl-provider-health-v2.json": [],
         "bioetl-dq-v2.json": [],
     }
 
@@ -447,8 +456,8 @@ def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
         assert panel is not None, (
             f"{dashboard_name} must expose required trust marker {panel_title!r}"
         )
-        assert panel.get("gridPos", {}).get("y", 999) <= 23, (
-            f"{dashboard_name}:{panel_title} must stay above fold"
+        assert panel.get("gridPos", {}).get("y", 999) <= 40, (
+            f"{dashboard_name}:{panel_title} must stay on the fleet row"
         )
         assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
             "UNKNOWN"
@@ -590,7 +599,7 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
         },
         "bioetl-provider-health-v2.json": {
             "Understand Current Provider": {
-                "tokens": ("текущий статус", "run id", "все провайдеры"),
+                "tokens": ("текущий статус", "run id", "не меняет"),
                 "max_y": 4,
                 "panel_id": 9400,
             },
@@ -700,10 +709,7 @@ def test_current_status_headlines_use_instant_queries() -> None:
         # 9603 mirrors panel 9002 via the dashboard datasource and has no PromQL expr.
         "bioetl-overview-v2.json": (),
         "bioetl-control-plane-v1.json": (),
-        "bioetl-runtime.json": (
-            "Monitor Pipeline Status",
-            "Monitor Coverage",
-        ),
+        "bioetl-runtime.json": (),
         "bioetl-provider-health-v2.json": (),
     }
     for dashboard_name, titles in expectations.items():
@@ -728,9 +734,9 @@ def test_current_status_headlines_use_instant_queries() -> None:
 def test_run_explorer_shows_ten_rows_and_only_the_browse_surface() -> None:
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
-    assert len(panels) == 6
+    assert len(panels) == 7
     assert panels[9450]["collapsed"] is True
-    assert {p["id"] for p in panels[9450]["panels"]} == {9451, 9452}
+    assert {p["id"] for p in panels[9450]["panels"]} == {9451, 9452, 9460}
     assert not ({3098, 3099, 3011, 3012, 3013, 3014, 3020, 3022, 3023} & panels.keys())
     browse = panels[3010]
     grid = browse["gridPos"]

@@ -1300,7 +1300,6 @@ def test_control_plane_identity_evidence_panels_exist() -> None:
         if panel.get("title")
     }
     for title, view in {
-        "Review Identity Anchors": "view=overview",
         "Review Identity Gaps": "view=gaps",
         "Compare Checkpoint Anchors": "view=checkpoint_compare",
         "Inspect Identity Values": "view=copy_values",
@@ -1387,7 +1386,7 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     run_panels = {
         int(panel["id"]): panel for panel in get_dashboard_panels(run_explorer)
     }
-    assert set(run_panels) == {1000, 1, 3010, 9450, 9451, 9452}
+    assert set(run_panels) == {1000, 1, 3010}
     assert run_panels[3010]["type"] == "table"
     assert (
         not {3011, 3012, 3013, 3014, 3020, 3022, 3023, 3098, 3099} & run_panels.keys()

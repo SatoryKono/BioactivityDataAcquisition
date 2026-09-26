@@ -300,7 +300,7 @@
         "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-current\" href=\"#bioetl-run-explorer-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"0. Run Explorer (Run Explorer)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">0. Run Explorer</a><a class=\"bioetl-nav-link\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" tabindex=\"-1\" title=\"1. Trust (Trust)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none;cursor:default;pointer-events:none\">1. Trust</a><a class=\"bioetl-nav-link\" href=\"#bioetl-overview-v2\" aria-disabled=\"true\" tabindex=\"-1\" title=\"2. Overview (Overview)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none;cursor:default;pointer-events:none\">2. Overview</a><a class=\"bioetl-nav-link\" href=\"#bioetl-runtime\" aria-disabled=\"true\" tabindex=\"-1\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none;cursor:default;pointer-events:none\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" tabindex=\"-1\" title=\"4. Provider Health (Provider Health)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none;cursor:default;pointer-events:none\">4. Provider Health</a><a class=\"bioetl-nav-link\" href=\"#bioetl-dq-v2\" aria-disabled=\"true\" tabindex=\"-1\" title=\"5. Data Quality (Data Quality)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none;cursor:default;pointer-events:none\">5. Data Quality</a><a class=\"bioetl-nav-link\" href=\"#bioetl-incident-v1\" aria-disabled=\"true\" tabindex=\"-1\" title=\"6. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none;cursor:default;pointer-events:none\">6. Incident Workspace</a></div>"
       },
       "links": [],
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light."
+      "description": "Chips on 0. Run Explorer do not open other dashboards. Open Trust, Overview, Pipeline Diagnostics, Provider Health, and Data Quality from Inspect Recent Runs."
     },
     {
       "id": 1,
@@ -653,7 +653,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 145
+                "value": 70
               }
             ]
           },
@@ -755,7 +755,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 40
               }
             ]
           },
@@ -815,7 +815,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 45
               }
             ]
           },
@@ -962,7 +962,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 120
+                "value": 50
               }
             ]
           },
@@ -985,6 +985,10 @@
               {
                 "id": "noValue",
                 "value": "Open"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           },
@@ -1007,6 +1011,10 @@
               {
                 "id": "noValue",
                 "value": "Open"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           },
@@ -1029,6 +1037,10 @@
               {
                 "id": "noValue",
                 "value": "Open"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           },
@@ -1051,6 +1063,10 @@
               {
                 "id": "noValue",
                 "value": "Open"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           },
@@ -1128,7 +1144,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 50
               }
             ]
           }
@@ -1206,23 +1222,23 @@
           "options": {
             "indexByName": {
               "selected": 0,
-              "started_at": 1,
-              "pipeline": 2,
-              "workflow_id": 3,
+              "started_at": 5,
+              "pipeline": 6,
+              "workflow_id": 7,
               "run_id": 4,
-              "duration_display": 5,
-              "event_age_display": 6,
-              "status": 7,
-              "trust_status": 8,
+              "duration_display": 9,
+              "event_age_display": 10,
+              "status": 11,
+              "trust_status": 12,
               "report_label": 13,
               "report_url": 14,
               "workflow_scope": 15,
               "run_type": 16,
               "completed_at": 17,
-              "overview_handoff": 9,
-              "diagnostics_handoff": 10,
-              "provider_handoff": 11,
-              "quality_handoff": 12
+              "overview_handoff": 1,
+              "diagnostics_handoff": 2,
+              "provider_handoff": 3,
+              "quality_handoff": 4
             },
             "renameByName": {
               "selected": "",
@@ -1273,425 +1289,6 @@
           "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md",
           "targetBlank": true,
           "includeVars": false
-        }
-      ]
-    },
-    {
-      "id": 9450,
-      "type": "row",
-      "title": "Inspect Saved Run Evidence",
-      "collapsed": true,
-      "gridPos": {
-        "x": 0,
-        "y": 17,
-        "w": 24,
-        "h": 1
-      },
-      "panels": [
-        {
-          "id": 9451,
-          "type": "table",
-          "title": "Inspect Selected Run Domains",
-          "gridPos": {
-            "x": 0,
-            "y": 18,
-            "w": 24,
-            "h": 12
-          },
-          "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
-          "options": {
-            "showHeader": true,
-            "cellHeight": "sm",
-            "footer": {
-              "show": false,
-              "enablePagination": false
-            }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "UNKNOWN",
-              "unit": "none",
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": false
-                },
-                "inspect": true,
-                "minWidth": 50,
-                "wrapText": false
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "action_path"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Domain"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 125
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Status"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 115
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Action"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 170
-                  },
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Inspect saved run report",
-                        "url": "/${__data.fields.action_path}&var-pipeline=${pipeline:percentencode}&var-run_type=${run_type:percentencode}&var-workflow=${workflow:percentencode}&${__url_time_range}",
-                        "targetBlank": true
-                      }
-                    ]
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "Inspect saved evidence": {
-                            "text": "Open report"
-                          },
-                          "Inspect reason and evidence": {
-                            "text": "Open report"
-                          },
-                          "Select run or inspect evidence": {
-                            "text": "Inspect report"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Reason"
-                },
-                "properties": [
-                  {
-                    "id": "custom.wrapText",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "selection_required": {
-                            "text": "Choose a run to inspect saved evidence"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Evidence reference"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              }
-            ]
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "type": "json",
-              "source": "url",
-              "parser": "backend",
-              "format": "table",
-              "root_selector": "presentation_domains",
-              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-              "url_options": {
-                "method": "GET",
-                "data": ""
-              }
-            }
-          ],
-          "transformations": [
-            {
-              "id": "limit",
-              "options": {
-                "limitField": 6
-              }
-            },
-            {
-              "id": "filterFieldsByName",
-              "options": {
-                "include": {
-                  "names": [
-                    "domain",
-                    "verdict",
-                    "reason_display",
-                    "action",
-                    "evidence_ref",
-                    "action_path"
-                  ]
-                }
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "indexByName": {
-                  "domain": 0,
-                  "verdict": 1,
-                  "action": 3,
-                  "evidence_ref": 4,
-                  "reason_display": 2
-                },
-                "renameByName": {
-                  "domain": "Domain",
-                  "verdict": "Status",
-                  "execution_state": "Result",
-                  "evidence_completeness": "Evidence",
-                  "rules_version": "Rules",
-                  "action": "Action",
-                  "evidence_ref": "Evidence reference",
-                  "pipeline": "Pipeline",
-                  "run_id": "Run ID",
-                  "completed_at": "Completed",
-                  "revision": "Revision",
-                  "reason_display": "Reason"
-                }
-              }
-            }
-          ],
-          "links": []
-        },
-        {
-          "id": 9452,
-          "type": "table",
-          "title": "Inspect Selected Run Identity",
-          "gridPos": {
-            "x": 0,
-            "y": 30,
-            "w": 24,
-            "h": 8
-          },
-          "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
-          "options": {
-            "showHeader": true,
-            "cellHeight": "sm",
-            "footer": {
-              "show": false,
-              "enablePagination": true
-            }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "UNKNOWN",
-              "unit": "none",
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
-                },
-                "inspect": true,
-                "minWidth": 50,
-                "wrapText": true
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Completed"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "time:YYYY-MM-DD HH:mm"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 175
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Pipeline"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          ".*": {
-                            "text": "No run selected"
-                          },
-                          "-": {
-                            "text": "No run selected"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Run ID"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          ".*": {
-                            "text": "No run selected"
-                          },
-                          "-": {
-                            "text": "No run selected"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "type": "json",
-              "source": "url",
-              "parser": "backend",
-              "format": "table",
-              "root_selector": "presentation_summary",
-              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-              "url_options": {
-                "method": "GET",
-                "data": ""
-              }
-            }
-          ],
-          "transformations": [
-            {
-              "id": "convertFieldType",
-              "options": {
-                "conversions": [
-                  {
-                    "targetField": "completed_at",
-                    "destinationType": "time"
-                  }
-                ]
-              }
-            },
-            {
-              "id": "limit",
-              "options": {
-                "limitField": 1
-              }
-            },
-            {
-              "id": "filterFieldsByName",
-              "options": {
-                "include": {
-                  "names": [
-                    "pipeline",
-                    "run_id",
-                    "completed_at",
-                    "rules_version",
-                    "revision",
-                    "evidence_completeness"
-                  ]
-                }
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "indexByName": {
-                  "pipeline": 0,
-                  "run_id": 1,
-                  "completed_at": 2,
-                  "rules_version": 3,
-                  "revision": 4,
-                  "evidence_completeness": 5
-                },
-                "renameByName": {
-                  "domain": "Domain",
-                  "verdict": "Status",
-                  "execution_state": "Result",
-                  "evidence_completeness": "Evidence",
-                  "rules_version": "Rules",
-                  "reason": "Reason",
-                  "action": "Action",
-                  "evidence_ref": "Evidence reference",
-                  "pipeline": "Pipeline",
-                  "run_id": "Run ID",
-                  "completed_at": "Completed",
-                  "revision": "Revision"
-                }
-              }
-            }
-          ],
-          "links": []
         }
       ]
     }

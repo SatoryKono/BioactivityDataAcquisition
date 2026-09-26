@@ -64,10 +64,25 @@ first_window_inspect_tables:
     rationale: Overview domain-status answer table.
     retire_when: 9002 leaves the first window
   - dashboard: bioetl-runtime.json
-    id: 9101
+    id: 9402
     owner: "@bioetl-observability"
-    rationale: First-window runtime blockers table.
-    retire_when: 9101 leaves the first window
+    rationale: Selected-run pipeline identity stays on the first window.
+    retire_when: 9402 leaves the first window
+  - dashboard: bioetl-runtime.json
+    id: 9403
+    owner: "@bioetl-observability"
+    rationale: Selected-run record counts stay on the first window.
+    retire_when: 9403 leaves the first window
+  - dashboard: bioetl-dq-v2.json
+    id: 9402
+    owner: "@bioetl-observability"
+    rationale: Selected-run identity stays on the Data Quality first window.
+    retire_when: 9402 leaves the first window
+  - dashboard: bioetl-dq-v2.json
+    id: 9403
+    owner: "@bioetl-observability"
+    rationale: Selected-run record counts stay on the Data Quality first window.
+    retire_when: 9403 leaves the first window
   - dashboard: bioetl-run-explorer-v1.json
     id: 3010
     owner: "@bioetl-observability"
@@ -97,7 +112,7 @@ operator_question:
     basis_tokens: [SELECTED RUN]
     next_action_tokens: [Open Run Explorer]
   bioetl-provider-health-v2.json:
-    answer_ids: [9101]
+    answer_ids: [9401]
     next_action_id: 9002
     basis_tokens: [CURRENT]
     next_action_tokens: [Start Provider Triage]

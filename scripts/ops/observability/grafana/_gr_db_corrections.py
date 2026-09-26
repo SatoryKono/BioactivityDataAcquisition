@@ -445,7 +445,7 @@ def _correct_provider(uid: object, panels: dict[int, dict]) -> None:
         },
     ]
     panels[9401]["fieldConfig"]["defaults"]["mappings"] = []
-    panels[9401]["title"] = "Текущий статус (${provider})"
+    panels[9401]["title"] = "Monitor Provider Status"
     panels[9401]["fieldConfig"]["defaults"]["noValue"] = "TELEMETRY MISSING"
     panels[9401]["description"] = (
         "CURRENT · выбранный провайдер, не история Run ID. "
@@ -774,9 +774,9 @@ def _correct_control_plane_trust(uid: object, panels: dict[int, dict]) -> None:
     }
     _organize_trust_reasons(trust)
     for field, width in (
-        ("Processing result", 150),
-        ("Saved trust verdict", 160),
-        ("Reason count", 120),
+        ("Processing result", 110),
+        ("Saved trust verdict", 110),
+        ("Reason count", 70),
     ):
         _override(trust, field, _WIDTH, width)
     for item in trust["fieldConfig"]["overrides"]:

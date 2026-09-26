@@ -12,7 +12,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 30
+    panel_count: 32
     key_panels:
       - id: 9422
         title: Review Exact Replay Readiness
@@ -50,7 +50,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 10
+    panel_count: 11
     key_panels:
       - id: 9603
         title: Review Selected Run Status
@@ -79,12 +79,16 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 8
+    panel_count: 9
     key_panels:
       - id: 9998
         title: Review Selected Run Status
         type: table
         description: Saved execution assessment for the always-selected Run ID
+      - id: 9460
+        title: Inspect Selected Run Stages
+        type: table
+        description: Saved stage rows for the selected Run ID, before domain evidence
       - id: 9402
         title: Inspect Pipeline Identity
         type: table
@@ -148,7 +152,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 8
+    panel_count: 9
     key_panels:
       - id: 9406
         title: Review Selected Run Status
@@ -185,7 +189,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 98
+    panel_count: 99
     key_panels:
       - id: 2010
         title: "Inspect Ranked Suspects"
@@ -217,7 +221,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 6
+    panel_count: 3
     key_panels:
       - id: 3010
         title: Inspect Recent Runs (last 10)

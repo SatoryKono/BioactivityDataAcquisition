@@ -11,7 +11,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
     row = next((p for p in panels if p.get("id") == 902), None)
     if card is None or row is None:
         return
-    card.update(type="stat", title="Replay Readiness")
+    card.update(type="stat", title="Review Exact Replay Readiness")
     card["options"] = {
         "reduceOptions": {
             "values": False,
@@ -39,7 +39,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
     card["fieldConfig"] = {
         "defaults": {
             "unit": "none",
-            "noValue": "QUERY ERROR",
+            "noValue": "—",
             "mappings": [
                 {
                     "type": "value",
@@ -80,22 +80,11 @@ def apply_replay_readiness_design(payload: dict) -> None:
             "description": "SELECTED RUN · Individual checks behind Replay Readiness. Fail blocks replay; unknown means the check could not be confirmed. Evidence references point into the saved report.",
             "datasource": card["datasource"],
             "targets": [target],
-            "gridPos": {"x": 0, "y": bottom, "w": 24, "h": 12},
+            "gridPos": {"x": 0, "y": bottom, "w": 24, "h": 8},
             "options": {
                 "showHeader": True,
                 "cellHeight": "lg",
                 "footer": {"show": False, "enablePagination": True},
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "noValue": "—",
-                    "custom": {
-                        "align": "left",
-                        "wrapText": True,
-                        "cellOptions": {"type": "auto", "wrapText": True},
-                    },
-                },
-                "overrides": [],
             },
             "transformations": [
                 {
@@ -116,5 +105,35 @@ def apply_replay_readiness_design(payload: dict) -> None:
                     },
                 }
             ],
+            "fieldConfig": {
+                "defaults": {
+                    "noValue": "—",
+                    "custom": {
+                        "align": "left",
+                        "wrapText": True,
+                        "cellOptions": {"type": "auto", "wrapText": True},
+                    },
+                },
+                "overrides": [
+                    {
+                        "matcher": {"id": "byName", "options": "Check"},
+                        "properties": [
+                            {
+                                "id": "mappings",
+                                "value": [
+                                    {
+                                        "type": "value",
+                                        "options": {
+                                            "manifest_not_recorded": {
+                                                "text": "manifest этого запуска не найден"
+                                            }
+                                        },
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ],
+            },
         }
     )

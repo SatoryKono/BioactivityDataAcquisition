@@ -155,7 +155,7 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     dashboard = load_dashboard(dashboard_path)
     panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9416)
 
-    assert panel.get("gridPos") == {"h": 7, "w": 12, "x": 12, "y": 5}
+    assert panel.get("gridPos") == {"h": 8, "w": 12, "x": 12, "y": 7}
     assert panel.get("options", {}).get("cellHeight") == "sm"
     assert panel.get("options", {}).get("sortBy") == [
         {"displayName": "Status", "desc": True}
@@ -303,7 +303,7 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
         "bioetl-dq-v2.json": ("CURRENT", "SELECTED RUN", "TIME RANGE"),
         "bioetl-incident-v1.json": ("CURRENT", "SELECTED RUN"),
         "bioetl-run-explorer-v1.json": ("BROWSE", "SELECTED RUN"),
-        "bioetl-control-plane-v1.json": ("CURRENT", "SELECTED RUN"),
+        "bioetl-control-plane-v1.json": ("SELECTED RUN",),
     }
     by_name = {path.name: load_dashboard(path) for path in get_dashboard_files()}
     missing: list[str] = []
