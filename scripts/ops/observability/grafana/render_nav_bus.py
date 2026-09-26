@@ -176,6 +176,16 @@ _TRUST_DROP_EMPTY_ROW_IDS = frozenset({903, 904, 9490})
 _RUNTIME_RANGE_ROW_ID = 8800
 _RUNTIME_PANEL_ID_REMAP = {4: 8804, 5: 8805, 6: 8806, 7: 8807}
 _MOVED_TRUST_RANGE_PANELS: list[dict[str, object]] = []
+_MOVED_RUNTIME_FLEET: list[dict[str, object]] = []
+_RUNTIME_SELECTED_IDS = (1000, 9400, 9998, 9402, 9403)
+_RUNTIME_DROP_IDS = frozenset({22460})
+_RUNTIME_FLEET_ROW_ID = 8808
+_RUNTIME_SELECTED_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
+    9400: (0, 2, 24, 3),
+    9998: (0, 5, 24, 5),
+    9402: (0, 10, 12, 5),
+    9403: (12, 10, 12, 5),
+}
 _INCIDENT_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     2001: (0, 6, 24, 2),
     2010: (0, 8, 24, 5),
@@ -1551,6 +1561,13 @@ def _pin_collapsed_rows_from(
 
 def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
     if current_uid == "bioetl-runtime" and any(
+        panel.get("id") == 9998 for panel in _root_panels(panels)
+    ):
+        _apply_first_window_geometry(
+            panels, _RUNTIME_SELECTED_GEOMETRY, uid=current_uid
+        )
+        return
+    if current_uid == "bioetl-runtime" and any(
         panel.get("id") == 9101 for panel in _root_panels(panels)
     ):
         for panel in _root_panels(panels):
@@ -1838,6 +1855,9 @@ def apply_to_dashboard(
         _stash_trust_range_panels(payload)
     elif current_uid == "bioetl-runtime":
         _attach_trust_range_panels(payload)
+        _retain_runtime_selected_run(payload)
+    elif current_uid == "bioetl-incident-v1":
+        _attach_runtime_fleet_row(payload)
     elif current_uid == "bioetl-dq-v2":
         _retain_dq_selected_run_panels(payload)
     # Remove generated details before earlier layout passes measure bottom rows.

@@ -47,6 +47,8 @@ def _bands(row: dict, bands: list[list[tuple[int, int, int, int]]]) -> None:
 
 
 def _runtime(p: dict[int, dict]) -> None:
+    if 2460 not in p:
+        return
     p[9400]["options"]["content"] = (
         '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">'
         "CURRENT · Pipeline / Run Type. <b>INCOMPLETE / UNKNOWN:</b> expected stage evidence is unverified. "
