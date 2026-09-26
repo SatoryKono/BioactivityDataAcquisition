@@ -1695,6 +1695,37 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "lineage, artifacts, and ledger watermark. The verdict is the readiness stat, "
             "not this table."
         )
+    short_copy = {
+        9405: (
+            "SELECTED RUN · Anchors missing for this Run ID. "
+            "A missing anchor is not a pass."
+        ),
+        9406: (
+            "SELECTED RUN · This run's runtime anchors compared with its checkpoint. "
+            "MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass."
+        ),
+        9409: (
+            "SELECTED RUN · Extra forensic anchors for this Run ID: hashes, artifacts, "
+            "component runs, checkpoint files, and DQ reports."
+        ),
+        9413: (
+            "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity "
+            "anchors for this Run ID."
+        ),
+        9414: (
+            "SELECTED RUN · Manifest parse, structure, schema version, and contract "
+            "compatibility for this Run ID."
+        ),
+        9417: (
+            "SELECTED RUN · Failure counts for this Run ID in the fixed categories "
+            "api, dq, schema, storage, network, validation, and unknown. "
+            "UNKNOWN is not zero failures."
+        ),
+    }
+    for panel_id, description in short_copy.items():
+        panel = by_id.get(panel_id)
+        if isinstance(panel, dict):
+            panel["description"] = description
     trust = by_id.get(9418)
     if isinstance(trust, dict):
         trust["description"] = (
