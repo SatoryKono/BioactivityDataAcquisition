@@ -1842,6 +1842,177 @@ def _retain_dq_selected_run_panels(payload: dict[str, object]) -> None:
         footer["enablePagination"] = True
 
 
+def _stamp_runtime_fleet_panel(panel: dict[str, object]) -> None:
+    panel_id = panel.get("id")
+    description = str(panel.get("description") or "")
+    if panel_id == 9102 and "evidence confidence" not in description.lower():
+        panel["description"] = (
+            description.rstrip()
+            + " Evidence confidence is monitoring quality, not the selected Run ID verdict."
+        )
+    if panel_id in {893, 907} and not description.startswith("TIME RANGE"):
+        panel["description"] = "TIME RANGE · " + description
+    if panel.get("type") != "stat":
+        return
+    field_config = panel.setdefault("fieldConfig", {})
+    if not isinstance(field_config, dict):
+        return
+    defaults = field_config.setdefault("defaults", {})
+    if isinstance(defaults, dict) and not defaults.get("noValue"):
+        defaults["noValue"] = "UNKNOWN"
+
+
+def _stamp_runtime_answer(panel: dict[str, object]) -> None:
+    field_config = panel.setdefault("fieldConfig", {})
+    if not isinstance(field_config, dict):
+        return
+    defaults = field_config.setdefault("defaults", {})
+    if not isinstance(defaults, dict):
+        return
+    links = defaults.setdefault("links", [])
+    if not isinstance(links, list):
+        return
+    titles = {link.get("title") for link in links if isinstance(link, dict)}
+    for link in (
+        {
+            "title": "Open Trust replay readiness",
+            "url": (
+                "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}"
+                "&${pipeline:queryparam}&${run_type:queryparam}"
+                "&${run_id:queryparam}&viewPanel=9422"
+            ),
+            "targetBlank": False,
+        },
+        {
+            "title": "Open fleet signals on Incident",
+            "url": (
+                "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}"
+                "&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}"
+            ),
+            "targetBlank": False,
+        },
+    ):
+        if link["title"] not in titles:
+            links.append(link)
+
+
+def _stamp_runtime_scope(panel: dict[str, object]) -> None:
+    panel["title"] = ""
+    panel["description"] = (
+        "SELECTED RUN · This page assesses the selected Run ID from saved HTTP "
+        "evidence. Fleet status and time-range charts are on Incident Workspace. "
+        "An empty Prometheus series is not this run's verdict."
+    )
+    options = panel.setdefault("options", {})
+    if not isinstance(options, dict):
+        raise SystemExit("bioetl-runtime: panel 9400 options must be an object")
+    options["mode"] = "html"
+    options["bioetlDisplayTitle"] = "Understand Pipeline Scope"
+    options["content"] = (
+        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;'
+        "line-height:1.2;white-space:normal;overflow-wrap:anywhere\">"
+        '<div style="max-width:96ch">SELECTED RUN · Saved evidence for the selected '
+        "Run ID. Fleet and time-range charts are on Incident Workspace, not this "
+        "verdict.</div></div>"
+    )
+
+
+def _retain_runtime_selected_run(payload: dict[str, object]) -> None:
+    """Keep saved-run panels on Pipeline Diagnostics and park the fleet elsewhere."""
+    panels = payload.get("panels")
+    if not isinstance(panels, list):
+        return
+    found: dict[int, dict[str, object]] = {}
+    moved: list[dict[str, object]] = []
+    moved_ids: set[object] = set()
+
+    def collect(items: list[object]) -> None:
+        for panel in items:
+            if not isinstance(panel, dict):
+                continue
+            children = panel.get("panels")
+            if isinstance(children, list):
+                collect(children)
+            panel_id = panel.get("id")
+            if panel_id in _RUNTIME_DROP_IDS or panel.get("type") == "row":
+                continue
+            if panel_id in _RUNTIME_SELECTED_IDS:
+                if panel_id not in found:
+                    panel.pop("panels", None)
+                    found[int(panel_id)] = panel
+                continue
+            if panel_id not in moved_ids:
+                moved.append(panel)
+                moved_ids.add(panel_id)
+
+    collect(panels)
+    missing = set(_RUNTIME_SELECTED_IDS) - set(found)
+    if missing:
+        raise SystemExit(
+            "bioetl-runtime: missing selected-run panels " + str(sorted(missing))
+        )
+    for panel in moved:
+        _stamp_runtime_fleet_panel(panel)
+    _MOVED_RUNTIME_FLEET.extend(moved)
+    payload["panels"] = [found[panel_id] for panel_id in _RUNTIME_SELECTED_IDS]
+    _stamp_runtime_answer(found[9998])
+    _stamp_runtime_scope(found[9400])
+
+
+def _attach_runtime_fleet_row(payload: dict[str, object]) -> None:
+    panels = payload.get("panels")
+    if not isinstance(panels, list) or not _MOVED_RUNTIME_FLEET:
+        return
+    incoming: list[dict[str, object]] = []
+    seen: set[object] = set()
+    for panel in _MOVED_RUNTIME_FLEET:
+        panel_id = panel.get("id")
+        if panel_id in seen:
+            continue
+        seen.add(panel_id)
+        incoming.append(panel)
+    _MOVED_RUNTIME_FLEET.clear()
+    row = next(
+        (
+            panel
+            for panel in panels
+            if isinstance(panel, dict) and panel.get("id") == _RUNTIME_FLEET_ROW_ID
+        ),
+        None,
+    )
+    if row is None:
+        bottoms = [
+            int(panel["gridPos"]["y"]) + int(panel["gridPos"]["h"])
+            for panel in panels
+            if isinstance(panel, dict)
+            and isinstance(panel.get("gridPos"), dict)
+            and isinstance(panel["gridPos"].get("y"), int)
+            and isinstance(panel["gridPos"].get("h"), int)
+        ]
+        row = {
+            "id": _RUNTIME_FLEET_ROW_ID,
+            "type": "row",
+            "title": "Pipeline fleet and range, not this Run ID",
+            "collapsed": True,
+            "gridPos": {"x": 0, "y": max(bottoms, default=0), "w": 24, "h": 1},
+            "description": (
+                "CURRENT and TIME RANGE signals moved from Pipeline Diagnostics. "
+                "They do not assess one selected Run ID. Empty is UNKNOWN, not a healthy run."
+            ),
+            "panels": [],
+        }
+        panels.append(row)
+    children = row.get("panels")
+    if not isinstance(children, list):
+        children = []
+        row["panels"] = children
+    present = {child.get("id") for child in children if isinstance(child, dict)}
+    for panel in incoming:
+        if panel.get("id") not in present:
+            children.append(panel)
+            present.add(panel.get("id"))
+
+
 def apply_to_dashboard(
     path: Path, *, current_uid: str, check: bool = False, state_followup: bool = False
 ) -> bool:
