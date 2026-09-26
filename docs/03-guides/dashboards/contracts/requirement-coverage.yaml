@@ -16,7 +16,7 @@ dashboards:
     answer_panel_ids:
       - 9422
     next_action_tokens:
-      - Inspect Replay Safety State
+      - View replay checks
     basis_tokens:
       - CURRENT
       - processing_status
