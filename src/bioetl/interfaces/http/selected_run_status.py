@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 from collections.abc import Mapping
 from pathlib import Path
@@ -11,6 +12,11 @@ from typing import cast
 from bioetl.application.observability.reason_aliases import (
     display_reason,
     display_reasons_text,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.selected_run_replay_readiness import (
+    INSUFFICIENT,
+    empty_replay_readiness,
+    project_selected_run_replay_readiness,
 )
 from bioetl.application.services.run_reports.query import list_pipeline_reports
 from bioetl.composition.observability_runtime import create_run_report_store
@@ -80,7 +86,7 @@ def unavailable_status(
         "execution_state": "UNKNOWN",
         "checks_verdict": "UNKNOWN",
         "evidence_completeness": "INCOMPLETE",
-        "replay_readiness_now": _NOT_EVALUATED,
+        "replay_readiness_now": _readiness_state(state),
         "heartbeat_now": _NOT_EVALUATED,
     }
     for row in rows:
@@ -120,7 +126,135 @@ def unavailable_status(
         "presentation_domains": presentation_rows(rows, selection=state == _SELECT_RUN),
         "rows": rows,
         "trust": [trust],
+        **_readiness_fields(
+            empty_replay_readiness(
+                pipeline=pipeline,
+                run_id=run_id,
+                verdict=_readiness_state(state),
+                reason=reason,
+            )
+        ),
     }
+
+
+def _readiness_state(state: str) -> str:
+    if state == _SELECT_RUN:
+        return _SELECT_RUN
+    if state == _QUERY_ERROR:
+        return _QUERY_ERROR
+    return INSUFFICIENT
+
+
+def _readiness_fields(projection: Mapping[str, object]) -> dict[str, object]:
+    blockers = projection.get("blockers")
+    unknown = projection.get("unknown_checks")
+    blocker_text = (
+        ", ".join(blockers) if isinstance(blockers, list) and blockers else "—"
+    )
+    unknown_text = ", ".join(unknown) if isinstance(unknown, list) and unknown else "—"
+    row = {
+        key: value
+        for key, value in projection.items()
+        if key not in {"checks", "blockers", "unknown_checks"}
+    }
+    row["blockers"] = blocker_text
+    row["unknown_checks"] = unknown_text
+    checks = projection.get("checks")
+    return {
+        "replay_readiness": [row],
+        "replay_checks": checks if isinstance(checks, list) else [],
+    }
+
+
+def _artifact_probes(
+    report: Mapping[str, object], run_root: Path
+) -> tuple[list[dict[str, str]], bool]:
+    artifacts = report.get("artifacts")
+    if not isinstance(artifacts, list) or not artifacts:
+        return [], False
+    root = run_root.resolve()
+    probes: list[dict[str, str]] = []
+    for index, item in enumerate(artifacts):
+        ref = f"#/artifacts/{index}"
+        code = f"artifact_{index}"
+        if not isinstance(item, dict):
+            probes.append(
+                {
+                    "code": code,
+                    "result": "fail",
+                    "reason": "artifact_record_invalid",
+                    "evidence_ref": ref,
+                }
+            )
+            continue
+        name = item.get("name") or item.get("id") or item.get("kind") or code
+        code = str(name)
+        relative = item.get("path") or item.get("relative_path") or item.get("ref")
+        digest = item.get("sha256") or item.get("digest") or item.get("content_hash")
+        if not isinstance(relative, str) or not relative.strip():
+            probes.append(
+                {
+                    "code": code,
+                    "result": "fail",
+                    "reason": "hash_without_object"
+                    if digest
+                    else "artifact_path_missing",
+                    "evidence_ref": ref,
+                }
+            )
+            continue
+        raw = Path(relative)
+        candidate = raw.resolve() if raw.is_absolute() else (root / raw).resolve()
+        if not candidate.is_relative_to(root):
+            probes.append(
+                {
+                    "code": code,
+                    "result": "fail",
+                    "reason": "artifact_path_escape",
+                    "evidence_ref": ref,
+                }
+            )
+            continue
+        if not candidate.is_file():
+            probes.append(
+                {
+                    "code": code,
+                    "result": "fail",
+                    "reason": "artifact_missing",
+                    "evidence_ref": ref,
+                }
+            )
+            continue
+        if not isinstance(digest, str) or not digest.strip():
+            probes.append(
+                {
+                    "code": code,
+                    "result": "unknown",
+                    "reason": "digest_not_recorded",
+                    "evidence_ref": ref,
+                }
+            )
+            continue
+        actual = hashlib.sha256(candidate.read_bytes()).hexdigest()
+        if actual != digest.strip().lower():
+            probes.append(
+                {
+                    "code": code,
+                    "result": "fail",
+                    "reason": "digest_mismatch",
+                    "evidence_ref": ref,
+                }
+            )
+            continue
+        probes.append(
+            {
+                "code": code,
+                "result": "pass",
+                "reason": "digest_matches",
+                "evidence_ref": ref,
+            }
+        )
+    return probes, True
 
 
 def _accounting_conflicts(reconciliation: object, verdict: object) -> list[str]:
@@ -171,7 +305,7 @@ def _saved_trust(
         "run_id": summary["run_id"],
         "rules_version": summary["rules_version"],
         "revision": summary["revision"],
-        "replay_readiness_now": _NOT_EVALUATED,
+        "replay_readiness_now": summary.get("replay_readiness_now", INSUFFICIENT),
     }
 
 
@@ -302,10 +436,19 @@ def load_selected_run_status(
         "evaluation_at": report.get("assessment_at", identity.get("completed_at")),
         "revision": revision,
         "evidence_availability": availability,
-        "replay_readiness_now": _NOT_EVALUATED,
         "heartbeat_now": _NOT_EVALUATED,
         "reason": "Saved run evidence; CURRENT and chart coverage are separate",
     }
+    probes, inventory_present = _artifact_probes(report, path.parent)
+    projection = project_selected_run_replay_readiness(
+        identity=identity,
+        artifact_probes=probes,
+        inventory_present=inventory_present,
+        evidence_revision=revision,
+        checked_at=str(identity.get("completed_at") or ""),
+    )
+    summary["replay_readiness_now"] = projection["verdict"]
+    readiness_fields = _readiness_fields(projection)
     domain_rows = assessment["domains"]
     assert isinstance(domain_rows, list)  # Produced by the verified assessment.
     issues = [
@@ -357,6 +500,7 @@ def load_selected_run_status(
         "presentation_domains": presentation_rows(rows),
         "rows": rows,
         "trust": [trust],
+        **readiness_fields,
     }
 
 
@@ -385,6 +529,14 @@ def _merge_active_diagnostics(
     merged["presentation_domains"] = presentation_rows(
         cast(list[dict[str, object]], merged["domains"])
     )
+    live = empty_replay_readiness(
+        pipeline=str(merged.get("pipeline") or pipeline),
+        run_id=run_id,
+        verdict=INSUFFICIENT,
+        reason="live_run_not_archived",
+    )
+    merged["replay_readiness_now"] = INSUFFICIENT
+    merged.update(_readiness_fields(live))
     return merged
 
 

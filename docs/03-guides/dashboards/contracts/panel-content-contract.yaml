@@ -1481,6 +1481,30 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
+      '9422':
+        title: Review Exact Replay Readiness
+        role: evidence_table
+        tier: 1
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - READY
+        - BLOCKED
+        - INSUFFICIENT
+        - UNSUPPORTED
+        - SELECT RUN
+        - QUERY ERROR
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
       '9418':
         title: Review Selected-Run Trust
         role: evidence_table

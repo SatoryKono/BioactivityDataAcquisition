@@ -194,7 +194,7 @@ async def test_http_ignores_time_and_range(tmp_path, monkeypatch, age, chart_ran
     payload = host._send_payload_response.call_args.args[2]
     assert payload == read(tmp_path)
     assert payload["verdict"] == "OK"
-    assert payload["replay_readiness_now"] == "NOT EVALUATED"
+    assert payload["replay_readiness_now"] == "INSUFFICIENT"
 
 
 @pytest.mark.parametrize(
@@ -886,7 +886,7 @@ def test_unavailable_response_keeps_status_dimensions(tmp_path):
     assert value["checks_verdict"] == "UNKNOWN"
     assert value["evidence_completeness"] == "INCOMPLETE"
     assert value["evidence_availability"] == "run_not_found"
-    assert value["replay_readiness_now"] == "NOT EVALUATED"
+    assert value["replay_readiness_now"] == "INSUFFICIENT"
 
 
 def test_archive_rejects_valid_revision_from_a_neighbour(tmp_path):

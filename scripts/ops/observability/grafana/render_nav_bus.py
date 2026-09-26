@@ -123,15 +123,16 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 3, 18, 3),
-    9401: (18, 3, 6, 3),
+    9422: (18, 3, 6, 3),
     9418: (0, 6, 12, 7),
     9416: (12, 6, 12, 7),
-    891: (0, 13, 6, 4),
-    892: (6, 13, 6, 4),
-    893: (12, 13, 6, 4),
-    907: (18, 13, 6, 4),
+    9401: (0, 20, 5, 3),
+    891: (5, 20, 5, 3),
+    892: (10, 20, 5, 3),
+    893: (15, 20, 5, 3),
+    907: (20, 20, 4, 3),
 }
-_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
+_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 24
 _INCIDENT_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     2001: (0, 6, 24, 2),
     2010: (0, 8, 24, 5),
@@ -145,9 +146,9 @@ _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
     'font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch">'
-    "CURRENT · Pipeline / Run Type readiness is shown at right.<br>"
-    "SELECTED RUN · Do not replay while Trust is INCOMPLETE or UNKNOWN. "
-    "Check retention below.</div>"
+    "SELECTED RUN · Exact replay readiness is the answer on the right.<br>"
+    "Saved evidence decides. CURRENT telemetry does not change this verdict. "
+    "Do not replay while Trust is INCOMPLETE or UNKNOWN.</div>"
 )
 CHIP_BASE = (
     "box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;"
@@ -1229,8 +1230,96 @@ def _layout_uid_detail_panels(panels: list[object], *, current_uid: str) -> None
         _layout_incident_detail_panels(panels)
 
 
+def _ensure_exact_replay_readiness_panel(panels: list[object]) -> None:
+    """Insert the Trust answer panel. CURRENT monitors stay below the fold."""
+    from scripts.ops.observability.grafana._selected_run_panels import STATUS_URL
+
+    if any(isinstance(panel, dict) and panel.get("id") == 9422 for panel in panels):
+        return
+    panels.append(
+        {
+            "id": 9422,
+            "type": "table",
+            "title": "Review Exact Replay Readiness",
+            "gridPos": {"h": 3, "w": 6, "x": 18, "y": 3},
+            "datasource": "BioETL Ops HTTP",
+            "description": (
+                "SELECTED RUN · Exact replay readiness of the selected Run ID from saved "
+                "inputs. READY means required checks passed, not that a replay already ran "
+                "and not permission to write current tables. BLOCKED is a proven gap. "
+                "INSUFFICIENT means a required check could not be completed. UNSUPPORTED "
+                "means this family cannot exact-replay. SELECT RUN and QUERY ERROR are "
+                "request states. N/A is not zero. CURRENT Prometheus does not change this "
+                "verdict. Inspect Replay Safety State remains diagnostic, not this answer."
+            ),
+            "options": {
+                "showHeader": True,
+                "cellHeight": "sm",
+                "footer": {"show": False},
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "noValue": "QUERY ERROR",
+                    "unit": "none",
+                    "custom": {"align": "left", "inspect": True},
+                },
+                "overrides": [],
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "type": "json",
+                    "source": "url",
+                    "parser": "backend",
+                    "format": "table",
+                    "root_selector": "replay_readiness",
+                    "url": STATUS_URL,
+                    "url_options": {"method": "GET", "data": ""},
+                }
+            ],
+            "transformations": [
+                {
+                    "id": "filterFieldsByName",
+                    "options": {
+                        "include": {
+                            "names": ["verdict", "blockers", "unknown_checks"]
+                        }
+                    },
+                },
+                {
+                    "id": "organize",
+                    "options": {
+                        "indexByName": {
+                            "verdict": 0,
+                            "blockers": 1,
+                            "unknown_checks": 2,
+                        },
+                        "renameByName": {
+                            "verdict": "Readiness",
+                            "blockers": "Blockers",
+                            "unknown_checks": "Unchecked",
+                        },
+                    },
+                },
+            ],
+            "links": [
+                {
+                    "title": "Inspect Replay Safety State",
+                    "url": (
+                        "/d/bioetl-control-plane-v1/1-trust?"
+                        "${workflow:queryparam}&${pipeline:queryparam}&"
+                        "${run_type:queryparam}&${run_id:queryparam}&viewPanel=9422"
+                    ),
+                    "targetBlank": False,
+                }
+            ],
+        }
+    )
+
+
 def _layout_control_plane_first_window(panels: list[object]) -> None:
     """Keep Trust density/readability while fitting the canonical h=4 nav."""
+    _ensure_exact_replay_readiness_panel(panels)
     root = _root_panels(panels)
     rows = [panel for panel in root if panel.get("type") == "row"]
     row_geometries = [

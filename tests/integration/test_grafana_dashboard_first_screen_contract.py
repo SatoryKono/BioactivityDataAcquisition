@@ -155,7 +155,13 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
             for panel in get_dashboard_panels(dashboard)
             if isinstance(panel.get("id"), int)
         }
-        for panel_id in header_ids:
+        expected_header_ids = header_ids
+        if dashboard_name == "bioetl-control-plane-v1.json":
+            expected_header_ids = (9400, 9422)
+            current = panels.get(9401)
+            assert current is not None
+            assert current.get("gridPos", {}).get("y", 0) >= 18
+        for panel_id in expected_header_ids:
             panel = panels.get(panel_id)
             assert panel is not None, (
                 f"{dashboard_name} must expose common panel id={panel_id}"
