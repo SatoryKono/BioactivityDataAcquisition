@@ -52,7 +52,9 @@ class RunExplorerSnapshotCache:
             return payload
         observed = now if now is not None else current_utc_time()
         payload["items"] = [
-            refresh_recent_timing(item, now=observed) if isinstance(item, dict) else item
+            refresh_recent_timing(item, now=observed)
+            if isinstance(item, dict)
+            else item
             for item in items
         ]
         return payload
