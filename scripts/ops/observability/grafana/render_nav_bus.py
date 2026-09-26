@@ -208,7 +208,6 @@ _RECOVERY_ACTION_HTML = (
     "Do not replay while Trust is INCOMPLETE or UNKNOWN.</div>"
 )
 _RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
-_RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (
     "box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;"
     "border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere"
@@ -218,7 +217,6 @@ LINK_STYLE = (
     f"{CHIP_BASE};color:#f8fafc;background:#334155;"
     "border:2px solid #94a3b8;text-decoration:none"
 )
-INACTIVE_HANDOFF_STYLE = f"{LINK_STYLE};cursor:default;pointer-events:none"
 # Run Explorer keeps the slate chip face, but the chip must not navigate.
 INACTIVE_HANDOFF_STYLE = f"{LINK_STYLE};cursor:default;pointer-events:none"
 # Current chip: blue fill + cyan border + underline (not color-only).
