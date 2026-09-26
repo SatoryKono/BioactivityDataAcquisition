@@ -277,8 +277,6 @@ def test_control_plane_row_sequence_matches_operator_flow() -> None:
         (9419, "Review Lineage Validation"),
         (902, "Inspect Replay & Checkpoint Evidence"),
         (901, "Inspect Manifest & Ledger Evidence"),
-        (903, "Inspect Global Store Reliability"),
-        (904, "Inspect Audit & Lineage Evidence"),
         (905, "Inspect Run Identity Evidence"),
     ]
     assert row_pairs[: len(expected_prefix)] == expected_prefix, (
@@ -316,14 +314,9 @@ def test_control_plane_named_review_surfaces_are_findable() -> None:
         child for child in lineage_row.get("panels") or [] if child.get("id") == 9415
     )
     assert lineage.get("title") == "Review Lineage Validation"
-    audit_ids = {
-        child.get("id")
-        for child in (root[904].get("panels") or [])
-        if isinstance(child, dict)
-    }
-    assert 9415 not in audit_ids
-    assert 9416 not in audit_ids
-    assert 9418 not in audit_ids
+    assert 904 not in root
+    assert 9416 not in child_ids
+    assert 9418 not in child_ids
 
 
 def test_retention_panel_9416_retry_preserves_selected_run_and_time() -> None:

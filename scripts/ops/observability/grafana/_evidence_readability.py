@@ -232,59 +232,11 @@ def _trust_anchors(p: dict[int, dict]) -> None:
 
 
 def _trust_layout(p: dict[int, dict]) -> None:
-    _legend(p[7])
-    y = p[901]["gridPos"]["y"] + 1
-    p[908]["gridPos"].update(x=0, y=y, w=24, h=4)
-    y += 4
-    for index, pid in enumerate((2, 1, 132, 133)):
-        p[pid]["gridPos"].update(x=index * 6, y=y, w=6, h=3)
-    y += 3
-    for pid, height in ((131, 9), (7, 12), (9414, 9)):
-        p[pid]["gridPos"].update(x=0, y=y, w=24, h=height)
-        y += height
-    for pid, title in {
-        3: "Track Incompatibilities",
-        104: "Track Unreconstructable",
-        101: "Track Load Failures",
-        102: "Track Save Failures",
-        103: "Track Global Admin Failures",
-        2: "Track Ledger Failures",
-        1: "Track Manifest Failures",
-        132: "Monitor Manifest (30m)",
-        133: "Monitor Ledger (30m)",
-        122: "Track Missing Lineage",
-        137: "Track Lineage Failures",
-    }.items():
-        p[pid]["title"] = title
-        p[pid]["fieldConfig"]["defaults"]["displayName"] = title
-    # Three readable cards per band preserve the detail density contract.
-    _bands(
-        p[902],
-        [
-            [(894, 0, 24, 5)],
-            [(130, 0, 8, 3), (3, 8, 8, 3), (104, 16, 8, 3)],
-            [(120, 0, 8, 3), (101, 8, 8, 3), (102, 16, 8, 3)],
-            [(103, 0, 8, 3), (121, 8, 8, 3)],
-            [(134, 0, 12, 6), (5, 12, 12, 6)],
-            [(135, 0, 24, 6)],
-            [(105, 0, 24, 7)],
-            [(106, 0, 24, 7)],
-            [(9413, 0, 24, 6)],
-        ],
-    )
-    _bands(
-        p[901],
-        [
-            [(908, 0, 24, 4)],
-            [(2, 0, 8, 3), (1, 8, 8, 3)],
-            [(132, 0, 8, 3), (133, 8, 8, 3)],
-            [(131, 0, 24, 9)],
-            [(7, 0, 24, 12)],
-            [(9414, 0, 24, 9)],
-        ],
-    )
-    p[122]["gridPos"].update(x=0, w=8, h=3)
-    p[137]["gridPos"].update(x=8, w=8, h=3)
+    """Lay out the selected-run rows that remain on Trust."""
+    if 902 in p:
+        _bands(p[902], [[(9413, 0, 24, 6)]])
+    if 901 in p:
+        _bands(p[901], [[(9414, 0, 24, 9)]])
 
 
 def _trust(p: dict[int, dict]) -> None:

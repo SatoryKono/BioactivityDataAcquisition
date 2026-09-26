@@ -519,12 +519,15 @@ def _correct_control_plane(uid: object, panels: dict[int, dict]) -> None:
                 }
             ],
         )
-    panels[892]["description"] = (
-        "CURRENT · Last checkpoint age, informational only; age does not change readiness. "
-        "Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID."
-    )
+    if 892 in panels:
+        panels[892]["description"] = (
+            "CURRENT · Last checkpoint age, informational only; age does not change readiness. "
+            "Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID."
+        )
     for panel_id in (3, 104, 120, 101, 102, 103, 4, 137):
-        panel = panels[panel_id]
+        panel = panels.get(panel_id)
+        if panel is None:
+            continue
         if "UNKNOWN" not in panel.get("description", ""):
             panel["description"] = panel.get("description", "") + (
                 " Missing counter evidence is UNKNOWN; measured zero means no observed events."
