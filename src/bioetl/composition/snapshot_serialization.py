@@ -1,68 +1,10 @@
-# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-"""Shared snapshot-to-mapping serialization helpers for composition payloads."""
+"""Composition facade. Implementation lives in `bioetl.domain.serialization.snapshot_serialization` (#11241)."""
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
-from dataclasses import asdict, is_dataclass
-from datetime import date, datetime, time, timedelta
-from decimal import Decimal
-from enum import Enum
-from pathlib import Path
-from typing import TYPE_CHECKING, cast
-from uuid import UUID
-
-if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
-
-from bioetl.composition.contracts.structural import (
-    DictHost as _DictHost,
-    ModelDumpHost as _ModelDumpHost,
+from bioetl.domain.serialization.snapshot_serialization import (
+    normalize_snapshot,
+    to_serializable_mapping,
 )
 
-__all__ = ["normalize_snapshot", "to_serializable_mapping"]
-
-
-def normalize_snapshot(value: object) -> object:
-    """Normalize snapshot values into JSON-serializable primitives."""
-    if isinstance(value, Enum):
-        return value.value
-    if isinstance(value, (UUID, Decimal, Path)):
-        return str(value)
-    if isinstance(value, datetime | date | time):
-        return value.isoformat()
-    if isinstance(value, timedelta):
-        return value.total_seconds()
-    if not isinstance(value, type) and is_dataclass(value):
-        return normalize_snapshot(asdict(cast("DataclassInstance", value)))
-    if isinstance(value, Mapping):
-        return {str(key): normalize_snapshot(item) for key, item in value.items()}
-    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
-        return [normalize_snapshot(item) for item in value]
-    if isinstance(value, (set, frozenset)):
-        return [normalize_snapshot(item) for item in value]
-    if hasattr(value, "__dict__") and not isinstance(value, type):
-        return normalize_snapshot(
-            {key: item for key, item in vars(value).items() if not key.startswith("_")}
-        )
-    return value
-
-
-def to_serializable_mapping(value: object) -> dict[str, object]:
-    """Return a normalized mapping for manifest payload serialization."""
-    if isinstance(value, _ModelDumpHost):
-        payload: object = value.model_dump(mode="python", exclude_none=True)
-    elif isinstance(value, _DictHost):
-        payload = value.dict(exclude_none=True)
-    elif hasattr(value, "__dict__") and not isinstance(value, type):
-        payload = {
-            key: item for key, item in vars(value).items() if not key.startswith("_")
-        }
-    else:
-        payload = normalize_snapshot(value)
-    if not isinstance(payload, dict):
-        return {"value": normalize_snapshot(payload)}
-    normalized = normalize_snapshot(payload)
-    if not isinstance(normalized, dict):
-        raise TypeError("Manifest snapshot normalization must return a mapping")
-    return normalized
+__all__ = ['normalize_snapshot', 'to_serializable_mapping']
