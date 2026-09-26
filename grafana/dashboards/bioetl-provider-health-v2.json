@@ -3519,7 +3519,7 @@
           ],
           "title": "Track Rate-Limit Errors",
           "type": "timeseries",
-          "description": "TIME RANGE · Compact optional selected-range rate-limit pressure from HTTP errors where error_type indicates throttling/rate-limit classes. Empty samples stay diagnostic and do not refute current provider severity. Use alongside Monitor Rate Limiter Wait p95 for provider-global scope TELEMETRY MISSING is not a zero and not VALID EMPTY. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
+          "description": "This rate-limit trend shows rate-limit errors in the chart range. TIME RANGE · Compact optional selected-range rate-limit pressure from HTTP errors where error_type indicates throttling/rate-limit classes. Empty samples stay diagnostic and do not refute current provider severity. Use alongside Monitor Rate Limiter Wait p95 for provider-global scope TELEMETRY MISSING is not a zero and not VALID EMPTY. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -3597,7 +3597,7 @@
           ],
           "title": "Track Network & Timeout Errors",
           "type": "timeseries",
-          "description": "TIME RANGE · Compact optional selected-range network/timeout failures separated from rate-limit pressure. Empty samples stay diagnostic and do not refute current provider severity. Provider-global scope; correlate with Runtime stage errors when pipeline handoff context is set TELEMETRY MISSING is not a zero and not VALID EMPTY. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
+          "description": "This network error trend shows network and timeout errors in the chart range. TIME RANGE · Compact optional selected-range network/timeout failures separated from rate-limit pressure. Empty samples stay diagnostic and do not refute current provider severity. Provider-global scope; correlate with Runtime stage errors when pipeline handoff context is set TELEMETRY MISSING is not a zero and not VALID EMPTY. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -3686,7 +3686,7 @@
           ],
           "title": "Track Rate-Limiter Wait p95",
           "type": "timeseries",
-          "description": "TIME RANGE · Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
+          "description": "This limiter wait trend shows the 95th percentile limiter wait in the chart range. TIME RANGE · Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
