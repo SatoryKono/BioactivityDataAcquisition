@@ -254,6 +254,10 @@ def list_recent_pipeline_runs(
         )
         item["selected"] = int(item["run_id"] == selected_run_id)
         item["workflow_scope"] = _workflow_scope(item)
+        item["overview_handoff"] = "Open"
+        item["diagnostics_handoff"] = "Open"
+        item["provider_handoff"] = "Open"
+        item["quality_handoff"] = "Open"
     return {
         **payload,
         "items": items,

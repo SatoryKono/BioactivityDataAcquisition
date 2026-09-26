@@ -341,6 +341,26 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         uid = str(dashboard.get("uid") or "")
         # Full portfolio bus: 7 workspaces; current is non-interactive chip
         # (anchor with aria-disabled keeps styles under Grafana sanitizer).
+        # Run Explorer keeps the same chips and makes every handoff non-interactive.
+        if path.name == "bioetl-run-explorer-v1.json":
+            assert len(handoff_links) == 0, path.name
+            assert len(current) == 1, path.name
+            disabled = [
+                attrs
+                for tag, attrs in parser.elements
+                if tag == "a" and attrs.get("aria-disabled") == "true"
+            ]
+            assert len(disabled) == 7, path.name
+            assert all(
+                not str(attrs.get("href") or "").startswith("/d/") for attrs in disabled
+            ), path.name
+            for attrs in disabled:
+                if attrs in current:
+                    continue
+                style = attrs.get("style", "")
+                assert "background:#334155" in style, path.name
+                assert "pointer-events:none" in style, path.name
+            continue
         assert len(handoff_links) == 6, path.name
         assert len(current) == 1, path.name
         for attrs in handoff_links:

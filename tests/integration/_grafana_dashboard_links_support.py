@@ -811,7 +811,7 @@ def _assert_cross_dashboard_link_policy(
             )
         elif (
             current_uid == "bioetl-run-explorer-v1"
-            and link.get("title") == "Open 1. Trust"
+            and str(link.get("title") or "").startswith("Open ")
         ):
             values = _extract_link_var_values(url)
             assert values["run_id"] == "${__data.fields.Run:percentencode}"

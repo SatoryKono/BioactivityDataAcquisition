@@ -207,6 +207,8 @@ _RECOVERY_ACTION_HTML = (
     "Saved evidence decides. CURRENT telemetry does not change this verdict. "
     "Do not replay while Trust is INCOMPLETE or UNKNOWN.</div>"
 )
+_RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
+_RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (
     "box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;"
     "border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere"
@@ -216,6 +218,9 @@ LINK_STYLE = (
     f"{CHIP_BASE};color:#f8fafc;background:#334155;"
     "border:2px solid #94a3b8;text-decoration:none"
 )
+INACTIVE_HANDOFF_STYLE = f"{LINK_STYLE};cursor:default;pointer-events:none"
+# Run Explorer keeps the slate chip face, but the chip must not navigate.
+INACTIVE_HANDOFF_STYLE = f"{LINK_STYLE};cursor:default;pointer-events:none"
 # Current chip: blue fill + cyan border + underline (not color-only).
 # Rendered as <a aria-disabled> so Grafana HTML sanitizer keeps styles
 # (bare <span aria-current> may lose attributes/styles in text panels).
@@ -296,6 +301,13 @@ def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> st
             f'tabindex="-1" title="{title_attr}" style="{CURRENT_STYLE}">'
             f"{item['title']}</a>"
         )
+    if current_uid == _RUN_EXPLORER_UID:
+        title_attr = html.escape(f"{item['title']} ({short})", quote=True)
+        return (
+            f'<a class="bioetl-nav-link" href="#{item["uid"]}" '
+            f'aria-disabled="true" tabindex="-1" title="{title_attr}" '
+            f'style="{INACTIVE_HANDOFF_STYLE}">{item["title"]}</a>'
+        )
     tooltip = nav_link_tooltip(source_uid=source_uid, target=item)
     title_attr = html.escape(tooltip, quote=True)
     href = _html_href(_url_for(item, source_uid=source_uid))
@@ -319,6 +331,8 @@ def render_html(*, current_uid: str) -> str:
 
 
 def render_links(*, current_uid: str) -> list[dict[str, object]]:
+    if current_uid == _RUN_EXPLORER_UID:
+        return []
     links: list[dict[str, object]] = []
     for item in BUS:
         if item["uid"] == current_uid:

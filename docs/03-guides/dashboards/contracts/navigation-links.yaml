@@ -89,13 +89,7 @@ required_top_level_links_by_uid:
   - 4. Provider Health
   - 5. Data Quality
   - 0. Run Explorer
-  bioetl-run-explorer-v1:
-  - 1. Trust
-  - 2. Overview
-  - 3. Pipeline Diagnostics
-  - 4. Provider Health
-  - 5. Data Quality
-  - 6. Incident Workspace
+  bioetl-run-explorer-v1: []
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
   - title: 3. Pipeline Diagnostics
