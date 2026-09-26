@@ -9,6 +9,9 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 
 from bioetl.application.runtime_clock import current_utc_time
 from bioetl.composition.factories.storage.resilience import run_storage_blocking
+from bioetl.infrastructure.storage.delta.gold_table_vacuum import (
+    vacuum_gold_delta_table,
+)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -126,14 +129,13 @@ class StorageBundleMaintenanceMixin:
         # Metadata-only directories can exist when Gold writes are disabled.
         gold_table_path = self.gold.get_table_path(table_name)
         if _is_delta_table_dir(gold_table_path):
-            from deltalake import DeltaTable
-
             try:
-                dt = await run_storage_blocking(
-                    lambda: DeltaTable(str(gold_table_path)),
-                )
                 removed = await run_storage_blocking(
-                    lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
+                    lambda: vacuum_gold_delta_table(
+                        gold_table_path,
+                        retention_hours=retention_hours,
+                        dry_run=dry_run,
+                    ),
                 )
                 total_removed += len(removed)
             except (OSError, RuntimeError):

@@ -640,6 +640,7 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
         "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; "
         "$issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; "
         "$map(presentation_domains, function($d) { $merge([$d, {"
+        "'status_display': $d.domain = 'Workflow' and $d.verdict = 'N/A' ? '  ' : $d.verdict, "
         "'run_execution': $s.execution_state, 'run_verdict': $s.verdict, "
         "'saved_trust': $t, "
         "'run_reason': $r ? $r : ("
@@ -733,7 +734,10 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
         summary_fields = _overview_share_envelope(summary, source)
     views = [(summary, summary_fields)]
     if overview:
-        views.append((p[9002], ["domain", "verdict", "reason_display"]))
+        views.append((p[9002], ["domain", "status_display", "reason_display"]))
+        for transform in p[9002]["transformations"]:
+            if transform["id"] == "organize":
+                transform["options"]["renameByName"]["status_display"] = "Status"
     for panel, fields in views:
         _apply_reason_columns(panel, fields)
     _override(summary, "Result", "displayName", "Processing")
