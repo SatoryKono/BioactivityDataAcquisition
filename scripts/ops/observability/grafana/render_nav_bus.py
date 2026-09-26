@@ -215,7 +215,7 @@ _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
     'font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch">'
     "SELECTED RUN · Read exact replay readiness first, then the saved Trust verdict, "
-    "then retention.</div>"
+    "then retention. Blockers for that readiness are in <em>Review Exact Replay Checks</em>.</div>"
 )
 _RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (
@@ -1113,7 +1113,8 @@ def _stamp_recovery_copy(by_id: dict[object, dict[str, object]]) -> None:
     options["content"] = _RECOVERY_ACTION_HTML
     by_id[9400]["description"] = (
         "SELECTED RUN · Read exact replay readiness first, then the saved Trust "
-        "verdict, then retention. Those three answers use the selected Run ID. "
+        "verdict, then retention. Blockers for that readiness are in Review Exact "
+        "Replay Checks. Those three answers use the selected Run ID. "
         "They do not use current Prometheus telemetry."
     )
 
@@ -1716,10 +1717,9 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "SELECTED RUN · Manifest parse, structure, schema version, and contract "
             "compatibility for this Run ID."
         ),
-        9417: (
-            "SELECTED RUN · Failure counts for this Run ID in the fixed categories "
-            "api, dq, schema, storage, network, validation, and unknown. "
-            "UNKNOWN is not zero failures."
+        9407: (
+            "SELECTED RUN · Full identifiers for this Run ID. "
+            "Use Inspect to copy a hash or reference. A short cell is not a missing value."
         ),
     }
     for panel_id, description in short_copy.items():
@@ -1734,7 +1734,7 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "authorize replay. Reason count is the number of saved remarks: 0 is no, "
             "and missing data stays —. Assessed at is when that assessment was recorded. "
             "View trust reasons opens the remark list for this Run ID only when the count "
-            "is positive. The time range does not change these values."
+            "is positive."
         )
 
 

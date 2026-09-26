@@ -80,7 +80,10 @@ def apply_replay_readiness_design(payload: dict) -> None:
             "id": 9423,
             "type": "table",
             "title": "Review Exact Replay Checks",
-            "description": "SELECTED RUN · Individual checks behind Replay Readiness. Fail blocks replay; unknown means the check could not be confirmed. Evidence references point into the saved report.",
+            "description": (
+                "SELECTED RUN · One row per readiness check for this Run ID. "
+                "Fail blocks replay. Unknown is not a pass."
+            ),
             "datasource": card["datasource"],
             "targets": [target],
             "gridPos": {"x": 0, "y": bottom, "w": 24, "h": 8},

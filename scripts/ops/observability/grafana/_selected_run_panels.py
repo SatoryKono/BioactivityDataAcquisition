@@ -150,8 +150,7 @@ def _stamp_control_plane_copy(panel: dict[str, object], uid: object) -> None:
             "SELECTED RUN · Processing result is the saved ETL outcome. "
             "Saved trust verdict is the historical Trust assessment and does not "
             "authorize replay. Reason count is the number of saved remarks. "
-            "Assessed at is when that assessment was recorded. "
-            "The time range does not change these values."
+            "Assessed at is when that assessment was recorded."
         )
     if panel.get("id") == 9403:
         description = str(panel.get("description") or "")
