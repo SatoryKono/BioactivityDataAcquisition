@@ -916,16 +916,6 @@
             },
             "properties": [
               {
-                "id": "links",
-                "value": [
-                  {
-                    "title": "Open 1. Trust",
-                    "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
-                    "includeVars": false
-                  }
-                ]
-              },
-              {
                 "id": "noValue",
                 "value": "Open"
               },
@@ -943,8 +933,14 @@
                 ]
               },
               {
-                "id": "custom.width",
-                "value": 50
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open 1. Trust",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
+                    "includeVars": false
+                  }
+                ]
               }
             ]
           },
@@ -1119,6 +1115,35 @@
                       "unfinished": {
                         "text": "unfinished",
                         "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 50
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trust"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Open"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Inspect in 1. Trust": {
+                        "text": "Open"
                       }
                     }
                   }
