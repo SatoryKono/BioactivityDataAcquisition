@@ -993,10 +993,10 @@ def _correct_run_explorer(uid: object, panels: dict[int, dict]) -> None:
         enablePagination=False, countRows=False
     )
     _override(panels[3010], "Report", _WIDTH, 110)
-    _override(panels[3010], "Trust", _WIDTH, 110)
+    _override(panels[3010], "1. Trust", _WIDTH, 50)
     _override(
         panels[3010],
-        "Trust",
+        "1. Trust",
         "links",
         [
             {

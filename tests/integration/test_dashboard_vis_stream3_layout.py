@@ -148,4 +148,4 @@ def test_run_id_selector_and_recent_runs_do_not_label_uuid_as_count() -> None:
     assert rename.get("run_id") == "Run"
     assert rename.get("started_at") == "Started"
     assert rename.get("status") == "Processing"
-    assert rename.get("trust_status") == "Trust"
+    assert rename.get("trust_status") == "1. Trust"
