@@ -360,10 +360,15 @@ def _append_saved_run_evidence_row(
         )
         children.append(deepcopy(summary))
     else:
+        empty = (
+            "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
+        )
         details["description"] = (
             "SELECTED RUN · Domain trust reasons for this Run ID. "
             "Open this table from View trust reasons when the reason count is greater than zero."
         )
+        details["fieldConfig"]["defaults"]["noValue"] = empty
+        stages["fieldConfig"]["defaults"]["noValue"] = empty
     panels.append(
         {
             "id": 9450,
