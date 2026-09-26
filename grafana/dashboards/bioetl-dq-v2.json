@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Data Trust Explorer with three visually labeled lanes: Now, Run, Range. First screen promotes current reasons; range freshness is supporting impact.",
+  "description": "SELECTED RUN. This page assesses the selected Run ID from saved HTTP evidence. CURRENT pipeline status and TIME RANGE scores are not on this page. A time-range value never proves this run.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -952,7 +952,7 @@
         "h": 8
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · TIME RANGE · Selected run: Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
+      "description": "SELECTED RUN · Selected run: Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1325,7 +1325,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. VALID EMPTY is an empty successful query. Backend down is QUERY ERROR.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -1773,65 +1773,6 @@
                   "completed_at": "Completed",
                   "revision": "Revision"
                 }
-              }
-            }
-          ],
-          "links": []
-        },
-        {
-          "id": 9460,
-          "type": "table",
-          "title": "Inspect Selected Run Stages",
-          "gridPos": {
-            "x": 0,
-            "y": 36,
-            "w": 24,
-            "h": 8
-          },
-          "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. VALID EMPTY is an empty successful query. Backend down is QUERY ERROR.",
-          "options": {
-            "showHeader": true,
-            "cellHeight": "sm",
-            "footer": {
-              "show": false
-            }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "UNKNOWN",
-              "unit": "none",
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": false
-                },
-                "inspect": true
-              }
-            },
-            "overrides": []
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "type": "json",
-              "source": "url",
-              "parser": "backend",
-              "format": "table",
-              "root_selector": "stage_diagnostics",
-              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-              "url_options": {
-                "method": "GET",
-                "data": ""
-              }
-            }
-          ],
-          "transformations": [
-            {
-              "id": "limit",
-              "options": {
-                "limitField": 12
               }
             }
           ],
