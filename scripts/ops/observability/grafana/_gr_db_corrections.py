@@ -803,17 +803,18 @@ def _correct_control_plane_trust(uid: object, panels: dict[int, dict]) -> None:
                 "url": (
                     "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}"
                     "&${pipeline:queryparam}&${run_type:queryparam}"
-                    "&${run_id:queryparam}&viewPanel=9451&${__url_time_range}"
+                    "&${run_id:queryparam}&viewPanel=9418&${__url_time_range}"
                 ),
                 "includeVars": False,
                 "targetBlank": False,
             }
         ],
     )
-    details = panels[9451]
-    _organize_trust_details(details)
-    _override(details, "Reason", _CELL, {"type": "auto", "wrapText": True})
-    _override(details, "Reason", _INSPECT, True)
+    if 9451 in panels:
+        details = panels[9451]
+        _organize_trust_details(details)
+        _override(details, "Reason", _CELL, {"type": "auto", "wrapText": True})
+        _override(details, "Reason", _INSPECT, True)
     for item in trust["fieldConfig"]["overrides"]:
         _lighten_override_mappings(item)
 

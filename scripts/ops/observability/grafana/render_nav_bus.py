@@ -182,10 +182,10 @@ _RUNTIME_DROP_IDS = frozenset({22460, 9451, 9452, 9460})
 _RUNTIME_FLEET_ID_REMAP = {9401: 18940}
 _RUNTIME_FLEET_ROW_ID = 8808
 _RUNTIME_SELECTED_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 2, 24, 3),
-    9998: (0, 5, 24, 5),
-    9402: (0, 10, 12, 5),
-    9403: (12, 10, 12, 5),
+    9400: (0, 2, 24, 2),
+    9998: (0, 4, 24, 4),
+    9402: (0, 8, 12, 8),
+    9403: (12, 8, 12, 8),
 }
 _INCIDENT_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     2001: (0, 6, 24, 2),
@@ -206,10 +206,10 @@ _DQ_SCOPE_HTML = (
     "</div></div>"
 )
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 2, 24, 3),
-    9406: (0, 5, 24, 5),
-    9402: (0, 10, 12, 5),
-    9403: (12, 10, 12, 5),
+    9400: (0, 2, 24, 2),
+    9406: (0, 4, 24, 4),
+    9402: (0, 8, 12, 8),
+    9403: (12, 8, 12, 8),
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
@@ -1198,6 +1198,11 @@ def _stamp_retention_override(
         override["properties"] = [
             p for p in override.get("properties", []) if p.get("id") != CUSTOM_WIDTH
         ]
+        _set_override_value(
+            override,
+            "custom.cellOptions",
+            {"type": "auto", "wrapText": False},
+        )
     if field in wrap_fields:
         _set_override_value(
             override,
@@ -1234,7 +1239,7 @@ def _stamp_retention_readability(by_id: dict[object, dict[str, object]]) -> None
             custom["cellOptions"] = cell
         cell["wrapText"] = False
     widths = {"check": 170, "Check": 170, "status": 110, "Status": 110}
-    wrap_fields = {"check", "Check", "reason", "Reason"}
+    wrap_fields = {"check", "Check"}
     overrides = field_config.get("overrides")
     if not isinstance(overrides, list):
         return
@@ -1373,7 +1378,7 @@ def _stamp_trust_override(override: dict[str, object]) -> None:
                     "url": (
                         "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}"
                         "&${pipeline:queryparam}&${run_type:queryparam}"
-                        "&${run_id:queryparam}&viewPanel=9451&${__url_time_range}"
+                        "&${run_id:queryparam}&viewPanel=9418&${__url_time_range}"
                     ),
                     "includeVars": False,
                     "targetBlank": False,
@@ -1566,7 +1571,8 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
         139: _SELECT_RUN_EMPTY,
         9403: (
             "SELECT RUN — no exact Run ID selected. "
-            "Choose this run in Run Explorer."
+            "Choose this run in Run Explorer. "
+            "QUERY ERROR means the status request failed."
         ),
         9409: (
             "SELECT RUN — no exact Run ID selected. Choose a run first. "
@@ -2034,6 +2040,11 @@ def _stamp_runtime_fleet_panel(panel: dict[str, object]) -> None:
 
 
 def _stamp_runtime_answer(panel: dict[str, object]) -> None:
+    transforms = panel.setdefault("transformations", [])
+    if isinstance(transforms, list) and not any(
+        isinstance(item, dict) and item.get("id") == "limit" for item in transforms
+    ):
+        transforms.insert(0, {"id": "limit", "options": {"limitField": 1}})
     field_config = panel.setdefault("fieldConfig", {})
     if not isinstance(field_config, dict):
         return
@@ -2105,7 +2116,11 @@ def _retain_runtime_selected_run(payload: dict[str, object]) -> None:
             if isinstance(children, list):
                 collect(children)
             panel_id = panel.get("id")
-            if panel_id in _RUNTIME_DROP_IDS or panel.get("type") == "row":
+            if (
+                panel_id in _RUNTIME_DROP_IDS
+                or panel_id in {9401, 9450, 9451, 9452}
+                or panel.get("type") == "row"
+            ):
                 continue
             if panel_id in _RUNTIME_SELECTED_IDS:
                 if panel_id not in found:
@@ -2131,6 +2146,10 @@ def _retain_runtime_selected_run(payload: dict[str, object]) -> None:
     payload["panels"] = [found[panel_id] for panel_id in _RUNTIME_SELECTED_IDS]
     _stamp_runtime_answer(found[9998])
     _stamp_runtime_scope(found[9400])
+    for panel_id in (9402, 9403):
+        footer = found[panel_id].setdefault("options", {}).setdefault("footer", {})
+        if isinstance(footer, dict):
+            footer["enablePagination"] = True
 
 
 def _attach_runtime_fleet_row(payload: dict[str, object]) -> None:

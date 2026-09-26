@@ -113,6 +113,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
                     "noValue": "—",
                     "custom": {
                         "align": "left",
+                        "inspect": True,
                         "wrapText": True,
                         "cellOptions": {"type": "auto", "wrapText": True},
                     },

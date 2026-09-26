@@ -35,18 +35,12 @@ CONTROL_PLANE_GLOBAL_READ_PANEL_TITLES = {
 # Summary panels must preserve PromQL absence as No data (no masking `or vector(0)`).
 # Display-level empty text (fieldConfig.noValue) may still render operator-facing zeros.
 SUMMARY_NO_VECTOR_ZERO_FALLBACK_PANELS = {
-    "bioetl-runtime.json": {
+    "bioetl-incident-v1.json": {
         "Track Records by Stage / Interval",
         "Track Global Shutdown Starts",
         "Track Global Shutdown Completions",
         "Track Failed Workflow Runs",
         "Track Failed Workflow Steps",
-    },
-    "bioetl-provider-health-v2.json": {
-        "Monitor Healthy Checks",
-        "Monitor Health Checks",
-    },
-    "bioetl-control-plane-v1.json": {
         "Compare Global Audit Write Outcomes",
         "Compare Global Audit Query Outcomes",
     },
@@ -57,18 +51,12 @@ SUMMARY_NO_VECTOR_ZERO_FALLBACK_PANELS = {
 SUMMARY_ZERO_FALLBACK_EXPECTATIONS: dict[str, dict[str, str]] = {}
 
 DIAGNOSTIC_NO_ZERO_FALLBACK_EXPECTATIONS = {
-    "bioetl-runtime.json": {
+    "bioetl-incident-v1.json": {
         "Monitor Pipeline Alerts",
         "Inspect DQ Alert Conditions",
         "Inspect Control Plane Alerts",
         "Inspect Provider Alerts",
         "Inspect Global Provider Alert Conditions",
-    },
-    "bioetl-provider-health-v2.json": {
-        "Monitor Degraded Checks",
-        "Track Failure Rate",
-        "Track Rate-Limit Errors",
-        "Track Network & Timeout Errors",
     },
     "bioetl-control-plane-v1.json": {
         "Track Manifest Failures",

@@ -6,13 +6,10 @@ from copy import deepcopy
 
 STATUS_URL = "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
 DESCRIPTION = (
-    "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range "
-    "do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute "
-    "freshness rule. Historical Trust never authorizes replay now. Missing checks are "
-    "INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. "
-    "N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run "
-    "in Run Explorer to inspect a partial or outside range. Inspect the report for rules, "
-    "revision, completion and the saved source evidence."
+    "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; "
+    "missing selection is SELECT RUN; request failure is QUERY ERROR. "
+    "N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. "
+    "This saved verdict does not authorize replay."
 )
 
 
@@ -420,6 +417,9 @@ _DROP_PROVIDER_PANEL_IDS = frozenset(
         9105,
         9106,
         9404,
+        9450,
+        9451,
+        9452,
     }
 )
 
@@ -535,7 +535,39 @@ def prune_provider_health_panels(payload: dict[str, object]) -> None:
     if not isinstance(panels, list):
         return
     payload["panels"] = _without_panel_ids(panels, _DROP_PROVIDER_PANEL_IDS)
+    payload["description"] = (
+        "SELECTED RUN. Saved provider evidence for this Run ID. "
+        "Fleet and current telemetry are not on this page."
+    )
     panels = payload["panels"]
+    lifted: list[dict] = []
+
+    def _lift(items: list[object]) -> None:
+        for panel in items:
+            if not isinstance(panel, dict):
+                continue
+            children = panel.get("panels")
+            if isinstance(children, list):
+                kept_children = []
+                for child in children:
+                    if isinstance(child, dict) and child.get("id") in {9402, 9403}:
+                        lifted.append(child)
+                    else:
+                        kept_children.append(child)
+                panel["panels"] = kept_children
+                _lift(kept_children)
+
+    _lift(panels)
+    panels[:] = [
+        panel
+        for panel in panels
+        if not (
+            isinstance(panel, dict)
+            and panel.get("type") == "row"
+            and not panel.get("panels")
+        )
+    ]
+    panels.extend(lifted)
     for panel in panels:
         if isinstance(panel, dict) and panel.get("id") == 9400:
             options = panel.setdefault("options", {})
@@ -567,34 +599,35 @@ def prune_provider_health_panels(payload: dict[str, object]) -> None:
     evidence = _provider_check_panel(
         9460,
         "Review Provider Evidence",
-        {"x": 0, "y": 0, "w": 24, "h": 8},
+        {"x": 0, "y": 7, "w": 24, "h": 5},
         ["provider", "check_result", "evidence", "observed_at"],
         limit=None,
     )
+    evidence.setdefault("options", {}).setdefault("footer", {})["enablePagination"] = True
     review = _provider_check_panel(
         9461,
         "Review Provider Check",
-        {"x": 0, "y": 8, "w": 24, "h": 6},
+        {"x": 0, "y": 4, "w": 24, "h": 3},
         ["check_result", "evidence"],
         limit=1,
     )
+    review.setdefault("fieldConfig", {}).setdefault("defaults", {})["noValue"] = "UNKNOWN"
     for panel in panels:
         if not isinstance(panel, dict):
             continue
-        if panel.get("id") == 9405:
-            panel["gridPos"]["y"] = 5
-        if panel.get("id") == 9450:
-            panel["gridPos"]["y"] = 6
-    panels.append(
-        {
-            "id": 9462,
-            "type": "row",
-            "title": "Inspect Provider Check",
-            "collapsed": True,
-            "gridPos": {"x": 0, "y": 7, "w": 24, "h": 1},
-            "panels": [evidence, review],
-        }
-    )
+        if panel.get("id") == 9400:
+            panel["gridPos"] = {"x": 0, "y": 2, "w": 24, "h": 2}
+        if panel.get("id") == 9402:
+            panel["gridPos"] = {"x": 0, "y": 12, "w": 12, "h": 5}
+            panel.setdefault("options", {}).setdefault("footer", {})[
+                "enablePagination"
+            ] = True
+        if panel.get("id") == 9403:
+            panel["gridPos"] = {"x": 12, "y": 12, "w": 12, "h": 5}
+            panel.setdefault("options", {}).setdefault("footer", {})[
+                "enablePagination"
+            ] = True
+    panels.extend([review, evidence])
 
 
 def stamp_selected_run_panels(payload: dict[str, object]) -> None:
@@ -619,7 +652,17 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
         _stamp_overview_derived_panels(panel, uid)
     prune_provider_health_panels(payload)
     panels = payload.get("panels", [])
-    if uid != "bioetl-run-explorer-v1":
+    if uid in {
+        "bioetl-overview-v2",
+        "bioetl-control-plane-v1",
+        "bioetl-provider-health-v2",
+    }:
+        payload["panels"] = [
+            panel
+            for panel in panels
+            if not isinstance(panel, dict) or panel.get("id") != 9450
+        ]
+    elif uid != "bioetl-run-explorer-v1":
         _append_saved_run_evidence_row(
             panels, include_identity=uid != _CONTROL_PLANE_UID
         )
