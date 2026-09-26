@@ -39,7 +39,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
     card["fieldConfig"] = {
         "defaults": {
             "unit": "none",
-            "noValue": "QUERY ERROR",
+            "noValue": "—",
             "mappings": [
                 {
                     "type": "value",
@@ -86,17 +86,6 @@ def apply_replay_readiness_design(payload: dict) -> None:
                 "cellHeight": "lg",
                 "footer": {"show": False, "enablePagination": True},
             },
-            "fieldConfig": {
-                "defaults": {
-                    "noValue": "—",
-                    "custom": {
-                        "align": "left",
-                        "wrapText": True,
-                        "cellOptions": {"type": "auto", "wrapText": True},
-                    },
-                },
-                "overrides": [],
-            },
             "transformations": [
                 {
                     "id": "organize",
@@ -116,5 +105,35 @@ def apply_replay_readiness_design(payload: dict) -> None:
                     },
                 }
             ],
+            "fieldConfig": {
+                "defaults": {
+                    "noValue": "—",
+                    "custom": {
+                        "align": "left",
+                        "wrapText": True,
+                        "cellOptions": {"type": "auto", "wrapText": True},
+                    },
+                },
+                "overrides": [
+                    {
+                        "matcher": {"id": "byName", "options": "Check"},
+                        "properties": [
+                            {
+                                "id": "mappings",
+                                "value": [
+                                    {
+                                        "type": "value",
+                                        "options": {
+                                            "manifest_not_recorded": {
+                                                "text": "manifest этого запуска не найден"
+                                            }
+                                        },
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ],
+            },
         }
     )

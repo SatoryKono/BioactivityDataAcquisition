@@ -259,6 +259,11 @@ first_window_summary_tables:
     owner: "@bioetl-observability"
     bind: limit
   - dashboard: bioetl-control-plane-v1.json
+    id: 9422
+    max_rows: 1
+    owner: "@bioetl-observability"
+    bind: limit
+  - dashboard: bioetl-control-plane-v1.json
     id: 9418
     max_rows: 1
     owner: "@bioetl-observability"
@@ -291,7 +296,7 @@ scalar_density_enforced_uids:
 answer_panels:
   bioetl-control-plane-v1.json:
     - id: 9422
-      title: Review Exact Replay Readiness
+      title: Replay Readiness
   bioetl-overview-v2.json:
     - id: 9603
       title: Review Selected Run Status
