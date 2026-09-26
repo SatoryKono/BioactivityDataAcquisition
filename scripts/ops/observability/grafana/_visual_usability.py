@@ -575,21 +575,24 @@ def apply_visual_usability(payload: dict) -> None:
         _table(p[3010])
         _flex(p[3010], {"Run", "run_id"})
     # Native title chrome and typography remain untouched; preserve two wrapped link rows.
-    p[1000]["gridPos"]["h"] = 2
-    first_y = min(
-        panel["gridPos"]["y"] for panel in payload["panels"] if panel["id"] != 1000
-    )
-    shift = max(0, first_y - 2)
-    first_window = [
-        panel
-        for panel in payload["panels"]
-        if panel["id"] != 1000 and panel["type"] != "row"
-    ]
-    bottom = max(
-        panel["gridPos"]["y"] + panel["gridPos"]["h"] for panel in first_window
-    )
-    for panel in first_window:
-        if panel["gridPos"]["y"] + panel["gridPos"]["h"] == bottom:
-            panel["gridPos"]["h"] += shift
-        if panel["id"] != 1000:
-            panel["gridPos"]["y"] -= shift
+    if 1000 in p:
+        p[1000]["gridPos"]["h"] = 2
+        first_y = min(
+            panel["gridPos"]["y"]
+            for panel in payload["panels"]
+            if panel["id"] != 1000
+        )
+        shift = max(0, first_y - 2)
+        first_window = [
+            panel
+            for panel in payload["panels"]
+            if panel["id"] != 1000 and panel["type"] != "row"
+        ]
+        bottom = max(
+            panel["gridPos"]["y"] + panel["gridPos"]["h"] for panel in first_window
+        )
+        for panel in first_window:
+            if panel["gridPos"]["y"] + panel["gridPos"]["h"] == bottom:
+                panel["gridPos"]["h"] += shift
+            if panel["id"] != 1000:
+                panel["gridPos"]["y"] -= shift
