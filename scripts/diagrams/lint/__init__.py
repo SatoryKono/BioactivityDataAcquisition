@@ -1,1 +1,0 @@
-"""Diagram tooling: lint package."""

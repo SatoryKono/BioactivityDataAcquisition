@@ -1,9 +1,0 @@
-{
-  "content_hash": "85818bae89478c9617f0b9764fda5031dc0faff1fed5e39cfe81810b7eb12b95",
-  "normalized": {
-    "accession": "P12345",
-    "component_id": 77,
-    "component_type": "PROTEIN",
-    "target_component_xrefs": "[{\"xref_id\":\"P12345\",\"xref_src_db\":\"UniProt\"},{\"xref_id\":\"GO:0003677\",\"xref_src_db\":\"GoFunction\"}]"
-  }
-}

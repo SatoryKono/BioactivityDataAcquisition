@@ -1,5 +1,0 @@
-# License text (thin mirror)
-#
-# Exact-duplicate license text collapsed for docs skill mirrors.
-# Full text: _licenses/license-text-1.txt
-# Relative from this file: ../_licenses/license-text-1.txt

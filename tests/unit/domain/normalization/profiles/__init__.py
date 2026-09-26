@@ -1,1 +1,0 @@
-"""Normalization profile test package."""

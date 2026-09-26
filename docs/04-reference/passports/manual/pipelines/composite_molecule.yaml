@@ -1,6 +1,0 @@
-owner: BioETL Team
-owner_approved: true
-purpose: Enrich the ChEMBL molecule seed with compatible external compound facts.
-rationale: Seed-priority conflict handling preserves the canonical molecule identity.
-known_limitations:
-  - Normalized external anchors are used only when both sides expose compatible values.

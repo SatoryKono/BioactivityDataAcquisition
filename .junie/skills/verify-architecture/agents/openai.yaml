@@ -1,4 +1,0 @@
-interface:
-  display_name: "Verify Architecture"
-  short_description: "Run architecture verification"
-  default_prompt: "Use $verify-architecture to run quick, category, or full BioETL architecture checks."

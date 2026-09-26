@@ -1,4 +1,0 @@
-{"target_id":"CHEMBL_EDGE_1","mapping_status":"found","uniprot_accession":"P12345","reviewed":true}
-{"target_id":"CHEMBL_EDGE_2","mapping_status":"multiple","all_mappings":"[\"P12345\",\"Q9Y6K9\"]","reviewed":false}
-{"target_id":"CHEMBL_EDGE_3","mapping_status":"not_found","reviewed":false}
-{"target_id":"CHEMBL_EDGE_4","mapping_status":"error","reviewed":false}

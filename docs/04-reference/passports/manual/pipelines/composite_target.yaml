@@ -1,6 +1,0 @@
-owner: BioETL Team
-owner_approved: true
-purpose: Enrich ChEMBL targets with component, classification, mapping, and protein context.
-rationale: Ordered dependency boundaries keep target and protein identities auditable.
-known_limitations:
-  - UniProt enrichment requires a successful normalized mapping result.

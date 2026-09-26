@@ -1,6 +1,0 @@
-{
-  "generated_at_utc": "2026-09-25T08:51:03Z",
-  "status": "not_run",
-  "reason": "Этот аудит не запускал check-kpi. docs-kpi-weekly.yml не входил в разрешённые check-only команды карточки.",
-  "workflow": ".github/workflows/docs-kpi-weekly.yml"
-}

@@ -1,6 +1,0 @@
-owner: BioETL Team
-owner_approved: true
-purpose: Resolve UniProt mappings before fetching dependent protein records.
-rationale: The workflow preserves the mapping result as the typed handoff between executable pipelines.
-known_limitations:
-  - Unmapped identifiers remain explicit and do not trigger a protein fetch.
