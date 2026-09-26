@@ -6,262 +6,37 @@
 
 Dashboard `5. Data Quality` assesses the selected Run ID from saved HTTP evidence. Run ID is always set on this page. Prometheus CURRENT status and TIME RANGE scores are not panels on this dashboard. Shipped dashboard JSON is the source of truth.
 
-Counter panels that use `max_over_time()` show the maximum Pushgateway final
-snapshot observed in the selected window. They are bounded range evidence, not
-an exact total across multiple runs; use RunLedger for exact multi-run totals.
-
 The page answer is `SELECTED RUN`. A TIME RANGE value is not shown here and never proves this run.
 
-Silver/Gold validation, quarantine, and filter-reject diagnostic panels preserve
-empty Prometheus results as `No data`/`UNKNOWN`. They do not turn missing series
-into a synthetic healthy zero.
+Validation score metrics that are not on this page stay on the canonical `0.0-1.0` ratio scale.
 
-The canonical selected-range Silver validation count is panel `id=12`. The
-former `id=7` range-composite copy was removed because it repeated the same
-query, links, and operator fact.
-
-Selected-run accounting includes input, accepted, Silver/Gold quarantine,
-contract exclusions, Gold output and the exact Report link. Excl % uses Silver
-accepted as the denominator; zero/missing denominator remains unknown.
+Selected-run accounting includes input, accepted, Silver/Gold quarantine, contract exclusions, Gold output and the exact Report link. Excl % uses Silver accepted as the denominator; zero/missing denominator remains unknown.
 
 ## Key Panels
 
-### 2. Understand Evidence Scope
+### Understand Evidence Scope
 - **Type:** Text
-- **Purpose:** Show run ID, manifest ID, and replay provenance anchors.
-- **Data sources:** Dashboard variables and operator copy.
+- **Purpose:** State that this page is the selected Run ID assessment.
+- **Data sources:** Operator copy.
 
-### 3. Monitor Current DQ Status
-- **Type:** Stat
-- **Purpose:** Instant current DQ severity for the selected scope; it never
-  reduces a historical range while current reasons use an instant query.
-- **Data sources:** `bioetl_dq_current_status`
-
-### 4. Inspect Run Identity
+### Review Selected Run Status
 - **Type:** Table
-- **Purpose:** Show run ID, pipeline, run type, and timestamp.
-- **Data sources:** BioETL Ops HTTP control-plane identity endpoint
-  `/ops/control-plane/identity-table`; this is not a Prometheus panel.
+- **Purpose:** Saved verdict for the exact Run ID.
+- **Data sources:** `/ops/observability/selected-run-status` with `run_id`.
+- **Empty:** `QUERY ERROR` when the request fails. `SELECT RUN` is not a successful empty run.
 
-### 5. Inspect Processed Records
+### Inspect Run Identity
 - **Type:** Table
-- **Purpose:** Show Bronze/Silver/Gold counts and denominator-explicit percentages; both numeric columns are right-aligned.
-- **Data sources:** BioETL Ops HTTP
-  `/ops/observability/processed-records`; this is not a Prometheus panel.
+- **Purpose:** Manifest identity for the selected Run ID.
+- **Data sources:** `/ops/control-plane/identity-table` with `run_id`.
 
-### 6. Track Record Flow by Stage
-- **Type:** Timeseries
-- **Purpose:** Compare selected-range record flow and invariant status.
-- **Data sources:** `bioetl_records_processed_total`, `bioetl_record_flow_invariants_total`
+### Inspect Processed Records
+- **Type:** Table
+- **Purpose:** Input, accepted, quarantine, exclusions and Gold output for the selected Run ID.
+- **Data sources:** `/ops/observability/processed-records` with `run_id`.
 
-### 8. Monitor DQ Threshold State
-- **Type:** Stat
-- **Purpose:** Show the same instant bounded DQ threshold state as the current
-  reason projection.
-- **Data sources:** `bioetl_dq_current_reason`, `bioetl_dq_current_status`
-
-### 9. Inspect Current DQ Reasons
-- **Type:** Table (under collapsed **Selected Range · Impact & Freshness**, #6574)
-- **Purpose:** Show bounded current DQ reason, severity, and action rows. A
-  WARN/CRIT status without an active reason emits
-  `reason_evidence_unavailable` with action `verify_dq_reason_rules`.
-  Kept off first paint so the first-screen PromQL budget stays ≤200 chars.
-- **Data sources:** `bioetl_dq_current_reason`
-
-### 10. Start DQ Triage
-- **Type:** Text
-- **Purpose:** Guide operator to next triage action.
-- **Data sources:** Dashboard variables and operator copy.
-
-### 11. Monitor Weighted DQ
-- **Type:** Stat
-- **Purpose:** Show the latest volume-weighted DQ score retained for up to seven
-  days between runs on the canonical `0.0-1.0` ratio scale. If no score/count
-  pair exists in that window the panel remains `UNKNOWN`; absence is not `0`.
-- **Data sources:** `bioetl_dq_validation_score`
-
-### 12. Monitor Bronze Records
-- **Type:** Stat
-- **Purpose:** Count Bronze records in range.
-- **Data sources:** `bioetl_records_processed_total`
-
-### 13. Monitor Gold Records
-- **Type:** Stat
-- **Purpose:** Count Gold records in range.
-- **Data sources:** `bioetl_records_processed_total`
-
-### 14. Monitor Worst DQ
-- **Type:** Stat
-- **Purpose:** Show the latest worst-entity DQ score retained for up to seven
-  days between runs on the canonical `0.0-1.0` ratio scale. A missing sample
-  remains `UNKNOWN`, never a synthetic zero.
-- **Data sources:** `bioetl_dq_validation_score`
-
-### 15. Monitor Quarantined Records
-- **Type:** Stat
-- **Purpose:** Count quarantined records.
-- **Data sources:** `bioetl_dq_records_quarantined_total`
-
-### 16. Monitor Worst Freshness Age
-
-Age is evaluated at the selected range end using the latest observed timestamp
-per series within that range. Missing observations remain UNKNOWN; the card
-does not carry forward an earlier non-null age.
-- **Type:** Gauge
-- **Purpose:** Show worst TIME RANGE freshness age in hours. WARN begins at
-  `24h`, CRIT at `72h`; query output, unit, title, and thresholds use hours.
-- **Data sources:** `bioetl_data_freshness_seconds`
-
-### 17. Monitor Blocked Records
-- **Type:** Stat (`id=154`)
-- **Purpose:** Count blocked records as Silver `filtered_out` **plus** DQ
-  quarantine over `$__range`. This is a **superset** of panel `117`
-  (Monitor Silver Filter Rejects). Do not merge 117 and 154 without a 1:1
-  field contract; operators still need the reject-only funnel separately.
-- **Data sources:** `bioetl_records_processed_total{stage="filtered_out"}` +
-  `bioetl_dq_records_quarantined_total`
-
-### 18. Inspect Latest Successful Data
-- **Type:** Stat
-- **Purpose:** Show latest successful data timestamp.
-- **Data sources:** `bioetl_data_freshness_seconds`
-
-### 19. Monitor Silver Filter Rejects
-- **Type:** Stat (`id=117`)
-- **Purpose:** Count Silver structural rejects from `stage=filtered_out` only.
-  Panel `154` (Monitor Blocked Records) adds quarantine on top of this series;
-  117 is not the blocked KPI.
-- **Data sources:** `bioetl_records_processed_total{stage="filtered_out"}`
-
-### 20. Selected Range · Reject Evidence
+### Inspect Saved Run Evidence
 - **Type:** Row
-- **Purpose:** Collapsed-by-default reject analysis; expand after current reasons
-  or TIME RANGE delivery-impact cards identify a reject path.
-- **Data sources:** `bioetl_silver_filter_rejections_total`, `bioetl_dq_validation_failures_total`
-
-### 21. Monitor Silver Reject Mismatch
-- **Type:** Stat
-- **Purpose:** Detect Silver filter reject accounting mismatch.
-- **Data sources:** `bioetl_silver_filter_reject_total_mismatch_15m`
-
-### 22. Inspect Silver Rejects by Pipeline
-- **Type:** Table
-- **Purpose:** Show Silver rejects by pipeline and expose a neutral `No data` state when the bounded series is absent.
-- **Data sources:** `bioetl_records_processed_total{stage="filtered_out"}`
-
-### 23. Inspect Gold Reject Outcomes by Pipeline
-- **Type:** Table
-- **Purpose:** Show Gold reject outcomes by pipeline and expose a neutral `No data` state when both bounded series are absent.
-- **Data sources:** `bioetl_processed_records_gold_quarantined_current`, `bioetl_processed_records_gold_excluded_by_contract_current`
-
-### 24. Inspect Top Silver Reject Reasons
-- **Type:** Table
-- **Purpose:** Show top Silver reject reasons; an empty vector remains visible as neutral `No data` and never invents a reason.
-- **Data sources:** `bioetl_silver_filter_rejections_total{reason_code=...}`
-
-### 25. Inspect Top Silver Reject Fields
-- **Type:** Table
-- **Purpose:** Show top Silver reject fields; an empty vector remains visible as neutral `No data` and never invents a field.
-- **Data sources:** `bioetl_silver_filter_rejections_total{field=...}`
-
-### 26. Selected Range · Validation Diagnostics
-- **Type:** Row
-- **Purpose:** Collapsed-by-default validation/runtime/trend forensics.
-- **Data sources:** `bioetl_dq_validation_failures_total`, `bioetl_dq_anomaly_detected`
-
-### 27. Inspect Quarantine Error Types
-- **Type:** Bargauge
-- **Purpose:** Show quarantine by error type.
-- **Data sources:** `bioetl_dq_records_quarantined_total`
-
-### 28. Track DQ Anomalies
-- **Type:** Timeseries
-- **Purpose:** Show anomaly detection trend.
-- **Data sources:** `bioetl_dq_anomaly_detected`
-
-### 29. Track DQ Check Duration p95
-- **Type:** Timeseries
-- **Purpose:** Show DQ check duration p95.
-- **Data sources:** `bioetl_dq_check_duration_seconds`
-
-### 30. Monitor Silver Validation Failures
-- **Type:** Stat
-- **Purpose:** Count Silver validation failures.
-- **Data sources:** `bioetl_silver_validation_failures_total`
-
-### 31. Inspect Lineage in Control Plane
-- **Type:** Text
-- **Purpose:** Explain lineage handoff to control plane.
-- **Data sources:** Dashboard variables and operator copy.
-
-### 32. Track Volume-Weighted DQ Score
-- **Type:** Timeseries
-- **Purpose:** Show DQ score trend over time on the canonical `0.0-1.0` ratio
-  scale.
-- **Data sources:** `bioetl_dq_validation_score`
-
-### 33. Track DQ Threshold Events
-- **Type:** Timeseries
-- **Purpose:** Show DQ threshold events trend.
-- **Data sources:** `bioetl_dq_soft_threshold_exceeded`
-
-### 34. Inspect Aggregate Control-Plane Issues
-- **Type:** Text
-- **Purpose:** Explain aggregate control-plane handoff.
-- **Data sources:** Dashboard variables and operator copy.
-
-### 35. Monitor Gold Validation Failures
-- **Type:** Stat
-- **Purpose:** Count Gold strict validation failures.
-- **Data sources:** `bioetl_dq_validation_failures_total`
-
-### 36. Selected Range · Impact & Freshness
-- **Type:** Row
-- **Purpose:** Group selected-range score, quarantine, and reject evidence.
-- **Data sources:** Prometheus range evidence from the nested panels.
-
-### 37. Selected Run · Identity & Accounting
-- **Type:** Row
-- **Purpose:** Group selected-run identity and processed-record HTTP evidence.
-- **Data sources:** BioETL Ops HTTP.
-
-## Variables
-
-- `workflow`, `pipeline`, `run_type`, and `run_id` are the shared primary dashboard context shell.
-- `stage` narrows medallion-stage range evidence where the panel owns that selector.
-
-## Notes
-
-- Silver and Gold reject observability are intentionally distinct:
-  `bioetl_silver_filter_rejections_total` and filtered-out stage accounting
-  represent Silver structural rejects, while Gold uses Gold outcome recording
-  rules and validation failure metrics.
-- Legacy aggregate names for generic DQ scores, rule pass rates, Silver reject
-  rates, and validation errors are intentionally not documented here.
-- `Range · Records Quarantined`, `Range · Silver Filter Rejects` in
-  Range`, and `Track: DQ Blocked Records in Range (Evidence)` render a zero as
-  neutral valid-empty TIME RANGE evidence. They do not override a CURRENT
-  WARN/CRIT verdict.
-
-## Additional shipped panels
-### 38. Review Selected Run Status
-
-Shipped in `bioetl-dq-v2.json`.
-
-## Saved evidence and discovery panels
-
-### 39. Review DQ Coverage
-
-Explains the seven-day measured-data scope, missing validation timestamp and
-unavailable expected-entity coverage. A 100% score does not prove completeness.
-
-### 40. Inspect DQ Sample Coverage
-
-Shows records in the weighted-score denominator and observed score series.
-Missing telemetry remains UNKNOWN; these counts are not expected-entity coverage.
-
-| ID | Title | Purpose |
-| --- | --- | --- |
-| 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
-| 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
-| 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+- **Purpose:** Saved domain and identity detail for the same Run ID.
+- **Panels:** `Inspect Selected Run Domains`, `Inspect Selected Run Identity`.
+- **Data sources:** `/ops/observability/selected-run-status` with `run_id`.

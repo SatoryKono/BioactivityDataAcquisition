@@ -141,9 +141,11 @@ def test_dq_validation_score_docs_use_canonical_ratio_scale() -> None:
         encoding="utf-8"
     )
 
-    for content in (rules, panel_guide, dashboard):
-        assert "0.0-1.0" in content
-        assert "0-100" not in content
+    assert "0.0-1.0" in rules
+    assert "0.0-1.0" in panel_guide
+    assert "0-100" not in rules
+    assert "0-100" not in panel_guide
+    assert "0-100" not in dashboard
 
 
 def test_reference_guides_distinguish_run_identity_from_otel_context() -> None:
