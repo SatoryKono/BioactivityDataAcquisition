@@ -469,7 +469,7 @@
         "w": 24,
         "h": 2
       },
-      "description": "Open Review Provider Check for the stored verdict. This header is not a live health probe. Run ID on this page is already set. Current fleet telemetry is outside this page. The saved check belongs to the selected Run ID. Read this line before the tables. SELECTED RUN · Run ID is always set. Provider evidence is the saved check for this run. Fleet and current telemetry are not shown here.",
+      "description": "Provider evidence here is the stored check. The header names the scope of the tables below. A fleet chart is not on this screen. Open Review Provider Check for the stored verdict. This header is not a live health probe. Run ID on this page is already set. Current fleet telemetry is outside this page. The saved check belongs to the selected Run ID. Read this line before the tables. SELECTED RUN · Run ID is always set. Provider evidence is the saved check for this run. Fleet and current telemetry are not shown here.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Selected Run",
