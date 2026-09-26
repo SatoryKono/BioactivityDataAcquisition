@@ -45,6 +45,34 @@ from tests.integration.test_dashboard_units_decimals import DASHBOARD_DATETIME_U
 pytestmark = pytest.mark.integration
 
 DESIGN_SYSTEM = Path("docs/03-guides/dashboards/design-system.md")
+
+
+def test_trust_detail_tables_show_complete_evidence_inline() -> None:
+    """IDs and hashes must survive the displayed-frame projection intact."""
+    import json
+
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-control-plane-v1.json").read_text(encoding="utf-8")
+    )
+    checked = set()
+    for row in dashboard["panels"]:
+        for panel in row.get("panels", []):
+            if panel.get("type") != "table":
+                continue
+            assert panel["fieldConfig"]["defaults"]["custom"]["wrapText"]
+            assert not panel["options"]["footer"]["enablePagination"]
+            for transform in panel.get("transformations", []):
+                if transform["id"] != "organize":
+                    continue
+                options = transform["options"]
+                names = options.get("renameByName", {})
+                assert not any(name.endswith("_short") for name in names)
+                for full in (name for name in names if name.endswith("_full")):
+                    assert not options.get("excludeByName", {}).get(full, False)
+                    checked.add(panel["id"])
+    assert {9405, 9406, 9407, 9408, 9409} <= checked
+
+
 MONITORING_COMPOSE = Path("docker-compose.monitoring.yml")
 COPY_ROLE_ENFORCED_DASHBOARDS = frozenset({"bioetl-control-plane-v1.json"})
 

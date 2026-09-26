@@ -834,6 +834,53 @@ def apply_evidence_readability(payload: dict) -> None:
         from ._replay_readiness_design import apply_replay_readiness_design
 
         apply_replay_readiness_design(payload)
+        _trust_full_detail_values(payload)
+
+
+def _trust_full_detail_values(payload: dict) -> None:
+    """Render complete evidence inline in expandable Trust detail tables."""
+    for row in payload["panels"]:
+        if row.get("type") != "row":
+            continue
+        for panel in _panels(row.get("panels", [])):
+            if panel.get("type") != "table":
+                continue
+            replacements = {}
+            for transform in panel.get("transformations", []):
+                if transform["id"] != "organize":
+                    continue
+                options = transform["options"]
+                names = options.get("renameByName", {})
+                for short in list(names):
+                    if not short.endswith("_short"):
+                        continue
+                    full = short.removesuffix("_short") + "_full"
+                    replacements[short] = full
+                    names[full] = names.pop(short)
+                    indices = options.setdefault("indexByName", {})
+                    if short in indices:
+                        indices[full] = indices.pop(short)
+                    excluded = options.setdefault("excludeByName", {})
+                    excluded.pop(full, None)
+                    excluded[short] = True
+            config = panel["fieldConfig"]
+            custom = config["defaults"].setdefault("custom", {})
+            custom.update(wrapText=True, inspect=True)
+            custom.setdefault("cellOptions", {"type": "auto"})["wrapText"] = True
+            for override in config.get("overrides", []):
+                name = override["matcher"].get("options")
+                if name in replacements:
+                    override["matcher"]["options"] = replacements[name]
+                for prop in override["properties"]:
+                    if prop["id"] == _HIDDEN and name in replacements.values():
+                        prop["value"] = False
+                    elif prop["id"] == _WRAP:
+                        prop["value"] = True
+                    elif prop["id"] == _CELL:
+                        prop["value"]["wrapText"] = True
+            # Fixed-height pagination can clip multiline rows at page boundaries.
+            panel["options"]["cellHeight"] = "sm"
+            panel["options"].setdefault("footer", {})["enablePagination"] = False
 
 
 def _run_links(run: dict):
