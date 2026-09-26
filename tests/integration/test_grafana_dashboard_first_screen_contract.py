@@ -303,7 +303,7 @@ def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
     """Epic #6572: sole Status on Runtime/DQ first screen (no dual Status twin)."""
     for dashboard_name, banned in (
         ("bioetl-runtime.json", "Runtime Status"),
-        ("bioetl-dq-v2.json", "Monitor DQ Current Status"),
+        ("bioetl-dq-v2.json", "Monitor Current DQ Status"),
     ):
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         titles = {
@@ -314,6 +314,14 @@ def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
         assert banned not in titles, (
             f"{dashboard_name} must not ship dual Status twin {banned!r}"
         )
+        if dashboard_name == "bioetl-dq-v2.json":
+            assert any(
+                panel.get("id") == 9406 for panel in get_dashboard_panels(dashboard)
+            )
+            assert all(
+                panel.get("id") != 9401 for panel in get_dashboard_panels(dashboard)
+            )
+            continue
         assert any(panel.get("id") == 9401 for panel in get_dashboard_panels(dashboard))
 
 
@@ -566,13 +574,9 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
             },
         },
         "bioetl-dq-v2.json": {
-            "Start DQ Triage": {
-                "tokens": ("current", "selected-run", "range"),
-                "max_y": 22,
-            },
-            "Monitor Worst Freshness Age": {
-                "tokens": ("time range", "sla", "unknown"),
-                "max_y": 24,
+            "Understand Evidence Scope": {
+                "tokens": ("selected run", "time-range"),
+                "max_y": 4,
             },
         },
         "bioetl-provider-health-v2.json": {
