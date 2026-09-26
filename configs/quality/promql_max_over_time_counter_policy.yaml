@@ -1,13 +1,7 @@
 schema_version: 1
 reviewed_on: '2026-09-26'
-reviewed_expression_count: 31
+reviewed_expression_count: 29
 reviewed_expressions:
-- id: bioetl-runtime.json:panel=240:target=A
-  metrics:
-  - bioetl_records_processed_total
-- id: bioetl-runtime.json:panel=243:target=B
-  metrics:
-  - bioetl_stage_records_total
 - id: bioetl_runtime_dashboard_recording:bioetl_runtime_error_rate_30m:rule_index=3
   metrics:
   - bioetl_records_processed_total
