@@ -1,0 +1,2 @@
+Error: All files are ignored
+Previous local review has no stored findings.

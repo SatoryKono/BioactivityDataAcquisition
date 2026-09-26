@@ -12,6 +12,7 @@ from bioetl.application.core.batch_executor_loop_helpers import (
     create_batch_extraction_loop_state,
     flush_remaining_batch,
     process_extracted_record_iteration,
+    save_periodic_checkpoint_for_loop,
 )
 
 if TYPE_CHECKING:
@@ -134,8 +135,17 @@ class BatchExtractionLoopService:
 
                 aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
                 await aclose_fn()
+        had_remaining = bool(loop_state.batch)
         await flush_remaining_batch(
             loop_state=loop_state,
             records_fetched=progress_state.records_fetched,
             process_batch=process_batch,
         )
+        # Remaining flush also confirms Bronze; allow interval checkpoints (#11221).
+        if had_remaining and progress_state.records_bronze > 0:
+            await save_periodic_checkpoint_for_loop(
+                checkpoint_recovery_service=self._checkpoint_recovery_service,
+                records_fetched=progress_state.records_bronze,
+                resume_offset=execution_context.resume_offset,
+                checkpoint_interval=self._checkpoint_interval,
+            )

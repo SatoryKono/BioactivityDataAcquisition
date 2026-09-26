@@ -515,8 +515,9 @@ class TestBatchExecutorExecute:
 
         await batch_executor.execute(limit=None)
 
-        # With checkpoint_interval=5, should checkpoint at record 5 and 10
-        assert mock_checkpoint_manager.save_checkpoint.call_count == 2
+        # batch_size=10 → one flush at bronze=10; interval=5 ⇒ one confirmed checkpoint
+        assert mock_checkpoint_manager.save_checkpoint.call_count == 1
+        mock_checkpoint_manager.save_checkpoint.assert_awaited_with(10)
 
     async def test_execute_handles_shutdown(
         self, batch_executor, mock_services, mock_checkpoint_manager, shutdown_signal
@@ -576,10 +577,10 @@ class TestBatchExecutorExecute:
         mock_services,
         mock_checkpoint_manager,
     ):
-        """Checkpoint totals must include resume offset."""
+        """Checkpoint totals must include resume offset over confirmed Bronze (#11221)."""
 
         async def mock_fetch(**kwargs):
-            for i in range(5):  # checkpoint_interval in fixture is 5
+            for i in range(5):  # remaining flush confirms bronze=5 (batch_size=10)
                 yield {"id": str(i), "value": 10}
 
         mock_services.data_source.fetch = mock_fetch
@@ -595,7 +596,7 @@ class TestBatchExecutorExecute:
         mock_checkpoint_manager,
         shutdown_signal,
     ):
-        """Shutdown checkpoint must include resume offset and fetched count."""
+        """Shutdown checkpoint uses resume offset + confirmed Bronze only (#11221)."""
         records_yielded = 0
 
         async def mock_fetch(**kwargs):
@@ -616,7 +617,8 @@ class TestBatchExecutorExecute:
             for call in mock_checkpoint_manager.save_checkpoint.call_args_list
         ]
         assert checkpoint_totals
-        assert all(total == 10 for total in checkpoint_totals)
+        # Two fetched rows were still buffered → bronze=0 → total stays at offset 8.
+        assert all(total == 8 for total in checkpoint_totals)
 
 
 @pytest.mark.unit
@@ -917,7 +919,10 @@ class TestBatchExecutorTracing:
 
         async def boom(*_args, **_kwargs):
             await asyncio.sleep(0)
+            # Confirmed Bronze only — fetched-but-uncommitted rows must not advance
+            # the recovery offset (#11221).
             batch_executor_with_tracer.records_fetched = 3
+            batch_executor_with_tracer.records_bronze = 0
             raise RuntimeError("boom")
 
         batch_executor_with_tracer._run_extraction_loop = AsyncMock(side_effect=boom)
@@ -925,7 +930,7 @@ class TestBatchExecutorTracing:
         with pytest.raises(RuntimeError, match="boom"):
             await batch_executor_with_tracer.execute(limit=None, offset=4)
 
-        mock_checkpoint_manager.save_checkpoint.assert_awaited_once_with(7)
+        mock_checkpoint_manager.save_checkpoint.assert_awaited_once_with(4)
         span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
         span.record_exception.assert_called_once()
         span.set_attribute.assert_any_call("error", True)

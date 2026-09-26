@@ -126,11 +126,11 @@ async def test_save_periodic_checkpoint_skips_nonpositive_interval(
 
 
 @pytest.mark.asyncio
-async def test_resume_checkpoint_uses_fetched_offset_not_bronze_count(
+async def test_resume_checkpoint_uses_confirmed_count_plus_offset(
     service: BatchCheckpointRecoveryService,
     checkpoint_manager: AsyncMock,
 ) -> None:
-    """Resume offset is records_fetched + resume_offset (#11168)."""
+    """Resume offset is confirmed_count + resume_offset (#11221 supersedes #11168)."""
     await service.save_periodic_checkpoint(
         records_fetched=10,
         resume_offset=7,

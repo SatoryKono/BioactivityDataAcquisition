@@ -34,6 +34,20 @@
       "files": 114,
       "findings": "0",
       "at": "2026-09-26T08:07:31.998035Z"
+    },
+    "S08a-docs-00-project": {
+      "status": "ignored",
+      "reason": "all_files_ignored",
+      "files": 292,
+      "findings": "0",
+      "at": "2026-09-26T08:10:54.627839Z"
+    },
+    "S08b-docs-decisions": {
+      "status": "ignored",
+      "reason": "all_files_ignored",
+      "files": 64,
+      "findings": "0",
+      "at": "2026-09-26T08:12:01.524027Z"
     }
   }
 }
