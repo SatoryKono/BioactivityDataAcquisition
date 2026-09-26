@@ -19,6 +19,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+import httpx
+
 from bioetl.domain.exceptions import BioETLError
 from bioetl.infrastructure.observability.prometheus_metric_label_dispatch import (
     normalize_metric_dispatch_labels,
@@ -86,6 +88,9 @@ class AdapterMetricsRecorder:
         status = "success"
         try:
             yield
+        except httpx.HTTPStatusError:
+            status = "error"
+            raise
         except ADAPTER_REQUEST_ERRORS:
             status = "error"
             raise

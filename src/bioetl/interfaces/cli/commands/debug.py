@@ -122,8 +122,8 @@ def get_pipeline_runner_service(
 @typed_click_option(
     "--mode",
     type=click.Choice(["interactive", "log"]),
-    default="interactive",
-    help="Debug mode: interactive (CLI prompts) or log (auto-continue with logging)",
+    default="log",
+    help="Debug mode. Only log without breakpoints is supported.",
 )
 @typed_click_option(
     "--run-type",
@@ -166,6 +166,13 @@ def debug(
         echo_info(f"Breakpoints: {', '.join(bp.value for bp in enabled_breakpoints)}")
     else:
         echo_info("Breakpoints: all stages enabled")
+
+    if mode != "log" or enabled_breakpoints:
+        echo_error(
+            "Unsupported debug mode or breakpoints: only mode='log' without "
+            "breakpoints is available"
+        )
+        sys.exit(ExitCode.CONFIG_ERROR)
 
     run_options_type = _load_run_options_type()
     options = run_options_type(

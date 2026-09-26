@@ -183,7 +183,9 @@ async def handle_control_plane_ready(
         "validation_evidence_service": (
             host._control_plane_evidence_service is not None
         ),
-        "data_root": getattr(host, "_data_root", None),
+        "data_root": (
+            "configured" if getattr(host, "_data_root", None) else None
+        ),
         "runtime_source_id": getattr(host, "_runtime_source_id", None),
     }
     status_code = 200 if payload["run_manifest_port"] else 503

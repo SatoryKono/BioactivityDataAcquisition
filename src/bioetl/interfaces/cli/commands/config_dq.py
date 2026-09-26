@@ -197,7 +197,10 @@ def show_effective_config_command(
         runtime_overrides: JsonDict = {}
         for override in overrides:
             if "=" not in override:
-                continue
+                raise click.BadParameter(
+                    "override entries must use key=value",
+                    param_hint="--override",
+                )
             key, value = override.split("=", 1)
             runtime_overrides[key] = value
 

@@ -22,7 +22,7 @@ Operator **index** only. Runtime SSOT remains `.codex/**`, `.junie/**`, `.devin/
 | 2 | `prompt.audit.tests-system` | `library/test/system-audit.md` |
 | 3 | `prompt.audit.tech-debt` | `library/audit/tech-debt.md` |
 | 4 | `prompt.audit.repo-tree` | `library/audit/repo-tree.md` |
-| 5 | `prompt.audit.github-actions` | `library/audit/github-actions.md` |
+| 5 | `prompt.audit.github-actions` | `library/tests/cycle.md` |
 | 6 | `prompt.audit.agents-runtime` | `library/audit/agents-runtime.md` |
 | 7 | `prompt.audit.diagrams` | `library/audit/diagrams.md` |
 | 8 | `prompt.audit.docs-pipeline` | `library/doc/pipeline.md` |

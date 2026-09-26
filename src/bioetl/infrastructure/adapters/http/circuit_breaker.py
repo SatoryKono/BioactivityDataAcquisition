@@ -17,6 +17,8 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, ParamSpec, TypeVar
 
+import httpx
+
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import CircuitBreakerState
 from bioetl.infrastructure.adapters.http._circuit_breaker_support import (
@@ -180,6 +182,20 @@ class CircuitBreakerGuard:
                 self._trips_total += trips_delta
             raise
         else:
+            if isinstance(result, httpx.Response) and result.status_code in {429, 500, 502, 503, 504}:
+                async with self._lock:
+                    self._last_failure_time = _now()
+                    self._state, self._failure_count, trips_delta = record_failure(
+                        state=self._state,
+                        failure_count=self._failure_count,
+                        failure_threshold=self.failure_threshold,
+                        metrics=self.metrics,
+                        provider=self.provider,
+                        state_metric_name=METRIC_CIRCUIT_BREAKER_STATE,
+                        trip_metric_name=METRIC_CIRCUIT_BREAKER_TRIPS,
+                    )
+                    self._trips_total += trips_delta
+                return result
             async with self._lock:
                 self._failure_count = 0
                 self._state = record_success(

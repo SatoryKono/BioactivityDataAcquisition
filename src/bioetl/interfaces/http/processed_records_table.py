@@ -133,7 +133,7 @@ def build_processed_records_table_payload_from_ledger(
         return payload
 
     metric_values: dict[str, float | int | None] = {
-        spec.metric: 0 for spec in PROCESSED_RECORDS_ROW_SPECS
+        spec.metric: None for spec in PROCESSED_RECORDS_ROW_SPECS
     }
     latest_snapshot = _support.latest_metrics_snapshot(ledger_entries)
     if latest_snapshot:
@@ -141,17 +141,15 @@ def build_processed_records_table_payload_from_ledger(
             {
                 "bioetl_processed_records_bronze_current": latest_snapshot.get(
                     "records_bronze",
-                    0,
                 ),
                 "bioetl_processed_records_silver_valid_current": latest_snapshot.get(
                     "records_silver",
-                    0,
                 ),
                 "bioetl_processed_records_silver_quarantined_current": (
-                    latest_snapshot.get("records_quarantined", 0)
+                    latest_snapshot.get("records_quarantined")
                 ),
                 "bioetl_processed_records_silver_filtered_out_current": (
-                    latest_snapshot.get("records_filtered_out", 0)
+                    latest_snapshot.get("records_filtered_out")
                 ),
                 "bioetl_processed_records_gold_written_current": latest_snapshot.get(
                     "records_gold",

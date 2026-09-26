@@ -163,13 +163,13 @@ def _resolve_missing_severity(
     missing_severity: str | None,
     implementation_status: str | None,
 ) -> str | None:
-    resolved = _coalesce(missing_severity, implementation_status)
-    if resolved == "SHIPPED":
+    if missing_severity is not None:
+        return missing_severity
+    if implementation_status == "SHIPPED":
         return "INFO"
-    # Legacy implementation_status DEGRADED maps to WARNING severity token.
-    if resolved == "DEGRADED":
+    if implementation_status == "DEGRADED":
         return "WARNING"
-    return resolved
+    return implementation_status
 
 
 def _resolve_anchor_spec_values(

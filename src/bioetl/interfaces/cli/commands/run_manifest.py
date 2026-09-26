@@ -38,6 +38,7 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
 from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
     emit_inspection_payload,
 )
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 _RUN_MANIFEST_NOT_FOUND_MSG = "Run manifest not found"
@@ -90,10 +91,10 @@ def show_command(identifier: str, output_format: str) -> None:
         result = service.show(identifier)
     except RunManifestInspectionCorruptionError as exc:
         echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
-        return
+        raise SystemExit(ExitCode.FAIL) from exc
     except ValueError as exc:
         echo_error(_RUN_MANIFEST_NOT_FOUND_MSG, str(exc))
-        return
+        raise SystemExit(ExitCode.FAIL) from exc
     _emit_payload(result.to_dict(), output_format)
 
 

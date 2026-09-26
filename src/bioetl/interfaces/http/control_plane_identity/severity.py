@@ -71,7 +71,12 @@ def _identity_graph_severity(value: object | None) -> str:
     rendered_value = str(value).strip().lower()
     if rendered_value in {"true", "ok"} or rendered_value.startswith("complete"):
         return "OK"
-    if "run_id" in rendered_value or "manifest_id" in rendered_value:
+    tokens = {
+        part.strip(".,:;\"'")
+        for part in rendered_value.replace(",", " ").split()
+        if part.strip(".,:;\"'")
+    }
+    if "run_id" in tokens or "manifest_id" in tokens:
         return "FAILING"
     return "DEGRADED"
 

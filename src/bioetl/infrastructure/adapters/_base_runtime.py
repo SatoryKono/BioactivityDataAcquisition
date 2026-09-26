@@ -60,9 +60,11 @@ def init_inline_adapter_collaborators(
         else create_default_error_handler(logger=logger, metrics=metrics)
     )
     object.__setattr__(host, "_error_handler", resolved_error_handler)
-    if adapter_metrics is not None and request_collector is not None:
+    if adapter_metrics is not None:
         object.__setattr__(host, "_adapter_metrics", adapter_metrics)
+    if request_collector is not None:
         object.__setattr__(host, "_request_collector", request_collector)
+    if adapter_metrics is not None and request_collector is not None:
         return True
     return False
 
@@ -74,12 +76,16 @@ def init_default_adapter_metrics(
     provider_name: str,
 ) -> None:
     """Create standardized adapter metrics and request collector on the host."""
-    object.__setattr__(
-        host,
-        "_adapter_metrics",
-        create_default_adapter_metrics(metrics=metrics, provider=provider_name),
-    )
-    object.__setattr__(host, "_request_collector", create_default_request_collector())
+    if getattr(host, "_adapter_metrics", None) is None:
+        object.__setattr__(
+            host,
+            "_adapter_metrics",
+            create_default_adapter_metrics(metrics=metrics, provider=provider_name),
+        )
+    if getattr(host, "_request_collector", None) is None:
+        object.__setattr__(
+            host, "_request_collector", create_default_request_collector()
+        )
 
 
 def resolve_lazy_private_alias(host: object, name: str) -> tuple[bool, object]:

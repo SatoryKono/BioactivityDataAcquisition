@@ -60,6 +60,7 @@ class ProviderHealthState:
     status: HealthStatus = HealthStatus.HEALTHY
     consecutive_errors: int = 0
     last_success: float | None = None  # monotonic time
+    last_error: float | None = None  # monotonic time
     last_check: float | None = None  # monotonic time
 
     # Thresholds from RULES.md §3.5

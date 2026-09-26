@@ -37,14 +37,15 @@ def test_promtool_scenarios_cover_the_shipped_panel_queries() -> None:
         if panel["id"] == 9491
     )
     expressions = {
-        target["expr"].replace("$pipeline", "uniprot_protein").replace(
-            "$run_type", "incremental"
-        )
+        target["expr"]
+        .replace("$pipeline", "uniprot_protein")
+        .replace("$run_type", "incremental")
         for target in panel["targets"]
     }
     fixture = yaml.safe_load(
-        (ROOT / "grafana/prometheus-rules/tests/telemetry_coverage_panel.test.yml")
-        .read_text(encoding="utf-8")
+        (
+            ROOT / "grafana/prometheus-rules/tests/telemetry_coverage_panel.test.yml"
+        ).read_text(encoding="utf-8")
     )
     for scenario in fixture["tests"]:
         tested = {item["expr"] for item in scenario["promql_expr_test"]}

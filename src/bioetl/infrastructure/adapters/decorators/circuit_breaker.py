@@ -187,6 +187,14 @@ class CircuitBreakerDataSourceDecorator:
                 provider_name=self.provider_name,
                 error=exc,
             )
+
+            async def _record_failure() -> None:
+                raise exc
+
+            try:
+                await self.circuit_breaker.call(_record_failure)
+            except BioETLError:
+                pass
             raise
 
     async def health_check(self) -> HealthStatus:

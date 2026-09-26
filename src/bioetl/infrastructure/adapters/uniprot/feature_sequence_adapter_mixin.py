@@ -148,7 +148,18 @@ class UniProtFeatureSequenceAdapterMixin:
         if fasta_text:
             records = FastaParser.parse(fasta_text)
             for record in records:
-                yield record
+                header = str(record.get("header") or "")
+                sequence = str(record.get("sequence") or "")
+                parsed = FastaParser.parse_header(header)
+                accession = parsed.get("accession") or ""
+                yield {
+                    "header": header,
+                    "sequence": sequence,
+                    "accession": accession,
+                    "entry_name": parsed.get("entry_name"),
+                    "protein_name": parsed.get("description"),
+                    "length": len(sequence),
+                }
 
     async def _fetch_sequences(
         self,

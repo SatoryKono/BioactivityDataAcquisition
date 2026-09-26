@@ -211,11 +211,13 @@ async def health_server_context(
     try:
         yield server
     finally:
-        await server.stop()
-        await _deps.close_health_server_resources(
-            deps=deps,
-            quarantine_service=quarantine_service,
-        )
+        try:
+            await server.stop()
+        finally:
+            await _deps.close_health_server_resources(
+                deps=deps,
+                quarantine_service=quarantine_service,
+            )
 
 
 __all__ = [

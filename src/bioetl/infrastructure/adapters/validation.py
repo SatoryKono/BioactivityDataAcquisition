@@ -174,10 +174,7 @@ def parse_with_validation[T: BaseModel](
     result = validate_record(record, model_class, logger, context)
 
     if result.is_valid and result.validated is not None:
-        validated_dict: dict[
-            str, Any  # Any: validated records have heterogeneous field types
-        ] = result.validated.model_dump(by_alias=False)
-        return validated_dict
+        return record
 
     if strict:
         raise ValueError(result.error or "Validation failed")

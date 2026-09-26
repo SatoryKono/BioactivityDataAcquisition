@@ -7,6 +7,9 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import HealthStatus, JsonDict
+from bioetl.infrastructure.adapters.decorators._retry_support import (
+    _redact_transport_error_message,
+)
 from bioetl.infrastructure.adapters._health_check_policy import (
     _HealthCheckProbeOutcome,
     build_error_context,
@@ -150,7 +153,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
                     error=error,
                     fallback_status=HealthStatus.UNHEALTHY,
                 ),
-                last_error=str(error),
+                last_error=_redact_transport_error_message(str(error)),
                 consecutive_failures=self._get_consecutive_health_failures(),
             )
 

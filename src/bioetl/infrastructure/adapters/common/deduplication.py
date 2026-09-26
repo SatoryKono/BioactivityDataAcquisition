@@ -141,8 +141,11 @@ def build_record_dedup_key(
             None if not composite_key or composite_key == empty_key else composite_key
         )
 
-    record_id = str(record.get(primary_field, ""))
-    return record_id or None
+    record_id = record.get(primary_field, "")
+    if record_id is None:
+        return None
+    normalized_id = str(record_id)
+    return normalized_id or None
 
 
 def register_record_dedup_key(

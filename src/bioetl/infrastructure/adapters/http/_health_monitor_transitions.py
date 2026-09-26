@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
+import time
+
 from bioetl.domain.types import HealthStatus
 
 _ADAPTIVE_PARAMS_BY_STATUS: dict[HealthStatus, tuple[float, int]] = {
@@ -20,6 +22,7 @@ class ProviderHealthStateLike(Protocol):
     status: HealthStatus
     consecutive_errors: int
     last_success: float | None
+    last_error: float | None
     last_check: float | None
     DEGRADED_THRESHOLD: int
     UNHEALTHY_THRESHOLD: int
@@ -31,10 +34,10 @@ def check_clear_window(
     *,
     now: float,
 ) -> bool:
-    """Return True when the clear window elapsed since last success."""
-    if state.last_success is None:
-        return False
-    elapsed = now - state.last_success
+    """Return True when no error is recorded or the clear window elapsed since it."""
+    if state.last_error is None:
+        return True
+    elapsed = now - state.last_error
     return elapsed >= state.CLEAR_WINDOW_SECONDS
 
 
@@ -61,6 +64,7 @@ def record_success_transition(
 def record_error_transition(state: ProviderHealthStateLike) -> HealthStatus:
     """Apply error-driven state transition and return resulting status."""
     state.consecutive_errors += 1
+    state.last_error = time.monotonic()
 
     if state.consecutive_errors >= state.UNHEALTHY_THRESHOLD:
         state.status = HealthStatus.UNHEALTHY

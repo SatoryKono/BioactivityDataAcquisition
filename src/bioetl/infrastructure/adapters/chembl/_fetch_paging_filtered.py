@@ -90,7 +90,7 @@ class _ChemblFetchPagingFilteredMixin:
                     offset=offset,
                     records_yielded=len(seen_ids),
                 )
-                return
+                raise
             if not records:
                 break
             for record in as_mixin_host(self)._yield_deduplicated(  # Any: mixin host

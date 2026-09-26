@@ -174,7 +174,7 @@ class ChemblHealthMixin:
                 f"consecutive errors (circuit breaker)"
             )
         if health_status == HealthStatus.DEGRADED:
-            reduced = max(100, self._page_size // 2)  # Minimum 100
+            reduced = min(self._page_size, max(100, self._page_size // 2))
             self._logger.warning(
                 "chembl_degraded_mode",
                 provider="chembl",
