@@ -14,6 +14,7 @@ from bioetl.composition.observability_metrics_profile import (
     MetricsOperatorProfile,
     get_metrics_operator_profile,
 )
+from bioetl.domain.runtime.composition_boundary_policy import resolve_seed_run_type
 from bioetl.composition.bootstrap.cli.metrics import (
     bootstrap_metrics_service,
     refresh_control_plane_integrity_metrics,
@@ -168,11 +169,7 @@ def push_metrics_to_gateway(
 
 
 def _seed_run_type(run_type: str | None, workflow_name: str | None) -> str:
-    if isinstance(run_type, str) and run_type.strip():
-        return run_type.strip()
-    if workflow_name is None:
-        return "incremental"
-    return ""
+    return resolve_seed_run_type(run_type, workflow_name)
 
 
 def _ensure_publication_seeds(

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy import (
@@ -19,29 +18,6 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
 
-_PERSISTENCE_PROFILE_ACTIVE_LAYERS = ("bronze", "silver", "gold")
-
-
-def _resolve_sink_layer_config(yaml_config: object, layer: str) -> object | None:
-    sink = getattr(yaml_config, "sink", None)
-    if sink is None:
-        return None
-    if isinstance(sink, Mapping):
-        return sink.get(layer)
-    return getattr(sink, layer, None)
-
-
-def _is_sink_layer_enabled(layer_config: object | None) -> bool:
-    if layer_config is None:
-        return True
-    return bool(getattr(layer_config, "enabled", True))
-
-
-def _has_lineage_sidecar_persistence(layer_config: object | None) -> bool:
-    if layer_config is None:
-        return False
-    return bool(getattr(layer_config, "save_metadata", False))
-
 
 def resolve_required_artifact_lineage_layers(
     *,
@@ -49,36 +25,11 @@ def resolve_required_artifact_lineage_layers(
     skip_gold: bool = False,
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     """Return active sink layers and layers missing metadata sidecars."""
-    default_active_layers = tuple(
-        layer
-        for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS
-        if not (layer == "gold" and skip_gold)
+    from bioetl.domain.control_plane.artifact_lineage_layers import (
+        resolve_required_artifact_lineage_layers as resolve_layers,
     )
-    # Missing yaml_config: default active layers with unknown lineage state
-    # reported as active-but-unchecked (empty missing list keeps non-forensic
-    # launches wiring). Explicit sink=None on a config object is the same
-    # "defaults apply" surface for active layers.
-    if yaml_config is None:
-        return default_active_layers, ()
-    if getattr(yaml_config, "sink", None) is None:
-        # Active defaults + treat lineage as not yet configured for every
-        # default layer so strict profiles still require save_metadata when a
-        # real sink config appears; without a sink object there is nothing to
-        # inspect, so missing lineage is empty (compatibility with runner
-        # wiring tests that leave sink unset).
-        return default_active_layers, ()
-    active_layer_names: list[str] = []
-    missing_lineage_layers: list[str] = []
-    for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS:
-        if layer == "gold" and skip_gold:
-            continue
-        layer_config = _resolve_sink_layer_config(yaml_config, layer)
-        if not _is_sink_layer_enabled(layer_config):
-            continue
-        active_layer_names.append(layer)
-        if not _has_lineage_sidecar_persistence(layer_config):
-            missing_lineage_layers.append(layer)
-    return tuple(active_layer_names), tuple(missing_lineage_layers)
+
+    return resolve_layers(yaml_config=yaml_config, skip_gold=skip_gold)
 
 
 def validate_required_persistence_profile(
