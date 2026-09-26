@@ -469,7 +469,7 @@
         "w": 24,
         "h": 2
       },
-      "description": "The selected run is the only run these tables describe. The chart time range does not rewrite this header. This header does not authorize replay. Provider evidence here is the stored check. The header names the scope of the tables below. A fleet chart is not on this screen. Open Review Provider Check for the stored verdict. This header is not a live health probe. Run ID on this page is already set. Current fleet telemetry is outside this page. The saved check belongs to the selected Run ID. Read this line before the tables. SELECTED RUN · Run ID is always set. Provider evidence is the saved check for this run. Fleet and current telemetry are not shown here.",
+      "description": "The header stays above the tables. Saved evidence is not the same as current telemetry. Start here, then read Review Provider Check. The selected run is the only run these tables describe. The chart time range does not rewrite this header. This header does not authorize replay. Provider evidence here is the stored check. The header names the scope of the tables below. A fleet chart is not on this screen. Open Review Provider Check for the stored verdict. This header is not a live health probe. Run ID on this page is already set. Current fleet telemetry is outside this page. The saved check belongs to the selected Run ID. Read this line before the tables. SELECTED RUN · Run ID is always set. Provider evidence is the saved check for this run. Fleet and current telemetry are not shown here.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Selected Run",
