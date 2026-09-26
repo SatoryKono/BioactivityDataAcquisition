@@ -174,6 +174,25 @@ class TestCheckPressure:
         )
         assert result == 500
 
+    def test_rejects_nonpositive_check_interval(self) -> None:
+        manager = BatchMemoryManagerService(initial_batch_size=500)
+        with pytest.raises(ValueError, match="positive"):
+            manager.check_pressure(
+                current_size=500, check_interval=0, records_fetched=100
+            )
+
+    def test_disabled_sizing_decision_only_at_interval_boundary(self) -> None:
+        manager = BatchMemoryManagerService(initial_batch_size=500)
+        manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=50
+        )
+        assert manager.decision_trace == ()
+        manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
+        assert len(manager.decision_trace) == 1
+        assert manager.decision_trace[0].reason == "adaptive_sizing_disabled"
+
     def test_returns_current_size_before_interval(self):
         """Returns current_size when records_fetched % interval != 0."""
         manager = BatchMemoryManagerService(

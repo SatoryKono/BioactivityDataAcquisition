@@ -38,9 +38,9 @@ import textwrap
 
 import pytest
 
+from bioetl.domain.behavior.composite_metadata_cv import safe_ratio
 from bioetl.domain.behavior.merged_metadata_explainability import (
     MergedMetadataExplainer,
-    _safe_ratio,
     create_merged_metadata_explainability_service,
 )
 from bioetl.domain.models.metadata import CompositeOutputExt
@@ -296,4 +296,4 @@ def test_field_priority_explanation_defaults_are_stable() -> None:
             "conflict_resolution": "priority_based",
         }
     ]
-    assert _safe_ratio(1, 0) == 0.0
+    assert safe_ratio(1, 0) == 0.0

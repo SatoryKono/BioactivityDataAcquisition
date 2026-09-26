@@ -196,7 +196,6 @@ async def safe_write_layer(
         return None
     except operation_errors as error:
         if isinstance(error, Exception):
-            writer.track_batch_failed(stage=layer, count=len(records))
             emit_batch_failed(
                 emitter=domain_event_emitter,
                 run_id=run_id,

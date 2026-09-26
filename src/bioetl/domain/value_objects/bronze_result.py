@@ -153,8 +153,8 @@ class BronzeWriteResult:
             raise ValueError("absolute_path cannot be empty")
         if not self.checksum_blake2:
             raise ValueError("checksum_blake2 cannot be empty")
-        # Fail closed on relative paths that lack provider/entity segments.
-        _parse_provider_entity(self.relative_path)
+        if self.table_identity is None:
+            _parse_provider_entity(self.relative_path)
 
     @property
     def compression_ratio(self) -> float:

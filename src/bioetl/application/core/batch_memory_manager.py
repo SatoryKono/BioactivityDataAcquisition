@@ -76,6 +76,12 @@ class BatchMemoryManagerService:
         self, current_size: int, check_interval: int, records_fetched: int
     ) -> int:
         """Check memory pressure and adjust batch size if needed."""
+        if check_interval <= 0:
+            raise ValueError(
+                f"check_interval must be positive, got {check_interval!r}"
+            )
+        if records_fetched % check_interval != 0:
+            return current_size
         if not self.enabled:
             self._record_decision(
                 stage="pressure_check",
@@ -86,8 +92,6 @@ class BatchMemoryManagerService:
                 monitor_mode="disabled",
                 reason="adaptive_sizing_disabled",
             )
-            return current_size
-        if records_fetched % check_interval != 0:
             return current_size
         return self._adjust(current_size, record_index=records_fetched)
 

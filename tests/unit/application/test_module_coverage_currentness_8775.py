@@ -101,14 +101,14 @@ def test_score_card_residual_failure_branches_are_explicit() -> None:
     replay = score_replay_readiness(
         {
             "exact_replay_eligible": True,
-            "replay_mode": "rebuild_only",
+            "replay_mode": "rebuild",
             "artifact_publication_closure": "closed",
         }
     )
 
     assert failures[0]["reason"] == "category_score_missing"
     assert "checkpoint_policy_below_profile_minimum" in checkpoint.blockers
-    assert "rebuild_only_replay_mode" in replay.blockers
+    assert "rebuild_replay_mode" in replay.blockers
 
 
 def test_deduplication_handles_duplicate_key_only_frames() -> None:

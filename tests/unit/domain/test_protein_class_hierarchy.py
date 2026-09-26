@@ -73,3 +73,45 @@ def test_protein_class_hierarchy_rejects_noncontiguous_levels() -> None:
 def test_empty_protein_class_level_cannot_carry_text() -> None:
     with pytest.raises(ValueError, match="empty protein class levels"):
         ProteinClassLevel(id=None, name="HGNC-like text", desc=None)
+
+
+def test_protein_class_hierarchy_coerces_path_to_tuple() -> None:
+    l1 = ProteinClassLevel(id=1, name="Root", desc=None)
+    l2 = ProteinClassLevel(id=2, name="Child", desc=None)
+    hierarchy = ProteinClassHierarchy(
+        l1=l1,
+        l2=l2,
+        l3=ProteinClassLevel.empty(),
+        l4=ProteinClassLevel.empty(),
+        l5=ProteinClassLevel.empty(),
+        leaf_id=2,
+        path=[l1, l2],
+    )
+    assert isinstance(hierarchy.path, tuple)
+
+
+def test_protein_class_is_leaf_uses_last_populated_level() -> None:
+    hierarchy = ProteinClassHierarchy(
+        l1=ProteinClassLevel(id=1, name="Root", desc=None),
+        l2=ProteinClassLevel(id=2, name="Mid", desc=None),
+        l3=ProteinClassLevel(id=3, name="Leaf", desc=None),
+        l4=ProteinClassLevel.empty(),
+        l5=ProteinClassLevel.empty(),
+        leaf_id=3,
+    )
+    assert hierarchy.is_leaf is True
+
+
+def test_protein_class_levels_must_match_path_entries() -> None:
+    l1 = ProteinClassLevel(id=1, name="Root", desc=None)
+    l2 = ProteinClassLevel(id=2, name="Child", desc=None)
+    with pytest.raises(ValueError, match="must match path entries"):
+        ProteinClassHierarchy(
+            l1=l1,
+            l2=ProteinClassLevel(id=99, name="Child", desc=None),
+            l3=ProteinClassLevel.empty(),
+            l4=ProteinClassLevel.empty(),
+            l5=ProteinClassLevel.empty(),
+            leaf_id=2,
+            path=(l1, l2),
+        )

@@ -106,11 +106,13 @@ class RunContext:
 
     def __post_init__(self) -> None:
         """Validate run context after initialization."""
-        if self.started_at.tzinfo is None:
+        offset = self.started_at.utcoffset()
+        if self.started_at.tzinfo is None or offset is None:
             raise ValueError(
-                "started_at must be timezone-aware. "
-                "A timezone-aware offset is accepted; prefer datetime.now(UTC)."
+                "started_at must be timezone-aware UTC, got naive datetime"
             )
+        if offset.total_seconds() != 0:
+            raise ValueError("started_at must use a zero UTC offset")
 
         if not self.pipeline_name:
             raise ValueError("pipeline_name cannot be empty")

@@ -90,7 +90,15 @@ def normalize_severity(value: object | None, *, fallback: str) -> str:
     """Normalize severity into the bounded observability vocabulary."""
     normalized = coerce_non_empty(value, fallback=fallback).lower()
     normalized = _SEVERITY_ALIASES.get(normalized, normalized)
-    return normalized if normalized in _ALLOWED_SEVERITY_VALUES else "info"
+    if normalized in _ALLOWED_SEVERITY_VALUES:
+        return normalized
+    fallback_normalized = coerce_non_empty(fallback, fallback="info").lower()
+    fallback_normalized = _SEVERITY_ALIASES.get(
+        fallback_normalized, fallback_normalized
+    )
+    if fallback_normalized in _ALLOWED_SEVERITY_VALUES:
+        return fallback_normalized
+    return "info"
 
 
 def strip_legacy_keys(normalized: dict[str, object]) -> None:

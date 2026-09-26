@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from bioetl.composition.factories.pipeline._factory_method_types import (
+    extract_entity_type as _shared_extract_entity_type,
+)
 from bioetl.composition.factories.pipeline.creation_support import (
     BuildPipelineServicesFn,
     ServiceBundleDeps,
@@ -164,8 +167,8 @@ def _resolve_service_bundle_dependencies(
 
 
 def _extract_entity_type(pipeline_name: str) -> str | None:
-    """Preserve the complete entity suffix in `<provider>_<entity>` names."""
-    return pipeline_name.split("_", 1)[1] if "_" in pipeline_name else None
+    """Delegate to the shared pipeline entity-type extractor."""
+    return _shared_extract_entity_type(pipeline_name)
 
 
 def _create_data_source(

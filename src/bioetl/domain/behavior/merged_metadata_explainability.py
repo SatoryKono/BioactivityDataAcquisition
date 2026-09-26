@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.domain.behavior.composite_metadata_cv import (
+    build_explainability_summary,
+    empty_explainability_summary,
+)
 from bioetl.domain.behavior.merged_metadata_helpers import (
     deterministic_record_id as _deterministic_record_id,
 )
@@ -162,8 +166,8 @@ class MergedMetadataExplainer:
     ) -> JsonDict:
         """Summarize explainability coverage, conflicts, and enrichments."""
         if not explanations:
-            return _empty_explainability_summary()
-        return _build_explainability_summary(explanations)
+            return empty_explainability_summary()
+        return build_explainability_summary(explanations)
 
     def generate_field_priority_explanation(
         self,
@@ -195,102 +199,6 @@ def _count_conflicts_and_enrichments(
         if exp.enrichment_applied:
             enrichers.update(exp.enrichment_applied)
     return conflict_count, len(enrichers)
-
-
-def _empty_explainability_summary() -> JsonDict:
-    return {
-        "record_count": 0,
-        "field_count": 0,
-        "avg_fields_per_record": 0.0,
-        "source_provider_distribution": {},
-        "merge_strategy_distribution": {},
-        "conflict_summary": {
-            "total_conflicts": 0,
-            "conflict_rate": 0.0,
-            "records_with_conflicts": 0,
-        },
-        "enrichment_summary": {
-            "total_enrichments": 0,
-            "enrichment_rate": 0.0,
-            "records_with_enrichments": 0,
-        },
-    }
-
-
-def _build_distributions(
-    explanations: list[MergedRecordExplanation],
-) -> tuple[JsonDict, JsonDict]:
-    source_distribution: dict[str, int] = {}
-    strategy_distribution: dict[str, int] = {}
-    for explanation in explanations:
-        for provider in explanation.source_providers:
-            source_distribution[provider] = source_distribution.get(provider, 0) + 1
-        strategy = explanation.merge_strategy
-        strategy_distribution[strategy] = strategy_distribution.get(strategy, 0) + 1
-    return source_distribution, strategy_distribution
-
-
-def _build_explainability_summary(
-    explanations: list[MergedRecordExplanation],
-) -> JsonDict:
-    totals = _summary_totals(explanations)
-    source_distribution, strategy_distribution = _build_distributions(explanations)
-    return {
-        "record_count": totals["total_records"],
-        "field_count": totals["total_fields"],
-        "avg_fields_per_record": _safe_ratio(
-            totals["total_fields"],
-            totals["total_records"],
-        ),
-        "source_provider_distribution": source_distribution,
-        "merge_strategy_distribution": strategy_distribution,
-        "conflict_summary": _conflict_summary(explanations, totals),
-        "enrichment_summary": _enrichment_summary(explanations, totals),
-    }
-
-
-def _summary_totals(explanations: list[MergedRecordExplanation]) -> dict[str, int]:
-    return {
-        "total_records": len(explanations),
-        "total_fields": sum(len(exp.field_explanations) for exp in explanations),
-        "total_conflicts": sum(exp.conflict_count for exp in explanations),
-        "total_enrichments": sum(exp.enrichment_count for exp in explanations),
-    }
-
-
-def _conflict_summary(
-    explanations: list[MergedRecordExplanation],
-    totals: dict[str, int],
-) -> JsonDict:
-    return {
-        "total_conflicts": totals["total_conflicts"],
-        "conflict_rate": _safe_ratio(totals["total_conflicts"], totals["total_fields"]),
-        "records_with_conflicts": sum(
-            1 for exp in explanations if exp.conflict_count > 0
-        ),
-    }
-
-
-def _enrichment_summary(
-    explanations: list[MergedRecordExplanation],
-    totals: dict[str, int],
-) -> JsonDict:
-    # enrichment_count is now distinct enrichers per record; rate uses records.
-    records_with_enrichments = sum(
-        1 for exp in explanations if exp.enrichment_count > 0
-    )
-    return {
-        "total_enrichments": totals["total_enrichments"],
-        "enrichment_rate": _safe_ratio(
-            records_with_enrichments,
-            totals["total_records"],
-        ),
-        "records_with_enrichments": records_with_enrichments,
-    }
-
-
-def _safe_ratio(numerator: int, denominator: int) -> float:
-    return numerator / denominator if denominator > 0 else 0.0
 
 
 def create_merged_metadata_explainability_service() -> MergedMetadataExplainer:
