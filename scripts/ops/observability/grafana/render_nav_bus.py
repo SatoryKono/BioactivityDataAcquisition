@@ -2218,17 +2218,27 @@ def apply_to_dashboard(
         payload, provider_declared=current_uid in _PROVIDER_VARIABLE_UIDS
     )
     panels = payload.get("panels") or []
-    nav = next((p for p in panels if p.get("id") == 1000), None)
-    if nav is None:
-        raise SystemExit(f"{safe_path.name}: missing panel id=1000")
-    _stamp_nav_panel(nav, panels)
-    _restore_minimum_first_window_heights(panels, current_uid=current_uid)
-    _layout_uid_first_window(panels, current_uid=current_uid)
-    _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
-    _layout_uid_first_window(panels, current_uid=current_uid)
-    _normalize_collapsed_row_children(panels)
-    _layout_uid_detail_panels(panels, current_uid=current_uid)
-    _attach_nav_bus(nav, current_uid=current_uid)
+    if current_uid == _RUN_EXPLORER_UID:
+        payload["panels"] = [
+            panel
+            for panel in panels
+            if not (isinstance(panel, dict) and panel.get("id") == 1000)
+        ]
+        _restore_minimum_first_window_heights(
+            payload["panels"], current_uid=current_uid
+        )
+    else:
+        nav = next((p for p in panels if p.get("id") == 1000), None)
+        if nav is None:
+            raise SystemExit(f"{safe_path.name}: missing panel id=1000")
+        _stamp_nav_panel(nav, panels)
+        _restore_minimum_first_window_heights(panels, current_uid=current_uid)
+        _layout_uid_first_window(panels, current_uid=current_uid)
+        _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
+        _layout_uid_first_window(panels, current_uid=current_uid)
+        _normalize_collapsed_row_children(panels)
+        _layout_uid_detail_panels(panels, current_uid=current_uid)
+        _attach_nav_bus(nav, current_uid=current_uid)
     stamp_selector_columns(payload)
     # Remove our generated row before other appenders calculate their tail y.
     payload["panels"] = [p for p in payload["panels"] if p.get("id") != 9700]

@@ -285,24 +285,6 @@
   "style": "dark",
   "panels": [
     {
-      "id": 1000,
-      "type": "text",
-      "title": "",
-      "gridPos": {
-        "h": 2,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "options": {
-        "mode": "html",
-        "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-current\" href=\"#bioetl-run-explorer-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"0. Run Explorer (Run Explorer)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">0. Run Explorer</a><a class=\"bioetl-nav-link\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" tabindex=\"-1\" title=\"1. Trust (Trust)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none;cursor:default;pointer-events:none\">1. Trust</a><a class=\"bioetl-nav-link\" href=\"#bioetl-overview-v2\" aria-disabled=\"true\" tabindex=\"-1\" title=\"2. Overview (Overview)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none;cursor:default;pointer-events:none\">2. Overview</a><a class=\"bioetl-nav-link\" href=\"#bioetl-runtime\" aria-disabled=\"true\" tabindex=\"-1\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none;cursor:default;pointer-events:none\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" tabindex=\"-1\" title=\"4. Provider Health (Provider Health)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none;cursor:default;pointer-events:none\">4. Provider Health</a><a class=\"bioetl-nav-link\" href=\"#bioetl-dq-v2\" aria-disabled=\"true\" tabindex=\"-1\" title=\"5. Data Quality (Data Quality)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none;cursor:default;pointer-events:none\">5. Data Quality</a><a class=\"bioetl-nav-link\" href=\"#bioetl-incident-v1\" aria-disabled=\"true\" tabindex=\"-1\" title=\"6. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none;cursor:default;pointer-events:none\">6. Incident Workspace</a></div>"
-      },
-      "links": [],
-      "description": "Chips on 0. Run Explorer do not open other dashboards. Open Trust, Overview, Pipeline Diagnostics, Provider Health, and Data Quality from Inspect Recent Runs."
-    },
-    {
       "id": 1,
       "type": "text",
       "title": "",
@@ -310,7 +292,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 2
+        "y": 0
       },
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
@@ -333,10 +315,10 @@
       "title": "Inspect Recent Runs (last 10)",
       "description": "BROWSE — Last 10 launches by started_at across the selected pipeline scope, after Workflow and Run Type filters. The dashboard time picker does not filter this table. Start time comes from ledger/report identity, with explicitly recorded manifest-created fallback; never file mtime. One row is one launch. Running is the last recorded lifecycle state, not live-process proof. REPORT MISSING distinguishes launches without a persisted report. Click a Run cell to select and mark that run, binding Workflow, Pipeline, Run Type and Run ID from that row. Pipeline and Workflow belong to each row. Older runs: use the Run ID catalog. limit=10 shows all ten rows together without pagination. VALID EMPTY means no matching launches; TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY means a report bind failure. Backend failures are QUERY ERROR, not empty data. Run python scripts/ops/runtime/docker/verify_report_bind.py to diagnose the report bind. The matching SELECTED RUN row is marked; browse is not an exact-run snapshot. Report opens the row file in a new tab: Markdown when present, otherwise JSON. REPORT MISSING opens an explicit not-found response; it does not imply a persisted file. Find Run ID searches exact UUID before the ten-row limit. Duration needs valid start/end. Event age is the last ledger event for unfinished runs, not a heartbeat. Inspect a Run cell to copy its full UUID. DUAL-STATUS · Column Processing is run-report execution state (processing_status). Trust/evidence verdict is a separate axis — open 1. Trust for the selected Run ID; do not treat Processing success as trust OK.",
       "gridPos": {
-        "h": 12,
+        "h": 14,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 3
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {

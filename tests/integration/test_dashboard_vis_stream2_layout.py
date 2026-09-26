@@ -143,7 +143,6 @@ def test_nav_chips_use_eight_px_gap_and_status_stats_stay_compact() -> None:
         Path("grafana/dashboards/bioetl-dq-v2.json"),
         Path("grafana/dashboards/bioetl-incident-v1.json"),
         Path("grafana/dashboards/bioetl-runtime.json"),
-        Path("grafana/dashboards/bioetl-run-explorer-v1.json"),
     ):
         dashboard = load_dashboard(path)
         nav = _panel(dashboard, 1000)
