@@ -246,7 +246,6 @@ def test_percent_scores_integer_precision() -> None:
 def test_primary_status_documents_unknown_class() -> None:
     for path, status_id in (
         (DASH / "bioetl-runtime.json", 9401),
-        (DASH / "bioetl-dq-v2.json", 9401),
         (DASH / "bioetl-overview-v2.json", 214),
     ):
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -254,6 +253,10 @@ def test_primary_status_documents_unknown_class() -> None:
         desc = (status.get("description") or "").lower()
         assert "unknown" in desc
         assert "evidence incomplete" in desc or "missing" in desc
+    dq = json.loads((DASH / "bioetl-dq-v2.json").read_text(encoding="utf-8"))
+    selected = next(p for p in _walk(dq.get("panels")) if p.get("id") == 9406)
+    assert selected["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert "missing" in str(selected.get("description") or "").lower()
 
 
 def test_dux6_run_context_collapsed_outside_explorer() -> None:

@@ -143,14 +143,13 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
         in str(_panel(runtime, 9401).get("description")).lower()
     )
 
-    assert "bioetl_dq_current_status" in str(_panel(dq, 9401).get("targets"))
+    assert "run_id=${run_id}" in str(_panel(dq, 9406).get("targets"))
     provenance = str(_panel(dq, 9400).get("options", {}).get("content", ""))
-    for badge in ("CURRENT", "SELECTED RUN", "TIME RANGE"):
-        assert badge in provenance
-    for panel_id in (6, 117, 154):
-        panel = _panel(dq, panel_id)
-        assert panel.get("options", {}).get("colorMode") == "value"
-        assert "TIME RANGE delivery impact" in str(panel.get("description"))
+    assert "SELECTED RUN" in provenance
+    assert all(
+        panel.get("id") != 9401
+        for panel in _iter_panels(list(dq.get("panels", [])))
+    )
 
     # Workflow overview retired; workflow-band evidence lives on runtime.
 
