@@ -229,8 +229,14 @@ class BatchMetricsRecorderService:
         self,
         details: JsonDict | None = None,
         count: int = 1,
+        *,
+        account: bool = False,
     ) -> None:
-        """Always account removals; emit bounded labels only with a metrics port."""
+        """Emit bounded reject labels; account only when no durable filter write follows.
+
+        Durable quarantine persistence owns filtered-out removals. Pass
+        ``account=True`` for skip/fail policies that never persist a row.
+        """
         reason_code, rule_type, field = _silver_filter_rejection_labels(details)
         if self._metrics is not None:
             self._pipeline_metrics.record_silver_filter_rejections(
@@ -240,11 +246,12 @@ class BatchMetricsRecorderService:
                 field=field,
                 count=count,
             )
-        _record_silver_removal_accounting(
-            outcome="filtered_out",
-            reason_code=reason_code or "FILTERED_OUT_SILVER",
-            count=count,
-        )
+        if account:
+            _record_silver_removal_accounting(
+                outcome="filtered_out",
+                reason_code=reason_code or "FILTERED_OUT_SILVER",
+                count=count,
+            )
 
 
 # Compatibility alias retained for legacy imports.

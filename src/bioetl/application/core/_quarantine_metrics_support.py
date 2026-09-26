@@ -115,26 +115,43 @@ def count_dq_error_types(
     )
 
 
+def filtered_reason_code_from_details(
+    details: object | None,
+    *,
+    fallback: str = FILTERED_OUT_SILVER,
+) -> str:
+    """Prefer ``details.reason_code`` for accounting; else the filter baseline."""
+    if not isinstance(details, dict):
+        return fallback
+    raw = details.get("reason_code")
+    if isinstance(raw, str) and raw.strip():
+        return raw.strip()
+    return fallback
+
+
 def record_filtered_quarantine_metrics(
     *,
     metrics: MetricsPort | None,
     pipeline_metrics: PipelineMetricsRecorder,
     count: int,
+    reason_code: str = FILTERED_OUT_SILVER,
     record_accounting: bool = True,
+    emit_pipeline_metric: bool = True,
 ) -> None:
-    """Emit metrics for filter-rejected records.
+    """Emit metrics after a durable filter-rejection quarantine write.
 
-    Pipeline accounting always runs; optional MetricsPort is not required for
-    pipeline/silver removal bookkeeping.
+    The durable write is the source of truth for filtered-out removals.
+    ``reason_code`` should carry the per-entry catalog code when known.
     """
     _ = metrics
-    pipeline_metrics.record_quarantine_records(
-        reason=FILTERED_OUT_SILVER,
-        count=count,
-    )
+    if emit_pipeline_metric:
+        pipeline_metrics.record_quarantine_records(
+            reason=FILTERED_OUT_SILVER,
+            count=count,
+        )
     if record_accounting:
         _record_silver_removal_accounting(
             outcome="filtered_out",
-            reason_code=FILTERED_OUT_SILVER,
+            reason_code=reason_code or FILTERED_OUT_SILVER,
             count=count,
         )

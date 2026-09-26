@@ -82,19 +82,28 @@ async def test_gold_schema_quarantine_preserves_silver_and_zero_gold(
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("filtered", [True, False])
-async def test_rejection_and_durable_quarantine_count_once(filtered: bool) -> None:
+@pytest.mark.parametrize("with_batch_metrics", [True, False])
+async def test_rejection_and_durable_quarantine_count_once(
+    filtered: bool,
+    with_batch_metrics: bool,
+) -> None:
     accounting = StageAccountingAccumulator()
     token = bind_stage_accounting(accounting)
     metrics = BatchMetricsRecorderService(None, "chembl_activity", "incremental")
     port = MagicMock(write_many=AsyncMock())
     quarantine = QuarantineRuntimeService(
-        port, "chembl_activity", batch_metrics=metrics
+        port,
+        "chembl_activity",
+        batch_metrics=metrics if with_batch_metrics else None,
     )
     batch_id = BatchID(UUID("11111111-1111-4111-8111-111111111111"))
     try:
         if filtered:
             outcome = handle_filtered_out_error(
-                FilteredOutError("excluded"),
+                FilteredOutError(
+                    "excluded",
+                    details={"reason_code": "required_field_missing", "field": "x"},
+                ),
                 _build_filtered_out_handling_context(metrics, None, {"id": 1}, None, 0),
             )
             await quarantine.quarantine_filtered_records(
@@ -120,8 +129,42 @@ async def test_rejection_and_durable_quarantine_count_once(filtered: bool) -> No
         layers = accounting.snapshot_layers_from_metrics({"records_bronze": 1})
         assert layers.silver_filtered_out == int(filtered)
         assert layers.silver_quarantined == int(not filtered)
-        assert sum(r.count for r in accounting.snapshot_funnel(layers)[2].removals) == 1
+        silver = accounting.snapshot_funnel(layers)[2]
+        assert sum(r.count for r in silver.removals) == 1
+        assert silver.removed_total == 1
+        assert silver.records_in == silver.records_out + silver.removed_total
         port.write_many.assert_awaited_once()
+    finally:
+        reset_stage_accounting(token)
+
+
+@pytest.mark.asyncio
+async def test_filtered_skip_policy_accounts_without_durable_write() -> None:
+    from bioetl.domain.config import DQConfig
+
+    accounting = StageAccountingAccumulator()
+    token = bind_stage_accounting(accounting)
+    metrics = BatchMetricsRecorderService(None, "chembl_activity", "incremental")
+    try:
+        outcome = handle_filtered_out_error(
+            FilteredOutError(
+                "excluded",
+                details={"reason_code": "required_field_missing"},
+            ),
+            _build_filtered_out_handling_context(
+                metrics,
+                DQConfig(invalid_record_policy="skip"),
+                {"id": 1},
+                None,
+                0,
+            ),
+        )
+        assert outcome.filtered_entry is None
+        layers = accounting.snapshot_layers_from_metrics({"records_bronze": 1})
+        silver = accounting.snapshot_funnel(layers)[2]
+        assert layers.silver_filtered_out == 1
+        assert sum(r.count for r in silver.removals) == 1
+        assert silver.removals[0].reason_code == "required_field_missing"
     finally:
         reset_stage_accounting(token)
 
