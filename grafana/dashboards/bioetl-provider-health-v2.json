@@ -891,7 +891,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "This fleet evidence table shows the current reason for each provider. CURRENT · All providers. Not filtered by the selected Provider. Run ID is navigation context.",
+      "description": "This fleet evidence table is not the saved run check. This fleet evidence table shows the current reason for each provider. CURRENT · All providers. Not filtered by the selected Provider. Run ID is navigation context.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1342,7 +1342,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "This telemetry presence stat shows whether a current status series exists. TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK (presence color only; PRESENT≠OK for fleet health). Fail-closed UNKNOWN/gray when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy. SELECTED PROVIDER only; it does not summarize the fleet.",
+          "description": "This telemetry presence stat is not a healthy verdict. This telemetry presence stat shows whether a current status series exists. TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK (presence color only; PRESENT≠OK for fleet health). Fail-closed UNKNOWN/gray when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy. SELECTED PROVIDER only; it does not summarize the fleet.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2169,7 +2169,7 @@
           "type": "table"
         }
       ],
-      "description": "This fleet row shows non-OK providers and their top causes when expanded."
+      "description": "This fleet row is not the first-screen status card. This fleet row shows non-OK providers and their top causes when expanded."
     },
     {
       "collapsed": true,
