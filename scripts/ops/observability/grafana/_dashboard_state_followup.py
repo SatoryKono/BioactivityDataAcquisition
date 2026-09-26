@@ -426,9 +426,10 @@ def _pack_runtime_selected_run(dashboard: dict[str, Any]) -> None:
         9998: {"x": 0, "y": 6, "w": 24, "h": 4},
         9402: {"x": 0, "y": 10, "w": 12, "h": 6},
         9403: {"x": 12, "y": 10, "w": 12, "h": 6},
-        9450: {"x": 0, "y": 16, "w": 24, "h": 1},
-        9451: {"x": 0, "y": 17, "w": 24, "h": 8},
-        9452: {"x": 0, "y": 25, "w": 24, "h": 8},
+        9460: {"x": 0, "y": 16, "w": 24, "h": 8},
+        9450: {"x": 0, "y": 24, "w": 24, "h": 1},
+        9451: {"x": 0, "y": 25, "w": 24, "h": 8},
+        9452: {"x": 0, "y": 33, "w": 24, "h": 8},
     }
     for panel_id, grid in placements.items():
         panel = by_id.get(panel_id)
@@ -457,7 +458,7 @@ def _ensure_stage_panel(by_id: dict[int, dict[str, Any]]) -> None:
             "A recorded zero stays 0. An unknown count is empty, not 0. "
             "UNFINISHED means no terminal event. Prometheus does not change this table."
         ),
-        "gridPos": {"x": 0, "y": 33, "w": 24, "h": 8},
+        "gridPos": {"x": 0, "y": 16, "w": 24, "h": 8},
         "datasource": "BioETL Ops HTTP",
         "targets": [
             {

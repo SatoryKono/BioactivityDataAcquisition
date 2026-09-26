@@ -550,7 +550,7 @@ def _incident(p: dict[int, dict]) -> None:
         "UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action."
     )
     p[9400]["options"]["content"] = (
-        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">GLOBAL suspects are not verified causes. Telemetry gaps are UNKNOWN.</div>'
+        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">GLOBAL suspects are not verified causes. Telemetry gaps are UNKNOWN. VALID_EMPTY is an empty suspect list, not a healthy fleet.</div>'
     )
     p[2001]["options"]["content"] = (
         '<div style="font-size:16px;line-height:1.2">Open Action for evidence; PENDING has not fired. Use alert history.</div>'
@@ -942,11 +942,15 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
         "bioetl-run-explorer-v1": {
             3010: {
                 "selected": 28,
-                "Started": 145,
-                "Duration": 90,
-                "Trust": 120,
-                "Processing": 100,
-                "Report": 80,
+                "2. Overview": 90,
+                "3. Pipeline Diagnostics": 90,
+                "4. Provider Health": 90,
+                "5. Data Quality": 90,
+                "Started": 70,
+                "Duration": 45,
+                "Trust": 50,
+                "Processing": 50,
+                "Report": 40,
             }
         },
     }

@@ -653,7 +653,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 145
+                "value": 70
               }
             ]
           },
@@ -755,7 +755,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 40
               }
             ]
           },
@@ -815,7 +815,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 45
               }
             ]
           },
@@ -962,7 +962,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 120
+                "value": 50
               }
             ]
           },
@@ -985,6 +985,10 @@
               {
                 "id": "noValue",
                 "value": "Open"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           },
@@ -1007,6 +1011,10 @@
               {
                 "id": "noValue",
                 "value": "Open"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           },
@@ -1029,6 +1037,10 @@
               {
                 "id": "noValue",
                 "value": "Open"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           },
@@ -1051,6 +1063,10 @@
               {
                 "id": "noValue",
                 "value": "Open"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           },
@@ -1128,7 +1144,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 50
               }
             ]
           }
@@ -1206,23 +1222,23 @@
           "options": {
             "indexByName": {
               "selected": 0,
-              "started_at": 1,
-              "pipeline": 2,
-              "workflow_id": 3,
+              "started_at": 5,
+              "pipeline": 6,
+              "workflow_id": 7,
               "run_id": 4,
-              "duration_display": 5,
-              "event_age_display": 6,
-              "status": 7,
-              "trust_status": 8,
+              "duration_display": 9,
+              "event_age_display": 10,
+              "status": 11,
+              "trust_status": 12,
               "report_label": 13,
               "report_url": 14,
               "workflow_scope": 15,
               "run_type": 16,
               "completed_at": 17,
-              "overview_handoff": 9,
-              "diagnostics_handoff": 10,
-              "provider_handoff": 11,
-              "quality_handoff": 12
+              "overview_handoff": 1,
+              "diagnostics_handoff": 2,
+              "provider_handoff": 3,
+              "quality_handoff": 4
             },
             "renameByName": {
               "selected": "",
@@ -1688,6 +1704,65 @@
                   "completed_at": "Completed",
                   "revision": "Revision"
                 }
+              }
+            }
+          ],
+          "links": []
+        },
+        {
+          "id": 9460,
+          "type": "table",
+          "title": "Inspect Selected Run Stages",
+          "gridPos": {
+            "x": 0,
+            "y": 38,
+            "w": 24,
+            "h": 8
+          },
+          "datasource": "BioETL Ops HTTP",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "unit": "none",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "root_selector": "stage_diagnostics",
+              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "limit",
+              "options": {
+                "limitField": 12
               }
             }
           ],
