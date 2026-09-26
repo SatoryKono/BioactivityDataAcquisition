@@ -1,0 +1,83 @@
+---
+trigger: glob
+description: "BioETL Testing — VCR, E2E, Architecture Tests"
+globs:
+  - "tests/**/*.py"
+---
+
+# Testing Levels
+
+**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
+
+| Level | Scope | Key Requirements |
+|-------|-------|------------------|
+| Unit | Domain/application pure logic | In-memory fakes/ports; **NO** mocking external libraries |
+| Integration | Adapters, Delta, checkpoint/quarantine | VCR.py; durable boundaries |
+| Architecture | Layer boundaries, purity, ports | Block cross-layer imports, I/O in domain, factories outside composition |
+| Contract/Golden | Columns, order, types, serialization | Generated artifact parity |
+| E2E | Full pipeline | `@pytest.mark.e2e`, local-only |
+| Composite | Stage order, join keys, merge | ADR-026 coverage |
+| Reliability | Retry, idempotency, checkpoint, lock loss | Failure at each durable boundary |
+| Determinism | Golden hash, repeated-run equality | Byte-identical artifacts where applicable |
+| Contract (live) | Real APIs | Monthly scheduled workflow |
+
+Tests: `test_*.py`; mirror production concerns.
+
+# Unit Test Rules
+
+- Pure domain/application via in-memory fakes — **MUST NOT** mock external libs (`httpx`, `requests`, etc.)
+- `MagicMock` only for own seam objects when fake impractical
+- Cover: aggregate state machines, invalid transitions, Value Objects, hash normalization, DQ boundaries, negative cases
+- **Deterministic:** no uncontrolled `datetime.now()` / `time.time()` / unseeded `random` / live network — use fixtures, frozen time, seeds, or mocks limited to controlled time/random seams and project-owned ports; external HTTP clients still require in-memory fakes, VCR cassettes, or fixtures (not library mocks)
+- Behavior or public-API changes **MUST** add/update regression tests in the same change; bug fixes **SHOULD** include a failing-before/passing-after case
+- **MUST NOT** weaken assertions to green-wash (exact → contains, drop asserts, widen ranges) without explicit justification
+
+# VCR.py Rules
+
+- Store: `tests/fixtures/vcr/`
+- **MANDATORY sanitization:** redact `Authorization`, `X-Api-Key`, `X-Auth-Token`, `Set-Cookie`, `Cookie`, tokens, passwords, secrets, PII
+- Placeholders: `DUMMY_TOKEN`, `FAKE_API_KEY`, `REDACTED` — never production-like (`sk_live_`, JWT triplets)
+- CI: `--vcr-record=none` — fail if cassette missing; live network in normal CI **MUST NOT**
+
+# E2E Tests
+
+- Runtime: local-only (filesystem, MemoryLock, LocalCheckpoint)
+- Run: `pytest tests/e2e/ -v -m e2e`
+
+# Critical Architecture Tests
+
+| Test area | Validates |
+|-----------|-----------|
+| `test_no_random_in_writers.py` | No uncontrolled random in storage writers |
+| `test_no_datetime_now_in_infrastructure.py` | No wall-clock in infra |
+| `test_no_structlog_in_application_interfaces.py` | LoggerPort only |
+| `test_future_annotations_policy.py` | `__future__` annotations |
+| `test_quality_debt_scorecard.py` | Debt compliance |
+| import-linter | Layer matrix |
+| `test_force_full_scan_publication.py` | Publication full_scan_only configs |
+
+# Coverage
+
+**Minimum 85% overall** — `--cov-fail-under=85` in CI. No separate mandatory 90% domain gate in current RULES.
+New/modified files **SHOULD NOT** be significantly below 85% even if global passes.
+
+# Blocking CI Gates
+
+Ruff/format, mypy `--strict`, pytest, import-linter, architecture suite, config/schema validators, generated-artifact parity, Bandit, pip-audit (CVE ≥ HIGH), detect-secrets, docs checks, coverage, Conventional Commit header.
+
+# Pre-PR Minimum
+
+```bash
+make lint
+make test
+uv run lint-imports --config .importlinter
+uv run python -m scripts.schema validate-configs
+uv run python -m pytest tests/architecture/ -m "not slow and not benchmark and not memory" -q
+```
+
+# Quick Verification
+
+```bash
+find tests -name "*.py" -exec grep -l "ClassName" {} \;
+grep -o "self\.[a-z_]*\." <file> | sort -u
+```

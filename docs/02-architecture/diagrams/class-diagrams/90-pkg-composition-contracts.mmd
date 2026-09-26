@@ -1,0 +1,45 @@
+%% Title: Package Family: composition/contracts
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/contracts; modules: factories, structural, resources, health.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-09-25
+%% @level   Package Family / Inventory Slice
+%% @nodes   23
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace factories {
+        class BuildPipelineServicesFn
+        class FactoryLike
+        class HealthServerDependenciesFactoryProtocol
+        class LoggerBindableObservability
+        class ObservabilityApiModule
+        class PipelineRunnerServiceFactoryProtocol
+        class QuarantineServiceFactoryProtocol
+        class ServiceBundleDeps
+    }
+
+    namespace structural {
+        class AuditRequiredFn
+        class CandidatePathsFactory
+        class ControlPlaneSettingsFn
+        class DictHost
+        class ModelDumpHost
+        class ModelDumpProvider
+        class ModelDumpable
+    }
+
+    namespace resources {
+        class CheckpointRuntimeServiceProtocol
+        class CleanupPreviewProtocol
+        class CleanupServiceProtocol
+        class MedallionLifecycleServiceProtocol
+        class QuarantineRuntimeServiceProtocol
+    }
+
+    namespace health {
+        class BronzeCleanupServiceProtocol
+        class HealthListenerDependenciesProtocol
+        class HealthServerDependenciesProtocol
+    }

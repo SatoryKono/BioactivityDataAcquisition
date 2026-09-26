@@ -1,0 +1,57 @@
+version: 1
+profiles:
+  light:
+    run_cleanup: true
+    run_auto_fix: true
+    run_repo_checks: true
+    run_docs_identity_checks: true
+    run_docs_verify: false
+    run_memory_checks: true
+    strict_docs: false
+    architecture_group: ""
+  governance:
+    run_cleanup: true
+    run_auto_fix: true
+    run_repo_checks: true
+    run_docs_identity_checks: true
+    run_docs_verify: false
+    run_memory_checks: true
+    strict_docs: false
+    architecture_group: governance
+  full:
+    run_cleanup: true
+    run_auto_fix: true
+    run_repo_checks: true
+    run_docs_identity_checks: true
+    run_docs_verify: false
+    run_memory_checks: true
+    strict_docs: false
+    architecture_group: full
+  strict:
+    run_cleanup: true
+    run_auto_fix: true
+    run_repo_checks: true
+    run_docs_identity_checks: true
+    run_docs_verify: true
+    run_memory_checks: true
+    strict_docs: true
+    architecture_group: full
+architecture_groups:
+  governance:
+    - tests/architecture/test_integration_vcr_policy.py::TestIntegrationVcrPolicy::test_every_test_surface_under_integration_and_e2e_is_in_tracked_inventory
+    - tests/architecture/test_integration_vcr_policy.py::TestIntegrationVcrPolicy::test_testing_guide_matches_current_fixture_governance_and_live_contract_policy
+    - tests/architecture/test_documentation_sync.py::test_no_legacy_repo_slug_in_active_docs_and_workflows
+    - tests/architecture/test_documentation_sync.py::test_no_legacy_contract_path_in_active_docs
+    - tests/architecture/test_generated_artifact_routing.py
+    - tests/architecture/test_scripts_catalog_governance.py::test_scripts_catalog_governance_check_passes
+  full:
+    - tests/architecture/test_integration_vcr_policy.py::TestIntegrationVcrPolicy::test_every_test_surface_under_integration_and_e2e_is_in_tracked_inventory
+    - tests/architecture/test_integration_vcr_policy.py::TestIntegrationVcrPolicy::test_testing_guide_matches_current_fixture_governance_and_live_contract_policy
+    - tests/architecture/test_documentation_sync.py::test_no_legacy_repo_slug_in_active_docs_and_workflows
+    - tests/architecture/test_documentation_sync.py::test_no_legacy_contract_path_in_active_docs
+    - tests/architecture/test_generated_artifact_routing.py
+    - tests/architecture/test_scripts_catalog_governance.py::test_scripts_catalog_governance_check_passes
+    - tests/architecture/test_any_budget.py::test_any_budget_threshold
+    - tests/architecture/test_type_checking_density.py
+    - tests/architecture/test_hotspot_growth_family_ratchets.py
+    - tests/architecture/test_hotspot_fan_in_family_ratchets.py

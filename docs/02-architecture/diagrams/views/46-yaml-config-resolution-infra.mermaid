@@ -1,0 +1,17 @@
+%% View: Infrastructure-Mapping | Parent: 46-yaml-config-resolution-full.mermaid
+%% @uniform width=184 height=56 max_title_len=18 max_desc_lines=1
+flowchart TB
+    YAML["base / provider / entity YAML"] --> CFG["ConfigLoader"]
+    DQ["DQ hierarchy"] --> DQLOAD["DQConfigLoader"]
+    FILTERS["Filter hierarchy"] --> FLOAD["FilterConfigLoader"]
+    CFG --> YLOAD["YAML loader"]
+    YLOAD --> NORM["normalize_pipeline_config_payload"]
+    NORM --> PIPEVAL["PipelineYamlConfig"]
+    SOURCE["legacy-flat source payload"] -.-> SRCVAL["SourceYamlConfig"]
+
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef process fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+    class YAML,DQ,FILTERS,SOURCE storage;
+    class CFG,DQLOAD,FLOAD,YLOAD infra;
+    class NORM,PIPEVAL,SRCVAL process;

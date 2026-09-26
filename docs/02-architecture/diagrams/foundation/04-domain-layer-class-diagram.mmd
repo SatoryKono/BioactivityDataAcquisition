@@ -1,0 +1,372 @@
+%% Title: Domain Layer Class Diagram
+%% Covers: RULES.md §1.1 (Domain Layer), §1.2 (Ports), §1.3 (Entities)
+%% Updated: 2026-07-31
+%% Components: DataSourcePort, BronzeStoragePort, SilverStoragePort, GoldStoragePort, MergedStoragePort, StorageLifecyclePort, LockPort, Activity, Molecule, Assay, Target, RunType, HealthStatus
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    classDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   26
+%% @uniform class width=232 height=198 max_title_len=24 max_desc_lines=9
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+classDiagram
+    direction TB
+
+    namespace Ports {
+        class DataSourcePort {
+            <<Protocol>>
+            +fetch(query: Query) AsyncIterator~BronzeRecord~
+            +health_check() HealthStatus
+            +aclose() None
+
+
+
+
+
+        }
+
+        class FilterableDataSourcePort {
+            <<Protocol>>
+            +fetch_filtered(filters: FilterConfig) AsyncIterator~BronzeRecord~
+
+
+
+
+
+
+
+        }
+
+        class StorageLifecyclePort {
+            <<Protocol>>
+            +aclose() None
+            +health_check() bool
+        }
+
+        class BronzeStoragePort {
+            <<Protocol>>
+            +write_bronze(records, provider, entity) BronzeWriteResult
+            +cleanup_bronze(cutoff_date, dry_run) dict
+        }
+
+        class SilverStoragePort {
+            <<Protocol>>
+            +write_silver(records, table, mode) WriteResult
+            +read_silver(table, columns, limit) DataFrame
+            +clear_silver(table) int
+        }
+
+        class GoldStoragePort {
+            <<Protocol>>
+            +write_gold(records, table, schema) WriteResult
+            +clear_gold(table) int
+        }
+
+        class MergedStoragePort {
+            <<Protocol>>
+            +write_merged_silver(records, table) WriteResult
+            +write_merged_gold(records, table) WriteResult
+            +vacuum(table, retention_days) None
+            +archive(source, dest) None
+        }
+
+        class LockPort {
+            <<Protocol>>
+            +acquire(key, owner_id, ttl, wait, timeout, exclusive) bool
+            +release(key, owner_id, exclusive) bool
+            +heartbeat(key, owner_id, exclusive) bool
+            +validate_owner(key, owner_id) bool
+            +aclose() None
+
+
+
+        }
+
+        class CheckpointPort {
+            <<Protocol>>
+            +save(key, state) None
+            +load(key) CheckpointState?
+            +list_all() list~str~
+            +delete(key) None
+
+
+
+
+        }
+
+        class QuarantinePort {
+            <<Protocol>>
+            +write(record: QuarantineRecord) None
+            +inspect(pipeline, limit) list~QuarantineRecord~
+            +get_stats(pipeline) QuarantineStats
+            +aclose() None
+
+
+
+
+        }
+
+        class MetricsPort {
+            <<Protocol>>
+            +observe_histogram(name, value, labels) None
+            +increment_counter(name, labels, value) None
+            +set_gauge(name, value, labels) None
+            +close() None
+
+
+
+
+        }
+
+        class TracingPort {
+            <<Protocol>>
+            +get_tracer(name) Tracer
+            +close() None
+
+
+
+
+
+
+        }
+
+        class LoggerPort {
+            <<Protocol>>
+            +bind(**context) LoggerPort
+            +info(msg, **kwargs) None
+            +warning(msg, **kwargs) None
+            +error(msg, **kwargs) None
+            +debug(msg, **kwargs) None
+            +exception(msg, **kwargs) None
+
+
+        }
+
+        class CircuitBreakerPort {
+            <<Protocol>>
+            +get_state() CircuitState
+            +get_failure_count() int
+            +call(func, *args) T
+            +reset() None
+
+
+
+
+        }
+
+        class RateLimiterPort {
+            <<Protocol>>
+            +acquire() None
+            +try_acquire() bool
+            +available_tokens() int
+
+
+
+
+
+        }
+    }
+
+    namespace Entities {
+        class BaseEntity {
+            <<abstract>>
+            +entity_id: EntityID
+            +content_hash: ContentHash
+            +run_id: RunID
+            +run_type: RunType
+            +ingestion_ts: datetime
+
+
+
+        }
+
+        class Activity {
+            +activity_id: str
+            +assay_id: str
+            +molecule_id: str
+            +target_id: str?
+            +standard_type: str
+            +standard_value: float?
+            +standard_units: str?
+            +pchembl_value: float?
+
+        }
+
+        class Molecule {
+            +molecule_id: str
+            +pref_name: str?
+            +molecule_type: str
+            +canonical_smiles: str?
+            +inchi_key: str?
+            +molecular_weight: float?
+            +parent_molecule_id: str?
+
+
+        }
+
+        class Assay {
+            +assay_id: str
+            +assay_type: str
+            +description: str?
+            +target_id: str?
+            +document_id: str?
+
+
+
+
+        }
+
+        class Target {
+            +target_id: str
+            +target_type: str
+            +pref_name: str?
+            +organism: str?
+            +tax_id: int?
+            +uniprot_accessions: list~str~?
+
+
+
+        }
+
+        class PublicationEntityBase {
+            <<abstract>>
+            +doi: str?
+            +pmid: str?
+            +title: str?
+            +publication_year: int?
+            +citations_received: int?
+            +citations_made: int?
+            +author_orcids: str?
+            +_source: str
+        }
+
+        class ChemblPublication {
+            +document_chembl_id: str
+            +publication_type: str
+            +volume: str?
+            +src_id: int?
+
+
+
+
+
+        }
+    }
+
+    namespace Config {
+        class PipelineConfig {
+            <<frozen dataclass>>
+            +provider: str
+            +entity: str
+            +table_config: TableConfig
+            +dq_config: DQConfig
+
+
+
+
+        }
+
+        class RuntimeConfig {
+            +run_id: RunID
+            +run_type: RunType
+            +limit: int?
+            +resume: bool
+            +dry_run: bool
+            +filters: FilterConfig?
+
+
+
+        }
+
+        class DQConfig {
+            <<frozen dataclass>>
+            +soft_fail_threshold: float = 0.05
+            +hard_fail_threshold: float = 0.20
+            +strict_validation: bool = False
+
+
+
+
+
+        }
+
+        class TableConfig {
+            <<frozen dataclass>>
+            +primary_keys: tuple~str~
+            +silver_table: str?
+            +gold_table: str?
+            +silver_write_mode: SilverWriteMode
+            +gold_write_mode: GoldWriteMode
+            +partition_cols: tuple~str~
+
+
+        }
+    }
+
+    namespace Types {
+        class RunType {
+            <<enumeration>>
+            INCREMENTAL
+            BACKFILL
+            REBUILD
+
+
+
+
+
+        }
+
+        class SilverWriteMode {
+            <<enumeration>>
+            MERGE
+            APPEND
+            DELETE
+
+
+
+
+
+        }
+
+        class GoldWriteMode {
+            <<enumeration>>
+            APPEND
+            OVERWRITE
+            SCD2
+
+
+
+
+
+        }
+
+        class CircuitState {
+            <<enumeration>>
+            CLOSED = 0
+            HALF_OPEN = 1
+            OPEN = 2
+
+
+
+
+
+        }
+    }
+
+    %% Inheritance
+    BaseEntity <|-- Activity
+    BaseEntity <|-- Molecule
+    BaseEntity <|-- Assay
+    BaseEntity <|-- Target
+    BaseEntity <|-- PublicationEntityBase
+    PublicationEntityBase <|-- ChemblPublication
+
+    FilterableDataSourcePort --|> DataSourcePort
+
+    %% Associations
+    PipelineConfig --> TableConfig
+    PipelineConfig --> DQConfig
+    RuntimeConfig --> RunType
+    TableConfig --> SilverWriteMode
+    TableConfig --> GoldWriteMode

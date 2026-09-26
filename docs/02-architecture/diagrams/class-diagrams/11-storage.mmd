@@ -1,0 +1,144 @@
+%% BioETL — Class Diagram: Storage Components
+%% Bronze/Silver/Gold writers and supporting classes.
+%% Re-verified 2026-08-17 against live src/bioetl symbols
+
+%% @version 1.2.1
+%% @date    2026-08-17
+%% @type    classDiagram
+%% @level   Class / Interface
+%% @nodes   18
+%% @uniform class width=240 height=156 max_title_len=22 max_desc_lines=6
+
+classDiagram
+    direction LR
+    class BaseDeltaWriter {
+        +base_path
+        +logger
+        #_retention_manager
+        #_flat_structure
+        +get_table_path(provider, entity)
+        +clear(table_path)
+        +... : schema helpers
+    }
+
+    class BronzeWriter {
+        +base_path
+        +logger
+        +metrics
+        +audit
+        +metadata_writer
+        +write_bronze(records, config)
+        +aclose()
+    }
+
+    class SilverWriter {
+        +csv_exporter
+        +write_policy
+        +metrics
+        +audit
+        +silver_validator
+        +write_silver(records)
+        +merge_silver(records)
+    }
+
+    class GoldWriter {
+        +csv_exporter
+        +audit
+        +metadata_writer
+        +write_gold(records, config)
+        +clear_gold(table_name)
+    }
+
+    class DeltaReader {
+        +base_path
+        +logger
+        +read_table(path, cols, limit)
+        +get_schema(path)
+        +get_row_count(path)
+    }
+
+    class ArrowDataConverter {
+        +convert(records, schema)
+    }
+
+    class RetentionPolicy {
+        +manage_retention(table_path, hours)
+    }
+
+    class MetadataWriter {
+        +write_bronze_metadata(base_path, metadata)
+        +write_silver_metadata(base_path, metadata)
+        +write_gold_metadata(base_path, metadata)
+    }
+
+    class BronzeWriterMetadataMixin {
+        +write_bronze_metadata(...)
+    }
+
+    class SilverWriterMetadataMixin {
+        +write_silver_metadata(...)
+    }
+
+    class GoldWriterMetadataMixin {
+        +write_gold_metadata(...)
+    }
+
+    class MetadataWriteOperations {
+        <<module metadata_writer_operations>>
+        +prepare(request)
+        +build_retry_callback(...)
+        +emit_final_telemetry(...)
+    }
+
+    class composite_metadata_helpers {
+        <<module>>
+        +extract_composite_output_ext(records)
+        +parse_composite_list(value)
+        +parse_composite_status(value)
+    }
+
+    class AtomicWriteGroup {
+        +add(path, data)
+        +commit()
+        +rollback()
+    }
+
+    class CsvExporter {
+        +export(table_path, output_path)
+    }
+
+    class PanderaSilverValidator {
+        +validate(df, schema)
+    }
+
+    class PanderaGoldValidator {
+        +validate(df, schema)
+    }
+
+    class NoOpValidator {
+        <<Null Object>>
+        +validate(df, schema)
+    }
+
+    BaseDeltaWriter <|-- SilverWriter
+    BaseDeltaWriter <|-- GoldWriter
+
+    SilverWriter o-- ArrowDataConverter
+    GoldWriter o-- ArrowDataConverter
+    SilverWriter o-- RetentionPolicy
+    GoldWriter o-- RetentionPolicy
+    SilverWriter o-- MetadataWriter
+    GoldWriter o-- MetadataWriter
+    SilverWriter o-- CsvExporter
+    GoldWriter o-- CsvExporter
+    SilverWriter o-- PanderaSilverValidator
+    GoldWriter o-- PanderaGoldValidator
+
+    BronzeWriter o-- AtomicWriteGroup
+    BronzeWriter o-- MetadataWriter
+    BronzeWriter o-- BronzeWriterMetadataMixin
+    SilverWriter o-- SilverWriterMetadataMixin
+    GoldWriter o-- GoldWriterMetadataMixin
+    MetadataWriter --> MetadataWriteOperations
+    SilverWriterMetadataMixin --> composite_metadata_helpers
+    GoldWriterMetadataMixin --> composite_metadata_helpers

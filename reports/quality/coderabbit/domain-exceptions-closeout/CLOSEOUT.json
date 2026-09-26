@@ -1,0 +1,78 @@
+{
+  "campaign": "CR-FULL-20260806-full",
+  "leaf": "S01-domain-exceptions",
+  "branch": "grok-260807-108155",
+  "closed_at": "2026-08-07T07:08:06.517227+00:00",
+  "issue_range": "#8155-#8165",
+  "counts": {
+    "total": 11,
+    "fixed": 10,
+    "rejected": 1
+  },
+  "fixed": [
+    8155,
+    8156,
+    8157,
+    8158,
+    8159,
+    8161,
+    8162,
+    8163,
+    8164,
+    8165
+  ],
+  "rejected": [
+    8160
+  ],
+  "dispositions": {
+    "8155": {
+      "status": "fixed",
+      "note": "_redact_sequence materializes plain list/tuple instead of type(value)(generator)."
+    },
+    "8156": {
+      "status": "fixed",
+      "note": "Added residual unit coverage for BioETLError.to_structured_context, domain context, PipelineShutdownError, and storage compatibility constructors."
+    },
+    "8157": {
+      "status": "fixed",
+      "note": "Schema validation messages include one-sided column diffs when only expected or actual columns are present."
+    },
+    "8158": {
+      "status": "fixed",
+      "note": "ValidationError/SchemaViolationError always expose record_id and field (None when omitted)."
+    },
+    "8159": {
+      "status": "fixed",
+      "note": "Parametrized tests cover resolve_rate_limit_params provider/message/service_name fallbacks."
+    },
+    "8160": {
+      "status": "reject",
+      "note": "infrastructure/ is already a re-export facade over storage/; no duplicate _storage/_delta modules present."
+    },
+    "8161": {
+      "status": "fixed",
+      "note": "BucketNotFoundError/UploadError/BronzeValidationError/CachedBronzeEmptyError and Delta* aliases are concrete exception classes preserving constructors/attrs."
+    },
+    "8162": {
+      "status": "fixed",
+      "note": "Contract tests cover ApiError, ServiceUnavailableError, RateLimitError modes, and DataValidationError class."
+    },
+    "8163": {
+      "status": "fixed",
+      "note": "Lazy __getattr__ facade contract tests resolve every __all__ name and reject unknowns; removed dead TYPE_CHECKING branch."
+    },
+    "8164": {
+      "status": "fixed",
+      "note": "Canonical classes live in storage/_storage.py; infrastructure remains re-export facade (no separate broken alias module)."
+    },
+    "8165": {
+      "status": "fixed",
+      "note": "BioETLDomainError freezes nested context via MappingProxyType/tuples; to_dict returns plain dict snapshot."
+    }
+  },
+  "tests": [
+    "tests/unit/domain/exceptions/test_domain_exceptions_cr_residuals_8155_8165.py",
+    "tests/unit/domain/exceptions (full suite green)"
+  ],
+  "tech_debt_budgets": "unchanged"
+}

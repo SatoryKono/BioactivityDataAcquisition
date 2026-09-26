@@ -1,0 +1,2 @@
+{"tool":"read","target":"src/bioetl/__init__.py","content":"Inspect the package marker."}
+{"tool":"bash","command":"python -m pytest tests/unit/example.py","content":"Focused validation completed."}

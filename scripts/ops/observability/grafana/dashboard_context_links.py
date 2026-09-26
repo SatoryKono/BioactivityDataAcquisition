@@ -1,0 +1,504 @@
+#!/usr/bin/env python3
+"""Canonical Grafana context URLs for the seven ADR-053 dashboard UIDs.
+
+Production twin of the navigation-links contract. Builds `/d/` handoffs that:
+
+- trim `run_id` and reject internal whitespace
+- always pass `var-run_id` so a destination cannot keep a foreign UUID
+- preserve `${__url_time_range}` (or `from=`/`to=`)
+- emit a stable query order: workflow, pipeline, run_type, run_id, extras, time
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+import re
+from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
+
+SEVEN_UIDS: tuple[str, ...] = (
+    "bioetl-control-plane-v1",
+    "bioetl-overview-v2",
+    "bioetl-runtime",
+    "bioetl-provider-health-v2",
+    "bioetl-dq-v2",
+    "bioetl-incident-v1",
+    "bioetl-run-explorer-v1",
+)
+
+PATH_BY_UID: dict[str, str] = {
+    "bioetl-run-explorer-v1": "0-run-explorer",
+    "bioetl-control-plane-v1": "1-trust",
+    "bioetl-overview-v2": "2-overview",
+    "bioetl-runtime": "3-pipeline-diagnostics",
+    "bioetl-provider-health-v2": "4-provider-health",
+    "bioetl-dq-v2": "5-data-quality",
+    "bioetl-incident-v1": "6-incident-workspace",
+}
+
+CORE_VAR_ORDER: tuple[str, ...] = ("workflow", "pipeline", "run_type", "run_id")
+TIME_TOKEN = "${__url_time_range}"
+RUN_ID_TEMPLATE = "$run_id"
+HTML_AMPERSAND = "&amp;"
+_CUSTOM_INSPECT = "custom.inspect"
+# The API normalizes identity. Grafana capture groups replace the readable label
+# with the matched UUID even when Infinity supplies separate __text/__value.
+RUN_ID_GRAFANA_REGEX = ""
+_RUN_ID_TEMPLATE_VALUES = frozenset(
+    {
+        RUN_ID_TEMPLATE,
+        "${run_id}",
+        "${__value.raw}",
+        "${__data.fields.run_id}",
+        "${__data.fields.Run ID}",
+    }
+)
+GRAFANA_ALL = "$__all"
+
+
+class RunIdError(ValueError):
+    """Raised when a concrete run_id is missing, blank, or internally spaced."""
+
+
+def normalize_run_id(value: object) -> str:
+    """Trim leading/trailing whitespace; reject empty or internally spaced ids."""
+    if value is None:
+        raise RunIdError("run_id is required")
+    trimmed = unquote(str(value)).replace("\u00a0", " ").strip()
+    if not trimmed:
+        raise RunIdError("run_id is empty after trim")
+    if any(char.isspace() for char in trimmed):
+        raise RunIdError("run_id contains internal whitespace")
+    return trimmed
+
+
+@dataclass(frozen=True, slots=True)
+class DashboardContext:
+    """One operator selection applied to all seven UIDs."""
+
+    workflow: str
+    pipeline: str
+    run_type: str
+    run_id: str
+    provider: str = "unknown"
+    pipeline_context: str | None = None
+    stage: str = GRAFANA_ALL
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "run_id", normalize_run_id(self.run_id))
+
+
+def _pipeline_value(*, template: bool, context: DashboardContext | None) -> str:
+    if template:
+        return "$pipeline"
+    assert context is not None
+    return context.pipeline
+
+
+def build_handoff_url(
+    target_uid: str,
+    *,
+    source_uid: str = "bioetl-overview-v2",
+    context: DashboardContext | None = None,
+    template: bool = True,
+    extras: dict[str, str] | None = None,
+) -> str:
+    """Return a `/d/{uid}/{path}` URL with canonical var order and time range."""
+    if target_uid not in PATH_BY_UID:
+        raise ValueError(f"unknown dashboard uid: {target_uid}")
+    if not template and context is None:
+        raise ValueError("concrete context is required when template=False")
+    pipe = _pipeline_value(template=template, context=context)
+    if template:
+        workflow = "$workflow"
+        run_type = "$run_type"
+        run_id = RUN_ID_TEMPLATE
+        provider = (
+            "$provider"
+            if source_uid in {"bioetl-provider-health-v2", "bioetl-incident-v1"}
+            else GRAFANA_ALL
+        )
+        stage = GRAFANA_ALL
+        pipeline_context = pipe
+    else:
+        assert context is not None
+        workflow = context.workflow
+        run_type = context.run_type
+        run_id = context.run_id
+        provider = context.provider
+        stage = context.stage
+        pipeline_context = context.pipeline_context or context.pipeline
+    values: dict[str, str] = {
+        "workflow": workflow,
+        "pipeline": pipe,
+        "run_type": run_type,
+        "run_id": run_id,
+    }
+    extra_values: dict[str, str] = dict(extras or {})
+    if target_uid in {"bioetl-runtime", "bioetl-dq-v2"}:
+        extra_values.setdefault("stage", stage)
+    if target_uid == "bioetl-provider-health-v2":
+        # Auto-select the pipeline's configured provider. Explicit All stays
+        # only when the source variable itself is All.
+        resolved = (
+            "${provider_for_pipeline}" if provider == GRAFANA_ALL else provider
+        )
+        extra_values.setdefault("provider", resolved)
+        extra_values.setdefault("pipeline_context", pipeline_context)
+    return _assemble_url(target_uid, values=values, extras=extra_values)
+
+
+def urls_for_context(context: DashboardContext) -> dict[str, str]:
+    """Build the seven UID URLs from one trimmed context object."""
+    return {
+        uid: build_handoff_url(uid, context=context, template=False)
+        for uid in SEVEN_UIDS
+    }
+
+
+def _assemble_url(
+    target_uid: str,
+    *,
+    values: dict[str, str],
+    extras: dict[str, str],
+) -> str:
+    parts: list[str] = []
+    for name in CORE_VAR_ORDER:
+        parts.append(f"var-{name}={values[name]}")
+    for name, value in extras.items():
+        if name in CORE_VAR_ORDER:
+            continue
+        parts.append(f"var-{name}={value}")
+    parts.append(TIME_TOKEN)
+    query = "&".join(parts)
+    return serialize_selection_parameters(
+        f"/d/{target_uid}/{PATH_BY_UID[target_uid]}?{query}"
+    )
+
+
+def serialize_selection_parameters(url: str) -> str:
+    """Use Grafana's URL formatter, preserving All and repeated selections.
+
+    A datasource formatter turns All into a regex and arrays into globs.
+    queryparam instead serializes the selector's original URL values.
+    Concrete row fields and explicit scope resets remain authored values.
+    """
+
+    def replace(match: re.Match[str]) -> str:
+        target = match.group(1)
+        source = match.group(2) or match.group(3)
+        if source.startswith("__"):
+            return match.group(0)
+        if source == target:
+            return "${" + source + ":queryparam}"
+        return "var-" + target + "=${" + source + ":percentencode}"
+
+    url = re.sub(
+        r"\$\{([a-z_]+):customqueryparam:var-([a-z_]+)\}",
+        lambda m: "var-" + m[2] + "=${" + m[1] + ":percentencode}",
+        url,
+    )
+    return re.sub(
+        r"var-([a-z_]+)=\$(?:\{([a-z_]+)\}|([a-z_]+))(?=&|$)",
+        replace,
+        url,
+    )
+
+
+@dataclass(slots=True)
+class _HandoffQuery:
+    """Mutable query normalization state kept out of the public API."""
+
+    has_time_token: bool
+    has_from: bool = False
+    has_to: bool = False
+    extras: list[tuple[str, str]] = field(default_factory=list)
+    var_values: dict[str, str] = field(default_factory=dict)
+
+    def add(self, key: str, value: str) -> None:
+        if key == TIME_TOKEN or key.startswith("${__url_time_range"):
+            self.has_time_token = True
+            return
+        if key == "from":
+            self.has_from = True
+            self.extras.append((key, value))
+            return
+        if key == "to":
+            self.has_to = True
+            self.extras.append((key, value))
+            return
+        if not key.startswith("var-"):
+            self.extras.append((key, value))
+            return
+        name = key[4:]
+        self.var_values[name] = _normalize_query_variable(name, value)
+
+    def ensure_run_id(self) -> None:
+        is_panel_link = any(key == "viewPanel" for key, _ in self.extras)
+        if "run_id" not in self.var_values and not is_panel_link:
+            self.var_values["run_id"] = RUN_ID_TEMPLATE
+
+    def ordered_pairs(self) -> list[tuple[str, str]]:
+        ordered: list[tuple[str, str]] = []
+        for name in CORE_VAR_ORDER:
+            if name in self.var_values:
+                ordered.append((f"var-{name}", self.var_values.pop(name)))
+        ordered.extend(
+            (f"var-{name}", value) for name, value in self.var_values.items()
+        )
+        ordered.extend(self.extras)
+        return ordered
+
+    def append_time_token(self, query: str) -> str:
+        if not self.has_time_token and self.has_from and self.has_to:
+            return query
+        return f"{query}&{TIME_TOKEN}" if query else TIME_TOKEN
+
+
+def _normalize_query_variable(name: str, value: str) -> str:
+    if name != "run_id" or value in _RUN_ID_TEMPLATE_VALUES:
+        return value
+    try:
+        return normalize_run_id(value)
+    except RunIdError:
+        return str(value).strip()
+
+
+def rewrite_dashboard_handoff_url(url: str) -> str:
+    """Normalize a shipped `/d/` URL: require run_id + time, stable var order.
+
+    Template values (`$run_id`, `${__value.raw}`, …) are preserved. Concrete
+    `run_id` query values are trimmed. Missing `var-run_id` is filled with
+    `$run_id` so Grafana cannot silently keep a foreign UUID.
+    """
+    raw = url.replace(HTML_AMPERSAND, "&")
+    if not raw.startswith("/d/"):
+        return url
+    split = urlsplit(raw)
+    path = split.path
+    query_pairs = parse_qsl(split.query, keep_blank_values=True)
+    state = _HandoffQuery(has_time_token=TIME_TOKEN in raw)
+    for key, value in query_pairs:
+        state.add(key, value)
+    # Full-dashboard handoffs must carry run_id so Grafana cannot keep a foreign
+    # UUID. Same-dashboard viewPanel deep-links keep authored vars (CURRENT
+    # fleet CTAs must not leak run_id).
+    state.ensure_run_id()
+    query = urlencode(state.ordered_pairs(), safe="${}:._-")
+    query = state.append_time_token(query)
+    rewritten = urlunsplit((split.scheme, split.netloc, path, query, split.fragment))
+    if HTML_AMPERSAND in url:
+        rewritten = rewritten.replace("&", HTML_AMPERSAND)
+    return rewritten
+
+
+def preserves_time_window(url: str) -> bool:
+    """Return whether a `/d/` URL carries Grafana time-range handoff."""
+    decoded = url.replace(HTML_AMPERSAND, "&")
+    return TIME_TOKEN in decoded or ("from=" in decoded and "to=" in decoded)
+
+
+__all__ = [
+    "CORE_VAR_ORDER",
+    "PATH_BY_UID",
+    "RUN_ID_GRAFANA_REGEX",
+    "SEVEN_UIDS",
+    "TIME_TOKEN",
+    "DashboardContext",
+    "RunIdError",
+    "build_handoff_url",
+    "normalize_run_id",
+    "preserves_time_window",
+    "rewrite_dashboard_handoff_url",
+    "urls_for_context",
+]
+
+
+def _hide_field(panel: dict, name: str) -> None:
+    for transform in panel.get("transformations", []):
+        if transform.get("id") == "organize":
+            transform["options"].get("excludeByName", {}).pop(name, None)
+    overrides = panel.setdefault("fieldConfig", {}).setdefault("overrides", [])
+    if not any(o.get("matcher", {}).get("options") == name for o in overrides):
+        overrides.append(
+            {
+                "matcher": {"id": "byName", "options": name},
+                "properties": [{"id": "custom.hidden", "value": True}],
+            }
+        )
+
+
+def _rewrite_links(value: object) -> None:
+    if isinstance(value, list):
+        for item in value:
+            _rewrite_links(item)
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            if isinstance(item, str) and key == "url" and item.startswith("/d/"):
+                value[key] = serialize_selection_parameters(item)
+            elif isinstance(item, str) and key == "content":
+                value[key] = re.sub(
+                    r'href="(/d/[^\"]+)"',
+                    lambda m: (
+                        'href="'
+                        + serialize_selection_parameters(
+                            m[1].replace(HTML_AMPERSAND, "&")
+                        ).replace("&", HTML_AMPERSAND)
+                        + '"'
+                    ),
+                    item,
+                )
+            else:
+                _rewrite_links(item)
+
+
+def _fix_artifact_links(panel: dict) -> None:
+    for override in panel["fieldConfig"]["overrides"]:
+        if override["matcher"]["options"] in {"kind", "Artifact", "ref"}:
+            if override["matcher"]["options"] == "kind":
+                override["matcher"]["options"] = "Artifact"
+            for prop in override["properties"]:
+                if prop["id"] == "links":
+                    prop["value"] = [
+                        {
+                            "title": "Open report artifact",
+                            "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=${__data.fields.Artifact}",
+                            "targetBlank": True,
+                        }
+                    ]
+
+
+def _fix_ranked_links(panel: dict) -> None:
+    """Bind domain actions without replacing ranking or presentation semantics."""
+    _hide_field(panel, "action_dashboard_uid")
+    _hide_field(panel, "action_scope")
+    _separate_action_inspector(panel)
+    overrides = panel["fieldConfig"]["overrides"]
+    action = next(
+        (o for o in overrides if o.get("matcher", {}).get("options") == "Action"),
+        None,
+    )
+    if action is None:
+        action = {"matcher": {"id": "byName", "options": "Action"}, "properties": []}
+        overrides.append(action)
+    properties = action["properties"]
+    properties[:] = [p for p in properties if p["id"] not in {"links", _CUSTOM_INSPECT}]
+    properties.extend(
+        [
+            {"id": _CUSTOM_INSPECT, "value": False},
+            {
+                "id": "links",
+                "value": [
+                    {
+                        "title": "Open domain diagnostics",
+                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.route_pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
+                        "targetBlank": False,
+                        "includeVars": False,
+                    }
+                ],
+            },
+        ]
+    )
+
+
+def _separate_action_inspector(panel: dict) -> None:
+    """Keep Grafana's cell inspector from intercepting the navigation click."""
+    transforms = panel["transformations"]
+    transforms[:] = [t for t in transforms if t.get("id") != "extractFields"]
+    transforms.insert(
+        next(i for i, t in enumerate(transforms) if t["id"] == "organize"),
+        {
+            "id": "extractFields",
+            "options": {
+                "source": "signal",
+                "format": "regexp",
+                "regExp": "/(?<action_detail>.*)/",
+                "replace": False,
+            },
+        },
+    )
+    organize = next(t["options"] for t in transforms if t["id"] == "organize")
+    organize["renameByName"]["action_detail"] = "Details"
+    indexes = organize["indexByName"]
+    if "action_detail" not in indexes:
+        position = indexes["action"] + 1
+        for name, index in indexes.items():
+            if index >= position:
+                indexes[name] = index + 1
+        indexes["action_detail"] = position
+    overrides = panel["fieldConfig"]["overrides"]
+    overrides[:] = [o for o in overrides if o["matcher"]["options"] != "Details"]
+    overrides.append(
+        {
+            "matcher": {"id": "byName", "options": "Details"},
+            "properties": [
+                {"id": "custom.cellOptions", "value": {"type": "auto"}},
+                {"id": _CUSTOM_INSPECT, "value": True},
+                {"id": "custom.hidden", "value": False},
+                {"id": "links", "value": []},
+                {
+                    "id": "mappings",
+                    "value": [
+                        {
+                            "type": "value",
+                            "options": {"telemetry_gap": {"text": "Check telemetry"}},
+                        }
+                    ],
+                },
+            ],
+        }
+    )
+
+
+def _fix_runbook_link(panel: dict) -> None:
+    title = (
+        "Open provider incident runbook"
+        if panel["id"] == 9107
+        else "Open observability runbook"
+    )
+    panel["links"] = [
+        {
+            "title": title,
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+            "targetBlank": True,
+        }
+    ]
+
+
+def _fix_panel(panel: dict, uid: str) -> None:
+    for target in panel.get("targets", []):
+        if target.get("root_selector") == "summary":
+            for name in ("from_ms", "to_ms"):
+                _hide_field(panel, name)
+    if uid == "bioetl-run-explorer-v1" and panel.get("id") == 3013:
+        _fix_artifact_links(panel)
+    if uid == "bioetl-incident-v1" and panel.get("id") == 2010:
+        _fix_ranked_links(panel)
+    if (uid, panel.get("id")) in {
+        ("bioetl-provider-health-v2", 9107),
+        ("bioetl-runtime", 9102),
+    }:
+        _fix_runbook_link(panel)
+    for child in panel.get("panels", []):
+        _fix_panel(child, uid)
+
+
+def normalize_dashboard_actions(payload: dict) -> None:
+    """Keep helper fields in the data frame and bind visible actions explicitly."""
+    for panel in payload.get("panels", []):
+        _fix_panel(panel, payload.get("uid", ""))
+    _rewrite_links(payload)
+
+
+def finalize_dashboard_links(node: object) -> None:
+    """Pin explicit context after all generators have added their links."""
+    if isinstance(node, dict):
+        if isinstance(node.get("url"), str) and node["url"].startswith("/d/"):
+            node["includeVars"] = False
+        options = node.get("options")
+        if isinstance(options, dict) and options.get("dataLinks") == []:
+            options.pop("dataLinks")
+        for value in node.values():
+            finalize_dashboard_links(value)
+    elif isinstance(node, list):
+        for value in node:
+            finalize_dashboard_links(value)

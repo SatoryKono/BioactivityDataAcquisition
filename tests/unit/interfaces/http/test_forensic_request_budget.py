@@ -1,0 +1,295 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# pyright: reportUndefinedVariable=false
+# pyright: reportPossiblyUnboundVariable=false
+# pyright: reportTypedDictNotRequiredAccess=false
+# pyright: reportOptionalSubscript=false
+# pyright: reportOptionalOperand=false
+# pyright: reportOptionalCall=false
+# pyright: reportOptionalIterable=false
+# pyright: reportIncompatibleMethodOverride=false
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportReturnType=false
+# pyright: reportInvalidCast=false
+# pyright: reportAssignmentType=false
+# pyright: reportImplicitAbstractClass=false
+# pyright: reportFunctionMemberAccess=false
+# pyright: reportConstantRedefinition=false
+# pyright: reportInvalidTypeForm=false
+# PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
+"""Tests for bounded execution of expensive operator HTTP endpoints."""
+
+from __future__ import annotations
+
+import asyncio
+import time
+from collections.abc import Coroutine
+from typing import Any, cast
+
+import pytest
+
+from bioetl.interfaces.http._forensic_request_budget import (
+    FORENSIC_ENDPOINT_TIMEOUT_SECONDS,
+    ForensicEndpointUnavailable,
+    forensic_unavailable_payload,
+    forensic_unavailable_table_payload,
+    run_bounded_forensic_operation,
+    table_error_as_http_ok,
+)
+
+pytestmark = pytest.mark.unit
+
+
+@pytest.mark.asyncio
+async def test_stage_context_crosses_threads_without_crossing_requests(caplog) -> None:
+    from bioetl.application.observability.control_plane_evidence.timing import (
+        evidence_stage,
+    )
+
+    caplog.set_level("INFO")
+    limiter = asyncio.Semaphore(2)
+
+    def read(stage: str) -> None:
+        with evidence_stage(stage):
+            pass
+
+    async def request(name: str) -> None:
+        await run_bounded_forensic_operation(
+            limiter=limiter,
+            operation_factory=lambda: asyncio.to_thread(read, name),
+            endpoint=name,
+        )
+
+    await asyncio.gather(
+        request("manifest_resolution"), request("archive_verification")
+    )
+    messages = [
+        r.getMessage()
+        for r in caplog.records
+        if r.getMessage().startswith("forensic_stage")
+    ]
+    assert len(messages) == 2
+    assert len({message.split()[1] for message in messages}) == 2
+    for message in messages:
+        assert message.split()[2].split("=")[1] == message.split()[3].split("=")[1]
+    read("outside_request")
+    assert len(caplog.records) == 2
+
+
+@pytest.mark.asyncio
+async def test_timeout_and_deferred_completion_share_diagnostic_id(caplog) -> None:
+    limiter = asyncio.Semaphore(1)
+    finished = asyncio.Event()
+
+    async def operation() -> None:
+        await finished.wait()
+
+    with pytest.raises(ForensicEndpointUnavailable) as failure:
+        await run_bounded_forensic_operation(
+            limiter=limiter,
+            operation_factory=operation,
+            timeout_seconds=0.01,
+            endpoint="/ops/control-plane/retention-compliance",
+        )
+    assert limiter.locked()
+    finished.set()
+    for _ in range(10):
+        await asyncio.sleep(0)
+        if not limiter.locked():
+            break
+    messages = [record.getMessage() for record in caplog.records]
+    deadline = next(m for m in messages if m.startswith("forensic_deadline_exceeded"))
+    completion = next(
+        m for m in messages if m.startswith("forensic_deferred_completion")
+    )
+    assert deadline.split()[1] == completion.split()[1]
+    assert deadline.split()[1] == f"request_id={failure.value.request_id}"
+    payload = forensic_unavailable_table_payload(
+        endpoint="retention-compliance",
+        reason=failure.value.reason,
+        request_id=failure.value.request_id,
+    )
+    assert payload["request_id"] == failure.value.request_id
+    assert "queue_seconds=" in deadline
+    assert "endpoint=/ops/control-plane/retention-compliance" in deadline
+    assert "operation_seconds=" in deadline
+    assert not limiter.locked()
+
+
+@pytest.mark.asyncio
+async def test_synchronous_factory_failure_releases_capacity() -> None:
+    limiter = asyncio.Semaphore(1)
+
+    def fail_before_task_creation() -> Coroutine[Any, Any, str]:
+        raise RuntimeError("factory failed")
+
+    with pytest.raises(RuntimeError, match="factory failed"):
+        await run_bounded_forensic_operation(
+            limiter=limiter,
+            operation_factory=fail_before_task_creation,
+        )
+
+    await asyncio.wait_for(limiter.acquire(), timeout=0.1)
+    limiter.release()
+
+
+@pytest.mark.asyncio
+async def test_invalid_factory_result_releases_capacity() -> None:
+    limiter = asyncio.Semaphore(1)
+
+    def return_non_coroutine() -> Coroutine[Any, Any, str]:
+        return cast(Coroutine[Any, Any, str], object())
+
+    with pytest.raises(TypeError):
+        await run_bounded_forensic_operation(
+            limiter=limiter,
+            operation_factory=return_non_coroutine,
+        )
+
+    await asyncio.wait_for(limiter.acquire(), timeout=0.1)
+    limiter.release()
+
+
+@pytest.mark.asyncio
+async def test_timed_out_operation_keeps_capacity_until_backend_finishes() -> None:
+    """A timed-out thread-like task must retain its slot until real completion."""
+    limiter = asyncio.Semaphore(1)
+    backend_release = asyncio.Event()
+
+    async def slow_operation() -> str:
+        await backend_release.wait()
+        return "done"
+
+    with pytest.raises(ForensicEndpointUnavailable) as deadline_error:
+        await run_bounded_forensic_operation(
+            limiter=limiter,
+            operation_factory=slow_operation,
+            timeout_seconds=0.01,
+            queue_timeout_seconds=0.01,
+        )
+    assert deadline_error.value.reason == "deadline_exceeded"
+    assert deadline_error.value.status_code == 504
+
+    with pytest.raises(ForensicEndpointUnavailable) as capacity_error:
+        await run_bounded_forensic_operation(
+            limiter=limiter,
+            operation_factory=slow_operation,
+            timeout_seconds=0.01,
+            queue_timeout_seconds=0.01,
+        )
+    assert capacity_error.value.reason == "capacity_exhausted"
+    assert capacity_error.value.status_code == 503
+
+    backend_release.set()
+    await asyncio.wait_for(limiter.acquire(), timeout=0.5)
+    limiter.release()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("client_count", [1, 5, 10])
+async def test_bounded_load_profile_stays_below_twenty_second_budget(
+    client_count: int,
+) -> None:
+    """The 1/5/10-client profile remains bounded by the four-slot budget."""
+    limiter = asyncio.Semaphore(4)
+    active = 0
+    peak_active = 0
+
+    async def operation() -> int:
+        nonlocal active, peak_active
+        active += 1
+        peak_active = max(peak_active, active)
+        try:
+            await asyncio.sleep(0.01)
+            return active
+        finally:
+            active -= 1
+
+    started = time.monotonic()
+    results = await asyncio.gather(
+        *(
+            run_bounded_forensic_operation(
+                limiter=limiter,
+                operation_factory=operation,
+                timeout_seconds=1.0,
+                queue_timeout_seconds=0.5,
+            )
+            for _ in range(client_count)
+        )
+    )
+    elapsed = time.monotonic() - started
+
+    assert len(results) == client_count
+    assert peak_active <= 4
+    assert elapsed < 1.0
+    assert elapsed < 20.0
+
+
+def test_unavailable_payload_is_typed_and_retryable() -> None:
+    assert forensic_unavailable_payload(
+        endpoint="filtered-stats",
+        reason="backend_unavailable",
+    ) == {
+        "contract": "forensic_endpoint_error_v1",
+        "status": "unavailable",
+        "endpoint": "filtered-stats",
+        "reason": "backend_unavailable",
+        "retryable": True,
+    }
+
+
+def test_unavailable_table_payload_includes_error_row() -> None:
+    payload = forensic_unavailable_table_payload(
+        endpoint="/ops/control-plane/retention-compliance",
+        reason="deadline_exceeded",
+        observed_at="2026-08-19T00:00:00+00:00",
+    )
+    assert payload["contract"] == "forensic_endpoint_error_v1"
+    assert payload["status"] == "unavailable"
+    assert payload["retryable"] is True
+    assert payload["rows"][0]["check"] == "endpoint_availability"
+    assert payload["rows"][0]["status"] == "ERROR"
+    assert payload["rows"][0]["reason"] == "deadline_exceeded"
+    assert payload["rows"][0]["retryable"] is True
+    assert "refresh" in str(payload["rows"][0]["detail"]).lower()
+
+
+def test_table_error_as_http_ok_accepts_grafana_flag() -> None:
+    assert table_error_as_http_ok({"error_as_row": "1"}) is True
+    assert table_error_as_http_ok({"error_as_row": "true"}) is True
+    assert table_error_as_http_ok({}) is False
+
+
+@pytest.mark.parametrize("reason", ["deadline_exceeded", "capacity_exhausted"])
+def test_trust_query_failure_has_displayable_row_without_claiming_run_evidence(
+    reason: str,
+) -> None:
+    payload = forensic_unavailable_table_payload(
+        endpoint="/ops/control-plane/trust-summary",
+        reason=reason,
+        observed_at="2026-09-16T08:00:00+00:00",
+    )
+    assert payload["status"] == "unavailable"
+    assert payload["observed_at"] == "2026-09-16T08:00:00+00:00"
+    assert payload["trust"] == {
+        "processing_status": "UNKNOWN",
+        "trust_status": "QUERY ERROR",
+        "reasons_text": f"{reason}; Trust not evaluated. Retry the query.",
+        "reasons_display": f"{reason}; Trust not evaluated. Retry the query.",
+        "reasons_count": 1,
+        "evidence_observed_at": None,
+        "evidence_freshness": "unavailable",
+    }
+
+
+def test_forensic_deadline_remains_twelve_seconds() -> None:
+    assert FORENSIC_ENDPOINT_TIMEOUT_SECONDS == 12.0

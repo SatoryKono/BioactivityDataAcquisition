@@ -1,0 +1,4352 @@
+schema_version: 2
+coverage_policy: all_shipped_panels
+allowed_roles:
+- verdict
+- confidence
+- next_action
+- navigation
+- selected_range_count
+- selected_range_duration
+- identity_table
+- accounting_table
+- severity_table
+- causes_table
+- freshness
+- forensic_table
+- alert_timeline
+- row_group
+- guidance
+- indicator
+- evidence_table
+- trend
+- heatmap
+- state_timeline
+allowed_scopes:
+- current
+- selected_run
+- time_range
+- global
+allowed_evidence_sources:
+- prometheus
+- ops_http
+- grafana_builtin
+allowed_states:
+- OK
+- WARN
+- CRIT
+- UNKNOWN
+- INCOMPLETE
+- ERROR
+- VALID_EMPTY
+- TELEMETRY_ABSENT
+- N/A
+- READY
+- BLOCKED
+- INSUFFICIENT
+- UNSUPPORTED
+- SELECT RUN
+- QUERY ERROR
+allowed_empty_state_classes:
+- event_empty
+- telemetry_missing
+- unsupported
+- select_run
+dashboards:
+  bioetl-control-plane-v1:
+    panels:
+      '139':
+        title: Review Uncovered Replay Signals
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: &id001
+        - full_dark
+        - full_light
+        - zoom_200
+      '901':
+        title: Inspect Manifest Validation
+        role: row_group
+        tier: 4
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '902':
+        title: Inspect Checkpoint and Replay Checks
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '905':
+        title: Inspect Run Identity Evidence
+        role: row_group
+        tier: 4
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '1000':
+        title: ''
+        role: navigation
+        tier: 3
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - navigation_context
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9400':
+        title: ''
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9402':
+        title: Review Run Summary
+        role: identity_table
+        tier: 2
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - backend_error
+        render_profiles:
+        - full_dark
+        required_columns:
+        - parameter
+        - value
+      '9403':
+        title: Review Processed Records
+        role: accounting_table
+        tier: 2
+        scope: current
+        scope_class: current
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        - ERROR
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        required_columns:
+        - parameter
+        - value
+        - percentage
+        hidden_columns:
+        - row_status
+      '9405':
+        title: Review Identity Gaps
+        role: evidence_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9406':
+        title: Compare Checkpoint Anchors
+        role: evidence_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9407':
+        title: Inspect Identity Values
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9408':
+        title: Review Required Replay Anchors
+        role: evidence_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9409':
+        title: Review Additional Forensic Anchors
+        role: evidence_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9410':
+        title: Explain Missing Identity Data
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9411':
+        title: Explain Missing Record Counts
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9412':
+        title: Inspect Run Details
+        role: row_group
+        tier: 4
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9413':
+        title: Review Checkpoint Validation
+        role: evidence_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9414':
+        title: Review Manifest Validation
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9415':
+        title: Review Lineage Validation
+        role: evidence_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9416':
+        title: Review Retention Compliance
+        role: evidence_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9417':
+        title: Review Bounded Failure Reasons
+        role: evidence_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9418':
+        title: Review Selected-Run Trust
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9419':
+        title: Review Lineage Validation
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9420':
+        title: Inspect Complete Run Discovery
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: &id002
+        - full_dark
+        - full_light
+        - zoom_200
+      '9421':
+        title: Inspect Latest Complete Run
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id002
+      '9422':
+        title: Review Exact Replay Readiness
+        role: verdict
+        tier: 1
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - READY
+        - BLOCKED
+        - INSUFFICIENT
+        - UNSUPPORTED
+        - SELECT RUN
+        - QUERY ERROR
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9423':
+        title: Review Exact Replay Checks
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9460':
+        title: Inspect Selected Run Stages
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9423':
+        title: Review Exact Replay Checks
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '9450':
+        title: Inspect Saved Run Evidence
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: &id003
+        - full_dark
+        - full_light
+        - zoom_200
+      '9451':
+        title: Inspect Selected Run Domains
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+  bioetl-dq-v2:
+    panels:
+      '1000':
+        title: ''
+        role: navigation
+        tier: 3
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - navigation_context
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9400':
+        title: ''
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9402':
+        title: Inspect Run Identity
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9403':
+        title: Inspect Processed Records
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9406':
+        title: Review Selected Run Status
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - UNKNOWN
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: &id004
+        - full_dark
+        - full_light
+        - zoom_200
+      '9450':
+        title: Inspect Saved Run Evidence
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id003
+      '9451':
+        title: Inspect Selected Run Domains
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '9452':
+        title: Inspect Selected Run Identity
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '9460':
+        title: Inspect Selected Run Stages
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+  bioetl-incident-v1:
+    panels:
+      '1':
+        title: Track Manifest Failures
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '2':
+        title: Track Ledger Failures
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '3':
+        title: Track Incompatibilities
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '4':
+        title: Inspect DQ Alert Conditions
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '5':
+        title: Inspect Control Plane Alerts
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '6':
+        title: Inspect Provider Alerts
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '7':
+        title: Inspect Entities Stale Over 24h
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '16':
+        title: Monitor Active Blocker Count
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '21':
+        title: Monitor Memory Pressure
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '101':
+        title: Track Load Failures
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '102':
+        title: Track Save Failures
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '103':
+        title: Track Global Admin Failures
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '104':
+        title: Track Unreconstructable
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: event_empty
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '105':
+        title: Track Checkpoint Save Latency
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '106':
+        title: Track Global Checkpoint Admin Latency
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: event_empty
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '107':
+        title: Compare Global Audit Write Outcomes
+        role: evidence_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: event_empty
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '108':
+        title: Compare Global Audit Query Outcomes
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '109':
+        title: Track Global Audit Write Latency
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '110':
+        title: Track Global Audit Query Latency
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '111':
+        title: Track Global Read Latency
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '112':
+        title: Compare Lineage Persistence Outcomes
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '120':
+        title: Track Replay Drift
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '121':
+        title: Track Peak Replay Lag
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '122':
+        title: Track Missing Lineage
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '130':
+        title: Track Replay Blockers
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '131':
+        title: Track Observed Manifest Write Increments
+        role: trend
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '132':
+        title: Monitor Manifest (30m)
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '133':
+        title: Monitor Ledger (30m)
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '134':
+        title: Track Replay Drift by Type
+        role: trend
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '135':
+        title: Track Replay Lag
+        role: trend
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '136':
+        title: Monitor Global Read Failures (30m)
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '137':
+        title: Track Lineage Failures
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '138':
+        title: Review Missing Lineage by Layer
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '205':
+        title: Monitor Failed Runs
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '207':
+        title: Track Phase Duration
+        role: trend
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '209':
+        title: Track Global Shutdown Starts
+        role: trend
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '210':
+        title: Track Global Shutdown Completions
+        role: trend
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '220':
+        title: Monitor Runtime Error Rate
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '230':
+        title: Monitor Pipeline Alerts
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '236':
+        title: Monitor No-Records Runs
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '237':
+        title: Monitor Worst Stage Lag
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '238':
+        title: Track Stage Backlog Trend
+        role: trend
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '239':
+        title: Track Pipeline Duration
+        role: trend
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '240':
+        title: Track Records by Stage / Interval
+        role: trend
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '241':
+        title: Compare Records by Stage & Run Type
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '242':
+        title: Inspect Active Runtime Blocker Detail
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '243':
+        title: Inspect Stage Expectedness
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '256':
+        title: Review Errors by Stage & Code
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '259':
+        title: Inspect Global Provider Alert Conditions
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '891':
+        title: Monitor Replay
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '892':
+        title: Track Checkpoint
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '893':
+        title: Monitor Ledger
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '894':
+        title: Review Coverage Limits
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles:
+        - desktop_dark
+      '907':
+        title: Monitor Telemetry
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '908':
+        title: Review Observed Terminal Counters
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '1000':
+        title: ''
+        role: navigation
+        tier: 3
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - navigation_context
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '2001':
+        title: ''
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '2002':
+        title: Inspect Runtime Suspects
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '2003':
+        title: Inspect Provider Suspects
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '2004':
+        title: Inspect DQ Suspects
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '2005':
+        title: Monitor Global Alerts
+        role: causes_table
+        tier: 1
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: event_empty
+        state_model:
+        - VALID_EMPTY
+        - UNKNOWN
+        - ERROR
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - first_window_dark
+        - first_window_light
+      '2006':
+        title: Track Alert State History
+        role: alert_timeline
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: event_empty
+        state_model:
+        - VALID_EMPTY
+        - UNKNOWN
+        - ERROR
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+      '2007':
+        title: Assess Impact & Confidence
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '2010':
+        title: Inspect Ranked Suspects
+        role: forensic_table
+        tier: 1
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - UNKNOWN
+        - ERROR
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - first_window_dark
+        - first_window_light
+      '2020':
+        title: Review Alert Evidence
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '2099':
+        title: Domain Suspect Details · GLOBAL / CURRENT
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '2100':
+        title: Inspect Selected Run Summary
+        role: row_group
+        tier: 4
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id004
+      '2101':
+        title: Review Selected Run Status
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id004
+      '2460':
+        title: Review Stage Progress
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '2461':
+        title: Inspect Current Missing Stage Signals
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '2541':
+        title: Review Runtime Escalation
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles:
+        - desktop_dark
+      '2542':
+        title: Review Cross-Domain Handoffs
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles:
+        - desktop_dark
+      '2543':
+        title: Review Global Process Signals
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles:
+        - desktop_dark
+      '8804':
+        title: Track Global Read Failures
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '8805':
+        title: Compare Checkpoint Outcomes
+        role: trend
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '8806':
+        title: Compare Global Reads by Store
+        role: trend
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '8807':
+        title: Compare Ledger Appends by Type & Status
+        role: trend
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '8808':
+        title: Pipeline fleet and range, not this Run ID
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles:
+        - desktop_dark
+      '9101':
+        title: Review Runtime Blockers
+        role: severity_table
+        tier: 1
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - VALID_EMPTY
+        - ERROR
+        required_copy:
+        - state_mapping
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - backend_error
+        render_profiles:
+        - first_window_dark
+        - first_window_light
+      '9102':
+        title: Monitor Coverage
+        role: forensic_table
+        tier: 3
+        scope: global
+        scope_class: global
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - UNKNOWN
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - valid_empty
+        - populated
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '9105':
+        title: Track Stage Lag
+        role: row_group
+        tier: 4
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '9400':
+        title: ''
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9401':
+        title: Monitor Scope Status
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9450':
+        title: Inspect Saved Run Evidence
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id003
+      '9451':
+        title: Inspect Selected Run Domains
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '9452':
+        title: Inspect Selected Run Identity
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '9460':
+        title: Inspect Selected Run Stages
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '9491':
+        title: Inspect Telemetry Coverage
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '9700':
+        title: Inspect Current Workflow Evidence
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: &id005
+        - full_dark
+        - full_light
+        - zoom_200
+      '9701':
+        title: Review Current Workflow Evidence
+        role: evidence_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id005
+      '9991':
+        title: ''
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles:
+        - desktop_dark
+      '9996':
+        title: Track Failed Workflow Runs
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '9997':
+        title: Track Failed Workflow Steps
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '18940':
+        title: Monitor Pipeline Status
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - desktop_dark
+      '22005':
+        title: Monitor Global Alerts (Full)
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: &id006
+        - full_dark
+        - full_light
+        - zoom_200
+      '22010':
+        title: Inspect Global Suspects (Full)
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id006
+      '22011':
+        title: Inspect Global Signal Measurements
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '32005':
+        title: Browse Global Alerts
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: &id007
+        - full_dark
+        - full_light
+        - zoom_200
+      '32010':
+        title: Browse Global Suspects
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id007
+  bioetl-overview-v2:
+    panels:
+      '99':
+        title: ''
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '1000':
+        title: ''
+        role: navigation
+        tier: 2
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - evidence_scope
+        - next_action
+        fixture_cases:
+        - populated
+        render_profiles:
+        - first_window_dark
+        - first_window_light
+        - zoom_200
+      '9002':
+        title: Review Run Domains
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9300':
+        title: Review Run Identity
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9301':
+        title: Review Processed Records
+        role: evidence_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9450':
+        title: Inspect Saved Run Evidence
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id003
+      '9451':
+        title: Inspect Selected Run Domains
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '9452':
+        title: Inspect Selected Run Identity
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '9460':
+        title: Inspect Selected Run Stages
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '9602':
+        title: Inspect Run Context
+        role: row_group
+        tier: 4
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9603':
+        title: Review Selected Run Status
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id004
+  bioetl-provider-health-v2:
+    panels:
+      '1':
+        title: Track Health-Check Latency p95
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '2':
+        title: Monitor Healthy Checks
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '7':
+        title: Monitor Health Checks
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '31':
+        title: Monitor Global Circuit-Breaker State
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '32':
+        title: Track Global Circuit-Breaker Trips
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '91':
+        title: Selected Provider Details
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '102':
+        title: Inspect Health p95
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '104':
+        title: Track Failure Rate
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: event_empty
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '105':
+        title: Monitor Degraded Checks
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '106':
+        title: Track Health Failures & Degradation
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: event_empty
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '107':
+        title: Track Failure Share
+        role: evidence_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: event_empty
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '108':
+        title: Inspect Exhausted Retries
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '109':
+        title: Track Exhausted Retries
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '110':
+        title: Track Request Latency p95
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '111':
+        title: Track Rate-Limit Errors
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '112':
+        title: Track Rate-Limiter Wait p95
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '113':
+        title: Monitor Available Rate-Limit Tokens
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '114':
+        title: Inspect Raw Health Status
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '115':
+        title: Track Network & Timeout Errors
+        role: trend
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '1000':
+        title: ''
+        role: navigation
+        tier: 3
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - navigation_context
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9002':
+        title: ''
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9101':
+        title: Monitor Fleet Status
+        role: severity_table
+        tier: 1
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - VALID_EMPTY
+        - ERROR
+        required_copy:
+        - state_mapping
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - backend_error
+        render_profiles:
+        - first_window_dark
+        - first_window_light
+      '9102':
+        title: Inspect Non-OK Providers
+        role: forensic_table
+        tier: 3
+        scope: global
+        scope_class: global
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - UNKNOWN
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - valid_empty
+        - populated
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9103':
+        title: Inspect Top Provider Causes
+        role: causes_table
+        tier: 1
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - UNKNOWN
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - first_window_dark
+        - first_window_light
+      '9104':
+        title: Monitor Telemetry Presence
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9105':
+        title: Все провайдеры · подробности
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9106':
+        title: Все провайдеры
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '9107':
+        title: Inspect Fleet Evidence
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id004
+      '9111':
+        title: Inspect Full Fleet Severity
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9112':
+        title: Inspect Full Non-OK Providers
+        role: forensic_table
+        tier: 3
+        scope: global
+        scope_class: global
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9113':
+        title: Inspect Full Provider Causes
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - UNKNOWN
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9400':
+        title: ''
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9401':
+        title: Monitor Provider Status
+        role: indicator
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9402':
+        title: Inspect Run Identity
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9403':
+        title: Inspect Processed Records
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9404':
+        title: Range & Debug Evidence
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9405':
+        title: Run Context
+        role: row_group
+        tier: 4
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9450':
+        title: Сохранённый запуск
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id003
+      '9451':
+        title: Inspect Selected Run Domains
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '9452':
+        title: Inspect Selected Run Identity
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+  bioetl-run-explorer-v1:
+    panels:
+      '1':
+        title: ''
+        role: guidance
+        tier: 4
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '3010':
+        title: Inspect Recent Runs (last 10)
+        role: forensic_table
+        tier: 1
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - backend_error
+        render_profiles:
+        - first_window_dark
+        - first_window_light
+  bioetl-runtime:
+    panels:
+      '1000':
+        title: ''
+        role: navigation
+        tier: 3
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - navigation_context
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9400':
+        title: ''
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id001
+      '9402':
+        title: Inspect Pipeline Identity
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - UNKNOWN
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9403':
+        title: Inspect Processed Records
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
+      '9450':
+        title: Inspect Saved Run Evidence
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id003
+      '9451':
+        title: Inspect Selected Run Domains
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '9452':
+        title: Inspect Selected Run Identity
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '9460':
+        title: Inspect Selected Run Stages
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '9998':
+        title: Review Selected Run Status
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - UNKNOWN
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id004

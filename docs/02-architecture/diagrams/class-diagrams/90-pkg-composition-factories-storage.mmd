@@ -1,0 +1,58 @@
+%% Title: Package Family: composition/factories/storage
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/storage; modules: factory, _context_resolution, _layer_writers, _silver, bundle, clear_mixin.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-09-02
+%% @level   Package Family / Inventory Slice
+%% @nodes   11
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace factory {
+        class StorageContext
+        class StorageFactory
+    }
+
+    namespace context_resolution {
+        class StorageCreationContext
+    }
+
+    namespace layer_writers {
+        class _SilverLayerWriterSupport
+    }
+
+    namespace silver {
+        class CreateSilverWriterRequest
+    }
+
+    namespace bundle {
+        class StorageBundle
+    }
+
+    namespace clear_mixin {
+        class StorageBundleClearMixin
+    }
+
+    namespace health_mixin {
+        class StorageBundleHealthMixin
+    }
+
+    namespace maintenance_mixin {
+        class StorageBundleMaintenanceMixin
+    }
+
+    namespace merged_mixin {
+        class StorageBundleMergedMixin
+    }
+
+    namespace write_mixin {
+        class StorageBundleWriteMixin
+    }
+
+    StorageBundleClearMixin <|-- StorageBundle
+    StorageBundleHealthMixin <|-- StorageBundle
+    StorageBundleMaintenanceMixin <|-- StorageBundle
+    StorageBundleMergedMixin <|-- StorageBundle
+    StorageBundleWriteMixin <|-- StorageBundle
+

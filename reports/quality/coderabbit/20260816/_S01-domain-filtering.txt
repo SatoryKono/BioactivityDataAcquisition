@@ -1,0 +1,13 @@
+src/bioetl/domain/filtering/__init__.py
+src/bioetl/domain/filtering/_base_filter_config.py
+src/bioetl/domain/filtering/_filter_decision.py
+src/bioetl/domain/filtering/_filter_evaluator.py
+src/bioetl/domain/filtering/_filter_primitives.py
+src/bioetl/domain/filtering/column_filter.py
+src/bioetl/domain/filtering/gold_config.py
+src/bioetl/domain/filtering/input_config.py
+src/bioetl/domain/filtering/list_filters.py
+src/bioetl/domain/filtering/load_result.py
+src/bioetl/domain/filtering/range_filter.py
+src/bioetl/domain/filtering/silver_config.py
+src/bioetl/domain/filtering/silver_filter_identity.py

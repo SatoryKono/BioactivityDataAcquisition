@@ -1,0 +1,100 @@
+version: 1
+description: Shared ChEMBL controlled-vocabulary registry for non-strict canonicalization families.
+
+strict_boolean_families:
+  bool_like:
+    invalid_value_mode: coerce_common_boolean_lexemes
+    fields:
+      - chembl_molecule.therapeutic_flag
+      - chembl_molecule.oral
+      - chembl_molecule.parenteral
+      - chembl_molecule.topical
+      - chembl_molecule.withdrawn_flag
+      - chembl_publication.is_oa
+      - chembl_target.species_group_flag
+
+strict_flag_families:
+  binary_flags:
+    invalid_value_mode: coerce_common_flag_lexemes
+    fields:
+      - chembl_activity.standard_flag
+      - chembl_activity.potential_duplicate
+      - chembl_activity.manual_curation_flag
+      - chembl_molecule.black_box_warning
+      - chembl_molecule.dosed_ingredient
+      - chembl_molecule.polymer_flag
+      - chembl_protein_class.downgraded
+  provider_code_flags:
+    invalid_value_mode: coerce_reviewed_flag_provider_codes
+    fields:
+      - chembl_molecule.first_in_class
+      - chembl_molecule.inorganic_flag
+      - chembl_molecule.natural_product
+      - chembl_molecule.prodrug
+
+controlled_vocabularies:
+  activity_action_types:
+    canonicalizer: normalize_profile_governed_uppercase_vocabulary
+    invalid_value_mode: preserve_unknown_uppercase_lexeme
+    fields:
+      - chembl_activity.action_type
+  raw_units:
+    canonicalizer: normalize_unit
+    invalid_value_mode: preserve_unknown_lexeme
+    fields:
+      - chembl_activity.units
+      - chembl_assay_parameters.units
+  standard_units:
+    canonicalizer: normalize_standard_unit
+    invalid_value_mode: reject_unknown_lexeme
+    fields:
+      - chembl_activity.standard_units
+      - chembl_assay_parameters.standard_units
+  operators:
+    canonicalizer: normalize_operator
+    invalid_value_mode: preserve_unknown_lexeme
+    fields:
+      - chembl_activity.relation
+      - chembl_assay_parameters.relation
+  assay_parameter_types:
+    canonicalizer: normalize_cross_pipeline_case(strategy=uppercase)
+    invalid_value_mode: preserve_unknown_uppercase_lexeme
+    fields:
+      - chembl_assay_parameters.type
+      - chembl_assay_parameters.parameter_type
+  assay_categories:
+    canonicalizer: normalize_profile_governed_vocabulary
+    invalid_value_mode: reject_unknown_lexeme
+    fields:
+      - chembl_assay.assay_category
+  assay_confidence_descriptions:
+    canonicalizer: normalize_profile_governed_vocabulary
+    invalid_value_mode: reject_unknown_lexeme
+    fields:
+      - chembl_assay.confidence_description
+  publication_oa_statuses:
+    canonicalizer: normalize_profile_oa_status
+    invalid_value_mode: reject_unknown_lexeme
+    fields:
+      - chembl_publication.oa_status
+  target_organism_classes:
+    canonicalizer: normalize_profile_target_organism_class
+    invalid_value_mode: reject_unknown_lexeme
+    fields:
+      - chembl_target.organism_class
+  target_component_types:
+    canonicalizer: normalize_profile_json_string_list_vocabulary_strict
+    invalid_value_mode: reject_unknown_json_array_element
+    fields:
+      - chembl_target.component_types
+  target_component_relationships:
+    canonicalizer: normalize_profile_json_string_list_vocabulary_strict
+    invalid_value_mode: reject_unknown_json_array_element
+    fields:
+      - chembl_target.component_relationships
+  subcellular_fractions:
+    canonicalizer: normalize_profile_governed_vocabulary
+    invalid_value_mode: preserve_unknown_lexeme
+    fields:
+      - chembl_assay.assay_subcellular_fraction
+      - chembl_subcellular_fraction.subcellular_fraction

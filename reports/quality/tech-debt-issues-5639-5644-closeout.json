@@ -1,0 +1,78 @@
+{
+  "snapshot_date": "2026-07-15",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "issues": [
+    {
+      "issue": "#5639",
+      "theme": "Effective config diagnostics governance",
+      "debt_types": ["Config debt", "Governance gap", "Architecture debt"],
+      "action": "Governed effective config diagnostics with proper helper functions and diagnostic tracking.",
+      "risk": "low",
+      "evidence": [
+        "src/bioetl/application/services/control_plane/manifest/diagnostics/base.py",
+        "src/bioetl/application/services/control_plane/manifest/diagnostics/main_helpers.py",
+        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5640",
+      "theme": "Composite runtime bootstrap governance",
+      "debt_types": ["Architecture debt", "Governance gap", "Bootstrap debt"],
+      "action": "Governed composite runtime bootstrap with proper helper functions and support tracking.",
+      "risk": "low",
+      "evidence": [
+        "src/bioetl/composition/bootstrap/runtime/composite.py",
+        "src/bioetl/composition/bootstrap/runtime/composite_support_helpers.py",
+        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5641",
+      "theme": "Services factory governance",
+      "debt_types": ["Architecture debt", "Governance gap", "Factory debt"],
+      "action": "Governed services factory with proper dependency injection and composition tracking.",
+      "risk": "low",
+      "evidence": [
+        "src/bioetl/composition/factories/services/factory.py",
+        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5642",
+      "theme": "Compatibility census governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Public API debt"],
+      "action": "Governed compatibility census with proper entrypoint tracking and importer counts.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/compatibility-importer-census.json",
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5643",
+      "theme": "Debt scorecard governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Budget debt"],
+      "action": "Governed debt scorecard with proper metrics and ratchet tracking.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/debt_scorecard.yaml",
+        "reports/quality/architecture-quality-scorecard.json",
+        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5644",
+      "theme": "Governance artifact alignment",
+      "debt_types": ["Governance gap", "Architecture debt", "Documentation debt"],
+      "action": "Maintained governance artifact consistency across compatibility and scorecard surfaces.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/compatibility-importer-census.json",
+        "configs/quality/debt_scorecard.yaml",
+        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
+      ]
+    }
+  ]
+}

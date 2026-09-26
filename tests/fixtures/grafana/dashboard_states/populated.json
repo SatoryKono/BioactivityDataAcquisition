@@ -1,0 +1,22 @@
+{
+  "contract": "dashboard_state_fixture_v1",
+  "case": "populated",
+  "classification": "POPULATED",
+  "http_status": 200,
+  "rows": [
+    {
+      "parameter": "bronze [total]",
+      "value": "1 200",
+      "percentage": "100%",
+      "row_status": "OK"
+    },
+    {
+      "parameter": "silver [valid]",
+      "value": "1 080",
+      "percentage": "90.0%",
+      "row_status": "OK"
+    }
+  ],
+  "message": "The selected scope contains matching evidence rows.",
+  "next_action": "Inspect the bounded detail rows when further triage is needed."
+}

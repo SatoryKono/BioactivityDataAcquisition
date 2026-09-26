@@ -1,0 +1,81 @@
+version: 1
+owner: "@bioetl-observability"
+rationale: >
+  Dashboard query reuse is allowed only when the repeated expression is an
+  intentional shared operator view, not accidental copy/paste drift.
+exact_duplicates:
+  resolved_groups:
+    - id: dq-volume-weighted-score-shared-card
+      owner: "@bioetl-observability"
+      linked_issue: "#6360"
+      resolution: queries_now_have_distinct_time_semantics
+      rationale: The current stat uses a fixed latest-sample lookback while the trend remains selected-range evidence, so the former exact duplicate no longer exists.
+    - id: l0-status-shared-status-card
+      owner: "@bioetl-observability"
+      linked_issue: "#11269"
+      resolution: overview_selected_run_removed_shared_copy
+      rationale: Overview no longer ships Monitor Scope Health, so the shared priority expression is not an exact duplicate.
+    - id: workflow-evidence-status-shared
+      owner: "@bioetl-observability"
+      linked_issue: "#11269"
+      resolution: overview_selected_run_removed_shared_copy
+      rationale: Overview no longer ships Review Current Workflow Evidence.
+    - id: workflow-evidence-published-shared
+      owner: "@bioetl-observability"
+      linked_issue: "#11269"
+      resolution: overview_selected_run_removed_shared_copy
+      rationale: Overview no longer ships the shared publication clock.
+  allowed_groups: []
+near_duplicates:
+  max_count: 5
+  owner: "@bioetl-observability"
+  linked_issue: "#6360"
+  rationale: >
+    Current cross-panel audited baseline is five reviewed near-duplicate
+    families. Growth beyond five or a panel-set change requires review.
+  reviewed_groups:
+    - id: overview-l0-domain-status-input-variants
+      disposition: retain_semantic_variants
+      recording_rule_decision: rejected_distinct_input_selectors
+      rationale: >
+        Overview domain-status tables share the same L0 fail-closed shape after
+        selector stripping, but each panel binds a different input domain.
+      panel_refs:
+        - "bioetl-overview-v2.json :: Review Control Plane Status"
+        - "bioetl-overview-v2.json :: Review Data Quality Status"
+        - "bioetl-overview-v2.json :: Review Data Validation Status"
+        - "bioetl-overview-v2.json :: Review Runtime Status"
+        - "bioetl-overview-v2.json :: Review Workflow Status"
+    - id: processed-record-stage-range-variants
+      disposition: retain_semantic_variants
+      recording_rule_decision: rejected_distinct_stage_and_range_binding
+      rationale: >
+        Bronze, Gold, and Overview filtered-out selected-range counts share the
+        same shaped range aggregation after label stripping, but intentionally
+        keep distinct stage selectors and preserve missing telemetry as No data
+        instead of synthesizing a healthy zero.
+      panel_refs:
+        - "bioetl-dq-v2.json :: Monitor Bronze Records"
+        - "bioetl-dq-v2.json :: Monitor Gold Records"
+        - "bioetl-overview-v2.json :: Track Silver Rejects"
+    - id: silver-filter-reject-no-data-range-variants
+      disposition: retain_shared_diagnostic_absence
+      recording_rule_decision: rejected_cross_dashboard_range_binding
+      rationale: DQ and Overview show the same selected-range filtered-out evidence and intentionally preserve missing telemetry as No data instead of synthesizing a healthy zero.
+      panel_refs:
+        - "bioetl-dq-v2.json :: Monitor Silver Filter Rejects"
+        - "bioetl-overview-v2.json :: Track Silver Rejects"
+    - id: provider-http-error-class-variants
+      disposition: retain_semantic_variants
+      recording_rule_decision: rejected_distinct_error_taxonomy
+      rationale: Timeout/network and rate-limit regex classes are intentionally distinct operator diagnoses; merging them would erase cause semantics.
+      panel_refs:
+        - "bioetl-provider-health-v2.json :: Track Network & Timeout Errors"
+        - "bioetl-provider-health-v2.json :: Track Rate-Limit Errors"
+    - id: runtime-blocker-topk-depth-variants
+      disposition: retain_presentation_variants
+      recording_rule_decision: rejected_topk_is_consumer_specific
+      rationale: Top-3 is the first-screen summary and top-20 is the explicit drilldown; recording either topk would make the other consumer semantically wrong.
+      panel_refs:
+        - "bioetl-runtime.json :: Inspect Active Runtime Blocker Detail"
+        - "bioetl-runtime.json :: Review Runtime Blockers"

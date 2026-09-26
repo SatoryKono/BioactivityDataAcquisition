@@ -1,0 +1,88 @@
+{
+  "checked_at": "2026-08-07T18:29:04+0300",
+  "path": {
+    "candidate_count": 5,
+    "canonical_available": true,
+    "canonical_wins": true,
+    "launcher_policy": "managed_linux_first",
+    "managed_version": "codex-cli 0.147.0",
+    "paths_emitted": false,
+    "selected_version": "codex-cli 0.147.0"
+  },
+  "permissions": {
+    "checked_directories": 116,
+    "checked_files": 1589,
+    "errors": 0,
+    "required_directory_mode": "0700",
+    "required_file_mode": "0600",
+    "unsafe_directories": 0,
+    "unsafe_files": 0
+  },
+  "privacy": {
+    "credentials_emitted": false,
+    "env_files_touched": false,
+    "rule_content_emitted": false,
+    "session_content_read": false,
+    "user_paths_emitted": false
+  },
+  "retention": {
+    "deletion_performed": false,
+    "groups": {
+      "ARCHIVE": {
+        "action": "supported_archive_after_exact_approval",
+        "bytes": 2825929936,
+        "count": 272,
+        "restore": "verified_backup"
+      },
+      "BLOCKED": {
+        "action": "resolve_access_or_state_first",
+        "bytes": 0,
+        "count": 0,
+        "restore": "not_applicable"
+      },
+      "CORRUPT": {
+        "action": "quarantine_after_exact_approval",
+        "bytes": 0,
+        "count": 3,
+        "restore": "verified_backup"
+      },
+      "KEEP": {
+        "action": "retain",
+        "bytes": 5728908770,
+        "count": 1265,
+        "restore": "not_required"
+      },
+      "REVIEW_REQUIRED": {
+        "action": "manual_review_before_any_delete",
+        "bytes": 0,
+        "count": 0,
+        "restore": "verified_backup"
+      }
+    },
+    "index_repair": "retain_valid_database; audited Codex CLI exposes no supported reindex command; document upstream limitation",
+    "index_state": {
+      "indexed": 1495,
+      "unindexed": 45
+    },
+    "retention_days": 90,
+    "session_content_read": false,
+    "sqlite_integrity": "ok"
+  },
+  "rules": {
+    "content_emitted": false,
+    "dispositions": {
+      "KEEP": 342,
+      "NARROW": 0,
+      "REMOVE": 0,
+      "SECRET_REVIEW": 0
+    },
+    "files": 1,
+    "parse_errors": 0,
+    "reason_counts": {
+      "reusable_prefix": 342
+    },
+    "rules": 342
+  },
+  "schema_version": "bioetl-codex-local-state-audit-v1",
+  "status": "WARN"
+}

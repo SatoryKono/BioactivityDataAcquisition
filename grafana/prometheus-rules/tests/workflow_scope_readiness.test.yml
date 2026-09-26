@@ -1,0 +1,35 @@
+rule_files:
+  - ../bioetl_observability.yml
+evaluation_interval: 1m
+tests:
+  - name: Multi-pipeline workflow status follows explicit membership
+    interval: 1m
+    input_series:
+      - series: 'bioetl_workflow_pipeline_expected{workflow="chembl_baseline",pipeline="chembl_assay",run_type="backfill"}'
+        values: '1+0x5'
+      - series: 'bioetl_workflow_pipeline_expected{workflow="chembl_baseline",pipeline="chembl_target",run_type="backfill"}'
+        values: '1+0x5'
+      - series: 'bioetl_workflow_current_status{workflow="chembl_baseline",pipeline_context="unknown",run_type_context="All",provider_context="unknown"}'
+        values: '0+0x5'
+    promql_expr_test:
+      - expr: 'bioetl_l0_input_status{input="workflow",pipeline="chembl_assay",run_type="backfill"}'
+        eval_time: 3m
+        exp_samples:
+          - labels: '{__name__="bioetl_l0_input_status",input="workflow",pipeline="chembl_assay",run_type="backfill"}'
+            value: 0
+      - expr: 'bioetl_l0_input_status{input="workflow",pipeline="chembl_target",run_type="backfill"}'
+        eval_time: 3m
+        exp_samples:
+          - labels: '{__name__="bioetl_l0_input_status",input="workflow",pipeline="chembl_target",run_type="backfill"}'
+            value: 0
+  - name: Missing workflow result remains unknown
+    interval: 1m
+    input_series:
+      - series: 'bioetl_workflow_pipeline_expected{workflow="chembl_baseline",pipeline="chembl_assay",run_type="backfill"}'
+        values: '1+0x5'
+    promql_expr_test:
+      - expr: 'bioetl_l0_input_status_selected{input="workflow",pipeline="chembl_assay",run_type="backfill"}'
+        eval_time: 3m
+        exp_samples:
+          - labels: '{__name__="bioetl_l0_input_status_selected",input="workflow",pipeline="chembl_assay",run_type="backfill"}'
+            value: 3

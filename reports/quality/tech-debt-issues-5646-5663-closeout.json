@@ -1,0 +1,218 @@
+{
+  "snapshot_date": "2026-07-16",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "issues": [
+    {
+      "issue": "#5646",
+      "theme": "Technical debt roadmap governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Budget debt"],
+      "action": "Established technical debt roadmap governance with proper baseline tracking and artifact alignment.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/hotspot-family-baseline.json",
+        "reports/quality/architecture-quality-scorecard.json",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5647",
+      "theme": "Contract diagnostics governance",
+      "debt_types": ["Contract drift", "Governance gap", "Test debt"],
+      "action": "Governed contract diagnostics with proper DQ reference validation and error tracking.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/contract-registry-diagnostics.json",
+        "scripts/engineering/ci/validate_registry_dq_refs.py",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5648",
+      "theme": "Config discrepancy governance",
+      "debt_types": ["Config debt", "Governance gap", "Duplication"],
+      "action": "Governed config discrepancy baseline with proper duplication tracking and owner accountability.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/config-discrepancy-baseline.json",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5649",
+      "theme": "Runtime cardinality governance",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Governed runtime cardinality with proper inventory tracking and review alignment.",
+      "risk": "low",
+      "evidence": [
+        "reports/observability/runtime_cardinality_inventory.json",
+        "reports/observability/runtime_cardinality_review.json",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5650",
+      "theme": "Bronze fixture gaps governance",
+      "debt_types": ["Test debt", "Governance gap", "Quality debt"],
+      "action": "Governed bronze fixture gaps with proper gap tracking and test coverage.",
+      "risk": "low",
+      "evidence": [
+        "configs/base/bronze_fixture_gaps.yaml",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5651",
+      "theme": "Test governance config and report alignment",
+      "debt_types": ["Test debt", "Governance gap", "Quality debt"],
+      "action": "Aligned test governance config and report with proper metrics and budget tracking.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/test_governance_audit.yaml",
+        "reports/quality/test-governance-current.json",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5652",
+      "theme": "Workflow governance alignment",
+      "debt_types": ["Governance gap", "Process debt", "CI debt"],
+      "action": "Aligned workflow governance with proper gate enforcement and artifact tracking.",
+      "risk": "low",
+      "evidence": [
+        ".github/workflows/tests.yml",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5653",
+      "theme": "Snapshot invariants governance",
+      "debt_types": ["Test debt", "Governance gap", "Quality debt"],
+      "action": "Governed snapshot invariants with proper test coverage and validation.",
+      "risk": "low",
+      "evidence": [
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5654",
+      "theme": "Governance artifact consistency",
+      "debt_types": ["Governance gap", "Architecture debt", "Documentation debt"],
+      "action": "Maintained governance artifact consistency across all quality and observability surfaces.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/architecture-quality-scorecard.json",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5655",
+      "theme": "Hotspot family governance",
+      "debt_types": ["Hotspot", "Governance gap", "Architecture debt"],
+      "action": "Governed hotspot families with reviewed baselines and bounded growth budgets.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/hotspot-family-baseline.json",
+        "configs/quality/debt_scorecard.yaml::hotspot_family_ratchets",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5656",
+      "theme": "Debt gates artifact alignment",
+      "debt_types": ["Governance gap", "Quality debt", "Budget debt"],
+      "action": "Aligned debt gates artifacts with proper status tracking and source tree hash verification.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5657",
+      "theme": "Architecture scorecard governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Budget debt"],
+      "action": "Governed architecture quality scorecard with proper metrics and ratchet tracking.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/architecture-quality-scorecard.json",
+        "configs/quality/debt_scorecard.yaml",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5658",
+      "theme": "Module coverage governance",
+      "debt_types": ["Coverage debt", "Governance gap", "Budget debt"],
+      "action": "Governed module coverage with proper hash verification and gate alignment.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/module-coverage-inventory.json",
+        "configs/quality/module_coverage_gates.yaml",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5659",
+      "theme": "Config surface backlog governance",
+      "debt_types": ["Config debt", "Governance gap", "Duplication"],
+      "action": "Governed config surface backlog with proper duplication tracking and owner accountability.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/config-surface-backlog.json",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5660",
+      "theme": "Compatibility census governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Public API debt"],
+      "action": "Governed compatibility census with proper entrypoint tracking and importer counts.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/compatibility-importer-census.json",
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5661",
+      "theme": "Internal shims governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Architecture debt"],
+      "action": "Governed internal compatibility shims with proper tracking and sunset policies.",
+      "risk": "medium",
+      "evidence": [
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5662",
+      "theme": "Observability metric governance",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Governed observability metrics with proper allowlist and cardinality tracking.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/observability_metric_governance.yaml",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5663",
+      "theme": "Governance artifact consistency",
+      "debt_types": ["Governance gap", "Architecture debt", "Documentation debt"],
+      "action": "Maintained governance artifact consistency across all quality and observability surfaces.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/architecture-quality-scorecard.json",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ]
+    }
+  ]
+}

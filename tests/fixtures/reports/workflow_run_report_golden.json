@@ -1,0 +1,76 @@
+{
+  "schema_version": "workflow_run_report_v1",
+  "identity": {
+    "workflow_name": "chembl_activity_composite",
+    "workflow_version": "1.0.0",
+    "workflow_run_id": "00000000-0000-4000-8000-0000000000aa",
+    "manifest_id": "wf-manifest-001",
+    "execution_fingerprint": "fp-demo",
+    "status": "success",
+    "started_at": null,
+    "completed_at": null,
+    "duration_seconds": null,
+    "resumed": false
+  },
+  "plan": {
+    "steps": [
+      {
+        "step_id": "seed",
+        "kind": "pipeline",
+        "pipeline_name": "chembl_activity",
+        "transform_name": null,
+        "depends_on": []
+      },
+      {
+        "step_id": "dep_assay",
+        "kind": "pipeline",
+        "pipeline_name": "chembl_assay",
+        "transform_name": null,
+        "depends_on": ["seed"]
+      }
+    ]
+  },
+  "execution": [
+    {
+      "step_id": "seed",
+      "kind": "pipeline",
+      "pipeline_name": "chembl_activity",
+      "status": "success",
+      "records_extracted": 1000,
+      "records_bronze": 1000,
+      "records_silver": 850,
+      "records_gold": 820,
+      "pipeline_run_id": "00000000-0000-4000-8000-000000000001"
+    },
+    {
+      "step_id": "dep_assay",
+      "kind": "pipeline",
+      "pipeline_name": "chembl_assay",
+      "status": "success",
+      "records_extracted": 200,
+      "records_bronze": 200,
+      "records_silver": 190,
+      "records_gold": 185,
+      "pipeline_run_id": "00000000-0000-4000-8000-000000000002"
+    }
+  ],
+  "totals": {
+    "steps_planned": 2,
+    "steps_succeeded": 2,
+    "steps_failed": 0,
+    "steps_skipped": 0,
+    "records_extracted_sum": 1200,
+    "records_silver_sum": 1040,
+    "records_gold_sum": 1005
+  },
+  "index": {
+    "chembl_activity": {
+      "records_extracted": 1000,
+      "step_ids": ["seed"]
+    },
+    "chembl_assay": {
+      "records_extracted": 200,
+      "step_ids": ["dep_assay"]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+ M docs/03-guides/dashboards/contracts/dashboard-inventory.yaml
+ M docs/03-guides/dashboards/contracts/panel-content-contract.yaml
+ M docs/03-guides/dashboards/panels/bioetl-runtime-panels.md
+ M grafana/dashboards/bioetl-control-plane-v1.json
+ M scripts/ops/observability/grafana/apply_state_followup.py
+ M tests/unit/scripts/ops/observability/test_dashboard_state_followup.py
+?? reports/quality/coderabbit/network-recovery-20260914/
+?? reports/quality/coderabbit/review-20260914-0630/

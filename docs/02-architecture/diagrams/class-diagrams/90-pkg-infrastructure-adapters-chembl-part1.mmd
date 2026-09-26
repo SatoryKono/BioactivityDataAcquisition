@@ -1,0 +1,62 @@
+%% Title: Package Family: infrastructure/adapters/chembl (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/chembl; part 1/2; modules: models_additional, models_common, models_compound, _models_common_extra, models_activity, _fetch_paging_filtered.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-09-02
+%% @level   Package Family / Inventory Slice
+%% @nodes   30
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace models_additional {
+        class ChemblCompoundRecordApiRecord
+        class ChemblCompoundRecordResponse
+        class ChemblProteinClassApiRecord
+        class ChemblProteinClassResponse
+        class ChemblPublicationSimilarityApiRecord
+        class ChemblPublicationSimilarityResponse
+        class ChemblTissueApiRecord
+        class ChemblTissueResponse
+    }
+
+    namespace models_common {
+        class ChemblAssayRecord
+        class ChemblAssayResponse
+        class ChemblPublicationApiRecord
+        class ChemblPublicationResponse
+        class ChemblReleaseInfo
+        class ChemblTargetRecord
+        class ChemblTargetResponse
+    }
+
+    namespace models_compound {
+        class ChemblMoleculeRecord
+        class ChemblMoleculeResponse
+        class MoleculeHierarchy
+        class MoleculeProperties
+        class MoleculeStructures
+    }
+
+    namespace models_common_extra {
+        class ChemblCellLineRecord
+        class ChemblCellLineResponse
+        class ChemblTargetComponentRecord
+        class ChemblTargetComponentResponse
+    }
+
+    namespace models_activity {
+        class ActionType
+        class ChemblActivityRecord
+        class ChemblActivityResponse
+        class LigandEfficiency
+    }
+
+    namespace fetch_paging_filtered {
+        class _ChemblFetchPagingFilteredMixin
+    }
+
+    namespace fetch_resilience_error {
+        class ChemblErrorHost
+    }
+

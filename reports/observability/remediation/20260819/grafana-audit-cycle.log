@@ -1,0 +1,246 @@
+grafana-audit-cycle: ensure observability backend
+grafana-audit-cycle: semantic preflight
+grafana: status=ok detail=http://localhost:3000/api/health reachable
+panel-3010-terminal-states: status=ok detail=3010 positive render must classify healthy; successful empty must classify valid-empty (noValue starts with VALID EMPTY); a visible TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is a healthy fail-closed bind/origin state (HTTP 200), not explicit-error. Missing datasource or bootstrap deferred/failed must classify explicit-error. explicit-error is not success for positive 3010 renders. Use --fallback playwright (Grafana Render API leaves terminal state not-checked).
+prometheus: status=ok detail=http://localhost:9090/api/v1/status/runtimeinfo reachable
+quarantine-explorer: status=not_applicable detail=Quarantine Explorer HTTP/UI surface is retired from the shipped dashboard portfolio; domain quarantine write/storage remains unchanged.
+bioetl-control-plane-source: status=error detail=Expected runtime source identity resolution is not aligned: foreign
+bioetl-prometheus-target: status=ok detail=active bioetl scrape target health=up
+grafana-audit-cycle: discover filled dashboards
+grafana-audit-cycle: filled dashboards for rerender -> bioetl-control-plane-v1, bioetl-dq-v2, bioetl-incident-v1, bioetl-overview-v2, bioetl-provider-health-v2, bioetl-run-explorer-v1, bioetl-runtime [live discovery]
+grafana-audit-cycle: live panel semantic gate
+bioetl-control-plane-v1#9402 ID: ok/expected_empty
+bioetl-control-plane-v1#9403 Processed Records: ok/expected_empty
+bioetl-overview-v2#9301 Processed Records: ok/expected_empty
+bioetl-control-plane-v1#132 Monitor Manifest Failure Severity [30m]: ok/empty_result
+bioetl-control-plane-v1#133 Monitor Ledger Failure Severity [30m]: ok/empty_result
+bioetl-dq-v2#101 Review: Latest Successful Data Timestamp: ok/telemetry_missing
+bioetl-dq-v2#8 Time Range · Worst Freshness Age (hours; SLA 24/72): ok/telemetry_missing
+bioetl-dq-v2#9402 ID: ok/expected_empty
+bioetl-dq-v2#9403 Processed Records: ok/expected_empty
+bioetl-control-plane-v1#892 Monitor Checkpoint Age: ok/telemetry_missing
+bioetl-runtime#9403 Processed Records: ok/expected_empty
+bioetl-provider-health-v2#9403 Processed Records: ok/expected_empty
+bioetl-control-plane-v1#9401 Monitor Replay Readiness: ok/empty_result
+bioetl-control-plane-v1#9418 Review Selected-Run Trust: ok/nonempty_result
+bioetl-control-plane-v1#9416 Review Retention Compliance: ok/nonempty_result
+bioetl-control-plane-v1#891 Monitor Replay Safety: ok/empty_result
+bioetl-control-plane-v1#893 Monitor Manifest/Ledger: ok/empty_result
+bioetl-control-plane-v1#907 Monitor Telemetry: ok/empty_result
+bioetl-control-plane-v1#9415 Review Lineage Validation: ok/nonempty_result
+bioetl-control-plane-v1#130 Track Replay Blockers: ok/empty_result
+bioetl-control-plane-v1#3 Track Checkpoint Incompatibilities: ok/empty_result
+bioetl-control-plane-v1#104 Track Unreconstructable Replays: ok/empty_result
+bioetl-control-plane-v1#120 Track Replay Drift: ok/empty_result
+bioetl-control-plane-v1#101 Track Checkpoint Load Failures: ok/empty_result
+bioetl-control-plane-v1#102 Track Checkpoint Save Failures: ok/empty_result
+bioetl-control-plane-v1#103 Track Global Checkpoint Admin Failures: ok/empty_result
+bioetl-control-plane-v1#121 Track Peak Replay Lag: ok/empty_result
+bioetl-control-plane-v1#5 Compare Checkpoint Outcomes: ok/zero_result
+bioetl-control-plane-v1#134 Track Replay Drift by Type: ok/empty_result
+bioetl-control-plane-v1#135 Track Replay Lag: ok/empty_result
+bioetl-control-plane-v1#105 Track Checkpoint Save Latency: ok/empty_result
+bioetl-control-plane-v1#105 Track Checkpoint Save Latency: ok/empty_result
+bioetl-control-plane-v1#105 Track Checkpoint Save Latency: ok/empty_result
+bioetl-control-plane-v1#106 Track Global Checkpoint Admin Latency: ok/empty_result
+bioetl-control-plane-v1#106 Track Global Checkpoint Admin Latency: ok/empty_result
+bioetl-control-plane-v1#106 Track Global Checkpoint Admin Latency: ok/empty_result
+bioetl-control-plane-v1#9413 Review Checkpoint Validation: ok/nonempty_result
+bioetl-control-plane-v1#908 Review Terminal Run Outcomes: ok/empty_result
+bioetl-control-plane-v1#2 Track Ledger Append Failures: ok/empty_result
+bioetl-control-plane-v1#1 Track Manifest Write Failures: ok/empty_result
+bioetl-control-plane-v1#131 Compare Manifest Writes by Status: ok/empty_result
+bioetl-control-plane-v1#7 Compare Ledger Appends by Type & Status: ok/empty_result
+bioetl-control-plane-v1#9414 Review Manifest Validation: ok/nonempty_result
+bioetl-control-plane-v1#4 Track Global Read Failures: ok/empty_result
+bioetl-control-plane-v1#136 Monitor Global Read Failures (30m): ok/empty_result
+bioetl-control-plane-v1#6 Compare Global Reads by Store: ok/nonzero_result
+bioetl-control-plane-v1#111 Track Global Read Latency: ok/nonzero_result
+bioetl-control-plane-v1#111 Track Global Read Latency: ok/nonzero_result
+bioetl-control-plane-v1#111 Track Global Read Latency: ok/nonzero_result
+bioetl-control-plane-v1#122 Track Missing Lineage References: ok/empty_result
+bioetl-control-plane-v1#137 Track Lineage Persistence Failures: ok/empty_result
+bioetl-control-plane-v1#138 Review Missing Lineage by Layer: ok/empty_result
+bioetl-control-plane-v1#107 Compare Global Audit Write Outcomes: ok/empty_result
+bioetl-control-plane-v1#108 Compare Global Audit Query Outcomes: ok/empty_result
+bioetl-control-plane-v1#109 Track Global Audit Write Latency: ok/empty_result
+bioetl-control-plane-v1#109 Track Global Audit Write Latency: ok/empty_result
+bioetl-control-plane-v1#109 Track Global Audit Write Latency: ok/empty_result
+bioetl-control-plane-v1#110 Track Global Audit Query Latency: ok/empty_result
+bioetl-control-plane-v1#110 Track Global Audit Query Latency: ok/empty_result
+bioetl-control-plane-v1#110 Track Global Audit Query Latency: ok/empty_result
+bioetl-control-plane-v1#112 Compare Lineage Persistence Outcomes: ok/empty_result
+bioetl-control-plane-v1#9404 Review Identity Anchors: ok/nonempty_result
+bioetl-control-plane-v1#9407 Inspect Identity Values: ok/nonempty_result
+bioetl-control-plane-v1#9405 Review Identity Gaps: ok/nonempty_result
+bioetl-control-plane-v1#9406 Compare Checkpoint Anchors: ok/nonempty_result
+bioetl-control-plane-v1#9408 Review Required Replay Anchors: ok/nonempty_result
+bioetl-control-plane-v1#9409 Review Additional Forensic Anchors: ok/nonempty_result
+bioetl-control-plane-v1#9417 Review Bounded Failure Reasons: ok/nonempty_result
+bioetl-dq-v2#9401 Monitor Current DQ Status: ok/zero_result
+bioetl-dq-v2#9101 Monitor DQ Threshold State: ok/zero_result
+bioetl-dq-v2#9406 Review Selected Run Summary: ok/nonempty_result
+bioetl-dq-v2#9102 Inspect Current DQ Reasons: ok/empty_result
+bioetl-dq-v2#2 Monitor Volume-Weighted DQ Score: ok/empty_result
+bioetl-dq-v2#5 Monitor Worst-Entity DQ Score: ok/empty_result
+bioetl-dq-v2#154 Monitor Blocked Records: ok/empty_result
+bioetl-dq-v2#6 Monitor Quarantined Records: ok/empty_result
+bioetl-dq-v2#117 Monitor Silver Filter Rejects: ok/empty_result
+bioetl-dq-v2#152 Monitor Silver Reject Mismatch: ok/empty_result
+bioetl-dq-v2#121 Inspect Top Silver Reject Reasons: ok/empty_result
+bioetl-dq-v2#122 Inspect Top Silver Reject Fields: ok/empty_result
+bioetl-dq-v2#118 Inspect Silver Rejects by Pipeline: ok/empty_result
+bioetl-dq-v2#156 Inspect Gold Reject Outcomes by Pipeline: ok/empty_result
+bioetl-dq-v2#156 Inspect Gold Reject Outcomes by Pipeline: ok/empty_result
+bioetl-dq-v2#1 Track Record Flow by Stage: ok/empty_result
+bioetl-dq-v2#1 Track Record Flow by Stage: ok/empty_result
+bioetl-dq-v2#3 Monitor Bronze Records: ok/empty_result
+bioetl-dq-v2#4 Monitor Gold Records: ok/empty_result
+bioetl-dq-v2#9 Inspect Quarantine Error Types: ok/empty_result
+bioetl-dq-v2#12 Monitor Silver Validation Failures: ok/empty_result
+bioetl-dq-v2#151 Monitor Gold Validation Failures: ok/empty_result
+bioetl-dq-v2#10 Track DQ Anomalies: ok/empty_result
+bioetl-dq-v2#11 Track DQ Check Duration p95: ok/empty_result
+bioetl-dq-v2#155 Track DQ Threshold Events: ok/empty_result
+bioetl-dq-v2#153 Track Volume-Weighted DQ Score: ok/empty_result
+bioetl-incident-v1#9401 Monitor Incident Status: ok/empty_result
+bioetl-incident-v1#2010 Inspect Ranked Suspects: ok/empty_result
+bioetl-incident-v1#2010 Inspect Ranked Suspects: ok/empty_result
+bioetl-incident-v1#2010 Inspect Ranked Suspects: ok/empty_result
+bioetl-incident-v1#2005 Monitor Current Alerts: ok/nonzero_result
+bioetl-incident-v1#2006 Track Alert State History: ok/nonzero_result
+bioetl-incident-v1#2002 Inspect Runtime Suspects: ok/empty_result
+bioetl-incident-v1#2003 Inspect Provider Suspects: ok/empty_result
+bioetl-incident-v1#2004 Inspect DQ Suspects: ok/empty_result
+bioetl-incident-v1#2101 Review Selected Run Summary: ok/nonempty_result
+bioetl-overview-v2#214 Monitor Fleet Health: ok/empty_result
+bioetl-overview-v2#215 Review First Action: ok/empty_result
+bioetl-overview-v2#9002 Review Domain Status: ok/empty_result
+bioetl-overview-v2#9601 Review Active Alerts: ok/nonzero_result
+bioetl-overview-v2#9031 Review All Domain Status: ok/empty_result
+bioetl-overview-v2#9018 Track Runtime Blockers: ok/nonzero_result
+bioetl-overview-v2#9019 Track Data Quality Status: ok/nonzero_result
+bioetl-overview-v2#9020 Track Gold Lifecycle: ok/nonzero_result
+bioetl-overview-v2#9010 Review Failed Runs: ok/empty_result
+bioetl-overview-v2#9011 Review Recent Non-success Terminal Runs: ok/empty_result
+bioetl-overview-v2#9015 Track Silver Rejects: ok/empty_result
+bioetl-overview-v2#9015 Track Silver Rejects: ok/empty_result
+bioetl-overview-v2#9006 Review Control Plane Status: ok/nonzero_result
+bioetl-overview-v2#9003 Review Runtime Status: ok/nonzero_result
+bioetl-overview-v2#9004 Review Data Quality Status: ok/nonzero_result
+bioetl-overview-v2#9007 Review Global Provider Status: ok/zero_result
+bioetl-overview-v2#9005 Review Data Validation Status: ok/nonzero_result
+bioetl-overview-v2#9013 Review Workflow Status: ok/nonzero_result
+bioetl-overview-v2#9300 Review Run Identity: ok/expected_empty
+bioetl-overview-v2#9603 Review Selected Run Summary: ok/nonempty_result
+bioetl-provider-health-v2#9401 Monitor Selected Provider: ok/nonzero_result
+bioetl-provider-health-v2#9101 Monitor Fleet Severity: ok/nonzero_result
+bioetl-provider-health-v2#9107 Inspect Status Reason: ok/empty_result
+bioetl-provider-health-v2#9104 Monitor Telemetry Presence: ok/nonzero_result
+bioetl-provider-health-v2#9102 Inspect Non-OK Providers: ok/empty_result
+bioetl-provider-health-v2#9103 Inspect Top Provider Causes: ok/empty_result
+bioetl-provider-health-v2#9111 Inspect Full Fleet Severity: ok/nonzero_result
+bioetl-provider-health-v2#9112 Inspect Full Non-OK Providers: ok/empty_result
+bioetl-provider-health-v2#9113 Inspect Full Provider Causes: ok/empty_result
+bioetl-provider-health-v2#106 Track Health Failures & Degradation: ok/empty_result
+bioetl-provider-health-v2#106 Track Health Failures & Degradation: ok/empty_result
+bioetl-provider-health-v2#107 Track Failure Share: ok/empty_result
+bioetl-provider-health-v2#108 Inspect Exhausted Retries: ok/empty_result
+bioetl-provider-health-v2#109 Track Exhausted Retries: ok/empty_result
+bioetl-provider-health-v2#102 Inspect Health-Check Latency p95: ok/empty_result
+bioetl-provider-health-v2#110 Track Request Latency p95: ok/empty_result
+bioetl-provider-health-v2#111 Track Rate-Limit Errors: ok/empty_result
+bioetl-provider-health-v2#115 Track Network & Timeout Errors: ok/empty_result
+bioetl-provider-health-v2#112 Track Rate-Limiter Wait p95: ok/empty_result
+bioetl-provider-health-v2#113 Monitor Available Rate-Limit Tokens: ok/empty_result
+bioetl-provider-health-v2#31 Monitor Circuit-Breaker State: ok/empty_result
+bioetl-provider-health-v2#32 Track Circuit-Breaker Trips: ok/empty_result
+bioetl-provider-health-v2#114 Inspect Raw Health Status: ok/nonzero_result
+bioetl-provider-health-v2#1 Track Health-Check Latency p95: ok/empty_result
+bioetl-provider-health-v2#2 Monitor Healthy Checks: ok/zero_result
+bioetl-provider-health-v2#105 Monitor Degraded Checks: ok/empty_result
+bioetl-provider-health-v2#104 Track Failure Rate: ok/empty_result
+bioetl-provider-health-v2#7 Monitor Health Checks: ok/empty_result
+bioetl-provider-health-v2#9402 Inspect Run Identity: ok/expected_empty
+bioetl-run-explorer-v1#3010 Inspect Recent Runs (last 4): ok/nonempty_result
+bioetl-run-explorer-v1#9402 Inspect Run Identity: ok/expected_empty
+bioetl-run-explorer-v1#9403 Inspect Processed Records: ok/expected_empty
+bioetl-run-explorer-v1#3021 Inspect Recent Runs (last 20): ok/nonempty_result
+bioetl-run-explorer-v1#3022 Inspect Full Run Identity: ok/expected_empty
+bioetl-run-explorer-v1#3023 Inspect Full Processed Records: ok/expected_empty
+bioetl-run-explorer-v1#3011 Inspect Stage Funnel: ok/nonempty_result
+bioetl-run-explorer-v1#3012 Inspect Top Run Reasons: ok/nonempty_result
+bioetl-run-explorer-v1#3015 Inspect Reconciliation: ok/nonempty_result
+bioetl-run-explorer-v1#3013 Inspect Run Artifacts: ok/nonempty_result
+bioetl-run-explorer-v1#3020 Inspect Recent Workflow Runs (last 20): ok/nonempty_result
+bioetl-runtime#9401 Monitor Pipeline Status: ok/empty_result
+bioetl-runtime#9101 Review Runtime Blockers: ok/empty_result
+bioetl-runtime#9102 Monitor Metrics Coverage: ok/zero_result
+bioetl-runtime#238 Track Stage Backlog Trend: ok/empty_result
+bioetl-runtime#240 Track Records by Stage / Interval: ok/empty_result
+bioetl-runtime#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-runtime#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-runtime#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-runtime#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-runtime#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-runtime#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-runtime#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-runtime#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-runtime#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-runtime#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-runtime#9105 Track Stage Lag: ok/empty_result
+bioetl-runtime#243 Inspect Stage Expectedness: ok/empty_result
+bioetl-runtime#243 Inspect Stage Expectedness: ok/empty_result
+bioetl-runtime#220 Monitor Runtime Error Rate: ok/empty_result
+bioetl-runtime#207 Track Phase Duration: ok/empty_result
+bioetl-runtime#207 Track Phase Duration: ok/empty_result
+bioetl-runtime#207 Track Phase Duration: ok/empty_result
+bioetl-runtime#239 Track Pipeline Duration: ok/empty_result
+bioetl-runtime#239 Track Pipeline Duration: ok/empty_result
+bioetl-runtime#239 Track Pipeline Duration: ok/empty_result
+bioetl-runtime#256 Review Errors by Stage & Code: ok/zero_result
+bioetl-runtime#241 Compare Records by Stage & Run Type: ok/zero_result
+bioetl-runtime#230 Monitor Pipeline Alert Conditions: ok/empty_result
+bioetl-runtime#236 Monitor No-Records Runs: ok/empty_result
+bioetl-runtime#21 Monitor Memory Pressure Active: ok/empty_result
+bioetl-runtime#4 Inspect DQ Alert Conditions: ok/empty_result
+bioetl-runtime#5 Inspect Control Plane Alert Conditions: ok/empty_result
+bioetl-runtime#6 Inspect Provider Alert Conditions: ok/empty_result
+bioetl-runtime#259 Inspect Global Provider Alert Conditions: ok/empty_result
+bioetl-runtime#7 Inspect Entities Stale Over 24h: ok/empty_result
+bioetl-runtime#209 Track Global Shutdown Starts: ok/empty_result
+bioetl-runtime#210 Track Global Shutdown Completions: ok/empty_result
+bioetl-runtime#237 Monitor Worst Stage Lag: ok/empty_result
+bioetl-runtime#16 Monitor Runtime Blockers: ok/empty_result
+bioetl-runtime#205 Monitor Failed Runs: ok/empty_result
+bioetl-runtime#9402 Inspect Pipeline Identity: ok/expected_empty
+bioetl-runtime#9998 Review Selected Run Summary: ok/nonempty_result
+bioetl-runtime#9996 Track Failed Workflow Runs: ok/empty_result
+bioetl-runtime#9997 Track Failed Workflow Steps: ok/empty_result
+grafana-audit-cycle: rerender screenshots
+rendered bioetl-control-plane-v1 -> /mnt/e/github/BioactivityDataAcquisition/reports/observability/grafana/screenshots/render-api/bioetl-control-plane-v1.png
+rendered bioetl-dq-v2 -> /mnt/e/github/BioactivityDataAcquisition/reports/observability/grafana/screenshots/render-api/bioetl-dq-v2.png
+rendered bioetl-incident-v1 -> /mnt/e/github/BioactivityDataAcquisition/reports/observability/grafana/screenshots/render-api/bioetl-incident-v1.pngError: Cannot find module 'playwright'
+Require stack:
+- /mnt/e/github/BioactivityDataAcquisition/scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1410:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1051:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1056:22)
+    at Module._load (node:internal/modules/cjs/loader:1219:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:238:24)
+    at Module.require (node:internal/modules/cjs/loader:1493:12)
+    at require (node:internal/modules/helpers:152:16)
+    at playwright (/mnt/e/github/BioactivityDataAcquisition/scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs:50:19)
+    at main (/mnt/e/github/BioactivityDataAcquisition/scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs:2166:27) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/mnt/e/github/BioactivityDataAcquisition/scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs'
+  ]
+}
+
+rendered bioetl-overview-v2 -> /mnt/e/github/BioactivityDataAcquisition/reports/observability/grafana/screenshots/render-api/bioetl-overview-v2.png
+rendered bioetl-provider-health-v2 -> /mnt/e/github/BioactivityDataAcquisition/reports/observability/grafana/screenshots/render-api/bioetl-provider-health-v2.png
+rendered bioetl-run-explorer-v1 -> /mnt/e/github/BioactivityDataAcquisition/reports/observability/grafana/screenshots/render-api/bioetl-run-explorer-v1.png
+rendered bioetl-runtime -> /mnt/e/github/BioactivityDataAcquisition/reports/observability/grafana/screenshots/render-api/bioetl-runtime.png
+Done.

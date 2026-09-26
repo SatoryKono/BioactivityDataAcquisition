@@ -1,0 +1,41 @@
+# Windows / cloud-drive architecture scan policy (test-audit #6640).
+# Linux CI remains the authoritative gate for full-repo walks.
+
+schema_version: 1
+owner: "@bioetl-platform"
+linked_issues:
+  - 6640
+  - 6634
+reviewed_on: "2026-07-27"
+
+authority:
+  linux_ci: authoritative
+  windows_local: developer_feedback_only
+  cloud_synced_worktrees:
+    - Google Drive
+    - OneDrive
+    - network_drive_type_4
+
+session_scan_index:
+  helper: tests/helpers/architecture_scan_index.py
+  fixtures: tests/architecture/conftest.py
+  cache_env: BIOETL_ARCHITECTURE_CACHE_DIR
+  network_drive_worker_cap: 1
+
+local_windows_policy:
+  prefer_lanes:
+    - architecture-fast-boundary
+    - unit-fast
+  bound_or_skip_patterns:
+    - full_repo_git_grep_subprocess
+    - whole_tree_rglob_without_session_cache
+    - docs_link_drift_walks
+  must_not_weaken:
+    - layering_guards_on_linux_ci
+    - determinism_guards_on_linux_ci
+    - private_module_import_guard_on_linux_ci
+
+rationale: >-
+  Cloud-synced Windows worktrees can stall on fsync/stat long enough to trip
+  the 60s pytest timeout during architecture inventory walks. Session caches
+  and CI Linux remain the merge-blocking truth.

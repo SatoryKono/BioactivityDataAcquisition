@@ -1,0 +1,1 @@
+"""Diagram tooling: cli package."""

@@ -1,0 +1,33 @@
+%% View: Infrastructure-Mapping | Parent: 01-full-system-component-full.mermaid
+%% @uniform width=184 height=56 max_title_len=17 max_desc_lines=0
+%%{init: {'layout':'elk','theme':'base','flowchart':{'defaultRenderer':'elk'},'elk':{'mergeEdges':true,'edgeRouting':'ORTHOGONAL','nodePlacementStrategy':'BRANDES_KOEPF'}}}%%
+flowchart TB
+    subgraph Composition["Composition"]
+        Build["build_pipeline_runner"]
+        StorageFactory["StorageFactory"]
+    end
+
+    subgraph Infrastructure["Infrastructure"]
+        Provider["Provider adapters"]
+        HTTP["Unified HTTP stack"]
+        Storage["Bronze / Delta / Gold"]
+        State["Lock / checkpoint"]
+        Obs["Metrics / tracing"]
+    end
+
+    subgraph Domain["Domain"]
+        Ports["Port facades"]
+    end
+
+    Provider --> HTTP
+    Build --> State
+    Build --> Obs
+    StorageFactory --> Storage
+    Provider -.-> Ports
+    Storage -.-> Ports
+    State -.-> Ports
+    Obs -.-> Ports
+
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px

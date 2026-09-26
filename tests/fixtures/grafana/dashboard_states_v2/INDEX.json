@@ -1,0 +1,36 @@
+{
+  "cases": {
+    "backend_error": {
+      "classification": "ERROR",
+      "http_status": 503,
+      "path": "tests/fixtures/grafana/dashboard_states_v2/backend_error.json"
+    },
+    "crit": {
+      "classification": "CRIT",
+      "http_status": 200,
+      "path": "tests/fixtures/grafana/dashboard_states_v2/crit.json"
+    },
+    "ok": {
+      "classification": "OK",
+      "http_status": 200,
+      "path": "tests/fixtures/grafana/dashboard_states_v2/ok.json"
+    },
+    "telemetry_absent": {
+      "classification": "TELEMETRY_ABSENT",
+      "http_status": 200,
+      "path": "tests/fixtures/grafana/dashboard_states_v2/telemetry_absent.json"
+    },
+    "valid_empty": {
+      "classification": "VALID_EMPTY",
+      "http_status": 200,
+      "path": "tests/fixtures/grafana/dashboard_states_v2/valid_empty.json"
+    },
+    "warn": {
+      "classification": "WARN",
+      "http_status": 200,
+      "path": "tests/fixtures/grafana/dashboard_states_v2/warn.json"
+    }
+  },
+  "contract": "dashboard_state_fixture_v2",
+  "description": "Execution-bound dashboard state fixtures (#8984)."
+}

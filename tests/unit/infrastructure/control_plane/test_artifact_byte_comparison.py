@@ -1,0 +1,125 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# pyright: reportUndefinedVariable=false
+# pyright: reportPossiblyUnboundVariable=false
+# pyright: reportTypedDictNotRequiredAccess=false
+# pyright: reportOptionalSubscript=false
+# pyright: reportOptionalOperand=false
+# pyright: reportOptionalCall=false
+# pyright: reportOptionalIterable=false
+# pyright: reportIncompatibleMethodOverride=false
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportReturnType=false
+# pyright: reportInvalidCast=false
+# pyright: reportAssignmentType=false
+# pyright: reportImplicitAbstractClass=false
+# pyright: reportFunctionMemberAccess=false
+# pyright: reportConstantRedefinition=false
+# pyright: reportInvalidTypeForm=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+"""Tests for file-backed artifact comparison semantics."""
+
+from __future__ import annotations
+
+import pytest
+
+import json
+from pathlib import Path
+
+from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapter
+
+
+pytestmark = pytest.mark.unit
+
+
+def _ref(path: Path) -> dict[str, object]:
+    return {"artifact_path": str(path)}
+
+
+def _metadata_ref(path: Path) -> dict[str, object]:
+    return {"metadata_path": str(path)}
+
+
+def test_compare_artifacts_reports_raw_byte_equivalent_files(tmp_path: Path) -> None:
+    left = tmp_path / "left.parquet"
+    right = tmp_path / "right.parquet"
+    left.write_bytes(b"same")
+    right.write_bytes(b"same")
+
+    result = FileArtifactByteComparisonAdapter().compare_artifacts(
+        [_ref(left)],
+        [_ref(right)],
+    )
+
+    assert result["equivalent"] is True
+    assert result["semantic_equivalent"] is True
+    assert result["raw_byte_equivalent"] is True
+    assert result["mismatched_artifacts"] == []
+
+
+def test_compare_artifacts_reports_raw_byte_mismatch(tmp_path: Path) -> None:
+    left = tmp_path / "left.parquet"
+    right = tmp_path / "right.parquet"
+    left.write_bytes(b"left")
+    right.write_bytes(b"right")
+
+    result = FileArtifactByteComparisonAdapter().compare_artifacts(
+        [_ref(left)],
+        [_ref(right)],
+    )
+
+    assert result["equivalent"] is False
+    assert result["semantic_equivalent"] is False
+    assert result["raw_byte_equivalent"] is False
+    assert result["mismatched_artifacts"]
+    assert result["raw_byte_mismatched_artifacts"]
+
+
+def test_compare_artifacts_reports_missing_candidate(tmp_path: Path) -> None:
+    left = tmp_path / "left.parquet"
+    missing = tmp_path / "missing.parquet"
+    left.write_bytes(b"left")
+
+    result = FileArtifactByteComparisonAdapter().compare_artifacts(
+        [_ref(left)],
+        [_ref(missing)],
+    )
+
+    assert result["available"] is True
+    assert result["equivalent"] is False
+    assert result["missing_artifacts"]
+
+
+def test_compare_artifacts_treats_occurrence_only_metadata_as_semantic_match(
+    tmp_path: Path,
+) -> None:
+    left = tmp_path / "left.json"
+    right = tmp_path / "right.json"
+    left.write_text(
+        json.dumps({"run_id": "run-a", "manifest_id": "manifest-a", "rows": 10}),
+        encoding="utf-8",
+    )
+    right.write_text(
+        json.dumps({"run_id": "run-b", "manifest_id": "manifest-b", "rows": 10}),
+        encoding="utf-8",
+    )
+
+    result = FileArtifactByteComparisonAdapter().compare_artifacts(
+        [_metadata_ref(left)],
+        [_metadata_ref(right)],
+    )
+
+    assert result["equivalent"] is True
+    assert result["semantic_equivalent"] is True
+    assert result["raw_byte_equivalent"] is False
+    assert result["occurrence_only"] is True
+    assert result["occurrence_only_artifacts"]
+    assert result["mismatched_artifacts"] == []

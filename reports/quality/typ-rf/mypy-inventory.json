@@ -1,0 +1,276 @@
+{
+  "campaign": "TYP-RF",
+  "parent_issue": 9069,
+  "captured_at": "2026-08-19T17:50:58Z",
+  "origin_main_sha": "1c9e9682b307d34ed573b64bd4adda7fb3e67f9a",
+  "worktree_sha_at_capture": "bdafedeba103fde75dca52e93b82bda9d5d5e800",
+  "mypy_error_count": 36,
+  "mypy_file_count": 21,
+  "ruff_ruf022": "clean on current origin/main campaign surfaces",
+  "rf002_fact": {
+    "canonical": "bioetl.domain.value_objects.protein_class_hierarchy.ProteinClassHierarchy",
+    "broken": "bioetl.domain.chembl.protein_classification",
+    "disposition": "retarget import; do not invent stub"
+  },
+  "assignment": {
+    "RF-002": 1,
+    "RF-003": 11,
+    "RF-004": 9,
+    "RF-005": 15
+  },
+  "errors": [
+    {
+      "path": "src/bioetl/application/services/protein/_classification_resolution_support.py",
+      "line": 10,
+      "message": "Cannot find implementation or library stub for module named \"bioetl.domain.chembl.protein_classification\"",
+      "code": "import-not-found",
+      "rf": "RF-002"
+    },
+    {
+      "path": "src/bioetl/domain/run_reports/workflow_reasons.py",
+      "line": 20,
+      "message": "Redundant cast to \"Sequence[object]\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/domain/types/gold_contracts_rules.py",
+      "line": 204,
+      "message": "Redundant cast to \"int | float\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/domain/types/gold_contracts_rules.py",
+      "line": 205,
+      "message": "Redundant cast to \"int | float\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/application/services/run_reports/writer.py",
+      "line": 213,
+      "message": "Redundant cast to \"PipelineRunReport\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/domain/workflow/_delete_orphans_scope.py",
+      "line": 113,
+      "message": "Redundant cast to \"WorkflowConfig\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
+      "line": 345,
+      "message": "Redundant cast to \"_DeltaWriteRequest\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/domain/behavior/composite_validation_layer.py",
+      "line": 92,
+      "message": "Redundant cast to \"CompositeValidationReport\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_refs.py",
+      "line": 194,
+      "message": "Function is missing a type annotation for one or more parameters",
+      "code": "no-untyped-def",
+      "rf": "RF-004"
+    },
+    {
+      "path": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_refs.py",
+      "line": 211,
+      "message": "Function is missing a type annotation for one or more parameters",
+      "code": "no-untyped-def",
+      "rf": "RF-004"
+    },
+    {
+      "path": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_refs.py",
+      "line": 225,
+      "message": "Function is missing a type annotation for one or more parameters",
+      "code": "no-untyped-def",
+      "rf": "RF-004"
+    },
+    {
+      "path": "src/bioetl/domain/behavior/dq_rule_evaluator.py",
+      "line": 164,
+      "message": "Redundant cast to \"DQRuleOutcome\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "line": 342,
+      "message": "\"object\" has no attribute \"write_reconcile_debug_artifacts\"",
+      "code": "attr-defined",
+      "rf": "RF-004"
+    },
+    {
+      "path": "src/bioetl/application/services/workflow/workflow_runner_reports.py",
+      "line": 148,
+      "message": "Redundant cast to \"WorkflowRunExecutionResult\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/application/services/workflow/workflow_runner_reports.py",
+      "line": 164,
+      "message": "Redundant cast to \"WorkflowRunExecutionResult\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/application/core/lifecycle/checkpoint_identity_overrides.py",
+      "line": 183,
+      "message": "Redundant cast to \"CheckpointMetadata\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/interfaces/http/_health_server_checkpoint_freshness.py",
+      "line": 82,
+      "message": "\"object\" has no attribute \"resolved_via\"",
+      "code": "attr-defined",
+      "rf": "RF-004"
+    },
+    {
+      "path": "src/bioetl/interfaces/http/_health_server_checkpoint_freshness.py",
+      "line": 98,
+      "message": "\"object\" has no attribute \"resolved_via\"",
+      "code": "attr-defined",
+      "rf": "RF-004"
+    },
+    {
+      "path": "src/bioetl/application/services/execution/_pipeline_runner_support.py",
+      "line": 181,
+      "message": "Redundant cast to \"RunResult\"",
+      "code": "redundant-cast",
+      "rf": "RF-003"
+    },
+    {
+      "path": "src/bioetl/application/services/execution/_pipeline_runner_support.py",
+      "line": 189,
+      "message": "Redundant cast to \"RunResult\"",
+      "code": "redundant-cast",
+      "rf": "RF-003"
+    },
+    {
+      "path": "src/bioetl/application/services/execution/_pipeline_runner_support.py",
+      "line": 251,
+      "message": "Function is missing a type annotation for one or more parameters",
+      "code": "no-untyped-def",
+      "rf": "RF-003"
+    },
+    {
+      "path": "src/bioetl/application/services/execution/_pipeline_runner_support.py",
+      "line": 276,
+      "message": "Function is missing a type annotation",
+      "code": "no-untyped-def",
+      "rf": "RF-003"
+    },
+    {
+      "path": "src/bioetl/application/services/execution/pipeline_runner_service.py",
+      "line": 220,
+      "message": "Function is missing a type annotation for one or more parameters",
+      "code": "no-untyped-def",
+      "rf": "RF-003"
+    },
+    {
+      "path": "src/bioetl/application/services/execution/pipeline_runner_service.py",
+      "line": 232,
+      "message": "Call to untyped function \"create_execution_runner_audited\" in typed context",
+      "code": "no-untyped-call",
+      "rf": "RF-003"
+    },
+    {
+      "path": "src/bioetl/application/services/execution/pipeline_runner_service.py",
+      "line": 233,
+      "message": "Argument 1 to \"create\" of \"RunnerFactoryPort\" has incompatible type \"object\"; expected \"PipelineRunContext\"",
+      "code": "arg-type",
+      "rf": "RF-003"
+    },
+    {
+      "path": "src/bioetl/application/services/execution/pipeline_runner_service.py",
+      "line": 241,
+      "message": "Argument \"run_logger\" to \"_execute_pipeline\" of \"PipelineRunnerService\" has incompatible type \"object\"; expected \"LoggerPort\"",
+      "code": "arg-type",
+      "rf": "RF-003"
+    },
+    {
+      "path": "src/bioetl/application/services/execution/pipeline_runner_service.py",
+      "line": 243,
+      "message": "Argument \"run_id\" to \"_execute_pipeline\" of \"PipelineRunnerService\" has incompatible type \"UUID\"; expected \"RunID\"",
+      "code": "arg-type",
+      "rf": "RF-003"
+    },
+    {
+      "path": "src/bioetl/application/services/execution/pipeline_runner_service.py",
+      "line": 245,
+      "message": "Argument \"started_at\" to \"_execute_pipeline\" of \"PipelineRunnerService\" has incompatible type \"object\"; expected \"datetime\"",
+      "code": "arg-type",
+      "rf": "RF-003"
+    },
+    {
+      "path": "src/bioetl/application/services/execution/pipeline_runner_service.py",
+      "line": 246,
+      "message": "Argument \"started_monotonic\" to \"_execute_pipeline\" of \"PipelineRunnerService\" has incompatible type \"object\"; expected \"float\"",
+      "code": "arg-type",
+      "rf": "RF-003"
+    },
+    {
+      "path": "src/bioetl/composition/observability.py",
+      "line": 166,
+      "message": "Redundant cast to \"RunnerInputs\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/application/core/base_transformer/base.py",
+      "line": 40,
+      "message": "Redundant cast to \"TransformerDependencyContext\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/application/services/control_plane/replay/historical_corpus_service.py",
+      "line": 93,
+      "message": "\"HistoricalReplayCorpusService\" has no attribute \"_skipped_bulk_record\"",
+      "code": "attr-defined",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/application/services/workflow/workflow_runner_service.py",
+      "line": 133,
+      "message": "Redundant cast to \"WorkflowRunExecutionResult\"",
+      "code": "redundant-cast",
+      "rf": "RF-005"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py",
+      "line": 22,
+      "message": "Module \"bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support\" has no attribute \"log_reconciliation_started\"; maybe \"log_reconciliation\"?",
+      "code": "attr-defined",
+      "rf": "RF-004"
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/_runner_assembly_support.py",
+      "line": 104,
+      "message": "Argument \"metrics\" to \"ProviderHealthMonitor\" has incompatible type \"object\"; expected \"MetricsPort\"",
+      "code": "arg-type",
+      "rf": "RF-004"
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/_runner_assembly_support.py",
+      "line": 120,
+      "message": "Argument \"health_monitor\" to \"HealthAggregator\" has incompatible type \"object\"; expected \"HealthMonitorPort | None\"",
+      "code": "arg-type",
+      "rf": "RF-004"
+    }
+  ],
+  "after_typing_mypy": "0 errors / 2440 files"
+}

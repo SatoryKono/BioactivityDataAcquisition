@@ -1,0 +1,355 @@
+# src/bioetl/application/pipelines/semanticscholar/transformer.py
+"""Semantic Scholar Publication Transformer.
+
+Transforms Bronze records to Silver format (Publication entity).
+Handles both DOI-resolved and title-fallback records.
+"""
+
+from __future__ import annotations
+
+__all__ = ["SemanticScholarPublicationTransformer"]
+
+
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, override
+
+from bioetl.application.pipelines.common import BasePublicationTransformer
+from bioetl.application.pipelines.common.publication_transformer_context import (
+    install_runtime_transformer_init,
+)
+from bioetl.application.pipelines.semanticscholar.extractors import (
+    extract_affiliations,
+    extract_author_h_indices,
+    extract_author_orcids,
+    extract_author_s2_ids,
+    extract_authors,
+    extract_citation_contexts,
+    extract_external_ids,
+    extract_fields_of_study,
+    extract_journal_info,
+    extract_open_access_info,
+    extract_raw_citation_contexts,
+    extract_tldr,
+)
+from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
+from bioetl.domain.types import GoldRecord
+from bioetl.domain.value_objects import PublicationYear
+from bioetl.domain.value_objects.publications import DOI, PubMedId
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord
+
+
+def _publication_type_inputs(
+    publication_types: object,
+    *,
+    resolve_scalar: Callable[[object], str | None],
+) -> tuple[list[str] | None, str | None]:
+    raw_types_list: list[str] | None
+    if isinstance(publication_types, list):
+        items: list[object] = publication_types
+        raw_types_list = [
+            str(t).strip() for t in items if t is not None and str(t).strip()
+        ]
+    else:
+        raw_types_list = None
+    raw_type = None if raw_types_list else resolve_scalar(publication_types)
+    return raw_types_list, raw_type
+
+
+def _journal_and_citation_fields(host: Any, rec: GoldRecord) -> GoldRecord:
+    citation_contexts = extract_citation_contexts(rec.get("citations"))
+    raw_contexts = extract_raw_citation_contexts(rec.get("citations"))
+    journal_info = extract_journal_info(rec.get("journal"), rec.get("venue"))
+    oa_info = extract_open_access_info(
+        rec.get("isOpenAccess"), rec.get("openAccessPdf")
+    )
+    return {
+        "citation_contexts": host.serialize_json_list(citation_contexts)
+        if citation_contexts
+        else None,
+        "citation_contexts_raw_json": host.serialize_json(raw_contexts),
+        "citation_contexts_canonical_json": host.serialize_json_list(citation_contexts),
+        "journal": journal_info.get("journal"),
+        "issn": None,
+        "issn_list": None,
+        "volume": journal_info.get("volume"),
+        "issue": journal_info.get("issue"),
+        "page_range": journal_info.get("page_range"),
+        "page_first": journal_info.get("page_first"),
+        "page_last": journal_info.get("page_last"),
+        "publication_year": host.validate_value_object(
+            PublicationYear, rec.get("year"), as_string=False
+        ),
+        "publication_date": host._data_normalizer.normalize_partial_date(
+            rec.get("publicationDate")
+        ),
+        "citations_received": rec.get("citationCount"),
+        "citations_made": rec.get("referenceCount"),
+        "influential_citation_count": rec.get("influentialCitationCount"),
+        "is_oa": oa_info.get("is_oa"),
+        "open_access_url": oa_info.get("url"),
+        "oa_status": oa_info.get("oa_status"),
+    }
+
+
+def _subject_and_type_fields(
+    host: Any,  # Any: transformer mixin host
+    rec: GoldRecord,
+    *,
+    raw_type: str | None,
+    raw_types_list: list[str] | None,
+    publication_types: object,
+) -> GoldRecord:
+    fields_of_study = rec.get("fieldsOfStudy")
+    types_list = publication_types if isinstance(publication_types, list) else None
+    return {
+        "subject_fields": host.serialize_json_list(
+            extract_fields_of_study(fields_of_study)
+        ),
+        "subject_fields_raw_json": host.serialize_json_list(
+            fields_of_study if isinstance(fields_of_study, list) else None
+        ),
+        "subject_fields_canonical_json": host.serialize_json_list(
+            extract_fields_of_study(fields_of_study)
+        ),
+        **host._classify_publication_type(
+            "semanticscholar",
+            raw_type=raw_type,
+            raw_types_list=raw_types_list,
+        ),
+        "publication_types": host.serialize_json_list(types_list),
+        "publication_types_raw_json": host.serialize_json_list(types_list),
+        "publication_types_canonical_json": host.serialize_json_list(types_list),
+    }
+
+
+class SemanticScholarPublicationTransformer(BasePublicationTransformer):
+    """Transforms Semantic Scholar papers to Publication entity.
+
+    Mapping:
+    - paper_id: paperId (40-char hex S2 ID)
+    - doi: externalIds.DOI
+    - pmid: externalIds.PubMed
+    - arxiv_id: externalIds.ArXiv
+    - dblp_id: externalIds.DBLP
+    - title: title
+    - abstract: abstract (fallback to tldr.text if missing)
+    - tldr: tldr.text (AI-generated summary)
+    - authors: authors.name (extraction + optional PII hashing)
+    - author_s2_ids: authors.authorId (S2 author IDs for disambiguation)
+    - author_orcids: authors.externalIds.ORCID (persistent researcher IDs)
+    - author_h_indices: authors.hIndex (research impact metric)
+    - journal: journal.name / venue
+    - year: year
+    - publication_date: publicationDate
+    - citation_count: citationCount
+    - reference_count: referenceCount
+    - influential_citation_count: influentialCitationCount
+    - is_oa: isOpenAccess (normalized)
+    - oa_status: openAccessPdf.status (normalized to lowercase)
+    - open_access_url: openAccessPdf.url
+    - subject_fields: fieldsOfStudy
+    - publication_type: publicationTypes joined by "|"
+    - publication_types: publicationTypes
+    - citation_contexts: citations.contexts (citing sentences, when available)
+
+    Handles lookup metadata:
+    - _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    - _original_id: Original identifier used for lookup
+
+    Subclasses BasePublicationTransformer to provide:
+    - Unified transformation flow via Template Method
+    - Automatic primary ID validation and fallback logging
+    - Content hash computation (excluding metadata)
+    - Tracing and metrics observability (O1)
+    """
+
+    DEFAULT_PROVIDER = "semanticscholar"
+    DEFAULT_ENTITY_TYPE = "publication"
+
+    def _resolve_publication_type(
+        self,
+        publication_types: Any,  # Any: raw API value type varies
+    ) -> str:  # Any: raw API JSON list|None
+        """Resolve raw publication types list to a unified scalar string."""
+        if not isinstance(publication_types, list):
+            return "PUBLICATION"
+        cleaned = [
+            str(item).strip()
+            for item in publication_types
+            if item is not None and str(item).strip()
+        ]
+        return "|".join(cleaned) if cleaned else "PUBLICATION"
+
+    def _extract_validated_ids(
+        self, rec: GoldRecord
+    ) -> GoldRecord:  # Any: raw API JSON values
+        """Extract and validate external identifiers using Value Objects."""
+        external_ids = extract_external_ids(rec.get("externalIds"))
+        doi_vo = DOI.from_raw(external_ids.get("doi"))
+        pmid_vo = PubMedId.from_raw(external_ids.get("pmid"))
+        return {
+            "paper_id": rec.get("paperId"),
+            "doi": str(doi_vo) if doi_vo else None,
+            "pmid": str(pmid_vo) if pmid_vo else None,
+            "dblp_id": external_ids.get("dblp"),
+            "corpus_id": external_ids.get("corpus_id"),
+        }
+
+    def _extract_author_metadata(
+        self,
+        authors_list: Any,  # Any: raw API value type varies
+    ) -> GoldRecord:  # Any: raw API JSON
+        """Extract author identifiers, h-indices, and affiliations.
+
+        Uses unified normalization service for authors and affiliations.
+        """
+        normalizer = self._data_normalizer
+
+        # Extract and normalize author names using unified service
+        raw_authors = extract_authors(authors_list)
+        authors_json = normalizer.normalize_author_list(raw_authors)
+        author_keys = normalizer.normalize_author_keys(raw_authors)
+
+        # Extract author metadata (not PII)
+        author_s2_ids = extract_author_s2_ids(authors_list)
+        author_orcids = extract_author_orcids(authors_list)
+        author_h_indices = extract_author_h_indices(authors_list)
+
+        # Extract and normalize affiliations using unified service
+        affiliations = extract_affiliations(authors_list)
+        affiliations_json = (
+            normalizer.normalize_affiliations(affiliations) if affiliations else None
+        )
+
+        return {
+            "authors": authors_json,
+            "author_keys": author_keys,
+            "author_s2_ids": self.serialize_json_list(author_s2_ids)
+            if author_s2_ids
+            else None,
+            "author_orcids": self.serialize_json_list(author_orcids)
+            if any(author_orcids)
+            else None,
+            "author_h_indices": self.serialize_json_list(author_h_indices)
+            if any(h is not None for h in author_h_indices)
+            else None,
+            "author_h_indices_raw_json": self.serialize_json_list(
+                [author.get("hIndex") for author in (authors_list or [])]
+            ),
+            "author_h_indices_canonical_json": self.serialize_json_list(
+                author_h_indices
+            ),
+            "affiliation_list": affiliations_json,
+        }
+
+    @override
+    def _extract_business_data(self, record: BronzeRecord) -> GoldRecord:
+        """Extract and normalize fields from Semantic Scholar record.
+
+        Args:
+            record: Raw Bronze record from Semantic Scholar API.
+
+        Returns:
+            Dictionary of extracted and normalized fields.
+
+        """
+        rec = record
+        tldr = self._data_normalizer.normalize_string(extract_tldr(rec.get("tldr")))
+        abstract = self._data_normalizer.normalize_string(rec.get("abstract"))
+        if abstract is None:
+            abstract = tldr
+        publication_types = rec.get("publicationTypes")
+        raw_types_list, raw_type = _publication_type_inputs(
+            publication_types,
+            resolve_scalar=self._resolve_publication_type,
+        )
+        return {
+            **self._extract_validated_ids(rec),
+            "pmc_id": None,
+            "title": rec.get("title"),
+            "abstract": abstract,
+            "tldr": tldr,
+            **self._extract_author_metadata(rec.get("authors")),
+            **_journal_and_citation_fields(self, rec),
+            **_subject_and_type_fields(
+                self,
+                rec,
+                raw_type=raw_type,
+                raw_types_list=raw_types_list,
+                publication_types=publication_types,
+            ),
+            "_source": "semanticscholar",
+            "_lookup_method": rec.get("_lookup_method", "unknown"),
+            "_original_id": rec.get("_original_id"),
+            "_dq_warn": False,
+            "_dq_error": False,
+        }
+
+    @override
+    def transform_for_gold(
+        self, _context: PipelineContext, silver_record: GoldRecord
+    ) -> GoldRecord:
+        """Preserve exact corpus identifiers in the Gold string contract."""
+        result = super().transform_for_gold(_context, silver_record)
+        corpus_id = result.get("corpus_id")
+        if corpus_id is not None:
+            result["corpus_id"] = str(corpus_id)
+        return result
+
+    @override
+    def _get_primary_id_field(self) -> str:
+        """Return the primary ID field name for Semantic Scholar publications.
+
+        Returns:
+            'paper_id' - the Semantic Scholar-specific identifier field.
+
+        """
+        return "paper_id"
+
+    @override
+    def _get_entity_class(self) -> type[SemanticScholarPublicationEntity]:
+        """Return the domain entity class for Semantic Scholar publications.
+
+        Returns:
+            SemanticScholarPublicationEntity class.
+
+        """
+        return SemanticScholarPublicationEntity
+
+    @override
+    def entity_to_silver_record(
+        self,
+        entity: Any,  # Any: generic domain entity; type varies by pipeline
+    ) -> GoldRecord:
+        """Convert Domain Entity to SilverRecord, preserving base schema fields.
+
+        Note: pmc_id is kept with None value to satisfy PublicationBaseSchema
+        inheritance requirement. arxiv_id is excluded as it's not in the base schema.
+
+        Args:
+            entity: Domain entity (dataclass).
+
+        Returns:
+            SilverRecord dictionary with all base schema fields.
+
+        """
+        silver_record = super().entity_to_silver_record(entity)
+
+        # Note: Do NOT remove pmc_id - it inherits from PublicationBaseSchema
+        # and must exist in DataFrame even if set to None (Pandera requires
+        # columns to exist, not just be nullable)
+
+        # Remove arxiv_id only (not part of base schema)
+        silver_record.pop("arxiv_id", None)
+
+        return silver_record
+
+
+install_runtime_transformer_init(
+    SemanticScholarPublicationTransformer,
+    SemanticScholarPublicationTransformer.DEFAULT_PROVIDER,
+    SemanticScholarPublicationTransformer.DEFAULT_ENTITY_TYPE,
+)

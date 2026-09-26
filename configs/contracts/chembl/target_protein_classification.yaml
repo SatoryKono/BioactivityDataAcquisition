@@ -1,0 +1,50 @@
+# ChEMBL Target Protein Classification Gold Relation Data Quality Contract
+# Aligned with configs/base/contract_registry.yaml identity tuple.
+
+contract_ref: "chembl.target_protein_classification"
+contract_version: "2.2.0"
+dq_policy_ref: "chembl.dq.v1"
+rule_bundle_version: "dq-rules.v1.0"
+default_disposition_policy: "quarantine"
+strictness_mode: "strict"
+soft_fail_threshold: 0.01
+hard_fail_threshold: 0.05
+strict_dq_validation: true
+invalid_record_policy: "quarantine"
+disposition_overrides:
+  TT-001: "fail"
+  TT-002: "fail"
+  TT-003: "fail"
+  TT-004: "fail"
+  TT-005: "fail"
+  TT-006: "warn"
+  TT-007: "warn"
+  TT-008: "fail"
+  TT-009: "warn"
+  TT-010: "warn"
+semantic_rules:
+  - rule_id: "TT-001"
+    description: "target_protein_class_type=multifunctional requires top_level_count >= 2."
+  - rule_id: "TT-002"
+    description: "top_level_count=1 requires primary_top_level."
+  - rule_id: "TT-003"
+    description: "top_level_count=0 requires target_protein_class_type=unknown."
+  - rule_id: "TT-004"
+    description: "canonical_top_levels must be sorted and unique."
+  - rule_id: "TT-005"
+    description: "unclassified_protein must not appear in counted_top_levels."
+  - rule_id: "TT-006"
+    description: "Mapping miss-rate above threshold requires review."
+  - rule_id: "TT-007"
+    description: "PROTEIN COMPLEX plus multifunctional should expose multifunctional_origin."
+  - rule_id: "TT-008"
+    description: "Empty raw classification list must publish target_protein_class_type=unknown."
+  - rule_id: "TT-009"
+    description: "Duplicate class_path_hash/class leaf evidence within a target is deduped or warned."
+  - rule_id: "TT-010"
+    description: "major_family contradictions with canonical L1 logic require review."
+report:
+  enabled: true
+  format: "json"
+  include_sample_failures: true
+  sample_size: 1000

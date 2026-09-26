@@ -1,0 +1,157 @@
+{
+  "issue": 7946,
+  "date_utc": "2026-08-06T13:44Z",
+  "method": "orphan cr-scope-* worktree + coderabbit review --base-commit HEAD^ --agent --light",
+  "cli_version": "0.7.2",
+  "leaves": [
+    {
+      "leaf": "S01-domain-exceptions",
+      "rate_limit": false,
+      "bytes": 16345,
+      "severity": {
+        "major": 13,
+        "minor": 4,
+        "trivial": 1
+      },
+      "finding_files": [
+        "src/bioetl/domain/exceptions/__init__.py",
+        "src/bioetl/domain/exceptions/_redaction.py",
+        "src/bioetl/domain/exceptions/base.py",
+        "src/bioetl/domain/exceptions/base_exceptions.py",
+        "src/bioetl/domain/exceptions/infrastructure/_storage.py",
+        "src/bioetl/domain/exceptions/network/service.py",
+        "src/bioetl/domain/exceptions/network_rate_limit_helpers.py",
+        "src/bioetl/domain/exceptions/storage/__init__.py",
+        "src/bioetl/domain/exceptions/storage/_delta.py",
+        "src/bioetl/domain/exceptions/storage/_storage.py",
+        "src/bioetl/domain/exceptions/validation.py"
+      ],
+      "critical": [],
+      "status": "ok"
+    },
+    {
+      "leaf": "S01-domain-entities",
+      "rate_limit": false,
+      "bytes": 29296,
+      "severity": {
+        "major": 22,
+        "minor": 6,
+        "trivial": 8
+      },
+      "finding_files": [
+        "src/bioetl/domain/entities/__init__.py",
+        "src/bioetl/domain/entities/_chembl_activity_assay_models.py",
+        "src/bioetl/domain/entities/_chembl_activity_target_models.py",
+        "src/bioetl/domain/entities/_chembl_additional_models.py",
+        "src/bioetl/domain/entities/_chembl_molecule_target_models.py",
+        "src/bioetl/domain/entities/_chembl_reference_models.py",
+        "src/bioetl/domain/entities/base.py",
+        "src/bioetl/domain/entities/bioactivity/__init__.py",
+        "src/bioetl/domain/entities/bioactivity/_converters.py",
+        "src/bioetl/domain/entities/bioactivity/_entity.py",
+        "src/bioetl/domain/entities/bioactivity/_extractors.py",
+        "src/bioetl/domain/entities/chembl.py",
+        "src/bioetl/domain/entities/chembl_activity.py",
+        "src/bioetl/domain/entities/chembl_compound_record.py",
+        "src/bioetl/domain/entities/chembl_structures_foundation.py",
+        "src/bioetl/domain/entities/chembl_tissue.py",
+        "src/bioetl/domain/entities/crossref.py",
+        "src/bioetl/domain/entities/openalex.py",
+        "src/bioetl/domain/entities/pubchem.py",
+        "src/bioetl/domain/entities/publication_base.py",
+        "src/bioetl/domain/entities/pubmed.py",
+        "src/bioetl/domain/entities/semanticscholar.py",
+        "src/bioetl/domain/entities/uniprot.py"
+      ],
+      "critical": [],
+      "status": "ok"
+    },
+    {
+      "leaf": "S01-domain-value_objects",
+      "rate_limit": false,
+      "bytes": 42829,
+      "severity": {
+        "major": 19,
+        "minor": 5,
+        "trivial": 24,
+        "critical": 1
+      },
+      "finding_files": [
+        "src/bioetl/domain/value_objects/_chemical_identifiers.py",
+        "src/bioetl/domain/value_objects/_molecular_weight.py",
+        "src/bioetl/domain/value_objects/_publication_field_group_config.py",
+        "src/bioetl/domain/value_objects/_publication_year.py",
+        "src/bioetl/domain/value_objects/academic_ids.py",
+        "src/bioetl/domain/value_objects/activity.py",
+        "src/bioetl/domain/value_objects/activity_concentration.py",
+        "src/bioetl/domain/value_objects/activity_confidence.py",
+        "src/bioetl/domain/value_objects/base.py",
+        "src/bioetl/domain/value_objects/bronze_result.py",
+        "src/bioetl/domain/value_objects/column_order.py",
+        "src/bioetl/domain/value_objects/column_qualifier.py",
+        "src/bioetl/domain/value_objects/compound_ids.py",
+        "src/bioetl/domain/value_objects/dq_metrics.py",
+        "src/bioetl/domain/value_objects/dq_metrics_calculations.py",
+        "src/bioetl/domain/value_objects/dq_report_builder.py",
+        "src/bioetl/domain/value_objects/dq_report_results_core.py",
+        "src/bioetl/domain/value_objects/dq_report_results_quality.py",
+        "src/bioetl/domain/value_objects/dq_result.py",
+        "src/bioetl/domain/value_objects/identifiers.py",
+        "src/bioetl/domain/value_objects/inchi.py",
+        "src/bioetl/domain/value_objects/molecular_descriptors.py",
+        "src/bioetl/domain/value_objects/pchembl_value.py",
+        "src/bioetl/domain/value_objects/protein_class_hierarchy.py",
+        "src/bioetl/domain/value_objects/publication_field_group_types.py",
+        "src/bioetl/domain/value_objects/publications.py",
+        "src/bioetl/domain/value_objects/taxonomy_id.py"
+      ],
+      "critical": [
+        {
+          "file": "src/bioetl/domain/value_objects/bronze_result.py",
+          "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/value_objects/bronze_result.py around lines 106 - 115, Update the compression_ratio property in BronzeWriteResult t"
+        }
+      ],
+      "status": "ok"
+    },
+    {
+      "leaf": "S01-domain-schemas",
+      "rate_limit": true,
+      "bytes": 896,
+      "severity": {},
+      "finding_files": [],
+      "critical": [],
+      "status": "rate_limit"
+    },
+    {
+      "leaf": "S01-domain-control_plane",
+      "rate_limit": true,
+      "bytes": 901,
+      "severity": {},
+      "finding_files": [],
+      "critical": [],
+      "status": "rate_limit"
+    },
+    {
+      "leaf": "S04-app-services-quality",
+      "rate_limit": true,
+      "bytes": 900,
+      "severity": {},
+      "finding_files": [],
+      "critical": [],
+      "status": "rate_limit"
+    }
+  ],
+  "product_fix_from_retry": [
+    {
+      "severity": "critical",
+      "path": "src/bioetl/domain/value_objects/bronze_result.py",
+      "fix": "guard compression_ratio when compressed_size==0"
+    }
+  ],
+  "net_new_path_cluster_issues": 0,
+  "notes": [
+    "3/6 leaves recovered after rate-limit window",
+    "3/6 still rate_limit after multi-hour retries with backoff",
+    "Open C+M path-cluster inventory remains 0; issues #7946/#7698 already closed by campaign FINAL"
+  ]
+}

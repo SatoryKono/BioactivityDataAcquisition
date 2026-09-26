@@ -1,0 +1,7 @@
+src/bioetl/domain/models/__init__.py
+src/bioetl/domain/models/_metadata_bronze.py
+src/bioetl/domain/models/_metadata_common.py
+src/bioetl/domain/models/_metadata_gold.py
+src/bioetl/domain/models/_metadata_silver.py
+src/bioetl/domain/models/filter.py
+src/bioetl/domain/models/metadata.py

@@ -1,0 +1,169 @@
+---
+title: "How BioETL structures data: Bronze, Silver, Gold"
+description: "BioETL writes data through three layers — Bronze, Silver, and Gold — giving you reproducible outputs, Delta Lake time travel, and a full audit trail."
+---
+
+> ## Documentation Index
+>
+> Fetch the complete documentation index at: [https://biomoltech.mintlify.app/llms.txt](https://biomoltech.mintlify.app/llms.txt). Use this file to discover all available pages before exploring further.
+
+Every pipeline run in BioETL writes data through three discrete layers. This design — called the medallion architecture — separates raw API responses from normalized records and analysis-ready aggregates, giving you a clear data lineage from source to query. Because each layer persists independently, you can reprocess any stage without re-fetching from the API, inspect what arrived from an upstream source, and travel back to earlier versions of a table.
+
+## The three layers
+
+<CardGroup cols={3}>
+  <Card title="Bronze" icon="1">
+    Raw records exactly as received from the API, compressed with zstd. Nothing is changed or filtered.
+  </Card>
+
+  <Card title="Silver" icon="2">
+    Normalized, validated records written to Delta Lake. Schema is enforced and content-hashed for deduplication.
+  </Card>
+
+  <Card title="Gold" icon="3">
+    Flattened, analytics-ready records derived from Silver. Nested fields are expanded and excluded fields are removed.
+  </Card>
+</CardGroup>
+
+### Bronze: raw data exactly as received
+
+Bronze stores each batch of API responses as a JSONL file compressed with zstd. Nothing is transformed — if the API returns a malformed record, it lands in Bronze unchanged. This immutability is what makes exact replay possible: you can re-run Silver and Gold processing against the same Bronze files and get identical results.
+
+Each Bronze batch file includes a sidecar data quality report and optional metadata YAML:
+
+```text
+data/output/bronze/chembl/activity/2025-01-15/
+├── batch-2025-01-15-a1b2c3d4.jsonl.zst       # Compressed batch
+├── batch-2025-01-15-a1b2c3d4.jsonl           # Optional plain copy
+├── chembl-activity-metadata.yaml             # Record counts, timestamps
+└── batch-2025-01-15-chembl-activity-dq-report.json
+```
+
+Bronze files are retained on disk until you choose to delete them. Use standard file system tools to remove old Bronze batches, or configure your pipeline's vacuum settings to reclaim space automatically.
+
+### Silver: normalized and validated
+
+Silver is a [Delta Lake](https://delta.io) table. Records from Bronze pass through a multi-step **normalization** and **validation** pipeline before being written.
+
+#### Normalization
+
+Normalization transforms raw API responses into a consistent, schema-aligned shape:
+
+- **Field renaming** — provider-specific field names (e.g. `standard_value` in ChEMBL, `CanonicalSMILES` in PubChem) are mapped to a uniform schema shared across all pipelines.
+- **Type coercion** — string-encoded numbers are cast to the correct numeric types (`float64`, `int32`, etc.); date strings are parsed into `datetime` columns.
+- **Unit standardization** — numeric activity values are converted to canonical units where applicable (e.g. IC50 values reported in µM are stored in nM for cross-provider comparability).
+- **Null harmonization** — provider-specific sentinel values (`"None"`, `"-"`, empty strings) are replaced with proper nulls so downstream queries behave consistently.
+- **Nested field extraction** — selected nested or array-typed API fields are flattened into top-level columns to keep Silver queries straightforward.
+
+#### Validation
+
+Validation runs immediately after normalization using [Pandera](https://pandera.readthedocs.io/) and the field-level rules defined in your entity YAML:
+
+- **Schema checks** — every column is verified against its declared dtype. A type mismatch raises a validation failure for the affected record.
+- **Required-field checks** — fields marked `required: true` must not be null; missing values route the record to quarantine.
+- **Range checks** — numeric fields configured with `min` / `max` bounds are evaluated. Out-of-range values are flagged with a `DQ-RANGE` error code.
+- **Enum checks** — categorical fields configured with `allowed_values` reject any record containing an unlisted value.
+- **Pattern checks** — string fields with a `pattern` rule are matched against the supplied regex; non-matching values are quarantined.
+- **Deduplication** — each record is content-hashed (SHA-256 over the business key \+ payload). Duplicate hashes are skipped during the Delta Lake merge, making re-runs against the same Bronze data fully idempotent.
+
+Records that pass all checks are merged into the Silver table using upsert semantics (match on business primary keys, update if the payload hash changed). Records that fail any check are written to the quarantine table instead of corrupting clean data.
+
+You can read a Silver table directly with Polars:
+
+```python
+import polars as pl
+
+# Current version
+df = pl.read_delta("data/output/silver/chembl/activity")
+
+# An earlier version — Delta Lake keeps the full history
+df = pl.read_delta("data/output/silver/chembl/activity", version=5)
+```
+
+### Gold: flattened and analytics-ready
+
+Gold is built from Silver by flattening nested JSON structures, removing internal-only fields, and applying any provider-specific aggregations. Gold tables are optimized for direct queries — no JSON unpacking required.
+
+<Note>
+  Gold is written as a Delta Lake table with the same time-travel guarantees as Silver. You can query any historical version of a Gold table the same way you would Silver.
+</Note>
+
+## Directory structure
+
+After running a pipeline you will find the following layout under `data/output/`:
+
+```text
+data/output/
+├── bronze/{provider}/{entity}/{date}/
+│   └── batch-*.jsonl.zst
+├── silver/{provider}/{entity}/           # Delta Lake table
+│   ├── _delta_log/
+│   └── part-00000-*.parquet
+├── gold/{provider}/{entity}/             # Delta Lake table (flattened)
+│   ├── _delta_log/
+│   └── part-00000-*.parquet
+├── checkpoints/                          # Pipeline resume state
+├── quarantine/                           # Records that failed validation
+│   └── common.quarantine/
+│       ├── _delta_log/
+│       └── part-00000-*.parquet
+└── control/run_manifest/                 # Immutable run records
+```
+
+The `{provider}` and `{entity}` segments match the pipeline name. For example, the `chembl_activity` pipeline writes to `bronze/chembl/activity/`, `silver/chembl/activity/`, and `gold/chembl/activity/`.
+
+## How data flows
+
+```text
+External API
+     │
+     ▼
+Bronze (JSONL + zstd)
+  raw records, unmodified, append-only
+     │
+     ▼ field renaming, type coercion, null harmonization
+     ▼ schema validation, range/enum/pattern checks, deduplication
+Silver (Delta Lake)
+  normalized, content-hashed, time-travel enabled
+     │
+     ▼ flatten, aggregate, exclude internal fields
+Gold (Delta Lake)
+  analytics-ready, no nested JSON
+```
+
+Records that fail DQ checks at the Silver stage are written to the quarantine table instead of being silently dropped. You can inspect, replay, or purge quarantined records at any time with the `bioetl quarantine` commands.
+
+## What Delta Lake gives you
+
+BioETL uses [delta-rs](https://github.com/delta-io/delta-rs) to write Silver and Gold layers. This means every write is atomic, schema changes are detected and rejected unless explicitly allowed, and every version of a table is accessible by number.
+
+<AccordionGroup>
+  <Accordion title="ACID transactions">
+    Each batch write either fully commits or is rolled back. You will never read a partially written table, even if a pipeline run is interrupted mid-batch.
+  </Accordion>
+
+  <Accordion title="Time travel">
+    Delta Lake retains the full transaction log. You can query any past version of a Silver or Gold table by passing the `version` parameter to `pl.read_delta()`. The transaction log is retained for 7 days by default (configurable via `BIOETL_DELTA_VACUUM_RETENTION`).
+  </Accordion>
+
+  <Accordion title="Schema enforcement">
+    Incoming records are validated against the declared schema before each write. If new fields appear in the API response, BioETL detects the drift and logs a warning rather than silently altering the table schema.
+  </Accordion>
+
+  <Accordion title="Audit trail">
+    Every write is recorded in the Delta log with a timestamp, operation type, and record count. Combined with the run manifest stored in `data/output/control/run_manifest/`, you have a complete, immutable history of every pipeline execution.
+  </Accordion>
+</AccordionGroup>
+
+## Why this matters for your workflow
+
+Because Bronze is immutable and Silver/Gold are derived, you can:
+
+- **Reproduce any result** — rerun Silver and Gold processing against cached Bronze files to get byte-identical outputs.
+- **Recover from schema bugs** — fix a transformation rule and rebuild Silver and Gold from Bronze without re-fetching from the API.
+- **Audit any record** — trace a Gold row back through Silver to the original Bronze batch that contained it, with a `manifest_id` linking the record to the exact pipeline run.
+- **Compare runs** — use `bioetl run-manifest diff` to see exactly how two runs differed in configuration, record counts, or DQ outcomes.
+
+<Tip>
+  Use `bioetl run --run-type rebuild` to wipe and rebuild Silver and Gold from existing Bronze files. This is faster than a full re-fetch and guarantees the same source data.
+</Tip>

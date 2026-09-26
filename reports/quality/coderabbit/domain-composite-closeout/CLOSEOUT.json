@@ -1,0 +1,61 @@
+{
+  "campaign": "CR-FULL-20260806-full",
+  "leaf": "S01-domain-composite-trivial",
+  "branch": "main",
+  "closed_at": "2026-08-07T08:52:53.651646+00:00",
+  "issue_range": "#8238,#8239,#8241,#8242,#8248,#8249,#8251,#8253",
+  "counts": {
+    "total": 8,
+    "fixed": 7,
+    "partial_reject": 1
+  },
+  "fixed": [
+    8238,
+    8239,
+    8241,
+    8242,
+    8248,
+    8249,
+    8251,
+    8253
+  ],
+  "dispositions": {
+    "8238": {
+      "status": "fixed",
+      "note": "skipped factory keeps error_message=None"
+    },
+    "8239": {
+      "status": "fixed",
+      "note": "StrEnum for AggregationFunction/EnricherCardinality; ADR-026 covers contract (no extra version bump)"
+    },
+    "8241": {
+      "status": "fixed",
+      "note": "display_name non-empty validation"
+    },
+    "8242": {
+      "status": "fixed",
+      "note": "normalize fields before validation"
+    },
+    "8248": {
+      "status": "fixed",
+      "note": "re.compile pattern at construction"
+    },
+    "8249": {
+      "status": "fixed",
+      "note": "precomputed group rank map"
+    },
+    "8251": {
+      "status": "fixed",
+      "note": "tuple-of-dicts conversion for merge/aggregation"
+    },
+    "8253": {
+      "status": "fixed",
+      "note": "cached enum transition sets"
+    }
+  },
+  "tests": [
+    "tests/unit/domain/composite/test_domain_composite_cr_residuals_8238_8253.py",
+    "tests/unit/domain/composite (full suite green)"
+  ],
+  "tech_debt_budgets": "unchanged"
+}

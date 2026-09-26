@@ -1,0 +1,1188 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Run Explorer: latest 10 launches across all pipelines by start time, from reports and the control-plane catalog. Defaults Workflow/Pipeline/Run Type=All, Run ID=-. Details use exact Ops HTTP evidence; run_id never a Prometheus label.",
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "refresh": "60s",
+  "schemaVersion": 39,
+  "tags": [
+    "bioetl",
+    "run-explorer",
+    "dashboard-2.0"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_workflow_universe, workflow)",
+        "description": "Optional workflow evidence context and workflow-dashboard handoff selector. Overview remains pipeline-summary-first: workflow does not yet drive exact intersection filtering for the current-status PromQL surfaces.",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Workflow",
+        "multi": false,
+        "name": "workflow",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_universe, workflow)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "BioETL Ops HTTP",
+        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Pipeline",
+        "multi": false,
+        "name": "pipeline",
+        "options": [],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false,
+        "description": "Browse scope from the local control-plane catalog. Default All includes every pipeline. Explicit URL selections take precedence. Select a table row to inspect its exact pipeline and Run ID."
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "BioETL Ops HTTP",
+        "definition": "/ops/control-plane/filter-options?dimension=run_type&response_shape=options&workflow=${workflow}&pipeline=${pipeline}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Run Type",
+        "multi": true,
+        "name": "run_type",
+        "options": [],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=run_type&response_shape=options&workflow=${workflow}&pipeline=${pipeline}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false,
+        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence. Select a table row to inspect its exact pipeline and Run ID."
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "-",
+          "value": "-"
+        },
+        "datasource": "BioETL Ops HTTP",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}",
+        "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Selected Run",
+        "multi": false,
+        "name": "run_id",
+        "options": [
+          {
+            "selected": true,
+            "text": "-",
+            "value": "-"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "name": "lookup_run_id",
+        "label": "Find exact Run ID",
+        "type": "textbox",
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "options": [],
+        "query": "",
+        "hide": 0,
+        "skipUrlSync": false,
+        "description": "Exact UUID lookup within Workflow/Pipeline/Run Type, including launches older than the latest ten. Clear to browse recent launches."
+      },
+      {
+        "name": "provider_for_pipeline",
+        "label": "Provider for pipeline",
+        "type": "query",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "refresh": 1,
+        "sort": 1,
+        "regex": "",
+        "skipUrlSync": true,
+        "options": [],
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
+        "query": {
+          "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
+          "refId": "StandardVariableQuery"
+        }
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "0. Run Explorer",
+  "uid": "bioetl-run-explorer-v1",
+  "version": 2,
+  "style": "dark",
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "bioetlDisplayTitle": "Understand Run Scope",
+        "mode": "html",
+        "content": "<div style=\"padding:0px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;width:100%;max-width:100%;box-sizing:border-box;overflow:visible\"><strong>Last 10 launches · newest first · independent of the time range</strong><br>Select a status to view details. <a href=\"/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a></div>"
+      },
+      "description": "Browse the latest 10 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
+      "links": [
+        {
+          "title": "Run-manifest inspection runbook",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md",
+          "targetBlank": true,
+          "includeVars": false
+        }
+      ]
+    },
+    {
+      "id": 3010,
+      "type": "table",
+      "title": "Inspect Recent Runs (last 10)",
+      "description": "Last 10 launches, newest Started first, independent of the time range. Workflow and Pipeline open passports. Run ID opens the persisted Report; inspect its full UUID in the cell. Overview is processing status, not replay readiness. Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. QUERY ERROR is a source failure; VALID EMPTY means no matching launches. Running is a recorded state, not proof of current liveness. Missing reports have no link.",
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "datasource": "BioETL Ops HTTP",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "inspect": true,
+            "minWidth": 50,
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            },
+            "wrapText": true
+          },
+          "noValue": "N/A",
+          "links": [],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#E5E7EB"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Workflow"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 135
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Workflow passport",
+                    "url": "${__data.fields.workflow_passport_url:raw}",
+                    "includeVars": false,
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#93C5FD"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "—": {
+                        "text": "N/A",
+                        "color": "#9CA3AF"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Pipeline passport",
+                    "url": "${__data.fields.pipeline_passport_url:raw}",
+                    "includeVars": false,
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#93C5FD"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Provider"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 85
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Provider Health",
+                    "url": "/d/bioetl-provider-health-v2/4-provider-health?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}&var-provider=${__data.fields.Provider:percentencode}",
+                    "includeVars": false,
+                    "targetBlank": false
+                  }
+                ]
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#93C5FD"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Run ID"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Report · ${__data.fields.run_id}",
+                    "url": "${__data.fields.report_url:raw}",
+                    "includeVars": false,
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#93C5FD"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Started"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              },
+              {
+                "id": "unit",
+                "value": "time:YY-MM-DD:HH:mm"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Overview"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Run Overview",
+                    "url": "/d/bioetl-overview-v2/2-overview?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}",
+                    "includeVars": false,
+                    "targetBlank": false
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "OK": {
+                        "text": "OK",
+                        "color": "#14532D"
+                      },
+                      "WARN": {
+                        "text": "WARN",
+                        "color": "#713F12"
+                      },
+                      "ERROR": {
+                        "text": "ERROR",
+                        "color": "#7F1D1D"
+                      },
+                      "INCOMPLETE": {
+                        "text": "INCOMPLETE",
+                        "color": "#7C2D12"
+                      },
+                      "IN PROGRESS": {
+                        "text": "IN PROGRESS",
+                        "color": "#1E3A8A"
+                      },
+                      "N/A": {
+                        "text": "N/A",
+                        "color": "#374151"
+                      },
+                      "QUERY ERROR": {
+                        "text": "QUERY ERROR",
+                        "color": "#7F1D1D"
+                      },
+                      "success": {
+                        "text": "success",
+                        "color": "#14532D"
+                      },
+                      "failed": {
+                        "text": "failed",
+                        "color": "#7F1D1D"
+                      },
+                      "fail": {
+                        "text": "fail",
+                        "color": "#7F1D1D"
+                      },
+                      "partial": {
+                        "text": "partial",
+                        "color": "#713F12"
+                      },
+                      "running": {
+                        "text": "running",
+                        "color": "#1E3A8A"
+                      },
+                      "unfinished": {
+                        "text": "unfinished",
+                        "color": "#7C2D12"
+                      },
+                      "shutdown": {
+                        "text": "shutdown",
+                        "color": "#713F12"
+                      },
+                      "dry_run": {
+                        "text": "dry_run",
+                        "color": "#4C1D95"
+                      },
+                      "unknown": {
+                        "text": "unknown",
+                        "color": "#374151"
+                      },
+                      "TREE_MISSING": {
+                        "text": "TREE_MISSING",
+                        "color": "#7F1D1D"
+                      },
+                      "LAYOUT_UNHEALTHY": {
+                        "text": "LAYOUT_UNHEALTHY",
+                        "color": "#7F1D1D"
+                      },
+                      "IDENTITY_UNHEALTHY": {
+                        "text": "IDENTITY_UNHEALTHY",
+                        "color": "#7F1D1D"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Saved Evidence"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 125
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Saved Evidence",
+                    "url": "/d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}",
+                    "includeVars": false,
+                    "targetBlank": false
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "OK": {
+                        "text": "OK",
+                        "color": "#14532D"
+                      },
+                      "WARN": {
+                        "text": "WARN",
+                        "color": "#713F12"
+                      },
+                      "ERROR": {
+                        "text": "ERROR",
+                        "color": "#7F1D1D"
+                      },
+                      "INCOMPLETE": {
+                        "text": "INCOMPLETE",
+                        "color": "#7C2D12"
+                      },
+                      "IN PROGRESS": {
+                        "text": "IN PROGRESS",
+                        "color": "#1E3A8A"
+                      },
+                      "N/A": {
+                        "text": "N/A",
+                        "color": "#374151"
+                      },
+                      "QUERY ERROR": {
+                        "text": "QUERY ERROR",
+                        "color": "#7F1D1D"
+                      },
+                      "success": {
+                        "text": "success",
+                        "color": "#14532D"
+                      },
+                      "failed": {
+                        "text": "failed",
+                        "color": "#7F1D1D"
+                      },
+                      "fail": {
+                        "text": "fail",
+                        "color": "#7F1D1D"
+                      },
+                      "partial": {
+                        "text": "partial",
+                        "color": "#713F12"
+                      },
+                      "running": {
+                        "text": "running",
+                        "color": "#1E3A8A"
+                      },
+                      "unfinished": {
+                        "text": "unfinished",
+                        "color": "#7C2D12"
+                      },
+                      "shutdown": {
+                        "text": "shutdown",
+                        "color": "#713F12"
+                      },
+                      "dry_run": {
+                        "text": "dry_run",
+                        "color": "#4C1D95"
+                      },
+                      "unknown": {
+                        "text": "unknown",
+                        "color": "#374151"
+                      },
+                      "TREE_MISSING": {
+                        "text": "TREE_MISSING",
+                        "color": "#7F1D1D"
+                      },
+                      "LAYOUT_UNHEALTHY": {
+                        "text": "LAYOUT_UNHEALTHY",
+                        "color": "#7F1D1D"
+                      },
+                      "IDENTITY_UNHEALTHY": {
+                        "text": "IDENTITY_UNHEALTHY",
+                        "color": "#7F1D1D"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Data Quality"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Data Quality",
+                    "url": "/d/bioetl-dq-v2/5-data-quality?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}",
+                    "includeVars": false,
+                    "targetBlank": false
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "OK": {
+                        "text": "OK",
+                        "color": "#14532D"
+                      },
+                      "WARN": {
+                        "text": "WARN",
+                        "color": "#713F12"
+                      },
+                      "ERROR": {
+                        "text": "ERROR",
+                        "color": "#7F1D1D"
+                      },
+                      "INCOMPLETE": {
+                        "text": "INCOMPLETE",
+                        "color": "#7C2D12"
+                      },
+                      "IN PROGRESS": {
+                        "text": "IN PROGRESS",
+                        "color": "#1E3A8A"
+                      },
+                      "N/A": {
+                        "text": "N/A",
+                        "color": "#374151"
+                      },
+                      "QUERY ERROR": {
+                        "text": "QUERY ERROR",
+                        "color": "#7F1D1D"
+                      },
+                      "success": {
+                        "text": "success",
+                        "color": "#14532D"
+                      },
+                      "failed": {
+                        "text": "failed",
+                        "color": "#7F1D1D"
+                      },
+                      "fail": {
+                        "text": "fail",
+                        "color": "#7F1D1D"
+                      },
+                      "partial": {
+                        "text": "partial",
+                        "color": "#713F12"
+                      },
+                      "running": {
+                        "text": "running",
+                        "color": "#1E3A8A"
+                      },
+                      "unfinished": {
+                        "text": "unfinished",
+                        "color": "#7C2D12"
+                      },
+                      "shutdown": {
+                        "text": "shutdown",
+                        "color": "#713F12"
+                      },
+                      "dry_run": {
+                        "text": "dry_run",
+                        "color": "#4C1D95"
+                      },
+                      "unknown": {
+                        "text": "unknown",
+                        "color": "#374151"
+                      },
+                      "TREE_MISSING": {
+                        "text": "TREE_MISSING",
+                        "color": "#7F1D1D"
+                      },
+                      "LAYOUT_UNHEALTHY": {
+                        "text": "LAYOUT_UNHEALTHY",
+                        "color": "#7F1D1D"
+                      },
+                      "IDENTITY_UNHEALTHY": {
+                        "text": "IDENTITY_UNHEALTHY",
+                        "color": "#7F1D1D"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Replay Readiness"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 140
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Replay Readiness",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}",
+                    "includeVars": false,
+                    "targetBlank": false
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "OK": {
+                        "text": "OK",
+                        "color": "#14532D"
+                      },
+                      "WARN": {
+                        "text": "WARN",
+                        "color": "#713F12"
+                      },
+                      "ERROR": {
+                        "text": "ERROR",
+                        "color": "#7F1D1D"
+                      },
+                      "INCOMPLETE": {
+                        "text": "INCOMPLETE",
+                        "color": "#7C2D12"
+                      },
+                      "IN PROGRESS": {
+                        "text": "IN PROGRESS",
+                        "color": "#1E3A8A"
+                      },
+                      "N/A": {
+                        "text": "N/A",
+                        "color": "#374151"
+                      },
+                      "QUERY ERROR": {
+                        "text": "QUERY ERROR",
+                        "color": "#7F1D1D"
+                      },
+                      "success": {
+                        "text": "success",
+                        "color": "#14532D"
+                      },
+                      "failed": {
+                        "text": "failed",
+                        "color": "#7F1D1D"
+                      },
+                      "fail": {
+                        "text": "fail",
+                        "color": "#7F1D1D"
+                      },
+                      "partial": {
+                        "text": "partial",
+                        "color": "#713F12"
+                      },
+                      "running": {
+                        "text": "running",
+                        "color": "#1E3A8A"
+                      },
+                      "unfinished": {
+                        "text": "unfinished",
+                        "color": "#7C2D12"
+                      },
+                      "shutdown": {
+                        "text": "shutdown",
+                        "color": "#713F12"
+                      },
+                      "dry_run": {
+                        "text": "dry_run",
+                        "color": "#4C1D95"
+                      },
+                      "unknown": {
+                        "text": "unknown",
+                        "color": "#374151"
+                      },
+                      "TREE_MISSING": {
+                        "text": "TREE_MISSING",
+                        "color": "#7F1D1D"
+                      },
+                      "LAYOUT_UNHEALTHY": {
+                        "text": "LAYOUT_UNHEALTHY",
+                        "color": "#7F1D1D"
+                      },
+                      "IDENTITY_UNHEALTHY": {
+                        "text": "IDENTITY_UNHEALTHY",
+                        "color": "#7F1D1D"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_id"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "workflow_scope"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_type"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "report_url"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "report_label"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "workflow_passport_url"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline_passport_url"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false,
+          "enablePagination": false,
+          "countRows": false
+        },
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Started",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "started_at",
+                "destinationType": "time"
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "workflow_id",
+                "pipeline",
+                "provider",
+                "run_label",
+                "started_at",
+                "duration_display",
+                "status",
+                "saved_evidence_status",
+                "data_quality_status",
+                "replay_readiness_status",
+                "run_id",
+                "workflow_scope",
+                "run_type",
+                "report_url",
+                "report_label",
+                "workflow_passport_url",
+                "pipeline_passport_url"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "workflow_id": 0,
+              "pipeline": 1,
+              "provider": 2,
+              "run_label": 3,
+              "started_at": 4,
+              "duration_display": 5,
+              "status": 6,
+              "saved_evidence_status": 7,
+              "data_quality_status": 8,
+              "replay_readiness_status": 9,
+              "run_id": 10,
+              "workflow_scope": 11,
+              "run_type": 12,
+              "report_url": 13,
+              "report_label": 14,
+              "workflow_passport_url": 15,
+              "pipeline_passport_url": 16
+            },
+            "renameByName": {
+              "workflow_id": "Workflow",
+              "pipeline": "Pipeline",
+              "provider": "Provider",
+              "run_label": "Run ID",
+              "started_at": "Started",
+              "duration_display": "Duration",
+              "status": "Overview",
+              "saved_evidence_status": "Saved Evidence",
+              "data_quality_status": "Data Quality",
+              "replay_readiness_status": "Replay Readiness"
+            },
+            "excludeByName": {}
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 10
+          }
+        }
+      ],
+      "links": [
+        {
+          "title": "Browse all pipelines",
+          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Run-manifest inspection runbook",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md",
+          "targetBlank": true,
+          "includeVars": false
+        }
+      ]
+    }
+  ]
+}

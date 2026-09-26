@@ -1,0 +1,3 @@
+{"type":"review_context","reviewType":"uncommitted","currentBranch":"main","baseBranch":"origin/main","baseCommit":"5c4243c9adad87f4a8eb4a6b0228e4b65841810e","workingDirectory":"/mnt/e/github/BioactivityDataAcquisition"}
+{"type":"status","phase":"connecting","status":"connecting_to_review_service"}
+{"type":"error","errorType":"connection","message":"Connection failed: WebSocket closed","recoverable":true,"details":{"cause":{"name":"TRPCWebSocketClosedError"},"name":"TRPCClientError"}}

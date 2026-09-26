@@ -1,0 +1,225 @@
+# BioETL run-report reason catalog (v1)
+# Stable codes for pipeline stage removals. Free-text messages must not be used as keys.
+version: "reason_catalog_v1"
+unknown_code: UNKNOWN_REASON
+
+families:
+  extract: Extract / adapter intake losses
+  structural: Structural / schema policy rejects
+  dq: Data-quality quarantine
+  contract: Gold contract rejects
+  semantic: Gold semantic exclusions
+  dedup: Deduplication
+  operator: Operator / skip paths
+  system: System / unmapped
+
+reasons:
+  - code: FILTERED_OUT_SILVER
+    family: structural
+    default_outcome: filtered_out
+    layer: silver
+    description: Silver structural filter rejection (legacy aggregate code)
+
+  - code: structural_policy_required_missing
+    family: structural
+    default_outcome: filtered_out
+    layer: silver
+    description: Required field missing under structural policy
+
+  - code: structural_policy_null_optional_forbidden
+    family: structural
+    default_outcome: filtered_out
+    layer: silver
+    description: Optional field null when policy forbids nulls
+
+  - code: structural_policy_type_mismatch
+    family: structural
+    default_outcome: filtered_out
+    layer: silver
+    description: Structural policy type mismatch
+
+  - code: missing_publication_primary_id
+    family: structural
+    default_outcome: filtered_out
+    layer: silver
+    description: Publication record has no primary identifier
+
+  - code: missing_compound_identifier
+    family: structural
+    default_outcome: filtered_out
+    layer: silver
+    description: PubChem compound record has no compound identifier
+
+  - code: SCHEMA_VALIDATION_FAILURE
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Pandera / schema validation failure
+
+  - code: DQ_THRESHOLD_VIOLATION
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: DQ threshold hard-fail quarantine
+
+  - code: SCHEMA_VIOLATION
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Record failed schema validation and was quarantined
+
+  - code: INVALID_DATA
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Record failed with invalid data and was quarantined
+
+  - code: MISSING_REQUIRED_FIELD
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Record failed with a missing required field and was quarantined
+
+  - code: DATA_QUALITY
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Record failed a data-quality check and was quarantined
+
+  - code: SCHEMA_REQUIRED_FIELD_MISSING
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Required field missing from the record payload
+
+  - code: SCHEMA_TYPE_MISMATCH
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Record payload failed schema or type validation
+
+  - code: DQ_SOFT_RULE_FAILED
+    family: dq
+    default_outcome: filtered_out
+    layer: silver
+    description: Non-fatal runtime DQ rule rejected the record
+
+  - code: DQ_HARD_RULE_FAILED
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Blocking runtime DQ rule rejected the record
+
+  - code: QUARANTINE_POLICY
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Invalid-record policy routed the record to quarantine
+
+  - code: DUPLICATE_PRIMARY_KEY
+    family: dedup
+    default_outcome: deduplicated
+    layer: silver
+    description: Duplicate business key skipped during merge
+
+  - code: OPERATOR_SKIPPED
+    family: operator
+    default_outcome: skipped
+    layer: silver
+    description: Record skipped without a more specific removal reason
+
+  - code: SCHEMA_MISMATCH_GOLD
+    family: contract
+    default_outcome: quarantined
+    layer: gold
+    description: Gold Delta or contract schema mismatch
+
+  - code: CROSS_VALIDATION_NULLIFIED
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Cross-validation nullified one or more fields
+
+  - code: DEDUP_KEY_COLLISION
+    family: dedup
+    default_outcome: deduplicated
+    layer: silver
+    description: Duplicate primary key dropped
+
+  - code: gold_filter_exclusion
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Record excluded by configured Gold eligibility filter
+
+  - code: required_field_missing
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold required field is empty. Field-specific code is required_field_missing:<field>.
+
+  - code: exclude_if_present
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold exclude_if_present field is populated. Field-specific code is exclude_if_present:<field>.
+
+  - code: column_filter_mismatch
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold column filter rejected the record.
+
+  - code: range_filter_mismatch
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold range filter rejected the record.
+
+  - code: list_length_filter_mismatch
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold list-length filter rejected the record.
+
+  - code: list_contains_filter_mismatch
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold list-contains filter rejected the record.
+
+  - code: gold_contract_schema_failure
+    family: contract
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold contract schema failure
+
+  - code: gold_contract_required_failure
+    family: contract
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold required field failure
+
+  - code: gold_contract_reference_failure
+    family: contract
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold reference integrity failure
+
+  - code: gold_semantic_business_exclusion
+    family: semantic
+    default_outcome: quarantined
+    layer: gold
+    description: Gold semantic business exclusion
+
+  - code: gold_semantic_profile_exclusion
+    family: semantic
+    default_outcome: quarantined
+    layer: gold
+    description: Gold semantic profile exclusion
+
+  - code: UNKNOWN_REASON
+    family: system
+    default_outcome: other
+    layer: silver
+    description: Unmapped or missing reason code

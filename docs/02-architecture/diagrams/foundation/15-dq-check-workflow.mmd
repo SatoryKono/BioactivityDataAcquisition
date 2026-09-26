@@ -1,0 +1,111 @@
+%% Title: Data Quality Check Workflow
+%% Covers: RULES.md §3.1 (DQ Checks), §2.3 (Quarantine)
+%% Updated: 2026-07-31
+%% Components: DQMonitorPort, BronzeDQAnalyzerPort, SilverDQAnalyzerPort, GoldDQAnalyzerPort, ErrorClassifier, QuarantineManager
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @nodes   26
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%% @uniform width=312 height=72 max_title_len=31 max_desc_lines=2
+flowchart TD
+%% keep-orphan: CFG1, CFG2, CFG3
+    subgraph Input["Input Stage"]
+        A[/"📥 Input Records<br/>(from Bronze)"/]
+    end
+
+    subgraph Validation["Validation Stage"]
+        B["🔍 Pandera Schema Validation<br/>"]
+        B1["Check required fields<br/>"]
+        B2["Validate data types<br/>"]
+        B3["Check value constraints<br/>"]
+        B4["Validate relationships<br/>"]
+
+        B --> B1
+        B --> B2
+        B --> B3
+        B --> B4
+    end
+
+    subgraph Classification["Error Classification"]
+        C{{"📊 Calculate Error Rate<br/>"}}
+        D["✅ 0% errors<br/>"]
+        E["⚠️ < 5% errors<br/>(soft_fail_threshold)"]
+        F["⚠️ 5-20% errors<br/>(warning zone)"]
+        G["❌ > 20% errors<br/>(hard_fail_threshold)"]
+    end
+
+    subgraph Actions["Action Paths"]
+        H["✅ All Pass<br/>No warnings"]
+        I["✅ Pass with Quarantine<br/>Route failures"]
+        J["⚠️ Pass with Warnings<br/>Set _dq_warn=true"]
+        K["❌ FAIL Batch<br/>All to Quarantine"]
+    end
+
+    subgraph Routing["Record Routing"]
+        L[("💾 Silver Layer<br/>SilverWriter.merge()")]
+        M[("🗑️ Quarantine<br/>QuarantineWriter")]
+        N["🚨 Alert<br/>P2 Notification"]
+    end
+
+    subgraph Metrics["Metrics Export"]
+        O["📈 dq_validation_score<br/>Gauge: 0.0-1.0"]
+        P["📈 record_error_rate<br/>Gauge: percentage"]
+        Q["📈 dq_check_duration_ms<br/>Histogram"]
+        R["📈 dq_soft_threshold_exceeded<br/>Counter"]
+        S["📈 quarantine_records_total<br/>Counter"]
+    end
+
+    %% Main flow
+    A --> B
+    B1 --> C
+    B2 --> C
+    B3 --> C
+    B4 --> C
+
+    C -->|"0%"| D
+    C -->|"< 5%"| E
+    C -->|"5-20%"| F
+    C -->|"> 20%"| G
+
+    D --> H
+    E --> I
+    F --> J
+    G --> K
+
+    H --> L
+    I --> L
+    I --> M
+    J --> L
+    J --> M
+    J --> R
+    K --> M
+    K --> N
+
+    %% Metrics connections
+    B --> O
+    B --> P
+    B --> Q
+    M --> S
+
+    %% Styling
+    style D fill:#f0fdf4,color:#212121
+    style E fill:#fefce8,color:#212121
+    style F fill:#fefce8,color:#212121
+    style G fill:#ffe4e6,color:#212121
+    style L fill:#f1f5f9,color:#212121
+    style M fill:#ffe4e6,color:#212121
+    style N fill:#ffe4e6,color:#212121
+
+    %% Configuration annotation
+    subgraph Config["DQConfig Parameters"]
+        direction LR
+        CFG1["soft_fail_threshold: 0.05 (5%)<br/>"]
+        CFG2["hard_fail_threshold: 0.20 (20%)<br/>"]
+        CFG3["strict_validation: false<br/>"]
+    end
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27 stroke:#475569,stroke-width:2px
+    linkStyle 28 stroke:#475569,stroke-width:2px,opacity:0.85

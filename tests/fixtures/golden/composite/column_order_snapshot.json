@@ -1,0 +1,16 @@
+{
+  "input_columns": [
+    "openalex.publication.citation_count",
+    "chembl.publication.doi",
+    "_composite_run_id",
+    "chembl.publication.title",
+    "_lineage_created_at"
+  ],
+  "expected_order": [
+    "_composite_run_id",
+    "_lineage_created_at",
+    "chembl.publication.doi",
+    "chembl.publication.title",
+    "openalex.publication.citation_count"
+  ]
+}

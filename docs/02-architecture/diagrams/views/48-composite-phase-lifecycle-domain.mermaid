@@ -1,0 +1,74 @@
+%% View: Domain-Focus | Parent: 48-composite-phase-lifecycle-full.mermaid
+%% @uniform width=232 height=64 max_title_len=26 max_desc_lines=0
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL',
+    'spacing.nodeNode': 34,
+    'spacing.edgeNode': 24,
+    'spacing.edgeEdge': 12
+  }
+}}%%
+flowchart LR
+
+    subgraph Domain["Domain Layer"]
+        direction LR
+        NOT_STARTED["NOT_STARTED"]
+        SEED_RUNNING["SEED_RUNNING"]
+        SEED_COMPLETED["SEED_COMPLETED"]
+        DEPENDENCIES_RUNNING["DEPENDENCIES_RUNNING"]
+        DEPENDENCIES_COMPLETED["DEPENDENCIES_COMPLETED"]
+        ENRICHING["ENRICHING"]
+        ENRICHMENT_COMPLETED["ENRICHMENT_COMPLETED"]
+        MERGING["MERGING"]
+        COMPLETED["COMPLETED"]
+        FAILED["FAILED"]
+        HAS_DEPS{"has dependencies?"}
+        ENRICH_FAIL{"all enrichers failed?"}
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        FSM_HELPER["FSMStateHelper.validate_transition()"]
+    end
+
+    NOT_STARTED --> SEED_RUNNING
+    SEED_RUNNING --> SEED_COMPLETED
+    SEED_RUNNING -. seed error .-> FAILED
+
+    SEED_COMPLETED --> HAS_DEPS
+    HAS_DEPS -->|yes| DEPENDENCIES_RUNNING
+    HAS_DEPS -->|no| ENRICHING
+
+    DEPENDENCIES_RUNNING --> DEPENDENCIES_COMPLETED
+    DEPENDENCIES_RUNNING -. dep error .-> FAILED
+    DEPENDENCIES_COMPLETED --> ENRICHING
+
+    ENRICHING --> ENRICH_FAIL
+    ENRICH_FAIL -->|yes| FAILED
+    ENRICH_FAIL -->|no| ENRICHMENT_COMPLETED
+
+    ENRICHMENT_COMPLETED --> MERGING
+    MERGING --> COMPLETED
+    MERGING -. merge error .-> FAILED
+
+    FAILED -. resume .-> SEED_COMPLETED
+
+    FSM_HELPER -. validates guards .-> HAS_DEPS
+    FSM_HELPER -. validates guards .-> ENRICH_FAIL
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#475569,stroke-width:2px

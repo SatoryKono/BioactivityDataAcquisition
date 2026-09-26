@@ -1,0 +1,18 @@
+# Disabled (#11012): the remote installer still downloads releases/latest and
+# pipes a remote script to bash. Do not restore that installer, id-token: write,
+# or a secret environment until the installer is digest-pinned.
+name: opencode-triage
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: OpenCode triage disabled
+        run: echo "OpenCode triage is disabled until the installer is digest-pinned."

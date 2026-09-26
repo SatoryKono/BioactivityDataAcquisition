@@ -1,0 +1,286 @@
+# pyright: reportArgumentType=false
+# pyright: reportIndexIssue=false
+"""Regression tests for Grafana action routes and navigation layout rendering."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from scripts.ops.observability.grafana import action_target_routes as routes
+from scripts.ops.observability.grafana import render_nav_bus as nav_bus
+
+
+pytestmark = pytest.mark.unit
+
+
+def test_complete_run_discovery_preserves_scope_and_avoids_null_auto_height() -> None:
+    from scripts.ops.observability.grafana._latest_complete_run_panel import (
+        stamp_latest_complete_run_panel,
+    )
+
+    panels: list[object] = []
+    stamp_latest_complete_run_panel(panels)
+    stamp_latest_complete_run_panel(panels)
+    assert len(panels) == 1
+    row = panels[0]
+    assert isinstance(row, dict)
+    assert row["collapsed"] is True
+    panel = row["panels"][0]
+    assert (
+        panel["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"] is False
+    )
+    overrides = panel["fieldConfig"]["overrides"]
+    candidate = next(x for x in overrides if x["matcher"]["options"] == "Candidate run")
+    link = candidate["properties"][0]["value"][0]
+    assert link["targetBlank"] is True
+    assert "${run_id:queryparam}" not in link["url"]
+    for token in (
+        "${workflow:queryparam}",
+        "${pipeline:queryparam}",
+        "${run_type:queryparam}",
+        "${__url_time_range}",
+    ):
+        assert token in link["url"]
+    assert "var-run_id=${__value.raw}" in link["url"]
+
+
+def _panel(
+    panel_id: int,
+    panel_type: str,
+    *,
+    y: int,
+    height: int,
+    nested: list[object] | None = None,
+) -> dict[str, object]:
+    panel: dict[str, object] = {
+        "id": panel_id,
+        "type": panel_type,
+        "gridPos": {"x": 0, "y": y, "w": 24, "h": height},
+    }
+    if nested is not None:
+        panel["panels"] = nested
+    return panel
+
+
+def test_row_aware_action_url_preserves_row_and_destination_context() -> None:
+    url = routes.row_aware_dashboard_url()
+
+    assert "/d/${__data.fields.action_dashboard_uid}/" in url
+    for field in ("workflow", "pipeline", "run_type", "run_id"):
+        assert f"var-{field}=${{__data.fields.{field}}}" in url
+    assert "var-stage=$__all" in url
+    assert "var-provider=unknown" in url
+    assert "var-pipeline_context=${__data.fields.pipeline}" in url
+    assert nav_bus.build_handoff_url.__module__.endswith("dashboard_context_links")
+    assert routes.TIME_TOKEN in url
+
+
+@pytest.mark.parametrize(
+    ("target", "expected_uid"),
+    [
+        ("runtime", "bioetl-runtime"),
+        ("control_plane", "bioetl-control-plane-v1"),
+        ("data_quality", "bioetl-dq-v2"),
+        ("workflow", "bioetl-runtime"),
+        ("provider", "bioetl-provider-health-v2"),
+        ("dq", "bioetl-dq-v2"),
+        ("verify_dq_reason_rules", None),
+        ("future_target", None),
+    ],
+)
+def test_dashboard_uid_for_every_action_target(
+    target: str, expected_uid: str | None
+) -> None:
+    assert routes.dashboard_uid_for_target(target) == expected_uid
+
+
+def test_nav_tooltips_describe_resets_and_escape_html_attributes() -> None:
+    provider = {
+        "uid": "bioetl-provider-health-v2",
+        "title": '4. Provider "Health" <scope>',
+        "path": "bioetl-provider-health-v2",
+    }
+    tooltip = nav_bus.nav_link_tooltip(
+        source_uid="bioetl-overview-v2",
+        target=provider,
+    )
+    rendered = nav_bus._chip_html(
+        provider,
+        current_uid="bioetl-overview-v2",
+        source_uid="bioetl-overview-v2",
+    )
+
+    assert "provider=All" not in tooltip
+    assert "Preserves selected scope and time range." in tooltip
+    assert "run_id:queryparam" in rendered
+    assert "var-provider=$__all" not in rendered
+    assert "var-provider=All" not in rendered
+    assert "pipeline context" in tooltip
+    assert "&quot;Health&quot;" in rendered
+    assert "&lt;scope&gt;" in rendered
+    runtime = next(item for item in nav_bus.BUS if item["uid"] == "bioetl-runtime")
+    assert "stage=All" in nav_bus.nav_link_tooltip(
+        source_uid="bioetl-overview-v2",
+        target=runtime,
+    )
+
+
+def test_overflow_reclamation_uses_root_panels_and_keeps_minimum_height() -> None:
+    nav = _panel(1000, "text", y=0, height=4)
+    slack = _panel(1001, "text", y=4, height=4)
+    first_window = _panel(1002, "table", y=12, height=6)
+    nested = _panel(9601, "table", y=15, height=6)
+    collapsed_row = _panel(9600, "row", y=18, height=1, nested=[nested])
+    panels: list[object] = [nav, slack, first_window, collapsed_row]
+
+    assert nav_bus._first_window_overflow(panels) == 1
+    nav_bus._reclaim_first_window_overflow(nav, panels)
+
+    assert slack["gridPos"]["h"] == 3
+    assert first_window["gridPos"]["y"] == 11
+    assert collapsed_row["gridPos"]["y"] == 17
+    assert nested["gridPos"]["y"] == 15
+    assert nav_bus._first_window_overflow(panels) == 0
+
+
+def test_overflow_reclamation_fails_when_no_text_rail_has_slack() -> None:
+    nav = _panel(1000, "text", y=0, height=4)
+    too_short = _panel(1001, "text", y=4, height=3)
+    overflowing = _panel(1002, "table", y=12, height=6)
+
+    with pytest.raises(SystemExit, match="no protected layout band can reclaim"):
+        nav_bus._reclaim_first_window_overflow(nav, [nav, too_short, overflowing])
+
+
+def test_nav_expansion_shifts_only_root_panels() -> None:
+    nav = _panel(1000, "text", y=0, height=3)
+    nested = _panel(9601, "table", y=4, height=6)
+    collapsed_row = _panel(9600, "row", y=3, height=1, nested=[nested])
+
+    nav_bus._expand_nav_height(nav, [nav, collapsed_row], new_height=4)
+
+    assert collapsed_row["gridPos"]["y"] == 4
+    assert nested["gridPos"]["y"] == 4
+
+
+def test_trust_layout_preserves_scalar_area_and_detail_rows() -> None:
+    nav = _panel(1000, "text", y=0, height=3)
+    scope = _panel(9400, "text", y=4, height=4)
+    status = _panel(9401, "stat", y=4, height=4)
+    trust = _panel(9418, "table", y=8, height=5)
+    trust["targets"] = [
+        {
+            "url": "/ops/control-plane/trust-summary?pipeline=${pipeline}&run_id=${run_id}"
+        }
+    ]
+    retention = _panel(9416, "table", y=8, height=5)
+    kpis = [
+        _panel(891, "stat", y=13, height=4),
+        _panel(892, "stat", y=13, height=4),
+        _panel(893, "stat", y=13, height=4),
+        _panel(907, "stat", y=13, height=4),
+    ]
+    recovery = _panel(906, "text", y=20, height=3)
+    collapsed_row = _panel(902, "row", y=18, height=1, nested=[recovery])
+    panels: list[object] = [
+        nav,
+        scope,
+        status,
+        trust,
+        retention,
+        *kpis,
+        collapsed_row,
+    ]
+
+    nav_bus._layout_control_plane_first_window(panels)
+    nav_bus._layout_control_plane_first_window(panels)
+    nav_bus._normalize_collapsed_row_children(panels)
+
+    assert scope["gridPos"] == {"x": 0, "y": 3, "w": 24, "h": 2}
+    readiness = next(panel for panel in panels if panel.get("id") == 9422)
+    assert readiness["gridPos"] == {"x": 0, "y": 5, "w": 24, "h": 3}
+    assert readiness["links"] == []
+    assert readiness["fieldConfig"]["defaults"]["noValue"] == "—"
+    assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 8
+    assert trust["gridPos"]["h"] == retention["gridPos"]["h"] == 9
+    assert trust["targets"][0]["url"].count("error_as_row=1") == 1
+    assert "run_id=${run_id}" in trust["targets"][0]["url"]
+    assert "SELECT RUN" in trust["fieldConfig"]["defaults"]["noValue"]
+    assert "QUERY ERROR" in trust["fieldConfig"]["defaults"]["noValue"]
+    assert all(kpi["gridPos"]["y"] == 13 for kpi in kpis)
+    assert all(kpi["gridPos"]["h"] == 4 for kpi in kpis)
+    assert recovery["gridPos"] == {"x": 0, "y": 18, "w": 24, "h": 3}
+    assert collapsed_row["gridPos"]["y"] == 17
+    assert collapsed_row["title"] == "Inspect Checkpoint and Replay Checks"
+    assert nav_bus._first_window_overflow(panels) == 0
+
+
+def test_run_explorer_nav_chips_do_not_open_other_dashboards() -> None:
+    html = nav_bus.render_html(current_uid="bioetl-run-explorer-v1")
+    assert "/d/" not in html
+    assert html.count('aria-disabled="true"') == 7
+    assert html.count("pointer-events:none") == 7
+    assert nav_bus.render_links(current_uid="bioetl-run-explorer-v1") == []
+    overview = nav_bus.render_html(current_uid="bioetl-overview-v2")
+    assert overview.count('class="bioetl-nav-link"') == 6
+    assert "/d/bioetl-run-explorer-v1/" in overview
+    assert len(nav_bus.render_links(current_uid="bioetl-overview-v2")) == 6
+
+
+def test_run_explorer_restores_scope_and_compacts_reviewed_table() -> None:
+    nav = _panel(1000, "text", y=0, height=4)
+    scope = _panel(1, "text", y=4, height=2)
+    browse = _panel(3010, "table", y=6, height=12)
+    collapsed_row = _panel(3099, "row", y=18, height=1)
+    panels: list[object] = [nav, scope, browse, collapsed_row]
+
+    nav_bus._restore_minimum_first_window_heights(
+        panels, current_uid="bioetl-run-explorer-v1"
+    )
+    nav_bus._reclaim_first_window_overflow(
+        nav, panels, current_uid="bioetl-run-explorer-v1"
+    )
+
+    assert scope["gridPos"] == {"x": 0, "y": 4, "w": 24, "h": 3}
+    assert browse["gridPos"] == {"x": 0, "y": 7, "w": 24, "h": 10}
+    assert collapsed_row["gridPos"]["y"] == 17
+
+
+def test_apply_to_dashboard_expands_nav_and_reclaims_first_window(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    dashboard = tmp_path / "dashboard.json"
+    payload = {
+        "templating": {"list": []},
+        "panels": [
+            _panel(1000, "text", y=0, height=2),
+            _panel(1001, "text", y=2, height=5),
+            _panel(1002, "table", y=7, height=10),
+        ],
+    }
+    dashboard.write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(nav_bus, "DASH_DIR", tmp_path)
+
+    assert nav_bus.apply_to_dashboard(
+        dashboard,
+        current_uid="bioetl-overview-v2",
+    )
+
+    rendered = json.loads(dashboard.read_text(encoding="utf-8"))
+    nav, slack, first_window, evidence_row = rendered["panels"]
+    assert evidence_row["id"] == 9450
+    assert evidence_row["type"] == "row"
+    assert nav["gridPos"] == {"x": 0, "y": 0, "w": 24, "h": 2}
+    assert slack["gridPos"]["h"] == 5
+    assert first_window["gridPos"]["y"] + first_window["gridPos"]["h"] == 17
+    assert len(nav["links"]) == 6
+    assert "bioetl-panel-title" not in nav["options"]["content"]
+    before_check = dashboard.read_bytes()
+    assert nav_bus.apply_to_dashboard(
+        dashboard, current_uid="bioetl-overview-v2", check=True
+    )
+    assert dashboard.read_bytes() == before_check

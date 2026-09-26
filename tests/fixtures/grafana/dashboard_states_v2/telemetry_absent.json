@@ -1,0 +1,20 @@
+{
+  "case_id": "telemetry_absent",
+  "contract": "dashboard_state_fixture_v2",
+  "datasource_response": {
+    "rows": [],
+    "status": "TELEMETRY_ABSENT"
+  },
+  "expected_copy_tokens": [
+    "TELEMETRY_ABSENT"
+  ],
+  "expected_panels": [
+    {
+      "classification": "TELEMETRY_ABSENT",
+      "id": "9418"
+    }
+  ],
+  "http_status": 200,
+  "response_sha256": "b51c6ac9b5f06b8311f1e4af6eb1d4763d29be841244fc774b0a271ca295f7cf",
+  "scope": "selected_run"
+}

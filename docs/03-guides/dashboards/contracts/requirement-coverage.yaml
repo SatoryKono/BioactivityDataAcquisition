@@ -1,0 +1,122 @@
+# Fail-closed pytest contract for incomplete DASH-* rows (#9204).
+# Questions MUST stay byte-equal to DASHBOARD_REQUIREMENTS.md §7.
+# Allowlist entries require owner + rationale + retire_when.
+
+version: 1
+owner: "@bioetl-observability"
+source: grafana/dashboards/*.json
+requirements_path: docs/01-requirements/DASHBOARD_REQUIREMENTS.md
+
+allowed_grafana_proxy_paths:
+  - /api/datasources/proxy/uid/bioetl-ops-http/health/live
+
+dashboards:
+  bioetl-control-plane-v1:
+    question: Can the selected run be exactly replayed from saved inputs?
+    answer_panel_ids:
+      - 9422
+    next_action_tokens:
+      - View replay checks
+    basis_tokens:
+      - CURRENT
+      - processing_status
+      - trust_status
+  bioetl-overview-v2:
+    question: What is the saved assessment of the selected Run ID?
+    answer_panel_ids:
+      - 9603
+      - 9002
+    next_action_tokens:
+      - Open Run Explorer
+    basis_tokens:
+      - SELECTED RUN
+      - QUERY ERROR
+  bioetl-runtime:
+    question: What is the saved runtime assessment of the selected Run ID?
+    answer_panel_ids:
+      - 9998
+    next_action_tokens:
+      - Open Run Explorer
+    basis_tokens:
+      - SELECTED RUN
+      - QUERY ERROR
+  bioetl-provider-health-v2:
+    question: Which provider is degraded/failing, and why?
+    answer_panel_ids:
+      - 9401
+    next_action_tokens:
+      - Review severity matrix
+    basis_tokens:
+      - CURRENT
+  bioetl-dq-v2:
+    question: What is the DQ assessment of the selected Run ID?
+    answer_panel_ids:
+      - 9406
+    next_action_tokens:
+      - Open Run Explorer
+    basis_tokens:
+      - SELECTED RUN
+      - QUERY ERROR
+  bioetl-incident-v1:
+    question: What is the highest-confidence active suspect?
+    answer_panel_ids:
+      - 2010
+    next_action_tokens:
+      - Open Pipeline Diagnostics
+    basis_tokens:
+      - TIME RANGE
+      - VALID_EMPTY
+  bioetl-run-explorer-v1:
+    question: Which pipelines ran most recently, and where are their reports?
+    answer_panel_ids:
+      - 3010
+    next_action_tokens:
+      - Click a Run cell
+    basis_tokens:
+      - SELECTED RUN
+      - VALID EMPTY
+
+allowlists:
+  first_window_inspect_tables:
+    - dashboard: bioetl-incident-v1.json
+      id: 2010
+      owner: "@bioetl-observability"
+      rationale: >-
+        Canonical DASH-FIT-003 answer panel. Title uses Inspect because the
+        operator question is the ranked-suspect matrix, not a below-fold dump.
+      retire_when: answer panel is retitled without Inspect or moved below the fold
+    - dashboard: bioetl-run-explorer-v1.json
+      id: 3010
+      owner: "@bioetl-observability"
+      rationale: >-
+        Canonical DASH-FIT-003 browse/select table. First-window Inspect Recent
+        Runs is the exact-run picker, not forensic evidence.
+      retire_when: browse table is retitled without Inspect or replaced as answer panel
+    - dashboard: bioetl-provider-health-v2.json
+      id: 9107
+      owner: "@bioetl-observability"
+      rationale: >-
+        First-window cause companion to Monitor Fleet Severity (9101). Shows
+        current status reason for the worst providers, not a collapsed forensic
+        row.
+      retire_when: status-reason table moves into a collapsed row at y >= first_window_y
+    - dashboard: bioetl-dq-v2.json
+      id: 9402
+      owner: "@bioetl-observability"
+      rationale: >-
+        First-window identity for the selected Run ID. Inspect names the HTTP table, not a collapsed range dump.
+      retire_when: 9402 leaves the first window or is retitled without Inspect
+    - dashboard: bioetl-dq-v2.json
+      id: 9403
+      owner: "@bioetl-observability"
+      rationale: >-
+        First-window processed-record accounting for the selected Run ID.
+      retire_when: 9403 leaves the first window or is retitled without Inspect
+  answer_panels_without_cta:
+    - dashboard: bioetl-run-explorer-v1.json
+      id: 3010
+      owner: "@bioetl-observability"
+      rationale: >-
+        Browse/select is the action: choosing a row sets run_id; Report opens
+        the persisted file or an explicit report-not-found response.
+      retire_when: 3010 grows a unique primary /d/ or runbook CTA

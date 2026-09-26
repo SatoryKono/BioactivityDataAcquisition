@@ -1,0 +1,124 @@
+# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
+"""Gold-layer prepare/validate helpers for BatchWriter IO paths."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Protocol, cast
+
+from bioetl.application.services.run_reports.observations import record_gold_observation
+from bioetl.domain.exceptions import SchemaViolationError
+
+if TYPE_CHECKING:
+    from bioetl.application.core.batch_writer_io_mixin import BatchWriterIOMixin
+    from bioetl.domain.ports import GoldValidatorPort
+    from bioetl.domain.types import GoldRecord, GoldSchemaType
+
+
+class _GoldWriterHost(Protocol):
+    """Minimal BatchWriter surface for Gold prepare/validate helpers."""
+
+    _gold_schema: GoldSchemaType
+    _gold_validator: GoldValidatorPort
+
+    def _get_schema_columns(self, schema: object) -> set[str] | None: ...
+
+    def _collect_record_columns(self, records: list[GoldRecord]) -> list[str]: ...
+
+
+def prepare_gold_records(
+    writer: _GoldWriterHost,
+    records: list[GoldRecord],
+    *,
+    schema: object | None = None,
+) -> tuple[list[GoldRecord], list[str]]:
+    """Project records to schema and compute available columns."""
+    target_schema = schema if schema is not None else writer._gold_schema
+    schema_columns = writer._get_schema_columns(target_schema)
+    if not schema_columns:
+        return records, writer._collect_record_columns(records)
+
+    ordered_columns = sorted(schema_columns)
+    dq_defaults = {"_dq_warn": False, "_dq_error": False}
+    projected = [
+        {
+            key: record.get(key, dq_defaults.get(key))
+            for key in ordered_columns
+            if key in record or key in dq_defaults
+        }
+        for record in records
+    ]
+    return projected, ordered_columns
+
+
+def validate_gold_records(
+    writer: _GoldWriterHost,
+    records: list[GoldRecord],
+    *,
+    schema: object | None = None,
+) -> None:
+    """Validate Gold records against schema contract."""
+    validator = writer._gold_validator
+    target_schema = schema if schema is not None else writer._gold_schema
+    if schema is not None:
+        validator = cast(
+            "GoldValidatorPort",
+            rebind_gold_validator_schema(validator, target_schema),
+        )
+
+    result = validator.validate(records)
+
+    record_gold_observation(result.valid, len(records))
+    if not result.valid:
+        debug_export_service = getattr(writer, "_debug_export_service", None)
+        if debug_export_service is not None:
+            debug_export_service.record_gold_validation_failure(
+                records=records,
+                errors=result.errors,
+            )
+        raise SchemaViolationError("gold", result.errors)
+
+
+def rebind_gold_validator_schema(
+    validator: object,
+    schema: object,
+) -> object:
+    """Rebind schema-aware validators via their owned rebind/clone API."""
+    rebind = getattr(validator, "rebind_schema", None)
+    if callable(rebind):
+        return rebind(schema)
+    # Validators without a rebind surface keep their original schema binding.
+    return validator
+
+
+def should_defer_gold_validation_to_storage(writer: object) -> bool:
+    """Whether Gold validation/projection must happen per-version in storage."""
+    policy = getattr(writer, "_gold_schema_policy_by_version", None)
+    return bool(policy is not None and policy.is_multi_version)
+
+
+def prepare_validated_gold_write(
+    writer: BatchWriterIOMixin, records: list[GoldRecord]
+) -> tuple[list[GoldRecord], list[str], object]:
+    """Prepare one Gold write, retaining storage-owned versioned validation."""
+    if should_defer_gold_validation_to_storage(writer):
+        available_cols = writer._collect_record_columns(records)
+        schema_payload: object = writer._gold_schema_policy_by_version
+    else:
+        records, available_cols = prepare_gold_records(writer, records)
+        validate_gold_records(writer, records)
+        column_order_preview, _rename_preview = writer._resolve_layer_columns(
+            "gold", available_cols
+        )
+        schema_payload = writer._project_schema_for_layer(
+            "gold",
+            writer._gold_schema,
+            column_order_preview,
+        )
+        if schema_payload is not None and schema_payload is not writer._gold_schema:
+            records, available_cols = prepare_gold_records(
+                writer,
+                records,
+                schema=schema_payload,
+            )
+            validate_gold_records(writer, records, schema=schema_payload)
+    return records, available_cols, schema_payload

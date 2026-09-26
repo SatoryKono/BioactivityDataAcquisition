@@ -1,0 +1,487 @@
+rule_files: []
+evaluation_interval: 1m
+tests:
+- name: empty
+  interval: 1m
+  input_series: []
+  promql_expr_test:
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples: []
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples: []
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples: []
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples: []
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (push_time_seconds{job="bioetl",pipeline!="",run_type!=""}
+      > 0 and push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time()))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples: []
+- name: missing
+  interval: 1m
+  input_series:
+  - &id001
+    series: bioetl_control_plane_run_type_universe{pipeline="uniprot_protein",run_type="incremental"}
+    values: 1+0x10
+  promql_expr_test:
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (push_time_seconds{job="bioetl",pipeline!="",run_type!=""}
+      > 0 and push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time()))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+- name: complete
+  interval: 1m
+  input_series:
+  - *id001
+  - &id008
+    series: bioetl_control_plane_manifest_writes_total{pipeline="uniprot_protein",run_type="incremental",status="success"}
+    values: 0+0x10
+  - &id002
+    series: bioetl_control_plane_ledger_appends_total{pipeline="uniprot_protein",status="success"}
+    values: 0+0x10
+  - &id003
+    series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="uniprot_protein",run_type="incremental",risk_type="duplicate"}
+    values: 0+0x10
+  - &id004
+    series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="uniprot_protein",run_type="incremental",risk_type="overwrite"}
+    values: 0+0x10
+  - &id005
+    series: bioetl_manifest_ledger_integrity_ratio{pipeline="uniprot_protein",run_type="incremental",integrity_type="consistent"}
+    values: 0+0x10
+  - &id006
+    series: bioetl_manifest_ledger_integrity_ratio{pipeline="uniprot_protein",run_type="incremental",integrity_type="inconsistent"}
+    values: 0+0x10
+  - &id007
+    series: push_time_seconds{job="bioetl",pipeline="uniprot_protein",run_type="incremental"}
+    values: 60+0x10
+  promql_expr_test:
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (push_time_seconds{job="bioetl",pipeline!="",run_type!=""}
+      > 0 and push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time()))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+- name: missing_0
+  interval: 1m
+  input_series:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  promql_expr_test:
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (push_time_seconds{job="bioetl",pipeline!="",run_type!=""}
+      > 0 and push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time()))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+- name: missing_1
+  interval: 1m
+  input_series:
+  - *id001
+  - *id008
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  promql_expr_test:
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (push_time_seconds{job="bioetl",pipeline!="",run_type!=""}
+      > 0 and push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time()))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+- name: missing_2
+  interval: 1m
+  input_series:
+  - *id001
+  - *id008
+  - *id002
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  promql_expr_test:
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (push_time_seconds{job="bioetl",pipeline!="",run_type!=""}
+      > 0 and push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time()))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+- name: missing_3
+  interval: 1m
+  input_series:
+  - *id001
+  - *id008
+  - *id002
+  - *id003
+  - *id004
+  - *id006
+  - *id007
+  promql_expr_test:
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (push_time_seconds{job="bioetl",pipeline!="",run_type!=""}
+      > 0 and push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time()))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+- name: missing_4
+  interval: 1m
+  input_series:
+  - *id001
+  - *id008
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  promql_expr_test:
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m])))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (push_time_seconds{job="bioetl",pipeline!="",run_type!=""}
+      > 0 and push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time()))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+- name: invalid_timestamp_0
+  interval: 1m
+  input_series:
+  - series: bioetl_control_plane_run_type_universe{pipeline="uniprot_protein",run_type="incremental"}
+    values: 1+0x10
+  - series: bioetl_control_plane_manifest_writes_total{pipeline="uniprot_protein",run_type="incremental",status="success"}
+    values: 0+0x10
+  - series: bioetl_control_plane_ledger_appends_total{pipeline="uniprot_protein",status="success"}
+    values: 0+0x10
+  - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="uniprot_protein",run_type="incremental",risk_type="duplicate"}
+    values: 0+0x10
+  - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="uniprot_protein",run_type="incremental",risk_type="overwrite"}
+    values: 0+0x10
+  - series: bioetl_manifest_ledger_integrity_ratio{pipeline="uniprot_protein",run_type="incremental",integrity_type="consistent"}
+    values: 0+0x10
+  - series: bioetl_manifest_ledger_integrity_ratio{pipeline="uniprot_protein",run_type="incremental",integrity_type="inconsistent"}
+    values: 0+0x10
+  - series: push_time_seconds{job="bioetl",pipeline="uniprot_protein",run_type="incremental"}
+    values: 0+0x10
+  promql_expr_test:
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (push_time_seconds{job="bioetl",pipeline!="",run_type!=""}
+      > 0 and push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time()))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 1
+- name: invalid_timestamp_9999
+  interval: 1m
+  input_series:
+  - series: bioetl_control_plane_run_type_universe{pipeline="uniprot_protein",run_type="incremental"}
+    values: 1+0x10
+  - series: bioetl_control_plane_manifest_writes_total{pipeline="uniprot_protein",run_type="incremental",status="success"}
+    values: 0+0x10
+  - series: bioetl_control_plane_ledger_appends_total{pipeline="uniprot_protein",status="success"}
+    values: 0+0x10
+  - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="uniprot_protein",run_type="incremental",risk_type="duplicate"}
+    values: 0+0x10
+  - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="uniprot_protein",run_type="incremental",risk_type="overwrite"}
+    values: 0+0x10
+  - series: bioetl_manifest_ledger_integrity_ratio{pipeline="uniprot_protein",run_type="incremental",integrity_type="consistent"}
+    values: 0+0x10
+  - series: bioetl_manifest_ledger_integrity_ratio{pipeline="uniprot_protein",run_type="incremental",integrity_type="inconsistent"}
+    values: 0+0x10
+  - series: push_time_seconds{job="bioetl",pipeline="uniprot_protein",run_type="incremental"}
+    values: 9999+0x10
+  promql_expr_test:
+  - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      unless on(pipeline,run_type) (push_time_seconds{job="bioetl",pipeline!="",run_type!=""}
+      > 0 and push_time_seconds{job="bioetl",pipeline!="",run_type!=""} <= time()))
+      or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
+      * 0))
+    eval_time: 10m
+    exp_samples:
+    - labels: '{}'
+      value: 1

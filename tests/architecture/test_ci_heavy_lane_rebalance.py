@@ -1,0 +1,172 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+"""Architecture checks for CI heavy-lane rebalancing."""
+
+from __future__ import annotations
+
+import re
+from pathlib import Path
+
+import pytest
+import yaml
+
+ROOT = Path(__file__).resolve().parents[2]
+POLICY_PATH = ROOT / "configs" / "quality" / "ci_heavy_lane_rebalance.yaml"
+
+
+def _load_policy() -> dict[str, object]:
+    return yaml.safe_load(POLICY_PATH.read_text(encoding="utf-8"))
+
+
+def _read_workflow(policy: dict[str, object]) -> str:
+    return (ROOT / str(policy["workflow_path"])).read_text(encoding="utf-8")
+
+
+def _job_block(workflow: str, job: str) -> str:
+    # tests.yml uses 2-space job keys under `jobs:`.
+    match = re.search(
+        rf"^  {re.escape(job)}:\n(?P<body>.*?)(?=^  [A-Za-z0-9_-]+:|\Z)",
+        workflow,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    assert match, f"workflow is missing job {job!r}"
+    return match.group("body")
+
+
+@pytest.mark.architecture
+class TestCiHeavyLaneRebalance:
+    """Keep expensive CI lanes aligned with their architectural purpose."""
+
+    def test_policy_declares_heavy_lane_inventory_and_success_metrics(self) -> None:
+        policy = _load_policy()
+
+        assert policy["policy_scope"] == "ci_heavy_lane_rebalance"
+        assert policy["workflow_path"] == ".github/workflows/tests.yml"
+        assert policy["source_issue"] == 3329
+        assert set(policy["success_metrics"]) == {
+            "track_d_gate_scope",
+            "coverage_verify_scope",
+            "duration_telemetry",
+        }
+
+        lanes = {entry["job"]: entry for entry in policy["lanes"]}  # type: ignore[index]
+        assert set(lanes) == {
+            "track-d-gates",
+            "control-plane-e2e",
+            "test-matrix",
+            "memory-tests",
+            "performance-budgets",
+            "coverage-verify",
+        }
+        for entry in lanes.values():
+            assert entry["owner"]
+            assert entry["classification"]
+            assert entry["full_bootstrap_policy"]
+            assert entry["retained_scenarios"]
+            assert entry["telemetry_artifact"]
+
+    def test_declared_heavy_lanes_exist_in_workflow(self) -> None:
+        policy = _load_policy()
+        workflow = _read_workflow(policy)
+
+        for entry in policy["lanes"]:  # type: ignore[index]
+            assert f"  {entry['job']}:" in workflow
+
+    def test_track_d_gate_contains_only_runtime_linkage_suite(self) -> None:
+        policy = _load_policy()
+        workflow = _read_workflow(policy)
+        track_d = next(
+            entry
+            for entry in policy["lanes"]
+            if entry["job"] == "track-d-gates"  # type: ignore[index]
+        )
+        block = _job_block(workflow, "track-d-gates")
+
+        retained_paths = {
+            scenario["path"] for scenario in track_d["retained_scenarios"]
+        }
+        assert retained_paths == {
+            "tests/integration/ci/test_track_d_fixture_control_plane_linkage.py"
+        }
+        assert (
+            "tests/integration/ci/test_track_d_fixture_control_plane_linkage.py"
+            in block
+        )
+        assert "tests/unit/" not in block
+        assert "tests/architecture/" not in block
+
+        for scenario in track_d["relocated_scenarios"]:
+            assert scenario["path"] not in block
+            assert scenario["new_lane"] == "test-fast"
+
+    def test_coverage_verify_consumes_dedicated_serial_subset_without_pytest_rerun(
+        self,
+    ) -> None:
+        policy = _load_policy()
+        workflow = _read_workflow(policy)
+        serial_block = _job_block(workflow, "serial-coverage")
+        verify_block = _job_block(workflow, "coverage-verify")
+        metric = policy["success_metrics"]["coverage_verify_scope"]  # type: ignore[index]
+
+        producer_job = str(metric["serial_producer_job"])
+        serial_shard = str(metric["serial_shard"])
+        download_pattern = "pattern: coverage-data-*"
+        combine_command = "coverage combine --keep reports/coverage"
+
+        assert producer_job == "serial-coverage"
+        assert f"      - {producer_job}" in verify_block
+        assert (
+            '--parallel-marker "serial and not e2e and not benchmark and not memory"'
+            in serial_block
+        )
+        assert "--ignore=tests/e2e" in serial_block
+        assert "--ignore=tests/contract" in serial_block
+        assert "--skip-serial-pass" in serial_block
+        assert "coverage-data-serial" in serial_block
+        assert download_pattern in verify_block
+        assert serial_shard in verify_block
+        assert combine_command in verify_block
+        assert verify_block.index(download_pattern) < verify_block.index(
+            combine_command
+        )
+        assert verify_block.index(serial_shard) < verify_block.index(combine_command)
+        assert "run_pytest_resilient.py" not in verify_block
+
+    def test_memory_and_performance_lanes_stay_isolated(self) -> None:
+        policy = _load_policy()
+        workflow = _read_workflow(policy)
+        memory_block = _job_block(workflow, "memory-tests")
+        performance_block = _job_block(workflow, "performance-budgets")
+        matrix_block = _job_block(workflow, "test-matrix")
+
+        assert '-m "memory"' in memory_block
+        assert "--junitxml=reports/test-telemetry/junit-memory.xml" in memory_block
+        assert "tests/performance/test_hotspot_budgets.py" in performance_block
+        assert '-m "benchmark and performance"' in performance_block
+        assert "Hotspot observations file is missing." in performance_block
+        assert "Hotspot degradation report is missing." in performance_block
+        assert "skipping degradation report generation" not in performance_block
+        assert (
+            '-m "not serial and not memory and not fs_contract and not subprocess_backed"'
+            in matrix_block
+        )
+
+    def test_duration_telemetry_consumes_rebalanced_lane_artifacts(self) -> None:
+        policy = _load_policy()
+        workflow = _read_workflow(policy)
+        block = _job_block(workflow, "duration-telemetry")
+        metric = policy["success_metrics"]["duration_telemetry"]  # type: ignore[index]
+
+        assert "name: test-duration-telemetry" in block
+        for artifact in metric["required_inputs"]:
+            assert artifact in workflow
+        assert "junit-track-d.xml" in block
+        assert "junit-memory.xml" in block

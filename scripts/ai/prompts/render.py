@@ -1,0 +1,217 @@
+"""Render Prompt Library cards with fragments and param substitution."""
+
+from __future__ import annotations
+
+import re
+from pathlib import Path
+
+from scripts.ai.prompts.registry import (
+    PROMPTS_ROOT,
+    PromptCard,
+    RegistryEntry,
+    find_entry,
+    fragment_body,
+    load_card,
+    load_registry,
+    resolve_include,
+)
+
+PARAM_TOKEN_RE = re.compile(r"\{\{([A-Z][A-Z0-9_]*)\}\}")
+PARAM_TABLE_KEY_RE = re.compile(r"`([A-Z][A-Z0-9_]*)`")
+FRAGMENT_INCLUDE_RE = re.compile(r"\{\{>\s*([a-z0-9-]+)\s*\}\}")
+
+
+def _parameter_table_cells(line: str) -> tuple[str, str] | None:
+    """Return the key/default cells from one Markdown table row."""
+    stripped = line.lstrip()
+    if not stripped.startswith("|"):
+        return None
+    cells = stripped.split("|", maxsplit=3)
+    if len(cells) != 4:
+        return None
+    key_match = PARAM_TABLE_KEY_RE.fullmatch(cells[1].strip())
+    if key_match is None:
+        return None
+    return key_match.group(1), cells[2].strip()
+
+
+def extract_defaults_from_body(body: str) -> dict[str, str]:
+    """Best-effort defaults from markdown params tables."""
+    defaults: dict[str, str] = {}
+    for line in body.splitlines():
+        cells = _parameter_table_cells(line)
+        if cells is None:
+            continue
+        key, raw = cells
+        # strip surrounding backticks / code
+        if raw.startswith("`") and raw.endswith("`") and len(raw) >= 2:
+            raw = raw[1:-1]
+        defaults[key] = raw
+    return defaults
+
+
+def substitute_params(text: str, params: dict[str, str]) -> str:
+    def repl(match: re.Match[str]) -> str:
+        key = match.group(1)
+        if key not in params:
+            raise ValueError(f"missing required param: {key}")
+        return params[key]
+
+    return PARAM_TOKEN_RE.sub(repl, text)
+
+
+def expand_fragment_includes(text: str) -> str:
+    """Expand `{{> fragment-name}}` tokens to fragment bodies."""
+
+    def repl(match: re.Match[str]) -> str:
+        name = match.group(1)
+        return fragment_body(resolve_include(f"fragments/{name}.md")).rstrip()
+
+    return FRAGMENT_INCLUDE_RE.sub(repl, text)
+
+
+def render_card(
+    card: PromptCard,
+    *,
+    params: dict[str, str] | None = None,
+    include_fragments: bool = True,
+) -> str:
+    """Compose paste-ready text: optional fragments + body + param fill."""
+    parts: list[str] = []
+    parts.append(f"<!-- prompt-id: {card.id} version: {card.version} -->\n")
+
+    if include_fragments and card.includes:
+        parts.append("<!-- included fragments -->\n")
+        for rel in card.includes:
+            frag_path = resolve_include(rel)
+            parts.append(fragment_body(frag_path))
+            parts.append("\n")
+
+    body = expand_fragment_includes(card.body)
+    defaults = extract_defaults_from_body(body)
+    merged = {**defaults, **(params or {})}
+
+    # Validate declared params if {{PARAM}} tokens present
+    tokens = set(PARAM_TOKEN_RE.findall(body))
+    for token in tokens:
+        if token not in merged:
+            raise ValueError(
+                f"missing required param {token!r} for {card.id} "
+                f"(declare via --param {token}=...)"
+            )
+
+    if tokens:
+        body = substitute_params(body, merged)
+    elif params:
+        # No tokens: append applied params block for operator visibility
+        applied = "\n".join(f"- {k}: {v}" for k, v in sorted(params.items()))
+        body = body.rstrip() + "\n\n## Applied params\n\n" + applied + "\n"
+
+    parts.append(body.rstrip() + "\n")
+    return "".join(parts)
+
+
+def render_by_id(
+    prompt_id: str,
+    *,
+    params: dict[str, str] | None = None,
+    registry_path: Path | None = None,
+) -> str:
+    entries = load_registry(registry_path)
+    entry = find_entry(entries, prompt_id)
+    card = load_card(entry.absolute_path)
+    return render_card(card, params=params)
+
+
+def list_entries(
+    *,
+    class_filter: str | None = None,
+    status_filter: str | None = "active",
+    registry_path: Path | None = None,
+) -> list[RegistryEntry]:
+    entries = load_registry(registry_path)
+    result: list[RegistryEntry] = []
+    for entry in entries:
+        if status_filter and entry.status != status_filter:
+            continue
+        if class_filter and entry.class_ != class_filter:
+            continue
+        result.append(entry)
+    return result
+
+
+def show_entry(prompt_id: str, *, registry_path: Path | None = None) -> str:
+    entries = load_registry(registry_path)
+    entry = find_entry(entries, prompt_id)
+    card = load_card(entry.absolute_path)
+    lines = [
+        f"id: {card.id}",
+        f"version: {card.version}",
+        f"status: {card.status}",
+        f"class: {card.class_}",
+        f"owner: {card.owner}",
+        f"path: {entry.path}",
+        f"absolute: {entry.absolute_path}",
+        f"summary: {card.summary or entry.summary}",
+        f"params: {', '.join(card.params) or '(none)'}",
+        f"includes: {', '.join(card.includes) or '(none)'}",
+        f"related_ssot: {', '.join(card.related_ssot) or '(none)'}",
+        f"tags: {', '.join(card.tags) or ', '.join(entry.tags) or '(none)'}",
+        f"body_lines: {len(card.body.splitlines())}",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def generate_catalog_markdown(
+    *,
+    registry_path: Path | None = None,
+) -> str:
+    entries = load_registry(registry_path)
+    lines = [
+        "<!-- GENERATED by python -m scripts.ai.prompts catalog — do not edit by hand -->",
+        "",
+        "# Prompt Library Catalog",
+        "",
+        "Source: `docs/00-project/ai/prompts/REGISTRY.yaml`",
+        "",
+        "Operator paste templates and fragments. Not runtime SSOT.",
+        "",
+        "## Active operator-paste",
+        "",
+        "| Id | Path | Summary |",
+        "| --- | --- | --- |",
+    ]
+    for entry in entries:
+        if entry.status != "active" or entry.class_ != "operator-paste":
+            continue
+        lines.append(f"| `{entry.id}` | `{entry.path}` | {entry.summary} |")
+
+    lines.extend(
+        [
+            "",
+            "## Active fragments",
+            "",
+            "| Id | Path | Summary |",
+            "| --- | --- | --- |",
+        ]
+    )
+    for entry in entries:
+        if entry.status != "active" or entry.class_ != "fragment":
+            continue
+        lines.append(f"| `{entry.id}` | `{entry.path}` | {entry.summary} |")
+
+    lines.extend(
+        [
+            "",
+            "## All registry entries",
+            "",
+            "| Id | Class | Status | Path |",
+            "| --- | --- | --- | --- |",
+        ]
+    )
+    for entry in entries:
+        lines.append(
+            f"| `{entry.id}` | {entry.class_} | {entry.status} | `{entry.path}` |"
+        )
+    lines.append("")
+    return "\n".join(lines)

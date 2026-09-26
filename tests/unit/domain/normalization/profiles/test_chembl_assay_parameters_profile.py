@@ -1,0 +1,115 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# pyright: reportUndefinedVariable=false
+# pyright: reportPossiblyUnboundVariable=false
+# pyright: reportTypedDictNotRequiredAccess=false
+# pyright: reportOptionalSubscript=false
+# pyright: reportOptionalOperand=false
+# pyright: reportOptionalCall=false
+# pyright: reportOptionalIterable=false
+# pyright: reportIncompatibleMethodOverride=false
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportReturnType=false
+# pyright: reportInvalidCast=false
+# pyright: reportAssignmentType=false
+# pyright: reportImplicitAbstractClass=false
+# pyright: reportFunctionMemberAccess=false
+# pyright: reportConstantRedefinition=false
+# pyright: reportInvalidTypeForm=false
+# PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
+"""Unit tests for the ChEMBL Assay Parameters normalization profile."""
+
+from __future__ import annotations
+
+import pytest
+
+from bioetl.domain.normalization.profiles import (
+    CHEMBL_ASSAY_PARAMETERS_PROFILE,
+    CHEMBL_ASSAY_PARAMETERS_SCHEMA_FIELDS,
+)
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_json_string,
+)
+
+pytestmark = pytest.mark.unit
+
+CHEMBL_STANDARD_UNIT_ALIAS_CASES = (
+    ("uM", "µM"),
+    ("UM", "µM"),
+    ("μM", "µM"),
+    ("micromolar", "µM"),
+    ("nM", "nM"),
+    ("nanomolar", "nM"),
+    ("pM", "pM"),
+    ("picomolar", "pM"),
+    ("mM", "mM"),
+    ("millimolar", "mM"),
+    ("M", "M"),
+    ("molar", "M"),
+    ("percent", "%"),
+    ("PERCENT", "%"),
+)
+
+
+def test_chembl_assay_parameters_profile_covers_schema_exactly() -> None:
+    missing, extra = CHEMBL_ASSAY_PARAMETERS_PROFILE.coverage_gaps(
+        CHEMBL_ASSAY_PARAMETERS_SCHEMA_FIELDS
+    )
+
+    assert missing == frozenset()
+    assert extra == frozenset()
+
+
+def test_chembl_assay_parameters_profile_centralizes_business_canonicalization() -> (
+    None
+):
+    type_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("type")
+    relation_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("relation")
+    standard_relation_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for(
+        "standard_relation"
+    )
+    units_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("units")
+    standard_units_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("standard_units")
+    standard_type_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("standard_type")
+
+    assert type_rule is not None
+    assert type_rule.normalizer(" conc ") == "CONC"
+    assert type_rule.normalizer("unexpected_new_type") == "UNEXPECTED_NEW_TYPE"
+    assert "without rejecting unknown" in (type_rule.notes or "")
+
+    assert relation_rule is not None
+    assert relation_rule.normalizer("≤") == "<="
+
+    assert standard_relation_rule is not None
+    assert standard_relation_rule.normalizer("gte") == ">="
+    assert standard_relation_rule.normalizer(">>") is None
+
+    assert units_rule is not None
+    assert units_rule.normalizer("uM") == "µM"
+    assert "Canonicalize units" in (units_rule.notes or "")
+
+    assert standard_units_rule is not None
+    for raw_value, expected in CHEMBL_STANDARD_UNIT_ALIAS_CASES:
+        assert standard_units_rule.normalizer(raw_value) == expected
+
+    assert standard_type_rule is not None
+    assert standard_type_rule.normalizer(" conc ") == "CONC"
+    assert standard_type_rule.normalizer("unknown") is None
+
+
+def test_chembl_assay_parameters_comments_are_plain_text_not_json_by_default() -> None:
+    comments_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("comments")
+
+    assert comments_rule is not None
+    assert comments_rule.normalizer is not normalize_profile_json_string
+    assert comments_rule.normalizer(' {"b":2,"a":1} ') == '{"b":2,"a":1}'
+    assert "plain text" in (comments_rule.notes or "")

@@ -1,0 +1,14 @@
+{
+  "pages": [
+    {
+      "title": "Provider Documentation",
+      "purpose": "Index of provider-specific documentation including API details, rate limits, and normalization rules.",
+      "parent": "Data Pipelines",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/04-reference/providers/, configs/entities/, src/bioetl/infrastructure/adapters/."
+        }
+      ]
+    }
+  ]
+}

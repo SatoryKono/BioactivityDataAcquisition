@@ -1,0 +1,712 @@
+{
+  "campaign": "CR-FULL-20260811",
+  "base_ref": "origin/main",
+  "base_sha": "8f34de1cf14126908cba8326905b3ee224719537",
+  "created_utc": "2026-08-11T08:51:20.277605+00:00",
+  "coderabbit": "0.7.2",
+  "cap": 300,
+  "tracked_files": 10525,
+  "assigned_files": 10525,
+  "duplicate_assignments": 0,
+  "missing_files": [],
+  "coverage_ok": true,
+  "leaf_count": 87,
+  "leaves": [
+    {
+      "id": "S-D-security-residual",
+      "wave": "D",
+      "files": 20,
+      "under_cap": true,
+      "selection": "security-relevant interfaces/composition/infra/scripts plus tests/security",
+      "file_list": "reports/quality/coderabbit/20260811/_S-D-security-residual.txt"
+    },
+    {
+      "id": "S01-domain-aggregates",
+      "wave": "A",
+      "files": 19,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/aggregates",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-aggregates.txt"
+    },
+    {
+      "id": "S01-domain-behavior",
+      "wave": "A",
+      "files": 53,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/behavior",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-behavior.txt"
+    },
+    {
+      "id": "S01-domain-composite",
+      "wave": "A",
+      "files": 29,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/composite",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-composite.txt"
+    },
+    {
+      "id": "S01-domain-config",
+      "wave": "A",
+      "files": 12,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/config",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-config.txt"
+    },
+    {
+      "id": "S01-domain-contracts",
+      "wave": "A",
+      "files": 23,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/contracts",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-contracts.txt"
+    },
+    {
+      "id": "S01-domain-control_plane",
+      "wave": "A",
+      "files": 32,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/control_plane",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-control_plane.txt"
+    },
+    {
+      "id": "S01-domain-entities",
+      "wave": "A",
+      "files": 28,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/entities",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-entities.txt"
+    },
+    {
+      "id": "S01-domain-exceptions",
+      "wave": "A",
+      "files": 24,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/exceptions",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-exceptions.txt"
+    },
+    {
+      "id": "S01-domain-filtering",
+      "wave": "A",
+      "files": 13,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/filtering",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-filtering.txt"
+    },
+    {
+      "id": "S01-domain-lineage",
+      "wave": "A",
+      "files": 6,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/lineage",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-lineage.txt"
+    },
+    {
+      "id": "S01-domain-mapping",
+      "wave": "A",
+      "files": 15,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/mapping",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-mapping.txt"
+    },
+    {
+      "id": "S01-domain-models",
+      "wave": "A",
+      "files": 7,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/models",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-models.txt"
+    },
+    {
+      "id": "S01-domain-normalization",
+      "wave": "A",
+      "files": 88,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/normalization",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-normalization.txt"
+    },
+    {
+      "id": "S01-domain-ports",
+      "wave": "A",
+      "files": 77,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/ports",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-ports.txt"
+    },
+    {
+      "id": "S01-domain-registry",
+      "wave": "A",
+      "files": 6,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/registry",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-registry.txt"
+    },
+    {
+      "id": "S01-domain-run_reports",
+      "wave": "A",
+      "files": 10,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/run_reports",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-run_reports.txt"
+    },
+    {
+      "id": "S01-domain-schemas",
+      "wave": "A",
+      "files": 49,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/schemas",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-schemas.txt"
+    },
+    {
+      "id": "S01-domain-transformations",
+      "wave": "A",
+      "files": 5,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/transformations",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-transformations.txt"
+    },
+    {
+      "id": "S01-domain-types",
+      "wave": "A",
+      "files": 24,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/types",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-types.txt"
+    },
+    {
+      "id": "S01-domain-validation",
+      "wave": "A",
+      "files": 4,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/validation",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-validation.txt"
+    },
+    {
+      "id": "S01-domain-value_objects",
+      "wave": "A",
+      "files": 43,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/value_objects",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-value_objects.txt"
+    },
+    {
+      "id": "S01-domain-workflow",
+      "wave": "A",
+      "files": 6,
+      "under_cap": true,
+      "selection": "src/bioetl/domain/workflow",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-workflow.txt"
+    },
+    {
+      "id": "S01-domain-residual-root",
+      "wave": "A",
+      "files": 31,
+      "under_cap": true,
+      "selection": "src/bioetl/domain",
+      "file_list": "reports/quality/coderabbit/20260811/_S01-domain-residual-root.txt"
+    },
+    {
+      "id": "S05-app-pipelines",
+      "wave": "B",
+      "files": 99,
+      "under_cap": true,
+      "selection": "src/bioetl/application/pipelines",
+      "file_list": "reports/quality/coderabbit/20260811/_S05-app-pipelines.txt"
+    },
+    {
+      "id": "S02-app-core",
+      "wave": "A",
+      "files": 196,
+      "under_cap": true,
+      "selection": "src/bioetl/application/core",
+      "file_list": "reports/quality/coderabbit/20260811/_S02-app-core.txt"
+    },
+    {
+      "id": "S03-app-control-plane",
+      "wave": "A",
+      "files": 140,
+      "under_cap": true,
+      "selection": "src/bioetl/application/services/control_plane",
+      "file_list": "reports/quality/coderabbit/20260811/_S03-app-control-plane.txt"
+    },
+    {
+      "id": "S04-app-services-other",
+      "wave": "A",
+      "files": 150,
+      "under_cap": true,
+      "selection": "src/bioetl/application/services",
+      "file_list": "reports/quality/coderabbit/20260811/_S04-app-services-other.txt"
+    },
+    {
+      "id": "S04b-app-residual",
+      "wave": "A",
+      "files": 171,
+      "under_cap": true,
+      "selection": "src/bioetl/application",
+      "file_list": "reports/quality/coderabbit/20260811/_S04b-app-residual.txt"
+    },
+    {
+      "id": "S09-composition",
+      "wave": "A",
+      "files": 283,
+      "under_cap": true,
+      "selection": "src/bioetl/composition",
+      "file_list": "reports/quality/coderabbit/20260811/_S09-composition.txt"
+    },
+    {
+      "id": "S10-interfaces-cli",
+      "wave": "A",
+      "files": 104,
+      "under_cap": true,
+      "selection": "src/bioetl/interfaces/cli",
+      "file_list": "reports/quality/coderabbit/20260811/_S10-interfaces-cli.txt"
+    },
+    {
+      "id": "S11-interfaces-http",
+      "wave": "A",
+      "files": 50,
+      "under_cap": true,
+      "selection": "src/bioetl/interfaces/http",
+      "file_list": "reports/quality/coderabbit/20260811/_S11-interfaces-http.txt"
+    },
+    {
+      "id": "S11b-interfaces-residual",
+      "wave": "A",
+      "files": 2,
+      "under_cap": true,
+      "selection": "src/bioetl/interfaces",
+      "file_list": "reports/quality/coderabbit/20260811/_S11b-interfaces-residual.txt"
+    },
+    {
+      "id": "S07-infra-storage",
+      "wave": "B",
+      "files": 145,
+      "under_cap": true,
+      "selection": "src/bioetl/infrastructure/storage",
+      "file_list": "reports/quality/coderabbit/20260811/_S07-infra-storage.txt"
+    },
+    {
+      "id": "S16-configs-quality",
+      "wave": "B",
+      "files": 100,
+      "under_cap": true,
+      "selection": "configs/quality",
+      "file_list": "reports/quality/coderabbit/20260811/_S16-configs-quality.txt"
+    },
+    {
+      "id": "S16b-configs-other",
+      "wave": "B",
+      "files": 156,
+      "under_cap": true,
+      "selection": "configs",
+      "file_list": "reports/quality/coderabbit/20260811/_S16b-configs-other.txt"
+    },
+    {
+      "id": "S06-infra-adapters",
+      "wave": "C",
+      "files": 218,
+      "under_cap": true,
+      "selection": "src/bioetl/infrastructure/adapters",
+      "file_list": "reports/quality/coderabbit/20260811/_S06-infra-adapters.txt"
+    },
+    {
+      "id": "S08-infra-observability",
+      "wave": "C",
+      "files": 57,
+      "under_cap": true,
+      "selection": "src/bioetl/infrastructure/observability",
+      "file_list": "reports/quality/coderabbit/20260811/_S08-infra-observability.txt"
+    },
+    {
+      "id": "S08b-infra-residual",
+      "wave": "C",
+      "files": 206,
+      "under_cap": true,
+      "selection": "src/bioetl/infrastructure",
+      "file_list": "reports/quality/coderabbit/20260811/_S08b-infra-residual.txt"
+    },
+    {
+      "id": "S17-docs-00-project-01",
+      "wave": "E",
+      "files": 300,
+      "under_cap": true,
+      "selection": "docs/00-project",
+      "file_list": "reports/quality/coderabbit/20260811/_S17-docs-00-project-01.txt"
+    },
+    {
+      "id": "S17-docs-00-project-02",
+      "wave": "E",
+      "files": 27,
+      "under_cap": true,
+      "selection": "docs/00-project",
+      "file_list": "reports/quality/coderabbit/20260811/_S17-docs-00-project-02.txt"
+    },
+    {
+      "id": "S17-docs-decisions",
+      "wave": "E",
+      "files": 60,
+      "under_cap": true,
+      "selection": "docs/02-architecture/decisions",
+      "file_list": "reports/quality/coderabbit/20260811/_S17-docs-decisions.txt"
+    },
+    {
+      "id": "S18-dashboard-docs",
+      "wave": "E",
+      "files": 83,
+      "under_cap": true,
+      "selection": "dashboard/grafana documentation",
+      "file_list": "reports/quality/coderabbit/20260811/_S18-dashboard-docs.txt"
+    },
+    {
+      "id": "S18-grafana",
+      "wave": "E",
+      "files": 104,
+      "under_cap": true,
+      "selection": "grafana",
+      "file_list": "reports/quality/coderabbit/20260811/_S18-grafana.txt"
+    },
+    {
+      "id": "S19-github-workflows",
+      "wave": "E",
+      "files": 41,
+      "under_cap": true,
+      "selection": ".github/workflows",
+      "file_list": "reports/quality/coderabbit/20260811/_S19-github-workflows.txt"
+    },
+    {
+      "id": "S19b-github-actions",
+      "wave": "E",
+      "files": 5,
+      "under_cap": true,
+      "selection": ".github/actions",
+      "file_list": "reports/quality/coderabbit/20260811/_S19b-github-actions.txt"
+    },
+    {
+      "id": "S12-tests-architecture-01",
+      "wave": "F",
+      "files": 300,
+      "under_cap": true,
+      "selection": "tests/architecture",
+      "file_list": "reports/quality/coderabbit/20260811/_S12-tests-architecture-01.txt"
+    },
+    {
+      "id": "S12-tests-architecture-02",
+      "wave": "F",
+      "files": 198,
+      "under_cap": true,
+      "selection": "tests/architecture",
+      "file_list": "reports/quality/coderabbit/20260811/_S12-tests-architecture-02.txt"
+    },
+    {
+      "id": "S13-tests-unit-domain-01",
+      "wave": "F",
+      "files": 300,
+      "under_cap": true,
+      "selection": "tests/unit/domain",
+      "file_list": "reports/quality/coderabbit/20260811/_S13-tests-unit-domain-01.txt"
+    },
+    {
+      "id": "S13-tests-unit-domain-02",
+      "wave": "F",
+      "files": 38,
+      "under_cap": true,
+      "selection": "tests/unit/domain",
+      "file_list": "reports/quality/coderabbit/20260811/_S13-tests-unit-domain-02.txt"
+    },
+    {
+      "id": "S14-tests-unit-application-01",
+      "wave": "F",
+      "files": 300,
+      "under_cap": true,
+      "selection": "tests/unit/application",
+      "file_list": "reports/quality/coderabbit/20260811/_S14-tests-unit-application-01.txt"
+    },
+    {
+      "id": "S14-tests-unit-application-02",
+      "wave": "F",
+      "files": 92,
+      "under_cap": true,
+      "selection": "tests/unit/application",
+      "file_list": "reports/quality/coderabbit/20260811/_S14-tests-unit-application-02.txt"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-01",
+      "wave": "F",
+      "files": 300,
+      "under_cap": true,
+      "selection": "tests/unit/infrastructure",
+      "file_list": "reports/quality/coderabbit/20260811/_S14b-tests-unit-infrastructure-01.txt"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-02",
+      "wave": "F",
+      "files": 79,
+      "under_cap": true,
+      "selection": "tests/unit/infrastructure",
+      "file_list": "reports/quality/coderabbit/20260811/_S14b-tests-unit-infrastructure-02.txt"
+    },
+    {
+      "id": "S15-tests-integration",
+      "wave": "F",
+      "files": 223,
+      "under_cap": true,
+      "selection": "tests/integration",
+      "file_list": "reports/quality/coderabbit/20260811/_S15-tests-integration.txt"
+    },
+    {
+      "id": "S15b-tests-unit-scripts",
+      "wave": "F",
+      "files": 130,
+      "under_cap": true,
+      "selection": "tests/unit/scripts",
+      "file_list": "reports/quality/coderabbit/20260811/_S15b-tests-unit-scripts.txt"
+    },
+    {
+      "id": "S15c-tests-residual-01",
+      "wave": "F",
+      "files": 300,
+      "under_cap": true,
+      "selection": "tests",
+      "file_list": "reports/quality/coderabbit/20260811/_S15c-tests-residual-01.txt"
+    },
+    {
+      "id": "S15c-tests-residual-02",
+      "wave": "F",
+      "files": 300,
+      "under_cap": true,
+      "selection": "tests",
+      "file_list": "reports/quality/coderabbit/20260811/_S15c-tests-residual-02.txt"
+    },
+    {
+      "id": "S15c-tests-residual-03",
+      "wave": "F",
+      "files": 300,
+      "under_cap": true,
+      "selection": "tests",
+      "file_list": "reports/quality/coderabbit/20260811/_S15c-tests-residual-03.txt"
+    },
+    {
+      "id": "S15c-tests-residual-04",
+      "wave": "F",
+      "files": 173,
+      "under_cap": true,
+      "selection": "tests",
+      "file_list": "reports/quality/coderabbit/20260811/_S15c-tests-residual-04.txt"
+    },
+    {
+      "id": "S-R-scripts-engineering",
+      "wave": "R",
+      "files": 225,
+      "under_cap": true,
+      "selection": "scripts/engineering",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-scripts-engineering.txt"
+    },
+    {
+      "id": "S-R-scripts-ai",
+      "wave": "R",
+      "files": 177,
+      "under_cap": true,
+      "selection": "scripts/ai",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-scripts-ai.txt"
+    },
+    {
+      "id": "S-R-scripts-ops",
+      "wave": "R",
+      "files": 136,
+      "under_cap": true,
+      "selection": "scripts/ops",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-scripts-ops.txt"
+    },
+    {
+      "id": "S-R-scripts-docs",
+      "wave": "R",
+      "files": 46,
+      "under_cap": true,
+      "selection": "scripts/docs",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-scripts-docs.txt"
+    },
+    {
+      "id": "S-R-scripts-schema",
+      "wave": "R",
+      "files": 25,
+      "under_cap": true,
+      "selection": "scripts/schema",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-scripts-schema.txt"
+    },
+    {
+      "id": "S-R-scripts-memory",
+      "wave": "R",
+      "files": 6,
+      "under_cap": true,
+      "selection": "scripts/memory",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-scripts-memory.txt"
+    },
+    {
+      "id": "S-R-scripts-diagrams",
+      "wave": "R",
+      "files": 49,
+      "under_cap": true,
+      "selection": "scripts/diagrams",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-scripts-diagrams.txt"
+    },
+    {
+      "id": "S-R-scripts-residual",
+      "wave": "R",
+      "files": 27,
+      "under_cap": true,
+      "selection": "scripts",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-scripts-residual.txt"
+    },
+    {
+      "id": "S-R-catchall-01",
+      "wave": "R",
+      "files": 136,
+      "under_cap": true,
+      "selection": "residual catch-all: .codex/agents, .codex/config.toml, .codex/skills, .devin/QUICK_REFERENCE.md, .devin/TUTORIAL.md, .devin/agent-metrics.json, .devin/agents, .devin/config.json, .devin/mcp_config.json, .devin/prompts, .devin/scripts, .devin/skills, .devin/troubleshooting.md, .devin/wiki-architecture.json, .devin/wiki-core.json, .devin/wiki-index.json, .devin/wiki-observability.json, .devin/wiki-pipelines.json, .devin/wiki-providers.json, .devin/wiki-reference.json, .devin/wiki-schemas.json, .devin/wiki.json, .devin/workflows, .github/CODEOWNERS, .github/CODE_OF_CONDUCT.md, .github/CONTRIBUTING.md",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-catchall-01.txt"
+    },
+    {
+      "id": "S-R-.github-ISSUES-01",
+      "wave": "R",
+      "files": 300,
+      "under_cap": true,
+      "selection": "residual catch-all: .github/ISSUES",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-.github-ISSUES-01.txt"
+    },
+    {
+      "id": "S-R-.github-ISSUES-02",
+      "wave": "R",
+      "files": 33,
+      "under_cap": true,
+      "selection": "residual catch-all: .github/ISSUES",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-.github-ISSUES-02.txt"
+    },
+    {
+      "id": "S-R-catchall-02",
+      "wave": "R",
+      "files": 94,
+      "under_cap": true,
+      "selection": "residual catch-all: .github/ISSUE_TEMPLATE, .github/PULL_REQUEST_HYGIENE.md, .github/SECURITY.md, .github/copilot-instructions.md, .github/dependabot.yml, .github/instructions, .github/labeler.yml, .github/pull_request_template.md, .github/root-allowlist.txt, .github/vcr-noext-allowlist.txt, .junie/agents, .junie/guidelines.md, .junie/plans, .junie/skills, .zed/README.md, .zed/USER_SETTINGS_NO_AGENT_MCP.overlay.json, .zed/keymap.json, .zed/mcp.json, .zed/settings.json, .zed/snippets, .zed/tasks.json, data/README.md, data/input, docs/01-requirements",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-catchall-02.txt"
+    },
+    {
+      "id": "S-R-docs-02-architecture-01",
+      "wave": "R",
+      "files": 300,
+      "under_cap": true,
+      "selection": "residual catch-all: docs/02-architecture",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-docs-02-architecture-01.txt"
+    },
+    {
+      "id": "S-R-docs-02-architecture-02",
+      "wave": "R",
+      "files": 300,
+      "under_cap": true,
+      "selection": "residual catch-all: docs/02-architecture",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-docs-02-architecture-02.txt"
+    },
+    {
+      "id": "S-R-docs-02-architecture-03",
+      "wave": "R",
+      "files": 300,
+      "under_cap": true,
+      "selection": "residual catch-all: docs/02-architecture",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-docs-02-architecture-03.txt"
+    },
+    {
+      "id": "S-R-docs-02-architecture-04",
+      "wave": "R",
+      "files": 300,
+      "under_cap": true,
+      "selection": "residual catch-all: docs/02-architecture",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-docs-02-architecture-04.txt"
+    },
+    {
+      "id": "S-R-docs-02-architecture-05",
+      "wave": "R",
+      "files": 93,
+      "under_cap": true,
+      "selection": "residual catch-all: docs/02-architecture",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-docs-02-architecture-05.txt"
+    },
+    {
+      "id": "S-R-catchall-03",
+      "wave": "R",
+      "files": 60,
+      "under_cap": true,
+      "selection": "residual catch-all: docs/03-data-model, docs/03-guides",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-catchall-03.txt"
+    },
+    {
+      "id": "S-R-docs-04-reference-01",
+      "wave": "R",
+      "files": 300,
+      "under_cap": true,
+      "selection": "residual catch-all: docs/04-reference",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-docs-04-reference-01.txt"
+    },
+    {
+      "id": "S-R-docs-04-reference-02",
+      "wave": "R",
+      "files": 41,
+      "under_cap": true,
+      "selection": "residual catch-all: docs/04-reference",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-docs-04-reference-02.txt"
+    },
+    {
+      "id": "S-R-catchall-04",
+      "wave": "R",
+      "files": 297,
+      "under_cap": true,
+      "selection": "residual catch-all: docs/05-engineering, docs/05-operations, docs/99-archive, docs/DOCKER_QUICKSTART.md, docs/DOCKER_SETUP.md, docs/INDEX.md, docs/devin-optimization-analysis.md, docs/doc.json, docs/docs-folder-analysis.md, docs/filters, docs/plans, docs/reports, docs/reports-migration-analysis.md, docs/security, reports/.bioetl-report-root, reports/ai, reports/architecture, reports/coverage, reports/docs-evidence",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-catchall-04.txt"
+    },
+    {
+      "id": "S-R-catchall-05",
+      "wave": "R",
+      "files": 57,
+      "under_cap": true,
+      "selection": "residual catch-all: reports/grafana, reports/logs, reports/observability, reports/plans",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-catchall-05.txt"
+    },
+    {
+      "id": "S-R-reports-quality-01",
+      "wave": "R",
+      "files": 300,
+      "under_cap": true,
+      "selection": "residual catch-all: reports/quality",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-reports-quality-01.txt"
+    },
+    {
+      "id": "S-R-reports-quality-02",
+      "wave": "R",
+      "files": 42,
+      "under_cap": true,
+      "selection": "residual catch-all: reports/quality",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-reports-quality-02.txt"
+    },
+    {
+      "id": "S-R-catchall-06",
+      "wave": "R",
+      "files": 63,
+      "under_cap": true,
+      "selection": "residual catch-all: reports/review, reports/root-hygiene, reports/semantic_pipeline_audit, reports/test-swarm, reports/test-telemetry, root-files, src/bioetl",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-catchall-06.txt"
+    },
+    {
+      "id": "S-R-src-memory-01",
+      "wave": "R",
+      "files": 300,
+      "under_cap": true,
+      "selection": "residual catch-all: src/memory",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-src-memory-01.txt"
+    },
+    {
+      "id": "S-R-src-memory-02",
+      "wave": "R",
+      "files": 164,
+      "under_cap": true,
+      "selection": "residual catch-all: src/memory",
+      "file_list": "reports/quality/coderabbit/20260811/_S-R-src-memory-02.txt"
+    }
+  ]
+}

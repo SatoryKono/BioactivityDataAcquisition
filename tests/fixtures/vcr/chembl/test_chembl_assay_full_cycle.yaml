@@ -1,0 +1,1999 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/assay?limit=1000&offset=0&format=json&assay_type__in=B%2CF&confidence_score__gte=8&relationship_type=D&target_chembl_id__isnull=false&assay_chembl_id__in=CHEMBL1000139%2CCHEMBL1000140%2CCHEMBL1000236%2CCHEMBL1000237%2CCHEMBL1000238%2CCHEMBL1000239%2CCHEMBL1000240%2CCHEMBL1000241%2CCHEMBL1000242%2CCHEMBL1000243%2CCHEMBL1000259%2CCHEMBL1000323%2CCHEMBL1000326%2CCHEMBL1000327%2CCHEMBL1000360%2CCHEMBL1000365%2CCHEMBL1000392%2CCHEMBL1000429%2CCHEMBL1000436%2CCHEMBL1000438%2CCHEMBL1000453%2CCHEMBL1000455%2CCHEMBL1000457%2CCHEMBL1000459%2CCHEMBL1000461%2CCHEMBL1000499%2CCHEMBL1000500%2CCHEMBL1000504%2CCHEMBL1000791%2CCHEMBL1001098%2CCHEMBL1001152%2CCHEMBL1001153%2CCHEMBL1001154%2CCHEMBL1001157%2CCHEMBL1001164%2CCHEMBL1001173%2CCHEMBL1001316%2CCHEMBL1001317%2CCHEMBL1001318%2CCHEMBL1001319%2CCHEMBL1001321%2CCHEMBL1001322%2CCHEMBL1001370%2CCHEMBL1001385%2CCHEMBL1001386%2CCHEMBL1001497%2CCHEMBL1001498%2CCHEMBL1001508%2CCHEMBL1001509%2CCHEMBL1001510%2CCHEMBL1002042%2CCHEMBL1002063%2CCHEMBL1002142%2CCHEMBL1002143%2CCHEMBL1002144%2CCHEMBL1002145%2CCHEMBL1002146%2CCHEMBL1002147%2CCHEMBL1002148%2CCHEMBL1002149%2CCHEMBL1002150%2CCHEMBL1002151%2CCHEMBL1002153%2CCHEMBL1002154%2CCHEMBL1002155%2CCHEMBL1002177%2CCHEMBL1002226%2CCHEMBL1002228%2CCHEMBL1002249%2CCHEMBL1002250%2CCHEMBL1002353%2CCHEMBL1002355%2CCHEMBL1002439%2CCHEMBL1002508%2CCHEMBL1002514%2CCHEMBL1002515%2CCHEMBL1002717%2CCHEMBL1002718%2CCHEMBL1002720%2CCHEMBL1002723%2CCHEMBL1002983%2CCHEMBL1002984%2CCHEMBL1002985%2CCHEMBL1002988%2CCHEMBL1002989%2CCHEMBL1003097%2CCHEMBL1003111%2CCHEMBL1003145%2CCHEMBL1003147%2CCHEMBL1003207%2CCHEMBL1003656%2CCHEMBL1003657%2CCHEMBL1003672%2CCHEMBL1003709%2CCHEMBL1003710%2CCHEMBL1003711%2CCHEMBL1003729%2CCHEMBL1003787%2CCHEMBL1003792%2CCHEMBL1003881
+  response:
+    body:
+      string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1003656", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Bos taurus", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9913, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of COX1 in bovine platelets assessed as formation
+        of 12-hydroxyheptadecatrienoic acid by HPLC", "document_chembl_id": "CHEMBL1140871",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL2860",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL1003657", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Inhibition of COX2 in LPS-stimulated
+        human blood", "document_chembl_id": "CHEMBL1140871", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL230", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000323", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Human immunodeficiency virus 1", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        11676, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of RNA-dependent DNA polymerase activity of
+        HIV1 reverse transcriptase Lys103Asn mutant by SPA", "document_chembl_id":
+        "CHEMBL1140225", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL247", "tissue_chembl_id": null, "variant_sequence": {"accession": "Q9WJQ2",
+        "isoform": null, "mutation": "K103N", "organism": "Human immunodeficiency
+        virus 1", "sequence": "PISPIEPVPVKLKPGMDGPKVKQWPLTEEKIKALVEICTEMEKEGKISKIGPENPYNTPVFAIKKKDSTRWRKLVDFRELNKRTQDFWEVQLGIPHPAGLKKNRSVTVLDVGDAYFSVPLDKEFRKYTAFTIPSINNETPGIRYQYNVLPQGWKGSPAIFQSSMTKILEPFRKQNPDIVIYQYMDDLYVGSDLEIGQHRTKIEELRQHLLKWGFTTPDKKHQKEPPFLWMGYEHHPDKWTVQPIVLPEKDSWTVNDIQK",
+        "tax_id": 11676, "version": 1}}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": null, "assay_chembl_id": "CHEMBL1000326", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Human immunodeficiency virus 1",
+        "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 11676, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000019",
+        "bao_label": "assay format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of RNA-dependent DNA polymerase activity of HIV1 reverse transcriptase
+        Lys103Asn/Tyr181Cys mutant by SPA", "document_chembl_id": "CHEMBL1140225",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL247", "tissue_chembl_id":
+        null, "variant_sequence": {"accession": "Q9WJQ2", "isoform": null, "mutation":
+        "K103N,Y181C", "organism": "Human immunodeficiency virus 1", "sequence": "PISPIEPVPVKLKPGMDGPKVKQWPLTEEKIKALVEICTEMEKEGKISKIGPENPYNTPVFAIKKKDSTRWRKLVDFRELNKRTQDFWEVQLGIPHPAGLKKNRSVTVLDVGDAYFSVPLDKEFRKYTAFTIPSINNETPGIRYQYNVLPQGWKGSPAIFQSSMTKILEPFRKQNPDIVICQYMDDLYVGSDLEIGQHRTKIEELRQHLLKWGFTTPDKKHQKEPPFLWMGYEHHPDKWTVQPIVLPEKDSWTVNDIQK",
+        "tax_id": 11676, "version": 1}}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": null, "assay_chembl_id": "CHEMBL1000327", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Human immunodeficiency virus 1",
+        "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 11676, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of RNA-dependent DNA polymerase activity of wild type HIV1 reverse
+        transcriptase by SPA", "document_chembl_id": "CHEMBL1140225", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL247", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000139", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Cavia porcellus", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": "Membrane", "assay_tax_id": 10141, "assay_test_type":
+        null, "assay_tissue": "Liver", "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000249", "bao_label": "cell membrane format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Displacement of [3H](-)-(S)-emopamil
+        from EBP in guinea pig liver membrane", "document_chembl_id": "CHEMBL1140235",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL5525",
+        "tissue_chembl_id": "CHEMBL3559723", "variant_sequence": null}, {"aidx": "CLD0",
+        "assay_category": null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL1000140",
+        "assay_classifications": [], "assay_group": null, "assay_organism": "Cavia
+        porcellus", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        "Membrane", "assay_tax_id": 10141, "assay_test_type": null, "assay_tissue":
+        "Brain", "assay_type": "B", "assay_type_description": "Binding", "bao_format":
+        "BAO_0000249", "bao_label": "cell membrane format", "cell_chembl_id": null,
+        "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Displacement of [3H](+)-pentazocine from sigma 1 receptor
+        in guinea pig brain membrane without cerebellum", "document_chembl_id": "CHEMBL1140235",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL4153",
+        "tissue_chembl_id": "CHEMBL3638188", "variant_sequence": null}, {"aidx": "CLD0",
+        "assay_category": null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL1001098",
+        "assay_classifications": [], "assay_group": null, "assay_organism": "Homo
+        sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human recombinant HAT PCAF", "document_chembl_id": "CHEMBL1140889",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL5500",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL1001152", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Displacement of radiolabeled
+        ligand from human PPARalpha by competition-binding assay", "document_chembl_id":
+        "CHEMBL1141686", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL239", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1001153", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of radiolabeled ligand from human PPARgamma by competition-binding
+        assay", "document_chembl_id": "CHEMBL1141686", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL235", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1001154", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Displacement of [3H]GW 2433 from human PPARdelta by competition-binding
+        assay", "document_chembl_id": "CHEMBL1141686", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL3979", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "LMtk", "assay_chembl_id": "CHEMBL1001157", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000219", "bao_label": "cell-based format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Binding affinity to human NPY Y5 receptor transfected in
+        mouse LMtk cells", "document_chembl_id": "CHEMBL1141687", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL4561", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "LMtk", "assay_chembl_id": "CHEMBL1001164", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "F", "assay_type_description": "Functional",
+        "bao_format": "BAO_0000219", "bao_label": "cell-based format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Antagonist activity at human NPY Y5 receptor transfected
+        in mouse LMtk cells assessed as inhibition of neuropeptide Y-induced increase
+        in intercellular Ca2+ level", "document_chembl_id": "CHEMBL1141687", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL4561", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "CHO", "assay_chembl_id": "CHEMBL1003787", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "F", "assay_type_description": "Functional",
+        "bao_format": "BAO_0000219", "bao_label": "cell-based format", "cell_chembl_id":
+        "CHEMBL3308072", "confidence_description": "Direct single protein target assigned",
+        "confidence_score": 9, "description": "Antagonist activity at human CXCR3
+        expressed in CHO cells assessed as inhibition of ITAC-stimulated [35S]GTPgammaS
+        binding pretreated 30 mins before ITAC challenge", "document_chembl_id": "CHEMBL1139391",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL4441",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL1003792", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Displacement of [125I]ITAC
+        from CXCR3 in PHA/IL-2 activated human PBMC pretreated 30 mins before [125I]ITAC
+        challenge after 1 hr by liquid scintillation counter", "document_chembl_id":
+        "CHEMBL1139391", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL4441", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1001173", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human recombinant TACE", "document_chembl_id": "CHEMBL1139393",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL3706",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": "HCT-116", "assay_chembl_id": "CHEMBL1002042", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3308372", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Inhibition
+        of CDK9 in human HCT116 cells assessed as phosphor-ser2 level of RNA polymerase
+        2 after 16 hrs by high content cellular assay", "document_chembl_id": "CHEMBL1143434",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL3116",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": "Caco-2", "assay_chembl_id": "CHEMBL1002063", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307519", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Inhibition
+        of human Caco-2 cells-derived DPP4", "document_chembl_id": "CHEMBL1152235",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL284", "tissue_chembl_id":
+        null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": "SK-N-MC", "assay_chembl_id": "CHEMBL1003672", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307551", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Displacement
+        of [125I]iodoproxyfan from human recombinant histamine H3 receptor expressed
+        in human SK-N-MC cells", "document_chembl_id": "CHEMBL1143437", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL264", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1002983", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of human recombinant carbonic anhydrase 1 by
+        stopped flow CO2 hydration assay", "document_chembl_id": "CHEMBL1138443",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL261", "tissue_chembl_id":
+        null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": null, "assay_chembl_id": "CHEMBL1002984", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Inhibition of human recombinant
+        carbonic anhydrase 2 by stopped flow CO2 hydration assay", "document_chembl_id":
+        "CHEMBL1138443", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL205", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1002985", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Mycobacterium tuberculosis", "assay_parameters": [], "assay_strain": null,
+        "assay_subcellular_fraction": null, "assay_tax_id": 1773, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of Mycobacterium tuberculosis recombinant carbonic
+        anhydrase 1 encoded by Rv1284 by stopped flow CO2 hydration assay", "document_chembl_id":
+        "CHEMBL1138443", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL5631", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": "HEK293", "assay_chembl_id":
+        "CHEMBL1002988", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": "CHEMBL3307715", "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]SR141716 from human recombinant CB1 receptor expressed
+        in HEK293 cells", "document_chembl_id": "CHEMBL1138444", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL218", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "HEK293", "assay_chembl_id": "CHEMBL1002989", "assay_classifications": [],
+        "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307715", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Displacement
+        of [3H]SR141716 from human recombinant CB2 receptor expressed in HEK293 cells",
+        "document_chembl_id": "CHEMBL1138444", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL253", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1003709", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Electrophorus electricus", "assay_parameters": [], "assay_strain": null,
+        "assay_subcellular_fraction": null, "assay_tax_id": 8005, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of electric eel AChE by Rappaport method", "document_chembl_id":
+        "CHEMBL1138487", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL4078", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1003710", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human serum BChE by Ellman''s method", "document_chembl_id":
+        "CHEMBL1138487", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL1914", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1003711", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human serum AChE by Ellman''s method", "document_chembl_id":
+        "CHEMBL1138487", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL220", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1003729", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human recombinant MAO-B assessed as hydrogen peroxide production",
+        "document_chembl_id": "CHEMBL1138489", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL2039", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": "CHO",
+        "assay_chembl_id": "CHEMBL1000259", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000219", "bao_label": "cell-based format", "cell_chembl_id":
+        "CHEMBL3308072", "confidence_description": "Direct single protein target assigned",
+        "confidence_score": 9, "description": "Displacement of [125I]substance P human
+        recombinant NK1 receptor expressed in CHO cells in absence of human serum
+        albumin", "document_chembl_id": "CHEMBL1138468", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL249", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000236", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Displacement of [3H]PDBu form human PKCalpha in presence
+        of phosphatidylserine", "document_chembl_id": "CHEMBL1138492", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL299", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000237", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Displacement of [3H]PDBu form human PKCbeta in presence
+        of phosphatidylserine", "document_chembl_id": "CHEMBL1138492", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL3045", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000238", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Displacement of [3H]PDBu form human PKCgamma in presence
+        of phosphatidylserine", "document_chembl_id": "CHEMBL1138492", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL2938", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000239", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Displacement of [3H]PDBu form human PKCdelta in presence
+        of phosphatidylserine", "document_chembl_id": "CHEMBL1138492", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL2996", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000240", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Displacement of [3H]PDBu form human PKCepsilon in presence
+        of phosphatidylserine", "document_chembl_id": "CHEMBL1138492", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL3582", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000241", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000249", "bao_label": "cell membrane format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Displacement of [3H]PDBu form human PKCalpha in presence
+        of plasma membrane lipid mimetic mixture", "document_chembl_id": "CHEMBL1138492",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL299", "tissue_chembl_id":
+        null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": null, "assay_chembl_id": "CHEMBL1000242", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000249", "bao_label": "cell membrane format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Displacement of [3H]PDBu
+        form human PKCbeta in presence of plasma membrane lipid mimetic mixture",
+        "document_chembl_id": "CHEMBL1138492", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL3045", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1000243", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000249",
+        "bao_label": "cell membrane format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]PDBu form human PKCgamma in presence of plasma membrane
+        lipid mimetic mixture", "document_chembl_id": "CHEMBL1138492", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL2938", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1002142", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of basal ATPase activity of human Eg5", "document_chembl_id":
+        "CHEMBL1156439", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL4581", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1002143", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of microtubule-stimulated human Eg5 ATPase activity", "document_chembl_id":
+        "CHEMBL1156439", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL4581", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": "HEK293", "assay_chembl_id":
+        "CHEMBL1002144", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": "CHEMBL3307715", "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]CFT from human DAT M272L/1291M/R344M mutant expressed
+        in HEK293 cells", "document_chembl_id": "CHEMBL1156440", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL238", "tissue_chembl_id": null,
+        "variant_sequence": {"accession": "Q01959", "isoform": null, "mutation": "M272L,I291M,R344M",
+        "organism": "Homo sapiens", "sequence": "MSKSKCSVGLMSSVVAPAKEPNAVGPKEVELILVKEQNGVQLTSSTLTNPRQSPVEAQDRETWGKKIDFLLSVIGFAVDLANVWRFPYLCYKNGGGAFLVPYLLFMVIAGMPLFYMELALGQFNREGAAGVWKICPILKGVGFTVILISLYVGFFYNVIIAWALHYLFSSFTTELPWIHCNNSWNSPNCSDAHPGDSSGDSSGLNDTFGTTPAAEYFERGVLHLHQSHGIDDLGPPRWQLTACLVLVIVLLYFSLWKGVKTSGKVVWITATLPYVVLTALLLRGVTLPGAMDGIRAYLSVDFYRLCEASVWIDAATQVCFSLGVGFGVLIAFSSYNKFTNNCYMDAIVTTSINSLTSFSSGFVVFSFLGYMAQKHSVPIGDVAKDGPGLIFIIYPEAIATLPLSSAWAVVFFIMLLTLGIDSAMGGMESVITGLIDEFQLLHRHRELFTLFIVLATFLLSLFCVTNGGIYVFTLLDHFAAGTSILFGVLIEAIGVAWFYGVGQFSDDIQQMTGQRPSLYWRLCWKLVSPCFLLFVVVVSIVTFRPPHYGAYIFPDWANALGWVIATSSMAMVPIYAAYKFCSLPGSFREKLAYAIAPEKDRELVDRGEVRQFTLRHWLKV",
+        "tax_id": 9606, "version": 1}}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "HEK293", "assay_chembl_id": "CHEMBL1002145", "assay_classifications": [],
+        "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307715", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Displacement
+        of [3H]CFT from human DAT M272L/R344M mutant expressed in HEK293 cells", "document_chembl_id":
+        "CHEMBL1156440", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL238", "tissue_chembl_id": null, "variant_sequence": {"accession": "Q01959",
+        "isoform": null, "mutation": "M272L,R344M", "organism": "Homo sapiens", "sequence":
+        "MSKSKCSVGLMSSVVAPAKEPNAVGPKEVELILVKEQNGVQLTSSTLTNPRQSPVEAQDRETWGKKIDFLLSVIGFAVDLANVWRFPYLCYKNGGGAFLVPYLLFMVIAGMPLFYMELALGQFNREGAAGVWKICPILKGVGFTVILISLYVGFFYNVIIAWALHYLFSSFTTELPWIHCNNSWNSPNCSDAHPGDSSGDSSGLNDTFGTTPAAEYFERGVLHLHQSHGIDDLGPPRWQLTACLVLVIVLLYFSLWKGVKTSGKVVWITATLPYVVLTALLLRGVTLPGAIDGIRAYLSVDFYRLCEASVWIDAATQVCFSLGVGFGVLIAFSSYNKFTNNCYMDAIVTTSINSLTSFSSGFVVFSFLGYMAQKHSVPIGDVAKDGPGLIFIIYPEAIATLPLSSAWAVVFFIMLLTLGIDSAMGGMESVITGLIDEFQLLHRHRELFTLFIVLATFLLSLFCVTNGGIYVFTLLDHFAAGTSILFGVLIEAIGVAWFYGVGQFSDDIQQMTGQRPSLYWRLCWKLVSPCFLLFVVVVSIVTFRPPHYGAYIFPDWANALGWVIATSSMAMVPIYAAYKFCSLPGSFREKLAYAIAPEKDRELVDRGEVRQFTLRHWLKV",
+        "tax_id": 9606, "version": 1}}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "HEK293", "assay_chembl_id": "CHEMBL1002146", "assay_classifications": [],
+        "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307715", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Displacement
+        of [3H]CFT from human DAT R344M mutant expressed in HEK293 cells", "document_chembl_id":
+        "CHEMBL1156440", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL238", "tissue_chembl_id": null, "variant_sequence": {"accession": "Q01959",
+        "isoform": null, "mutation": "R344M", "organism": "Homo sapiens", "sequence":
+        "MSKSKCSVGLMSSVVAPAKEPNAVGPKEVELILVKEQNGVQLTSSTLTNPRQSPVEAQDRETWGKKIDFLLSVIGFAVDLANVWRFPYLCYKNGGGAFLVPYLLFMVIAGMPLFYMELALGQFNREGAAGVWKICPILKGVGFTVILISLYVGFFYNVIIAWALHYLFSSFTTELPWIHCNNSWNSPNCSDAHPGDSSGDSSGLNDTFGTTPAAEYFERGVLHLHQSHGIDDLGPPRWQLTACLVLVIVLLYFSLWKGVKTSGKVVWITATMPYVVLTALLLRGVTLPGAIDGIRAYLSVDFYRLCEASVWIDAATQVCFSLGVGFGVLIAFSSYNKFTNNCYMDAIVTTSINSLTSFSSGFVVFSFLGYMAQKHSVPIGDVAKDGPGLIFIIYPEAIATLPLSSAWAVVFFIMLLTLGIDSAMGGMESVITGLIDEFQLLHRHRELFTLFIVLATFLLSLFCVTNGGIYVFTLLDHFAAGTSILFGVLIEAIGVAWFYGVGQFSDDIQQMTGQRPSLYWRLCWKLVSPCFLLFVVVVSIVTFRPPHYGAYIFPDWANALGWVIATSSMAMVPIYAAYKFCSLPGSFREKLAYAIAPEKDRELVDRGEVRQFTLRHWLKV",
+        "tax_id": 9606, "version": 1}}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "HEK293", "assay_chembl_id": "CHEMBL1002147", "assay_classifications": [],
+        "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307715", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Displacement
+        of [3H]CFT from human DAT expressed in HEK293 cells", "document_chembl_id":
+        "CHEMBL1156440", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL238", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": "HEK293", "assay_chembl_id":
+        "CHEMBL1002148", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": "CHEMBL3307715", "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of [3H]dopamine uptake at human DAT M272L/1291M/R344M mutant expressed
+        in HEK293 cells", "document_chembl_id": "CHEMBL1156440", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL238", "tissue_chembl_id": null,
+        "variant_sequence": {"accession": "Q01959", "isoform": null, "mutation": "M272L,I291M,R344M",
+        "organism": "Homo sapiens", "sequence": "MSKSKCSVGLMSSVVAPAKEPNAVGPKEVELILVKEQNGVQLTSSTLTNPRQSPVEAQDRETWGKKIDFLLSVIGFAVDLANVWRFPYLCYKNGGGAFLVPYLLFMVIAGMPLFYMELALGQFNREGAAGVWKICPILKGVGFTVILISLYVGFFYNVIIAWALHYLFSSFTTELPWIHCNNSWNSPNCSDAHPGDSSGDSSGLNDTFGTTPAAEYFERGVLHLHQSHGIDDLGPPRWQLTACLVLVIVLLYFSLWKGVKTSGKVVWITATLPYVVLTALLLRGVTLPGAMDGIRAYLSVDFYRLCEASVWIDAATQVCFSLGVGFGVLIAFSSYNKFTNNCYMDAIVTTSINSLTSFSSGFVVFSFLGYMAQKHSVPIGDVAKDGPGLIFIIYPEAIATLPLSSAWAVVFFIMLLTLGIDSAMGGMESVITGLIDEFQLLHRHRELFTLFIVLATFLLSLFCVTNGGIYVFTLLDHFAAGTSILFGVLIEAIGVAWFYGVGQFSDDIQQMTGQRPSLYWRLCWKLVSPCFLLFVVVVSIVTFRPPHYGAYIFPDWANALGWVIATSSMAMVPIYAAYKFCSLPGSFREKLAYAIAPEKDRELVDRGEVRQFTLRHWLKV",
+        "tax_id": 9606, "version": 1}}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "HEK293", "assay_chembl_id": "CHEMBL1002149", "assay_classifications": [],
+        "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307715", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Inhibition
+        of [3H]dopamine uptake at human DAT M272L/R344M mutant expressed in HEK293
+        cells", "document_chembl_id": "CHEMBL1156440", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL238", "tissue_chembl_id": null,
+        "variant_sequence": {"accession": "Q01959", "isoform": null, "mutation": "M272L,R344M",
+        "organism": "Homo sapiens", "sequence": "MSKSKCSVGLMSSVVAPAKEPNAVGPKEVELILVKEQNGVQLTSSTLTNPRQSPVEAQDRETWGKKIDFLLSVIGFAVDLANVWRFPYLCYKNGGGAFLVPYLLFMVIAGMPLFYMELALGQFNREGAAGVWKICPILKGVGFTVILISLYVGFFYNVIIAWALHYLFSSFTTELPWIHCNNSWNSPNCSDAHPGDSSGDSSGLNDTFGTTPAAEYFERGVLHLHQSHGIDDLGPPRWQLTACLVLVIVLLYFSLWKGVKTSGKVVWITATLPYVVLTALLLRGVTLPGAIDGIRAYLSVDFYRLCEASVWIDAATQVCFSLGVGFGVLIAFSSYNKFTNNCYMDAIVTTSINSLTSFSSGFVVFSFLGYMAQKHSVPIGDVAKDGPGLIFIIYPEAIATLPLSSAWAVVFFIMLLTLGIDSAMGGMESVITGLIDEFQLLHRHRELFTLFIVLATFLLSLFCVTNGGIYVFTLLDHFAAGTSILFGVLIEAIGVAWFYGVGQFSDDIQQMTGQRPSLYWRLCWKLVSPCFLLFVVVVSIVTFRPPHYGAYIFPDWANALGWVIATSSMAMVPIYAAYKFCSLPGSFREKLAYAIAPEKDRELVDRGEVRQFTLRHWLKV",
+        "tax_id": 9606, "version": 1}}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "HEK293", "assay_chembl_id": "CHEMBL1002150", "assay_classifications": [],
+        "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307715", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Inhibition
+        of [3H]dopamine uptake at human DAT R344M mutant expressed in HEK293 cells",
+        "document_chembl_id": "CHEMBL1156440", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL238", "tissue_chembl_id": null, "variant_sequence":
+        {"accession": "Q01959", "isoform": null, "mutation": "R344M", "organism":
+        "Homo sapiens", "sequence": "MSKSKCSVGLMSSVVAPAKEPNAVGPKEVELILVKEQNGVQLTSSTLTNPRQSPVEAQDRETWGKKIDFLLSVIGFAVDLANVWRFPYLCYKNGGGAFLVPYLLFMVIAGMPLFYMELALGQFNREGAAGVWKICPILKGVGFTVILISLYVGFFYNVIIAWALHYLFSSFTTELPWIHCNNSWNSPNCSDAHPGDSSGDSSGLNDTFGTTPAAEYFERGVLHLHQSHGIDDLGPPRWQLTACLVLVIVLLYFSLWKGVKTSGKVVWITATMPYVVLTALLLRGVTLPGAIDGIRAYLSVDFYRLCEASVWIDAATQVCFSLGVGFGVLIAFSSYNKFTNNCYMDAIVTTSINSLTSFSSGFVVFSFLGYMAQKHSVPIGDVAKDGPGLIFIIYPEAIATLPLSSAWAVVFFIMLLTLGIDSAMGGMESVITGLIDEFQLLHRHRELFTLFIVLATFLLSLFCVTNGGIYVFTLLDHFAAGTSILFGVLIEAIGVAWFYGVGQFSDDIQQMTGQRPSLYWRLCWKLVSPCFLLFVVVVSIVTFRPPHYGAYIFPDWANALGWVIATSSMAMVPIYAAYKFCSLPGSFREKLAYAIAPEKDRELVDRGEVRQFTLRHWLKV",
+        "tax_id": 9606, "version": 1}}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "HEK293", "assay_chembl_id": "CHEMBL1002151", "assay_classifications": [],
+        "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307715", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Inhibition
+        of [3H]dopamine uptake at human DAT expressed in HEK293 cells", "document_chembl_id":
+        "CHEMBL1156440", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL238", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1002153", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human non-glycosylated PAI1 using tissue type plasminogen activator
+        substrate by direct chromogenic assay", "document_chembl_id": "CHEMBL1156441",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL3475",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL1002154", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Inhibition of human non-glycosylated
+        PAI1 using urokinase type plasminogen activator substrate by direct chromogenic
+        assay", "document_chembl_id": "CHEMBL1156441", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL3475", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1002155", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of human glycosylated PAI1 using tissue type
+        plasminogen activator substrate by direct chromogenic assay", "document_chembl_id":
+        "CHEMBL1156441", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL3475", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1002353", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human glycosylated PAI1 using urokinase type plasminogen activator
+        substrate by direct chromogenic assay", "document_chembl_id": "CHEMBL1156441",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL3475",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL1002355", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Inhibition of vitronectin
+        binding to human PAI1", "document_chembl_id": "CHEMBL1156441", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL3475", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1003207", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of human recombinant GAR transformylase", "document_chembl_id":
+        "CHEMBL1156444", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL3972", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": "CHO", "assay_chembl_id":
+        "CHEMBL1000453", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": "CHEMBL3308072", "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]DPCPX from human adenosine A1 receptor expressed in CHO
+        cell membrane", "document_chembl_id": "CHEMBL1155896", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL226", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "HEK293", "assay_chembl_id": "CHEMBL1000455", "assay_classifications": [],
+        "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307715", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Displacement
+        of [3H]ZM241385 from human adenosine A2A receptor expressed in HEK293 cell
+        membrane", "document_chembl_id": "CHEMBL1155896", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL251", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "CHO", "assay_chembl_id": "CHEMBL1000457", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000219", "bao_label": "cell-based format", "cell_chembl_id":
+        "CHEMBL3308072", "confidence_description": "Direct single protein target assigned",
+        "confidence_score": 9, "description": "Displacement of [3H]MRS1754 from human
+        adenosine A2B receptor expressed in CHO cell membrane", "document_chembl_id":
+        "CHEMBL1155896", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL255", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": "HEK293", "assay_chembl_id":
+        "CHEMBL1000459", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": "CHEMBL3307715", "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]AB-MECA from human adenosine A3 receptor expressed in
+        HEK293 cell membrane", "document_chembl_id": "CHEMBL1155896", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL256", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000461", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Rattus norvegicus", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 10116, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000249", "bao_label": "cell membrane format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Displacement of [125I]alpha-bungarotoxin from alpha7 nAChR
+        in rat cortical membrane", "document_chembl_id": "CHEMBL1155922", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL4980", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1001370", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of human factor 10a", "document_chembl_id":
+        "CHEMBL1155925", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL244", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": "HEK293", "assay_chembl_id":
+        "CHEMBL1001385", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": "CHEMBL3307715", "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]citalopram from human SERT expressed in HEK293 cells",
+        "document_chembl_id": "CHEMBL1155929", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL228", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": "HEK293",
+        "assay_chembl_id": "CHEMBL1001386", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000219", "bao_label": "cell-based format", "cell_chembl_id":
+        "CHEMBL3307715", "confidence_description": "Direct single protein target assigned",
+        "confidence_score": 9, "description": "Displacement of [3H]paroxetine from
+        human SERT expressed in HEK293 cells", "document_chembl_id": "CHEMBL1155929",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL228", "tissue_chembl_id":
+        null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": null, "assay_chembl_id": "CHEMBL1000499", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Rattus norvegicus", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        10116, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of AchE in rat cortex by Ellman''s method",
+        "document_chembl_id": "CHEMBL1156564", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL3199", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1000500", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Rattus norvegicus", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 10116, "assay_test_type": null, "assay_tissue": "Serum",
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000366",
+        "bao_label": "cell-free format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of BuchE in rat serum by Ellman''s method", "document_chembl_id":
+        "CHEMBL1156564", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL3403", "tissue_chembl_id": "CHEMBL3638229", "variant_sequence": null},
+        {"aidx": "CLD0", "assay_category": null, "assay_cell_type": "SK-N-MC", "assay_chembl_id":
+        "CHEMBL1000504", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": "CHEMBL3307551", "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [I125]CGRP from human CGRP receptor in SK-N-MC cells", "document_chembl_id":
+        "CHEMBL1156565", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL3798", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": "CHO", "assay_chembl_id":
+        "CHEMBL1002177", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": "CHEMBL3308072", "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]nicotinic acid from human GPR109a receptor expressed
+        in CHO cells", "document_chembl_id": "CHEMBL1156568", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL3785", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "V79 MZh", "assay_chembl_id": "CHEMBL1002226", "assay_classifications": [],
+        "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Inhibition of human CYP11B2
+        expressed in hamster V79 MZh cells", "document_chembl_id": "CHEMBL1156596",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL2722",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": "V79 MZh", "assay_chembl_id": "CHEMBL1002228", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Inhibition of human CYP11B1
+        expressed in hamster V79 MZh cells", "document_chembl_id": "CHEMBL1156596",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL1908",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL1002249", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of human recombinant CYP17 expressed in Escherichia
+        coli", "document_chembl_id": "CHEMBL1156596", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL3522", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1002250", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of human placental CYP19", "document_chembl_id":
+        "CHEMBL1156596", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL1978", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1003097", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human EGFR", "document_chembl_id": "CHEMBL1156626", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL203", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1003111", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Mus musculus", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 10090, "assay_test_type":
+        null, "assay_tissue": "Vas deferens", "assay_type": "F", "assay_type_description":
+        "Functional", "bao_format": "BAO_0000221", "bao_label": "tissue-based format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Agonist activity at delta
+        opioid receptor in mouse vas deferens assessed as inhibition of electrically-stimulated
+        muscle contraction", "document_chembl_id": "CHEMBL1156628", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL3222", "tissue_chembl_id": "CHEMBL3638198",
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "HEK293", "assay_chembl_id": "CHEMBL1003145", "assay_classifications": [],
+        "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307715", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Displacement
+        of [3H]CP-55940 from human CB2 receptor expressed in HEK293 cells", "document_chembl_id":
+        "CHEMBL1140049", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL253", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": "HEK293", "assay_chembl_id":
+        "CHEMBL1003147", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": "CHEMBL3307715", "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]CP-55940 from human CB1 receptor expressed in HEK293
+        cells", "document_chembl_id": "CHEMBL1140049", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL218", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000360", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of human Wee1 assessed as polyornithine-tyrosine
+        copolymer phosphorylation", "document_chembl_id": "CHEMBL1156685", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL5491", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "HT-29", "assay_chembl_id": "CHEMBL1000365", "assay_classifications": [],
+        "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307768", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Inhibition
+        of Cdc2 Tyr15 phosphorylation in human HT29 cells by Western blot", "document_chembl_id":
+        "CHEMBL1156685", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL308", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1000392", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human recombinant GAR transformylase", "document_chembl_id":
+        "CHEMBL1157354", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL3972", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1001316", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human PDE4B1 in cytosolic fraction of lung", "document_chembl_id":
+        "CHEMBL1157355", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL275", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1001317", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human PDE4B1 in particular fraction of lung", "document_chembl_id":
+        "CHEMBL1157355", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL275", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1001318", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human PDE4B2 in cytosolic fraction of lung", "document_chembl_id":
+        "CHEMBL1157355", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL275", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1001319", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human PDE4B2 in particular fraction of lung", "document_chembl_id":
+        "CHEMBL1157355", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL275", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1001321", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human PDE4B3 in cytosolic fraction of lung", "document_chembl_id":
+        "CHEMBL1157355", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL275", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1001322", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human PDE4B3 in particular fraction of lung", "document_chembl_id":
+        "CHEMBL1157355", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL275", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1000429", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human PDE4D", "document_chembl_id": "CHEMBL1157355", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL288", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "CHO", "assay_chembl_id": "CHEMBL1000436", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000219", "bao_label": "cell-based format", "cell_chembl_id":
+        "CHEMBL3308072", "confidence_description": "Direct single protein target assigned",
+        "confidence_score": 9, "description": "Inhibition of GST-fused human MLK1
+        expressed in CHO cells assessed as MKK4 phosphorylation", "document_chembl_id":
+        "CHEMBL1140055", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL2872", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1000438", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000019",
+        "bao_label": "assay format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human DLK expressed in baculovirus insect cell system", "document_chembl_id":
+        "CHEMBL1140055", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL5671", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1003881", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human PDE4A", "document_chembl_id": "CHEMBL1157355", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL254", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1002439", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": "Brain", "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000221", "bao_label": "tissue-based format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Displacement of [125I]IMPY
+        from beta-amyloid plaques in brain homogenate of patient with Alzheimer''s
+        disease by gamma counting", "document_chembl_id": "CHEMBL1137725", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL2487", "tissue_chembl_id": "CHEMBL3638188",
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        "HEK293", "assay_chembl_id": "CHEMBL1002508", "assay_classifications": [],
+        "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307715", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Inhibition
+        of human C-terminal FLAG-tagged HDAC1 in HEK293 cells", "document_chembl_id":
+        "CHEMBL1136937", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL325", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": "HEK293", "assay_chembl_id":
+        "CHEMBL1002514", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": "CHEMBL3307715", "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human C-terminal FLAG-tagged HDAC2 in HEK293 cells", "document_chembl_id":
+        "CHEMBL1136937", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL1937", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": "HEK293", "assay_chembl_id":
+        "CHEMBL1002515", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": "CHEMBL3307715", "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human C-terminal FLAG-tagged HDAC3 in HEK293 cells", "document_chembl_id":
+        "CHEMBL1136937", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL1829", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1001497", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "F", "assay_type_description": "Functional", "bao_format": "BAO_0000019",
+        "bao_label": "assay format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Antagonist activity at CCR2 in human PBMC assessed as MCP1-induced calcium
+        flux by fluorescence-imaging plate reader assay", "document_chembl_id": "CHEMBL1137003",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL4015",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL1001498", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "F", "assay_type_description":
+        "Functional", "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Antagonist activity at CCR2 in human PBMC assessed as MCP1-induced
+        chemotaxis", "document_chembl_id": "CHEMBL1137003", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL4015", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1001508", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of human soluble epoxide hydrolase", "document_chembl_id":
+        "CHEMBL1137005", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL2409", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1001509", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Rattus norvegicus", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 10116, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of rat soluble epoxide hydrolase", "document_chembl_id": "CHEMBL1137005",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL5669",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": "HEK293", "assay_chembl_id": "CHEMBL1001510", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307715", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Inhibition
+        of human soluble epoxide hydrolase in HEK293 cells assessed as DHET production",
+        "document_chembl_id": "CHEMBL1137005", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL2409", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": "CHO",
+        "assay_chembl_id": "CHEMBL1000791", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000219", "bao_label": "cell-based format", "cell_chembl_id":
+        "CHEMBL3308072", "confidence_description": "Direct single protein target assigned",
+        "confidence_score": 9, "description": "Displacement of [125I]gp-120 from human
+        CCR5 receptor expressed in CHO cells", "document_chembl_id": "CHEMBL1151236",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL274", "tissue_chembl_id":
+        null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": null, "assay_chembl_id": "CHEMBL1002717", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Inhibition of human recombinant
+        AChE", "document_chembl_id": "CHEMBL1150386", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL220", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1002718", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of human recombinant BuChE", "document_chembl_id":
+        "CHEMBL1150386", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL1914", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1002720", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Bos taurus", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9913, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of fetal bovine serum AChE", "document_chembl_id": "CHEMBL1150386",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL4768",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL1002723", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Torpedo californica", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        7787, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Inhibition of Torpedo californica
+        AChE", "document_chembl_id": "CHEMBL1150386", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL4780", "tissue_chembl_id": null,
+        "variant_sequence": null}], "page_meta": {"limit": 1000, "next": null, "offset":
+        0, "previous": null, "total_count": 100}}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '97855'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 23 Dec 2025 16:39:08 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'False'
+      X-ChEMBL-retrieval-time:
+      - '0.2346806526184082'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
+  response:
+    body:
+      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
+        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
+        99142, "status": "UP", "targets": 17803}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Length:
+      - '211'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Dec 2025 06:02:14 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/assay?limit=1000&offset=0&format=json&assay_type__in=B%2CF&confidence_score__gte=8&relationship_type=D&target_chembl_id__isnull=false&assay_chembl_id__in=CHEMBL1000139%2CCHEMBL1000140%2CCHEMBL1000236%2CCHEMBL1000237%2CCHEMBL1000238%2CCHEMBL1000239%2CCHEMBL1000240%2CCHEMBL1000241%2CCHEMBL1000242%2CCHEMBL1000243%2CCHEMBL1000259%2CCHEMBL1000323%2CCHEMBL1000326%2CCHEMBL1000327%2CCHEMBL1000360%2CCHEMBL1000365%2CCHEMBL1000392%2CCHEMBL1000429%2CCHEMBL1000436%2CCHEMBL1000438
+  response:
+    body:
+      string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000323", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Human immunodeficiency virus 1", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        11676, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of RNA-dependent DNA polymerase activity of
+        HIV1 reverse transcriptase Lys103Asn mutant by SPA", "document_chembl_id":
+        "CHEMBL1140225", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL247", "tissue_chembl_id": null, "variant_sequence": {"accession": "Q9WJQ2",
+        "isoform": null, "mutation": "K103N", "organism": "Human immunodeficiency
+        virus 1", "sequence": "PISPIEPVPVKLKPGMDGPKVKQWPLTEEKIKALVEICTEMEKEGKISKIGPENPYNTPVFAIKKKDSTRWRKLVDFRELNKRTQDFWEVQLGIPHPAGLKKNRSVTVLDVGDAYFSVPLDKEFRKYTAFTIPSINNETPGIRYQYNVLPQGWKGSPAIFQSSMTKILEPFRKQNPDIVIYQYMDDLYVGSDLEIGQHRTKIEELRQHLLKWGFTTPDKKHQKEPPFLWMGYEHHPDKWTVQPIVLPEKDSWTVNDIQK",
+        "tax_id": 11676, "version": 1}}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": null, "assay_chembl_id": "CHEMBL1000326", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Human immunodeficiency virus 1",
+        "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 11676, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000019",
+        "bao_label": "assay format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of RNA-dependent DNA polymerase activity of HIV1 reverse transcriptase
+        Lys103Asn/Tyr181Cys mutant by SPA", "document_chembl_id": "CHEMBL1140225",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL247", "tissue_chembl_id":
+        null, "variant_sequence": {"accession": "Q9WJQ2", "isoform": null, "mutation":
+        "K103N,Y181C", "organism": "Human immunodeficiency virus 1", "sequence": "PISPIEPVPVKLKPGMDGPKVKQWPLTEEKIKALVEICTEMEKEGKISKIGPENPYNTPVFAIKKKDSTRWRKLVDFRELNKRTQDFWEVQLGIPHPAGLKKNRSVTVLDVGDAYFSVPLDKEFRKYTAFTIPSINNETPGIRYQYNVLPQGWKGSPAIFQSSMTKILEPFRKQNPDIVICQYMDDLYVGSDLEIGQHRTKIEELRQHLLKWGFTTPDKKHQKEPPFLWMGYEHHPDKWTVQPIVLPEKDSWTVNDIQK",
+        "tax_id": 11676, "version": 1}}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": null, "assay_chembl_id": "CHEMBL1000327", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Human immunodeficiency virus 1",
+        "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 11676, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of RNA-dependent DNA polymerase activity of wild type HIV1 reverse
+        transcriptase by SPA", "document_chembl_id": "CHEMBL1140225", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL247", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000139", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Cavia porcellus", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": "Membrane", "assay_tax_id": 10141, "assay_test_type":
+        null, "assay_tissue": "Liver", "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000249", "bao_label": "cell membrane format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Displacement of [3H](-)-(S)-emopamil
+        from EBP in guinea pig liver membrane", "document_chembl_id": "CHEMBL1140235",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL5525",
+        "tissue_chembl_id": "CHEMBL3559723", "variant_sequence": null}, {"aidx": "CLD0",
+        "assay_category": null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL1000140",
+        "assay_classifications": [], "assay_group": null, "assay_organism": "Cavia
+        porcellus", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        "Membrane", "assay_tax_id": 10141, "assay_test_type": null, "assay_tissue":
+        "Brain", "assay_type": "B", "assay_type_description": "Binding", "bao_format":
+        "BAO_0000249", "bao_label": "cell membrane format", "cell_chembl_id": null,
+        "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Displacement of [3H](+)-pentazocine from sigma 1 receptor
+        in guinea pig brain membrane without cerebellum", "document_chembl_id": "CHEMBL1140235",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL4153",
+        "tissue_chembl_id": "CHEMBL3638188", "variant_sequence": null}, {"aidx": "CLD0",
+        "assay_category": null, "assay_cell_type": "CHO", "assay_chembl_id": "CHEMBL1000259",
+        "assay_classifications": [], "assay_group": null, "assay_organism": "Homo
+        sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": "CHEMBL3308072", "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [125I]substance P human recombinant NK1 receptor expressed
+        in CHO cells in absence of human serum albumin", "document_chembl_id": "CHEMBL1138468",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL249", "tissue_chembl_id":
+        null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": null, "assay_chembl_id": "CHEMBL1000236", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Displacement of [3H]PDBu
+        form human PKCalpha in presence of phosphatidylserine", "document_chembl_id":
+        "CHEMBL1138492", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL299", "tissue_chembl_id": null, "variant_sequence": null}, {"aidx":
+        "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1000237", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]PDBu form human PKCbeta in presence of phosphatidylserine",
+        "document_chembl_id": "CHEMBL1138492", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL3045", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1000238", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]PDBu form human PKCgamma in presence of phosphatidylserine",
+        "document_chembl_id": "CHEMBL1138492", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL2938", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1000239", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]PDBu form human PKCdelta in presence of phosphatidylserine",
+        "document_chembl_id": "CHEMBL1138492", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL2996", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1000240", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]PDBu form human PKCepsilon in presence of phosphatidylserine",
+        "document_chembl_id": "CHEMBL1138492", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL3582", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1000241", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000249",
+        "bao_label": "cell membrane format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Displacement of [3H]PDBu form human PKCalpha in presence of plasma membrane
+        lipid mimetic mixture", "document_chembl_id": "CHEMBL1138492", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL299", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000242", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000249", "bao_label": "cell membrane format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Displacement of [3H]PDBu form human PKCbeta in presence
+        of plasma membrane lipid mimetic mixture", "document_chembl_id": "CHEMBL1138492",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL3045",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL1000243", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000249", "bao_label": "cell membrane format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Displacement of [3H]PDBu
+        form human PKCgamma in presence of plasma membrane lipid mimetic mixture",
+        "document_chembl_id": "CHEMBL1138492", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL2938", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1000360", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000357",
+        "bao_label": "single protein format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human Wee1 assessed as polyornithine-tyrosine copolymer phosphorylation",
+        "document_chembl_id": "CHEMBL1156685", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL5491", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": "HT-29",
+        "assay_chembl_id": "CHEMBL1000365", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000219", "bao_label": "cell-based format", "cell_chembl_id":
+        "CHEMBL3307768", "confidence_description": "Direct single protein target assigned",
+        "confidence_score": 9, "description": "Inhibition of Cdc2 Tyr15 phosphorylation
+        in human HT29 cells by Western blot", "document_chembl_id": "CHEMBL1156685",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL308", "tissue_chembl_id":
+        null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": null, "assay_chembl_id": "CHEMBL1000392", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Inhibition of human recombinant
+        GAR transformylase", "document_chembl_id": "CHEMBL1157354", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL3972", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL1000429", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000357", "bao_label": "single protein format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Inhibition of human PDE4D", "document_chembl_id": "CHEMBL1157355",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL288", "tissue_chembl_id":
+        null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": "CHO", "assay_chembl_id": "CHEMBL1000436", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3308072", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 9, "description": "Inhibition
+        of GST-fused human MLK1 expressed in CHO cells assessed as MKK4 phosphorylation",
+        "document_chembl_id": "CHEMBL1140055", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL2872", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL1000438", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Homo sapiens", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 9606, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000019",
+        "bao_label": "assay format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of human DLK expressed in baculovirus insect cell system", "document_chembl_id":
+        "CHEMBL1140055", "relationship_description": "Direct protein target assigned",
+        "relationship_type": "D", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL5671", "tissue_chembl_id": null, "variant_sequence": null}], "page_meta":
+        {"limit": 1000, "next": null, "offset": 0, "previous": null, "total_count":
+        20}}'
+    headers:
+      cache-control:
+      - max-age=30000000, s-maxage=30000000
+      content-disposition:
+      - inline
+      content-length:
+      - '19553'
+      content-type:
+      - application/json
+      date:
+      - Mon, 29 Dec 2025 22:41:39 GMT
+      server:
+      - gunicorn/20.0.4
+      strict-transport-security:
+      - max-age=0
+      vary:
+      - Accept, Origin
+      x-chembl-in-cache:
+      - 'False'
+      x-chembl-retrieval-time:
+      - '0.09725165367126465'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/assay?limit=5&offset=0&format=json&assay_type__in=B%2CF&confidence_score__gte=8&relationship_type=D&target_chembl_id__isnull=false
+  response:
+    body:
+      string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL615117", "assay_classifications": [], "assay_group":
+        null, "assay_organism": null, "assay_parameters": [], "assay_strain": null,
+        "assay_subcellular_fraction": null, "assay_tax_id": null, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Homologous single protein target assigned",
+        "confidence_score": 8, "description": "The compound was tested for the in
+        vitro inhibition of platelet 12-lipoxygenase at a concentration of 30 uM",
+        "document_chembl_id": "CHEMBL1125582", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL2741", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL615118", "assay_classifications": [], "assay_group": null, "assay_organism":
+        null, "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": null, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "F", "assay_type_description": "Functional", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 8, "description":
+        "Compound was evaluated for its ability to mobilize calcium in 1321NI cells",
+        "document_chembl_id": "CHEMBL1127008", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL612545", "tissue_chembl_id": null,
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL615119", "assay_classifications": [], "assay_group":
+        null, "assay_organism": null, "assay_parameters": [], "assay_strain": null,
+        "assay_subcellular_fraction": null, "assay_tax_id": null, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        8, "description": "Receptor binding assay", "document_chembl_id": "CHEMBL1133101",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL2362975",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL615120", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Bos taurus", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": "Membrane", "assay_tax_id":
+        9913, "assay_test_type": null, "assay_tissue": "Striatum", "assay_type": "B",
+        "assay_type_description": "Binding", "bao_format": "BAO_0000249", "bao_label":
+        "cell membrane format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 8, "description":
+        "Binding affinity against A2 adenosine receptor in bovine striatal membranes
+        using [3H]CGS-21680", "document_chembl_id": "CHEMBL1149169", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL2094257", "tissue_chembl_id":
+        "CHEMBL3638255", "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": "143B", "assay_chembl_id": "CHEMBL615121", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Homo sapiens", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        9606, "assay_test_type": null, "assay_tissue": null, "assay_type": "F", "assay_type_description":
+        "Functional", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "cell_chembl_id": "CHEMBL3307382", "confidence_description": "Direct single
+        protein target assigned", "confidence_score": 8, "description": "In vitro
+        cell cytotoxicity against 143-B cell lines (Human osteosarcoma cell line)",
+        "document_chembl_id": "CHEMBL1136729", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL614508", "tissue_chembl_id": null,
+        "variant_sequence": null}], "page_meta": {"limit": 5, "next": "/chembl/api/data/assay?limit=5&offset=5",
+        "offset": 0, "previous": null, "total_count": 1890749}}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '4794'
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 04 Jan 2026 18:18:32 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'True'
+      X-ChEMBL-retrieval-time:
+      - '0.19446420669555664'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
+  response:
+    body:
+      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
+        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
+        99142, "status": "UP", "targets": 17803}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Length:
+      - '211'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:28:09 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/assay?format=json&limit=1&offset=0&assay_type__in=B%2CF&confidence_score__gte=8&relationship_type=D&target_chembl_id__isnull=false&src_id=1
+  response:
+    body:
+      string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL615159", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Rattus norvegicus", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 10116, "assay_test_type":
+        null, "assay_tissue": "Testis", "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000221", "bao_label": "tissue-based format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Inhibition of 17-alpha-hydroxylase/17,20
+        lyase from rat testes microsomal preparation", "document_chembl_id": "CHEMBL1124902",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL4430",
+        "tissue_chembl_id": "CHEMBL3638183", "variant_sequence": null}], "page_meta":
+        {"limit": 1, "next": "/chembl/api/data/assay.json?limit=1&offset=1&assay_type__in=B%2CF&confidence_score__gte=8&relationship_type=D&target_chembl_id__isnull=false&src_id=1",
+        "offset": 0, "previous": null, "total_count": 310986}}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '1199'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:28:10 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'True'
+      X-ChEMBL-retrieval-time:
+      - '0.08925676345825195'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
+  response:
+    body:
+      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
+        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
+        99142, "status": "UP", "targets": 17803}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Length:
+      - '211'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:28:13 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/assay?format=json&limit=1&offset=0
+  response:
+    body:
+      string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL615117", "assay_classifications": [], "assay_group":
+        null, "assay_organism": null, "assay_parameters": [], "assay_strain": null,
+        "assay_subcellular_fraction": null, "assay_tax_id": null, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Homologous single protein target assigned",
+        "confidence_score": 8, "description": "The compound was tested for the in
+        vitro inhibition of platelet 12-lipoxygenase at a concentration of 30 uM",
+        "document_chembl_id": "CHEMBL1125582", "relationship_description": "Homologous
+        protein target assigned", "relationship_type": "H", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL2741", "tissue_chembl_id": null, "variant_sequence":
+        null}], "page_meta": {"limit": 1, "next": "/chembl/api/data/assay.json?limit=1&offset=1",
+        "offset": 0, "previous": null, "total_count": 1890749}}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '1087'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:28:14 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'True'
+      X-ChEMBL-retrieval-time:
+      - '0.07098674774169922'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
+  response:
+    body:
+      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
+        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
+        99142, "status": "UP", "targets": 17803}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Length:
+      - '211'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:34:26 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/assay?format=json&limit=5&offset=0&assay_type__in=B%2CF&confidence_score__gte=8&relationship_type=D&target_chembl_id__isnull=false&src_id=1
+  response:
+    body:
+      string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL615159", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Rattus norvegicus", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 10116, "assay_test_type":
+        null, "assay_tissue": "Testis", "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000221", "bao_label": "tissue-based format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Inhibition of 17-alpha-hydroxylase/17,20
+        lyase from rat testes microsomal preparation", "document_chembl_id": "CHEMBL1124902",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL4430",
+        "tissue_chembl_id": "CHEMBL3638183", "variant_sequence": null}, {"aidx": "CLD0",
+        "assay_category": null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL615172",
+        "assay_classifications": [], "assay_group": null, "assay_organism": "Rattus
+        norvegicus", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": 10116, "assay_test_type": null, "assay_tissue": "Testis",
+        "assay_type": "B", "assay_type_description": "Binding", "bao_format": "BAO_0000221",
+        "bao_label": "tissue-based format", "cell_chembl_id": null, "confidence_description":
+        "Direct single protein target assigned", "confidence_score": 9, "description":
+        "Inhibition of 17-alpha-hydroxylase/17,20 lyase from rat testes microsomal
+        preparation", "document_chembl_id": "CHEMBL1124902", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL4430", "tissue_chembl_id": "CHEMBL3638183",
+        "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL615173", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Rattus norvegicus", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 10116, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Percent inhibition of 17-alpha-hydroxylase/17,20 lyase
+        of rat testes microsomes at 100 uM", "document_chembl_id": "CHEMBL1124902",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL4430",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL615174", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Rattus norvegicus", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": null, "assay_tax_id":
+        10116, "assay_test_type": null, "assay_tissue": null, "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Direct single protein target assigned", "confidence_score":
+        9, "description": "Percent inhibition of Steroid 17-alpha-hydroxylase/17,20
+        lyase of rat testes microsomes at 100 uM", "document_chembl_id": "CHEMBL1124902",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL4430",
+        "tissue_chembl_id": null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category":
+        null, "assay_cell_type": null, "assay_chembl_id": "CHEMBL615210", "assay_classifications":
+        [], "assay_group": null, "assay_organism": "Rattus norvegicus", "assay_parameters":
+        [], "assay_strain": null, "assay_subcellular_fraction": "Microsome", "assay_tax_id":
+        10116, "assay_test_type": null, "assay_tissue": "Liver", "assay_type": "B",
+        "assay_type_description": "Binding", "bao_format": "BAO_0000251", "bao_label":
+        "microsome format", "cell_chembl_id": null, "confidence_description": "Direct
+        single protein target assigned", "confidence_score": 9, "description": "Compound
+        was evaluated for the inhibition of microsomal 2,3-oxidosqualene cyclase in
+        rat liver microsomes", "document_chembl_id": "CHEMBL1125522", "relationship_description":
+        "Direct protein target assigned", "relationship_type": "D", "src_assay_id":
+        null, "src_id": 1, "target_chembl_id": "CHEMBL3262", "tissue_chembl_id": "CHEMBL3559723",
+        "variant_sequence": null}], "page_meta": {"limit": 5, "next": "/chembl/api/data/assay.json?limit=5&offset=5&assay_type__in=B%2CF&confidence_score__gte=8&relationship_type=D&target_chembl_id__isnull=false&src_id=1",
+        "offset": 0, "previous": null, "total_count": 310986}}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '4974'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:34:26 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'True'
+      X-ChEMBL-retrieval-time:
+      - '0.2956864833831787'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/assay?format=json&limit=1&offset=0&assay_type__in=B%2CF&confidence_score__gte=8&relationship_type=D&target_chembl_id__isnull=false
+  response:
+    body:
+      string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL615159", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Rattus norvegicus", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 10116, "assay_test_type":
+        null, "assay_tissue": "Testis", "assay_type": "B", "assay_type_description":
+        "Binding", "bao_format": "BAO_0000221", "bao_label": "tissue-based format",
+        "cell_chembl_id": null, "confidence_description": "Direct single protein target
+        assigned", "confidence_score": 9, "description": "Inhibition of 17-alpha-hydroxylase/17,20
+        lyase from rat testes microsomal preparation", "document_chembl_id": "CHEMBL1124902",
+        "relationship_description": "Direct protein target assigned", "relationship_type":
+        "D", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL4430",
+        "tissue_chembl_id": "CHEMBL3638183", "variant_sequence": null}], "page_meta":
+        {"limit": 1, "next": "/chembl/api/data/assay.json?limit=1&offset=1&assay_type__in=B%2CF&confidence_score__gte=8&relationship_type=D&target_chembl_id__isnull=false",
+        "offset": 0, "previous": null, "total_count": 409708}}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '1190'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 03 Jul 2026 19:45:02 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'True'
+      X-ChEMBL-retrieval-time:
+      - '0.32111024856567383'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,0 +1,88 @@
+{
+  "categories": [
+    "api",
+    "dq",
+    "schema",
+    "storage",
+    "network",
+    "validation",
+    "unknown"
+  ],
+  "contract": "control_plane_validation_evidence_v1",
+  "endpoint": "failure-reasons",
+  "evidence_freshness": "unknown",
+  "manifest_id": null,
+  "pipeline": "chembl_activity",
+  "processing_status": "unknown",
+  "resolved_via": "selected_run_id_not_found",
+  "rows": [
+    {
+      "category": "api",
+      "count": null,
+      "reason": "selected_run_id_not_found",
+      "status": "UNKNOWN"
+    },
+    {
+      "category": "dq",
+      "count": null,
+      "reason": "selected_run_id_not_found",
+      "status": "UNKNOWN"
+    },
+    {
+      "category": "schema",
+      "count": null,
+      "reason": "selected_run_id_not_found",
+      "status": "UNKNOWN"
+    },
+    {
+      "category": "storage",
+      "count": null,
+      "reason": "selected_run_id_not_found",
+      "status": "UNKNOWN"
+    },
+    {
+      "category": "network",
+      "count": null,
+      "reason": "selected_run_id_not_found",
+      "status": "UNKNOWN"
+    },
+    {
+      "category": "validation",
+      "count": null,
+      "reason": "selected_run_id_not_found",
+      "status": "UNKNOWN"
+    },
+    {
+      "category": "unknown",
+      "count": null,
+      "reason": "selected_run_id_not_found",
+      "status": "UNKNOWN"
+    }
+  ],
+  "run_id": "00000000-0000-0000-0000-000000008576",
+  "run_type": "incremental",
+  "scope_kind": "unresolved",
+  "status": "UNKNOWN",
+  "summary": {
+    "check_count": 1,
+    "error_count": 0,
+    "ok_count": 0,
+    "unknown_count": 1,
+    "warning_count": 0
+  },
+  "total_failure_count": null,
+  "trust": {
+    "evidence_freshness": "unknown",
+    "evidence_observed_at": null,
+    "processing_status": "unknown",
+    "reasons": [
+      "selected_run_id_not_found"
+    ],
+    "reasons_count": 1,
+    "reasons_text": "selected_run_id_not_found",
+    "reasons_truncated": false,
+    "scope_kind": "unresolved",
+    "trust_status": "INCOMPLETE"
+  },
+  "trust_status": "INCOMPLETE"
+}

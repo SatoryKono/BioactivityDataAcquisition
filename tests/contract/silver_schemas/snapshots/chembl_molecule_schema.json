@@ -1,0 +1,723 @@
+{
+  "_dq_error": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality errors.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_dq_warn": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality warnings.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_index": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Sequential index of the record in the pipeline run.",
+    "dtype": "int64",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_ingestion_ts": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)?$"
+      }
+    ],
+    "coerce": false,
+    "description": "Timestamp when the record was ingested (UTC, ISO 8601 format).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Correlation ID for the pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Type of pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_source_batch_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Batch context ID from the source.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "aromatic_ring_count": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Aromatic rings count.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "atc_classifications": {
+    "checks": [],
+    "coerce": false,
+    "description": "JSON string of ATC classifications.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "availability_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Availability type (float for nullable int).",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "black_box_warning": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Black box warning flag.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "canonical_smiles": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical SMILES representation.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "chirality": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Chirality flag: -1=unknown, 0=achiral, 1=single, 2=racemic.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "content_hash": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^[a-f0-9]{64}$"
+      }
+    ],
+    "coerce": false,
+    "description": "SHA256 hash of canonical record representation (64 hex chars).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "cross_references": {
+    "checks": [],
+    "coerce": false,
+    "description": "JSON string of cross references.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "dosed_ingredient": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Dosed ingredient flag.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "entity_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Unique business identifier for the entity.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "first_approval": {
+    "checks": [],
+    "coerce": false,
+    "description": "Year of first approval (float for nullable int).",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "first_in_class": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "First in class flag (-1=unknown).",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "hba_count": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Hydrogen bond acceptors count.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "hbd_count": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Hydrogen bond donors count.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "heavy_atom_count": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Heavy (non-hydrogen) atoms count.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "helm_notation": {
+    "checks": [],
+    "coerce": false,
+    "description": "HELM notation for biopolymers.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "hierarchy_active_chembl_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Active molecule ChEMBL ID in hierarchy.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "hierarchy_child_chembl_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Child molecule ChEMBL ID in hierarchy.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "hierarchy_parent_chembl_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Parent molecule ChEMBL ID in hierarchy.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "inchi_key": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
+      }
+    ],
+    "coerce": false,
+    "description": "Standard InChI Key (27 characters, NNNN-YYYY-Z format).",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "inorganic_flag": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Inorganic flag (-1=unknown).",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "logp": {
+    "checks": [],
+    "coerce": false,
+    "description": "Partition coefficient (ALogP/XlogP).",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "logp_method": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Source method for logp.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "max_phase": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Maximum clinical phase.",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "molecular_formula": {
+    "checks": [],
+    "coerce": false,
+    "description": "Full molecular formula.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "molecular_weight": {
+    "checks": [],
+    "coerce": false,
+    "description": "Full molecular weight including salts.",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "molecule_hierarchy": {
+    "checks": [],
+    "coerce": false,
+    "description": "JSON string of molecule hierarchy.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "molecule_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Canonical molecule ID (ChEMBL ID).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "molecule_properties": {
+    "checks": [],
+    "coerce": false,
+    "description": "JSON string of molecule properties.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "molecule_species": {
+    "checks": [],
+    "coerce": false,
+    "description": "Species for biologics.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "molecule_structures": {
+    "checks": [],
+    "coerce": false,
+    "description": "JSON string of molecule structures.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "molecule_synonyms": {
+    "checks": [],
+    "coerce": false,
+    "description": "JSON string of molecule synonyms.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "molecule_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Molecule type.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "mw_freebase": {
+    "checks": [],
+    "coerce": false,
+    "description": "Molecular weight of parent compound.",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "natural_product": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Natural product flag.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "oral": {
+    "checks": [],
+    "coerce": false,
+    "description": "Oral administration flag.",
+    "dtype": "bool",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "parenteral": {
+    "checks": [],
+    "coerce": false,
+    "description": "Parenteral administration flag.",
+    "dtype": "bool",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "polar_surface_area": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Polar surface area (PSA/tPSA).",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "polymer_flag": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Polymer flag.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "pref_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "Preferred name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "prodrug": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Prodrug flag (-1=unknown).",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "qed_score": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      },
+      {
+        "name": "less_than_or_equal_to",
+        "type": "le"
+      }
+    ],
+    "coerce": false,
+    "description": "Quantitative Estimate of Drug-likeness.",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "ro3_pass": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Rule-of-3 compliance (Y/N).",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "ro5_violation_count": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      },
+      {
+        "name": "less_than_or_equal_to",
+        "type": "le"
+      }
+    ],
+    "coerce": false,
+    "description": "Number of Lipinski rule-of-5 violations.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "rotatable_bond_count": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Rotatable bonds count.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "standard_inchi": {
+    "checks": [],
+    "coerce": false,
+    "description": "Standard InChI representation.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "structure_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Structure type.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "therapeutic_flag": {
+    "checks": [],
+    "coerce": false,
+    "description": "Therapeutic flag.",
+    "dtype": "bool",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "topical": {
+    "checks": [],
+    "coerce": false,
+    "description": "Topical administration flag.",
+    "dtype": "bool",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "usan_stem": {
+    "checks": [],
+    "coerce": false,
+    "description": "USAN stem name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "usan_stem_definition": {
+    "checks": [],
+    "coerce": false,
+    "description": "USAN stem definition.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "usan_substem": {
+    "checks": [],
+    "coerce": false,
+    "description": "USAN substem name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "usan_year": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      },
+      {
+        "name": "less_than_or_equal_to",
+        "type": "le"
+      }
+    ],
+    "coerce": false,
+    "description": "USAN approval year (float for nullable int).",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "withdrawn_flag": {
+    "checks": [],
+    "coerce": false,
+    "description": "Withdrawn flag.",
+    "dtype": "bool",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  }
+}

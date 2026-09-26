@@ -1,0 +1,20 @@
+"""Writable control-plane path helpers shared outside runtime-builder fan-in."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+from bioetl.composition.runtime_builders.run_manifest_data_roots import (
+    resolve_data_root,
+)
+
+__all__ = ["control_plane_root", "resolve_data_root"]
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.config.settings_api import Settings
+
+
+def control_plane_root(settings: Settings, leaf: str) -> Path:
+    """Return the canonical control-plane output root for one leaf namespace."""
+    return resolve_data_root(settings) / "output" / "control" / leaf

@@ -1,0 +1,19 @@
+version: 1
+policy_scope: cast_any_unjustified_ratchet
+linked_issue: "#10596"
+owner: "@bioetl-architecture"
+generator: scripts/engineering/qa/report_cast_any_typing_census.py
+artifact: reports/quality/cast-any-typing-census.json
+ratchet_policy: shrink_only
+rationale: >-
+  AUD-006 census of ``cast(Any, ...)`` call sites in src/bioetl. Call sites carrying
+  PD3 / PD6 / TYPE-002 / ``Any: mixin host`` / ``Any: host attr`` / ``Any: JSON`` markers or
+  routed through ``as_mixin_host(`` are reviewed and justified. Everything else (including
+  PD4 ``host default`` class-level defaults that still await a Protocol host surface) is
+  counted as unjustified and MUST only decrease. Increasing this budget is forbidden.
+baseline:
+  recorded_on: "2026-09-24"
+  total_cast_any_count: 374
+  justified_count: 243
+  unjustified_count: 131
+max_unjustified_count: 131

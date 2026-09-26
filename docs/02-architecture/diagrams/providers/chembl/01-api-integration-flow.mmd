@@ -1,0 +1,75 @@
+%% Title: ChEMBL API Integration Flow
+%% Description: API integration flow diagram for the public ChEMBL API. Request construction uses offset/limit pagination, then rate limiting and response parsing. ChEMBL is not an API-key provider and does not use cursor or scroll pagination.
+%% @version 1.1.0
+%% @date 2026-09-24
+%% @type flowchart
+%% @level system
+%% @nodes   28
+%% @adr ADR-032, ADR-010, ADR-040
+%%{init: {'layout': 'elk'}}%%
+flowchart TD
+    Start([ChEMBL API Integration Start]) --> Init[Initialize ChEMBL Adapter]
+
+    Init --> Auth[Public ChEMBL API]
+    Auth --> Request[Request Construction]
+
+    Request --> Endpoint[Select ChEMBL Endpoint]
+    Endpoint --> EndType{Endpoint Type?}
+    EndType -->|Activity| Activity[Activity Endpoint]
+    EndType -->|Target| Target[Target Endpoint]
+    EndType -->|Compound| Compound[Compound Endpoint]
+    EndType -->|Assay| Assay[Assay Endpoint]
+
+    Activity --> Params[Build Request Parameters]
+    Target --> Params
+    Compound --> Params
+    Assay --> Params
+
+    Params --> Pagination[Offset/Limit Pagination]
+    Pagination --> RateLimit[Rate Limit Check]
+
+    RateLimit --> RateCheck{Rate Limit OK?}
+    RateCheck -->|Yes| HTTP[Execute HTTP Request]
+    RateCheck -->|No| Wait[Wait for Rate Limit Reset]
+    Wait --> RateLimit
+
+    HTTP --> Response[Receive Response]
+    Response --> Status{Response Status?}
+    Status -->|200 OK| Parse[Parse Response]
+    Status -->|429 Rate Limit| Wait
+    Status -->|5xx Server Error| Retry[Retry with Backoff]
+    Status -->|4xx Client Error| Error[Handle Error]
+
+    Retry --> RetryCount{Max Retries?}
+    RetryCount -->|No| Error
+    RetryCount -->|Yes| Backoff[Wait with Backoff]
+    Backoff --> HTTP
+
+    Parse --> Validate[Validate Response Format]
+    Validate --> Valid{Valid JSON?}
+    Valid -->|Yes| Extract[Extract Data]
+    Valid -->|No| Error
+
+    Extract --> Transform[Transform to Domain Model]
+    Transform --> Domain[Create ChEMBL Domain Entity]
+    Domain --> NextPage{More Pages?}
+    NextPage -->|Yes| Pagination
+    NextPage -->|No| Complete[API Integration Complete]
+
+    Error --> Log[Log Error Details]
+    Log --> Metrics[Emit Error Metrics]
+    Metrics --> Fail[API Integration Failed]
+
+    Complete --> Success[Emit Success Metrics]
+    Success --> End([ChEMBL API Integration End])
+
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    class Start,End interfaces
+    class Complete app
+    class Fail infra
+    class RateCheck,Status,Valid,NextPage,RetryCount domain

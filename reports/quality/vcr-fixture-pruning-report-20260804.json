@@ -1,0 +1,61 @@
+{
+  "schema_version": "vcr-fixture-pruning-report-v1",
+  "linked_issue": "#4468",
+  "reviewed_on": "2026-08-04",
+  "owner": "@bioetl-platform",
+  "policy": {
+    "canonical_root": "tests/fixtures/vcr",
+    "shadow_locations_forbidden": true,
+    "metadata_sidecars_required_for_managed_inventory": true
+  },
+  "removed_shadows": [
+    {
+      "path": "tests/integration/chembl/cassettes/TestActivityExtractionParams.test_filtered_api_request.yaml",
+      "rationale": "Duplicate stem of managed catalog cassette under tests/fixtures/vcr/chembl; no path consumers; lacked metadata sidecar; outside placement/catalog scan.",
+      "canonical_replacement": "tests/fixtures/vcr/chembl/TestActivityExtractionParams.test_filtered_api_request.yaml"
+    },
+    {
+      "path": "tests/integration/chembl/cassettes/TestAssayExtractionParams.test_assay_filtered_api_request.yaml",
+      "rationale": "Duplicate stem of managed catalog cassette under tests/fixtures/vcr/chembl; no path consumers; lacked metadata sidecar; outside placement/catalog scan.",
+      "canonical_replacement": "tests/fixtures/vcr/chembl/TestAssayExtractionParams.test_assay_filtered_api_request.yaml"
+    },
+    {
+      "path": "tests/integration/chembl/cassettes/TestMoleculeExtractionParams.test_molecule_filtered_api_request.yaml",
+      "rationale": "Duplicate stem of managed catalog cassette; contract replay already pins tests/fixtures/vcr/chembl path.",
+      "canonical_replacement": "tests/fixtures/vcr/chembl/TestMoleculeExtractionParams.test_molecule_filtered_api_request.yaml"
+    },
+    {
+      "path": "tests/integration/chembl/cassettes/TestPublicationExtractionParams.test_publication_filtered_api_request.yaml",
+      "rationale": "Duplicate stem of managed catalog cassette under tests/fixtures/vcr/chembl; no path consumers; lacked metadata sidecar.",
+      "canonical_replacement": "tests/fixtures/vcr/chembl/TestPublicationExtractionParams.test_publication_filtered_api_request.yaml"
+    },
+    {
+      "path": "tests/integration/chembl/cassettes/TestTargetExtractionParams.test_target_filtered_api_request.yaml",
+      "rationale": "Duplicate stem of managed catalog cassette; contract replay already pins tests/fixtures/vcr/chembl path.",
+      "canonical_replacement": "tests/fixtures/vcr/chembl/TestTargetExtractionParams.test_target_filtered_api_request.yaml"
+    }
+  ],
+  "retained": {
+    "notes": "All managed cassettes under tests/fixtures/vcr/** with metadata sidecars remain; provider balance/budget gates unchanged.",
+    "canonical_roots": [
+      "tests/fixtures/vcr/chembl",
+      "tests/fixtures/vcr/pubchem",
+      "tests/fixtures/vcr/uniprot",
+      "tests/fixtures/vcr/pubmed",
+      "tests/fixtures/vcr/crossref",
+      "tests/fixtures/vcr/openalex",
+      "tests/fixtures/vcr/semanticscholar"
+    ]
+  },
+  "enforcement": {
+    "placement_command": "python -m scripts.engineering.qa.vcr check-placement",
+    "catalog_command": "python -m scripts.engineering.qa report-vcr-metadata --check",
+    "widened_checks": [
+      "scripts/engineering/qa/vcr/check_root_vcr_cassettes.py::get_noncanonical_test_vcr_cassettes"
+    ]
+  },
+  "verification": {
+    "offline_replay": "--vcr-record=none",
+    "network_dependency": "none"
+  }
+}

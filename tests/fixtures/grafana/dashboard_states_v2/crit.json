@@ -1,0 +1,25 @@
+{
+  "case_id": "crit",
+  "contract": "dashboard_state_fixture_v2",
+  "datasource_response": {
+    "rows": [
+      {
+        "message": "failed",
+        "state": "CRIT"
+      }
+    ],
+    "status": "CRIT"
+  },
+  "expected_copy_tokens": [
+    "failed"
+  ],
+  "expected_panels": [
+    {
+      "classification": "CRIT",
+      "id": "9418"
+    }
+  ],
+  "http_status": 200,
+  "response_sha256": "7312f6af610e9f64f66e60b54c43138086fcf1ecd178919aa353fea914706a8f",
+  "scope": "selected_run"
+}

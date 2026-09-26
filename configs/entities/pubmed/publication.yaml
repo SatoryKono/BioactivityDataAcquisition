@@ -1,0 +1,429 @@
+version: 1.0.0
+provider: pubmed
+entity: publication
+pipeline:
+  pipeline_name: pubmed_publication
+  provider: pubmed
+  entity_type: publication
+  description: Extract publication metadata from PubMed via Entrez API
+  loading_strategy: full_scan_only
+  field_policy: {}
+  business_primary_keys:
+  - pmid
+  sink:
+    bronze:
+      save_json: true
+      save_metadata: true
+    silver:
+      partition_by: []
+    gold:
+      mode: scd2
+      idempotency_contract: scd2
+      scd_config:
+        valid_from_col: _valid_from
+        valid_to_col: _valid_to
+        current_flag_col: _is_current
+        version_col: _version
+  batch_size: 1000
+  checkpoint_interval: 1000
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _source
+    - _ingestion_ts
+    - _index
+    - _lookup_method
+    - _original_id
+  - name: identifiers
+    fields:
+    - pmid
+    - pmc_id
+    - doi
+    - nlm_unique_id
+  - name: title
+    fields:
+    - title
+  - name: abstract
+    fields:
+    - abstract
+    - abstract_structured
+  - name: authors
+    fields:
+    - authors
+    - author_count
+    - authors_with_affiliations
+    - authors_with_affiliations_canonical_json
+    - authors_with_affiliations_raw_json
+  - name: affiliations
+    fields:
+    - affiliation_list
+    - affiliation_structured
+    - affiliation_structured_canonical_json
+    - affiliation_structured_raw_json
+  - name: journal
+    fields:
+    - journal
+    - journal_name
+    - journal_name_short
+    - journal_iso_abbrev
+    - issn
+    - issn_list
+    - journal_issn_type
+  - name: year
+    fields:
+    - publication_year
+  - name: dates
+    fields:
+    - publication_date
+    - pub_date
+    - pub_day
+    - pub_month
+    - date_completed
+    - date_revised
+  - name: pagination
+    fields:
+    - volume
+    - issue
+    - page_first
+    - page_last
+    - page_range
+    - medline_pgn
+  - name: citations
+    fields:
+    - citations_made
+    - citation_subset
+  - name: subjects
+    fields:
+    - subject_mesh
+    - mesh_heading_count
+    - subject_keywords
+    - keyword_count
+    - publication_types
+  - name: funding
+    fields:
+    - grant_count
+  - name: chemicals
+    fields:
+    - chemical_count
+  - name: doc_type
+    fields:
+    - publication_type
+    - publication_type_unified
+    - publication_subclass
+    - publication_class
+  - name: language
+    fields:
+    - language
+  - name: misc
+    fields:
+    - country
+    - publication_status
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - identifiers
+    - title
+    - abstract
+    - authors
+    - affiliations
+    - journal
+    - year
+    - dates
+    - pagination
+    - citations
+    - subjects
+    - funding
+    - chemicals
+    - doc_type
+    - language
+    - misc
+    - dq
+    exclude_fields: []
+  gold:
+    include_groups:
+    - system
+    - identifiers
+    - title
+    - abstract
+    - authors
+    - affiliations
+    - journal
+    - year
+    - subjects
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+    - _lookup_method
+    - _original_id
+quality:
+  version: 1.0.0
+  provider: pubmed
+  entity: publication
+  entity_field_validations:
+  - field: pmid
+    type: pattern
+    pattern: ^[1-9]\d{0,9}$
+    nullable: false
+    error_message: PMID is required and must be a canonical positive numeric string
+  - field: title
+    type: max_length
+    max_length: 2000
+    nullable: false
+    error_message: Title must not exceed 2000 characters
+  - field: title
+    type: not_null
+    nullable: false
+    error_message: Missing title is not allowed for PubMed publication Gold records
+  - field: title
+    type: pattern
+    pattern: \S
+    nullable: false
+    error_message: Title must not be empty or whitespace-only
+  - field: doi
+    type: pattern
+    pattern: ^10\.\d{4,}/\S+$
+    nullable: true
+    error_message: DOI must match format 10.XXXX/suffix (no whitespace)
+  - field: pmc_id
+    type: pattern
+    pattern: ^PMC\d+$
+    nullable: true
+    error_message: PMC identifier must match PMC format when present
+  - field: publication_year
+    type: range
+    min: 1950
+    nullable: true
+    severity: warn
+    error_message: "Publication year before 1950 — will be filtered at Gold stage"
+  - field: publication_type
+    type: pattern
+    pattern: \S
+    nullable: true
+  - field: publication_type_unified
+    type: custom
+    validator: validate_publication_type_unified_taxonomy
+    nullable: true
+    error_message: publication_type_unified must match the shared publication taxonomy
+  - field: publication_subclass
+    type: custom
+    validator: validate_publication_subclass_taxonomy
+    nullable: true
+    error_message: publication_subclass must match the shared publication taxonomy
+  - field: publication_class
+    type: custom
+    validator: validate_publication_class_taxonomy
+    nullable: true
+    error_message: publication_class must match the shared publication taxonomy
+  - field: author_orcids
+    type: pattern
+    pattern: '^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: author_orcids must be a canonical JSON string array of ORCID identifiers
+  - field: issn_list
+    type: pattern
+    pattern: '^\[("[0-9Xx-]+"(,"[0-9Xx-]+")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: issn_list must be a canonical JSON string array of ISSN values
+  - field: publication_status
+    type: enum
+    allowed_values:
+    - ppublish
+    - epublish
+    - aheadofprint
+    nullable: true
+    error_message: publication_status must match the governed PubMed lifecycle vocabulary
+  - field: citations_received
+    type: range
+    min: 0
+    nullable: true
+    error_message: Citation count must be non-negative
+  - field: citations_received
+    type: range
+    min: 0
+    max: 10000000
+    nullable: true
+    severity: warn
+    error_message: Unusually high citation count
+  - field: citations_made
+    type: range
+    min: 0
+    nullable: true
+    error_message: Reference count must be non-negative
+  entity_cross_field_validations:
+  - name: publication_identifiable
+    fields:
+    - pmid
+    - title
+    condition: all_present
+    error_message: Publication must have PMID and title
+  - name: has_identifier
+    fields:
+    - pmid
+    - doi
+    - pmc_id
+    condition: any_present
+    error_message: At least one identifier required
+  entity_conditional_validations: []
+  key_nullability:
+  - field: pmid
+    key_type: merge
+    nullable: false
+filters:
+  version: 1.0.0
+  provider: pubmed
+  entity: publication
+  input_filter:
+    enabled: true
+    source_path: data/input/pubmed.csv
+    column_name: pubmed_id
+    filter_field: pmid
+    batch_size: 100
+    fallback_column: title
+    checkpoint_interval: 1000
+  extraction_params: {}
+  silver_filters:
+    exclude_if_present: []
+    required_fields:
+    - pmid
+    - title
+  gold_filters:
+    list_contains: {}
+    list_lengths: {}
+    ranges:
+      publication_year:
+        min: 1950
+        max: 2050
+    required_fields:
+    - pmid
+    - title
+    columns: {}
+    exclude_if_present: []
+contracts:
+  primary_key:
+  - pmid
+  merge_keys:
+  - pmid
+  hash_include: []
+  hash_exclude: []
+  hash_datetime_policy: v2_datetime_utc
+  contract_ref: pubmed.publication
+  active_version: 1.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 1.0.0
+    write_versions:
+    - 1.0.0
+    affects_hash: false
+hash_policy:
+  provider: pubmed
+  entity: publication
+  contract:
+    version: 1.0.0
+    migration_note: Explicit config-level hash contract aligned with normalization profile pubmed.publication.
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - abstract
+    - abstract_structured
+    - affiliation_list
+    - affiliation_structured
+    - affiliation_structured_canonical_json
+    - author_count
+    - author_keys
+    - author_orcids
+    - authors
+    - authors_with_affiliations
+    - authors_with_affiliations_canonical_json
+    - authors_with_affiliations_raw_json
+    - chemical_count
+    - chemicals
+    - citation_subset
+    - citations_made
+    - citations_received
+    - country
+    - databanks
+    - date_completed
+    - date_revised
+    - doi
+    - gene_symbols
+    - grant_count
+    - is_oa
+    - issn
+    - issn_list
+    - issue
+    - journal
+    - journal_iso_abbrev
+    - journal_issn_type
+    - journal_name_short
+    - keyword_count
+    - language
+    - medline_pgn
+    - mesh_heading_count
+    - mid
+    - nlm_unique_id
+    - page_first
+    - page_last
+    - page_range
+    - pii
+    - pmc_id
+    - pmid
+    - pub_date
+    - pub_day
+    - pub_month
+    - publication_class
+    - publication_date
+    - publication_doi
+    - publication_pmc_id
+    - publication_pmid
+    - publication_status
+    - publication_subclass
+    - publication_type
+    - publication_type_unified
+    - publication_types
+    - publication_year
+    - publisher_id
+    - subject_keywords
+    - subject_mesh
+    - title
+    - volume
+    exclude_fields:
+    - _dq_error
+    - _dq_warn
+    - _index
+    - _ingestion_ts
+    - _lookup_method
+    - _original_id
+    - _run_id
+    - _run_type
+    - _source
+    - _source_batch_id
+    - affiliation_structured_raw_json
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

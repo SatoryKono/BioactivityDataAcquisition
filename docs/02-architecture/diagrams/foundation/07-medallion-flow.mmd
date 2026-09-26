@@ -1,0 +1,82 @@
+%% Title: Medallion Data Flow (Sources → Bronze → Silver → Gold)
+%% Covers: RULES.md §2.1 (Medallion Architecture), §2.8 (Transformation)
+%% Updated: 2026-07-31
+%% Components: BronzeWriter, SilverWriter, GoldWriter, ChEMBL, PubChem, UniProt, PubMed
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @nodes   13
+%% @uniform width=320 height=96 max_title_len=32 max_desc_lines=3
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+
+flowchart LR
+%% keep-orphan: B, G, S
+    subgraph Sources["External Sources"]
+        ChEMBL[(ChEMBL API<br/>)]
+        PubChem[(PubChem API<br/>)]
+        UniProt[(UniProt API<br/>)]
+        PubMed[(PubMed API<br/>)]
+    end
+
+    subgraph Bronze["Bronze Layer"]
+        direction TB
+        BronzeWriter[BronzeWriter<br/>]
+        BronzeData[("JSONL + zstd<br/>Append-only<br/>90d retention")]
+
+        BronzeWriter --> BronzeData
+    end
+
+    subgraph Silver["Silver Layer"]
+        direction TB
+        SilverWriter[SilverWriter<br/>]
+        SilverData[("Delta Lake<br/>Merge/Upsert<br/>ACID transactions")]
+
+        SilverWriter --> SilverData
+    end
+
+    subgraph Gold["Gold Layer"]
+        direction TB
+        GoldWriter[GoldWriter<br/>]
+        GoldData[("Delta Lake<br/>SCD Type 2<br/>Analytics-ready")]
+
+        GoldWriter --> GoldData
+    end
+
+    %% Data Flow
+    ChEMBL ==> BronzeWriter
+    PubChem --> BronzeWriter
+    UniProt --> BronzeWriter
+    PubMed --> BronzeWriter
+
+    BronzeData --> |Transform| SilverWriter
+    SilverData --> |Validate| GoldWriter
+
+    %% Annotations
+    subgraph Legend["Data Characteristics"]
+        B["Bronze: Raw, immutable<br/><br/>"]
+        S["Silver: Normalized, deduplicated<br/><br/>"]
+        G["Gold: Validated, flattened<br/><br/>"]
+    end
+
+    %% Styling
+    classDef source fill:#eff6ff,stroke:#2563eb
+    classDef bronze fill:#fff7ed,stroke:#f59e0b
+    classDef silver fill:#f1f5f9,stroke:#475569
+    classDef gold fill:#fefce8,stroke:#ca8a04
+
+    class ChEMBL,PubChem,UniProt,PubMed source
+    class BronzeWriter,BronzeData bronze
+    class SilverWriter,SilverData silver
+    class GoldWriter,GoldData gold

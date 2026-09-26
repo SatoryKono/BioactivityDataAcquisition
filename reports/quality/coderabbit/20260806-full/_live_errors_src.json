@@ -1,0 +1,140 @@
+[
+  {
+    "file": "application/composite/_lifecycle_observer_span_management.py",
+    "line": 74,
+    "rule": "reportArgumentType",
+    "message": "Argument of type \"SpanHandle\" cannot be assigned to parameter \"value\" of type \"_CompositeSpanHandleProtocol\" in function \"__setitem__\"\n  \"SpanHandle\" is incompatible with protocol \"_CompositeSpanHandleProtocol\"\n    \"__exit__\" is an incompatible type\n      Type \"(exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> (bool | None)\" is not assignable to type \"(exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> (object | None)\"\n        Parameter name mismatch: \"exc_val\" versus \"exc\"\n        Parameter name mismatch: \"exc_tb\" versus \"tb\""
+  },
+  {
+    "file": "application/composite/_lifecycle_observer_span_management.py",
+    "line": 105,
+    "rule": "reportArgumentType",
+    "message": "Argument of type \"SpanHandle\" cannot be assigned to parameter \"value\" of type \"_CompositeSpanHandleProtocol\" in function \"__setitem__\"\n  \"SpanHandle\" is incompatible with protocol \"_CompositeSpanHandleProtocol\"\n    \"__exit__\" is an incompatible type\n      Type \"(exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> (bool | None)\" is not assignable to type \"(exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> (object | None)\"\n        Parameter name mismatch: \"exc_val\" versus \"exc\"\n        Parameter name mismatch: \"exc_tb\" versus \"tb\""
+  },
+  {
+    "file": "application/composite/checkpoint/_checkpoint_runtime.py",
+    "line": 1,
+    "rule": "reportImportCycles",
+    "message": "Cycle detected in import chain\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\checkpoint\\_checkpoint_runtime.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\checkpoint\\_checkpoint_warnings.py"
+  },
+  {
+    "file": "application/composite/runner_pkg/runner.py",
+    "line": 112,
+    "rule": "reportInvalidCast",
+    "message": "Conversion of type `Self@CompositePipelineRunner` to type `_RunnerLifecycleHost` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first."
+  },
+  {
+    "file": "application/composite/runner_pkg/runner_checkpoint_save_observability.py",
+    "line": 100,
+    "rule": "reportInvalidCast",
+    "message": "Conversion of type `SpanHandle` to type `Span` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first."
+  },
+  {
+    "file": "application/core/_base_transformer_execution_support.py",
+    "line": 57,
+    "rule": "reportInvalidCast",
+    "message": "Conversion of type `SpanHandle` to type `_ClosableSpan` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first."
+  },
+  {
+    "file": "application/core/_record_processor_span_support.py",
+    "line": 104,
+    "rule": "reportArgumentType",
+    "message": "Argument of type \"dict[str, str | int]\" cannot be assigned to parameter \"attributes\" of type \"dict[str, object] | None\" in function \"start_as_current_span\"\n  Type \"dict[str, str | int]\" is not assignable to type \"dict[str, object] | None\"\n    \"dict[str, str | int]\" is not assignable to \"dict[str, object]\"\n      Type parameter \"_VT@dict\" is invariant, but \"str | int\" is not the same as \"object\"\n      Consider switching from \"dict\" to \"Mapping\" which is covariant in the value type\n    \"dict[str, str | int]\" is not assignable to \"None\""
+  },
+  {
+    "file": "application/core/_record_processor_span_support.py",
+    "line": 106,
+    "rule": "reportInvalidCast",
+    "message": "Conversion of type `SpanHandle` to type `Span` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first."
+  },
+  {
+    "file": "application/core/batch_checkpoint_recovery_service.py",
+    "line": 164,
+    "rule": "reportInvalidCast",
+    "message": "Conversion of type `SpanHandle` to type `Span` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first."
+  },
+  {
+    "file": "application/core/data_sources/publication_term.py",
+    "line": 63,
+    "rule": "reportAttributeAccessIssue",
+    "message": "Cannot access attribute \"_fetch_publication_terms\" for class \"PublicationTermDataSource*\"\n  Could not bind method \"_fetch_publication_terms\" because \"Self@PublicationTermDataSource\" is not assignable to parameter \"self\"\n    \"PublicationTermDataSource*\" is incompatible with protocol \"PublicationTermExtractionHost\"\n      \"SOURCE_ENTITY_TYPE\" is invariant because it is mutable\n      \"SOURCE_ENTITY_TYPE\" is an incompatible type\n        \"Literal['publication']\" is not assignable to \"str\"\n      \"PUBLICATION_LIMIT_MULTIPLIER\" is invariant because it is mutable\n      \"PUBLICATION_LIMIT_MULTIPLIER\" is an incompatible type\n        \"Literal[50]\" is not assignable to \"int\""
+  },
+  {
+    "file": "composition/_workflow_services.py",
+    "line": 129,
+    "rule": "reportArgumentType",
+    "message": "Argument of type \"NoOpTracing\" cannot be assigned to parameter \"tracing\" of type \"TracingPort | None\" in function \"__init__\"\n  Type \"NoOpTracing\" is not assignable to type \"TracingPort | None\"\n    \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n      \"get_tracer\" is an incompatible type\n        Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n          Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n    \"NoOpTracing\" is not assignable to \"None\""
+  },
+  {
+    "file": "composition/_workflow_services.py",
+    "line": 151,
+    "rule": "reportArgumentType",
+    "message": "Argument of type \"NoOpTracing\" cannot be assigned to parameter \"tracing\" of type \"TracingPort | None\" in function \"__init__\"\n  Type \"NoOpTracing\" is not assignable to type \"TracingPort | None\"\n    \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n      \"get_tracer\" is an incompatible type\n        Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n          Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n    \"NoOpTracing\" is not assignable to \"None\""
+  },
+  {
+    "file": "composition/bootstrap/cli/storage.py",
+    "line": 97,
+    "rule": "reportArgumentType",
+    "message": "Argument of type \"NoOpTracing\" cannot be assigned to parameter \"tracing\" of type \"TracingPort\" in function \"bootstrap_storage_adapter\"\n  \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n    \"get_tracer\" is an incompatible type\n      Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n        Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n          \"_NoOpOtelTracer\" is incompatible with protocol \"TracerHandle\""
+  },
+  {
+    "file": "composition/bootstrap/runtime/tracing_bootstrap.py",
+    "line": 25,
+    "rule": "reportInvalidCast",
+    "message": "Conversion of type `OpenTelemetryTracer` to type `TracingPort` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first."
+  },
+  {
+    "file": "composition/bootstrap/runtime/tracing_bootstrap.py",
+    "line": 50,
+    "rule": "reportReturnType",
+    "message": "Type \"NoOpTracing\" is not assignable to return type \"TracingPort\"\n  \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n    \"get_tracer\" is an incompatible type\n      Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n        Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n          \"_NoOpOtelTracer\" is incompatible with protocol \"TracerHandle\""
+  },
+  {
+    "file": "composition/observability_resolution.py",
+    "line": 65,
+    "rule": "reportReturnType",
+    "message": "Type \"NoOpTracing\" is not assignable to return type \"TracingPort\"\n  \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n    \"get_tracer\" is an incompatible type\n      Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n        Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n          \"_NoOpOtelTracer\" is incompatible with protocol \"TracerHandle\""
+  },
+  {
+    "file": "infrastructure/adapters/http/client_retry_observability.py",
+    "line": 94,
+    "rule": "reportInvalidCast",
+    "message": "Conversion of type `TracerHandle` to type `_OtelTracerLike` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first."
+  },
+  {
+    "file": "infrastructure/adapters/openalex/__init__.py",
+    "line": 1,
+    "rule": "reportImportCycles",
+    "message": "Cycle detected in import chain\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\openalex\\__init__.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\openalex\\client.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\openalex\\_client_support.py"
+  },
+  {
+    "file": "infrastructure/adapters/pubmed/_adapter_support.py",
+    "line": 1,
+    "rule": "reportImportCycles",
+    "message": "Cycle detected in import chain\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\pubmed\\_adapter_support.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\pubmed\\adapter.py"
+  },
+  {
+    "file": "infrastructure/adapters/uniprot/__init__.py",
+    "line": 1,
+    "rule": "reportImportCycles",
+    "message": "Cycle detected in import chain\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\uniprot\\__init__.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\uniprot\\client.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\uniprot\\_client_support.py"
+  },
+  {
+    "file": "infrastructure/observability/noop_resolution.py",
+    "line": 23,
+    "rule": "reportReturnType",
+    "message": "Type \"tuple[TracingPort | NoOpTracing, MetricsPort | NoOpMetrics]\" is not assignable to return type \"tuple[TracingPort, MetricsPort]\"\n  Type \"TracingPort | NoOpTracing\" is not assignable to type \"TracingPort\"\n    \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n      \"get_tracer\" is an incompatible type\n        Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n          Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\""
+  },
+  {
+    "file": "interfaces/cli/commands/config_dq.py",
+    "line": 93,
+    "rule": "reportPossiblyUnboundVariable",
+    "message": "\"dq_config\" is possibly unbound"
+  },
+  {
+    "file": "interfaces/cli/commands/config_dq.py",
+    "line": 95,
+    "rule": "reportPossiblyUnboundVariable",
+    "message": "\"dq_config\" is possibly unbound"
+  }
+]

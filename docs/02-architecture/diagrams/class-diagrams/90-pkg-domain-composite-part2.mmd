@@ -1,0 +1,77 @@
+%% Title: Package Family: domain/composite (Part 2/3)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/composite; part 2/3; modules: config_composite_validation, config_models, lineage, result_seed_dependency, strategy, config_dq.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-09-02
+%% @level   Package Family / Inventory Slice
+%% @nodes   30
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace config_composite_validation {
+        class CompositeConfigProtocol
+        class _DependencyConfigProtocol
+        class _EnricherConfigProtocol
+        class _SeedConfigProtocol
+    }
+
+    namespace config_models {
+        class CompositeConfig
+        class DependencyConfig
+        class EnricherConfig
+        class SeedConfig
+    }
+
+    namespace lineage {
+        class CompositeLineageMetadata
+        class EnrichmentStatusRecord
+        class FieldSource
+    }
+
+    namespace result_seed_dependency {
+        class DependencyResult
+        class DependencyStatus
+        class SeedResult
+    }
+
+    namespace strategy {
+        class ConflictResolution
+        class FallbackStrategy
+        class MergeStrategy
+    }
+
+    namespace config_dq {
+        class CompositeDQConfig
+        class DQOverrideConfig
+    }
+
+    namespace config_merge {
+        class ColumnGroupConfig
+        class MergeConfig
+    }
+
+    namespace config_runtime {
+        class ExecutionConfig
+        class LineageConfig
+    }
+
+    namespace config_schema {
+        class DataSchemaConfig
+        class LayerColumnConfig
+    }
+
+    namespace field_groups_models {
+        class FieldGroupDefinition
+        class FieldMapping
+    }
+
+    namespace result_enrichment {
+        class EnrichmentResult
+        class EnrichmentStatus
+    }
+
+    namespace config_cross_validation {
+        class CrossValidationConfig
+    }
+

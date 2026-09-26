@@ -1,0 +1,360 @@
+# Host attrs/methods provided by concrete composition.
+"""Detached observability backend process helpers."""
+
+from __future__ import annotations
+
+import os
+import signal
+import subprocess  # nosec B404 - see suppression registry
+import sys
+import time
+from collections.abc import Mapping
+from pathlib import Path
+from shutil import which
+from typing import TYPE_CHECKING, Any, cast
+
+import bioetl
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping
+
+_PROCESS_PROBE_TIMEOUT_SECONDS = 5.0
+DEFAULT_HEALTH_SERVER_PORT = 8000
+_BIOETL_PACKAGE_ROOT = Path(bioetl.__file__).resolve().parent
+_BIOETL_SRC_ROOT = _BIOETL_PACKAGE_ROOT.parent
+_BIOETL_REPOSITORY_ROOT = _BIOETL_SRC_ROOT.parent
+
+
+def _resolve_system_executable(command: str) -> str | None:
+    """Return an absolute executable path when available."""
+    return which(command)
+
+
+def _as_sorted_pid_tuple(values: set[int]) -> tuple[int, ...]:
+    return tuple(sorted(values))
+
+
+def _try_parse_pid(pid_text: str) -> int | None:
+    try:
+        return int(pid_text)
+    except ValueError:
+        return None
+
+
+def _parse_windows_netstat_listener_pids(output: str, port: int) -> tuple[int, ...]:
+    suffix = f":{port}"
+    pids: set[int] = set()
+    for line in output.splitlines():
+        normalized = line.split()
+        if len(normalized) < 5:
+            continue
+        local_address, state, pid_text = normalized[1], normalized[3], normalized[4]
+        if state.upper() != "LISTENING" or not local_address.endswith(suffix):
+            continue
+        if (pid := _try_parse_pid(pid_text)) is not None:
+            pids.add(pid)
+    return _as_sorted_pid_tuple(pids)
+
+
+def _parse_posix_ss_listener_pids(output: str, port: int) -> tuple[int, ...]:
+    suffix = f":{port}"
+    pids: set[int] = set()
+    for line in output.splitlines():
+        process_field = _posix_ss_listener_process_field(line, suffix=suffix)
+        if process_field is None:
+            continue
+        for remainder in process_field.split("pid=")[1:]:
+            pid_text = remainder.split(",", maxsplit=1)[0].split(")", maxsplit=1)[0]
+            if (pid := _try_parse_pid(pid_text)) is not None:
+                pids.add(pid)
+    return _as_sorted_pid_tuple(pids)
+
+
+def _posix_ss_listener_process_field(line: str, *, suffix: str) -> str | None:
+    """Return the process field only for a matching local LISTEN address."""
+    fields = line.split(maxsplit=5)
+    if len(fields) < 5:
+        return None
+    if fields[0].upper() != "LISTEN":
+        return None
+    if not fields[3].endswith(suffix):
+        return None
+    return fields[5] if len(fields) > 5 else ""
+
+
+def _run_listener_probe(command: list[str]) -> str:
+    try:
+        result = subprocess.run(  # nosec B603 - see suppression registry
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=_PROCESS_PROBE_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        return ""
+    return result.stdout
+
+
+def _find_windows_listener_pids_by_port(port: int) -> tuple[int, ...]:
+    netstat = _resolve_system_executable("netstat")
+    if netstat is None:
+        return ()
+    output = _run_listener_probe([netstat, "-ano", "-p", "tcp"])
+    return _parse_windows_netstat_listener_pids(output, port)
+
+
+def _find_posix_listener_pids_by_port(port: int) -> tuple[int, ...]:
+    ss = _resolve_system_executable("ss")
+    if ss is None:
+        return ()
+    output = _run_listener_probe([ss, "-ltnp"])
+    return _parse_posix_ss_listener_pids(output, port)
+
+
+def _find_listening_backend_pids_by_port(port: int) -> tuple[int, ...]:
+    if os.name == "nt":
+        return _find_windows_listener_pids_by_port(port)
+    return _find_posix_listener_pids_by_port(port)
+
+
+def _find_listening_backend_pid_by_port(port: int) -> int | None:
+    pids = _find_listening_backend_pids_by_port(port)
+    return pids[0] if pids else None
+
+
+def find_listening_backend_pid_by_port(port: int) -> int | None:
+    """Return one listening backend PID for a port when one is currently bound."""
+    return _find_listening_backend_pid_by_port(port)
+
+
+def drop_listening_backend_on_port(
+    port: int,
+    *,
+    sleep_fn: Callable[[float], None] = time.sleep,
+) -> bool:
+    """Terminate the current listener on one port so a fresh backend can bind."""
+    pids = _find_listening_backend_pids_by_port(port)
+    if not pids:
+        return True
+    if not _drop_listener_pids(port, pids):
+        return False
+    sleep_fn(0.5)
+    return not _find_listening_backend_pids_by_port(port)
+
+
+def _drop_listener_pids(port: int, pids: tuple[int, ...]) -> bool:
+    drop_pid = (
+        _drop_windows_listener_pid if os.name == "nt" else _drop_posix_listener_pid
+    )
+    return all(drop_pid(port, pid) for pid in pids)
+
+
+def _drop_windows_listener_pid(port: int, pid: int) -> bool:
+    taskkill_result = _run_taskkill(pid)
+    if taskkill_result.returncode == 0 or not _pid_still_listening(port, pid):
+        return True
+    return _terminate_pid_with_sigterm(port, pid)
+
+
+def _run_taskkill(pid: int) -> subprocess.CompletedProcess[str]:
+    taskkill = _resolve_system_executable("taskkill")
+    if taskkill is None:
+        return subprocess.CompletedProcess(args=(), returncode=1)
+    command = [taskkill, "/PID", str(pid), "/T", "/F"]
+    try:
+        return subprocess.run(  # nosec B603 - see suppression registry
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=_PROCESS_PROBE_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(args=command, returncode=1)
+
+
+def _drop_posix_listener_pid(port: int, pid: int) -> bool:
+    return _terminate_pid_with_sigterm(port, pid)
+
+
+def _terminate_pid_with_sigterm(port: int, pid: int) -> bool:
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except OSError:
+        return not _pid_still_listening(port, pid)
+    return True
+
+
+def _pid_still_listening(port: int, pid: int) -> bool:
+    return pid in _find_listening_backend_pids_by_port(port)
+
+
+def _build_detached_backend_popen_kwargs(
+    *,
+    os_name: str = os.name,
+    subprocess_module: object = subprocess,
+) -> dict[str, object]:
+    """Build platform-specific detached subprocess kwargs for the backend."""
+    kwargs: dict[str, object] = {
+        "stdin": subprocess.DEVNULL,
+        "stdout": subprocess.DEVNULL,
+        "stderr": subprocess.DEVNULL,
+    }
+    if os_name == "nt":
+        detached_process = int(getattr(subprocess_module, "DETACHED_PROCESS", 0))
+        new_process_group = int(
+            getattr(subprocess_module, "CREATE_NEW_PROCESS_GROUP", 0)
+        )
+        create_no_window = int(getattr(subprocess_module, "CREATE_NO_WINDOW", 0))
+        kwargs["creationflags"] = (
+            detached_process | new_process_group | create_no_window
+        )
+
+        startupinfo_factory = getattr(subprocess_module, "STARTUPINFO", None)
+        if callable(startupinfo_factory):
+            startupinfo = startupinfo_factory()
+            startf_use_show_window = int(
+                getattr(subprocess_module, "STARTF_USESHOWWINDOW", 0)
+            )
+            has_sw_hide = hasattr(subprocess_module, "SW_HIDE")
+            sw_hide = int(getattr(subprocess_module, "SW_HIDE", 0))
+            if startf_use_show_window:
+                existing_dw_flags = (
+                    int(
+                        cast(Any, startupinfo).dwFlags
+                    )  # Any: Windows STARTUPINFO duck-type
+                    if hasattr(startupinfo, "dwFlags")
+                    else 0
+                )
+                cast(Any, startupinfo).dwFlags = (  # Any: Windows STARTUPINFO duck-type
+                    existing_dw_flags | startf_use_show_window
+                )
+            if has_sw_hide:
+                cast(
+                    Any, startupinfo
+                ).wShowWindow = (  # Any: Windows STARTUPINFO duck-type
+                    sw_hide
+                )
+            kwargs["startupinfo"] = startupinfo
+    else:
+        kwargs["start_new_session"] = True
+    return kwargs
+
+
+def _build_detached_backend_env(
+    *,
+    current_env: Mapping[str, str],
+) -> dict[str, str]:
+    """Ensure detached backend subprocess can import the src-layout package."""
+    env = dict(current_env)
+    existing_pythonpath = env.get("PYTHONPATH", "").strip()
+    pythonpath_parts = [str(_BIOETL_SRC_ROOT)]
+    if existing_pythonpath:
+        pythonpath_parts.append(existing_pythonpath)
+    env["PYTHONPATH"] = os.pathsep.join(pythonpath_parts)
+    return env
+
+
+def build_detached_backend_log_path(
+    port: int,
+    *,
+    data_root: Path | None = None,
+) -> Path:
+    """Return the deterministic detached Ops HTTP backend startup log path.
+
+    Prefer ``data_root/ops/`` when a medallion/data root is supplied. Otherwise
+    use repository-local ``logs/ops/`` (gitignored). A legacy
+    ``bioetl-quarantine-backend-{port}.log`` path is accepted as a read alias
+    only by failure-detail helpers when present.
+    """
+    filename = f"bioetl-ops-http-backend-{port}.log"
+    if data_root is not None:
+        return Path(data_root) / "ops" / filename
+    return _BIOETL_REPOSITORY_ROOT / "logs" / "ops" / filename
+
+
+def start_detached_ops_http_backend(
+    *,
+    bind_host: str = "0.0.0.0",
+    port: int = DEFAULT_HEALTH_SERVER_PORT,
+    python_executable: str | None = None,
+    data_root: Path | None = None,
+    current_env: Mapping[str, str],
+    popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
+) -> subprocess.Popen[bytes]:
+    """Launch ``bioetl health server`` as a detached Ops HTTP backend process.
+
+    This is the shipping identity surface for BioETL Ops HTTP dashboard panels.
+    ``data_root`` selects the startup log directory (``<data_root>/ops/``);
+    the health-server command line still discovers control-plane roots from
+    runtime config.
+    """
+    command = [
+        python_executable or sys.executable,
+        "-m",
+        "bioetl",
+        "health",
+        "server",
+        "--host",
+        bind_host,
+        "--port",
+        str(port),
+    ]
+    kwargs = _build_detached_backend_popen_kwargs()
+    kwargs.pop("stdout", None)
+    kwargs.pop("stderr", None)
+    kwargs["cwd"] = str(_BIOETL_REPOSITORY_ROOT)
+    kwargs["env"] = _build_detached_backend_env(current_env=current_env)
+    log_path = build_detached_backend_log_path(port, data_root=data_root)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path.write_text("", encoding="utf-8")
+    with log_path.open("ab") as log_handle:
+        return popen_factory(
+            command,
+            stdout=log_handle,
+            stderr=subprocess.STDOUT,
+            **kwargs,
+        )
+
+
+def start_detached_quarantine_backend(
+    *,
+    bind_host: str = "0.0.0.0",
+    port: int = DEFAULT_HEALTH_SERVER_PORT,
+    python_executable: str | None = None,
+    data_root: Path | None = None,
+    current_env: Mapping[str, str],
+    popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
+) -> subprocess.Popen[bytes]:
+    """Compatibility alias for :func:`start_detached_ops_http_backend`.
+
+    Historical name retained for tests and import paths. Does **not** start
+    ``quarantine serve``; the shipping backend is ``bioetl health server``.
+    """
+    return start_detached_ops_http_backend(
+        bind_host=bind_host,
+        port=port,
+        python_executable=python_executable,
+        data_root=data_root,
+        current_env=current_env,
+        popen_factory=popen_factory,
+    )
+
+
+def python_executable_to_tuple(args: object) -> tuple[str, ...]:
+    """Normalize subprocess ``args`` into a tuple for stable reporting/tests."""
+    if isinstance(args, (list, tuple)):
+        return tuple(str(item) for item in args)
+    return (str(args),)
+
+
+__all__ = [
+    "DEFAULT_HEALTH_SERVER_PORT",
+    "build_detached_backend_log_path",
+    "drop_listening_backend_on_port",
+    "find_listening_backend_pid_by_port",
+    "python_executable_to_tuple",
+    "start_detached_ops_http_backend",
+    "start_detached_quarantine_backend",
+]

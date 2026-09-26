@@ -1,0 +1,47 @@
+{
+  "source": "configs/quality/module_coverage_gates.yaml + pyproject.toml + .github/workflows/tests.yml",
+  "invented_target": false,
+  "line_coverage": {
+    "hard_gate_percent": 85,
+    "enforced_in": "coverage-verify",
+    "command": "coverage report --show-missing --fail-under=85",
+    "pyproject_fail_under": null,
+    "pyproject_note": "fail_under is NOT set in [tool.coverage.report] because partial CI groups would fail; CI coverage-verify is the only repo-wide gate"
+  },
+  "branch_coverage": {
+    "measurement": true,
+    "policy": "blocking",
+    "hard_gate_threshold_percent": 85,
+    "advisory_target_percent": 85.2,
+    "linked_issue": "7611",
+    "command": "python -m scripts.engineering.qa check-branch-coverage --coverage-xml reports/coverage/coverage.xml --min-percent 85"
+  },
+  "module_inventory": {
+    "artifact": "reports/quality/module-coverage-inventory.json",
+    "unmeasured_module_count_max": 0,
+    "uncovered_module_count_max": 0,
+    "tier_violation_mode": "block",
+    "domain_line_min_percent": 90,
+    "aggregates_and_contracts_line_min_percent": 95,
+    "this_session_xml": "NOT_PROVEN"
+  },
+  "required_coverage_shards": [
+    "reports/coverage/.coverage.smoke",
+    "reports/coverage/.coverage.contract-confidence",
+    "reports/coverage/.coverage.repo-backed-unit",
+    "reports/coverage/.coverage.unit-scripts-tooling",
+    "reports/coverage/.coverage.unit-filesystem-contracts",
+    "reports/coverage/.coverage.unit-subprocess-backed",
+    "reports/coverage/.coverage.unit-domain",
+    "reports/coverage/.coverage.unit-application",
+    "reports/coverage/.coverage.unit-infrastructure",
+    "reports/coverage/.coverage.unit-other",
+    "reports/coverage/.coverage.integration",
+    "reports/coverage/.coverage.security"
+  ],
+  "excluded_from_hard_threshold": [
+    "control-plane-e2e",
+    "memory-tests",
+    "live-provider-contracts"
+  ]
+}

@@ -1,0 +1,15 @@
+# P1 #9808 — full-write execution profile
+# Explicit override for authorized full run — enables all mutations.
+# Requires operator authorization; kernel guards, evidence contract and CI gates remain mandatory.
+name: full-write
+description: Explicit override for authorized full run
+MODE: full
+AUDIT_MODE: full
+ALLOW_ISSUE_WRITE: true
+ALLOW_PUSH: true
+ALLOW_MERGE: true
+ALLOW_CLOSE: true
+ALLOW_NETWORK: true
+ALLOW_FULL_SUITE: true
+LANGUAGE: ru
+N: 10

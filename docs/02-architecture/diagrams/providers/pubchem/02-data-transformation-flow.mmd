@@ -1,0 +1,30 @@
+%% Title: PubChem Data Transformation Flow
+%% Description: Transformation/normalization flow for PubChem.
+%% @version 1.0.0
+%% @date 2026-07-28
+%% @type flowchart
+%% @level system
+%% @nodes   35
+%% @adr ADR-040
+
+%% @version 1.0.0
+%% @date 2026-07-28
+%% @type flowchart
+%% @level system
+%%{init: {'layout': 'elk'}}%%
+flowchart TD
+    Raw[Raw provider records] --> Map[Field mapping FieldSpec/profile]
+    Map --> Norm[Domain normalization profiles]
+    Norm --> Id[Identifier family canonicalization]
+    Id --> Val[Pandera schema validation]
+    Val --> OK{Valid?}
+    OK -->|Yes| Domain[Domain entity / row contract]
+    OK -->|Soft fail| Soft[Null/flag per policy]
+    Soft --> Domain
+    OK -->|Hard fail path| Q[Quarantine routing]
+    Domain --> Out([Silver write input])
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px

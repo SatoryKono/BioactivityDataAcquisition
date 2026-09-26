@@ -1,0 +1,10 @@
+{
+  "content_hash": "77bfb13809644be87fab42f34c760a2268b5171a1206531fea0d5ceaf14e24e9",
+  "normalized": {
+    "max_phase": 0.5,
+    "molecule_synonyms": "[{\"molecule_synonym\":\"Example\"},{\"molecule_synonym\":\"Alt\"}]",
+    "molecule_type": "Small molecule",
+    "pref_name": "Example Molecule",
+    "structure_type": "MOL"
+  }
+}

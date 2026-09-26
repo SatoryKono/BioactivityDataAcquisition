@@ -1,0 +1,148 @@
+{
+  "snapshot_date": "2026-07-14",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "issues": [
+    {
+      "issue": "#5626",
+      "theme": "Internal shims sunset enforcement",
+      "debt_types": ["Compatibility debt", "Governance gap", "Architecture debt"],
+      "action": "Enforced internal shims sunset policies with proper date tracking and removal enforcement.",
+      "risk": "medium",
+      "evidence": [
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5627",
+      "theme": "Runtime cardinality review freshness",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Maintained runtime cardinality review freshness with proper age tracking and inventory alignment.",
+      "risk": "low",
+      "evidence": [
+        "reports/observability/runtime_cardinality_review.json",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5628",
+      "theme": "Observability metric governance",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Governed observability metrics with proper allowlist and cardinality tracking.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/observability_metric_governance.yaml",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5629",
+      "theme": "Contract registry diagnostics",
+      "debt_types": ["Contract drift", "Governance gap", "Test debt"],
+      "action": "Maintained contract registry diagnostics with proper DQ reference validation and error tracking.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/contract-registry-diagnostics.json",
+        "scripts/engineering/ci/validate_registry_dq_refs.py",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5630",
+      "theme": "Architecture scorecard governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Budget debt"],
+      "action": "Governed architecture quality scorecard with proper metrics and ratchet tracking.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/architecture-quality-scorecard.json",
+        "configs/quality/debt_scorecard.yaml",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5631",
+      "theme": "Module coverage inventory governance",
+      "debt_types": ["Coverage debt", "Governance gap", "Budget debt"],
+      "action": "Governed module coverage inventory with proper hash verification and gate alignment.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/module-coverage-inventory.json",
+        "configs/quality/module_coverage_gates.yaml",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5632",
+      "theme": "Debt gates artifact alignment",
+      "debt_types": ["Governance gap", "Quality debt", "Budget debt"],
+      "action": "Aligned debt gates artifacts with proper status tracking and source tree hash verification.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5633",
+      "theme": "Config surface backlog governance",
+      "debt_types": ["Config debt", "Governance gap", "Duplication"],
+      "action": "Governed config surface backlog with proper duplication tracking and owner accountability.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/config-surface-backlog.json",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5634",
+      "theme": "Root hygiene governance",
+      "debt_types": ["Governance gap", "Root hygiene", "Architecture debt"],
+      "action": "Governed root hygiene with proper registry tracking and policy enforcement.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "scripts/ops/support/repo/cleanup_repository.py",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5635",
+      "theme": "Test fixture governance",
+      "debt_types": ["Test debt", "Governance gap", "Quality debt"],
+      "action": "Governed test fixtures with proper duplication tracking and ledger management.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/test-fixture-asset-duplication.json",
+        "configs/quality/fixture_governance_ledger.yaml",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5636",
+      "theme": "VCR metadata governance",
+      "debt_types": ["Test debt", "Governance gap", "VCR debt"],
+      "action": "Governed VCR metadata with proper catalog tracking and ownership assignment.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/vcr-metadata-catalog.json",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5637",
+      "theme": "Governance artifact consistency",
+      "debt_types": ["Governance gap", "Architecture debt", "Documentation debt"],
+      "action": "Maintained governance artifact consistency across all quality and observability surfaces.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/architecture-quality-scorecard.json",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    }
+  ]
+}

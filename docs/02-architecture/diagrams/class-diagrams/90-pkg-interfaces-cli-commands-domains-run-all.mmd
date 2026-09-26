@@ -1,0 +1,47 @@
+%% Title: Package Family: interfaces/cli/commands/domains/run_all
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/interfaces/cli/commands/domains/run_all; modules: command_policy, public_runtime_deps, support, execution, command_entrypoint.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-09-02
+%% @level   Package Family / Inventory Slice
+%% @nodes   21
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace command_policy {
+        class BatchExecutorCallable
+        class BatchExitCodeCallable
+        class BatchSummaryPresenterCallable
+        class DestructiveConfirmationCallable
+        class ExitCallable
+        class HealthInfoPresenterCallable
+        class ListingEmitterCallable
+        class PreviewEmitterCallable
+        class RunAllCommandInput
+    }
+
+    namespace public_runtime_deps {
+        class RunAllBatchRuntime
+        class RunAllCallbackRuntime
+        class RunAllPolicyRuntime
+        class RunAllPresentationRuntime
+    }
+
+    namespace support {
+        class BatchRunResult
+        class PipelineRegistryView
+        class RunAllExecutionPlan
+        class _BatchRunAccumulator
+    }
+
+    namespace execution {
+        class RunAllBatchExecutionRequest
+        class RunAllPolicyRequest
+        class _GetPipelineRunnerServiceFn
+    }
+
+    namespace command_entrypoint {
+        class RunAllCommandCallback
+    }
+

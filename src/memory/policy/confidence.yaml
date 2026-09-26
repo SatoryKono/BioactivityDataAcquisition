@@ -1,0 +1,23 @@
+version: 1
+levels:
+  - id: canonical
+    rank: 100
+    description: "Directly backed by canonical repository truth."
+  - id: derived
+    rank: 70
+    description: "Deterministically derived from canonical sources."
+  - id: curated
+    rank: 50
+    description: "Human-promoted summary or lesson with source refs."
+  - id: episodic
+    rank: 20
+    description: "Short-lived task-local summary requiring revalidation."
+defaults:
+  policy: canonical
+  catalog: canonical
+  schema: canonical
+  rag_manifest: derived
+  graph_export: derived
+  timeline_event: derived
+  curated_note: curated
+  episodic_note: episodic

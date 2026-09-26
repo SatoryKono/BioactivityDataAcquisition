@@ -1,0 +1,1017 @@
+{
+  "0d290d4f12d6b226": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-001",
+    "path": "src/bioetl/domain/aggregates/batch.py",
+    "claim": "In @src/bioetl/domain/aggregates/batch.py around lines 9 - 17, Document the new public import contracts exposed by bioetl.domain.aggregates.batch for Batch, BatchRecord, and BatchStatus: add the required package version bump, create or reference an ADR, and provide migration notes plus a rollback procedure in the project’s established release documentation locations.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "56f79c0fdcc51cdb": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-002",
+    "path": "src/bioetl/domain/aggregates/_quarantine_value_objects.py",
+    "claim": "In @src/bioetl/domain/aggregates/_quarantine_value_objects.py around lines 1 - 5, Refresh reports/quality/module-coverage-inventory.json using _refresh_module_coverage_inventory.py after the src/bioetl changes, then run the architecture hash guard and include its updated evidence or results.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "1f290f5fd5659a92": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-003",
+    "path": "src/bioetl/domain/aggregates/pipeline_run_stage_result.py",
+    "claim": "In @src/bioetl/domain/aggregates/pipeline_run_stage_result.py around lines 95 - 191, Add nominal-path unit tests for the StageResult dataclass covering valid pending, success, and failure construction. Exercise with_success() and verify it produces a successful result with the expected duration, then exercise with_failure() and verify the failed status preserves the supplied error and error_type.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "d3ba2d006eb3c5b9": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-004",
+    "path": "src/bioetl/domain/aggregates/_quarantine_value_objects.py",
+    "claim": "In @src/bioetl/domain/aggregates/_quarantine_value_objects.py around lines 21 - 116, Add unit tests covering nominal behavior for QuarantineStatus.is_terminal and can_resolve, successful ResolutionInfo construction with each valid terminal resolution type, and _validate_quarantine_required_fields with a complete valid field set. Preserve and retain rejection coverage for invalid resolution types and missing required fields.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "c4be5f1146fd0e41": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-005",
+    "path": "src/bioetl/domain/aggregates/events.py",
+    "claim": "In @src/bioetl/domain/aggregates/events.py around lines 30 - 42, Document the public event contracts exported through __all__, including a version bump, an ADR reference, migration notes, and a rollback procedure. Add these artifacts using the repository’s established locations and conventions, and ensure they cover the event classes listed here without changing their runtime behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "03c1285a79cb833a": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-006",
+    "path": "src/bioetl/domain/aggregates/quarantine_entry.py",
+    "claim": "In @src/bioetl/domain/aggregates/quarantine_entry.py around lines 9 - 19, Document and version the public contracts exported by quarantine_entry—QuarantineEntry, QuarantineStatus, and ResolutionInfo—before release: add the required version bump, ADR reference, migration notes, and rollback procedure using the repository’s established locations and conventions. Keep the existing exports unchanged.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "bf1bc7c124a954bd": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-007",
+    "path": "src/bioetl/domain/aggregates/pipeline_run.py",
+    "claim": "In @src/bioetl/domain/aggregates/pipeline_run.py around lines 26 - 31, Version and document the newly exported PipelineRun public API: add the required version bump, ADR reference, migration notes, and rollback procedure for PipelineRun, PipelineRunState, StageResult, and StageStatus before release, without changing the export list.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "f7a14065bf6c2282": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-008",
+    "path": "src/bioetl/domain/aggregates/_quarantine_aggregate.py",
+    "claim": "In @src/bioetl/domain/aggregates/_quarantine_aggregate.py around lines 162 - 168, Move the function-local imports of hashlib, serialize_to_json_canonical, and QuarantineEntryCreated out of create() and into module scope in _quarantine_aggregate.py. Remove the duplicate local imports while preserving the existing hashing and event-creation behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "daf286d558af21ef": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-009",
+    "path": "src/bioetl/domain/aggregates/_quarantine_aggregate.py",
+    "claim": "In @src/bioetl/domain/aggregates/_quarantine_aggregate.py at line 46, Apply the Batch pattern to QuarantineEntry: place the instance attribute __slots__ and bare annotations in a dedicated attributes base, make QuarantineEntryPropertiesMixin and QuarantineEntryTransitionsMixin declare __slots__ = (), and have QuarantineEntry inherit that attributes base. Remove the mixin class-level defaults that conflict with the slot descriptors so missing initialization remains detectable and instances no longer receive __dict__.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "5c6e64993894d226": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-010",
+    "path": "src/bioetl/domain/aggregates/_pipeline_run_mixins.py",
+    "claim": "In @src/bioetl/domain/aggregates/_pipeline_run_mixins.py around lines 124 - 172, Update record_stage_failure to call _replace_running_stage with the failed StageResult instead of appending it directly to _stages, matching record_stage_success and ensuring the existing RUNNING entry is replaced by the FAILED result. Leave the run status, timestamps, and PipelineFailed event handling unchanged.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "f89526569d066427": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-011",
+    "path": "src/bioetl/domain/aggregates/_batch_mixins.py",
+    "claim": "In @src/bioetl/domain/aggregates/_batch_mixins.py around lines 142 - 180, Update quarantine_record to verify that self._records[position] is the supplied record before modifying the batch, rejecting foreign records even when their indices overlap. Also reject records already present as quarantined before appending or emitting the RecordQuarantined event, preserving single-count and single-event behavior on retries.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "8b1e99869270735e": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-011-S1",
+    "path": "src/bioetl/domain/aggregates/_batch_mixins.py",
+    "claim": "Batch.quarantine_record accepts a foreign BatchRecord with the same index and overwrites the batch-owned record instead of rejecting it.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "d76e2de66cb17372": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-011-S2",
+    "path": "src/bioetl/domain/aggregates/_batch_mixins.py",
+    "claim": "Batch.quarantine_record is not idempotent for an already quarantined record and duplicates both the quarantine projection and RecordQuarantined events on retry.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "6f87fc2b585dd0af": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-aggregates-012",
+    "path": "src/bioetl/domain/aggregates/_quarantine_entry_properties_mixin.py",
+    "claim": "In @src/bioetl/domain/aggregates/_quarantine_entry_properties_mixin.py around lines 22 - 34, Replace the cast(Any, None) initializers in the quarantine entry property declarations with bare type annotations and add the targeted pyright: ignore[reportUninitializedInstanceVariable] pattern used by _BatchAttrs. Remove imports made unused by this change, and move QuarantineStatus and ResolutionInfo under TYPE_CHECKING as indicated; preserve all declared types and attribute names.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "20c75dfc7dbe89da": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-001",
+    "path": "src/bioetl/domain/behavior/validation_result_envelopes.py",
+    "claim": "In @src/bioetl/domain/behavior/validation_result_envelopes.py around lines 10 - 23, Add a unit test for build_validation_result that supplies representative issues, validation_layer, execution_context, and timestamp, then verifies each value is preserved on the returned ValidationResult.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "f20487850de50e00": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-002",
+    "path": "src/bioetl/domain/behavior/value_validator.py",
+    "claim": "In @src/bioetl/domain/behavior/value_validator.py around lines 72 - 300, Add unit tests for ValueValidator covering concentration validation, strict-mode pChEMBL validation, percent-inhibition activity validation when a unit is supplied, and custom bounds configured through set_concentration_range. Assert both valid and invalid nominal-path outcomes, including returned error results.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "90e3e86ee75ab0e6": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-003",
+    "path": "src/bioetl/domain/behavior/validation_helpers.py",
+    "claim": "In @src/bioetl/domain/behavior/validation_helpers.py around lines 6 - 21, Add unit tests for validate_data covering non-empty payloads, None, every supported empty collection/string type, numeric 0, and boolean False. Assert that valid values complete without raising and that None or empty values raise ValueError with the expected message, using the project’s existing test conventions.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "63c775457f6ca25b": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-004",
+    "path": "src/bioetl/domain/behavior/value_validator.py",
+    "claim": "In @src/bioetl/domain/behavior/value_validator.py around lines 218 - 223, Update the validation flow around _validate_by_activity_type so ActivityType.PERCENT_INHIBITION is validated by its 0–100 activity-type rules before any unit-based concentration validation. Preserve the existing concentration path for other activity types when unit is supplied.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "7d1db3617d29a05c": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-005",
+    "path": "src/bioetl/domain/behavior/unit_converter.py",
+    "claim": "In @src/bioetl/domain/behavior/unit_converter.py around lines 19 - 20, Update the release artifacts for the public UnitConverter API contract: add the required version bump, reference an ADR, document migration notes, and provide a rollback procedure. Keep the existing __all__ export unchanged and place the additions in the project’s established release or documentation artifacts.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "015139c0d35611e2": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-006",
+    "path": "src/bioetl/domain/behavior/value_validator_rules.py",
+    "claim": "In @src/bioetl/domain/behavior/value_validator_rules.py around lines 34 - 118, Add unit tests covering normalize_unit_name with each supported alias and canonical unit output, plus validate_percent_value accepting boundary and nominal values 0, 50, and 100. Place the tests alongside the existing value-validator tests and assert both the valid status and absence of an error message.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "85af844070cea4ae": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-007",
+    "path": "src/bioetl/domain/behavior/unit_converter.py",
+    "claim": "In @src/bioetl/domain/behavior/unit_converter.py around lines 43 - 225, Add unit tests covering nominal conversions through UnitConverter.convert, to_concentration, to_pchembl, normalize_to_nanomolar, and normalize_to_micromolar. Verify representative nM/µM conversions, value-object creation, expected pChEMBL output, and normalized numeric results using the project’s existing test conventions.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "f586e84903c06e23": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-008",
+    "path": "src/bioetl/domain/behavior/validation_helpers.py",
+    "claim": "In @src/bioetl/domain/behavior/validation_helpers.py around lines 17 - 20, Update the collection-type check in validate_data to include frozenset alongside the existing container types, so empty frozenset values are rejected consistently with the documented empty-collection behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "21eebce43225ca37": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-009",
+    "path": "src/bioetl/domain/behavior/value_validator.py",
+    "claim": "In @src/bioetl/domain/behavior/value_validator.py around lines 296 - 300, Update the concentration-range validation around the min_value/max_value check to reject any non-finite bound, including NaN and infinities, before normalizing the unit or storing the range in _concentration_ranges. Preserve the existing requirement that min_value is less than max_value.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "32c0c2e923485c1c": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-010",
+    "path": "src/bioetl/domain/behavior/_dq_rule_evaluators.py",
+    "claim": "In @src/bioetl/domain/behavior/_dq_rule_evaluators.py around lines 119 - 124, Extract the shared `protein_class_id == parent_id` predicate from `_dq_rule_evaluators_cross.py` into a reusable symbol, then update `_custom_cross_rule_violated_impl` and the hierarchy self-reference evaluator in `_dq_rule_evaluators.py` to call it. Remove the duplicate inline comparison while preserving the existing validation behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "eba1f4fb8b7c65e7": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-011",
+    "path": "src/bioetl/domain/behavior/_dq_value_coercion.py",
+    "claim": "In @src/bioetl/domain/behavior/_dq_value_coercion.py around lines 50 - 68, Remove the duplicate helpers _coerce_string_list_like, _looks_like_json_list, and _decode_json_list_like from _dq_rule_evaluators_vocab.py, and import these symbols from _dq_value_coercion instead. Update the vocab module’s references to use the imported implementations so the JSON-list coercion contract has a single source of truth.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "71bcd1abb02db72f": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-012",
+    "path": "src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py",
+    "claim": "In @src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py around lines 20 - 25, Update the warning class returned by status_color_class to match the stylesheet’s .check-item.warn selector, while preserving the existing pass and fail mappings and status-warning badge class behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "60de25b0263157fa": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-013",
+    "path": "src/bioetl/domain/behavior/_author_helpers.py",
+    "claim": "In @src/bioetl/domain/behavior/_author_helpers.py around lines 187 - 193, In the text normalization flow, move the unescape operation before _HTML_TAG_PATTERN removes tags so entity-encoded markup is stripped as well. Update the sequence in the helper containing normalized and return normalized if normalized else None, while preserving the remaining whitespace, control-character, Unicode normalization, and empty-result handling.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "1a862a8773606abe": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-014",
+    "path": "src/bioetl/domain/behavior/_preflight_governance_helpers.py",
+    "claim": "In @src/bioetl/domain/behavior/_preflight_governance_helpers.py around lines 43 - 54, Update apply_overrides_to_issues so the no-override path returns a shallow copy of issues rather than the original list, matching the fresh-list behavior of the override path. Preserve the existing issue transformation and return type for configured overrides.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "caeec38d183ecfcf": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-015",
+    "path": "src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py",
+    "claim": "In @src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py around lines 211 - 221, Update _render_raw_data_card to serialize payloads fail-soft like _format_dict_detail: use the same supported non-string-key option and catch serialization TypeError, substituting a safe fallback payload so report rendering continues when values such as Decimal, set, or unsupported keys are present.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "0fe5c527ac40fc1d": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-016",
+    "path": "src/bioetl/domain/behavior/_dq_rule_evaluators_cross.py",
+    "claim": "In @src/bioetl/domain/behavior/_dq_rule_evaluators_cross.py around lines 68 - 78, Update _conditional_required_rule_violated so incomplete rules with a missing trigger_field or required_field raise the package’s ValidationError instead of returning True. Match the existing ValidationError behavior and message conventions used by other rule dispatch points, while preserving the per-record evaluation for valid rules.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "ee6db090534be4ad": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-017",
+    "path": "src/bioetl/domain/behavior/__init__.py",
+    "claim": "In @src/bioetl/domain/behavior/__init__.py around lines 184 - 193, Remove the unreachable TYPE_CHECKING guard from __getattr__ and delete its blanket “pragma: no cover” exemption so the lazy public-export path is measured by coverage. Preserve the existing _PUBLIC_EXPORTS lookup, AttributeError behavior, dynamic import, caching, and return flow, then refresh reports/quality/module-coverage-inventory.json.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "8dca5a34b6696b8e": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-018",
+    "path": "src/bioetl/domain/behavior/_preflight_governance_types.py",
+    "claim": "In @src/bioetl/domain/behavior/_preflight_governance_types.py around lines 22 - 39, Update PreflightGovernanceConfig.__post_init__ to store issue_code_overrides as an immutable mapping snapshot, such as a MappingProxyType wrapping a copied dict, so callers cannot mutate it directly or through the original mapping. Ensure the frozen dataclass remains hashable when overrides are present by excluding this field from generated hashing or otherwise using a hash-safe immutable representation.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "63e0c4bf94ef1686": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-019",
+    "path": "src/bioetl/domain/behavior/composite_metadata_cv.py",
+    "claim": "In @src/bioetl/domain/behavior/composite_metadata_cv.py around lines 31 - 52, Update _build_cv_rule_provenance_entry to return dict[str, str | int | None] and store record_count as an integer instead of converting it with str(). Preserve the existing string and None fields while widening any related type annotations needed to keep this provenance contract consistent.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "2eaa4479cb5c172d": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-020",
+    "path": "src/bioetl/domain/behavior/composite_validation_layer.py",
+    "claim": "In @src/bioetl/domain/behavior/composite_validation_layer.py around lines 290 - 299, Remove the thin wrapper methods _is_valid_field_priorities, _extract_priority, and _is_valid_lineage_config from the validation class, then update _append_config_issue_if_invalid call sites to pass the corresponding module-level helper functions directly. Before removing them, preserve compatibility only if tests or external code patch these methods by class attribute.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "c0cec0c5ee532ddf": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-021",
+    "path": "src/bioetl/domain/behavior/activity_aggregator/_aggregator_extensions.py",
+    "claim": "In @src/bioetl/domain/behavior/activity_aggregator/_aggregator_extensions.py around lines 15 - 22, Update the extension methods represented by _AggregatorHost and the affected concentration, weighted, and filter paths to accept an optional method and propagate None to the host instead of hardcoding \"median\", allowing ActivityAggregator.default_method to resolve the aggregation strategy. Revise their docstrings to state that the default uses the configured aggregator method rather than median.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "dd3f7d1373587fff": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-022",
+    "path": "src/bioetl/domain/behavior/aggregation_validator.py",
+    "claim": "In @src/bioetl/domain/behavior/aggregation_validator.py around lines 174 - 193, Update _get_source_fields to extract each field descriptor’s name when fields_node contains dictionaries, while retaining string entries as field names. Ensure the resulting set contains actual schema field names such as “x”, so validate_aggregation_config does not report false CMP_PF_AGG_002 missing-field errors.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "d9d56a356d8e6e50": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-023",
+    "path": "src/bioetl/domain/behavior/composite_validation_helpers.py",
+    "claim": "In @src/bioetl/domain/behavior/composite_validation_helpers.py around lines 63 - 79, Update _convert_to_aggregation_config and _convert_to_cross_validation_config to validate user-supplied field shapes before constructing their dataclasses, raising ValueError for invalid group_by, aggregations, pairs, rules, and threshold/flag types as appropriate. Preserve valid defaults and values, and add ValueError handling around the converter call in CompositeValidator._validate_cross_validation_config so malformed input becomes validation issues instead of escaping.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "3dd74724d570137d": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-023-S1",
+    "path": "src/bioetl/domain/behavior/composite_validation_helpers.py",
+    "claim": "_convert_to_aggregation_config accepts malformed group_by and aggregations shapes, allowing type errors to escape composite preflight instead of producing validation issues.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "b23abb85cb69dab4": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-023-S2",
+    "path": "src/bioetl/domain/behavior/composite_validation_helpers.py",
+    "claim": "_convert_to_cross_validation_config accepts malformed pairs, rules, flags, and thresholds, and CompositeValidator lets conversion errors escape instead of returning validation issues.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "4f0e49ad5afee03e": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-024",
+    "path": "src/bioetl/domain/behavior/composite_validation_layer.py",
+    "claim": "In @src/bioetl/domain/behavior/composite_validation_layer.py around lines 250 - 263, Update _validate_cross_validation_config to wrap _convert_to_cross_validation_config in the same KeyError/ValueError handling used by _validate_aggregation_config, converting failures into the appropriate CMP_PF_CV_* ValidationIssue instead of allowing exceptions to escape validate_composite.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "28e52da66b71158f": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-025",
+    "path": "src/bioetl/domain/behavior/author_normalization_service.py",
+    "claim": "In @src/bioetl/domain/behavior/author_normalization_service.py around lines 26 - 30, Update the _filter_string_items parameter from list[Any] to list[object], preserving its existing string-filtering behavior, and remove the Any import if no other references remain in the module.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "9ef05aa8b2fa6bc4": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-026",
+    "path": "src/bioetl/domain/behavior/dq_policy_resolver.py",
+    "claim": "In @src/bioetl/domain/behavior/dq_policy_resolver.py around lines 53 - 62, Update _get_disposition_overrides_dict so its fallback branch raises TypeError for unsupported disposition_overrides types instead of returning an empty dictionary; preserve the existing dict and tuple/list handling so _validate_config fails fast on malformed configuration.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "d7abbcb989bb0537": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-027",
+    "path": "src/bioetl/domain/behavior/cross_validation_validator.py",
+    "claim": "In @src/bioetl/domain/behavior/cross_validation_validator.py around lines 8 - 14, Resolve the cross-module private-helper violation in cross_validation_validator.py by renaming the imported helpers in cross_validation_helpers.py to public names, exporting them via __all__, and updating all references and imports accordingly; follow the public naming pattern used by comparison_source_list.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "c4f81b64a7ed897d": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-028",
+    "path": "src/bioetl/domain/behavior/merged_metadata_explainability.py",
+    "claim": "In @src/bioetl/domain/behavior/merged_metadata_explainability.py around lines 45 - 63, Update generate_field_explanation and its callers, particularly generate_record_explanation, to accept and propagate the selected merge_strategy instead of hardcoding \"prioritize\". Ensure each MergedFieldExplanation uses the same strategy stored by its parent record explanation, including when callers pass \"union\".",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "f81c91207c719e01": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-029",
+    "path": "src/bioetl/domain/behavior/dq_policy_resolver.py",
+    "claim": "In @src/bioetl/domain/behavior/dq_policy_resolver.py around lines 103 - 136, Remove the unused threshold_breach and anomaly_signal parameters from resolve_disposition, _apply_strictness_mode, and create_rule_outcome, and remove their docstring entries. Update all callers and forwarding logic so these flags are no longer accepted or propagated, while preserving the existing disposition resolution behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "9d3c322c6893b677": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-030",
+    "path": "src/bioetl/domain/behavior/dq_serializer.py",
+    "claim": "In @src/bioetl/domain/behavior/dq_serializer.py around lines 166 - 167, Update _yaml_entry and the related _yaml_list/_yaml_dict serialization paths so empty lists and empty dictionaries emit explicit [] and {} values rather than a key with no nested lines, which becomes null. Preserve nested serialization for non-empty collections and ensure validation_errors remains distinguishable from a missing field.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "7f3c19d340a1c648": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-031",
+    "path": "src/bioetl/domain/behavior/dq_metrics_calculator.py",
+    "claim": "In @src/bioetl/domain/behavior/dq_metrics_calculator.py around lines 65 - 71, The DQ metrics calculation hardcodes warning_count to zero, so warnings are never reported. Update DQMetricsInput to carry a warning_count and pass it through in the BatchDQMetrics.from_records call within the calculator, or explicitly document the intentional lack of warning tracking if that is the designed behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "da8066d7e32c51a8": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-032",
+    "path": "src/bioetl/domain/behavior/dq_policy_resolver.py",
+    "claim": "In @src/bioetl/domain/behavior/dq_policy_resolver.py around lines 210 - 225, Update _apply_contract_adjustments to remove the unreachable strict-mode WARN-to-QUARANTINE branch and misleading placeholder comments, leaving it as an explicit contract-specific extension point that returns disposition unchanged.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "05548e0220af051d": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-033",
+    "path": "src/bioetl/domain/behavior/dq_metrics_calculator.py",
+    "claim": "In @src/bioetl/domain/behavior/dq_metrics_calculator.py at line 33, Remove the stale “Any: DQ check values vary by check type” comments from the annotations at the three referenced locations in the DQ metrics calculator, including the declarations using list[JsonDict] and set[str], while leaving the type annotations unchanged.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "2dab9b22dbe19681": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-034",
+    "path": "src/bioetl/domain/behavior/dq_metrics_calculator.py",
+    "claim": "In @src/bioetl/domain/behavior/dq_metrics_calculator.py around lines 139 - 153, The _has_critical_missing_fields check incorrectly treats every non-underscore missing field as required. Update the drift calculation around _has_critical_missing_fields to use the contract’s required-field set when determining critical missing fields, while preserving metadata handling and the existing warn/info classification for non-required omissions.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "9a1b0a4332dafa0a": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-035",
+    "path": "src/bioetl/domain/behavior/composite_validation_layer.py",
+    "claim": "In @src/bioetl/domain/behavior/composite_validation_layer.py around lines 100 - 119, In the composite configuration validation method, return immediately after recording CMP_STR_SCHEMA_001 when config.composite_config is not a dict, preventing the required-field membership loop from executing on malformed values. Also guard _deep_preflight_issues against non-dict composite_config before calling .get, since validate_composite runs both validation passes.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "0b42007ae96eff4d": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-036",
+    "path": "src/bioetl/domain/behavior/aggregation_validator.py",
+    "claim": "In @src/bioetl/domain/behavior/aggregation_validator.py around lines 238 - 245, Update _build_group_key to preserve each field value’s type in the group key and use a dedicated non-representable sentinel for missing fields, preventing collisions such as 1 versus \"1\" and absent versus \"MISSING\". Adjust the seen_groups annotation and _build_duplicate_samples to consume the new nested/type-tagged key shape while preserving duplicate detection and sample output.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "15c4a75215088a99": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-037",
+    "path": "src/bioetl/domain/behavior/dq_rule_evaluator.py",
+    "claim": "In @src/bioetl/domain/behavior/dq_rule_evaluator.py around lines 49 - 74, Cache the immutable policy reference in DQPolicyResolver.build_policy_ref using a cached property or equivalent memoized field, and ensure _config_path and create_rule_outcome reuse that cached value. Update evaluate_dq_rules_for_record and related callers to reuse a pre-built resolver where the policy remains unchanged, avoiding repeated constructor validation while preserving existing rule outcomes.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "da843a004008c4ef": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-038",
+    "path": "src/bioetl/domain/behavior/composite_metadata_helpers.py",
+    "claim": "In @src/bioetl/domain/behavior/composite_metadata_helpers.py around lines 134 - 158, Refactor _build_composite_output_ext to avoid duplicating the CompositeOutputExt construction: compute the four shared field values once and use them in the return path, varying only whether partition_count is included. Preserve the existing behavior for both None and non-None partition_count cases, and keep type safety by using typed locals rather than an untyped **common mapping if needed.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "a818ff07030e466e": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-039",
+    "path": "src/bioetl/domain/behavior/composite_validation_layer.py",
+    "claim": "In @src/bioetl/domain/behavior/composite_validation_layer.py around lines 90 - 93, Move the dataclasses.replace import from the function body to the module-level imports in the validation layer, then remove the inline import while preserving the existing replace(validation_report, execution_decision=governance_decision) call and its comment.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "3c6c43c2ed18d446": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-040",
+    "path": "src/bioetl/domain/behavior/composite_validation_helpers.py",
+    "claim": "In @src/bioetl/domain/behavior/composite_validation_helpers.py around lines 82 - 99, Update _is_valid_field_priorities to reject unhashable priority values before using them as keys in seen_by_priority, ensuring malformed list or dictionary priorities return False rather than raising TypeError. Remove the unreachable owner != field comparison and treat any existing priority key as a duplicate while preserving the current missing-priority validation.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "c89cfe2b37a7ca8e": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-041",
+    "path": "src/bioetl/domain/behavior/composite_metadata_cv.py",
+    "claim": "In @src/bioetl/domain/behavior/composite_metadata_cv.py around lines 148 - 163, Update the composite metadata summary around _marker_increments, error_count, and CompositeCvDQSummary to accurately document that error_records includes quarantined records and overlaps quarantine_records; remove the contradictory “distinct” comment and pass-through alias if unnecessary, while preserving the existing counter values and validation behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "730adc0bcd54c695": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-042",
+    "path": "src/bioetl/domain/behavior/cross_validation_helpers.py",
+    "claim": "In @src/bioetl/domain/behavior/cross_validation_helpers.py around lines 146 - 168, The _normalize_comparison_sources function should return a new list when comparison_sources is a validated list of strings, rather than returning the caller-supplied object directly. Copy the list in that success branch while preserving the existing string handling and validation errors.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "3af458f1e9606be2": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-043",
+    "path": "src/bioetl/domain/behavior/merged_metadata_explainability.py",
+    "claim": "In @src/bioetl/domain/behavior/merged_metadata_explainability.py around lines 173 - 181, Update _count_conflicts_and_enrichments so enrichment_count counts distinct enrichers once per record rather than summing the identical enrichment_applied list across fields. Deduplicate enrichment identifiers while aggregating the field explanations, preserving conflict_count and the existing return contract; ensure _enrichment_summary receives a value that keeps enrichment_rate within [0, 1].",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "e497cdd94da05991": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-044",
+    "path": "src/bioetl/domain/behavior/dataset_content_identity.py",
+    "claim": "In @src/bioetl/domain/behavior/dataset_content_identity.py around lines 36 - 45, In the row-normalization flow, hoist the set conversion of DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS outside the records comprehension and reuse the single set when calling normalize_for_hash. Verify that normalize_for_hash does not mutate the provided exclusion set before sharing this instance across records.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "47cfaa658e3e1a0d": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-045",
+    "path": "src/bioetl/domain/behavior/identity_service.py",
+    "claim": "In @src/bioetl/domain/behavior/identity_service.py around lines 82 - 90, Update has_explicit_content_hash_policy to detect whether the include or exclude fields were explicitly provided by checking for None rather than truthiness, so an empty set still counts as an explicit policy and prevents fallback to contract-level hash scoping.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "b508083bcd2df03a": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-046",
+    "path": "src/bioetl/domain/behavior/dq_serializer.py",
+    "claim": "In @src/bioetl/domain/behavior/dq_serializer.py around lines 202 - 209, Remove the unused report parameter from DQSerializer._generate_html and delete the corresponding del report statement. Update the _to_html caller to invoke _generate_html with only the data dictionary, preserving the existing HTML generation behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "86489977a59854d9": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-047",
+    "path": "src/bioetl/domain/behavior/dq_serializer.py",
+    "claim": "In @src/bioetl/domain/behavior/dq_serializer.py around lines 72 - 84, Update _serialize_value to handle unsupported JSON values before the fallback: preserve the existing datetime check before adding date handling, serialize date and Decimal values consistently, and serialize set/frozenset collections (including set-valued DQMetricsInput.existing_schema_fields) through the collection path. Ensure _to_json/orjson.dumps receives only supported values without relying on an unconfigured default handler.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "9ed539a6f2ba7980": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-048",
+    "path": "src/bioetl/domain/behavior/merged_metadata_explainability.py",
+    "claim": "In @src/bioetl/domain/behavior/merged_metadata_explainability.py around lines 184 - 201, Update _resolve_record_id to select the first identifier whose value is not None, preserving valid falsy values such as 0 and \"\". Update _deterministic_record_id to pass the project’s established JSON serialization fallback for non-JSON-native values, including datetime objects, so hashing remains deterministic without raising TypeError.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "e9ebe37ecba68ae4": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-048-S1",
+    "path": "src/bioetl/domain/behavior/merged_metadata_explainability.py",
+    "claim": "MergedMetadataExplainer._resolve_record_id discards valid falsy identifiers such as 0 and the empty string and falls back to another identifier or a derived hash.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "653bbe7425ef54be": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-048-S2",
+    "path": "src/bioetl/domain/behavior/merged_metadata_explainability.py",
+    "claim": "MergedMetadataExplainer._deterministic_record_id raises TypeError for non-JSON-native but supported record values instead of producing a deterministic fallback identifier.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "24a655afb610a37b": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-049",
+    "path": "src/bioetl/domain/behavior/normalization_config.py",
+    "claim": "In @src/bioetl/domain/behavior/normalization_config.py around lines 115 - 127, Update __post_init__ in NormalizationConfig to reject potency_threshold and high_potency_threshold values above pchembl_range.max_value while preserving the existing non-negative and ordering checks. Also replace the duplicated literal aggregation-method set with a runtime-derived set from the default_aggregation_method annotation so validation cannot drift from the declared Literal.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "049452ef760354d9": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-049-S1",
+    "path": "src/bioetl/domain/behavior/normalization_config.py",
+    "claim": "NormalizationConfig accepts potency_threshold and high_potency_threshold values above its configured pChEMBL absolute maximum, creating unreachable potency categories.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "2c2cb1559622d55c": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-050",
+    "path": "src/bioetl/domain/behavior/staged_enforcement.py",
+    "claim": "In @src/bioetl/domain/behavior/staged_enforcement.py around lines 56 - 57, The declared observe_until and soft_fail_until fields are unused; remove them from the staged-enforcement policy model and any related construction or serialization paths, preserving current_stage-based behavior in _stage_allowed_by_current_policy. Do not introduce date handling or wall-clock access.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "bde9f059f56e346d": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-051",
+    "path": "src/bioetl/domain/behavior/schema_metadata_extractor.py",
+    "claim": "In @src/bioetl/domain/behavior/schema_metadata_extractor.py around lines 63 - 87, Add a shared _get_config(gold_schema) -> Any | None helper that performs the Config lookup and returns None when unavailable. Update _extract_schema_version and _extract_validation_mode to use this helper, preserving their existing defaults and conversion behavior while removing the duplicated cast, hasattr, and Config access.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "09450767e6e178ca": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-052",
+    "path": "src/bioetl/domain/behavior/normalization_service.py",
+    "claim": "In @src/bioetl/domain/behavior/normalization_service.py around lines 55 - 72, Remove the cast(Any, None) class-attribute defaults from _NormalizationActivityMixin and _NormalizationBatchMixin, leaving only bare type annotations for config, converter, and validator. Add __slots__ = () to both mixins so BioactivityNormalizer’s dataclass slots are effective, while preserving the existing subclass-provided attributes and typing.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "9a84432ce19d073f": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-053",
+    "path": "src/bioetl/domain/behavior/merged_metadata_explainability.py",
+    "claim": "In @src/bioetl/domain/behavior/merged_metadata_explainability.py around lines 60 - 61, Update the final value source resolution in the surrounding explainability construction to honor priority_order: select the first provider from priority_order that is also present in source_providers, and fall back to the first source_providers entry when no priority match exists. Keep conflict_resolution aligned with this priority-based selection.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "5445bcc48105776d": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-054",
+    "path": "src/bioetl/domain/behavior/schema_classifier_helpers.py",
+    "claim": "In @src/bioetl/domain/behavior/schema_classifier_helpers.py around lines 34 - 49, Update build_field_type_change to validate old_field and new_field are mappings before calling .get(\"type\"), treating boolean or other non-mapping property values as having no type (or otherwise returning no type-change). Preserve normal comparison and SchemaChange construction for mapping values, and ensure malformed property definitions do not raise AttributeError during SchemaClassifier._calculate_diff.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "4af119d6fe192e6a": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-055",
+    "path": "src/bioetl/domain/behavior/normalization_config.py",
+    "claim": "In @src/bioetl/domain/behavior/normalization_config.py around lines 60 - 77, Update _validate_typical_range in PChemblRangeConfig to require typical_min and typical_max to both fall within the configured absolute [min_value, max_value] range, while preserving the existing ordering validation and deterministic ValueError behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "1b656d3cf471b316": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-056",
+    "path": "src/bioetl/domain/behavior/organism_classification_service_models.py",
+    "claim": "In @src/bioetl/domain/behavior/organism_classification_service_models.py around lines 41 - 61, Update ClassificationStats.__post_init__ to reject conflict_count values greater than total, while preserving the existing non-negative and bucket-sum validations. Ensure valid counts remain deterministic and enforce that conflict_count is bounded by total.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "1d20ebbfc2be6953": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-057",
+    "path": "src/bioetl/domain/behavior/schema_classifier_helpers.py",
+    "claim": "In @src/bioetl/domain/behavior/schema_classifier_helpers.py around lines 68 - 89, Update removed_field_changes and added_field_changes to iterate over sorted field names before building SchemaChange objects. Preserve the existing membership checks and value lookups while ensuring both returned lists have deterministic ordering consistent with changed_field_changes.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "746e59b731c54686": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-058",
+    "path": "src/bioetl/domain/behavior/text_similarity.py",
+    "claim": "In @src/bioetl/domain/behavior/text_similarity.py around lines 39 - 58, Update jaccard_similarity’s docstring to state that it returns 0.0 when either normalized text produces no words, including punctuation-only input. Remove the unnecessary union > 0 conditional from the final return, since the earlier empty-set check guarantees a nonzero union.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "9b3a6e3ac20d2a14": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-059",
+    "path": "src/bioetl/domain/behavior/schema_classifier.py",
+    "claim": "In @src/bioetl/domain/behavior/schema_classifier.py around lines 133 - 144, Update classify_from_registry_diff to validate that both decoded JSON payloads are objects before calling classify_changes; route non-object values such as arrays, null, and numbers to the existing manual_review fallback without allowing AttributeError to escape. Add a unit test covering classify_from_registry_diff(\"[]\", \"{}\") and assert the manual-review classification.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "f9bf20a166d69987": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-060",
+    "path": "src/bioetl/domain/behavior/normalization_service.py",
+    "claim": "In @src/bioetl/domain/behavior/normalization_service.py around lines 148 - 158, Update NormalizationService.classify_potency to use a single consistent boundary scheme derived from NormalizationConfig, eliminating the hardcoded 4.0 and 6.0 cutoffs so results agree with is_potent and configured thresholds. Add meaningful unit tests covering potency boundaries for all three factory configurations, including exact threshold values and values just below or above them.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "edbacfd49d065102": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-061",
+    "path": "src/bioetl/domain/behavior/preflight_governance_reporting.py",
+    "claim": "In @src/bioetl/domain/behavior/preflight_governance_reporting.py around lines 26 - 35, Update the runtime_guard_result checks in the runtime_guard report construction to use an explicit is not None guard for both issues and blockers, matching the presence semantics used by preflight_governance.py and preserving empty-but-present ValidationResult instances.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "1b9e3357776e6d20": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-062",
+    "path": "src/bioetl/domain/behavior/text_similarity.py",
+    "claim": "In @src/bioetl/domain/behavior/text_similarity.py around lines 21 - 36, Update normalize_text to replace all Unicode punctuation characters, including typographic apostrophes, quotation marks, en/em dashes, and non-breaking hyphens, rather than relying only on string.punctuation; preserve whitespace collapsing and case normalization, and add unit tests covering curly apostrophes and em dashes that verify equivalent normalized text and similarity behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "01218e4f544a2a72": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-063",
+    "path": "src/bioetl/domain/behavior/organism_classification_service_filtering.py",
+    "claim": "In @src/bioetl/domain/behavior/organism_classification_service_filtering.py around lines 52 - 76, Update build_filter_strategy to reject configurations where both include and exclude are provided, before selecting _include_strategy or _exclude_strategy. Raise the established validation exception with a clear message, while preserving the existing precedence and behavior when only one or neither filter is supplied.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "0eb6b70fa2abdf9c": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-064",
+    "path": "src/bioetl/domain/behavior/staged_enforcement.py",
+    "claim": "In @src/bioetl/domain/behavior/staged_enforcement.py around lines 48 - 65, Correct the default threshold values in EnforcementPolicy so warning_threshold is below failure_threshold and a zero failure rate resolves to OBSERVE; preserve the existing stage-selection order. Add validation enforcing failure_threshold > warning_threshold when constructing a policy, and add a unit test covering the default policy’s zero-rate OBSERVE result.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "86b999263a5c03f6": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-065",
+    "path": "src/bioetl/domain/behavior/dq_serializer.py",
+    "claim": "In @src/bioetl/domain/behavior/dq_serializer.py around lines 186 - 200, Update _yaml_value and _quote_yaml_string to use an approved YAML serializer such as yaml.safe_dump, or implement complete YAML scalar quoting and escaping. Ensure embedded quotes and backslashes are escaped, and quote type-like strings such as null, true, numeric values, and dates so parsing preserves their string type.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "d0c7b3dfed2955be": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-066",
+    "path": "src/bioetl/domain/behavior/schema_metadata_extractor.py",
+    "claim": "In @src/bioetl/domain/behavior/schema_metadata_extractor.py around lines 90 - 114, Update _extract_schema_columns to catch Pandera’s schema-construction exceptions, including SchemaInitError and SchemaDefinitionError, around the _safe_to_schema call so malformed models return empty metadata instead of propagating errors. Use the appropriate shared Pandera exception base when available; otherwise handle both exception classes explicitly.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "428e03a66b5c0ce6": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-067",
+    "path": "src/bioetl/domain/behavior/schema_classifier_helpers.py",
+    "claim": "In @src/bioetl/domain/behavior/schema_classifier_helpers.py around lines 92 - 127, The required-field classification in changed_field_changes currently excludes newly added properties. Extend the required-set check to cover fields present in new_properties and required by new_schema, routing newly required fields through build_required_field_change and honoring required_field_additions_as_breaking; avoid duplicating the change in added_field_changes. Add coverage for a newly added required field and include the required public-contract version bump, ADR reference, migration notes, and rollback procedure.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "c9a087dd1e8b32c1": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-067-S1",
+    "path": "src/bioetl/domain/behavior/schema_classifier_helpers.py",
+    "claim": "SchemaClassifier classifies a newly added required property only as FIELD_ADDED and never applies required_field_additions_as_breaking.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "e76b96c9ad32fd24": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-behavior-068",
+    "path": "src/bioetl/domain/behavior/schema_metadata_extractor.py",
+    "claim": "In @src/bioetl/domain/behavior/schema_metadata_extractor.py around lines 47 - 60, Update _extract_contract_path to derive the contract path from inspect.getmodule(gold_schema).__name__ rather than module.__file__, removing filesystem-layout and separator assumptions while preserving the existing optional return behavior. Convert the stable import path into the expected contract-path representation consistently for source checkouts and installed packages, and retain safe handling when no module or usable name is available.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "67cf2c2a49d9db12": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-001",
+    "path": "src/bioetl/domain/composite/result_merge.py",
+    "claim": "In @src/bioetl/domain/composite/result_merge.py around lines 21 - 27, Update MergeResult.__post_init__ to reject negative record counters, enforce records_fully_enriched <= records_enriched <= records_merged, and reject negative or non-finite duration_seconds. Preserve valid documented merge-result semantics and ensure invalid instances cannot be created.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "a9c9fa8c659fb004": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-002",
+    "path": "src/bioetl/domain/composite/result_enrichment.py",
+    "claim": "In @src/bioetl/domain/composite/result_enrichment.py around lines 50 - 67, Update __post_init__ to bound records_errored by records_input using the existing _require_bounded_by_input helper. Also validate the combined terminal counters records_enriched, records_not_found, and records_errored do not exceed records_input, preserving partial-output semantics while retaining the existing non-negative and rate/duration checks.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "2922c08706cd4845": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-003",
+    "path": "src/bioetl/domain/composite/result_seed_dependency.py",
+    "claim": "In @src/bioetl/domain/composite/result_seed_dependency.py around lines 16 - 56, Add validation to SeedResult and DependencyResult construction so record counts are non-negative and duration_seconds values are finite and non-negative, rejecting invalid inputs including NaN and infinity. Update DependencyResult.timeout to validate timeout_seconds with the same finite, non-negative rule before creating or formatting the timeout result.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "aeedba2b806fd113": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-003-S1",
+    "path": "src/bioetl/domain/composite/result_seed_dependency.py",
+    "claim": "SeedResult accepts negative record counters and negative or non-finite duration_seconds, allowing invalid composite checkpoint evidence.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "3b118055148a3d5f": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-003-S2",
+    "path": "src/bioetl/domain/composite/result_seed_dependency.py",
+    "claim": "DependencyResult and DependencyResult.timeout accept negative record counters and negative or non-finite duration/timeout values.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "4a442cf107673c82": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-004",
+    "path": "src/bioetl/domain/composite/state.py",
+    "claim": "In @src/bioetl/domain/composite/state.py around lines 170 - 177, Remove the Prometheus-specific _STATE_METRIC_VALUES mapping and to_metric_value method from the domain state model, keeping the state enum limited to domain behavior. Add the equivalent state-to-number mapping in the observability adapter that emits Prometheus metrics, and update its callers to use that adapter-local mapping while preserving values 0–11, including COMPLETED and FAILED.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "1d4169e532fd4a80": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-005",
+    "path": "src/bioetl/domain/composite/result_merge.py",
+    "claim": "In @src/bioetl/domain/composite/result_merge.py around lines 28 - 29, Remove output_silver_path and output_gold_path from the domain MergeResult and relocate these storage locations to an application-layer result or infrastructure DTO. Update callers and constructors to use the new result type while keeping MergeResult limited to domain facts and eliminating filesystem/storage coupling from bioetl.domain.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "b8c62a25d8e2442c": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-006",
+    "path": "src/bioetl/domain/composite/strategy.py",
+    "claim": "In @src/bioetl/domain/composite/strategy.py around lines 78 - 82, Do not expose the unimplemented LATEST_TIMESTAMP option through ConflictResolution.from_string(\"latest\"): either implement timestamp-based conflict resolution before accepting it, or remove the enum member and reject \"latest\" with a clear parsing error. Update the strategy documentation and parsing/dispatch logic around ConflictResolution and the corresponding merge handling so no path silently falls back to SEED_PRIORITY.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "9390c2e7ff8537ae": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-007",
+    "path": "src/bioetl/domain/composite/result_enrichment.py",
+    "claim": "In @src/bioetl/domain/composite/result_enrichment.py around lines 22 - 243, Add unit tests covering the public factory methods EnrichmentResult.success, EnrichmentResult.failed, and EnrichmentResult.timeout, including their nominal fields, statuses, and error messages or durations. Also test invalid count inputs and invalid duration/timeout values, asserting the expected ValueError behavior and preserving valid boundary cases.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "7649d33c8ca181f7": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-008",
+    "path": "src/bioetl/domain/composite/result_enrichment.py",
+    "claim": "In @src/bioetl/domain/composite/result_enrichment.py around lines 50 - 54, Update _validate_rates_and_duration to require math.isfinite(self.duration_seconds) before accepting the duration, while preserving the existing non-negative validation and dq_error_rate bounds. Ensure both positive/negative infinity and NaN are rejected, including values passed through EnrichmentResult.timeout.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "b8bb4db1852f4eef": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-009",
+    "path": "src/bioetl/domain/composite/state.py",
+    "claim": "In @src/bioetl/domain/composite/state.py around lines 89 - 119, Add an explicit recovery operation alongside CompositePipelineState.is_resumable and validate_transition that handles FAILED without treating it as a normal transition. Select the valid restart state from checkpoint history based on the latest completed phase, allowing retries from seed, dependency, enrichment, or cross-validation work as appropriate; do not add a blanket FAILED-to-MERGING transition. Ensure the operation returns a state accepted by the existing transition validation and preserves the documented retry behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "7693d5594fcaa291": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-010",
+    "path": "src/bioetl/domain/composite/config_composite_validation.py",
+    "claim": "In @src/bioetl/domain/composite/config_composite_validation.py around lines 38 - 52, Rename the protocol declared in this module from CompositeConfigProtocol to CompositeValidationTarget, updating all references and type annotations that use this local protocol. Leave the distinct CompositeConfigProtocol in config_composite_protocols.py unchanged.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "4e814f79126f07bf": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-011",
+    "path": "src/bioetl/domain/composite/config_merge.py",
+    "claim": "In @src/bioetl/domain/composite/config_merge.py around lines 83 - 99, Update the configuration class docstring Attributes section to document sort_by_silver, sort_by_gold, normalization_compatibility_overrides, and column_groups, including that sort_by_* controls deterministic output ordering. Match the existing documentation style and describe each field’s purpose and expected value.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "46026de3a4759c88": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-012",
+    "path": "src/bioetl/domain/composite/config_composite_protocols.py",
+    "claim": "In @src/bioetl/domain/composite/config_composite_protocols.py around lines 19 - 21, Update the protocol declarations in config_composite_protocols.py to match their cross-module usage: either remove the leading underscores from _SeedConfigProtocol through _CrossValidationConfigProtocol and add all renamed protocols to __all__, updating imports accordingly, or stop importing them from config_composite_encoder.py and expose only CompositeConfigProtocol.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "d8e355a9c4ff3e78": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-013",
+    "path": "src/bioetl/domain/composite/config_composite_section_decoders.py",
+    "claim": "In @src/bioetl/domain/composite/config_composite_section_decoders.py around lines 115 - 126, Update _comparison_method and _one_field_comparison_spec to omit absent configuration keys instead of supplying duplicated literal defaults, allowing ComparisonMethod and FieldComparisonSpec dataclass defaults to apply. Preserve explicit raw values, including None handling where required, and apply the same pattern to the related CrossValidationConfig decoder defaults.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "704d2e7dfdc4192b": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-014",
+    "path": "src/bioetl/domain/composite/config_composite_section_decoders.py",
+    "claim": "In @src/bioetl/domain/composite/config_composite_section_decoders.py around lines 44 - 51, Replace the silent type-filtering in _build_dq_overrides, _field_comparison_specs, _enricher_field_pairings, and the provider_lookup_fields comprehension with validation that raises a scoped ValueError when an entry has the wrong shape. Preserve processing of valid entries and include the affected entry name/context in each error, matching the fail-closed behavior of _validate_aggregation_filter_condition.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "86007076f9e1024c": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-015",
+    "path": "src/bioetl/domain/composite/config_dq.py",
+    "claim": "In @src/bioetl/domain/composite/config_dq.py around lines 61 - 64, Freeze all mapping-valued fields during post-initialization so the frozen value objects remain immutable, hashable, and deterministic. Update the __post_init__ logic for CompositeDQConfig.enricher_overrides and the corresponding field_priorities, normalization_compatibility_overrides, and field_mappings fields in config_merge.py to store immutable mappings or ordered tuple pairs before validation, while preserving existing validation and lookup behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "869bfbf579330f26": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-015-S1",
+    "path": "src/bioetl/domain/composite/config_dq.py",
+    "claim": "CompositeDQConfig leaves enricher_overrides as a caller-mutable dict despite being a frozen deterministic configuration value object.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "50e1a6ce92826841": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-015-S2",
+    "path": "src/bioetl/domain/composite/config_dq.py",
+    "claim": "MergeConfig leaves field_priorities, normalization_compatibility_overrides, and field_mappings mutable through a frozen configuration object.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "615aac0fc392bf26": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-016",
+    "path": "src/bioetl/domain/composite/config_dq.py",
+    "claim": "In @src/bioetl/domain/composite/config_dq.py around lines 114 - 126, Update _effective_override_thresholds to accept the declared DQOverrideConfig type instead of object, then remove both type: ignore[attr-defined] suppressions and access soft_fail_threshold and hard_fail_threshold directly.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "40a942f160418327": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-017",
+    "path": "src/bioetl/domain/composite/config_composite_decoder.py",
+    "claim": "In @src/bioetl/domain/composite/config_composite_decoder.py at line 157, Update _build_merge_config so column_groups is validated with the imported require_object_dict_sequence helper before being passed to MergeConfig, preserving the merge.column_groups-scoped typed error path and avoiding direct forwarding of arbitrary JSON.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "6552764728d76e47": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-018",
+    "path": "src/bioetl/domain/composite/aggregation.py",
+    "claim": "In @src/bioetl/domain/composite/aggregation.py around lines 244 - 263, Update AggregationConfig.__post_init__ to validate that fields is a supported sequence before converting entries; reject strings, single AggregationFieldSpec values, and other non-sequence inputs with ValueError instead of allowing _validate to accept them based on truthiness. Preserve conversion of list and tuple items into AggregationFieldSpec instances, then run the existing validation.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "cfb20a99728b4acd": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-019",
+    "path": "src/bioetl/domain/composite/config_composite_encoder.py",
+    "claim": "In @src/bioetl/domain/composite/config_composite_encoder.py around lines 158 - 163, Update _cv_field_entry to access field.method.value directly instead of using getattr with a fallback, matching the _FieldComparisonProtocol.method type and the module’s other enum serialization paths.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "6b9f49325378af06": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-020",
+    "path": "src/bioetl/domain/composite/aggregation.py",
+    "claim": "In @src/bioetl/domain/composite/aggregation.py around lines 142 - 155, Update _try_comparison_operator to reject right-hand operands containing another supported comparison operator or boolean keyword, while preserving validation for exactly one comparison with non-empty operands. Keep _validate_comparison_filter limited to the existing == and != operators and ensure expressions such as chained comparisons or AND conditions return False or raise the established validation error.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "ac18f5bac1784d0b": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-021",
+    "path": "src/bioetl/domain/composite/config_composite_validation.py",
+    "claim": "In @src/bioetl/domain/composite/config_composite_validation.py around lines 113 - 130, Extract a shared uniqueness-validation helper from _validate_unique_enrichers and _validate_unique_dependencies that performs a single seen/duplicates pass and raises the existing duplicate-name error. Update both validators to call the helper with their respective pipeline names, preserving their current messages and behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "b5240d04d15840bc": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-022",
+    "path": "src/bioetl/domain/composite/config_composite_section_decoders.py",
+    "claim": "In @src/bioetl/domain/composite/config_composite_section_decoders.py around lines 154 - 167, Update build_cross_validation_config to replace the int(str(...)) and float(str(...)) conversions for warning_threshold, error_threshold, quarantine_threshold, fuzzy_threshold, and numeric_tolerance with the imported require_int and require_float helpers, using scoped error names consistent with build_dq_config and build_execution_config. Apply the same typed validation change to the threshold field in the nearby decoder at line 125, while preserving the existing defaults and enricher_pairings handling.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "8742d50354314202": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-023",
+    "path": "src/bioetl/domain/composite/lineage.py",
+    "claim": "In @src/bioetl/domain/composite/lineage.py around lines 106 - 130, The from_dict method must reject missing or empty identity fields instead of converting them to empty strings. Validate _composite_run_id and _composite_name before constructing CompositeLineageMetadata, raise ValueError when either is absent or empty, and pass the validated values to cls while preserving the existing parsing of other fields.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "812ffab982eb6cb8": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-024",
+    "path": "src/bioetl/domain/composite/result_composite.py",
+    "claim": "In @src/bioetl/domain/composite/result_composite.py around lines 40 - 53, Rename the dataclass fields _required_enrichers and _required_dependencies to required_enrichers and required_dependencies, and update __post_init__ plus all references and constructor call sites to use the public names. Preserve their frozenset normalization and existing behavior while removing the underscore-prefixed constructor parameters.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "f8ea446fe5e87eea": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-025",
+    "path": "src/bioetl/domain/composite/lineage.py",
+    "claim": "In @src/bioetl/domain/composite/lineage.py around lines 46 - 48, Update CompositeLineageMetadata.__post_init__ to freeze enrichment_status, enrichment_timestamps, and field_sources using the existing freeze_fields treatment used by CompositeResult.__post_init__. Update to_dict so field_sources is copied before inclusion, preventing consumers from mutating internal state while preserving value-object invariants and deterministic serialization.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "9fa49c6e3f4d9efd": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-026",
+    "path": "src/bioetl/domain/composite/field_groups_models.py",
+    "claim": "In @src/bioetl/domain/composite/field_groups_models.py around lines 30 - 43, Resolve the duplicate group source in FieldMapping and FieldGroupRegistry.__init__: either remove FieldMapping.group or validate during registry construction that each mapping’s group matches its enclosing FieldGroupDefinition.group_id. Ensure mismatches fail fast instead of being silently ignored.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "8181daa3745fec2b": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-027",
+    "path": "src/bioetl/domain/composite/field_groups_registry.py",
+    "claim": "In @src/bioetl/domain/composite/field_groups_registry.py around lines 39 - 46, Update the registry-building loop in FieldGroupsRegistry to detect existing normalized keys before assigning to _field_to_group, _field_to_mapping, or _column_to_group. Raise a clear configuration error on duplicate base_name or provider-column collisions, while preserving the existing authoritative group_id mapping for unique entries.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "dca6fa7e14aeeabc": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-028",
+    "path": "src/bioetl/domain/composite/lineage.py",
+    "claim": "In @src/bioetl/domain/composite/lineage.py around lines 235 - 237, Update _parse_seed_id to check raw explicitly against None rather than using truthiness, preserving valid falsy identifiers such as 0, 0.0, and \"\" while still returning None for a missing value.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "69938d6bd85e2b51": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-028-S1",
+    "path": "src/bioetl/domain/composite/lineage.py",
+    "claim": "Composite lineage seed_record_id parsing drops a present numeric zero identifier because it uses truthiness instead of an explicit None check.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "8dfc409880332dd7": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-029",
+    "path": "src/bioetl/domain/composite/config_schema.py",
+    "claim": "In @src/bioetl/domain/composite/config_schema.py around lines 29 - 38, Update LayerColumnConfig.__post_init__ to always replace rename_fields with an immutable, detached mapping using the existing freeze_fields treatment applied by LineageConfig.__post_init__. Remove the conditional behavior that preserves dict references, while retaining conversion support for mapping-like inputs and ensuring deterministic value-object invariants.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "7224b6ca01e4ce91": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-030",
+    "path": "src/bioetl/domain/composite/config_parsing.py",
+    "claim": "In @src/bioetl/domain/composite/config_parsing.py around lines 157 - 187, Update _coerce_float to validate the converted result with a finiteness check before returning it, rejecting NaN and positive or negative infinity with the existing field-specific ValueError. Preserve current coercion behavior for finite int, float, and string values, and ensure require_float and optional_float inherit this validation.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "b474af983fd69a1d": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-composite-031",
+    "path": "src/bioetl/domain/composite/config_schema.py",
+    "claim": "In @src/bioetl/domain/composite/config_schema.py around lines 73 - 103, Restrict layer resolution in get_layer_groups and should_include_group to the supported “silver” and “gold” layer configurations instead of using unrestricted getattr(self, layer, None). Validate or explicitly map the layer name so invalid values such as “column_groups” or “Silver” are rejected rather than mis-resolved or silently falling back.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "5660267f1bc0b18f": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-config-001",
+    "path": "src/bioetl/domain/config/runtime.py",
+    "claim": "In @src/bioetl/domain/config/runtime.py around lines 117 - 143, Update _validate_positive_values to validate lock_ttl as either None or a strictly positive value, rejecting zero and negatives with a clear ValueError. Update effective_lock_ttl so it falls back to heartbeat_interval * 3 only when lock_ttl is None, preserving an explicitly configured positive TTL.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "82376650bffccd7e": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-config-002",
+    "path": "src/bioetl/domain/config/pipeline.py",
+    "claim": "In @src/bioetl/domain/config/pipeline.py around lines 37 - 54, Update FieldPolicyConfig.__post_init__ to normalize and store boolean_true_values and boolean_false_values as immutable tuples, preserving the normalized values used for overlap validation and coercion. Apply freeze_sequences to both sequence fields so list inputs cannot remain mutable in the frozen dataclass. Validate coercion_policy with require_literal using the existing package convention before retaining it, while preserving all current overlap errors.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "91e6fa721941d97d": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-config-002-S1",
+    "path": "src/bioetl/domain/config/pipeline.py",
+    "claim": "FieldPolicyConfig validates normalized boolean vocabularies but retains caller-mutable, unnormalized sequences, so accepted tokens can later fail coercion and a frozen policy can mutate.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "540c66f03e277b25": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-config-003",
+    "path": "src/bioetl/domain/config/enum_loader.py",
+    "claim": "In @src/bioetl/domain/config/enum_loader.py around lines 42 - 46, Update _normalize_coordinate to raise ValueError for blank coordinates instead of KeyError, preserving the existing validation message. Revise the Raises sections of get_enum_config, get_chembl_enum, and get_chembl_enum_set to document ValueError for blank provider, entity, or field arguments while retaining KeyError for missing enum configuration.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "f74116fcb7db9e91": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-config-004",
+    "path": "src/bioetl/domain/config/__init__.py",
+    "claim": "In @src/bioetl/domain/config/__init__.py around lines 112 - 120, Remove the `# pragma: no cover` marker from `__getattr__` so coverage exercises the lazy resolution path, while retaining it only on the `TYPE_CHECKING` guard if needed. Add a test that iterates over `bioetl.domain.config.__all__` and verifies each name resolves to a non-None value, covering every `_EXPORT_MODULES` mapping.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "739088aecb781cf0": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-config-005",
+    "path": "src/bioetl/domain/config/runtime.py",
+    "claim": "In @src/bioetl/domain/config/runtime.py around lines 177 - 184, Update the runtime configuration initialization around _validate_debug_export_formats to normalize every debug_export_formats token by trimming and lowercasing it before validation, and ensure the resulting collection is converted to the immutable tuple expected by the frozen value object. Preserve the existing csv/xlsx-only validation and deterministic ordering.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "792450fae1cb0be3": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-config-006",
+    "path": "src/bioetl/domain/config/pipeline.py",
+    "claim": "In @src/bioetl/domain/config/pipeline.py at line 109, Replace the Any | None annotation on gold_schema with the appropriate Pandera schema type, importing it only within the existing TYPE_CHECKING block after verifying the pinned version’s import path. Keep the annotation optional and avoid introducing any runtime Pandera dependency.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "d2223a8a7ccd6356": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-config-007",
+    "path": "src/bioetl/domain/config/base_provider.py",
+    "claim": "In @src/bioetl/domain/config/base_provider.py around lines 118 - 125, Mark the api_key field in BaseProviderConfig with repr=False so generated dataclass representations exclude the credential, while preserving its type, default value, and validation behavior in __post_init__.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "f34c7bf36e5a09aa": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-config-008",
+    "path": "src/bioetl/domain/config/validation_rules.py",
+    "claim": "In @src/bioetl/domain/config/validation_rules.py around lines 73 - 102, Extend FieldValidation.__post_init__ beyond discriminator checks to validate variant-specific parameters at construction: require range bounds to be present and ordered, compile pattern values and reject invalid regular expressions, require enum allowed values to be non-empty, and require custom validators to be provided. Raise the project’s established validation error with the relevant field/config context while preserving the existing freezing behavior and value-object invariants.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "5b5ec0a77e22e5c8": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-config-009",
+    "path": "src/bioetl/domain/config/validation_config.py",
+    "claim": "In @src/bioetl/domain/config/validation_config.py around lines 59 - 91, Update ValidationConfig._validate_ranges to require positive max_pmid and max_taxonomy_id values, and enforce valid positive publication-year bounds in addition to their ordering check. Move the isfinite import from inside _validate_ranges to module scope, while preserving the existing molecular-weight, pChEMBL, and precision validations and deterministic ValueError behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "768721c3fc5f7fea": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-config-010",
+    "path": "src/bioetl/domain/config/dq.py",
+    "claim": "In @src/bioetl/domain/config/dq.py around lines 117 - 152, Update the disposition_overrides field and __post_init__ normalization so its declared type matches the stored immutable representation and all accepted inputs normalize consistently. Preserve key-based access by exposing a read-only mapping accessor, or retain an immutable mapping internally, and ensure existing .get() and string-key indexing calls continue to work without runtime failures.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "1bf20a599e7c868b": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-contracts-001",
+    "path": "src/bioetl/domain/contracts/gold/__init__.py",
+    "claim": "In @src/bioetl/domain/contracts/gold/__init__.py around lines 13 - 16, Update the Example usage doctest in the gold contracts module to import pandas as pd before calling pd.read_parquet, while preserving the existing chembl import and schema validation flow.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "f3afbb5e569ee5e4": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-contracts-002",
+    "path": "src/bioetl/domain/contracts/gold/_strict_gold_contract_schema.py",
+    "claim": "In @src/bioetl/domain/contracts/gold/_strict_gold_contract_schema.py around lines 13 - 38, Refresh reports/quality/module-coverage-inventory.json using _refresh_module_coverage_inventory.py to include the changes to StrictGoldContractSchema, then run the architecture hash guard when feasible.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "cbc46d4b210c0410": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-contracts-003",
+    "path": "src/bioetl/domain/contracts/__init__.py",
+    "claim": "In @src/bioetl/domain/contracts/__init__.py around lines 1 - 65, Add the required public-contract lifecycle artifacts for the exports in the contracts module: bump the contract version, reference an ADR, document migration notes, and provide a rollback procedure. Keep the existing explicit re-exports and __all__ declarations unchanged while linking these artifacts to the newly published schema contracts.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "0a35b1dbcb777c76": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-contracts-004",
+    "path": "src/bioetl/domain/contracts/gold/_strict_gold_contract_schema.py",
+    "claim": "In @src/bioetl/domain/contracts/gold/_strict_gold_contract_schema.py around lines 13 - 38, The change needs automated contract-validation coverage for the new required metadata and strict-column behavior. Add parameterized nominal-path tests invoking ChEMBLActivityGoldSchema.validate() and PublicationGoldCommonSchema.validate() with valid DataFrames, plus rejection tests for unknown columns and invalid or missing required _index, _dq_warn, and _dq_error metadata; cover each exported schema family without altering validation behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "8003911afcb095b5": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-contracts-005",
+    "path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
+    "claim": "In @src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py around lines 230 - 234, Update the assay_count field definition in the relevant schema to enforce the declared non-negative invariant by adding the same ge=0 constraint used by its corresponding declaration. Preserve its nullable and coercion behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "82d3e74b49704d57": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-contracts-006",
+    "path": "src/bioetl/domain/contracts/gold/publications_pubmed.py",
+    "claim": "In @src/bioetl/domain/contracts/gold/publications_pubmed.py around lines 37 - 38, Add validation bounds to the date-part and count fields in the publications PubMed schema: constrain pub_month to 1–12, pub_day to 1–31, and every *_count field to be non-negative, matching the existing sibling schema conventions such as publications_crossref.py. Preserve the current nullable and coercion behavior.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "5eae4075049c6cde": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-contracts-006-S1",
+    "path": "src/bioetl/domain/contracts/gold/publications_pubmed.py",
+    "claim": "PubMed Gold pub_month and pub_day omit their calendar bounds, allowing impossible date components into strict Gold output.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "4cd746951059860a": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-contracts-006-S2",
+    "path": "src/bioetl/domain/contracts/gold/publications_pubmed.py",
+    "claim": "PubMed Gold author, MeSH, keyword, grant, and chemical count fields omit non-negative constraints and accept impossible negative counts.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "8d11f57965c5c5ea": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-contracts-007",
+    "path": "src/bioetl/domain/contracts/gold/composite_bioassay.py",
+    "claim": "In @src/bioetl/domain/contracts/gold/composite_bioassay.py around lines 135 - 179, Replace the repeated L1–L5 declarations in the composite bioassay DataFrameModel with class-level generation over levels 1 through 5 and the id/name/desc parts, assigning both each field’s pa.Field and its Series[str] annotation. Preserve the existing nullable settings and level-specific descriptions, and verify Pandera recognizes the injected annotations as model fields.",
+    "duplicates": [],
+    "gh_issue": null
+  },
+  "effe6d116c497618": {
+    "canonical_finding_id": "CR-20260811-A-S01-domain-contracts-008",
+    "path": "src/bioetl/domain/contracts/gold/uniprot.py",
+    "claim": "In @src/bioetl/domain/contracts/gold/uniprot.py around lines 174 - 175, Define a domain-level UNIPROT_MAPPING_STATUS_VALUES constant containing the four documented statuses, alongside the other domain value sets, and update the mapping_status pa.Field in the relevant schema to enforce it with isin=UNIPROT_MAPPING_STATUS_VALUES. Replace the comment-only validation while preserving the existing non-null requirement.",
+    "duplicates": [],
+    "gh_issue": null
+  }
+}

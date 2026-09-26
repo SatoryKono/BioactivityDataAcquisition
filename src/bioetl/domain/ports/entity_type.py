@@ -1,0 +1,14 @@
+"""Callable contract for deriving entity type from a pipeline name."""
+
+from __future__ import annotations
+
+from typing import Protocol, runtime_checkable
+
+
+@runtime_checkable
+class EntityTypeExtractor(Protocol):
+    """Callable contract for deriving entity type from pipeline name."""
+
+    def __call__(self, pipeline_name: str) -> str | None:
+        """Return the entity type for ``pipeline_name``, or ``None``."""
+        ...

@@ -1,0 +1,53 @@
+{
+  "pages": [
+    {
+      "title": "Architecture",
+      "purpose": "Index of the layer model, import rules, ports, facades, and wiring guidance for the core BioETL architecture.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Domain Layer",
+      "purpose": "Deep dive into the pure domain layer: Ports (Protocol interfaces), Aggregates, Value Objects, Entities, Schemas (Pandera DataFrameModel), Exceptions hierarchy, and the domain's public API facade.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Application Layer",
+      "purpose": "Covers the orchestration layer: BasePipeline, PipelineRunner, RecordProcessor, BatchExecutor, BaseTransformer, and the data-quality service.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Infrastructure Layer",
+      "purpose": "Covers concrete adapters, HTTP client, storage writers, observability implementations, quarantine, locking, and validation.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Composition and Interfaces Layers",
+      "purpose": "Explains the Dependency Injection wiring layer and CLI/HTTP interfaces.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    }
+  ]
+}

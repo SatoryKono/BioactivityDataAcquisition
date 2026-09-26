@@ -1,0 +1,63 @@
+%% Title: Package Family: application/core/lifecycle
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/core/lifecycle; modules: batch_fsm, cleanup_service, checkpoint_identity_overrides, checkpoint_manager, lock_runtime_service, _checkpoint_types.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-09-02
+%% @level   Package Family / Inventory Slice
+%% @nodes   22
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace batch_fsm {
+        class BatchExecutionCommandTask
+        class BatchExecutionCoordinator
+        class BatchExecutionEventSignal
+        class BatchExecutionState
+        class BatchExecutionTransitionResult
+        class IllegalStateTransitionError
+    }
+
+    namespace cleanup_service {
+        class CleanupPreview
+        class CleanupResult
+        class CleanupService
+        class CleanupStorageProtocol
+        class LayerInfo
+    }
+
+    namespace checkpoint_identity_overrides {
+        class _CoreIdentityOverrides
+        class _ReplayIdentityOverrides
+    }
+
+    namespace checkpoint_manager {
+        class CheckpointRuntimeParams
+        class CheckpointRuntimeService
+    }
+
+    namespace lock_runtime_service {
+        class LockRuntimeService
+        class LockRuntimeServiceCreateContext
+    }
+
+    namespace checkpoint_types {
+        class CheckpointCompatibilityService
+    }
+
+    namespace checkpoint_load_validation {
+        class CheckpointValidationProtocol
+    }
+
+    namespace heartbeat {
+        class HeartbeatTask
+    }
+
+    namespace lock_lifecycle {
+        class _LockRuntimeHostProtocol
+    }
+
+    namespace shutdown {
+        class ShutdownSignal
+    }
+

@@ -1,0 +1,8 @@
+field,doc_spec,cfg_pipeline,cfg_schema,code_transformer,code_entity,code_silver_schema,code_gold_schema,json_type,nullable,primary_key,notes
+record_id,S2.1,YES,EMPTY,compound_record_transformer.py:68,MISSING,compound_record.py:29,chembl.py:284,integer,false,true,OK
+molecule_id,S2.2,YES,EMPTY,compound_record_transformer.py:70,MISSING,compound_record.py:36,chembl.py:287,string,false,false,RENAME:molecule_chembl_id->molecule_id
+publication_id,S2.2,YES,EMPTY,compound_record_transformer.py:71,MISSING,compound_record.py:41,chembl.py:288,string,false,false,RENAME:document_chembl_id->publication_id
+compound_key,S2.3,YES,EMPTY,compound_record_transformer.py:73,MISSING,compound_record.py:53,chembl.py:291,string,true,false,OK
+compound_name,S2.3,YES,EMPTY,compound_record_transformer.py:74,MISSING,compound_record.py:57,chembl.py:292,string,true,false,OK
+src_id,S2.4,YES,EMPTY,compound_record_transformer.py:78,MISSING,compound_record.py:46,chembl.py:295,integer,false,false,OK
+src_compound_id,S2.4,YES,EMPTY,compound_record_transformer.py:79,MISSING,compound_record.py:61,chembl.py:296,string,true,false,OK

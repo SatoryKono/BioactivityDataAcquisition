@@ -1,0 +1,641 @@
+[
+  {
+    "name": "accepted-run-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-run-explorer-v1/0-run-explorer?orgId=1&from=now-24h&to=now&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&timezone=browser&var-workflow=$__all&var-lookup_run_id=&refresh=60s",
+    "time": "2026-09-23T08:17:00.008Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-run-wide.jpg",
+    "image": {
+      "width": 1920,
+      "height": 1080
+    },
+    "sha256": "42caa885f1cd04738407e534b940ae698c70a9d0e232f5f6d4ab619935e2d080"
+  },
+  {
+    "name": "accepted-run-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-run-explorer-v1/0-run-explorer?orgId=1&from=now-24h&to=now&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&timezone=browser&var-workflow=$__all&var-lookup_run_id=&refresh=60s",
+    "time": "2026-09-23T08:17:20.021Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-run-narrow.jpg",
+    "image": {
+      "width": 1000,
+      "height": 900
+    },
+    "sha256": "2afb76a506730d021fb5159821c36f03899213805619ca1616652030ad093ecf"
+  },
+  {
+    "name": "accepted-overview-timeline-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-overview-v2/2-overview?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:22:41.266Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-overview-timeline-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "469340cf08828194aea61c7150fc1f47060ff6b7fc22b69228ad61ea68d85374"
+  },
+  {
+    "name": "accepted-overview-timeline-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-overview-v2/2-overview?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:22:49.957Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-overview-timeline-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "c9dfe3dbe47c84e162a37868f41df41f6e8799caa497db035fb6c7daeea2757d"
+  },
+  {
+    "name": "accepted-overview-timeline-page2",
+    "url": "http://127.0.0.1:3000/d/bioetl-overview-v2/2-overview?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:22:59.549Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-overview-timeline-page2.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "e1a7dbcdb1250a398d20db58905786bda9e89a17a9b335630eef1544a04fe462"
+  },
+  {
+    "name": "accepted-run-domains-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev",
+    "time": "2026-09-23T08:18:47.072Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-run-domains-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "3f7cd3778887922993d9154a97e919b23e5b933602ce234f0f6849dd38ba9376"
+  },
+  {
+    "name": "accepted-run-domains-narrow-final",
+    "url": "http://127.0.0.1:3000/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-lookup_run_id=&refresh=60s",
+    "time": "2026-09-23T08:20:27.788Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-run-domains-narrow-final.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "570b447d86dfb70429aa96e368711443d62e739907b602cf5279c905770e549f"
+  },
+  {
+    "name": "accepted-trust-manifest-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-control-plane-v1/1-trust?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-read_latency_quantile=0.95&refresh=60s",
+    "time": "2026-09-23T08:21:30.034Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-trust-manifest-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "2bc8993a76b1585135d491e032865b74773309f3837565f08e0c2a36570a8918"
+  },
+  {
+    "name": "accepted-trust-manifest-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-control-plane-v1/1-trust?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-read_latency_quantile=0.95&refresh=60s",
+    "time": "2026-09-23T08:21:36.658Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-trust-manifest-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "c4d1c1743c49af2487ba41368b1e9ea07c2af90990b8ab260f47e16696abbdb5"
+  },
+  {
+    "name": "accepted-trust-ledger-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-control-plane-v1/1-trust?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-read_latency_quantile=0.95&refresh=60s",
+    "time": "2026-09-23T08:21:23.759Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-trust-ledger-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "da5b4c903fa67437fdfa3f0a9cc557fa74374576b9c66ab42e0bd9703cc5a336"
+  },
+  {
+    "name": "accepted-overview-runs-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-overview-v2/2-overview?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:23:24.163Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-overview-runs-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "01c5b2aa7b925080a1f413e5dafe02935e8d6fe4a2efa44da0cbffe2267fd65d"
+  },
+  {
+    "name": "accepted-overview-runs-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-overview-v2/2-overview?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:23:15.789Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-overview-runs-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "d1361f5fe65b33fefe6336ac9bd3fa52802a4127bdf443825cc4a3d2de453400"
+  },
+  {
+    "name": "accepted-overview-actions-wide-final",
+    "url": "http://127.0.0.1:3000/d/bioetl-overview-v2/2-overview?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:46:16.052Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-overview-actions-wide-final.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "39e2ad113594158964fe297ad09876da9a7ca9ac78f40c9d16db6702c736a26e"
+  },
+  {
+    "name": "accepted-overview-actions-narrow-final",
+    "url": "http://127.0.0.1:3000/d/bioetl-overview-v2/2-overview?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:48:00.379Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-overview-actions-narrow-final.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "5c3ed4a3bc44c9fd3853378fbd91f03c3dc6d05772bcd5332060e0acae8a88b9"
+  },
+  {
+    "name": "accepted-runtime-stage-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&var-stage=$__all&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider_hint=$__all&refresh=60s",
+    "time": "2026-09-23T08:25:01.335Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-runtime-stage-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "a998ebbb3ced808f7627d164309badcfcaf734572fdfc68fb1da1c96de31c192"
+  },
+  {
+    "name": "accepted-runtime-stage-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&var-stage=$__all&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider_hint=$__all&refresh=60s",
+    "time": "2026-09-23T08:24:54.365Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-runtime-stage-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "e1e7d97975fda4ebdeb4c32d0bbdb69b36ed6d1288174e881f1dbdc4c57c259f"
+  },
+  {
+    "name": "accepted-runtime-legend-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&var-stage=$__all&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider_hint=$__all&refresh=60s",
+    "time": "2026-09-23T08:25:23.903Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-runtime-legend-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "63557c1e19f68739d6d87e18893fb9eae64a256e02ccb7cc41a8965a8398ca89"
+  },
+  {
+    "name": "accepted-runtime-legend-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&var-stage=$__all&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider_hint=$__all&refresh=60s",
+    "time": "2026-09-23T08:25:33.308Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-runtime-legend-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "ac74641692b97a7dd240c0af3e4d8b80450e0dac88f22e78af3e1fa3996828f6"
+  },
+  {
+    "name": "accepted-provider-freshness-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-provider-health-v2/4-provider-health?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&var-provider=$__all&var-pipeline_context=.%2A&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-adapter=$__all&refresh=60s",
+    "time": "2026-09-23T08:26:25.766Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-provider-freshness-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "d9dfc502c49fed37d58b54f4126013918f356d019f18f579e24e4237c45e5e27"
+  },
+  {
+    "name": "accepted-provider-freshness-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-provider-health-v2/4-provider-health?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&var-provider=$__all&var-pipeline_context=.%2A&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-adapter=$__all&refresh=60s",
+    "time": "2026-09-23T08:26:19.406Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-provider-freshness-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "e28afb18ec61804904c8a5777daf52dacd9cd45199cf788ba81b9e494e9c578e"
+  },
+  {
+    "name": "accepted-provider-degraded-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-provider-health-v2/4-provider-health?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&var-provider=$__all&var-pipeline_context=.%2A&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-adapter=$__all&refresh=60s",
+    "time": "2026-09-23T08:26:34.965Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-provider-degraded-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "6d77a3928d6e69ecfffb9da6b6ea3a315e6520f587d38fd4d112f9aaf9f60943"
+  },
+  {
+    "name": "accepted-provider-degraded-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-provider-health-v2/4-provider-health?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&var-provider=$__all&var-pipeline_context=.%2A&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-adapter=$__all&refresh=60s",
+    "time": "2026-09-23T08:26:48.598Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-provider-degraded-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "4096980cf53818a160ed7915b3d0cb1d98459651dde6ba5d9dd6c35282dc0940"
+  },
+  {
+    "name": "accepted-dq-gold-link",
+    "url": "http://127.0.0.1:3000/d/bioetl-dq-v2/5-data-quality?var-workflow=$__all&var-pipeline=chembl_assay&var-stage=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&viewPanel=panel-156&orgId=1",
+    "time": "2026-09-23T08:29:38.063Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-dq-gold-link.jpg",
+    "image": {
+      "width": 1000,
+      "height": 900
+    },
+    "sha256": "4ffc6ccd41176a57fd1cb6467bfedbb709839f8334c83eda8d87849b0e1a3f77"
+  },
+  {
+    "name": "accepted-dq-silver-link",
+    "url": "http://127.0.0.1:3000/d/bioetl-dq-v2/5-data-quality?var-workflow=$__all&var-pipeline=chembl_assay&var-stage=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&viewPanel=panel-121&orgId=1",
+    "time": "2026-09-23T08:31:05.995Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-dq-silver-link.jpg",
+    "image": {
+      "width": 1000,
+      "height": 900
+    },
+    "sha256": "ee7ff20ec4c4d64b4e96ca7bb9083db7c7ea3fffe2a5545f5349275983f50109"
+  },
+  {
+    "name": "accepted-dq-categories-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-dq-v2/5-data-quality?var-workflow=$__all&var-pipeline=$__all&var-stage=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:35:14.472Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-dq-categories-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "a1a734114355533a9b13559267f934b18d090baa2599463aab196c395a282788"
+  },
+  {
+    "name": "accepted-dq-categories-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-dq-v2/5-data-quality?var-workflow=$__all&var-pipeline=$__all&var-stage=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:35:23.219Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-dq-categories-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "52d09413a4c709180c897540978e431bd614fb92ef188b7815c2f3225ea2ce2b"
+  },
+  {
+    "name": "accepted-dq-palette-wide-final",
+    "url": "http://127.0.0.1:3000/d/bioetl-dq-v2/5-data-quality?var-workflow=$__all&var-pipeline=$__all&var-stage=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:36:37.176Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-dq-palette-wide-final.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "0525edfddda88d06dcdc4ec31942a592b69b6b60a143206275f2abfda7cdfc4f"
+  },
+  {
+    "name": "accepted-dq-palette-narrow-final",
+    "url": "http://127.0.0.1:3000/d/bioetl-dq-v2/5-data-quality?var-workflow=$__all&var-pipeline=$__all&var-stage=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:36:16.280Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-dq-palette-narrow-final.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "67067c38b82b3f522a167f99d2b2df089fc2a51b05a29c5ec8c266def489ce37"
+  },
+  {
+    "name": "accepted-incident-suspects-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider=unknown&refresh=60s",
+    "time": "2026-09-23T08:42:13.548Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-incident-suspects-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "cf5103bb50b28f5e83248580ab9f1799ddfb79daa191882c423fde27b80ba066"
+  },
+  {
+    "name": "accepted-incident-suspects-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider=unknown&refresh=60s",
+    "time": "2026-09-23T08:42:19.726Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-incident-suspects-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "64e51dd19d9886293d5c44358c358000db0c5c4391374e7f3cc67372b5ff5ec1"
+  },
+  {
+    "name": "accepted-incident-top-wide-final",
+    "url": "http://127.0.0.1:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider=unknown&refresh=60s",
+    "time": "2026-09-23T08:51:00.708Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-incident-top-wide-final.jpg",
+    "image": {
+      "width": 1920,
+      "height": 1080
+    },
+    "sha256": "e38f817d2946e503368a3f7e437af9ea763f082f03e2f137589152e5b9682717"
+  },
+  {
+    "name": "accepted-incident-top-narrow-final",
+    "url": "http://127.0.0.1:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider=unknown&refresh=60s",
+    "time": "2026-09-23T08:49:42.083Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-incident-top-narrow-final.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "4e4d2e51d8498f1607bbd3372094d3fb3e3a93e67d6b792e9b4b86e4879dcc6e"
+  },
+  {
+    "name": "accepted-incident-runtime-narrow-complete",
+    "url": "http://127.0.0.1:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider=unknown&refresh=60s",
+    "time": "2026-09-23T08:52:38.376Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-incident-runtime-narrow-complete.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "65886575e0c7087195709751a84e51277195d97793f728809086447d369869a4"
+  },
+  {
+    "name": "accepted-incident-dq-narrow-complete",
+    "url": "http://127.0.0.1:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider=unknown&refresh=60s",
+    "time": "2026-09-23T08:52:44.363Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-incident-dq-narrow-complete.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "65168c3338f5cb85396c78e80ff293674ed943cb03dc8e94de4ecbb0809d962a"
+  },
+  {
+    "name": "accepted-incident-details-wide-complete",
+    "url": "http://127.0.0.1:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider=unknown&refresh=60s",
+    "time": "2026-09-23T08:52:52.066Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-incident-details-wide-complete.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "0fb6919cec69014173d275946dfd4d887a749bb14e4e4ebdcbb25ea1e7541b0a"
+  },
+  {
+    "name": "accepted-select-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-run-explorer-v1/0-run-explorer?orgId=1&from=now-24h&to=now&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&timezone=browser&var-workflow=$__all&var-lookup_run_id=&refresh=60s",
+    "time": "2026-09-23T08:17:42.371Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-select-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "2c9a12498e026701c6b2462e5375ac53155c6c8372c6eb0855c6dc21890430df"
+  },
+  {
+    "name": "accepted-select-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-run-explorer-v1/0-run-explorer?orgId=1&from=now-24h&to=now&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&timezone=browser&var-workflow=$__all&var-lookup_run_id=&refresh=60s",
+    "time": "2026-09-23T08:17:33.525Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-select-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "a14ae869b20ff8c9ee91365bc90a3971d7fdfd55cdef233999f9c7bbeaa9cf09"
+  },
+  {
+    "name": "accepted-dq-single-cta-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-dq-v2/5-data-quality?var-workflow=$__all&var-pipeline=chembl_assay&var-stage=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:32:15.268Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-dq-single-cta-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "a33ce130c35e02940c49ef28ed730e26c73f2daa91a05a863d44c24a8b86d2e0"
+  },
+  {
+    "name": "accepted-single-cta-wide-complete",
+    "url": "http://127.0.0.1:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider=unknown&refresh=60s",
+    "time": "2026-09-23T08:55:15.817Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-single-cta-wide-complete.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "da7b55168929c01544f511e657051a6cd01bf134e7a7286e22fbae794fddc52a"
+  },
+  {
+    "name": "accepted-overview-query-error-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-overview-v2/2-overview?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&refresh=60s",
+    "time": "2026-09-23T08:46:03.418Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-overview-query-error-wide.jpg",
+    "image": {
+      "width": 1920,
+      "height": 1080
+    },
+    "sha256": "80dd10bbdedd671d29b17c6a55db5373b7b7332cd2a0107fe8865a5a1cb0b5ae"
+  },
+  {
+    "name": "accepted-runtime-narrow-top",
+    "url": "http://127.0.0.1:3000/d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&var-stage=$__all&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider_hint=$__all&refresh=60s",
+    "time": "2026-09-23T08:24:32.688Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-runtime-narrow-top.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "f557640888845a78716209f968f7deef02c1738359a16e52fae9317e2ccfabae"
+  },
+  {
+    "name": "accepted-provider-narrow-top",
+    "url": "http://127.0.0.1:3000/d/bioetl-provider-health-v2/4-provider-health?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&var-provider=$__all&var-pipeline_context=.%2A&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-adapter=$__all&refresh=60s",
+    "time": "2026-09-23T08:25:56.501Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-provider-narrow-top.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "61fa3b1dad0d0797458a0a3bffd28f1a607cdfdc3f2cce6a69a9efd2abf6cc70"
+  },
+  {
+    "name": "accepted-trust-narrow-top",
+    "url": "http://127.0.0.1:3000/d/bioetl-control-plane-v1/1-trust?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-read_latency_quantile=0.95&refresh=60s",
+    "time": "2026-09-23T08:21:06.113Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-trust-narrow-top.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "e891db875fbad46d43fe08c2a377973030a29b0f04f9900ddde96227c73196ee"
+  },
+  {
+    "name": "accepted-empty-fixture-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-vis-empty-acceptance/test-fixture-incident-successful-empty?orgId=1&from=now-24h&to=now&timezone=browser",
+    "time": "2026-09-23T09:03:07.200Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-empty-fixture-wide.jpg",
+    "image": {
+      "width": 1920,
+      "height": 1080
+    },
+    "sha256": "d8665b4f99b9ed96e0d3b598040cf9886bacacaa26437d86d5adc38a8edc6dc9",
+    "fixture": true
+  },
+  {
+    "name": "accepted-empty-fixture-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-vis-empty-acceptance/test-fixture-incident-successful-empty?orgId=1&from=now-24h&to=now&timezone=browser",
+    "time": "2026-09-23T09:02:36.220Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-empty-fixture-narrow.jpg",
+    "image": {
+      "width": 1000,
+      "height": 900
+    },
+    "sha256": "3d4b2c04b937279d1b1bb2f3ae572001c40834ce584320dea94d5480a486e5e3",
+    "fixture": true
+  },
+  {
+    "name": "accepted-post-main-trust-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-control-plane-v1/1-trust?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-read_latency_quantile=0.95&refresh=60s",
+    "time": "2026-09-23T09:15:38.384Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-post-main-trust-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "8b695d13476efe04d168b9f8377354058e65ba1f0590aca602057b528c1376c5"
+  },
+  {
+    "name": "accepted-post-main-trust-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-control-plane-v1/1-trust?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-read_latency_quantile=0.95&refresh=60s",
+    "time": "2026-09-23T09:15:45.504Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-post-main-trust-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "e661dd0b1a18b6e8c6ac76c6e7eb382865df147d80be7c2b3ef993dbbfc2c4f4"
+  },
+  {
+    "name": "accepted-post-main-incident-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider=chembl&refresh=60s",
+    "time": "2026-09-23T09:23:07.756Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-post-main-incident-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "b00738c6f8dc5e19e8c08ad9ffa8acfc5bd97e04cb4921ebe13e6e1f9175e2ba"
+  },
+  {
+    "name": "accepted-post-main-incident-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider=chembl&refresh=60s",
+    "time": "2026-09-23T09:22:57.672Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-post-main-incident-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "b7a8efbc3d61baf166cfb7c9733707f7beb6f23486c96254037581aa7d60f06e"
+  }
+]

@@ -1,0 +1,1 @@
+Регрессия гейта: observed_count 21 > max_count 19 из-за новых импортов CLI → `composition._resource_management`. Исправить пары без роста max_count: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9644. Плановый shrink ниже 19 остаётся здесь.

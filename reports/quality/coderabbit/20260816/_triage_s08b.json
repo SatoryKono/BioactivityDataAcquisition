@@ -1,0 +1,1182 @@
+{
+  "dc321de69e00835d": {
+    "status": "reject",
+    "triage_reason": "Any→object is typing-only; runtime unchanged.",
+    "evidence": "src/bioetl/infrastructure/arrow_typed.py"
+  },
+  "adfdb8750588f665": {
+    "status": "reject",
+    "triage_reason": "Test-only request for ADR catalog nominal paths.",
+    "evidence": "src/bioetl/infrastructure/adr/fs_adr_service.py"
+  },
+  "dd50e3f34aa91148": {
+    "status": "reject",
+    "triage_reason": "Filename-case unification is style; lookup already works for tracked ADRs.",
+    "evidence": "src/bioetl/infrastructure/adr/_adr_file_utils.py"
+  },
+  "1d2dde1d7e4a9d8b": {
+    "status": "reject",
+    "triage_reason": "Test-only request for FileAuditAdapter contract coverage.",
+    "evidence": "src/bioetl/infrastructure/audit/file_audit.py"
+  },
+  "598c5958856ae0ff": {
+    "status": "reject",
+    "triage_reason": "Extra redaction policy is hardening, not a current leak invariant.",
+    "evidence": "src/bioetl/infrastructure/audit/_file_audit_payloads.py"
+  },
+  "6a915e4bbeb67f40": {
+    "status": "reject",
+    "triage_reason": "Query scan bounds are a perf enhancement; limit already exists.",
+    "evidence": "src/bioetl/infrastructure/audit/_file_audit_io.py"
+  },
+  "b21852661900a09d": {
+    "status": "reject",
+    "triage_reason": "Remove unused merger parameter is DRY/API cleanup.",
+    "evidence": "src/bioetl/infrastructure/config/_dq_config_validation_merge.py"
+  },
+  "ba238e06ae039ae4": {
+    "status": "reject",
+    "triage_reason": "Narrow mypy suppression is style-only.",
+    "evidence": "src/bioetl/infrastructure/config/_yaml_settings_source.py"
+  },
+  "7c4e1cfd4648b5c2": {
+    "status": "reject",
+    "triage_reason": "Contextual KeyError helper is DX; missing keys already fail closed.",
+    "evidence": "src/bioetl/infrastructure/config/chembl_policy_registry_loader.py"
+  },
+  "4a3fd474705df60e": {
+    "status": "reject",
+    "triage_reason": "Empty-registry `or` fallback is unused; callers pass None or a populated map.",
+    "evidence": "src/bioetl/infrastructure/config/composite_config_api.py"
+  },
+  "fafd329c9450818f": {
+    "status": "reject",
+    "triage_reason": "Mixed-list merge TypeError is a hypothetical; current lists are strings.",
+    "evidence": "src/bioetl/infrastructure/config/base_config_loader.py"
+  },
+  "5a6569872dd70b34": {
+    "status": "reject",
+    "triage_reason": "base>max delay check is extra validation, not a broken retry invariant.",
+    "evidence": "src/bioetl/infrastructure/config/_retry_settings.py"
+  },
+  "78c872a8089d2d67": {
+    "status": "reject",
+    "triage_reason": "OSError fallback returns {}; callers then fail closed on missing source/mapping.",
+    "evidence": "src/bioetl/infrastructure/config/base_config_loader.py"
+  },
+  "b99e14779c1e8360": {
+    "status": "reject",
+    "triage_reason": "CR asks to fail-open malformed timeouts to 60; current raise is fail-closed.",
+    "evidence": "src/bioetl/infrastructure/config/_settings_validation.py"
+  },
+  "395ab5fd4e390b9f": {
+    "status": "reject",
+    "triage_reason": "Non-mapping family skip is loader filtering; families mapping itself is type-checked.",
+    "evidence": "src/bioetl/infrastructure/config/chembl_policy_registry_loader.py"
+  },
+  "d133dd2d9e889009": {
+    "status": "reject",
+    "triage_reason": "YAML error wrapping is DX; parse failures already propagate.",
+    "evidence": "src/bioetl/infrastructure/config/composite_config_api.py"
+  },
+  "b82123c188256697": {
+    "status": "reject",
+    "triage_reason": "Unnamed-rule key is the documented replace-by-field/type/severity merge.",
+    "evidence": "src/bioetl/infrastructure/config/_dq_config_validation_merge.py"
+  },
+  "75e3ab7fb4e86665": {
+    "status": "reject",
+    "triage_reason": "Test-only request for control-plane __all__ lazy imports.",
+    "evidence": "src/bioetl/infrastructure/control_plane/__init__.py"
+  },
+  "7c25da473ec2176e": {
+    "status": "reject",
+    "triage_reason": "Test-only request for hierarchical filter-config coverage.",
+    "evidence": "src/bioetl/infrastructure/config_loader_filtering.py"
+  },
+  "b17056631bbcd27b": {
+    "status": "reject",
+    "triage_reason": "Bounded I/O plus tests is hardening/test-only.",
+    "evidence": "src/bioetl/infrastructure/config/semantic_field_registry_loader.py"
+  },
+  "c2ac90e056f083fb": {
+    "status": "reject",
+    "triage_reason": "Provider is a trusted config id; same traversal class already rejected on workflow names.",
+    "evidence": "src/bioetl/infrastructure/config/source_config_loader.py"
+  },
+  "0081c13cbfea6a24": {
+    "status": "reject",
+    "triage_reason": "Max YAML size is hardening, not a current invariant hole.",
+    "evidence": "src/bioetl/infrastructure/config/workflow_config_api.py"
+  },
+  "3fb1ee7fffaf9afc": {
+    "status": "reject",
+    "triage_reason": "Default registry path is repo-relative; production callers run from repo root or pass a path.",
+    "evidence": "src/bioetl/infrastructure/config/staged_enforcement_policy_loader.py"
+  },
+  "c52321d6a1f3858d": {
+    "status": "reject",
+    "triage_reason": "Extra fsync is durability hardening, not a correctness breach.",
+    "evidence": "src/bioetl/infrastructure/checkpoint/_local_checkpoint_io.py"
+  },
+  "703741c7cde2d283": {
+    "status": "reject",
+    "triage_reason": "Write-order tweak is durability hardening; current atomic writes already succeed or fail.",
+    "evidence": "src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py"
+  },
+  "71813d0e7e589262": {
+    "status": "reject",
+    "triage_reason": "Test-only request for get_pipeline_config cache keys.",
+    "evidence": "src/bioetl/infrastructure/config/_base.py"
+  },
+  "44085c19aefffd28": {
+    "status": "reject",
+    "triage_reason": "Test-only request for LocalCheckpoint save/load.",
+    "evidence": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py"
+  },
+  "aebc1dd87d1d007c": {
+    "status": "reject",
+    "triage_reason": "Owned executor/timeout is an enhancement, not a broken invariant.",
+    "evidence": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py"
+  },
+  "27a60dc5d57a3057": {
+    "status": "reject",
+    "triage_reason": "Cited rebind_schema is Gold and already keeps dq_config; Silver has no rebind_schema.",
+    "evidence": "src/bioetl/infrastructure/validation/contract_validator.py"
+  },
+  "3663fdb89619c543": {
+    "status": "reject",
+    "triage_reason": "Dead-branch/DRY cleanup; severity mapping already works.",
+    "evidence": "src/bioetl/infrastructure/validation/contract_validator.py"
+  },
+  "ec1f1c41716d1221": {
+    "status": "reject",
+    "triage_reason": "`is None` vs truthiness is style; schemas are not empty containers.",
+    "evidence": "src/bioetl/infrastructure/validation/pandera_validator.py"
+  },
+  "f65b8af8d8e86c8d": {
+    "status": "reject",
+    "triage_reason": "Nullable-int prep alignment is hardening; schema validation already fail-closes.",
+    "evidence": "src/bioetl/infrastructure/validation/contract_validator.py"
+  },
+  "f42049f105b2009c": {
+    "status": "reject",
+    "triage_reason": "Remove passthrough wrapper is extract-helper/DRY.",
+    "evidence": "src/bioetl/infrastructure/schemas/silver_publication_field_blocks.py"
+  },
+  "430f48277cbc666f": {
+    "status": "reject",
+    "triage_reason": "Reuse lookup-prefix helper is DRY; field lists already match.",
+    "evidence": "src/bioetl/infrastructure/schemas/silver_publication_field_blocks.py"
+  },
+  "b63d2525197a7780": {
+    "status": "reject",
+    "triage_reason": "Literal vs allow-list is typing/style; closed set already enforced.",
+    "evidence": "src/bioetl/infrastructure/schemas/pipeline_contract_policy.py"
+  },
+  "9f400502f2cf6bf5": {
+    "status": "reject",
+    "triage_reason": "Stale comment only.",
+    "evidence": "src/bioetl/infrastructure/schemas/silver_chembl_core.py"
+  },
+  "e95c0e562a4167f0": {
+    "status": "reject",
+    "triage_reason": "Trailing comment cleanup only.",
+    "evidence": "src/bioetl/infrastructure/schemas/silver_compounds.py"
+  },
+  "d33fc7d079853c8f": {
+    "status": "reject",
+    "triage_reason": "Sync mkdir on async path is style; directory is created before write either way.",
+    "evidence": "src/bioetl/infrastructure/export/dq_report_writer.py"
+  },
+  "699838b5b0387487": {
+    "status": "reject",
+    "triage_reason": "TTL-loop print vs LoggerPort is observability style.",
+    "evidence": "src/bioetl/infrastructure/locking/memory_lock.py"
+  },
+  "e3eac551cf844a75": {
+    "status": "reject",
+    "triage_reason": "cwd-relative debug root is operator config, not a path-escape hole.",
+    "evidence": "src/bioetl/infrastructure/export/debug_export_ops.py"
+  },
+  "35932192e1c90a62": {
+    "status": "reject",
+    "triage_reason": "Event instead of 100ms poll is a perf enhancement.",
+    "evidence": "src/bioetl/infrastructure/locking/memory_lock.py"
+  },
+  "8468108f11894c21": {
+    "status": "reject",
+    "triage_reason": "Append fast path assumes caller-stable schema; not a current producer hole.",
+    "evidence": "src/bioetl/infrastructure/export/csv_exporter.py"
+  },
+  "366e28ebafe42502": {
+    "status": "reject",
+    "triage_reason": "Empty lineage on debug-export miss is degraded optional output, not data loss.",
+    "evidence": "src/bioetl/infrastructure/export/debug_export_adapter.py"
+  },
+  "34badea9fb0034dc": {
+    "status": "reject",
+    "triage_reason": "Atomic CSV for debug packs is durability hardening.",
+    "evidence": "src/bioetl/infrastructure/export/debug_export_adapter.py"
+  },
+  "882352a460657c5c": {
+    "status": "reject",
+    "triage_reason": "Sorted directory walk is determinism polish, not a wrong-table invariant.",
+    "evidence": "src/bioetl/infrastructure/export/export_catalog_adapter.py"
+  },
+  "4b2db7048cc55979": {
+    "status": "reject",
+    "triage_reason": "Chunked copy is a memory bound, not a correctness hole.",
+    "evidence": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py"
+  },
+  "0ab2379eb6a72778": {
+    "status": "reject",
+    "triage_reason": "Non-blocking acquire tweak is locking-style; non-reentrant contract already holds.",
+    "evidence": "src/bioetl/infrastructure/locking/memory_lock.py"
+  },
+  "eebfb5f22718f12c": {
+    "status": "reject",
+    "triage_reason": "Excel sheet-name sanitize is export hardening, not data corruption.",
+    "evidence": "src/bioetl/infrastructure/export/debug_export_ops.py"
+  },
+  "a7ad9f77548ca9de": {
+    "status": "reject",
+    "triage_reason": "Absolute source_file fallback is unused; production write always passes provider/entity.",
+    "evidence": "src/bioetl/infrastructure/export/dq_report_writer.py"
+  },
+  "e5a5a3fdfbe43086": {
+    "status": "reject",
+    "triage_reason": "importlib vs _builtin_import is style.",
+    "evidence": "src/bioetl/infrastructure/export/csv_exporter_table_ops.py"
+  },
+  "b1f71545dfa02ec8": {
+    "status": "reject",
+    "triage_reason": "Unused tuple removal is dead-code cleanup.",
+    "evidence": "src/bioetl/infrastructure/serialization/encoders.py"
+  },
+  "97c003ab3bec28e9": {
+    "status": "reject",
+    "triage_reason": "Broader psutil catch is fail-open hardening, not a current invariant.",
+    "evidence": "src/bioetl/infrastructure/system/memory_monitor.py"
+  },
+  "a9ae5109188a39d0": {
+    "status": "reject",
+    "triage_reason": "Reuse validated WorkflowConfig is DRY; conversion already fail-closes.",
+    "evidence": "src/bioetl/infrastructure/schemas/workflow_config.py"
+  },
+  "4bed7b133d53337b": {
+    "status": "reject",
+    "triage_reason": "assert vs explicit check is style; orjson is required in this env.",
+    "evidence": "src/bioetl/infrastructure/serialization/encoders.py"
+  },
+  "4c0a5816bd755d52": {
+    "status": "reject",
+    "triage_reason": "Import-time field-parity guard is extra; shipped schema already matches run options.",
+    "evidence": "src/bioetl/infrastructure/schemas/workflow_config.py"
+  },
+  "e95696e816eb3dad": {
+    "status": "reject",
+    "triage_reason": "Shared FK normalizer extract is DRY.",
+    "evidence": "src/bioetl/infrastructure/schemas/workflow_config.py"
+  },
+  "1f240b3ff5e0057a": {
+    "status": "reject",
+    "triage_reason": "Encoder cache size is a micro-optimization.",
+    "evidence": "src/bioetl/infrastructure/serialization/encoders.py"
+  },
+  "00483eddcc12ae9c": {
+    "status": "reject",
+    "triage_reason": "Synthetic last-batch default is recovery polish, not data loss.",
+    "evidence": "src/bioetl/infrastructure/system/memory_monitor.py"
+  },
+  "1ff320268da3a3a9": {
+    "status": "reject",
+    "triage_reason": "Alias __doc__ cleanup is style.",
+    "evidence": "src/bioetl/infrastructure/schemas/source_config.py"
+  },
+  "66db980d2c2f6790": {
+    "status": "reject",
+    "triage_reason": "Custom repr redaction is hardening; salts are not logged on the current path.",
+    "evidence": "src/bioetl/infrastructure/security/pii_hasher.py"
+  },
+  "aef5d7ec311d38f0": {
+    "status": "reject",
+    "triage_reason": "Avoid to_pylist is a memory/perf request.",
+    "evidence": "src/bioetl/infrastructure/export/csv_exporter.py"
+  },
+  "073e8d2a282435be": {
+    "status": "reject",
+    "triage_reason": "Remove as_mixin_host indirection is style.",
+    "evidence": "src/bioetl/infrastructure/system/memory_monitor.py"
+  },
+  "95bc6de1a5ee9ad0": {
+    "status": "reject",
+    "triage_reason": "Re-export SaltConfig is API hygiene.",
+    "evidence": "src/bioetl/infrastructure/security/__init__.py"
+  },
+  "5f26684e6bfee52a": {
+    "status": "reject",
+    "triage_reason": "datetime.now(UTC) vs time helper is style; clock is UTC.",
+    "evidence": "src/bioetl/infrastructure/time/system_clock.py"
+  },
+  "a98a1bbad6a1ce8c": {
+    "status": "reject",
+    "triage_reason": "Hardcoded provider_order default is the shipped contract, not a hole.",
+    "evidence": "src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py"
+  },
+  "aaf7862d9b2ea6e5": {
+    "status": "reject",
+    "triage_reason": "Shared extra=forbid base is DRY.",
+    "evidence": "src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py"
+  },
+  "5368a6beeeac2082": {
+    "status": "reject",
+    "triage_reason": "Cache manifest lookups is a perf request.",
+    "evidence": "src/bioetl/infrastructure/quarantine/filtered_manifest_support.py"
+  },
+  "42ab6042a862ddd4": {
+    "status": "reject",
+    "triage_reason": "Status overlay on filtered reads is a feature ask, not a broken write path.",
+    "evidence": "src/bioetl/infrastructure/quarantine/filtered_reads.py"
+  },
+  "b061628b44c744e0": {
+    "status": "reject",
+    "triage_reason": "Partition-scoped lookup is a perf request; hash filter already selects the row.",
+    "evidence": "src/bioetl/infrastructure/quarantine/unified.py"
+  },
+  "c242d94e7748f86c": {
+    "status": "reject",
+    "triage_reason": "Explorer zero defaults are unused metrics, not a storage invariant.",
+    "evidence": "src/bioetl/infrastructure/quarantine/_timeseries.py"
+  },
+  "994522074c1d8158": {
+    "status": "reject",
+    "triage_reason": "Extra event-id tiebreak is concurrency hardening; sequence already orders events.",
+    "evidence": "src/bioetl/infrastructure/quarantine/status_events.py"
+  },
+  "6f56d74346f74fe8": {
+    "status": "reject",
+    "triage_reason": "Storage-level time filter/ceiling is a perf bound.",
+    "evidence": "src/bioetl/infrastructure/quarantine/filtered_reads.py"
+  },
+  "0a9ec1e1a7611e56": {
+    "status": "reject",
+    "triage_reason": "Bind payload once is DRY/style.",
+    "evidence": "src/bioetl/infrastructure/quarantine/filtered_read_support.py"
+  },
+  "baa492eb0da07ac6": {
+    "status": "reject",
+    "triage_reason": "Copy overrides into MergeConfig is freeze polish; domain already freezes collections.",
+    "evidence": "src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py"
+  },
+  "76e17c6a4375ee28": {
+    "status": "reject",
+    "triage_reason": "Offload get_stats to a thread is a perf request.",
+    "evidence": "src/bioetl/infrastructure/quarantine/unified.py"
+  },
+  "f9d6261d28fd9968": {
+    "status": "reject",
+    "triage_reason": "darwin ru_maxrss units are platform polish, not a pipeline invariant.",
+    "evidence": "src/bioetl/infrastructure/system/memory_monitor.py"
+  },
+  "c94be3fcf30a3897": {
+    "status": "reject",
+    "triage_reason": "Keyword-only construction is style.",
+    "evidence": "src/bioetl/infrastructure/control_plane/_raw_run_manifest_inspection.py"
+  },
+  "a03635714424cad5": {
+    "status": "reject",
+    "triage_reason": "Shared append/truncate helper is DRY; both paths already flush/rollback.",
+    "evidence": "src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py"
+  },
+  "0fc5f8d405fcddbf": {
+    "status": "reject",
+    "triage_reason": "Bound CACHED_BRONZE walk is a perf request.",
+    "evidence": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_surfaces.py"
+  },
+  "5777a8bfbfb8d243": {
+    "status": "reject",
+    "triage_reason": "Protocol signature alignment is typing-only.",
+    "evidence": "src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py"
+  },
+  "7298cad620572a0b": {
+    "status": "reject",
+    "triage_reason": "Transitive inherits is an enhancement; current one-level inherit is the shipped contract.",
+    "evidence": "src/bioetl/infrastructure/config/publication_controlled_vocabulary_loader.py"
+  },
+  "5acc2cdbbb00c90f": {
+    "status": "reject",
+    "triage_reason": "Deep-copy projected schema fields is isolation polish, not a live mutation hole.",
+    "evidence": "src/bioetl/infrastructure/config/pipeline_normalizers.py"
+  },
+  "a872624711efcf71": {
+    "status": "reject",
+    "triage_reason": "Distinct wrong-type error is DX; invalid collections already fail.",
+    "evidence": "src/bioetl/infrastructure/config/pipeline_normalizers.py"
+  },
+  "7da9bd92b4116284": {
+    "status": "reject",
+    "triage_reason": "Normalize sort timestamps is explorer polish, not data loss.",
+    "evidence": "src/bioetl/infrastructure/quarantine/filtered_reads.py"
+  },
+  "614e714d3d2d1b27": {
+    "status": "reject",
+    "triage_reason": "csv_export mapping guard is extra; YAML schema already requires mappings.",
+    "evidence": "src/bioetl/infrastructure/config/pipeline_payload_normalization.py"
+  },
+  "81b2edc09739ea04": {
+    "status": "reject",
+    "triage_reason": "Non-str quote_literal fallback is unused; predicates quote str/bool/number.",
+    "evidence": "src/bioetl/infrastructure/quarantine/record_encoding.py"
+  },
+  "082ef63c020dc4b7": {
+    "status": "reject",
+    "triage_reason": "Cache glob existence check is a perf request.",
+    "evidence": "src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py"
+  },
+  "c232341578d56dcf": {
+    "status": "reject",
+    "triage_reason": "mtime cache key is a stale-cache enhancement, not fail-open.",
+    "evidence": "src/bioetl/infrastructure/config/pipeline_config_api.py"
+  },
+  "f12e2a2991ba1487": {
+    "status": "reject",
+    "triage_reason": "Stricter JSON shape checks are extra; malformed assets already raise.",
+    "evidence": "src/bioetl/infrastructure/config/publication_type_classification_loader.py"
+  },
+  "b0c8927596ccc0fe": {
+    "status": "reject",
+    "triage_reason": "Mapping guard before .get is DX; FieldGroupLoadError already wraps failures.",
+    "evidence": "src/bioetl/infrastructure/config/field_group_loader.py"
+  },
+  "6a9866080d528540": {
+    "status": "reject",
+    "triage_reason": "replay_of_manifest_id evidence-floor add is a protection-set expansion.",
+    "evidence": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_manifest_protections.py"
+  },
+  "6d8349fb2a4822d1": {
+    "status": "reject",
+    "triage_reason": "Catch TypeError in parser probe is hardening.",
+    "evidence": "src/bioetl/infrastructure/control_plane/_raw_run_manifest_inspection.py"
+  },
+  "fcf1a663756c951e": {
+    "status": "reject",
+    "triage_reason": "Hash-once cache is a perf request.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_reasons.py"
+  },
+  "b2171578b89408d4": {
+    "status": "reject",
+    "triage_reason": "Chunked hash / parse fallback is hardening, not a compare-wrong invariant.",
+    "evidence": "src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py"
+  },
+  "5739ffca42ee7929": {
+    "status": "reject",
+    "triage_reason": "Explicit UTF-8 open is style; default encoding is already UTF-8 here.",
+    "evidence": "src/bioetl/infrastructure/config/enum_file_loader.py"
+  },
+  "f6525b1c01424aa2": {
+    "status": "reject",
+    "triage_reason": "Dedup _normalize_error_details is DRY.",
+    "evidence": "src/bioetl/infrastructure/quarantine/statistics_support.py"
+  },
+  "b32dcd310393f6a5": {
+    "status": "reject",
+    "triage_reason": "clear_cache wiring is cache-hygiene, not an invariant breach.",
+    "evidence": "src/bioetl/infrastructure/config/pipeline_config_loader.py"
+  },
+  "0060b51db489f179": {
+    "status": "reject",
+    "triage_reason": "run_id/manifest_id path harden is extra; IDs are generated UUIDs, OSError already returns None.",
+    "evidence": "src/bioetl/infrastructure/quarantine/filtered_manifest_support.py"
+  },
+  "a2e4187259582f18": {
+    "status": "reject",
+    "triage_reason": "Freeze-shape parity across load modes is consistency polish.",
+    "evidence": "src/bioetl/infrastructure/config/enum_file_loader.py"
+  },
+  "2868b85e8b65bac0": {
+    "status": "reject",
+    "triage_reason": "nested hash_policy is the policy body; identity is validated before projection.",
+    "evidence": "src/bioetl/infrastructure/config/pipeline_normalizers.py"
+  },
+  "705fa4b4848fa92b": {
+    "status": "reject",
+    "triage_reason": "Reject string provider_order is extra; YAML already supplies a list.",
+    "evidence": "src/bioetl/infrastructure/config/field_group_loader.py"
+  },
+  "f5f8f981df77a6a3": {
+    "status": "reject",
+    "triage_reason": "Collapse FileNotFoundError into OSError is style.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_contract_registry_store.py"
+  },
+  "0fbff9e6cd733352": {
+    "status": "reject",
+    "triage_reason": "isinstance-before-cast is typing/style.",
+    "evidence": "src/bioetl/infrastructure/control_plane/_raw_run_manifest_nested_validation.py"
+  },
+  "967907671c0fe282": {
+    "status": "reject",
+    "triage_reason": "Delegate path build to enum_file_loader is DRY.",
+    "evidence": "src/bioetl/infrastructure/config/enum_loader_adapter.py"
+  },
+  "8580c6b8b204b2b0": {
+    "status": "reject",
+    "triage_reason": "Cross-writer ftruncate lock is a concurrency enhancement, not a current multi-writer path.",
+    "evidence": "src/bioetl/infrastructure/control_plane/_file_lineage_index.py"
+  },
+  "17f459f7964de246": {
+    "status": "reject",
+    "triage_reason": "Merge identical switch arms is DRY.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_payloads.py"
+  },
+  "8925ec5d5b582c13": {
+    "status": "reject",
+    "triage_reason": "Dangling-index log is DX; missing artifact already returns None.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py"
+  },
+  "f9f6304554fa0479": {
+    "status": "reject",
+    "triage_reason": "Empty vocab on read failure is the optional-asset contract, not silent policy success.",
+    "evidence": "src/bioetl/infrastructure/config/publication_controlled_vocabulary_loader.py"
+  },
+  "022fbdc53da291cc": {
+    "status": "reject",
+    "triage_reason": "UnicodeDecodeError/first-line jsonl is hardening.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_payloads.py"
+  },
+  "eaa886050a7ae415": {
+    "status": "reject",
+    "triage_reason": "Reorder forbidden-override check is DX; missing provider source already fails.",
+    "evidence": "src/bioetl/infrastructure/config/pipeline_payload_normalization.py"
+  },
+  "6636bced3efcd2b2": {
+    "status": "reject",
+    "triage_reason": "Protection-reason attribution tweak is lifecycle UX, not a delete-wrong-file hole.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_reasons.py"
+  },
+  "754efe3b1382a0e3": {
+    "status": "reject",
+    "triage_reason": "Strip occurrence_envelope from semantic fallback is payload-shape polish.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py"
+  },
+  "d433b97079af19b8": {
+    "status": "reject",
+    "triage_reason": "quote() already encodes `/`; `.`/`..` pipeline names are not a current producer.",
+    "evidence": "src/bioetl/infrastructure/control_plane/_run_manifest_scope_index.py"
+  },
+  "5f62a7572b9479f1": {
+    "status": "reject",
+    "triage_reason": "Continue after unlink failure is apply-pass UX, not data loss.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_store.py"
+  },
+  "134d931def9107a6": {
+    "status": "reject",
+    "triage_reason": "Same-id rewrite is guarded by run_id mapping; rollback already restores on failure.",
+    "evidence": "src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py"
+  },
+  "41adee72176b480b": {
+    "status": "reject",
+    "triage_reason": "Pair compare by path key is comparison polish, not a hash mismatch.",
+    "evidence": "src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py"
+  },
+  "91264c7ed9da5f10": {
+    "status": "reject",
+    "triage_reason": "Force dumps_canonical/allow_nan=False is encoder unification, not a current NaN producer.",
+    "evidence": "src/bioetl/infrastructure/serialization/encoders.py"
+  },
+  "ac57a379dbd8dda9": {
+    "status": "reject",
+    "triage_reason": "Extract shared filter-section helper is DRY.",
+    "evidence": "src/bioetl/infrastructure/config/filter_config_loader.py"
+  },
+  "be8f7c162d80673b": {
+    "status": "reject",
+    "triage_reason": "Named tuple for scorecard inputs is style.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_quality_scorecard.py"
+  },
+  "d25d0ad810453894": {
+    "status": "reject",
+    "triage_reason": "Index __init__.py modules is inventory completeness, not a runtime hole.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_debt_task_support.py"
+  },
+  "3fe21c09ff7533c2": {
+    "status": "reject",
+    "triage_reason": "Public SRC_ROOT_PREFIX re-export is naming hygiene.",
+    "evidence": "src/bioetl/infrastructure/quality/exemptions_registry_policy.py"
+  },
+  "e6f125b29cb26586": {
+    "status": "reject",
+    "triage_reason": "Remove scripts import is layering/style, not a broken scorecard.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_quality_scorecard.py"
+  },
+  "0ed122777866dc8f": {
+    "status": "reject",
+    "triage_reason": "Restore prior occurrence on rollback is durability hardening.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py"
+  },
+  "596cb7b62d31aef5": {
+    "status": "reject",
+    "triage_reason": "Resolve-then-exists path order is DX.",
+    "evidence": "src/bioetl/infrastructure/quality/debt_scorecard.py"
+  },
+  "04751c4288ff7c9a": {
+    "status": "reject",
+    "triage_reason": "lstrip('./') vs removeprefix is path-key polish for quality inventory.",
+    "evidence": "src/bioetl/infrastructure/quality/exemptions_registry_paths.py"
+  },
+  "7ca97cde5ac44343": {
+    "status": "reject",
+    "triage_reason": "Exclude bool from float coerce is typing hardening.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_quality_scorecard.py"
+  },
+  "c4cce84505d35f22": {
+    "status": "reject",
+    "triage_reason": "Resolve-then-exists is the same path-order polish as debt_scorecard.",
+    "evidence": "src/bioetl/infrastructure/quality/exemptions_registry_access.py"
+  },
+  "3e7ce56e7efaac4a": {
+    "status": "reject",
+    "triage_reason": "Error-text prefix list is docstring/DX.",
+    "evidence": "src/bioetl/infrastructure/quality/exemptions_registry_validation.py"
+  },
+  "f03fc647f6da41f4": {
+    "status": "reject",
+    "triage_reason": "Build empty stats via helper is DRY.",
+    "evidence": "src/bioetl/infrastructure/quarantine/_statistics.py"
+  },
+  "63780f556cdbb113": {
+    "status": "reject",
+    "triage_reason": "Cache symbol index is a perf request.",
+    "evidence": "src/bioetl/infrastructure/quality/exemptions_registry_targets.py"
+  },
+  "1b8ace0a8893ae3d": {
+    "status": "reject",
+    "triage_reason": "Thread baseline section name into messages is DX.",
+    "evidence": "src/bioetl/infrastructure/quality/registry_sync_service.py"
+  },
+  "2c11864c8ba8046f": {
+    "status": "reject",
+    "triage_reason": "Report malformed hotspot rows is quality-gate DX, not pipeline fail-open.",
+    "evidence": "src/bioetl/infrastructure/quality/budget_evaluator.py"
+  },
+  "e37d18c2e820749a": {
+    "status": "reject",
+    "triage_reason": "Non-mapping registries error shape is DX.",
+    "evidence": "src/bioetl/infrastructure/quality/inventory.py"
+  },
+  "fa8882914ae47f31": {
+    "status": "reject",
+    "triage_reason": "Missing-budget KeyError→violation is quality-tool UX.",
+    "evidence": "src/bioetl/infrastructure/quality/scoring.py"
+  },
+  "f74cb522b147ae85": {
+    "status": "reject",
+    "triage_reason": "Raise on unknown registry_name is defensive; current callers use known names.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_debt_task_policy.py"
+  },
+  "8bf4c9e5ce343883": {
+    "status": "reject",
+    "triage_reason": "Push filters/limit into Delta is a perf request.",
+    "evidence": "src/bioetl/infrastructure/quarantine/_inspection.py"
+  },
+  "9d710ef39f345ded": {
+    "status": "reject",
+    "triage_reason": "cwd vs project_root for module keys is inventory polish.",
+    "evidence": "src/bioetl/infrastructure/quality/exemptions_registry_paths.py"
+  },
+  "57125fa729b58e6f": {
+    "status": "reject",
+    "triage_reason": "Exclude bool thresholds is typing hardening.",
+    "evidence": "src/bioetl/infrastructure/quality/scoring.py"
+  },
+  "77f40e18fec70992": {
+    "status": "reject",
+    "triage_reason": "Stricter group_cfg shape checks are quality-config DX.",
+    "evidence": "src/bioetl/infrastructure/quality/scoring.py"
+  },
+  "186ee9bf380c1c44": {
+    "status": "reject",
+    "triage_reason": "Default missing payload keys is explorer hardening; full rows have those columns.",
+    "evidence": "src/bioetl/infrastructure/quarantine/_inspection.py"
+  },
+  "6a7ff9f1d99761fa": {
+    "status": "reject",
+    "triage_reason": "Reject YAML bool budgets is typing hardening.",
+    "evidence": "src/bioetl/infrastructure/quality/registry_sync_service.py"
+  },
+  "29785b5be56daaba": {
+    "status": "reject",
+    "triage_reason": "Named constants for literal 3 is style.",
+    "evidence": "src/bioetl/infrastructure/quality/_governance_validation.py"
+  },
+  "341312f74f2498a0": {
+    "status": "reject",
+    "triage_reason": "Centralize artifact path strings is DRY.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py"
+  },
+  "3cd297dd897d0c07": {
+    "status": "reject",
+    "triage_reason": "Typed UUID parse error is DX; invalid index text already fails.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_execution_state_store.py"
+  },
+  "cb05eebc6eab56a6": {
+    "status": "reject",
+    "triage_reason": "Reuse shared append_jsonl_payload is DRY.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_ledger_store.py"
+  },
+  "127e3b9f9800de28": {
+    "status": "reject",
+    "triage_reason": "retry_after 0.0 vs default is retry timing polish, not fail-open storage.",
+    "evidence": "src/bioetl/infrastructure/errors/exception_mapper.py"
+  },
+  "cefd30c791ba1c58": {
+    "status": "reject",
+    "triage_reason": "Empty ledger marked miss is metrics wording, not data loss.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_ledger_store.py"
+  },
+  "77d5f4f285ce3a83": {
+    "status": "reject",
+    "triage_reason": "Restore prior manifest on index failure is durability hardening.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py"
+  },
+  "f40e52b853a81ee2": {
+    "status": "reject",
+    "triage_reason": "Defensive task-payload shape checks are plan-builder DX.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_debt_reduction.py"
+  },
+  "be1b488f92a45477": {
+    "status": "reject",
+    "triage_reason": "Atomic CSV write is durability hardening.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py"
+  },
+  "1375656fdbcdff2d": {
+    "status": "reject",
+    "triage_reason": "Latest-pointer monotonicity is replay polish, not a destructive empty-key op.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_execution_state_store.py"
+  },
+  "12947cc700ee703c": {
+    "status": "reject",
+    "triage_reason": "Remove redundant delegation is DRY.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_run_manifest_store.py"
+  },
+  "7c13722361227567": {
+    "status": "reject",
+    "triage_reason": "Avoid json.dumps probe is a micro-optimization.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py"
+  },
+  "1c28c447ede49e23": {
+    "status": "reject",
+    "triage_reason": "Wording of duplicate-registry errors is DX.",
+    "evidence": "src/bioetl/infrastructure/quality/_baseline_validation.py"
+  },
+  "3fa356484e741b43": {
+    "status": "reject",
+    "triage_reason": "Resolve debug_export_dir vs cwd is operator-path polish.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py"
+  },
+  "2bdf3cac1cc5b605": {
+    "status": "reject",
+    "triage_reason": "Typed corruption error is exception-taxonomy style.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py"
+  },
+  "852b17229cdc8ecc": {
+    "status": "reject",
+    "triage_reason": "Remove store-local _debug_refs is API cleanup.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py"
+  },
+  "70ac8d882e6ab22d": {
+    "status": "reject",
+    "triage_reason": "Idempotency side index is a perf request.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py"
+  },
+  "65f46207e8ec716d": {
+    "status": "reject",
+    "triage_reason": "Reject bool min_integral_score is typing hardening.",
+    "evidence": "src/bioetl/infrastructure/quality/_decomposition_program_policy.py"
+  },
+  "3d8dcf27d52ca1eb": {
+    "status": "reject",
+    "triage_reason": "Empty allocation → None is validation-message polish.",
+    "evidence": "src/bioetl/infrastructure/quality/_decomposition_owner_policy.py"
+  },
+  "f9cad497a4b9b120": {
+    "status": "reject",
+    "triage_reason": "Avoid second scorecard read is a perf/DRY request.",
+    "evidence": "src/bioetl/infrastructure/quality/debt_scorecard.py"
+  },
+  "8e6358cbf9de9dd0": {
+    "status": "reject",
+    "triage_reason": "Skip unknown budget keys in the value loop is DX.",
+    "evidence": "src/bioetl/infrastructure/quality/_primitives.py"
+  },
+  "ce0ce9e719b7901c": {
+    "status": "reject",
+    "triage_reason": "seen_quarters ordering tweak is validation polish.",
+    "evidence": "src/bioetl/infrastructure/quality/_decomposition_owner_policy.py"
+  },
+  "971c2eba9e94c6ac": {
+    "status": "reject",
+    "triage_reason": "Include quarter labels in errors is DX.",
+    "evidence": "src/bioetl/infrastructure/quality/_quarterly_targets_validation.py"
+  },
+  "ba8c02845fe129a5": {
+    "status": "reject",
+    "triage_reason": "Use _count_value helper is DRY/defensive.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py"
+  },
+  "e13ba76f9aa4ca73": {
+    "status": "reject",
+    "triage_reason": "Zero bronze_records/reject_ratio are unused explorer fields, not storage.",
+    "evidence": "src/bioetl/infrastructure/quarantine/_statistics.py"
+  },
+  "e5e0937f5ad4a490": {
+    "status": "reject",
+    "triage_reason": "Pass task_family explicitly is DRY/naming.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py"
+  },
+  "380a51cae7250a96": {
+    "status": "reject",
+    "triage_reason": "Caller payload overriding schema_version is debug-artifact metadata, not fail-closed storage.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py"
+  },
+  "a3e78ad6a14c1f8c": {
+    "status": "reject",
+    "triage_reason": "Exclude bool from numeric score is typing hardening.",
+    "evidence": "src/bioetl/infrastructure/quality/_quarterly_targets_validation.py"
+  },
+  "536c670912a6e043": {
+    "status": "reject",
+    "triage_reason": "Bounded read of debt-tasks JSON is hardening.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_debt_reduction.py"
+  },
+  "b75eb5baf80a5f25": {
+    "status": "reject",
+    "triage_reason": "Reject bool reviewed_limit is typing hardening.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py"
+  },
+  "9691bc531339eaed": {
+    "status": "reject",
+    "triage_reason": "Strip-once RF id parse is style.",
+    "evidence": "src/bioetl/infrastructure/quality/_grace_windows_validation.py"
+  },
+  "1b9ad87e9f9f02eb": {
+    "status": "reject",
+    "triage_reason": "Sort by parsed quarter is quality-report polish.",
+    "evidence": "src/bioetl/infrastructure/quality/_decomposition_burndown_policy.py"
+  },
+  "b2d85d2e3c960b00": {
+    "status": "reject",
+    "triage_reason": "Dedupe non-string CSV headers is debug-export polish.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py"
+  },
+  "ef5a069bdef92866": {
+    "status": "reject",
+    "triage_reason": "list_all empty→miss is metrics wording.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py"
+  },
+  "c1a48516f5353f80": {
+    "status": "reject",
+    "triage_reason": "Ignore non-int allowance totals is quality-tool hardening.",
+    "evidence": "src/bioetl/infrastructure/quality/report_formatter.py"
+  },
+  "4405087a25063e35": {
+    "status": "reject",
+    "triage_reason": "Reject bool as non-negative int is typing/test-only.",
+    "evidence": "src/bioetl/infrastructure/quality/_primitives.py"
+  },
+  "c23892fbc11b5ec1": {
+    "status": "reject",
+    "triage_reason": "Unreachable isinstance is style.",
+    "evidence": "src/bioetl/infrastructure/quality/_baseline_validation.py"
+  },
+  "fdb3f27ad97172ae": {
+    "status": "reject",
+    "triage_reason": "Classify -15..-6 debt band is planner taxonomy, not a runtime invariant.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_debt_reduction.py"
+  },
+  "f29bd5bcfa7f0f15": {
+    "status": "reject",
+    "triage_reason": "UTC vs local today for warn_until is determinism polish.",
+    "evidence": "src/bioetl/infrastructure/quality/_governance_validation.py"
+  },
+  "d07bff7b8feb6e3b": {
+    "status": "reject",
+    "triage_reason": "Only mark coverage after budget validates is quality-gate DX.",
+    "evidence": "src/bioetl/infrastructure/quality/_governance_validation.py"
+  },
+  "99a7cc4caa1f44e2": {
+    "status": "reject",
+    "triage_reason": "Strict YYYY-MM-DD due dates is format tightening; fromisoformat already parses.",
+    "evidence": "src/bioetl/infrastructure/quality/exemptions_registry_validation.py"
+  },
+  "9bed01480cac9452": {
+    "status": "reject",
+    "triage_reason": "Repo-relative POSIX artifact paths are report determinism.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_debt_task_generation.py"
+  },
+  "f427904ebeb3f61a": {
+    "status": "reject",
+    "triage_reason": "Record index rollbacks incrementally is durability hardening.",
+    "evidence": "src/bioetl/infrastructure/control_plane/file_lineage_store.py"
+  },
+  "d4cb691210518c53": {
+    "status": "reject",
+    "triage_reason": "Key complexity by (name, lineno) is inventory polish.",
+    "evidence": "src/bioetl/infrastructure/quality/architecture_debt_task_support.py"
+  },
+  "7a4c31a8ec8fb019": {
+    "status": "reject",
+    "triage_reason": "Missing vs explicit-zero allocation is quality-policy nuance.",
+    "evidence": "src/bioetl/infrastructure/quality/scoring.py"
+  },
+  "7ed9cb26beb09de7": {
+    "status": "reject",
+    "triage_reason": "Use delete metrics instead of pre-count is an API-shape request.",
+    "evidence": "src/bioetl/infrastructure/quarantine/_lifecycle.py"
+  },
+  "1c50682e700515aa": {
+    "status": "reject",
+    "triage_reason": "Deep-copy filter payload is isolation polish.",
+    "evidence": "src/bioetl/infrastructure/config/entity_filter_metadata_registry.py"
+  },
+  "cc14df505c6b7c91": {
+    "status": "reject",
+    "triage_reason": "Cache parsed filter registry is a perf request.",
+    "evidence": "src/bioetl/infrastructure/config/entity_filter_metadata_registry.py"
+  },
+  "46b297dce0c0295b": {
+    "status": "reject",
+    "triage_reason": "resolve_configs_root instead of hardcoded root is path-resolution polish.",
+    "evidence": "src/bioetl/infrastructure/config/contract_policy_loader.py"
+  },
+  "b45cbd9e3c136d3e": {
+    "status": "reject",
+    "triage_reason": "Split pipeline_name for provider/entity is the shipped loader contract.",
+    "evidence": "src/bioetl/infrastructure/config/dq_contract_config_loader.py"
+  },
+  "b450dc57a51e74ec": {
+    "status": "reject",
+    "triage_reason": "Drop duplicate alignment call is DRY/perf.",
+    "evidence": "src/bioetl/infrastructure/config/contract_policy_validation.py"
+  },
+  "02389ef96148260d": {
+    "status": "reject",
+    "triage_reason": "Module-level DQ loader cache is a perf request.",
+    "evidence": "src/bioetl/infrastructure/config/dq_config_loader.py"
+  },
+  "9419edf3aa63cf8e": {
+    "status": "reject",
+    "triage_reason": "Present-but-falsy identity compare is extra; current identities are non-empty strings.",
+    "evidence": "src/bioetl/infrastructure/config/dq_contract_config_loader.py"
+  },
+  "0e26ac4e7ee275de": {
+    "status": "reject",
+    "triage_reason": "Stale Any comments are comment-only.",
+    "evidence": "src/bioetl/infrastructure/config/dq_config_loader.py"
+  },
+  "930715b22960329e": {
+    "status": "reject",
+    "triage_reason": "Load registry once and drop dead checks is DRY.",
+    "evidence": "src/bioetl/infrastructure/config/contract_registry_loader.py"
+  },
+  "531c59894d9a0f49": {
+    "status": "reject",
+    "triage_reason": "Freeze CI contract maps is immutability polish.",
+    "evidence": "src/bioetl/infrastructure/config/config_ci_contract.py"
+  },
+  "f2224d17d888ff90": {
+    "status": "reject",
+    "triage_reason": "Comment on f-string obfuscation is comment-only.",
+    "evidence": "src/bioetl/infrastructure/config/config_ci_contract.py"
+  },
+  "21c69e13a081de68": {
+    "status": "reject",
+    "triage_reason": "Non-object contract → {} then fails later validation; not silent success.",
+    "evidence": "src/bioetl/infrastructure/config/dq_contract_config_loader.py"
+  },
+  "1c58e7372b4c3677": {
+    "status": "reject",
+    "triage_reason": "Extract _is_rooted_explicit_path is DRY.",
+    "evidence": "src/bioetl/infrastructure/config/config_root.py"
+  },
+  "4c43c3218e2af705": {
+    "status": "reject",
+    "triage_reason": "Empty hash_include inheriting defaults is the intentional merge contract.",
+    "evidence": "src/bioetl/infrastructure/config/contract_policy_loader.py"
+  },
+  "d4bd0d1cdb1f668e": {
+    "status": "reject",
+    "triage_reason": "None vs empty registry_entries is an unused injection edge.",
+    "evidence": "src/bioetl/infrastructure/config/contract_policy_validation.py"
+  },
+  "e6d2233a998790a0": {
+    "status": "reject",
+    "triage_reason": "Remove no-op del is style.",
+    "evidence": "src/bioetl/infrastructure/config/contract_policy_loader.py"
+  },
+  "b371c1fb6db4d1d1": {
+    "status": "reject",
+    "triage_reason": "Overlapping true/false vocab check is extra; current vocabs are disjoint.",
+    "evidence": "src/bioetl/infrastructure/config/converters.py"
+  },
+  "9e72e33315b2d3cf": {
+    "status": "reject",
+    "triage_reason": "Report resolved defaults path is DX.",
+    "evidence": "src/bioetl/infrastructure/config/dq_config_resolution.py"
+  },
+  "8320d54de4eea299": {
+    "status": "reject",
+    "triage_reason": "Per-item source_fields normalize is unused mixed-list hardening.",
+    "evidence": "src/bioetl/infrastructure/config/converters.py"
+  },
+  "4604cad6a68fb950": {
+    "status": "reject",
+    "triage_reason": "Fail if repo root not found is extra; this tree always has the marker ancestors.",
+    "evidence": "src/bioetl/infrastructure/config/config_root.py"
+  },
+  "1334071cc0a3dad2": {
+    "status": "reject",
+    "triage_reason": "Stricter version grammar is extra; current contract versions already parse.",
+    "evidence": "src/bioetl/infrastructure/config/contract_policy_validation.py"
+  },
+  "472fd6a464e38f22": {
+    "status": "reject",
+    "triage_reason": "Duplicate applies_to detection is extra; registry entries are unique.",
+    "evidence": "src/bioetl/infrastructure/config/entity_filter_metadata_registry.py"
+  },
+  "d22009a68ca1e1a5": {
+    "status": "reject",
+    "triage_reason": "Single registry load is DRY/perf.",
+    "evidence": "src/bioetl/infrastructure/config/dq_contract_config_loader.py"
+  },
+  "1dcdc38fed432535": {
+    "status": "reject",
+    "triage_reason": "Share Silver filter schema impl is DRY.",
+    "evidence": "src/bioetl/infrastructure/schemas/filter_config.py"
+  },
+  "a932d4a48d6e9674": {
+    "status": "reject",
+    "triage_reason": "Freeze provider_lookup_fields is freeze polish.",
+    "evidence": "src/bioetl/infrastructure/schemas/composite_validation.py"
+  },
+  "fb176f969558f8bc": {
+    "status": "reject",
+    "triage_reason": "extra=forbid on FilterConfigFile is a contract expansion.",
+    "evidence": "src/bioetl/infrastructure/schemas/filter_config.py"
+  },
+  "d5ce2a74828e60e7": {
+    "status": "reject",
+    "triage_reason": "Duplicate batch_size constraint is DRY.",
+    "evidence": "src/bioetl/infrastructure/schemas/pipeline_config.py"
+  },
+  "590a4dcd95d6c48e": {
+    "status": "reject",
+    "triage_reason": "Strip join/output keys is polish; empty/whitespace keys already fail.",
+    "evidence": "src/bioetl/infrastructure/schemas/composite_config_base.py"
+  },
+  "7d0d521937e7c029": {
+    "status": "reject",
+    "triage_reason": "then-validation max_length omit has no current YAML producer; not a live hole.",
+    "evidence": "src/bioetl/infrastructure/schemas/dq_config.py"
+  },
+  "10cf960c9d4f2597": {
+    "status": "reject",
+    "triage_reason": "Per-enricher threshold-order check is extra; composite-level order already validated.",
+    "evidence": "src/bioetl/infrastructure/schemas/composite_validation.py"
+  },
+  "bf5a5769ee8d701b": {
+    "status": "reject",
+    "triage_reason": "keepalive>max / base>max delay checks are extra field pairing.",
+    "evidence": "src/bioetl/infrastructure/schemas/base_schemas_chembl.py"
+  },
+  "51d314b03b8941d3": {
+    "status": "reject",
+    "triage_reason": "extra=forbid on nested composite schemas is a contract expansion.",
+    "evidence": "src/bioetl/infrastructure/schemas/composite_config_base.py"
+  },
+  "b9fb1d612ca7ea42": {
+    "status": "reject",
+    "triage_reason": "Catch narrower ValidationError is exception-style.",
+    "evidence": "src/bioetl/infrastructure/schemas/composite_config.py"
+  },
+  "abf8d865a3b34c75": {
+    "status": "reject",
+    "triage_reason": "Split Gold/Silver to_domain inheritance is a typing/refactor.",
+    "evidence": "src/bioetl/infrastructure/schemas/filter_config.py"
+  },
+  "8db3d72e1217330d": {
+    "status": "reject",
+    "triage_reason": "extra=forbid on CompositeConfig schemas is a contract expansion.",
+    "evidence": "src/bioetl/infrastructure/schemas/composite_config.py"
+  },
+  "a43217247b665545": {
+    "status": "reject",
+    "triage_reason": "Generic DQ report config base is DRY.",
+    "evidence": "src/bioetl/infrastructure/schemas/dq_report_config.py"
+  },
+  "e0012624e24f476e": {
+    "status": "reject",
+    "triage_reason": "get_checks_enums documents filtering invalid names; not silent pipeline success.",
+    "evidence": "src/bioetl/infrastructure/schemas/dq_report_config.py"
+  },
+  "68de2fdc5ab0778a": {
+    "status": "reject",
+    "triage_reason": "extra=forbid on remaining composite models is a contract expansion.",
+    "evidence": "src/bioetl/infrastructure/schemas/composite_validation.py"
+  },
+  "1cf615d44ea01bf5": {
+    "status": "reject",
+    "triage_reason": "OS-level YAML kill is the same enhancement already rejected on S08b-260.",
+    "evidence": "src/bioetl/infrastructure/config/contract_registry_loader.py"
+  },
+  "a1f34ee4c6f9dec0": {
+    "status": "reject",
+    "triage_reason": "Bronze format rewrite to jsonl enforces the Medallion invariant rather than fail-opening.",
+    "evidence": "src/bioetl/infrastructure/schemas/pipeline_config.py"
+  },
+  "e6c3685301113b1e": {
+    "status": "reject",
+    "triage_reason": "Require source_path when enabled is extra; current enabled filters already set it.",
+    "evidence": "src/bioetl/infrastructure/schemas/base_schemas_pubchem.py"
+  },
+  "90affe4429c6d72d": {
+    "status": "reject",
+    "triage_reason": "Inherit BaseMaintenanceConfig is DRY.",
+    "evidence": "src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py"
+  },
+  "d2d98b41750175fb": {
+    "status": "reject",
+    "triage_reason": "Inherit BaseCsvExportConfig is DRY.",
+    "evidence": "src/bioetl/infrastructure/schemas/pipeline_config_common.py"
+  },
+  "c152b76b83662a08": {
+    "status": "reject",
+    "triage_reason": "extra=forbid on DQConfigFile is a contract expansion.",
+    "evidence": "src/bioetl/infrastructure/schemas/dq_config.py"
+  },
+  "234c6108384fa590": {
+    "status": "reject",
+    "triage_reason": "timeout `or 30` treats 0 as unset; 0 is not a supported client timeout.",
+    "evidence": "src/bioetl/infrastructure/schemas/base_schemas_chembl.py"
+  },
+  "7b0ca21671d0fa97": {
+    "status": "reject",
+    "triage_reason": "Compile exclude_patterns at schema time is extra validation.",
+    "evidence": "src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py"
+  },
+  "23514e94d8bce0af": {
+    "status": "reject",
+    "triage_reason": "Re-export BaseRateLimitValues is API hygiene.",
+    "evidence": "src/bioetl/infrastructure/schemas/base_schemas.py"
+  },
+  "53d7a9c3a99300af": {
+    "status": "reject",
+    "triage_reason": "Stricter provider charset is extra; current providers are lowercase ids.",
+    "evidence": "src/bioetl/infrastructure/schemas/pipeline_config.py"
+  },
+  "11ccda68c9545911": {
+    "status": "reject",
+    "triage_reason": "Unify circuit-breaker schemas is DRY.",
+    "evidence": "src/bioetl/infrastructure/schemas/pipeline_config_common.py"
+  }
+}

@@ -1,0 +1,1371 @@
+{
+  "f4852ad4e702cc29": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/config.py"
+  },
+  "b843b0b2ff398ae2": {
+    "status": "reject",
+    "triage_reason": "Process-local MemoryLock is the documented shipped CLI/runtime contract until a durable adapter exists.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/lock.py:21-26"
+  },
+  "1a7b09fddede0f1c": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/assembly/checkpoint.py"
+  },
+  "1f82376c78bb9c23": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/assembly/health_service.py"
+  },
+  "528d28ed5207f19b": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/assembly/health_server.py"
+  },
+  "a19a034fd42f9832": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/config_helpers.py"
+  },
+  "e5c7b17ce6b2c223": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/assembly/metrics_service.py"
+  },
+  "292c4f38899392e7": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/__init__.py"
+  },
+  "1e8280fa773eaa3c": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/lock.py"
+  },
+  "076f09ece6934ddd": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/bootstrap/assembly/health_service.py"
+  },
+  "deffd7965b4e9daa": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/lineage.py"
+  },
+  "9368fd95fabff00f": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/health.py"
+  },
+  "6c9a1f3a333ac447": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/config_helpers.py"
+  },
+  "398216925ef945db": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/checkpoint.py"
+  },
+  "de1d4af3207ae29d": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/assembly/health_server.py"
+  },
+  "81c08b7306ff088b": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/assembly/storage.py"
+  },
+  "b9cda3d2d386c981": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/execution_api.py"
+  },
+  "300328c1ba2062f9": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/composite_api.py"
+  },
+  "388782a9437a3725": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/entrypoints.py"
+  },
+  "27aeaf5c6a5494ba": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap_logger.py"
+  },
+  "4691a71442c43d8d": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/__init__.py"
+  },
+  "8b0c9fa855fb9078": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap_logger.py"
+  },
+  "fe866c271f3d4880": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/_transformer_spec_rows.py"
+  },
+  "6511d85326738cc8": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/_observability_wiring.py"
+  },
+  "a910cb9ae4ef2d1a": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/builders.py"
+  },
+  "faec5f516c2d8a86": {
+    "status": "reject",
+    "triage_reason": "Docs/ADR-for-shipped-API request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/entrypoints.py"
+  },
+  "f92d53be21a51a4c": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/__init__.py"
+  },
+  "7231a3378a6ff5c1": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/metrics.py"
+  },
+  "d0460a027d35ac48": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/storage.py"
+  },
+  "0c4abd88a6d2866c": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py"
+  },
+  "fee154369231abe5": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/_composite_plan_runtime_support.py"
+  },
+  "6a0f0c6f3c3ff4b3": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/noop.py"
+  },
+  "3e17a0889e468992": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py"
+  },
+  "20517692bb83df6f": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/service_builders.py"
+  },
+  "45bfc5f5847a9150": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/control_plane_store_builders.py"
+  },
+  "aaa12e9d12b42b75": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py"
+  },
+  "08935b22fa034297": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_builder_support.py"
+  },
+  "e17a43ba0069b462": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py"
+  },
+  "6e004bae8289b799": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/storage.py"
+  },
+  "8ba752c05427a509": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_builder_support.py"
+  },
+  "366060e8fc2057ca": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/cli/run_manifest.py"
+  },
+  "351a0e64be403c43": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/services/port_factories.py"
+  },
+  "f592ba2f13db4048": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/storage/audit.py"
+  },
+  "dcf56dc4735a3fea": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/services/runtime_managers.py"
+  },
+  "b24383ca164fd17f": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/services/runtime_managers.py"
+  },
+  "950269155411579e": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/storage/_helpers.py"
+  },
+  "69f744f623d12dc4": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/factories/storage/_helpers.py"
+  },
+  "afff42a35d6b4ceb": {
+    "status": "reject",
+    "triage_reason": "Injected registry is caller-owned; get(pipeline_name) already fail-closes a missing name. Auto-registering into a partial registry is a convenience change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/pipeline_bootstrap_phases.py:174-179"
+  },
+  "ad326908d0298fb6": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/runtime_basics.py"
+  },
+  "aa02d80c0ef4b722": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/runner_factory_builder_service.py"
+  },
+  "385c99dd38e0041c": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime_public_exports.py"
+  },
+  "0254749313191e67": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py"
+  },
+  "375c6c877e8098e5": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py"
+  },
+  "51e34a09c8d3ceee": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py"
+  },
+  "e8fc039731b1ea93": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/composite_support_services_factory.py"
+  },
+  "f21abb062f7f20ef": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py"
+  },
+  "bbe5db89ed3a53cc": {
+    "status": "reject",
+    "triage_reason": "Deterministic UUIDv5 from pid+counter is the intended occurrence/correlation contract, not a randomness hole.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py"
+  },
+  "07b4c489cdd585cb": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/pipeline/contract_validator.py"
+  },
+  "48659d58511ccecf": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/storage/maintenance_mixin.py"
+  },
+  "2857a42c65abb070": {
+    "status": "reject",
+    "triage_reason": "Tests lock in no-op: clear_delta(None) returns 0. Tests outrank the port docstring request to wipe all tables.",
+    "evidence": "tests/unit/composition/factories/storage/test_clear_mixin.py:164-168"
+  },
+  "41955dd72cbc8066": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/storage/resilience.py"
+  },
+  "818c91f2a5a4b14c": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/storage/clear_mixin.py"
+  },
+  "757c948db617f8b2": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/storage/merged_mixin.py"
+  },
+  "a4153869d77852ef": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/transformer_dependencies.py"
+  },
+  "8d22b17c7df7e8cf": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/health_service_access.py"
+  },
+  "08696f6f0add123a": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/storage/maintenance_mixin.py"
+  },
+  "f9a831218c237136": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/health_api.py"
+  },
+  "b3b867327664e1f8": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/storage/merged_mixin.py"
+  },
+  "ff2347137f61503f": {
+    "status": "reject",
+    "triage_reason": "Docs/ADR-for-shipped-API request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/storage/storage_factory.py"
+  },
+  "c2b68c4ae4a8735c": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/storage/write_mixin.py"
+  },
+  "36d086e32409e593": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/storage/factory.py"
+  },
+  "3aaa39cf30a43287": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/transformer_factory.py"
+  },
+  "39790cd412a76d10": {
+    "status": "reject",
+    "triage_reason": "csv_exporter.clear returns list[Path]; len(deleted) in _run_clear matches the exporter contract.",
+    "evidence": "src/bioetl/infrastructure/export/csv_exporter.py:116"
+  },
+  "f9c1805e0eed199b": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/config_types.py"
+  },
+  "e9e5461d74d0688e": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/creation_support.py"
+  },
+  "3ececc48c689e3a6": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/storage/health_mixin.py"
+  },
+  "fc0954b6d2594727": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/_workflow_services.py"
+  },
+  "b64c682a05ad4f36": {
+    "status": "reject",
+    "triage_reason": "Lazy MemoryLock singleton race is concurrency hardening without a demonstrated dual-lock producer.",
+    "evidence": "src/bioetl/composition/_workflow_services.py"
+  },
+  "34fd9b123b395468": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/_workflow_services.py"
+  },
+  "4f871430577379c6": {
+    "status": "reject",
+    "triage_reason": "Docs/ADR-for-shipped-API request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/README.md"
+  },
+  "04b1ec9f7f7c5ea3": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/_services.py"
+  },
+  "5a92998b516db036": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/assembly/__init__.py"
+  },
+  "a492d9583cfec7b8": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/__init__.py"
+  },
+  "ef44311db075e9da": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/_resource_management.py"
+  },
+  "0383729eaea9a443": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/_services.py"
+  },
+  "dd097632e1e2eae4": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/_workflow_services.py"
+  },
+  "833f7820350749d4": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/assembly/__init__.py"
+  },
+  "f8d51e7ec23e8c17": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/_pipeline_execution.py"
+  },
+  "dbd8f2b775ec3987": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/_pipeline_execution.py"
+  },
+  "3abb726dcb88c09e": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/_workflow_services.py"
+  },
+  "ee655afb295be114": {
+    "status": "reject",
+    "triage_reason": "Docs/ADR-for-shipped-API request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/README.md"
+  },
+  "93ce12b3852ac4d4": {
+    "status": "reject",
+    "triage_reason": "json.dumps already fail-closes on non-JSON leaves; default=str would fail-open.",
+    "evidence": "src/bioetl/composition/services/effective_config_serializer.py:46-48"
+  },
+  "9e74f6c2be7c54f8": {
+    "status": "reject",
+    "triage_reason": "Ancestor lockfile walk is the shipped lookup contract; no demonstrated wrong-file producer on current CLI cwd.",
+    "evidence": "src/bioetl/composition/services/versioning.py:155-165"
+  },
+  "380c4fddd0c9dda3": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/services/versioning.py"
+  },
+  "59f12a5e0e974e5d": {
+    "status": "reject",
+    "triage_reason": "_to_jsonable already str()-coerces keys; sorted(items()) TypeError on mixed keys is fail-closed, not a silent hash hole.",
+    "evidence": "src/bioetl/composition/services/effective_config_serializer.py:39-40"
+  },
+  "e251a3798d63a6da": {
+    "status": "reject",
+    "triage_reason": "Docs/ADR-for-shipped-API request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/types.py"
+  },
+  "9f0b406a86c079c2": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/services/effective_config_serializer.py"
+  },
+  "8d3633912fa3f556": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/composite_merge_service_builder.py"
+  },
+  "d6716dca5eb6dab1": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/composite_support_runtime_context.py"
+  },
+  "e0a92001aa39c4d9": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/composite_support_runtime_context.py"
+  },
+  "5f58cba6c2540a9e": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/composite_filter_extraction_service.py"
+  },
+  "39b283d3a84bbb73": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/composite_runtime_management_builder.py"
+  },
+  "d096e3aebd366091": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/composite_runtime_management_builder.py"
+  },
+  "3cd00c8542b4e9d4": {
+    "status": "reject",
+    "triage_reason": "Filesystem path already hashes raw bytes; git-show text path is a fallback when the file is absent, not a current dual-hash producer.",
+    "evidence": "src/bioetl/composition/services/versioning.py:168-181"
+  },
+  "7c1415a3a821921b": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/composite_support_helpers.py"
+  },
+  "54e91136d2da80f9": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/composite_runtime_management_builder.py"
+  },
+  "00a05ad6cd5042c4": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/runtime_builders/runner_control_plane_assembly.py"
+  },
+  "7e98a8e59b221c47": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py"
+  },
+  "aceb8b50871949c9": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_snapshot_support.py"
+  },
+  "e12f1c5f021f143d": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py"
+  },
+  "765f6ba94bb37ee6": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_runner_builder_orchestration.py"
+  },
+  "f14f0ee5fb0109da": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/runtime_builders/_runner_builder_orchestration.py"
+  },
+  "749eaa845846fcc5": {
+    "status": "reject",
+    "triage_reason": "Temporary pending manifest_id is the two-phase create/attach seam, not a leftover identity written to disk.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_publication_support.py"
+  },
+  "2caa8ed83b3d6efe": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_replay_support.py"
+  },
+  "ee61f382932dff9d": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py"
+  },
+  "472ec6ff2f996189": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_refs.py"
+  },
+  "05dd0cedc07471c0": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/runtime_builders/_runner_control_plane_artifact_policy.py"
+  },
+  "aabcab7daebf2489": {
+    "status": "confirm",
+    "triage_reason": "isinstance(raw, int | float) accepts bool; False becomes 0.0 and invents lag for blocked status, True becomes 1.0.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py:206-210",
+    "gh_issue": 8918
+  },
+  "4fc1dd5ce8f1c7c2": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_snapshot_support.py"
+  },
+  "769243ffd77cc770": {
+    "status": "reject",
+    "triage_reason": "Owner-private mode/uid checks already fail closed; symlink lstat is hardening without a demonstrated traversal producer.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py:102-151"
+  },
+  "0211db30e0cf9b65": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/composite_merge_dependency_builder.py"
+  },
+  "8778c87078e1a13e": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_identity_ref_values.py"
+  },
+  "79f1f0690bd84504": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py"
+  },
+  "470b85a5b8fb580c": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/factories/datasource/adapter_helpers.py"
+  },
+  "0a5ad0412e394d4f": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/datasource/adapter_helpers.py"
+  },
+  "f54413733694a356": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/datasource/_crossref_support.py"
+  },
+  "ff2901154d5ef897": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/datasource/data_source_factory.py"
+  },
+  "a36352ed6d53c1dc": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/dq/_context_resolver_support.py"
+  },
+  "1b8cd3fffdd8a370": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/datasource/pubchem.py"
+  },
+  "051f035f9585ca5b": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/control_plane.py"
+  },
+  "04d13816e706d070": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/inputs_resolution_orchestration.py"
+  },
+  "ced3161a7e295ec7": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/cached_bronze_snapshot_support.py"
+  },
+  "1bcbd1342348689a": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/runtime_builders/_runner_control_plane_policy.py"
+  },
+  "4338da28b8c84106": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_runner_input_preparation.py"
+  },
+  "35d8fc5d6d5d67da": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_context_field_binding.py"
+  },
+  "768cf78df65b20b8": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_effective_config_graph_support.py"
+  },
+  "346be5dba95a9784": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/provider_registry.py"
+  },
+  "b18e335a16e5e3a5": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/registration_biblio.py"
+  },
+  "e92b5c58fdc5c11f": {
+    "status": "reject",
+    "triage_reason": "Empty missing-lineage on unset sink is the documented compatibility path for non-forensic launches.",
+    "evidence": "src/bioetl/composition/runtime_builders/_runner_control_plane_policy_support.py:58-70"
+  },
+  "c7db3e6bd518e3ea": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py"
+  },
+  "ed193120654213fd": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/registration_bio.py"
+  },
+  "50fbe540a6db7f57": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py"
+  },
+  "2c86c6310c237fd4": {
+    "status": "reject",
+    "triage_reason": "Empty default_email is already falsy and raises; kwargs path already requires a non-empty str.",
+    "evidence": "src/bioetl/composition/factories/datasource/_crossref_inputs.py:10-20"
+  },
+  "034bda00f1cffe59": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_effective_config_graph_support.py"
+  },
+  "07c7bce6381a7887": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/datasource/data_source_factory.py"
+  },
+  "493806c717254ee1": {
+    "status": "reject",
+    "triage_reason": "Concurrency hardening without a demonstrated race on the current producer path.",
+    "evidence": "src/bioetl/composition/factories/datasource/pubchem.py"
+  },
+  "fca5163761d1e142": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/datasource/pubchem.py"
+  },
+  "7ee81ed5b3ea7353": {
+    "status": "confirm",
+    "triage_reason": "normalize_snapshot serializes set/frozenset in hash-randomized iteration order, so snapshot hashes are non-deterministic.",
+    "evidence": "src/bioetl/composition/runtime_builders/_snapshot_mapping_support.py:52-53",
+    "gh_issue": 8918
+  },
+  "8d4d9c60f8181ff1": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/datasource/http_client.py"
+  },
+  "a98db3d7d20fbf65": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/runtime_builders/_context_field_binding.py"
+  },
+  "7256430fe3e6d612": {
+    "status": "confirm",
+    "triage_reason": "Malformed replay run_id UUID is swallowed as ValueError and becomes None, so a bad replay pointer silently drops parent snapshot evidence.",
+    "evidence": "src/bioetl/composition/runtime_builders/input_snapshot_resolution.py:127-130",
+    "gh_issue": 8918
+  },
+  "bbc054c6ff75e3f7": {
+    "status": "reject",
+    "triage_reason": "source.api has default_factory=ApiConfig, so .base_url access cannot see a missing api on typed config.",
+    "evidence": "src/bioetl/infrastructure/schemas/pipeline_config_provider.py:51; registration_bio.py:205"
+  },
+  "a33307099c599550": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/factories/datasource/crossref.py"
+  },
+  "0eabf2f8c0eb222b": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/_observability_preflight_support.py"
+  },
+  "c2bc203e3c4963f3": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py"
+  },
+  "74975a7b11d8babb": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py"
+  },
+  "3879742b077a3a3e": {
+    "status": "reject",
+    "triage_reason": "AssertionError-to-ValueError is exception-type style; the missing-input path already fails.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py"
+  },
+  "16e566bc77ee13ff": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/runtime_builders/_snapshot_mapping_support.py"
+  },
+  "2a08b65d92367b7d": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/_factory_method_types.py"
+  },
+  "a4b0ab431aa1abe7": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/_factory_method_control_plane.py"
+  },
+  "1b7a3dbd3f67b86e": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/_assembler_factory.py"
+  },
+  "3f57c38123b251eb": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_manifest_publication_context_support.py"
+  },
+  "f5f977e92fc884af": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py"
+  },
+  "c381e7656f9460de": {
+    "status": "reject",
+    "triage_reason": "Optional filter batch-size resolution fail-softs to None so batch adjustment is skipped; not a required-config hole.",
+    "evidence": "src/bioetl/composition/runtime_builders/_inputs_resolution_support.py:161-171"
+  },
+  "4e6c3764c5f678b3": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py"
+  },
+  "f90572f84ae7b9c4": {
+    "status": "reject",
+    "triage_reason": "Docs/ADR-for-shipped-API request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/pipeline/_factory_method_types.py"
+  },
+  "d5b4516d362688e3": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_effective_config_runtime_snapshot_support.py"
+  },
+  "df3cba93995ed489": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_inputs_resolution_support.py"
+  },
+  "13d5fe4efdb86a81": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py"
+  },
+  "9a2a37b11b6adc82": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_effective_config_runtime_snapshot_support.py"
+  },
+  "bc8d77084f5fce5d": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_effective_config_secret_support.py"
+  },
+  "03aa9f1cb13f8d57": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/_factory_method_runtime_support.py"
+  },
+  "c7c96b5f7466ea97": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_effective_config_secret_support.py"
+  },
+  "d53969f03f6bcced": {
+    "status": "reject",
+    "triage_reason": "VacuumSettings.retention_days is a required positive int; enabled tri-state is the documented selector.",
+    "evidence": "src/bioetl/domain/context_filtering.py:175-186"
+  },
+  "6929759d325b241c": {
+    "status": "reject",
+    "triage_reason": "exact_replay already dereferences ctx.cached_bronze and AttributeErrors; that is fail-closed, not a silent hole.",
+    "evidence": "src/bioetl/composition/runtime_builders/_inputs_resolution_support.py:107-111"
+  },
+  "dc33fa5c85154530": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/_registry_factory_catalog.py"
+  },
+  "739f5d20b91bd8fb": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
+  },
+  "09051806edc45910": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/_assembler_factory.py"
+  },
+  "2dc865780c3d0768": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_context_updates.py"
+  },
+  "c7d87296a8274b0a": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/_registry_factory_catalog.py"
+  },
+  "38625866566fc60e": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_context_updates.py"
+  },
+  "1bdc82461019957b": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_builder_policy.py"
+  },
+  "9ce9305187194d85": {
+    "status": "reject",
+    "triage_reason": "Docs/ADR-for-shipped-API request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
+  },
+  "d9c3cb392fe662ce": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/_factory_method_runtime_support.py"
+  },
+  "559bcd075c396a04": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/factories/services/_record_processor_policy_support.py"
+  },
+  "b7943c73dc8c2180": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/factories/pipeline_support/checkpoint_policy_helpers.py"
+  },
+  "3f721b0a5b0e145e": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/pipeline_support/registry_validation_helpers.py"
+  },
+  "3f5dc0e6509f40f1": {
+    "status": "reject",
+    "triage_reason": "Docs/ADR-for-shipped-API request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/pipeline_support/contract_validation_helpers.py"
+  },
+  "520a1e95f812d36d": {
+    "status": "reject",
+    "triage_reason": "Layering/DRY move of already-correct policy; composition wiring is not a broken invariant.",
+    "evidence": "src/bioetl/composition/factories/services/_record_processor_policy_support.py"
+  },
+  "55d18c3177d0b2ef": {
+    "status": "reject",
+    "triage_reason": "Docs/ADR-for-shipped-API request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_resolution.py"
+  },
+  "2300e75aa23760f7": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline_support/registry_validation_helpers.py"
+  },
+  "d1fa1f1c00a2c722": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/services/_builder_record_processor_support.py"
+  },
+  "ce79f336dc2e7480": {
+    "status": "confirm",
+    "triage_reason": "Unrecognized hash_datetime_policy is silently remapped to v2_datetime_utc instead of failing closed.",
+    "evidence": "src/bioetl/composition/factories/services/_record_processor_policy_support.py:82-87",
+    "gh_issue": 8918
+  },
+  "876d56cb6fa27eb6": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_helpers.py"
+  },
+  "7c8ee19e254ca66e": {
+    "status": "reject",
+    "triage_reason": "Docs/ADR-for-shipped-API request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/pipeline/runner_constructor.py"
+  },
+  "b39382f5221f6f84": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/transformer_dependencies.py"
+  },
+  "4c829efb20ee1a01": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/registry_core.py"
+  },
+  "d4065275c5e308b8": {
+    "status": "reject",
+    "triage_reason": "Concurrency hardening without a demonstrated race on the current producer path.",
+    "evidence": "src/bioetl/composition/factories/pipeline/registry.py"
+  },
+  "fef097f8a1f513c8": {
+    "status": "reject",
+    "triage_reason": "Test-only request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/pipeline/transformer_builder.py"
+  },
+  "73a287821b2ec179": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/runner_assembly.py"
+  },
+  "d0dcefcfb9918fad": {
+    "status": "reject",
+    "triage_reason": "Concurrency hardening without a demonstrated race on the current producer path.",
+    "evidence": "src/bioetl/composition/factories/pipeline/registry.py"
+  },
+  "51bedc2a897a5d5b": {
+    "status": "reject",
+    "triage_reason": "Concurrency hardening without a demonstrated race on the current producer path.",
+    "evidence": "src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_helpers.py"
+  },
+  "07221d59c4d2aab1": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/factories/services/_record_processor_policy_support.py"
+  },
+  "6f5517c837d7fe97": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/services/__init__.py"
+  },
+  "a431e364b1f61c95": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/factories/pipeline_support/assembler_helpers.py"
+  },
+  "af9154671190a06d": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/inputs_resolver.py"
+  },
+  "5ca3b5c939a8b9a7": {
+    "status": "reject",
+    "triage_reason": "Docs/ADR-for-shipped-API request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
+  },
+  "553a786488fd46f5": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/ledger_collaborator.py"
+  },
+  "76d73dd0742b5dc0": {
+    "status": "reject",
+    "triage_reason": "Non-dict registry entries become None and still fail closed under strict=True.",
+    "evidence": "src/bioetl/composition/runtime_builders/run_manifest_contract_identity.py:107-118"
+  },
+  "ef942583fccddf83": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/inputs_runtime_helpers.py"
+  },
+  "6af3918398e746f6": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/runner_builder_wiring.py"
+  },
+  "a1890945e1c1cba4": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/run_manifest_contract_identity.py"
+  },
+  "f50271ab41f63712": {
+    "status": "reject",
+    "triage_reason": "_coerce_optional_text already maps empty/whitespace to None; or-fallback is text identity, not empty-zero.",
+    "evidence": "src/bioetl/composition/runtime_builders/run_manifest_contract_identity.py:150-192"
+  },
+  "7fd6ae0e798b072c": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/run_manifest_support.py"
+  },
+  "0a97b57cc33ea7d0": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/run_manifest_support.py"
+  },
+  "bceaa34d03547844": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/factories/observability_api.py"
+  },
+  "d353026047abdaf0": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
+  },
+  "30befa27e0852387": {
+    "status": "reject",
+    "triage_reason": "Concurrency hardening without a demonstrated race on the current producer path.",
+    "evidence": "src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_resolution.py"
+  },
+  "601d645161865861": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/_creation_wiring.py"
+  },
+  "73ecb1e617b021fa": {
+    "status": "confirm",
+    "triage_reason": "Empty content_hash_include_fields is truthy-collapsed to None, so an explicit empty include policy becomes hash-all; EntityIdentityGenerator treats empty set as explicit.",
+    "evidence": "src/bioetl/composition/factories/pipeline/transformer_dependencies.py:76-79; src/bioetl/domain/behavior/identity_service.py:75-80",
+    "gh_issue": 8918
+  },
+  "c80efa699c7dd22d": {
+    "status": "reject",
+    "triage_reason": "TransformConfig.steps is list[str] via Pydantic; a scalar string is rejected at config parse, not character-split.",
+    "evidence": "src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py:262-269"
+  },
+  "31e355a398d6f139": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/runtime_builders/inputs_resolver.py"
+  },
+  "96a5d20a7071c758": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/registry_exports.py"
+  },
+  "7d19aaf3e2e5c2eb": {
+    "status": "reject",
+    "triage_reason": "Salt-free NoOpPiiHasher is the shipped default; tests assert it. Warning/strict escalation is a policy expansion.",
+    "evidence": "src/bioetl/composition/factories/pipeline/transformer_dependencies.py:40-45; tests/unit/composition/factories/pipeline/test_transformer_dependencies.py"
+  },
+  "b86ba8732bb765da": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/runner_assembly.py"
+  },
+  "3c5b00b9370c70d3": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline_support/checkpoint_policy_helpers.py"
+  },
+  "50b28d6f1ad7b0d5": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/runner_constructor.py"
+  },
+  "7c56a4c2e9e4bc7e": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/runtime_builders/observability_builder.py"
+  },
+  "ca53df2cffd77b7b": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/runtime_builders/ledger_collaborator.py"
+  },
+  "8f8a39c12fc22329": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/pipeline/runner.py"
+  },
+  "994ea05eb2b78584": {
+    "status": "confirm",
+    "triage_reason": "leaf_ids_from_value and _component_ids_from_component_ids_value iterate Mapping keys; numeric-looking JSON object keys become leaf/component IDs.",
+    "evidence": "src/bioetl/composition/providers/_chembl_target_protein_classification_helpers.py:135-155,207-216",
+    "gh_issue": 8918
+  },
+  "2ccd4d09c981a97b": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/_chembl_target_protein_classification_manifest.py"
+  },
+  "4e367c7e99e5643e": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py"
+  },
+  "495f78612d630010": {
+    "status": "confirm",
+    "triage_reason": "fetch offset slices target_ids while limit counts emitted relation rows, so checkpoint resume skips parents rather than records.",
+    "evidence": "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py:162-171; src/bioetl/domain/ports/data_source.py:72-74",
+    "gh_issue": 8918
+  },
+  "b7f74e02b7faa335": {
+    "status": "reject",
+    "triage_reason": "Occurrence counters are process-local correlation IDs, not replay anchors; lock/live-pid is concurrency hardening.",
+    "evidence": "src/bioetl/composition/occurrence_identity.py:1-6,18-31"
+  },
+  "a1fbf30c131ca182": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/observability_api.py"
+  },
+  "b155a80dd5a02916": {
+    "status": "reject",
+    "triage_reason": "Concurrency hardening without a demonstrated race on the current producer path.",
+    "evidence": "src/bioetl/composition/factories/pipeline/runner.py"
+  },
+  "aff0ff454e2c96bf": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/observability_api.py"
+  },
+  "9cba071750fcd198": {
+    "status": "reject",
+    "triage_reason": "Docs/ADR-for-shipped-API request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/observability_api.py"
+  },
+  "4c6a2f6fcd1e4f13": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py"
+  },
+  "c4d9a41d9e8cb0a2": {
+    "status": "reject",
+    "triage_reason": "0.0.0.0 is the shipped metrics-server default; changing it is an API change, not a residual invariant hole.",
+    "evidence": "src/bioetl/composition/observability_api.py:114-117"
+  },
+  "9de2e177c0d0934d": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/pipeline_runner_request.py"
+  },
+  "929d9430c6702a46": {
+    "status": "confirm",
+    "triage_reason": "_audit_required is true only for a present NoOpAudit; audit_required=True with audit=None fail-opens prod preflight. Forensic path already treats None as missing.",
+    "evidence": "src/bioetl/composition/bootstrap/runtime/_observability_bundle_support.py:229-230; _observability_preflight_support.py:120-135,154-155",
+    "gh_issue": 8918
+  },
+  "60d7952a6f631b59": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/pipeline_runner_request.py"
+  },
+  "1c786220464cd062": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/observability.py"
+  },
+  "978a7ff1ff9ae665": {
+    "status": "confirm",
+    "triage_reason": "strict resolver TypeError is caught and retried without strict=True, so an internal TypeError bypasses fail-closed identity instead of only handling legacy two-arg signatures.",
+    "evidence": "src/bioetl/composition/factories/pipeline/run_context_contract_identity.py:119-127",
+    "gh_issue": 8918
+  },
+  "903e83a2609532df": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/providers/_chembl_target_protein_classification_manifest.py"
+  },
+  "cbc129e65117c3ef": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/lazy_exports.py"
+  },
+  "982fa56aa6a9c919": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/_store.py"
+  },
+  "f1abc7857f104c8d": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/_creation.py"
+  },
+  "2ca9de247cc73099": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/_loading.py"
+  },
+  "d5a46864eca328b5": {
+    "status": "reject",
+    "triage_reason": "Fingerprint is documented as stable identifier drift, not full hierarchy content hashing.",
+    "evidence": "src/bioetl/composition/providers/_chembl_target_protein_classification_manifest.py:86-111"
+  },
+  "fd0e5e39bb315fd5": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/decorators.py"
+  },
+  "0e6cf3740a83164e": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/providers/_models.py"
+  },
+  "6d253b02c85f8c0a": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/providers/_registry_protocols.py"
+  },
+  "c4fc13e6578c2e66": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/providers/_registration_biblio_adapters.py"
+  },
+  "bdf97d0a930463b9": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py"
+  },
+  "50334f90a36ffbbb": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/providers/_config_helpers.py"
+  },
+  "081040e6f8fdc191": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/__init__.py"
+  },
+  "2cad24d3c05b56da": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/_store.py"
+  },
+  "0dcc007b8418cb3e": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/providers/_config_helpers.py"
+  },
+  "e084091016e3917e": {
+    "status": "reject",
+    "triage_reason": "Concurrency hardening without a demonstrated race on the current producer path.",
+    "evidence": "src/bioetl/composition/providers/_store.py"
+  },
+  "d5e0f39ca31aaacf": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/_default_registry.py"
+  },
+  "562ffa1ffe03f166": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/_creation.py"
+  },
+  "e8095d640339aa3f": {
+    "status": "reject",
+    "triage_reason": "Protocol/conformance typing request; reject class for this campaign.",
+    "evidence": "src/bioetl/composition/providers/_registry_resolution.py"
+  },
+  "e8d51d83a128c837": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/providers/_models.py"
+  },
+  "830e6d2c6954e323": {
+    "status": "reject",
+    "triage_reason": "Concurrency hardening without a demonstrated race on the current producer path.",
+    "evidence": "src/bioetl/composition/providers/_default_registry.py"
+  },
+  "dd1421a2316cdb3b": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/services/builder.py"
+  },
+  "173ba752f223f9d6": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/services/builder.py"
+  },
+  "d0f1d0b0ed16057f": {
+    "status": "reject",
+    "triage_reason": "No current-disk invariant breach; request is hardening, layering, or a shipped-contract change.",
+    "evidence": "src/bioetl/composition/factories/services/bundle.py"
+  },
+  "339a9fe5a59d493f": {
+    "status": "reject",
+    "triage_reason": "Style/DRY/typing cleanup without a demonstrated outcome change.",
+    "evidence": "src/bioetl/composition/factories/services/pipeline_record_processor_builder.py"
+  },
+  "61daaa5ce64a9ece": {
+    "status": "reject",
+    "triage_reason": "Empty debug_export_formats falling back to csv/xlsx is the documented default-all-formats path.",
+    "evidence": "src/bioetl/composition/factories/services/pipeline_record_processor_builder.py:50-55"
+  }
+}
