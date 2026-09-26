@@ -5202,6 +5202,7 @@
           },
           "gridPos": {
             "x": 0,
+<<<<<<< HEAD
             "y": 23,
             "w": 12,
             "h": 4
@@ -5224,6 +5225,15 @@
               "valueSize": 20,
               "titleSize": 14
             }
+||||||| 1de34832856d
+            "y": 33,
+            "w": 24,
+            "h": 8
+=======
+            "y": 16,
+            "w": 24,
+            "h": 8
+>>>>>>> fix/cr-11262-selected-run-diagnostics
           },
           "targets": [
             {
@@ -8930,7 +8940,13 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
+<<<<<<< HEAD
         "y": 26,
+||||||| 1de34832856d
+        "y": 16,
+=======
+        "y": 24,
+>>>>>>> fix/cr-11262-selected-run-diagnostics
         "w": 24,
         "h": 1
       },
@@ -8941,7 +8957,13 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
+<<<<<<< HEAD
             "y": 27,
+||||||| 1de34832856d
+            "y": 17,
+=======
+            "y": 25,
+>>>>>>> fix/cr-11262-selected-run-diagnostics
             "w": 24,
             "h": 12
           },
@@ -9166,7 +9188,13 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
+<<<<<<< HEAD
             "y": 39,
+||||||| 1de34832856d
+            "y": 25,
+=======
+            "y": 33,
+>>>>>>> fix/cr-11262-selected-run-diagnostics
             "w": 24,
             "h": 8
           },
