@@ -195,10 +195,10 @@ _DQ_SCOPE_HTML = (
     "</div></div>"
 )
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 2, 24, 2),
-    9406: (0, 4, 24, 5),
-    9402: (0, 9, 12, 5),
-    9403: (12, 9, 12, 5),
+    9400: (0, 2, 24, 3),
+    9406: (0, 5, 24, 5),
+    9402: (0, 10, 12, 5),
+    9403: (12, 10, 12, 5),
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
