@@ -157,41 +157,21 @@ def test_dq_quarantine_count_is_shipped_in_range_evidence_lane() -> None:
     dashboard = json.loads(
         (DASHBOARD_DIR / "bioetl-dq-v2.json").read_text(encoding="utf-8")
     )
-    # Diet surface (#6647): quarantine evidence is shipped as blocked-records panel.
-    accepted_titles = {
-        "Monitor Quarantined Records",
-        "Monitor Blocked Records",
+    titles = {
+        item.get("title")
+        for item in dashboard.get("panels", [])
+        if isinstance(item, dict)
     }
-    range_lane = next(
-        (
-            item
-            for item in dashboard.get("panels", [])
-            if item.get("title") == "Selected Range · Impact & Freshness"
-        ),
-        None,
-    )
-    assert range_lane is not None
-    dashboard_panels = dashboard.get("panels", [])
-    assert isinstance(dashboard_panels, list)
-    if range_lane.get("collapsed"):
-        lane_panels = range_lane.get("panels", [])
-    else:
-        lane_index = dashboard_panels.index(range_lane)
-        lane_panels = []
-        for item in dashboard_panels[lane_index + 1 :]:
-            if isinstance(item, dict) and item.get("type") == "row":
-                break
-            lane_panels.append(item)
-    panel = next(
-        (
-            item
-            for item in lane_panels
-            if isinstance(item, dict) and item.get("title") in accepted_titles
-        ),
-        None,
-    )
-    assert panel is not None
-    assert panel.get("type") != "row"
+    nested = {
+        child.get("title")
+        for item in dashboard.get("panels", [])
+        if isinstance(item, dict)
+        for child in (item.get("panels") or [])
+        if isinstance(child, dict)
+    }
+    assert "Monitor Quarantined Records" not in titles | nested
+    assert "Monitor Blocked Records" not in titles | nested
+    assert "Selected Range · Impact & Freshness" not in titles
 
 
 def test_pipeline_summary_dashboards_apply_run_type_to_labelled_metrics() -> None:

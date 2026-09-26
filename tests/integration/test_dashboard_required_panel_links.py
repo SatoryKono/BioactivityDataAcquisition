@@ -58,13 +58,12 @@ def test_dq_dashboard_required_panel_links():
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panels = {p.get("id"): p for p in get_dashboard_panels(dashboard)}
 
-    # Silver Reject Explorer was removed; panel 9102 must not keep residual handoffs.
-    panel_9102 = panels.get(9102)
-    assert panel_9102 is not None, "Panel 9102 (Now · DQ Current Reasons) must exist"
-    data_links_9102 = panel_9102.get("options", {}).get("dataLinks", [])
-    assert not any(
-        "Silver Reject Explorer" in link.get("title", "") for link in data_links_9102
-    ), "Panel 9102 must not link to removed Silver Reject Explorer"
+    assert 9102 not in panels
+    assert 9406 in panels
+    links = (
+        panels[9406].get("fieldConfig", {}).get("defaults", {}).get("links") or []
+    )
+    assert any(link.get("title") == "Open Run Explorer" for link in links)
 
 
 def test_workflow_overview_required_panel_links():

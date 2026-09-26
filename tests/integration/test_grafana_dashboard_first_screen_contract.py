@@ -222,10 +222,6 @@ def test_current_status_recording_rules_are_canonicalized() -> None:
 def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> None:
     """L2 first screens must answer current state before range evidence."""
     expectations = {
-        "bioetl-runtime.json": {
-            "Monitor Pipeline Status": "bioetl_runtime_current_status_trusted",
-            "Review Runtime Blockers": "bioetl_runtime_current_blocker_reason",
-        },
         "bioetl-provider-health-v2.json": {
             "Monitor Fleet Status": "bioetl_provider_current_status",
             "Inspect Health Evidence": "bioetl_provider_current_status_info",
@@ -266,6 +262,19 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             assert all("$__range" not in expr for expr in expressions), (
                 f"{dashboard_name}:{panel_title} must not use selected range for current status"
             )
+
+    runtime_dashboard = load_dashboard(Path("grafana/dashboards") / "bioetl-runtime.json")
+    runtime_panels = {
+        panel.get("id"): panel
+        for panel in get_dashboard_panels(runtime_dashboard)
+        if isinstance(panel.get("id"), int)
+    }
+    runtime_status = runtime_panels[9998]
+    assert runtime_status.get("title") == "Review Selected Run Status"
+    assert int((runtime_status.get("gridPos") or {}).get("y", 999)) <= 12
+    assert "run_id=${run_id}" in str(runtime_status.get("targets"))
+    assert 9401 not in runtime_panels
+    assert 9101 not in runtime_panels
 
     dq_dashboard = load_dashboard(Path("grafana/dashboards") / "bioetl-dq-v2.json")
     dq_panels = {
