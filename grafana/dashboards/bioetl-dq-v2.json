@@ -509,7 +509,11 @@
             "properties": [
               {
                 "id": "custom.hidden",
-                "value": true
+                "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 160
               }
             ]
           },
@@ -543,6 +547,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               }
             ]
           },
@@ -552,17 +560,6 @@
               "options": "Reason"
             },
             "properties": [
-              {
-                "id": "custom.wrapText",
-                "value": true
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              },
               {
                 "id": "displayName",
                 "value": "Reason"
@@ -607,6 +604,53 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Processing"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Overall verdict"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trust"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
               }
             ]
           }
@@ -650,7 +694,9 @@
                 "execution_state",
                 "verdict",
                 "saved_trust",
-                "reason_display"
+                "evidence_completeness",
+                "reason_display",
+                "rules_version"
               ]
             }
           }
@@ -662,16 +708,17 @@
               "execution_state": 0,
               "verdict": 1,
               "saved_trust": 2,
-              "reason_display": 3
+              "evidence_completeness": 3,
+              "reason_display": 4,
+              "rules_version": 5
             },
             "renameByName": {
-              "domain": "Domain",
-              "verdict": "Status",
-              "execution_state": "Result",
+              "execution_state": "Processing",
+              "verdict": "Overall verdict",
+              "saved_trust": "Trust",
               "evidence_completeness": "Evidence",
-              "rules_version": "Rules",
               "reason_display": "Reason",
-              "saved_trust": "Trust"
+              "rules_version": "Rules"
             }
           }
         }
@@ -692,7 +739,7 @@
       "gridPos": {
         "x": 0,
         "y": 8,
-        "w": 12,
+        "w": 14,
         "h": 8
       },
       "datasource": "BioETL Ops HTTP",
@@ -946,9 +993,9 @@
       "type": "table",
       "title": "Inspect Processed Records",
       "gridPos": {
-        "x": 12,
+        "x": 14,
         "y": 8,
-        "w": 12,
+        "w": 10,
         "h": 8
       },
       "datasource": "BioETL Ops HTTP",
@@ -1045,6 +1092,10 @@
                   "type": "color-text",
                   "wrapText": true
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 170
               }
             ]
           },
@@ -1096,10 +1147,6 @@
                 "value": "right"
               },
               {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
                 "id": "noValue",
                 "value": "UNKNOWN"
               },
@@ -1115,6 +1162,10 @@
                   "mode": "fixed",
                   "fixedColor": "text"
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 100
               }
             ]
           },
@@ -1237,6 +1288,30 @@
                   "mode": "fixed",
                   "fixedColor": "text"
                 }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "count in"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "count out"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 85
               }
             ]
           }

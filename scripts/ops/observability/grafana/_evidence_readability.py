@@ -338,9 +338,7 @@ def _provider(p: dict[int, dict]) -> None:
         if target["expr"].startswith("topk(3, ") and target["expr"].endswith(")"):
             target["expr"] = target["expr"][8:-1]
         p[pid]["title"] = (
-            "All providers · status"
-            if pid == 9101
-            else "All providers · evidence"
+            "All providers · status" if pid == 9101 else "All providers · evidence"
         )
         p[pid]["description"] = (
             "CURRENT · All providers. This section is not filtered by the selected Provider. "
@@ -369,7 +367,9 @@ def _provider(p: dict[int, dict]) -> None:
                 "options": {
                     "observed_health_status": {"text": "Health observation available"},
                     "invalid_health_timestamp": {"text": "Invalid observation time"},
-                    "missing_health_status": {"text": "No health check result available"},
+                    "missing_health_status": {
+                        "text": "No health check result available"
+                    },
                 },
             }
         ],
@@ -383,9 +383,7 @@ def _provider(p: dict[int, dict]) -> None:
         _override(p[9107], field, _WIDTH, width)
     _override(p[9107], "Source state", "displayName", "Source")
     _override(p[9111], "Provider", _WIDTH, 200)
-    _override(
-        p[9111], "Provider", _CELL, {"type": "auto", "wrapText": False}
-    )
+    _override(p[9111], "Provider", _CELL, {"type": "auto", "wrapText": False})
     for pid in (9101, 9107):
         p[pid]["gridPos"].update(y=20, h=8)
         p[pid]["options"].setdefault("footer", {})["enablePagination"] = True
@@ -656,7 +654,10 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
     for transform in summary["transformations"]:
         if transform["id"] == "organize":
             transform["options"]["renameByName"].update(
-                run_execution="Result", run_verdict="Status", run_reason="Reason", saved_trust="Trust"
+                run_execution="Result",
+                run_verdict="Status",
+                run_reason="Reason",
+                saved_trust="Trust",
             )
     return ["run_execution", "run_verdict", "saved_trust", "run_reason"]
 
@@ -829,6 +830,8 @@ def apply_evidence_readability(payload: dict) -> None:
         _selected_verdict_reasons(p, overview=payload["uid"] == "bioetl-overview-v2")
     _apply_enum_verdict_copy(payload.get("uid"), p)
     _apply_run_summary_wrap(p)
+    if payload.get("uid") == "bioetl-dq-v2":
+        _dq_complete_summary(p)
     if payload.get("uid") == "bioetl-control-plane-v1":
         _rename_trust_monitor_titles(p)
         from ._replay_readiness_design import apply_replay_readiness_design
@@ -838,6 +841,60 @@ def apply_evidence_readability(payload: dict) -> None:
         from ._replay_readiness_design import compact_replay_first_window
 
         compact_replay_first_window(payload)
+
+
+def _dq_complete_summary(p: dict[int, dict]) -> None:
+    """Keep the complete selected-run assessment beside compact accounting."""
+    summary = p[9406]
+    fields = [
+        "execution_state",
+        "verdict",
+        "saved_trust",
+        "evidence_completeness",
+        "reason_display",
+        "rules_version",
+    ]
+    for transform in summary["transformations"]:
+        if transform["id"] == "filterFieldsByName":
+            transform["options"]["include"]["names"] = fields
+        elif transform["id"] == "organize":
+            transform["options"] = {
+                "indexByName": {name: i for i, name in enumerate(fields)},
+                "renameByName": dict(
+                    zip(
+                        fields,
+                        [
+                            "Processing",
+                            "Overall verdict",
+                            "Trust",
+                            "Evidence",
+                            "Reason",
+                            "Rules",
+                        ],
+                        strict=True,
+                    )
+                ),
+            }
+    _override(summary, "Rules", _HIDDEN, False)
+    for name, width in {
+        "Processing": 110,
+        "Overall verdict": 130,
+        "Trust": 80,
+        "Evidence": 110,
+        "Rules": 160,
+    }.items():
+        _override(summary, name, _WIDTH, width)
+    _override(summary, "Reason", _WRAP, True)
+    _override(summary, "Reason", _CELL, {"type": "auto", "wrapText": True})
+    p[9402]["gridPos"].update(x=0, w=14)
+    p[9403]["gridPos"].update(x=14, w=10)
+    for name, width in {
+        "parameter": 170,
+        "count in": 75,
+        "count out": 85,
+        "percentage": 100,
+    }.items():
+        _override(p[9403], name, _WIDTH, width)
 
 
 def _trust_full_detail_values(payload: dict) -> None:
