@@ -399,6 +399,13 @@ allowlists:
         Collapsed Inspect Range Evidence row (h=1, y=19) is below-fold
         selected-range run/reject evidence, not a first-screen scalar group.
       retire_when: range evidence is represented by first-window scalar cards
+    - dashboard: bioetl-incident-v1.json
+      id: 8808
+      owner: "@bioetl-observability"
+      rationale: >-
+        Collapsed Pipeline fleet and range row moved from Pipeline Diagnostics.
+        It is below-fold fleet evidence, not a first-screen scalar group.
+      retire_when: fleet signals are represented by first-window scalar cards on Incident
     - dashboard: bioetl-runtime.json
       id: 252
       owner: "@bioetl-observability"

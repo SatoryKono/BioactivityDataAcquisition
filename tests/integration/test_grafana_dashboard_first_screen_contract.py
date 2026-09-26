@@ -164,6 +164,9 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
         if dashboard_name == "bioetl-dq-v2.json":
             expected_header_ids = (9400,)
             assert 9401 not in panels
+        if dashboard_name == "bioetl-runtime.json":
+            expected_header_ids = (9400,)
+            assert 9401 not in panels
         for panel_id in expected_header_ids:
             panel = panels.get(panel_id)
             assert panel is not None, (
@@ -224,10 +227,7 @@ def test_current_status_recording_rules_are_canonicalized() -> None:
 def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> None:
     """L2 first screens must answer current state before range evidence."""
     expectations = {
-        "bioetl-runtime.json": {
-            "Monitor Pipeline Status": "bioetl_runtime_current_status_trusted",
-            "Review Runtime Blockers": "bioetl_runtime_current_blocker_reason",
-        },
+        "bioetl-runtime.json": {},
         "bioetl-provider-health-v2.json": {},
     }
 
@@ -334,6 +334,14 @@ def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
                 panel.get("id") != 9401 for panel in get_dashboard_panels(dashboard)
             )
             continue
+        if dashboard_name == "bioetl-runtime.json":
+            assert any(
+                panel.get("id") == 9998 for panel in get_dashboard_panels(dashboard)
+            )
+            assert all(
+                panel.get("id") != 9401 for panel in get_dashboard_panels(dashboard)
+            )
+            continue
         assert any(panel.get("id") == 9401 for panel in get_dashboard_panels(dashboard))
 
 
@@ -386,10 +394,7 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
 def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> None:
     """Fail-closed current-status surfaces must not hide missing telemetry behind or vector(0)."""
     expectations = {
-        "bioetl-runtime.json": [
-            "Monitor Pipeline Status",
-            "Review Runtime Blockers",
-        ],
+        "bioetl-runtime.json": [],
         "bioetl-provider-health-v2.json": [
             "Inspect Top Provider Causes",
             "Monitor Telemetry Presence",
@@ -425,9 +430,9 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
 def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
     """Runtime coverage must say missing telemetry is not proof of delivery."""
     expectations = {
-        "bioetl-runtime.json": (
+        "bioetl-incident-v1.json": (
             "Monitor Coverage",
-            ("missing telemetry", "not proof"),
+            ("evidence confidence",),
         ),
     }
 
