@@ -6,6 +6,8 @@ import argparse
 import json
 from pathlib import Path
 
+from scripts.ops.observability.grafana._overall_verdict import apply_overall_verdict
+
 TITLES = {
     "bioetl-control-plane-v1": "Replay Readiness",
     "bioetl-overview-v2": "Run Overview",
@@ -21,25 +23,25 @@ _RENAMES = {
     "5. Data Quality": "Data Quality",
 }
 _COLORS = {
-    "OK": "#14532D",
-    "WARN": "#713F12",
-    "ERROR": "#7F1D1D",
-    "INCOMPLETE": "#7C2D12",
-    "IN PROGRESS": "#1E3A8A",
-    "N/A": "#374151",
-    "QUERY ERROR": "#7F1D1D",
-    "success": "#14532D",
-    "failed": "#7F1D1D",
-    "fail": "#7F1D1D",
-    "partial": "#713F12",
-    "running": "#1E3A8A",
-    "unfinished": "#7C2D12",
-    "shutdown": "#713F12",
-    "dry_run": "#4C1D95",
-    "unknown": "#374151",
-    "TREE_MISSING": "#7F1D1D",
-    "LAYOUT_UNHEALTHY": "#7F1D1D",
-    "IDENTITY_UNHEALTHY": "#7F1D1D",
+    "OK": "#73BF69",
+    "WARN": "#F2CC0C",
+    "ERROR": "#F2495C",
+    "INCOMPLETE": "#FF9830",
+    "IN PROGRESS": "#5794F2",
+    "N/A": "#9CA3AF",
+    "QUERY ERROR": "#F2495C",
+    "success": "#73BF69",
+    "failed": "#F2495C",
+    "fail": "#F2495C",
+    "partial": "#F2CC0C",
+    "running": "#5794F2",
+    "unfinished": "#FF9830",
+    "shutdown": "#F2CC0C",
+    "dry_run": "#B877D9",
+    "unknown": "#9CA3AF",
+    "TREE_MISSING": "#F2495C",
+    "LAYOUT_UNHEALTHY": "#F2495C",
+    "IDENTITY_UNHEALTHY": "#F2495C",
 }
 _COLUMNS = {
     "workflow_id": ("Workflow", 120),
@@ -51,7 +53,7 @@ _COLUMNS = {
     "status": ("Overview", 85),
     "saved_evidence_status": ("Saved Evidence", 120),
     "data_quality_status": ("Data Quality", 110),
-    "replay_readiness_status": ("Replay Readiness", 140),
+    "replay_readiness_status": ("Replay Readiness", 125),
 }
 _CONTEXT = "var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}"
 
@@ -73,6 +75,7 @@ def apply_run_explorer_columns(payload: dict) -> None:
     payload.update(_rename_text(payload))
     if payload.get("uid") in TITLES:
         payload["title"] = TITLES[payload["uid"]]
+    apply_overall_verdict(payload)
     if payload.get("uid") != "bioetl-run-explorer-v1":
         return
     panels = {panel["id"]: panel for panel in payload["panels"]}
@@ -103,7 +106,7 @@ def apply_run_explorer_columns(payload: dict) -> None:
     ]
     names = [*_COLUMNS, *hidden]
     panel["targets"][0]["root_selector"] = (
-        'index_state = "valid_empty" and $exists(items) and $count(items) = 0 ? [{"pipeline": "VALID EMPTY"}] : items'
+        'index_state = "valid_empty" and $exists(items) and $count(items) = 0 ? [{"pipeline": "VALID EMPTY"}] : (items ~> | $ | {"duration_display": $replace(duration_display, /([0-9])\\s+([a-z])/, "$1$2")} |)'
     )
     panel["transformations"] = [
         {
@@ -181,7 +184,7 @@ def apply_run_explorer_columns(payload: dict) -> None:
                     {
                         "id": "custom.cellOptions",
                         "value": {
-                            "type": "color-background",
+                            "type": "color-text",
                             "mode": "basic",
                             "wrapText": False,
                         },
@@ -192,7 +195,7 @@ def apply_run_explorer_columns(payload: dict) -> None:
                             {
                                 "type": "value",
                                 "options": {
-                                    s: {"text": s, "color": c}
+                                    s: {"text": s if s in {"OK", "N/A", "ERROR"} else s.lower(), "color": c}
                                     for s, c in _COLORS.items()
                                 },
                             }

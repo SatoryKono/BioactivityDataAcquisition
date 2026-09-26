@@ -395,7 +395,7 @@
       "title": "",
       "gridPos": {
         "h": 3,
-        "w": 10,
+        "w": 24,
         "x": 0,
         "y": 2
       },
@@ -412,10 +412,10 @@
       "type": "table",
       "title": "Review Selected Run Status",
       "gridPos": {
-        "h": 3,
-        "w": 14,
-        "x": 10,
-        "y": 2
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 18
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
@@ -429,7 +429,8 @@
               "type": "auto",
               "wrapText": false
             },
-            "inspect": true
+            "inspect": true,
+            "wrapText": false
           },
           "links": [
             {
@@ -468,6 +469,17 @@
               {
                 "id": "displayName",
                 "value": "Processing"
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -498,6 +510,17 @@
               {
                 "id": "displayName",
                 "value": "Overall verdict"
+              },
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -509,7 +532,11 @@
             "properties": [
               {
                 "id": "custom.hidden",
-                "value": true
+                "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 160
               }
             ]
           },
@@ -543,6 +570,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               }
             ]
           },
@@ -552,17 +583,6 @@
               "options": "Reason"
             },
             "properties": [
-              {
-                "id": "custom.wrapText",
-                "value": true
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              },
               {
                 "id": "displayName",
                 "value": "Reason"
@@ -607,6 +627,64 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trust"
+            },
+            "properties": [
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Processing"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Overall verdict"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
               }
             ]
           }
@@ -614,7 +692,7 @@
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "lg",
+        "cellHeight": "sm",
         "footer": {
           "show": false
         }
@@ -650,7 +728,9 @@
                 "execution_state",
                 "verdict",
                 "saved_trust",
-                "reason_display"
+                "evidence_completeness",
+                "reason_display",
+                "rules_version"
               ]
             }
           }
@@ -662,16 +742,17 @@
               "execution_state": 0,
               "verdict": 1,
               "saved_trust": 2,
-              "reason_display": 3
+              "evidence_completeness": 3,
+              "reason_display": 4,
+              "rules_version": 5
             },
             "renameByName": {
-              "domain": "Domain",
-              "verdict": "Status",
-              "execution_state": "Result",
+              "execution_state": "Processing",
+              "verdict": "Overall verdict",
+              "saved_trust": "Trust",
               "evidence_completeness": "Evidence",
-              "rules_version": "Rules",
               "reason_display": "Reason",
-              "saved_trust": "Trust"
+              "rules_version": "Rules"
             }
           }
         }
@@ -692,8 +773,8 @@
       "gridPos": {
         "x": 0,
         "y": 5,
-        "w": 12,
-        "h": 8
+        "w": 14,
+        "h": 13
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Selected run: Compact identity table showing Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, Replay [Capability.Mode], Checkpoint [Anchors], and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Inspect value opens full identifiers as selectable plain text.",
@@ -946,13 +1027,13 @@
       "type": "table",
       "title": "Inspect Processed Records",
       "gridPos": {
-        "x": 12,
+        "x": 14,
         "y": 5,
-        "w": 12,
+        "w": 10,
         "h": 13
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator. Missing counts remain UNKNOWN.",
+      "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1045,6 +1126,10 @@
                   "type": "color-text",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 170
               }
             ]
           },
@@ -1059,16 +1144,8 @@
                 "value": "count out"
               },
               {
-                "id": "custom.width",
-                "value": 70
-              },
-              {
                 "id": "custom.align",
                 "value": "right"
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
               },
               {
                 "id": "custom.cellOptions",
@@ -1083,6 +1160,32 @@
                   "mode": "fixed",
                   "fixedColor": "text"
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "noValue",
+                "value": "N/A"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "UNKNOWN": {
+                        "text": "N/A",
+                        "color": "gray"
+                      },
+                      "No data": {
+                        "text": "N/A",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -1097,10 +1200,6 @@
                 "value": "right"
               },
               {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
@@ -1113,6 +1212,32 @@
                   "mode": "fixed",
                   "fixedColor": "text"
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "percentage"
+              },
+              {
+                "id": "noValue",
+                "value": "N/A"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "UNKNOWN": {
+                        "text": "N/A",
+                        "color": "gray"
+                      },
+                      "No data": {
+                        "text": "N/A",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
               },
               {
                 "id": "custom.width",
@@ -1189,16 +1314,8 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 70
-              },
-              {
                 "id": "custom.align",
                 "value": "right"
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
               },
               {
                 "id": "custom.cellOptions",
@@ -1208,17 +1325,32 @@
                 }
               },
               {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "noValue",
+                "value": "N/A"
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
                     "type": "value",
                     "options": {
                       "No data": {
-                        "text": "UNKNOWN",
+                        "text": "N/A",
                         "color": "gray"
                       },
                       "UNKNOWN": {
-                        "text": "UNKNOWN",
+                        "text": "N/A",
                         "color": "gray"
                       }
                     }
@@ -1234,13 +1366,6 @@
                     }
                   }
                 ]
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
               }
             ]
           },
@@ -1251,12 +1376,34 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 90
-              },
-              {
                 "id": "custom.align",
                 "value": "right"
+              },
+              {
+                "id": "noValue",
+                "value": "N/A"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "UNKNOWN": {
+                        "text": "N/A",
+                        "color": "gray"
+                      },
+                      "No data": {
+                        "text": "N/A",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 75
               }
             ]
           },
@@ -1267,12 +1414,102 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 90
-              },
-              {
                 "id": "custom.align",
                 "value": "right"
+              },
+              {
+                "id": "noValue",
+                "value": "N/A"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "UNKNOWN": {
+                        "text": "N/A",
+                        "color": "gray"
+                      },
+                      "No data": {
+                        "text": "N/A",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 85
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value A"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "noValue",
+                "value": "N/A"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "UNKNOWN": {
+                        "text": "N/A",
+                        "color": "gray"
+                      },
+                      "No data": {
+                        "text": "N/A",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "percentage A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "percentage"
+              },
+              {
+                "id": "noValue",
+                "value": "N/A"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "UNKNOWN": {
+                        "text": "N/A",
+                        "color": "gray"
+                      },
+                      "No data": {
+                        "text": "N/A",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
@@ -1305,7 +1542,7 @@
             "data": "",
             "method": "GET"
           },
-          "uql": "parse-json | scope \"rows\""
+          "uql": "parse-json | jsonata \"$map(rows[parameter != '05 silver_skipped_records' and parameter != '10 gold_skipped_records'], function($r) {$merge([$r, {'percentage': $contains($string($r.percentage), '%') ? $formatNumber($number($substringBefore($r.percentage, '%')), '0.0') & '%' : $r.percentage}])})\""
         },
         {
           "refId": "StageInput",
@@ -1318,7 +1555,7 @@
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($f := funnel; $map(['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','05 silver_skipped_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','10 gold_skipped_records','11 gold_deduplicated_records'], function($p) { ($stage := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $stage].records_in}) }))\""
+          "uql": "parse-json | jsonata \"($f := funnel; $map(['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','11 gold_deduplicated_records'], function($p) { ($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) }))\""
         }
       ],
       "transformations": [
@@ -1338,11 +1575,17 @@
             "indexByName": {
               "parameter": 0,
               "count in": 1,
+              "count in StageInput": 1,
               "value": 2,
-              "percentage": 3
+              "value A": 2,
+              "percentage": 3,
+              "percentage A": 3
             },
             "renameByName": {
-              "value": "count out"
+              "value": "count out",
+              "value A": "count out",
+              "count in StageInput": "count in",
+              "percentage A": "percentage"
             }
           }
         }
@@ -1356,7 +1599,7 @@
       "description": "Expand for saved stage rows, then domain trust reasons, for the selected Run ID.",
       "gridPos": {
         "x": 0,
-        "y": 18,
+        "y": 22,
         "w": 24,
         "h": 1
       },
@@ -1367,7 +1610,7 @@
           "title": "Inspect Selected Run Stages",
           "gridPos": {
             "x": 0,
-            "y": 19,
+            "y": 23,
             "w": 24,
             "h": 8
           },
@@ -1426,7 +1669,7 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 27,
+            "y": 31,
             "w": 24,
             "h": 12
           },
@@ -1651,7 +1894,7 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 39,
+            "y": 43,
             "w": 24,
             "h": 8
           },

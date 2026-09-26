@@ -555,7 +555,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
+                  "type": "color-text",
                   "mode": "basic",
                   "wrapText": false
                 }
@@ -568,79 +568,79 @@
                     "options": {
                       "OK": {
                         "text": "OK",
-                        "color": "#14532D"
+                        "color": "#73BF69"
                       },
                       "WARN": {
-                        "text": "WARN",
-                        "color": "#713F12"
+                        "text": "warn",
+                        "color": "#F2CC0C"
                       },
                       "ERROR": {
                         "text": "ERROR",
-                        "color": "#7F1D1D"
+                        "color": "#F2495C"
                       },
                       "INCOMPLETE": {
-                        "text": "INCOMPLETE",
-                        "color": "#7C2D12"
+                        "text": "incomplete",
+                        "color": "#FF9830"
                       },
                       "IN PROGRESS": {
-                        "text": "IN PROGRESS",
-                        "color": "#1E3A8A"
+                        "text": "in progress",
+                        "color": "#5794F2"
                       },
                       "N/A": {
                         "text": "N/A",
-                        "color": "#374151"
+                        "color": "#9CA3AF"
                       },
                       "QUERY ERROR": {
-                        "text": "QUERY ERROR",
-                        "color": "#7F1D1D"
+                        "text": "query error",
+                        "color": "#F2495C"
                       },
                       "success": {
                         "text": "success",
-                        "color": "#14532D"
+                        "color": "#73BF69"
                       },
                       "failed": {
                         "text": "failed",
-                        "color": "#7F1D1D"
+                        "color": "#F2495C"
                       },
                       "fail": {
                         "text": "fail",
-                        "color": "#7F1D1D"
+                        "color": "#F2495C"
                       },
                       "partial": {
                         "text": "partial",
-                        "color": "#713F12"
+                        "color": "#F2CC0C"
                       },
                       "running": {
                         "text": "running",
-                        "color": "#1E3A8A"
+                        "color": "#5794F2"
                       },
                       "unfinished": {
                         "text": "unfinished",
-                        "color": "#7C2D12"
+                        "color": "#FF9830"
                       },
                       "shutdown": {
                         "text": "shutdown",
-                        "color": "#713F12"
+                        "color": "#F2CC0C"
                       },
                       "dry_run": {
                         "text": "dry_run",
-                        "color": "#4C1D95"
+                        "color": "#B877D9"
                       },
                       "unknown": {
                         "text": "unknown",
-                        "color": "#374151"
+                        "color": "#9CA3AF"
                       },
                       "TREE_MISSING": {
-                        "text": "TREE_MISSING",
-                        "color": "#7F1D1D"
+                        "text": "tree_missing",
+                        "color": "#F2495C"
                       },
                       "LAYOUT_UNHEALTHY": {
-                        "text": "LAYOUT_UNHEALTHY",
-                        "color": "#7F1D1D"
+                        "text": "layout_unhealthy",
+                        "color": "#F2495C"
                       },
                       "IDENTITY_UNHEALTHY": {
-                        "text": "IDENTITY_UNHEALTHY",
-                        "color": "#7F1D1D"
+                        "text": "identity_unhealthy",
+                        "color": "#F2495C"
                       }
                     }
                   }
@@ -676,7 +676,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
+                  "type": "color-text",
                   "mode": "basic",
                   "wrapText": false
                 }
@@ -689,79 +689,79 @@
                     "options": {
                       "OK": {
                         "text": "OK",
-                        "color": "#14532D"
+                        "color": "#73BF69"
                       },
                       "WARN": {
-                        "text": "WARN",
-                        "color": "#713F12"
+                        "text": "warn",
+                        "color": "#F2CC0C"
                       },
                       "ERROR": {
                         "text": "ERROR",
-                        "color": "#7F1D1D"
+                        "color": "#F2495C"
                       },
                       "INCOMPLETE": {
-                        "text": "INCOMPLETE",
-                        "color": "#7C2D12"
+                        "text": "incomplete",
+                        "color": "#FF9830"
                       },
                       "IN PROGRESS": {
-                        "text": "IN PROGRESS",
-                        "color": "#1E3A8A"
+                        "text": "in progress",
+                        "color": "#5794F2"
                       },
                       "N/A": {
                         "text": "N/A",
-                        "color": "#374151"
+                        "color": "#9CA3AF"
                       },
                       "QUERY ERROR": {
-                        "text": "QUERY ERROR",
-                        "color": "#7F1D1D"
+                        "text": "query error",
+                        "color": "#F2495C"
                       },
                       "success": {
                         "text": "success",
-                        "color": "#14532D"
+                        "color": "#73BF69"
                       },
                       "failed": {
                         "text": "failed",
-                        "color": "#7F1D1D"
+                        "color": "#F2495C"
                       },
                       "fail": {
                         "text": "fail",
-                        "color": "#7F1D1D"
+                        "color": "#F2495C"
                       },
                       "partial": {
                         "text": "partial",
-                        "color": "#713F12"
+                        "color": "#F2CC0C"
                       },
                       "running": {
                         "text": "running",
-                        "color": "#1E3A8A"
+                        "color": "#5794F2"
                       },
                       "unfinished": {
                         "text": "unfinished",
-                        "color": "#7C2D12"
+                        "color": "#FF9830"
                       },
                       "shutdown": {
                         "text": "shutdown",
-                        "color": "#713F12"
+                        "color": "#F2CC0C"
                       },
                       "dry_run": {
                         "text": "dry_run",
-                        "color": "#4C1D95"
+                        "color": "#B877D9"
                       },
                       "unknown": {
                         "text": "unknown",
-                        "color": "#374151"
+                        "color": "#9CA3AF"
                       },
                       "TREE_MISSING": {
-                        "text": "TREE_MISSING",
-                        "color": "#7F1D1D"
+                        "text": "tree_missing",
+                        "color": "#F2495C"
                       },
                       "LAYOUT_UNHEALTHY": {
-                        "text": "LAYOUT_UNHEALTHY",
-                        "color": "#7F1D1D"
+                        "text": "layout_unhealthy",
+                        "color": "#F2495C"
                       },
                       "IDENTITY_UNHEALTHY": {
-                        "text": "IDENTITY_UNHEALTHY",
-                        "color": "#7F1D1D"
+                        "text": "identity_unhealthy",
+                        "color": "#F2495C"
                       }
                     }
                   }
@@ -797,7 +797,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
+                  "type": "color-text",
                   "mode": "basic",
                   "wrapText": false
                 }
@@ -810,79 +810,79 @@
                     "options": {
                       "OK": {
                         "text": "OK",
-                        "color": "#14532D"
+                        "color": "#73BF69"
                       },
                       "WARN": {
-                        "text": "WARN",
-                        "color": "#713F12"
+                        "text": "warn",
+                        "color": "#F2CC0C"
                       },
                       "ERROR": {
                         "text": "ERROR",
-                        "color": "#7F1D1D"
+                        "color": "#F2495C"
                       },
                       "INCOMPLETE": {
-                        "text": "INCOMPLETE",
-                        "color": "#7C2D12"
+                        "text": "incomplete",
+                        "color": "#FF9830"
                       },
                       "IN PROGRESS": {
-                        "text": "IN PROGRESS",
-                        "color": "#1E3A8A"
+                        "text": "in progress",
+                        "color": "#5794F2"
                       },
                       "N/A": {
                         "text": "N/A",
-                        "color": "#374151"
+                        "color": "#9CA3AF"
                       },
                       "QUERY ERROR": {
-                        "text": "QUERY ERROR",
-                        "color": "#7F1D1D"
+                        "text": "query error",
+                        "color": "#F2495C"
                       },
                       "success": {
                         "text": "success",
-                        "color": "#14532D"
+                        "color": "#73BF69"
                       },
                       "failed": {
                         "text": "failed",
-                        "color": "#7F1D1D"
+                        "color": "#F2495C"
                       },
                       "fail": {
                         "text": "fail",
-                        "color": "#7F1D1D"
+                        "color": "#F2495C"
                       },
                       "partial": {
                         "text": "partial",
-                        "color": "#713F12"
+                        "color": "#F2CC0C"
                       },
                       "running": {
                         "text": "running",
-                        "color": "#1E3A8A"
+                        "color": "#5794F2"
                       },
                       "unfinished": {
                         "text": "unfinished",
-                        "color": "#7C2D12"
+                        "color": "#FF9830"
                       },
                       "shutdown": {
                         "text": "shutdown",
-                        "color": "#713F12"
+                        "color": "#F2CC0C"
                       },
                       "dry_run": {
                         "text": "dry_run",
-                        "color": "#4C1D95"
+                        "color": "#B877D9"
                       },
                       "unknown": {
                         "text": "unknown",
-                        "color": "#374151"
+                        "color": "#9CA3AF"
                       },
                       "TREE_MISSING": {
-                        "text": "TREE_MISSING",
-                        "color": "#7F1D1D"
+                        "text": "tree_missing",
+                        "color": "#F2495C"
                       },
                       "LAYOUT_UNHEALTHY": {
-                        "text": "LAYOUT_UNHEALTHY",
-                        "color": "#7F1D1D"
+                        "text": "layout_unhealthy",
+                        "color": "#F2495C"
                       },
                       "IDENTITY_UNHEALTHY": {
-                        "text": "IDENTITY_UNHEALTHY",
-                        "color": "#7F1D1D"
+                        "text": "identity_unhealthy",
+                        "color": "#F2495C"
                       }
                     }
                   }
@@ -898,7 +898,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 140
+                "value": 125
               },
               {
                 "id": "custom.inspect",
@@ -918,7 +918,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
+                  "type": "color-text",
                   "mode": "basic",
                   "wrapText": false
                 }
@@ -931,79 +931,79 @@
                     "options": {
                       "OK": {
                         "text": "OK",
-                        "color": "#14532D"
+                        "color": "#73BF69"
                       },
                       "WARN": {
-                        "text": "WARN",
-                        "color": "#713F12"
+                        "text": "warn",
+                        "color": "#F2CC0C"
                       },
                       "ERROR": {
                         "text": "ERROR",
-                        "color": "#7F1D1D"
+                        "color": "#F2495C"
                       },
                       "INCOMPLETE": {
-                        "text": "INCOMPLETE",
-                        "color": "#7C2D12"
+                        "text": "incomplete",
+                        "color": "#FF9830"
                       },
                       "IN PROGRESS": {
-                        "text": "IN PROGRESS",
-                        "color": "#1E3A8A"
+                        "text": "in progress",
+                        "color": "#5794F2"
                       },
                       "N/A": {
                         "text": "N/A",
-                        "color": "#374151"
+                        "color": "#9CA3AF"
                       },
                       "QUERY ERROR": {
-                        "text": "QUERY ERROR",
-                        "color": "#7F1D1D"
+                        "text": "query error",
+                        "color": "#F2495C"
                       },
                       "success": {
                         "text": "success",
-                        "color": "#14532D"
+                        "color": "#73BF69"
                       },
                       "failed": {
                         "text": "failed",
-                        "color": "#7F1D1D"
+                        "color": "#F2495C"
                       },
                       "fail": {
                         "text": "fail",
-                        "color": "#7F1D1D"
+                        "color": "#F2495C"
                       },
                       "partial": {
                         "text": "partial",
-                        "color": "#713F12"
+                        "color": "#F2CC0C"
                       },
                       "running": {
                         "text": "running",
-                        "color": "#1E3A8A"
+                        "color": "#5794F2"
                       },
                       "unfinished": {
                         "text": "unfinished",
-                        "color": "#7C2D12"
+                        "color": "#FF9830"
                       },
                       "shutdown": {
                         "text": "shutdown",
-                        "color": "#713F12"
+                        "color": "#F2CC0C"
                       },
                       "dry_run": {
                         "text": "dry_run",
-                        "color": "#4C1D95"
+                        "color": "#B877D9"
                       },
                       "unknown": {
                         "text": "unknown",
-                        "color": "#374151"
+                        "color": "#9CA3AF"
                       },
                       "TREE_MISSING": {
-                        "text": "TREE_MISSING",
-                        "color": "#7F1D1D"
+                        "text": "tree_missing",
+                        "color": "#F2495C"
                       },
                       "LAYOUT_UNHEALTHY": {
-                        "text": "LAYOUT_UNHEALTHY",
-                        "color": "#7F1D1D"
+                        "text": "layout_unhealthy",
+                        "color": "#F2495C"
                       },
                       "IDENTITY_UNHEALTHY": {
-                        "text": "IDENTITY_UNHEALTHY",
-                        "color": "#7F1D1D"
+                        "text": "identity_unhealthy",
+                        "color": "#F2495C"
                       }
                     }
                   }
@@ -1117,7 +1117,7 @@
           "format": "table",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items",
+          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : (items ~> | $ | {\"duration_display\": $replace(duration_display, /([0-9])\\s+([a-z])/, \"$1$2\")} |)",
           "source": "url",
           "type": "json",
           "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",

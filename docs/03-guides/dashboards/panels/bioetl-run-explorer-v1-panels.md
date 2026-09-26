@@ -15,12 +15,12 @@ before the global ten-row limit. No dashboard navigation band is shown here.
 
 | Column | Value | Destination |
 | --- | --- | --- |
-| Workflow | Workflow name; N/A when absent | Workflow passport |
+| Workflow | Workflow name; — when absent | Workflow passport |
 | Pipeline | Pipeline name | Pipeline passport |
 | Provider | Recorded provider; N/A when absent | Provider Health |
 | Run ID | Short UUID; full UUID in report link title | Exact persisted Report |
 | Started | YY-MM-DD:HH:mm; N/A when absent | None; descending sort |
-| Duration | Compact elapsed duration; N/A when unavailable | None |
+| Duration | Compact elapsed duration, e.g. 2m 32s; N/A when unavailable | None |
 | Overview | Execution status | Run Overview |
 | Saved Evidence | Verified saved-evidence status | Selected-run Pipeline Diagnostics |
 | Data Quality | Saved exact-run quality verdict | Data Quality |
@@ -52,11 +52,14 @@ snapshot show N/A; missing modern evidence shows INCOMPLETE. Replay maps READY t
 OK, BLOCKED to ERROR, INSUFFICIENT to INCOMPLETE and UNSUPPORTED to N/A.
 Missing quality evidence on a modern report is INCOMPLETE; it never becomes OK.
 
-Status backgrounds: OK/success #14532D; WARN/partial/shutdown #713F12;
-ERROR/failed/QUERY ERROR #7F1D1D; INCOMPLETE/unfinished #7C2D12;
-IN PROGRESS/running #1E3A8A; N/A/unknown #374151; dry_run #4C1D95.
-Grafana selects contrasting text for native background-colored cells. Ordinary
-links use #93C5FD and ordinary values #E5E7EB on the normal row background.
+Status text colors: OK/success #73BF69; warn/partial/shutdown #F2CC0C;
+ERROR/failed/query error #F2495C; incomplete/unfinished #FF9830;
+in progress/running #5794F2; N/A/unknown #9CA3AF; dry_run #B877D9.
+Cells keep the normal row background. Only OK, N/A and ERROR remain uppercase
+in the table; API assessment values retain their original spelling.
+Replay Readiness has a 125px column. The installed native table has no per-column
+font-size option, so Started and Replay Readiness retain the native font size.
+Ordinary links use #93C5FD and ordinary values #E5E7EB.
 
 ## Generation and verification
 

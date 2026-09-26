@@ -12,6 +12,14 @@ multiple runs; use RunLedger for exact reconciliation.
 
 ## Key Panels
 
+### Overall verdict
+
+The stat panel beside the selected-run scope banner repeats `run_verdict` from
+the same source frame as Review Selected Run Status. It retains the selected
+Run ID and does not independently infer success or authorize replay. Missing
+values display UNKNOWN. The panel occupies x=17/y=2/w=7/h=3; the scope banner
+uses the remaining 17 columns.
+
 ### 2. Inspect Scope & Evidence
 - **Type:** Text
 - **Purpose:** Show run ID, manifest ID, and replay provenance anchors.

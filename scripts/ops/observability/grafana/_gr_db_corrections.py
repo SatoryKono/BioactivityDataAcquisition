@@ -946,18 +946,25 @@ def _correct_runtime(uid: object, panels: dict[int, dict]) -> None:
 def _dq_processed_records(panel: dict) -> None:
     """Join saved stage inputs to the existing outcome accounting rows."""
     names = ["01 bronze_records", "02 silver_valid_records", "03 silver_filtered_out_records", "04 silver_quarantined_records", "05 silver_skipped_records", "06 silver_deduplicated_records", "07 gold_written_records", "08 gold_excluded_by_contract_records", "09 gold_quarantined_records", "10 gold_skipped_records", "11 gold_deduplicated_records"]
+    names = [name for name in names if "_skipped_" not in name]
     parameters = "[" + ",".join("'" + name + "'" for name in names) + "]"
     expression = (
         "($f := funnel; $map(" + parameters + ", function($p) { "
-        "($stage := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); "
-        "{'parameter': $p, 'count in': $f[stage_id = $stage].records_in}) }))"
+        "($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); "
+        "{'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) }))"
     )
     panel["targets"] = [t for t in panel["targets"] if t.get("refId") != "StageInput"]
-    panel["targets"][0].update(parser="uql", uql='parse-json | scope "rows"')
+    outcome_expression = (
+        "$map(rows[parameter != '05 silver_skipped_records' and "
+        "parameter != '10 gold_skipped_records'], function($r) {"
+        "$merge([$r, {'percentage': $contains($string($r.percentage), '%') ? "
+        "$formatNumber($number($substringBefore($r.percentage, '%')), '0.0') & '%' : $r.percentage}])})"
+    )
+    panel["targets"][0].update(parser="uql", uql='parse-json | jsonata "' + outcome_expression + '"')
     panel["targets"].append({"refId": "StageInput", "type": "json", "source": "url", "parser": "uql", "format": "table", "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}", "url_options": {"method": "GET", "data": ""}, "uql": 'parse-json | jsonata "' + expression + '"'})
     panel["transformations"] = [
         {"id": "joinByField", "options": {"byField": "parameter", "mode": "outer"}},
-        {"id": "organize", "options": {"excludeByName": {"row_status": True}, "indexByName": {"parameter": 0, "count in": 1, "value": 2, "percentage": 3}, "renameByName": {"value": "count out"}}},
+        {"id": "organize", "options": {"excludeByName": {"row_status": True}, "indexByName": {"parameter": 0, "count in": 1, "count in StageInput": 1, "value": 2, "value A": 2, "percentage": 3, "percentage A": 3}, "renameByName": {"value": "count out", "value A": "count out", "count in StageInput": "count in", "percentage A": "percentage"}}},
     ]
     for override in panel["fieldConfig"]["overrides"]:
         for prop in override["properties"]:
@@ -968,16 +975,34 @@ def _dq_processed_records(panel: dict) -> None:
     for field in ("count in", "count out"):
         _override(panel, field, _WIDTH, 90)
         _override(panel, field, "custom.align", "right")
+    for field in ("value", "value A", "count", "count out"):
+        _override(panel, field, _WIDTH, 100)
     _override(panel, "percentage", _WIDTH, 100)
+    _override(panel, "percentage", "displayName", "percentage")
+    _override(panel, "percentage A", "displayName", "percentage")
+    for field in ("value", "value A", "count", "count in", "count out", "percentage", "percentage A"):
+        _override(panel, field, "noValue", "N/A")
+        _override(panel, field, "mappings", [{"type": "value", "options": {"UNKNOWN": {"text": "N/A", "color": "gray"}, "No data": {"text": "N/A", "color": "gray"}}}])
     panel["options"]["footer"]["enablePagination"] = False
     panel["options"]["cellHeight"] = "sm"
     panel["gridPos"]["h"] = 13
-    panel["description"] = "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator. Missing counts remain UNKNOWN."
+    panel["description"] = "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden."
 
 
 def _correct_dq(uid: object, panels: dict[int, dict]) -> None:
     if uid == "bioetl-dq-v2" and 9403 in panels:
         _dq_processed_records(panels[9403])
+        summary = panels[9406]
+        summary["transformations"] = [
+            {"id": "limit", "options": {"limitField": 1}},
+            {"id": "filterFieldsByName", "options": {"include": {"names": ["verdict"]}}},
+            {"id": "organize", "options": {"renameByName": {"verdict": "Overall verdict"}}},
+        ]
+        summary["options"]["cellHeight"] = "sm"
+        summary["fieldConfig"]["defaults"].setdefault("custom", {}).update(wrapText=False, inspect=True)
+        for field in ("Result", "Status", "Trust", "Reason"):
+            _override(summary, field, "custom.wrapText", False)
+            _override(summary, field, _CELL, {"type": "auto", "wrapText": False})
     if uid != "bioetl-dq-v2" or 155 not in panels:
         return
     panels[10]["fieldConfig"]["defaults"]["noValue"] = (

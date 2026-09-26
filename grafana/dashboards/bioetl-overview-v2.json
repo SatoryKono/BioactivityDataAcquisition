@@ -360,7 +360,7 @@
       "gridPos": {
         "x": 0,
         "y": 2,
-        "w": 24,
+        "w": 17,
         "h": 3
       },
       "id": 99,
@@ -376,6 +376,107 @@
       "repeat": "overview_fleet",
       "repeatDirection": "v",
       "maxPerRow": 1
+    },
+    {
+      "id": 9604,
+      "type": "stat",
+      "title": "Overall verdict",
+      "description": "Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
+      "gridPos": {
+        "x": 17,
+        "y": 2,
+        "w": 7,
+        "h": 3
+      },
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "targets": [
+        {
+          "panelId": 9002,
+          "refId": "A",
+          "withTransforms": false
+        }
+      ],
+      "transformations": [
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 1
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "run_verdict"
+              ]
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "UNKNOWN",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "OK": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "WARN": {
+                  "text": "WARN",
+                  "color": "yellow"
+                },
+                "ERROR": {
+                  "text": "ERROR",
+                  "color": "red"
+                },
+                "INCOMPLETE": {
+                  "text": "INCOMPLETE",
+                  "color": "orange"
+                },
+                "UNKNOWN": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                },
+                "N/A": {
+                  "text": "N/A",
+                  "color": "gray"
+                },
+                "QUERY ERROR": {
+                  "text": "QUERY ERROR",
+                  "color": "red"
+                },
+                "SELECT RUN": {
+                  "text": "SELECT RUN",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/"
+        },
+        "orientation": "auto",
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center"
+      }
     },
     {
       "id": 9603,
