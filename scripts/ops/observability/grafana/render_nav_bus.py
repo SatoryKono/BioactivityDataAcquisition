@@ -1535,6 +1535,14 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "Inspect Manifest Validation",
             "Expand to review manifest validation for the selected Run ID.",
         ),
+        9420: (
+            "Inspect Complete Run Discovery",
+            "Expand to search persisted runs and choose a Run ID. This row does not score the run already selected.",
+        ),
+        9450: (
+            "Inspect Saved Run Evidence",
+            "Expand for saved stage rows, then domain trust reasons, for the selected Run ID.",
+        ),
     }
     for panel_id, (title, description) in row_copy.items():
         row = by_id.get(panel_id)
@@ -1556,6 +1564,10 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "SELECT RUN — no exact Run ID selected. "
             "Choose this run in Run Explorer."
         ),
+        9409: (
+            "SELECT RUN — no exact Run ID selected. Choose a run first. "
+            "VALID EMPTY if this run has no extra forensic anchors."
+        ),
     }
     for panel_id, text in empty_copy.items():
         panel = by_id.get(panel_id)
@@ -1576,6 +1588,25 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
                 "targetBlank": False,
             }
         ]
+    for panel_id in (9405, 9406, 9407, 9408, 9409, 9413, 9414, 9415, 9417):
+        panel = by_id.get(panel_id)
+        if not isinstance(panel, dict):
+            continue
+        description = str(panel.get("description") or "")
+        description = description.replace("SELECTED RUN · TIME RANGE · ", "SELECTED RUN · ")
+        description = description.replace("TIME RANGE · SELECTED RUN ", "SELECTED RUN · ")
+        description = description.replace("TIME RANGE · ", "")
+        panel["description"] = description
+    trust = by_id.get(9418)
+    if isinstance(trust, dict):
+        trust["description"] = (
+            "SELECTED RUN · Processing result is the saved ETL outcome. "
+            "Saved trust verdict is the historical Trust assessment and does not "
+            "authorize replay. Reason count is the number of saved remarks: 0 is no, "
+            "and missing data stays —. Assessed at is when that assessment was recorded. "
+            "View trust reasons opens the remark list for this Run ID only when the count "
+            "is positive. The time range does not change these values."
+        )
 
 
 def _layout_control_plane_first_window(panels: list[object]) -> None:

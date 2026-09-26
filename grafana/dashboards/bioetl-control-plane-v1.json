@@ -448,7 +448,7 @@
         "y": 7
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence. Processing result is the saved ETL outcome. Saved trust verdict is the historical Trust assessment. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded.",
+      "description": "SELECTED RUN · Processing result is the saved ETL outcome. Saved trust verdict is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded. The time range does not change these values.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1577,7 +1577,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "TIME RANGE · SELECTED RUN lineage closure, identity consistency, cycle freedom, and persistence profile. Lives in the collapsed row titled Review Lineage Validation (not Inspect Audit & Lineage Evidence). UNKNOWN is not a healthy zero. No matching rows are a valid empty result; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · lineage closure, identity consistency, cycle freedom, and persistence profile. Lives in the collapsed row titled Review Lineage Validation (not Inspect Audit & Lineage Evidence). UNKNOWN is not a healthy zero. No matching rows are a valid empty result; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1840,7 +1840,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Validates checkpoint parse, schema, checksum, and required identity anchors for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Validates checkpoint parse, schema, checksum, and required identity anchors for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2407,7 +2407,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Provides full run IDs, hashes, artifact references, lineage references, snapshots, and checkpoint values for copying. These values come from BioETL Ops HTTP and are never Prometheus labels. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Inspect value opens full identifiers as selectable plain text.",
+          "description": "SELECTED RUN · Provides full run IDs, hashes, artifact references, lineage references, snapshots, and checkpoint values for copying. These values come from BioETL Ops HTTP and are never Prometheus labels. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Inspect value opens full identifiers as selectable plain text.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3043,7 +3043,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Lists missing run, manifest, configuration, contract, snapshot, replay, composite, and checkpoint anchors. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Inspect value opens full identifiers as selectable plain text.",
+          "description": "SELECTED RUN · Lists missing run, manifest, configuration, contract, snapshot, replay, composite, and checkpoint anchors. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Inspect value opens full identifiers as selectable plain text.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3617,7 +3617,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Shows the primary evidence required for replay: source configuration, DQ policy, input snapshots, replay blockers, lineage, artifacts, and ledger watermark. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Shows the primary evidence required for replay: source configuration, DQ policy, input snapshots, replay blockers, lineage, artifacts, and ledger watermark. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4224,7 +4224,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Compares current runtime anchors with anchors stored in the checkpoint. MISMATCH=CRIT; MISSING or PARTIAL=WARN; no data=UNKNOWN. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Compares current runtime anchors with anchors stored in the checkpoint. MISMATCH=CRIT; MISSING or PARTIAL=WARN; no data=UNKNOWN. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4837,7 +4837,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Shows additional investigation details such as runtime hashes, artifacts, component runs, checkpoint files, DQ reports, and Bronze batch IDs. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Shows additional investigation details such as runtime hashes, artifacts, component runs, checkpoint files, DQ reports, and Bronze batch IDs. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4851,7 +4851,7 @@
                 "wrapText": false
               },
               "unit": "none",
-              "noValue": "No P2 forensic anchors for this scope. Use the summary cards above, then select an exact run_id or verify backend health before treating this as expected empty."
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if this run has no extra forensic anchors."
             },
             "overrides": [
               {
@@ -6240,7 +6240,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Summarizes selected-run failures into the fixed categories api, dq, schema, storage, network, validation, and unknown. Every category row carries bounded status and reason evidence; an UNKNOWN backend verdict must remain visible in the rows and must not look like a healthy zero. Raw exception messages and identifiers are excluded. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Summarizes selected-run failures into the fixed categories api, dq, schema, storage, network, validation, and unknown. Every category row carries bounded status and reason evidence; an UNKNOWN backend verdict must remain visible in the rows and must not look like a healthy zero. Raw exception messages and identifiers are excluded. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -6641,6 +6641,7 @@
       "type": "row",
       "title": "Inspect Complete Run Discovery",
       "collapsed": true,
+      "description": "Expand to search persisted runs and choose a Run ID. This row does not score the run already selected.",
       "gridPos": {
         "x": 0,
         "y": 22,
@@ -6844,6 +6845,7 @@
       "type": "row",
       "title": "Inspect Saved Run Evidence",
       "collapsed": true,
+      "description": "Expand for saved stage rows, then domain trust reasons, for the selected Run ID.",
       "gridPos": {
         "x": 0,
         "y": 23,
@@ -6852,12 +6854,71 @@
       },
       "panels": [
         {
+          "id": 9460,
+          "type": "table",
+          "title": "Inspect Selected Run Stages",
+          "gridPos": {
+            "x": 0,
+            "y": 24,
+            "w": 24,
+            "h": 8
+          },
+          "datasource": "BioETL Ops HTTP",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "unit": "none",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "root_selector": "stage_diagnostics",
+              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "limit",
+              "options": {
+                "limitField": 12
+              }
+            }
+          ],
+          "links": []
+        },
+        {
           "id": 9451,
           "type": "table",
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 24,
+            "y": 32,
             "w": 24,
             "h": 12
           },
@@ -7075,65 +7136,6 @@
                   "reason_display": "Reason",
                   "display_verdict": "Status"
                 }
-              }
-            }
-          ],
-          "links": []
-        },
-        {
-          "id": 9460,
-          "type": "table",
-          "title": "Inspect Selected Run Stages",
-          "gridPos": {
-            "x": 0,
-            "y": 36,
-            "w": 24,
-            "h": 8
-          },
-          "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
-          "options": {
-            "showHeader": true,
-            "cellHeight": "sm",
-            "footer": {
-              "show": false
-            }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "UNKNOWN",
-              "unit": "none",
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": false
-                },
-                "inspect": true
-              }
-            },
-            "overrides": []
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "type": "json",
-              "source": "url",
-              "parser": "backend",
-              "format": "table",
-              "root_selector": "stage_diagnostics",
-              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-              "url_options": {
-                "method": "GET",
-                "data": ""
-              }
-            }
-          ],
-          "transformations": [
-            {
-              "id": "limit",
-              "options": {
-                "limitField": 12
               }
             }
           ],

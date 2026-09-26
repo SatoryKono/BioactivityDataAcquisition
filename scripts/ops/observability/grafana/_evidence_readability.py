@@ -170,7 +170,10 @@ def _saved_run(p: dict[int, dict]) -> None:
         identity_custom["cellOptions"]["wrapText"] = True
         p[9452]["options"]["footer"]["enablePagination"] = True
     p[9451]["options"]["footer"]["enablePagination"] = False
-    heights = {9451: 12}
+    heights: dict[int, int] = {}
+    if 9460 in p:
+        heights[9460] = 8
+    heights[9451] = 12
     if 9452 in p:
         heights[9452] = 8
     _stack(p[9450], heights)
