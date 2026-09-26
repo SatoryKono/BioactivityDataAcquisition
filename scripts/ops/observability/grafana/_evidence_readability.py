@@ -81,6 +81,8 @@ def _selected_run_selectors(p: dict[int, dict]) -> None:
 
 def _saved_run(p: dict[int, dict]) -> None:
     _selected_run_selectors(p)
+    if 9451 not in p or 9450 not in p:
+        return
     panel = p[9451]
     panel["targets"][0]["root_selector"] = "presentation_domains"
     for transform in panel["transformations"]:

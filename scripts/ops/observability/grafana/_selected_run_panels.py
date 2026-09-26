@@ -164,7 +164,7 @@ def _stamp_control_plane_copy(panel: dict[str, object], uid: object) -> None:
     if panel.get("id") == 9421:
         panel["description"] = (
             "SELECTED RUN · Search persisted runs and choose one Run ID. "
-            "This table does not score the run already selected above."
+            "This table does not score the Run ID already selected on this dashboard."
         )
 
 

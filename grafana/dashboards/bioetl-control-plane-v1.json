@@ -462,7 +462,7 @@
             "wrapText": false
           },
           "unit": "none",
-          "noValue": "Trust response unavailable. Check the panel error and run selection.",
+          "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
           "links": []
         },
         "overrides": [
@@ -925,7 +925,7 @@
     },
     {
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Retention policy, evidence floor, required evidence, snapshot evidence, and archive (five structured rows). Check column header is the live summary from payload summary.ok_count / summary.unknown_count (not a hardcoded title). Non-OK statuses sort before OK. UNKNOWN is not a healthy zero. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK. TIME RANGE · SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; HTTP 504 deadline_exceeded is backend unavailable — refresh the panel; datasource error must not be treated as OK. SELECT RUN / VALID EMPTY is not OK. These rows are trust_status / retention evidence, not processing_status success. Archive N/A means a referenced policy does not require archiving; it is not proof of an archive. Archive verified means local copies and restore evidence passed current hash and identity checks.",
+      "description": "SELECTED RUN · Five retention rows for this Run ID: policy, evidence floor, required evidence, snapshot evidence, and archive. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. Archive N/A means a referenced policy does not require archiving; it is not proof of an archive. Archive verified means local copies and restore evidence passed current hash and identity checks.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1577,7 +1577,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · lineage closure, identity consistency, cycle freedom, and persistence profile. Lives in the collapsed row titled Review Lineage Validation (not Inspect Audit & Lineage Evidence). UNKNOWN is not a healthy zero. No matching rows are a valid empty result; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · lineage closure, identity consistency, cycle freedom, and persistence profile. Lives in the collapsed row titled Review Lineage Validation (not Inspect Audit & Lineage Evidence). UNKNOWN is not a healthy zero. No matching rows are a valid empty result; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1840,7 +1840,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Validates checkpoint parse, schema, checksum, and required identity anchors for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Validates checkpoint parse, schema, checksum, and required identity anchors for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2169,7 +2169,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Validates manifest parsing, structure, schema-version support, and contract compatibility for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Validates manifest parsing, structure, schema-version support, and contract compatibility for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3617,7 +3617,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Shows the primary evidence required for replay: source configuration, DQ policy, input snapshots, replay blockers, lineage, artifacts, and ledger watermark. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Shows the primary evidence required for replay: source configuration, DQ policy, input snapshots, replay blockers, lineage, artifacts, and ledger watermark. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4224,7 +4224,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Compares current runtime anchors with anchors stored in the checkpoint. MISMATCH=CRIT; MISSING or PARTIAL=WARN; no data=UNKNOWN. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Compares this run's runtime anchors with anchors stored in the checkpoint. MISMATCH=CRIT; MISSING or PARTIAL=WARN; no data=UNKNOWN. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4837,7 +4837,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Shows additional investigation details such as runtime hashes, artifacts, component runs, checkpoint files, DQ reports, and Bronze batch IDs. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Shows additional investigation details such as runtime hashes, artifacts, component runs, checkpoint files, DQ reports, and Bronze batch IDs. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -6240,7 +6240,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Summarizes selected-run failures into the fixed categories api, dq, schema, storage, network, validation, and unknown. Every category row carries bounded status and reason evidence; an UNKNOWN backend verdict must remain visible in the rows and must not look like a healthy zero. Raw exception messages and identifiers are excluded. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Summarizes selected-run failures into the fixed categories api, dq, schema, storage, network, validation, and unknown. Every category row carries bounded status and reason evidence; an UNKNOWN backend verdict must remain visible in the rows and must not look like a healthy zero. Raw exception messages and identifiers are excluded. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -6660,7 +6660,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Search persisted runs and choose one Run ID. This table does not score the run already selected above.",
+          "description": "SELECTED RUN · Search persisted runs and choose one Run ID. This table does not score the Run ID already selected on this dashboard.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm"
