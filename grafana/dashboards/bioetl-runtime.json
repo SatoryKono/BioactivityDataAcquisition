@@ -647,7 +647,7 @@
         "h": 8
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Shows HTTP-backed identity for an exact Run ID. Aggregate Pipeline scope does not guess a run. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live and continue in Run Explorer Inspect value opens full identifiers as selectable plain text.",
+      "description": "SELECTED RUN · Shows HTTP-backed identity for an exact Run ID. Aggregate Pipeline scope does not guess a run. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR. Verify /health/live and continue in Run Explorer. Inspect value opens full identifiers as selectable plain text.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1207,7 +1207,7 @@
       "type": "row",
       "title": "Inspect Saved Run Evidence",
       "collapsed": true,
-      "description": "Expand for saved stage rows, then domain trust reasons, for the selected Run ID.",
+      "description": "Expand for this Run ID: stage rows, then domain verdicts, then the identity row. Prometheus does not change these tables.",
       "gridPos": {
         "x": 0,
         "y": 16,
@@ -1285,7 +1285,7 @@
             "h": 12
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · One row per saved domain for this Run ID. Status is the domain verdict. Reason explains that verdict. Action is the next check. Evidence reference opens the saved report. Missing selection is SELECT RUN. Request failure is QUERY ERROR. VALID EMPTY is an empty successful query. This table does not authorize replay.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -1510,7 +1510,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · One identity row for this Run ID: Pipeline, Run ID, Completed, Rules, Revision, and Evidence. Evidence is the completeness of the saved report, not a domain verdict. Missing selection is SELECT RUN. Request failure is QUERY ERROR. VALID EMPTY is an empty successful query.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",

@@ -31,6 +31,20 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
     assert "blockers" not in description
     assert "taxonomy" not in description
 
+    runtime_panels = index_panels_by_base_title(get_dashboard_panels(runtime))
+    identity = str(runtime_panels["Inspect Pipeline Identity"].get("description", ""))
+    assert "VALID EMPTY" in identity
+    assert "QUERY ERROR" in identity
+    assert "Run Explorer Inspect" not in identity
+    domains = str(runtime_panels["Inspect Selected Run Domains"].get("description", ""))
+    summary = str(runtime_panels["Inspect Selected Run Identity"].get("description", ""))
+    assert "Evidence reference" in domains
+    assert "domain verdict" in domains
+    assert "completeness of the saved report" in summary
+    assert domains != summary
+    row = next(panel for panel in runtime["panels"] if panel.get("id") == 9450)
+    assert "identity row" in str(row.get("description", ""))
+
     incident = load_dashboard(_require_dashboard("bioetl-incident-v1.json"))
     panels = index_panels_by_base_title(get_dashboard_panels(incident))
     expected_tokens = {
