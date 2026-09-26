@@ -402,7 +402,7 @@
       "id": 9401,
       "type": "stat",
       "title": "Monitor Scope Status",
-      "description": "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed.",
+      "description": "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. Mapping: 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed.",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -3772,7 +3772,7 @@
         {
           "id": 18940,
           "type": "stat",
-          "title": "Monitor Scope Status",
+          "title": "Monitor Pipeline Status",
           "gridPos": {
             "h": 3,
             "w": 8,
@@ -3783,7 +3783,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed.",
+          "description": "CURRENT · Pipeline / Run Type readiness. Mapping: 0=OK, 1=WARN, 2=CRIT, 3/null=UNKNOWN. This is not the selected Run ID verdict.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3800,7 +3800,7 @@
                     },
                     "1": {
                       "text": "UNKNOWN",
-                      "color": "#555555"
+                      "color": "text"
                     },
                     "2": {
                       "text": "WARN",
@@ -3818,7 +3818,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "#555555"
+                      "color": "text"
                     }
                   }
                 }
@@ -3888,7 +3888,7 @@
             "textMode": "value_and_name",
             "text": {
               "valueSize": 20,
-              "titleSize": 12
+              "titleSize": 14
             }
           },
           "targets": [
@@ -11662,6 +11662,65 @@
                   "completed_at": "Completed",
                   "revision": "Revision"
                 }
+              }
+            }
+          ],
+          "links": []
+        },
+        {
+          "id": 9460,
+          "type": "table",
+          "title": "Inspect Selected Run Stages",
+          "gridPos": {
+            "x": 0,
+            "y": 46,
+            "w": 24,
+            "h": 8
+          },
+          "datasource": "BioETL Ops HTTP",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "unit": "none",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "root_selector": "stage_diagnostics",
+              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "limit",
+              "options": {
+                "limitField": 12
               }
             }
           ],

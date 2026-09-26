@@ -1164,7 +1164,7 @@
           "format": "table",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items.($merge([$, {\"overview_handoff\": \"Open\", \"diagnostics_handoff\": \"Open\", \"provider_handoff\": \"Open\", \"quality_handoff\": \"Open\"}]))",
+          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items",
           "source": "url",
           "type": "json",
           "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",
@@ -1225,7 +1225,7 @@
               "started_at": 5,
               "pipeline": 6,
               "workflow_id": 7,
-              "run_id": 8,
+              "run_id": 4,
               "duration_display": 9,
               "event_age_display": 10,
               "status": 11,
@@ -1704,6 +1704,65 @@
                   "completed_at": "Completed",
                   "revision": "Revision"
                 }
+              }
+            }
+          ],
+          "links": []
+        },
+        {
+          "id": 9460,
+          "type": "table",
+          "title": "Inspect Selected Run Stages",
+          "gridPos": {
+            "x": 0,
+            "y": 38,
+            "w": 24,
+            "h": 8
+          },
+          "datasource": "BioETL Ops HTTP",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "unit": "none",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "root_selector": "stage_diagnostics",
+              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "limit",
+              "options": {
+                "limitField": 12
               }
             }
           ],

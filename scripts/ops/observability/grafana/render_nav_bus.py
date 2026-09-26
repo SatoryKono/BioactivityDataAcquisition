@@ -1971,7 +1971,21 @@ def _retain_runtime_selected_run(payload: dict[str, object]) -> None:
 
 def _attach_runtime_fleet_row(payload: dict[str, object]) -> None:
     panels = payload.get("panels")
-    if not isinstance(panels, list) or not _MOVED_RUNTIME_FLEET:
+    if not isinstance(panels, list):
+        return
+    if not _MOVED_RUNTIME_FLEET:
+        existing = next(
+            (
+                panel
+                for panel in panels
+                if isinstance(panel, dict) and panel.get("id") == _RUNTIME_FLEET_ROW_ID
+            ),
+            None,
+        )
+        if isinstance(existing, dict):
+            for child in existing.get("panels") or []:
+                if isinstance(child, dict):
+                    _stamp_runtime_fleet_panel(child)
         return
     incoming: list[dict[str, object]] = []
     seen: set[object] = set()
