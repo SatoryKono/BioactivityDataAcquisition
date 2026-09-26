@@ -3942,7 +3942,7 @@
           ],
           "title": "Track Global Circuit-Breaker Trips",
           "type": "timeseries",
-          "description": "This circuit-breaker trend shows circuit-breaker trips over the chart range. TIME RANGE · Compact cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL ADAPTER evidence: covers all adapters, independent of Provider and Pipeline. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
+          "description": "This circuit-breaker trend is not provider status. This circuit-breaker trend shows circuit-breaker trips over the chart range. TIME RANGE · Compact cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL ADAPTER evidence: covers all adapters, independent of Provider and Pipeline. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
           "maxDataPoints": 400,
           "interval": "1m"
         }
@@ -3959,7 +3959,7 @@
         "y": 18
       },
       "id": 9404,
-      "description": "This range row shows raw status and range counters when expanded. Expand for selected-range and debug evidence after current fleet severity, causes, and telemetry presence have been interpreted together.",
+      "description": "This range row is not the current-status card. This range row shows raw status and range counters when expanded. Expand for selected-range and debug evidence after current fleet severity, causes, and telemetry presence have been interpreted together.",
       "panels": [
         {
           "datasource": {
@@ -4200,7 +4200,7 @@
           ],
           "title": "Inspect Raw Health Status",
           "type": "table",
-          "description": "This raw status table shows the raw health enum for the chart range. TIME RANGE / DIAGNOSTIC · 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN. Raw provider health enum evidence: best observed status in the selected range, not the canonical first-screen verdict. When raw status is absent, status is UNKNOWN. A past HEALTHY observation does not establish current freshness. Last check and age describe the latest observation, not necessarily the best status. Use Status Reason / Telemetry Presence for the current verdict.",
+          "description": "This raw status table is not the current-status card. This raw status table shows the raw health enum for the chart range. TIME RANGE / DIAGNOSTIC · 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN. Raw provider health enum evidence: best observed status in the selected range, not the canonical first-screen verdict. When raw status is absent, status is UNKNOWN. A past HEALTHY observation does not establish current freshness. Last check and age describe the latest observation, not necessarily the best status. Use Status Reason / Telemetry Presence for the current verdict.",
           "transformations": [
             {
               "id": "joinByField",
