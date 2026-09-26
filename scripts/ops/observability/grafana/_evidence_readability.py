@@ -274,12 +274,8 @@ def _trust(p: dict[int, dict]) -> None:
 
 def _compact_trust_monitors(p: dict[int, dict]) -> None:
     """Match the monitoring band to the readiness card and reclaim its space."""
-<<<<<<< HEAD
-||||||| 2d9509c4d82f
-=======
     if 9401 not in p or any(pid not in p for pid in (891, 892, 893, 907)):
         return
->>>>>>> main
     height = p[9401]["gridPos"]["h"]
     cards = [p[pid] for pid in (891, 892, 893, 907)]
     old_bottom = max(card["gridPos"]["y"] + card["gridPos"]["h"] for card in cards)

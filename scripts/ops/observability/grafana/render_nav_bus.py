@@ -184,17 +184,6 @@ _INCIDENT_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
 _DQ_SELECTED_RUN_IDS = (1000, 9400, 9406, 9402, 9403)
 _DQ_SCOPE_DESCRIPTION = (
     "SELECTED RUN · This page assesses the selected Run ID from saved HTTP "
-<<<<<<< HEAD
-    "evidence. Prometheus current status and time-range scores are not on "
-    "this page. A time-range value never proves this run."
-)
-_DQ_SCOPE_HTML = (
-    '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;'
-    'line-height:1.2;white-space:normal;overflow-wrap:anywhere"><div style="max-width:96ch">'
-    "SELECTED RUN · Saved evidence for the selected Run ID. "
-    "Current pipeline status and time-range scores are not on this page."
-||||||| 2d9509c4d82f
-=======
     "evidence. CURRENT pipeline status and TIME RANGE scores are not on "
     "this page. A time-range value never proves this run."
 )
@@ -203,7 +192,6 @@ _DQ_SCOPE_HTML = (
     'line-height:1.2;white-space:normal;overflow-wrap:anywhere"><div style="max-width:96ch">'
     "SELECTED RUN · Saved evidence for the selected Run ID. "
     "CURRENT pipeline status and TIME RANGE scores are not on this page."
->>>>>>> main
     "</div></div>"
 )
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
@@ -1810,9 +1798,6 @@ def _retain_dq_selected_run_panels(payload: dict[str, object]) -> None:
     options["mode"] = "html"
     options["bioetlDisplayTitle"] = "Understand Evidence Scope"
     options["content"] = _DQ_SCOPE_HTML
-<<<<<<< HEAD
-||||||| 2d9509c4d82f
-=======
     for panel_id in (9402, 9403):
         table = found[panel_id]
         table_options = table.setdefault("options", {})
@@ -1826,7 +1811,6 @@ def _retain_dq_selected_run_panels(payload: dict[str, object]) -> None:
                 f"bioetl-dq-v2: panel {panel_id} footer must be an object"
             )
         footer["enablePagination"] = True
->>>>>>> main
 
 
 def apply_to_dashboard(
