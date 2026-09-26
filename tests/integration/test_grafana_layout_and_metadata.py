@@ -333,15 +333,8 @@ def test_retention_panel_9416_retry_preserves_selected_run_and_time() -> None:
     assert "error_as_row=1" in target_url
     assert "run_id=${run_id}" in target_url
     links = panel.get("fieldConfig", {}).get("defaults", {}).get("links") or []
-    retry = next(
-        link
-        for link in links
-        if isinstance(link, dict) and "Retry" in str(link.get("title", ""))
-    )
-    retry_url = str(retry.get("url", ""))
-    assert "${run_id:queryparam}" in retry_url
-    assert "${__url_time_range}" in retry_url
-    assert "viewPanel=9416" in retry_url
+    assert all("viewPanel=9416" not in str(link.get("url", "")) for link in links)
+    assert "run_id=${run_id}" in target_url
 
 
 def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:

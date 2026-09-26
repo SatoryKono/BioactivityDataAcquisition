@@ -197,6 +197,107 @@ async def test_http_ignores_time_and_range(tmp_path, monkeypatch, age, chart_ran
     assert payload["replay_readiness_now"] == "INSUFFICIENT"
 
 
+def test_saved_report_readiness_uses_available_report_files(tmp_path):
+    persist(tmp_path)
+    result = read(tmp_path)
+    checks = {item["code"]: item for item in result["replay_checks"]}
+    assert result["trust"][0]["trust_status"] == "OK"
+    assert result["replay_readiness_now"] == "INSUFFICIENT"
+    assert checks["manifest_not_recorded"]["result"] == "unknown"
+    assert "effective_config_hash" not in checks
+    assert checks["pipeline_run_report_json"]["result"] == "pass"
+    assert checks["pipeline_run_report_md"]["result"] == "pass"
+    assert all(
+        item["reason"] != "digest_not_recorded" for item in result["replay_checks"]
+    )
+
+
+def test_repo_relative_report_ref_uses_file_in_run_directory(tmp_path):
+    run_id = "run-a"
+    value = replace(
+        report(run_id=run_id),
+        artifacts=(
+            {
+                "kind": "pipeline_run_report_json",
+                "ref": (
+                    "reports/run-reports/pipeline/chembl_activity/"
+                    f"{run_id}/pipeline-run-report.json"
+                ),
+            },
+            {
+                "kind": "pipeline_run_report_md",
+                "ref": (
+                    "reports/run-reports/pipeline/chembl_activity/"
+                    f"{run_id}/pipeline-run-report.md"
+                ),
+            },
+        ),
+    )
+    persist(tmp_path, value)
+    result = read(tmp_path, run_id)
+    checks = {item["code"]: item for item in result["replay_checks"]}
+    assert checks["pipeline_run_report_json"]["result"] == "pass"
+    assert checks["pipeline_run_report_md"]["result"] == "pass"
+    assert result["replay_readiness_now"] != "BLOCKED"
+
+
+def test_missing_report_markdown_blocks_readiness(tmp_path):
+    run_id = "run-a"
+    value = replace(
+        report(run_id=run_id),
+        artifacts=(
+            {
+                "kind": "pipeline_run_report_json",
+                "ref": f"reports/run-reports/pipeline/chembl_activity/{run_id}/pipeline-run-report.json",
+            },
+            {
+                "kind": "pipeline_run_report_md",
+                "ref": f"reports/run-reports/pipeline/chembl_activity/{run_id}/pipeline-run-report.md",
+            },
+        ),
+    )
+    persisted = persist(tmp_path, value)
+    persisted.markdown_path.unlink()
+    result = read(tmp_path, run_id)
+    markdown = next(
+        item
+        for item in result["replay_checks"]
+        if item["code"] == "pipeline_run_report_md"
+    )
+    assert markdown["result"] == "fail"
+    assert markdown["reason"] == "artifact_missing"
+    assert result["replay_readiness_now"] == "BLOCKED"
+
+
+def test_manifest_without_input_snapshot_is_not_ready(tmp_path):
+    from types import SimpleNamespace
+    from uuid import uuid4
+
+    run_id = str(uuid4())
+    persist(tmp_path, report(run_id=run_id))
+    port = MagicMock()
+    port.get_by_run_id.return_value = SimpleNamespace(
+        code_provenance=SimpleNamespace(
+            effective_config_hash="abc",
+            dependency_lock_hash=None,
+        ),
+        source_refs=(),
+        replay_capability=SimpleNamespace(value="exact_replay_supported"),
+        replay_of_run_id=None,
+        replay_of_manifest_id=None,
+    )
+    result = load_selected_run_status(
+        pipeline="chembl_activity",
+        run_id=run_id,
+        root=tmp_path,
+        manifest_port=port,
+    )
+    assert result["replay_readiness_now"] != "READY"
+    checks = {item["code"]: item["result"] for item in result["replay_checks"]}
+    assert checks["input_snapshot_fingerprint"] == "unknown"
+    assert checks["effective_config_hash"] == "unknown"
+
+
 @pytest.mark.parametrize(
     "status,expected",
     [
@@ -521,11 +622,11 @@ async def test_late_previous_request_keeps_its_own_identity(tmp_path, monkeypatc
     release_first = threading.Event()
     real_load = load_selected_run_status
 
-    def delayed_load(*, pipeline, run_id):
+    def delayed_load(*, pipeline, run_id, **kwargs):
         if run_id == "run-a":
             first_entered.set()
             assert release_first.wait(5)
-        return real_load(pipeline=pipeline, run_id=run_id, root=tmp_path)
+        return real_load(pipeline=pipeline, run_id=run_id, root=tmp_path, **kwargs)
 
     monkeypatch.setattr(
         "bioetl.interfaces.http.selected_run_status.load_selected_run_status",
