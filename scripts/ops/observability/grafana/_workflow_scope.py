@@ -385,7 +385,7 @@ def apply_workflow_scope(payload: dict) -> None:
     for panel in panels:
         if panel.get("type") == "text" and panel.get("id") in {99, 9400}:
             suffix = (
-                "GLOBAL tables below cover all pipelines; suspects are not verified causes."
+                "GLOBAL tables below cover all pipelines; suspects are not verified causes. VALID_EMPTY is an empty suspect list, not a healthy fleet."
                 if payload["uid"] == "bioetl-incident-v1"
                 else (
                     "Open First Action; VERIFY means evidence is missing. "

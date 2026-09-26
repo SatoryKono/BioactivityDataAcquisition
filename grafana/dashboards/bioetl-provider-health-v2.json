@@ -459,7 +459,7 @@
     {
       "id": 9401,
       "type": "stat",
-      "title": "Текущий статус (${provider})",
+      "title": "Monitor Provider Status",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -509,13 +509,13 @@
         "colorMode": "background",
         "dataLinks": [
           {
-            "title": "Все провайдеры · статус",
+            "title": "Monitor Fleet Status",
             "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${provider:queryparam}&viewPanel=9101&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           },
           {
-            "title": "Все провайдеры · evidence",
+            "title": "Inspect Fleet Evidence",
             "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${provider:queryparam}&viewPanel=9107&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
@@ -820,7 +820,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 20
+        "y": 7
       },
       "id": 9101,
       "options": {
@@ -883,7 +883,7 @@
           }
         }
       ],
-      "title": "Все провайдеры · статус",
+      "title": "Monitor Fleet Status",
       "type": "table"
     },
     {
@@ -1257,7 +1257,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 20
+        "y": 7
       },
       "id": 9107,
       "options": {
@@ -1289,7 +1289,7 @@
           "refId": "A"
         }
       ],
-      "title": "Все провайдеры · evidence",
+      "title": "Inspect Fleet Evidence",
       "type": "table",
       "transformations": [
         {
@@ -1326,102 +1326,6 @@
       ]
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK (presence color only; PRESENT≠OK for fleet health). Fail-closed UNKNOWN/gray when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy. SELECTED PROVIDER only; it does not summarize the fleet.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "displayName": "Monitor Telemetry Presence",
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "PRESENT",
-                  "color": "green"
-                }
-              }
-            },
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "text"
-                }
-              }
-            }
-          ],
-          "noValue": "UNKNOWN",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 28
-      },
-      "id": 9104,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": false,
-        "text": {
-          "valueSize": 20,
-          "titleSize": 14
-        }
-      },
-      "pluginVersion": "10.4.0",
-      "targets": [
-        {
-          "expr": "max(bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0 + max(bioetl_provider_health_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
-          "format": "time_series",
-          "instant": true,
-          "legendFormat": "Provider status evidence",
-          "refId": "A"
-        }
-      ],
-      "title": "Monitor Telemetry Presence",
-      "type": "stat"
-    },
-    {
       "type": "row",
       "id": 9106,
       "title": "Все провайдеры",
@@ -1430,9 +1334,105 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 15
       },
       "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK (presence color only; PRESENT≠OK for fleet health). Fail-closed UNKNOWN/gray when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy. SELECTED PROVIDER only; it does not summarize the fleet.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "displayName": "Monitor Telemetry Presence",
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "PRESENT",
+                      "color": "green"
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "text"
+                    }
+                  }
+                }
+              ],
+              "noValue": "UNKNOWN",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 9104,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value",
+            "wideLayout": false,
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
+          },
+          "pluginVersion": "10.4.0",
+          "targets": [
+            {
+              "expr": "max(bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0 + max(bioetl_provider_health_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
+              "format": "time_series",
+              "instant": true,
+              "legendFormat": "Provider status evidence",
+              "refId": "A"
+            }
+          ],
+          "title": "Monitor Telemetry Presence",
+          "type": "stat"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -2177,7 +2177,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 16
       },
       "id": 9105,
       "title": "Все провайдеры · подробности",
@@ -2811,7 +2811,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 17
       },
       "id": 91,
       "title": "Selected Provider Details",
@@ -3955,7 +3955,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 18
       },
       "id": 9404,
       "description": "Expand for selected-range and debug evidence after current fleet severity, causes, and telemetry presence have been interpreted together.",
@@ -4626,7 +4626,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 19
       },
       "id": 9405,
       "description": "Expand for compact HTTP-backed run context; Run Explorer is the canonical exact-run workspace.",
@@ -5258,7 +5258,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 23,
+        "y": 20,
         "w": 24,
         "h": 1
       },

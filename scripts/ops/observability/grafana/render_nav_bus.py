@@ -1696,6 +1696,12 @@ def _attach_nav_bus(nav: dict[str, object], *, current_uid: str) -> None:
         if isinstance(link, dict) and link.get("title") not in bus_titles
     ]
     nav["links"] = render_links(current_uid=current_uid) + extra_links
+    if current_uid == _RUN_EXPLORER_UID:
+        nav["description"] = (
+            "Chips on 0. Run Explorer do not open other dashboards. "
+            "Open Trust, Overview, Pipeline Diagnostics, Provider Health, "
+            "and Data Quality from Inspect Recent Runs."
+        )
     nav.pop("transparent", None)
 
 

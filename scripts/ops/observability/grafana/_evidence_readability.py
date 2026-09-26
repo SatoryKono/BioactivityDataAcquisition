@@ -327,9 +327,9 @@ def _provider(p: dict[int, dict]) -> None:
         if target["expr"].startswith("topk(3, ") and target["expr"].endswith(")"):
             target["expr"] = target["expr"][8:-1]
         p[pid]["title"] = (
-            "Все провайдеры · статус"
+            "Monitor Fleet Status"
             if pid == 9101
-            else "Все провайдеры · evidence"
+            else "Inspect Fleet Evidence"
         )
         p[pid]["description"] = (
             "CURRENT · Все провайдеры. Этот раздел не фильтруется выбранным Provider. "
