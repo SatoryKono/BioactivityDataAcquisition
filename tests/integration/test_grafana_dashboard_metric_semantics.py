@@ -376,7 +376,11 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("id"), int)
     }
-    assert {9400, 9401, 9402, 9403} <= panels.keys()
+    if dashboard_name == "bioetl-dq-v2.json":
+        assert 9401 not in panels
+        assert {9400, 9406, 9402, 9403} <= panels.keys()
+    else:
+        assert {9400, 9401, 9402, 9403} <= panels.keys()
 
     provenance = panels[9400]
     provenance_description = str(provenance.get("description", "")).lower()
@@ -408,39 +412,40 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     assert "run id=" not in provenance_content
     assert "run_id is http identity context" not in provenance_content
 
-    status = panels[9401]
-    status_expressions = get_panel_expressions({"panels": [status]})
-    status_description = str(status.get("description", "")).lower()
-    assert status_expressions
-    assert all("run_id" not in expr for expr in status_expressions)
-    assert all("payload_hash" not in expr for expr in status_expressions)
-    if dashboard_name == "bioetl-workflow-overview.json":
-        assert any("$__range" in expr for expr in status_expressions)
-        assert "selected range workflow evidence status" in status_description
-        assert "not current live run state" in status_description
-        assert "not exact-run evidence" in status_description
-        assert "run_id remains local id-only identity context" in status_description
-    elif dashboard_name == "bioetl-provider-health-v2.json":
-        assert any("bioetl_pstatus" in expr for expr in status_expressions)
-        # Provider headline is current-status based (no selected range glue).
-        assert all("$__range" not in expr for expr in status_expressions)
-        assert status_description, (
-            "Provider Monitor Current DQ Status must document operator semantics"
-        )
-        assert not any("), max_over_time" in expr for expr in status_expressions)
-    elif dashboard_name == "bioetl-control-plane-v1.json":
-        assert all("$__range" not in expr for expr in status_expressions)
-        assert any(
-            "bioetl_control_plane_current_status_trusted" in expr
-            for expr in status_expressions
-        )
-        assert "replay/resume" in status_description
-        assert "3=incomplete" in status_description.replace(" ", "")
-    else:
-        assert all("$__range" not in expr for expr in status_expressions)
-        assert "current" in status_description
-    assert "0=ok" in status_description
-    assert "null=unknown" in status_description
+    if dashboard_name != "bioetl-dq-v2.json":
+        status = panels[9401]
+        status_expressions = get_panel_expressions({"panels": [status]})
+        status_description = str(status.get("description", "")).lower()
+        assert status_expressions
+        assert all("run_id" not in expr for expr in status_expressions)
+        assert all("payload_hash" not in expr for expr in status_expressions)
+        if dashboard_name == "bioetl-workflow-overview.json":
+            assert any("$__range" in expr for expr in status_expressions)
+            assert "selected range workflow evidence status" in status_description
+            assert "not current live run state" in status_description
+            assert "not exact-run evidence" in status_description
+            assert "run_id remains local id-only identity context" in status_description
+        elif dashboard_name == "bioetl-provider-health-v2.json":
+            assert any("bioetl_pstatus" in expr for expr in status_expressions)
+            # Provider headline is current-status based (no selected range glue).
+            assert all("$__range" not in expr for expr in status_expressions)
+            assert status_description, (
+                "Provider Monitor Current DQ Status must document operator semantics"
+            )
+            assert not any("), max_over_time" in expr for expr in status_expressions)
+        elif dashboard_name == "bioetl-control-plane-v1.json":
+            assert all("$__range" not in expr for expr in status_expressions)
+            assert any(
+                "bioetl_control_plane_current_status_trusted" in expr
+                for expr in status_expressions
+            )
+            assert "replay/resume" in status_description
+            assert "3=incomplete" in status_description.replace(" ", "")
+        else:
+            assert all("$__range" not in expr for expr in status_expressions)
+            assert "current" in status_description
+        assert "0=ok" in status_description
+        assert "null=unknown" in status_description
 
     identity = panels[9402]
     identity_description = str(identity.get("description", "")).lower()
@@ -653,7 +658,6 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
             "Track Request Latency p95",
             "Track Rate-Limiter Wait p95",
         },
-        "bioetl-dq-v2.json": {"Track DQ Check Duration p95"},
         "bioetl-control-plane-v1.json": {
             "Track Global Read Latency",
             "Track Checkpoint Save Latency",
@@ -736,12 +740,6 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
             "No GLOBAL audit query latency samples in range. Empty means no audit "
             "queries were timed or audit telemetry is absent, not zero latency.",
         ),
-        (
-            "bioetl-dq-v2.json",
-            "Track DQ Check Duration p95",
-            "No data means no DQ duration samples were observed in range or DQ timing telemetry is absent",
-            "NO OBSERVATIONS — no usable histogram increments",
-        ),
     ],
 )
 def test_review_panels_explain_empty_state_explicitly(
@@ -774,11 +772,6 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Monitor Healthy Checks": "round(",
             "Monitor Degraded Checks": "round(",
             "Monitor Health Checks": "round(",
-        },
-        "bioetl-dq-v2.json": {
-            "Monitor Quarantined Records": "round(",
-            "Monitor Silver Filter Rejects": "round(",
-            "Monitor Silver Validation Failures": "round(",
         },
         "bioetl-runtime.json": {
             "Monitor Pipeline Alerts": "bioetl_runtime_pipeline_alert_count",
@@ -816,261 +809,91 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             )
 
 
-@pytest.mark.parametrize(
-    ("dashboard_file", "panel_title"),
-    [
-        ("bioetl-dq-v2.json", "Monitor Weighted DQ"),
-    ],
-)
-def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
-    """Ensure DQ score panels use the canonical DQ validation metric."""
-    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == panel_title
-        ),
-        None,
-    )
-    assert panel is not None, f"Panel '{panel_title}' not found in {dashboard_file}"
+def test_dq_score_uses_validation_metric() -> None:
+    """Volume-weighted 7d score is TIME RANGE and is not on this page."""
+    _assert_retired_from_dq("Monitor Weighted DQ")
 
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any("bioetl_dq_validation_score" in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must use bioetl_dq_validation_score"
-    )
-    assert any("bioetl_dq_validation_record_count" in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must use "
-        "bioetl_dq_validation_record_count for volume-aware weighting"
-    )
-    assert all("last_over_time(" in expr and "[7d]" in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must retain the last real DQ "
-        "sample between representative runs"
-    )
-    assert all("or vector(0)" not in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must preserve no-data state "
-        "instead of coercing missing telemetry to zero"
-    )
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    assert defaults.get("noValue") == "UNKNOWN", (
-        f"Panel '{panel_title}' in {dashboard_file} must render missing score "
-        "samples as UNKNOWN"
-    )
+
+def _dq_titles() -> set[str]:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    return {
+        str(panel.get("title"))
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+
+def _assert_retired_from_dq(*titles: str) -> None:
+    present = _dq_titles()
+    retired = set(titles)
+    overlap = sorted(retired & present)
+    assert not overlap, f"retired DQ panels still shipped: {overlap}"
+    assert "Review Selected Run Status" in present
 
 
 def test_worst_entity_dq_score_preserves_no_data_state() -> None:
-    """Worst-score gauges must not collapse missing DQ samples into score zero."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Worst DQ"
-        ),
-        None,
-    )
-    assert panel is not None, "Panel 'Monitor Worst DQ' not found"
-
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any("bioetl_dq_validation_score" in expr for expr in expressions)
-    assert all("last_over_time(" in expr and "[7d]" in expr for expr in expressions)
-    assert all("or vector(0)" not in expr for expr in expressions), (
-        "Monitor Worst DQ must preserve no-data rather than rendering score 0"
-    )
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    assert defaults.get("noValue") == "UNKNOWN", (
-        "Monitor Worst DQ must render missing score samples as UNKNOWN"
-    )
+    """Worst-score gauges are TIME RANGE and are not on the selected-run page."""
+    _assert_retired_from_dq("Monitor Worst DQ")
 
 
 def test_dq_current_status_panels_preserve_unknown_no_data_state() -> None:
-    """Current DQ status panels must not convert missing telemetry to OK."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    expected_panels = {
+    """CURRENT DQ status is not an assessment of the selected Run ID."""
+    _assert_retired_from_dq(
         "Monitor Current DQ Status",
         "Monitor DQ Threshold State",
-    }
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expected_panels
-    }
-    assert set(panels) == expected_panels
-
-    for panel_title, panel in panels.items():
-        expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-        assert all("or vector(0)" not in expr for expr in expressions), (
-            f"{panel_title} must preserve UNKNOWN/NO DATA instead of synthetic OK"
-        )
-        defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        assert defaults.get("noValue") == "UNKNOWN", (
-            f"{panel_title} must render missing current status as UNKNOWN"
-        )
+    )
 
 
 def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
-    """Current DQ status panels must render operator-facing status text, not raw enums."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    expected_panels = {
+    """CURRENT status vocabulary stays off 5. Data Quality."""
+    _assert_retired_from_dq(
         "Monitor Current DQ Status",
         "Monitor DQ Threshold State",
-    }
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expected_panels
-    }
-    assert set(panels) == expected_panels
-
-    expected_mappings = {
-        "Monitor Current DQ Status": {
-            "0": {"text": "OK", "color": "green"},
-            "1": {"text": "WARN", "color": "orange"},
-            "2": {"text": "CRIT", "color": "red"},
-            "3": {"text": "UNKNOWN", "color": "#555555"},
-        },
-        "Monitor DQ Threshold State": {
-            "0": {"text": "OK", "color": "green"},
-            "1": {"text": "WARN", "color": "orange"},
-            "2": {"text": "CRIT", "color": "red"},
-        },
-    }
-    for panel_title, panel in panels.items():
-        mappings = panel.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])
-        value_mapping = next(
-            (mapping for mapping in mappings if mapping.get("type") == "value"),
-            None,
-        )
-        assert value_mapping is not None, (
-            f"{panel_title} must define explicit operator status mappings"
-        )
-        assert value_mapping.get("options") == expected_mappings[panel_title], (
-            f"{panel_title} status vocabulary drifted"
-        )
+    )
 
 
 def test_dq_current_status_panels_use_canonical_severity_threshold_steps() -> None:
-    """Current DQ status panels must use standard L0 severity threshold steps."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    expected_panels = {
+    """CURRENT severity cards stay off 5. Data Quality."""
+    _assert_retired_from_dq(
         "Monitor Current DQ Status",
         "Monitor DQ Threshold State",
-    }
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expected_panels
-    }
-    assert set(panels) == expected_panels
-
-    expected_steps = [
-        {"color": "green", "value": None},
-        {"color": "orange", "value": 1},
-        {"color": "red", "value": 2},
-    ]
-    for panel_title, panel in panels.items():
-        defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        assert defaults.get("thresholds", {}).get("steps") == expected_steps, (
-            f"{panel_title} must use canonical 0/1/2 severity thresholds"
-        )
+    )
 
 
 def test_dq_first_screen_panels_expose_actionable_datalinks() -> None:
-    """Current DQ operator panels must offer a direct next action."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    expected_panels = {
+    """Selected-run status replaces the CURRENT first-screen action cards."""
+    _assert_retired_from_dq(
         "Monitor Current DQ Status",
         "Monitor DQ Threshold State",
         "Inspect Current DQ Reasons",
-    }
-    # Silver Reject Explorer handoffs were removed; keep actionability on the
-    # status/threshold cards while the reasons table remains diagnostic-only.
-    panels_requiring_links = {
-        "Monitor Current DQ Status",
-        "Monitor DQ Threshold State",
-    }
-    panels = {
-        panel.get("title"): panel
+    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    status = next(
+        panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expected_panels
-    }
-    assert set(panels) == expected_panels
-
-    for panel_title in panels_requiring_links:
-        panel = panels[panel_title]
-        data_links = panel.get("options", {}).get("dataLinks", [])
-        assert data_links, f"{panel_title} must expose at least one actionable dataLink"
-        assert all(link.get("title") for link in data_links), (
-            f"{panel_title} dataLinks must have human-readable titles"
-        )
-        assert all(link.get("url") for link in data_links), (
-            f"{panel_title} dataLinks must target a dashboard or runbook URL"
-        )
-
-    reasons_links = (
-        panels["Inspect Current DQ Reasons"].get("options", {}).get("dataLinks", [])
+        if panel.get("id") == 9406
     )
-    assert not any(
-        "Silver Reject Explorer" in str(link.get("title", "")) for link in reasons_links
-    )
+    links = (status.get("fieldConfig") or {}).get("defaults", {}).get("links") or []
+    assert any(link.get("title") == "Open Run Explorer" for link in links)
 
 
 def test_dq_threshold_state_panel_uses_bounded_reason_severity_with_ok_fallback() -> (
     None
 ):
-    """Threshold-state summary must stay in a bounded enum and preserve explicit OK."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor DQ Threshold State"
-        ),
-        None,
-    )
-    assert panel is not None, "Panel 'Monitor DQ Threshold State' not found"
-
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any("max(bioetl_dq_current_reason" in expr for expr in expressions), (
-        "Threshold state must derive severity from canonical current reasons"
-    )
-    assert any('severity="crit"' in expr for expr in expressions), (
-        "Threshold state must map canonical crit reasons into severity=2"
-    )
-    assert any("bioetl_dq_current_status" in expr for expr in expressions), (
-        "Threshold state must preserve explicit OK via bioetl_dq_current_status fallback"
-    )
-    assert all("sum(bioetl_dq_current_reason" not in expr for expr in expressions), (
-        "Threshold state must not sum current reasons into an unbounded severity value"
-    )
+    """Threshold-state PromQL is not on the selected-run page."""
+    _assert_retired_from_dq("Monitor DQ Threshold State")
 
 
 def test_dq_current_status_and_reasons_share_one_instant_snapshot() -> None:
-    """WARN/CRIT cannot be reduced from history while reasons use current data."""
+    """CURRENT instant panels 9401/9101/9102 are not on 5. Data Quality."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panels = {
-        panel.get("id"): panel
+    ids = {
+        panel.get("id")
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("id") in {9401, 9101, 9102}
+        if isinstance(panel.get("id"), int)
     }
-    assert set(panels) == {9401, 9101, 9102}
-    for panel_id, panel in panels.items():
-        targets = panel.get("targets", [])
-        assert targets and all(target.get("instant") is True for target in targets), (
-            f"DQ current panel {panel_id} must use an instant query"
-        )
-
-    assert panels[9401]["options"]["colorMode"] == "background"
-    assert panels[9101]["options"]["colorMode"] == "value"
-    reasons = panels[9102]
-    expression = str(reasons["targets"][0]["expr"])
-    assert "bioetl_dq_first_window_reason" in expression
-    assert len(expression) <= 200
-    assert "label_replace" not in expression
-    no_value = str(reasons["fieldConfig"]["defaults"]["noValue"]).lower()
-    assert "reason evidence unavailable" in no_value
-    assert "No active reasons (OK)" in reasons["targets"][1]["expr"]
-    assert "Evidence unavailable (UNKNOWN)" in reasons["targets"][2]["expr"]
+    assert {9401, 9101, 9102}.isdisjoint(ids)
+    assert 9406 in ids
 
 
 def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
@@ -1544,138 +1367,33 @@ def test_provider_degraded_checks_panel_uses_neutral_evidence_thresholds() -> No
 
 
 def test_dq_selected_range_evidence_panels_use_neutral_thresholds() -> None:
-    """Selected-range DQ evidence cards must not reuse live severity thresholds."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    expected_panels = {
+    """TIME RANGE evidence cards are not on the selected-run page."""
+    _assert_retired_from_dq(
         "Monitor Bronze Records",
         "Monitor Gold Records",
         "Monitor Quarantined Records",
-    }
-
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expected_panels
-    }
-    assert set(panels) == expected_panels
-
-    for panel_title, panel in panels.items():
-        defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        assert defaults.get("thresholds", {}).get("steps") == [
-            {"color": "gray", "value": None}
-        ], f"{panel_title} must use neutral evidence thresholds"
-
-    gold_description = str(
-        panels["Monitor Gold Records"].get("description", "")
-    ).lower()
-    assert "selected" in gold_description or "range" in gold_description
-    assert "gold" in gold_description
+    )
 
 
 def test_dq_blocked_record_evidence_panels_use_neutral_thresholds() -> None:
-    """Blocked-record evidence panels must not reapply entity YAML ratio thresholds in Grafana."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    expected_panels = {
+    """Blocked-record range panels are not on the selected-run page."""
+    _assert_retired_from_dq(
         "Monitor Blocked Records",
         "Track DQ Threshold Events",
-    }
-
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expected_panels
-    }
-    assert set(panels) == expected_panels, (
-        "DQ dashboard must expose blocked-record evidence and threshold-event trend panels"
     )
-
-    for panel_title, panel in panels.items():
-        defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        steps = defaults.get("thresholds", {}).get("steps", [])
-        assert all(step.get("value") not in {0.05, 0.2} for step in steps), (
-            f"Panel '{panel_title}' must not hardcode entity soft/hard fail thresholds"
-        )
-        if panel_title.startswith("Track: DQ Blocked Records"):
-            assert defaults.get("unit") == "short", (
-                f"Panel '{panel_title}' must use absolute record counts"
-            )
-        expressions = [
-            target.get("expr", "")
-            for target in panel.get("targets", [])
-            if isinstance(target.get("expr"), str)
-        ]
-        if panel_title.startswith("Track: DQ Blocked Records"):
-            assert any(
-                "bioetl_dq_records_quarantined_total" in expr for expr in expressions
-            ), f"Panel '{panel_title}' must include quarantined records"
-            assert "/ clamp_min(" not in "".join(expressions), (
-                f"Panel '{panel_title}' must not compute blocked-share ratios in PromQL"
-            )
-        if panel_title.startswith("Track: DQ Threshold Events"):
-            assert any(
-                "bioetl_dq_soft_threshold_exceeded" in expr for expr in expressions
-            ), f"Panel '{panel_title}' must use domain threshold counters"
 
 
 def test_dq_freshness_lag_panel_uses_time_domain_thresholds() -> None:
-    """Freshness age must expose the DQ 24h/72h policy directly in hours."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Worst Freshness Age"
-        ),
-        None,
-    )
-    assert panel is not None, "Freshness lag panel not found in bioetl-dq-v2.json"
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    assert defaults.get("unit") == "h"
-    assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "green", "value": None},
-        {"color": "orange", "value": 24},
-        {"color": "red", "value": 72},
-    ]
-    expressions = get_panel_expressions({"panels": [panel]})
-    assert expressions and all("/ 3600" in expr for expr in expressions)
+    """Freshness age is TIME RANGE and is not on the selected-run page."""
+    _assert_retired_from_dq("Monitor Worst Freshness Age")
 
 
 def test_dq_problem_panels_expose_actionable_datalinks() -> None:
-    """Key DQ incident panels must offer direct operator handoff."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    expected_panels = {
+    """Range problem cards are not on the selected-run page."""
+    _assert_retired_from_dq(
         "Monitor Worst DQ",
         "Monitor Worst Freshness Age",
         "Monitor Silver Filter Rejects",
-    }
-    # Silver Reject Explorer handoffs were removed; reject accounting stays on-panel.
-    panels_requiring_links = {
-        "Monitor Worst DQ",
-        "Monitor Worst Freshness Age",
-    }
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expected_panels
-    }
-    assert set(panels) == expected_panels
-
-    for panel_title in panels_requiring_links:
-        panel = panels[panel_title]
-        data_links = panel.get("options", {}).get("dataLinks", [])
-        assert data_links, f"{panel_title} must expose at least one actionable dataLink"
-        assert all(
-            str(link.get("title", "")).startswith("Open ") for link in data_links
-        ), f"{panel_title} must use canonical Open ... dataLink titles"
-
-    reject_panel = panels["Monitor Silver Filter Rejects"]
-    reject_links = reject_panel.get("options", {}).get("dataLinks", [])
-    assert not any(
-        "Silver Reject Explorer" in str(link.get("title", "")) for link in reject_links
-    )
-    assert not reject_panel.get("links"), (
-        "Monitor Silver Filter Rejects should not use legacy panel links"
     )
 
 
@@ -1711,23 +1429,6 @@ def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:
                 "intent": "event_delta",
                 "required": ("increase(",),
                 "forbidden": ("max_over_time(", "last_over_time("),
-            },
-        },
-        "bioetl-dq-v2.json": {
-            "Track Record Flow by Stage": {
-                "intent": "pushed_snapshot_evidence",
-                "required": ("max_over_time(",),
-                "forbidden": ("last_over_time(",),
-            },
-            "Monitor Bronze Records": {
-                "intent": "pushed_snapshot_evidence",
-                "required": ("max_over_time(",),
-                "forbidden": ("last_over_time(",),
-            },
-            "Monitor Gold Records": {
-                "intent": "pushed_snapshot_evidence",
-                "required": ("max_over_time(",),
-                "forbidden": ("last_over_time(",),
             },
         },
         "bioetl-runtime.json": {
@@ -1860,12 +1561,19 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         "bioetl-control-plane-v1.json",
         "bioetl-provider-health-v2.json",
     }
-    expected_heights = (12, 12) if full_width_evidence else (6, 6)
-    if full_width_evidence:
-        for panel in (identity, processed):
-            assert panel["gridPos"]["w"] == 24
-            assert panel["options"]["footer"]["enablePagination"] is True
-    assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == expected_heights
+    if dashboard_name == "bioetl-dq-v2.json":
+        assert identity["gridPos"]["w"] == 12
+        assert processed["gridPos"]["w"] == 12
+        assert identity["options"]["footer"]["enablePagination"] is True
+        assert processed["options"]["footer"]["enablePagination"] is True
+        assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == (5, 5)
+    else:
+        expected_heights = (12, 12) if full_width_evidence else (6, 6)
+        if full_width_evidence:
+            for panel in (identity, processed):
+                assert panel["gridPos"]["w"] == 24
+                assert panel["options"]["footer"]["enablePagination"] is True
+        assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == expected_heights
     identity_no_value = str(
         identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
     )

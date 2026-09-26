@@ -70,12 +70,6 @@ DIAGNOSTIC_NO_ZERO_FALLBACK_EXPECTATIONS = {
         "Track Rate-Limit Errors",
         "Track Network & Timeout Errors",
     },
-    "bioetl-dq-v2.json": {
-        "Monitor Quarantined Records",
-        "Monitor Silver Filter Rejects",
-        "Monitor Silver Validation Failures",
-        "Monitor Gold Validation Failures",
-    },
     "bioetl-control-plane-v1.json": {
         "Track Manifest Failures",
         "Track Ledger Failures",

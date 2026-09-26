@@ -10,41 +10,22 @@ exact_duplicates:
       linked_issue: "#6360"
       resolution: queries_now_have_distinct_time_semantics
       rationale: The current stat uses a fixed latest-sample lookback while the trend remains selected-range evidence, so the former exact duplicate no longer exists.
-  allowed_groups:
     - id: l0-status-shared-status-card
       owner: "@bioetl-observability"
-      linked_issue: "#6570"
-      normalized_expression: >-
-        topk(1, bioetl_workflow_scope_priority_by_input{workflow=~"$workflow",pipeline=~"$pipeline",run_type=~"$run_type"})
-      rationale: >
-        Overview and Incident share the same workflow-scope priority card
-        as a deliberate cross-dashboard first-action status hop; keep identical
-        semantics so operator drilldown does not diverge by board.
-      panel_refs:
-        - "bioetl-overview-v2.json :: Monitor Scope Health"
-        - "bioetl-incident-v1.json :: Monitor Scope Status"
+      linked_issue: "#11269"
+      resolution: overview_selected_run_removed_shared_copy
+      rationale: Overview no longer ships Monitor Scope Health, so the shared priority expression is not an exact duplicate.
     - id: workflow-evidence-status-shared
       owner: "@bioetl-observability"
-      linked_issue: "#6570"
-      normalized_expression: >-
-        label_replace(max by(workflow)(bioetl_workflow_scope_input_status{input="workflow",workflow=~"$workflow",pipeline=~"$pipeline",run_type=~"$run_type"}),"reason","Reason unavailable","","")
-      rationale: >
-        Overview and Incident expose the same current workflow evidence table
-        so the publication status hop stays identical across boards.
-      panel_refs:
-        - "bioetl-incident-v1.json :: Review Current Workflow Evidence"
-        - "bioetl-overview-v2.json :: Review Current Workflow Evidence"
+      linked_issue: "#11269"
+      resolution: overview_selected_run_removed_shared_copy
+      rationale: Overview no longer ships Review Current Workflow Evidence.
     - id: workflow-evidence-published-shared
       owner: "@bioetl-observability"
-      linked_issue: "#6570"
-      normalized_expression: >-
-        bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~"$workflow",pipeline=~"$pipeline",run_type=~"$run_type"}) * 1000
-      rationale: >
-        The publication clock beside workflow evidence is the same operator
-        fact on Overview and Incident.
-      panel_refs:
-        - "bioetl-incident-v1.json :: Review Current Workflow Evidence"
-        - "bioetl-overview-v2.json :: Review Current Workflow Evidence"
+      linked_issue: "#11269"
+      resolution: overview_selected_run_removed_shared_copy
+      rationale: Overview no longer ships the shared publication clock.
+  allowed_groups: []
 near_duplicates:
   max_count: 5
   owner: "@bioetl-observability"

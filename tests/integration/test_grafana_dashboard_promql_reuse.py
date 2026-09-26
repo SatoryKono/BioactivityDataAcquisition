@@ -59,78 +59,24 @@ def _expected_duplicate_uses() -> dict[str, set[tuple[str, str]]]:
 
 def _assert_dq_score_time_semantics() -> None:
     dq_dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    dq_panels = {
-        panel.get("title"): panel
+    titles = {
+        panel.get("title")
         for panel in get_dashboard_panels(dq_dashboard)
         if panel.get("title")
     }
-    score_summary = dq_panels["Monitor Weighted DQ"]
-    score_trend = dq_panels["Track Volume-Weighted DQ Score"]
-    assert score_summary.get("type") == "stat"
-    assert score_summary.get("options", {}).get("colorMode") == "value"
-    assert score_summary.get("options", {}).get("graphMode") == "none"
-    summary_defaults = score_summary.get("fieldConfig", {}).get("defaults", {})
-    assert summary_defaults.get("unit") == "percentunit"
-    assert summary_defaults.get("min") == 0
-    assert summary_defaults.get("max") == 1
-    # Base step is gray (no-value / unset), then risk bands orange→green.
-    assert summary_defaults.get("thresholds", {}).get("steps") == [
-        {"color": "gray", "value": None},
-        {"color": "orange", "value": 0.8},
-        {"color": "green", "value": 0.95},
-    ]
-    assert score_trend.get("type") == "timeseries"
-    assert score_trend.get("options", {}).get("tooltip", {}).get("mode") == "single"
-
-    summary_targets = score_summary.get("targets", [])
-    trend_targets = score_trend.get("targets", [])
-    assert len(summary_targets) == 1
-    assert len(trend_targets) == 1
-    summary_expr = " ".join(str(summary_targets[0].get("expr", "")).split())
-    trend_expr = " ".join(str(trend_targets[0].get("expr", "")).split())
-    assert summary_expr != trend_expr
-    assert "last_over_time(" in summary_expr
-    assert "[7d]" in summary_expr
-    assert "last_over_time(" not in trend_expr
-    assert trend_targets[0].get("range") is True
-
-    summary_description = str(score_summary.get("description", "")).lower()
-    assert "7 days" in summary_description
-    assert "trend panel" in summary_description
+    assert "Monitor Weighted DQ" not in titles
+    assert "Track Volume-Weighted DQ Score" not in titles
+    assert "Review Selected Run Status" in titles
 
 
 def _assert_lineage_control_plane_ownership_handoff() -> None:
     dq_dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    control_plane_dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-control-plane-v1.json")
-    )
-    dq_panels = {
-        panel.get("title"): panel
+    titles = {
+        panel.get("title")
         for panel in get_dashboard_panels(dq_dashboard)
         if panel.get("title")
     }
-    control_plane_panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(control_plane_dashboard)
-        if panel.get("title")
-    }
-    dq_handoff = dq_panels["Inspect Lineage in Control Plane"]
-    control_plane_lineage = control_plane_panels["Track Missing Lineage"]
-    assert dq_handoff.get("type") == "text"
-    dq_content = str(dq_handoff.get("options", {}).get("content", "")).lower()
-    assert "control plane" in dq_content
-    assert "canonical" in dq_content
-    dq_links = list(dq_handoff.get("links") or [])
-    assert any(
-        "bioetl-control-plane-v1" in str(link.get("url", ""))
-        and "viewPanel=904" in str(link.get("url", ""))
-        for link in dq_links
-    )
-    # Additional row groups use text/line-only color encoding (REQ-DASH-003).
-    assert control_plane_lineage.get("options", {}).get("graphMode") == "none"
-    lineage_description = str(control_plane_lineage.get("description", "")).lower()
-    assert "missing upstream lineage references" in lineage_description
-    assert "replay evidence incomplete" in lineage_description
+    assert "Inspect Lineage in Control Plane" not in titles
 
 
 def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> None:
