@@ -30,7 +30,10 @@ def stamp_latest_complete_run_panel(panels: list[object]) -> None:
         "options": {"showHeader": True, "cellHeight": "sm"},
         "fieldConfig": {
             "defaults": {
-                "noValue": "—",
+                "noValue": (
+                    "SELECT RUN if no Run ID is selected. "
+                    "QUERY ERROR if the request failed."
+                ),
                 # Grafana's table auto-height reads the first string cell's
                 # .length without a null guard when default wrapText is true.
                 # Empty candidate identity must remain null, never a fake ID.
