@@ -164,7 +164,7 @@ def test_run_cell_inspection_and_links_use_full_identity():
     assert rules["Workflow"]["custom.hidden"] is False
     for field in ("Pipeline", "Workflow", "Run"):
         assert "custom.width" not in rules[field]
-    for field in ("Started", "Duration", "Processing", "1. Trust", "Report"):
+    for field in ("Started", "Duration", "Processing", "Replay readiness", "Report"):
         assert isinstance(rules[field]["custom.width"], int)
 
 

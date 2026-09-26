@@ -297,7 +297,7 @@
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
         "mode": "html",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">BROWSE last 10 launches, newest start first; not this time range.<br>Columns 1. Trust through 5. Data Quality open that launch.<br>Pipeline: ${pipeline:text}. SELECTED RUN: $run_id.<br><a href=\"/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">All pipelines · clear search</a> · Open Report for persisted evidence.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">BROWSE last 10 launches, newest start first; not this time range.<br>Open columns: Run Overview, Pipeline Diagnostics, Data Quality, Replay readiness, Provider Health.<br>Pipeline: ${pipeline:text}. SELECTED RUN: $run_id.<br><a href=\"/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">All pipelines · clear search</a> · Open Report for persisted evidence.</div>"
       },
       "description": "Browse the latest 10 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
       "links": [
@@ -313,7 +313,7 @@
       "id": 3010,
       "type": "table",
       "title": "Inspect Recent Runs (last 10)",
-      "description": "BROWSE — Last 10 launches by started_at across the selected pipeline scope, after Workflow and Run Type filters. The dashboard time picker does not filter this table. Start time comes from ledger/report identity, with explicitly recorded manifest-created fallback; never file mtime. One row is one launch. Running is the last recorded lifecycle state, not live-process proof. REPORT MISSING distinguishes launches without a persisted report. Click a Run cell to select and mark that run, binding Workflow, Pipeline, Run Type and Run ID from that row. Pipeline and Workflow belong to each row. Older runs: use the Run ID catalog. limit=10 shows all ten rows together without pagination. VALID EMPTY means no matching launches; TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY means a report bind failure. Backend failures are QUERY ERROR, not empty data. Run python scripts/ops/runtime/docker/verify_report_bind.py to diagnose the report bind. The matching SELECTED RUN row is marked; browse is not an exact-run snapshot. Report opens the row file in a new tab: Markdown when present, otherwise JSON. REPORT MISSING opens an explicit not-found response; it does not imply a persisted file. Find Run ID searches exact UUID before the ten-row limit. Duration needs valid start/end. Event age is the last ledger event for unfinished runs, not a heartbeat. Inspect a Run cell to copy its full UUID. DUAL-STATUS · Column Processing is run-report execution state (processing_status). Trust/evidence verdict is a separate axis — open 1. Trust for the selected Run ID; do not treat Processing success as trust OK.",
+      "description": "BROWSE — Last 10 launches by started_at across the selected pipeline scope, after Workflow and Run Type filters. The dashboard time picker does not filter this table. Start time comes from ledger/report identity, with explicitly recorded manifest-created fallback; never file mtime. One row is one launch. Running is the last recorded lifecycle state, not live-process proof. REPORT MISSING distinguishes launches without a persisted report. Click a Run cell to select and mark that run, binding Workflow, Pipeline, Run Type and Run ID from that row. Pipeline and Workflow belong to each row. Older runs: use the Run ID catalog. limit=10 shows all ten rows together without pagination. VALID EMPTY means no matching launches; TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY means a report bind failure. Backend failures are QUERY ERROR, not empty data. Run python scripts/ops/runtime/docker/verify_report_bind.py to diagnose the report bind. The matching SELECTED RUN row is marked; browse is not an exact-run snapshot. Report opens the row file in a new tab: Markdown when present, otherwise JSON. REPORT MISSING opens an explicit not-found response; it does not imply a persisted file. Find Run ID searches exact UUID before the ten-row limit. Duration needs valid start/end. Event age is the last ledger event for unfinished runs, not a heartbeat. Inspect a Run cell to copy its full UUID. DUAL-STATUS · Column Processing is run-report execution state (processing_status). Trust/evidence verdict is a separate axis — open Replay readiness for the selected Run ID; do not treat Processing success as trust OK.",
       "gridPos": {
         "h": 14,
         "w": 24,
@@ -635,7 +635,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 70
+                "value": 60
               }
             ]
           },
@@ -912,9 +912,13 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "1. Trust"
+              "options": "Replay readiness"
             },
             "properties": [
+              {
+                "id": "custom.width",
+                "value": 50
+              },
               {
                 "id": "noValue",
                 "value": "Open"
@@ -936,7 +940,7 @@
                 "id": "links",
                 "value": [
                   {
-                    "title": "Open 1. Trust",
+                    "title": "Open Replay readiness",
                     "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
                     "includeVars": false
                   }
@@ -947,14 +951,14 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "2. Overview"
+              "options": "Run Overview"
             },
             "properties": [
               {
                 "id": "links",
                 "value": [
                   {
-                    "title": "Open 2. Overview",
+                    "title": "Open Run Overview",
                     "url": "/d/bioetl-overview-v2/2-overview?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
                     "includeVars": false
                   }
@@ -966,21 +970,21 @@
               },
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 80
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "3. Pipeline Diagnostics"
+              "options": "Pipeline Diagnostics"
             },
             "properties": [
               {
                 "id": "links",
                 "value": [
                   {
-                    "title": "Open 3. Pipeline Diagnostics",
+                    "title": "Open Pipeline Diagnostics",
                     "url": "/d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
                     "includeVars": false
                   }
@@ -992,21 +996,21 @@
               },
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 80
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "4. Provider Health"
+              "options": "Provider Health"
             },
             "properties": [
               {
                 "id": "links",
                 "value": [
                   {
-                    "title": "Open 4. Provider Health",
+                    "title": "Open Provider Health",
                     "url": "/d/bioetl-provider-health-v2/4-provider-health?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&var-provider=$__all&var-pipeline_context=${__data.fields.Pipeline:percentencode}&${__url_time_range}",
                     "includeVars": false
                   }
@@ -1018,21 +1022,21 @@
               },
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 80
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "5. Data Quality"
+              "options": "Data Quality"
             },
             "properties": [
               {
                 "id": "links",
                 "value": [
                   {
-                    "title": "Open 5. Data Quality",
+                    "title": "Open Data Quality",
                     "url": "/d/bioetl-dq-v2/5-data-quality?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
                     "includeVars": false
                   }
@@ -1044,7 +1048,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 80
               }
             ]
           },
@@ -1229,14 +1233,14 @@
           "options": {
             "indexByName": {
               "selected": 0,
-              "started_at": 5,
-              "pipeline": 6,
-              "workflow_id": 7,
-              "run_id": 4,
-              "duration_display": 9,
-              "event_age_display": 10,
-              "status": 11,
-              "trust_status": 12,
+              "started_at": 6,
+              "pipeline": 7,
+              "workflow_id": 8,
+              "run_id": 9,
+              "duration_display": 10,
+              "event_age_display": 11,
+              "status": 12,
+              "trust_status": 4,
               "report_label": 13,
               "report_url": 14,
               "workflow_scope": 15,
@@ -1244,8 +1248,8 @@
               "completed_at": 17,
               "overview_handoff": 1,
               "diagnostics_handoff": 2,
-              "provider_handoff": 3,
-              "quality_handoff": 4
+              "provider_handoff": 5,
+              "quality_handoff": 3
             },
             "renameByName": {
               "selected": "",
@@ -1256,12 +1260,12 @@
               "status": "Processing",
               "report_label": "Report",
               "event_age_display": "Event age",
-              "trust_status": "1. Trust",
+              "trust_status": "Replay readiness",
               "run_id": "Run",
-              "overview_handoff": "2. Overview",
-              "diagnostics_handoff": "3. Pipeline Diagnostics",
-              "provider_handoff": "4. Provider Health",
-              "quality_handoff": "5. Data Quality"
+              "overview_handoff": "Run Overview",
+              "diagnostics_handoff": "Pipeline Diagnostics",
+              "provider_handoff": "Provider Health",
+              "quality_handoff": "Data Quality"
             },
             "excludeByName": {
               "Value": true,
