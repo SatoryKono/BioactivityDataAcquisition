@@ -335,6 +335,8 @@ def _runtime(p: dict[int, dict]) -> None:
 
 
 def _provider(p: dict[int, dict]) -> None:
+    if 9101 not in p or 9107 not in p:
+        return
     p[9101]["title"] = "Monitor Fleet Status"
     p[9107]["title"] = "Inspect Health Evidence"
     for pid in (9101, 9107):

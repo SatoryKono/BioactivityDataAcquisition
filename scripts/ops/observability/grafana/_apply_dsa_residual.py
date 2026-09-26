@@ -336,6 +336,9 @@ def apply_runtime() -> None:
 
 def apply_provider() -> None:
     ph = load("bioetl-provider-health-v2.json")
+    if by_id(ph, 9401) is None or by_id(ph, 9101) is None:
+        print("provider fleet panels removed; skip CURRENT copy")
+        return
     set_desc(
         by_id(ph, 9401),
         "Fleet dependency verdict = state x freshness/confidence. "

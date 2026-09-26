@@ -156,6 +156,8 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
             if isinstance(panel.get("id"), int)
         }
         expected_header_ids = header_ids
+        if dashboard_name == "bioetl-provider-health-v2.json":
+            expected_header_ids = (9400,)
         if dashboard_name == "bioetl-control-plane-v1.json":
             expected_header_ids = (9400, 9422)
             current = panels.get(9401)
@@ -225,10 +227,7 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             "Monitor Pipeline Status": "bioetl_runtime_current_status_trusted",
             "Review Runtime Blockers": "bioetl_runtime_current_blocker_reason",
         },
-        "bioetl-provider-health-v2.json": {
-            "Monitor Fleet Status": "bioetl_provider_current_status",
-            "Inspect Health Evidence": "bioetl_provider_current_status_info",
-        },
+        "bioetl-provider-health-v2.json": {},
         "bioetl-dq-v2.json": {
             "Monitor Current DQ Status": "bioetl_dq_current_status",
         },
@@ -286,19 +285,16 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
     provider_dashboard = load_dashboard(
         Path("grafana/dashboards") / "bioetl-provider-health-v2.json"
     )
-    provider_causes_row = next(
+    assert all(panel.get("id") != 9106 for panel in provider_dashboard.get("panels", []))
+    provider_check_row = next(
         panel
         for panel in provider_dashboard.get("panels", [])
-        if panel.get("id") == 9106
+        if panel.get("id") == 9462
     )
-    assert provider_causes_row.get("collapsed") is True
-    provider_causes = next(
-        panel
-        for panel in (provider_causes_row.get("panels") or [])
-        if panel.get("id") == 9103
+    assert provider_check_row.get("collapsed") is True
+    assert any(
+        panel.get("id") == 9460 for panel in provider_check_row.get("panels") or []
     )
-    assert provider_causes.get("title") == "Inspect Top Provider Causes"
-    assert int((provider_causes.get("gridPos") or {}).get("y", 0)) >= 18
 
 
 def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
@@ -375,11 +371,7 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
             "Monitor Pipeline Status",
             "Review Runtime Blockers",
         ],
-        "bioetl-provider-health-v2.json": [
-            "Monitor Fleet Status",
-            "Inspect Top Provider Causes",
-            "Monitor Telemetry Presence",
-        ],
+        "bioetl-provider-health-v2.json": [],
         "bioetl-dq-v2.json": [
             "Monitor Current DQ Status",
             "Inspect Current DQ Reasons",
@@ -578,15 +570,10 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
             },
         },
         "bioetl-provider-health-v2.json": {
-            "Start Provider Triage": {
-                "tokens": (
-                    "fleet severity",
-                    "top causes",
-                    "selected-provider",
-                    "range",
-                ),
-                "max_y": 23,
-                "panel_id": 9002,
+            "Understand Selected Run": {
+                "tokens": ("selected run", "run id is always set", "fleet"),
+                "max_y": 4,
+                "panel_id": 9400,
             },
         },
     }
@@ -700,7 +687,7 @@ def test_current_status_headlines_use_instant_queries() -> None:
             "Monitor Pipeline Status",
             "Monitor Coverage",
         ),
-        "bioetl-provider-health-v2.json": ("Monitor Selected Provider",),
+        "bioetl-provider-health-v2.json": (),
     }
     for dashboard_name, titles in expectations.items():
         dashboard = load_dashboard(_DASHBOARD_DIR / dashboard_name)

@@ -475,7 +475,7 @@ shipped_selector_registry:
       pipeline: control_plane_filter_options_api
       run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
-      provider: prometheus_provider_health_union
+      provider: selected_run_status_api
       pipeline_context: textbox_navigation_context
       adapter: prometheus_circuit_breaker_state
   bioetl-dq-v2:

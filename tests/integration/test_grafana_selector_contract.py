@@ -529,6 +529,24 @@ def test_current_dashboards_do_not_ship_future_execution_selectors() -> None:
         )
 
 
+def test_provider_health_selector_follows_selected_run() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    variable = next(
+        item
+        for item in dashboard["templating"]["list"]
+        if item.get("name") == "provider"
+    )
+    assert variable.get("includeAll") is False
+    query = variable["query"]["infinityQuery"]["url"]
+    assert "selected-run-status" in query
+    assert "run_id=${run_id}" in query
+    assert "bioetl_provider_current_status" not in json.dumps(variable)
+
+
 def test_http_selector_frames_declare_columns_for_empty_catalogs() -> None:
     for path in Path("grafana/dashboards").glob("*.json"):
         dashboard = json.loads(path.read_text(encoding="utf-8"))

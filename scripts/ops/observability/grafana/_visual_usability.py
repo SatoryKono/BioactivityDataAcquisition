@@ -380,6 +380,10 @@ def _clear_wrap_text(item: dict) -> None:
 
 
 def _provider(p: dict[int, dict]) -> None:
+    if 9105 not in p or 91 not in p or 9404 not in p:
+        if 9402 in p and 9403 in p:
+            _provider_disable_summary_wrap(p)
+        return
     _provider_status_columns(p)
     _bands(p[9105], [[(9111, 0, 12, 5), (9112, 12, 12, 5)], [(9113, 0, 24, 5)]])
     _provider_latency_panels(p)

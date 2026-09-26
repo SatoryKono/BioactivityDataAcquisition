@@ -211,8 +211,6 @@ def nav_link_tooltip(*, source_uid: str, target: dict[str, str]) -> str:
     if target_uid == "bioetl-provider-health-v2":
         if source_uid in _PROVIDER_VARIABLE_UIDS:
             preserved.append("provider")
-        else:
-            resets.append("provider=All")
         preserved.append("pipeline context")
     if target_uid in _STAGE_TARGET_UIDS:
         resets.append("stage=All")
@@ -221,6 +219,10 @@ def nav_link_tooltip(*, source_uid: str, target: dict[str, str]) -> str:
     ):
         preserved.append("visible pipeline selection")
     if not resets:
+        if "pipeline context" in preserved:
+            return (
+                f"{base}. {_PRESERVE_SCOPE_TOOLTIP} Preserves pipeline context."
+            )
         return f"{base}. {_PRESERVE_SCOPE_TOOLTIP}"
     preserve_clause = "; preserves " + ", ".join(dict.fromkeys(preserved)) + "."
     return f"{base}. Scope reset: {', '.join(resets)}{preserve_clause}"

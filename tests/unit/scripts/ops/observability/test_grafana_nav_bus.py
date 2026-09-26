@@ -113,8 +113,10 @@ def test_nav_tooltips_describe_resets_and_escape_html_attributes() -> None:
         source_uid="bioetl-overview-v2",
     )
 
-    assert "Scope reset: provider=All" in tooltip
-    assert "var-provider=$__all" in rendered
+    assert "provider=All" not in tooltip
+    assert "Preserves selected scope and time range." in tooltip
+    assert "run_id:queryparam" in rendered
+    assert "var-provider=$__all" not in rendered
     assert "var-provider=All" not in rendered
     assert "pipeline context" in tooltip
     assert "&quot;Health&quot;" in rendered

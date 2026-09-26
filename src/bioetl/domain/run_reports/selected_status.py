@@ -54,6 +54,79 @@ def _row(domain: str, verdict: str, reason: str, source: str) -> dict[str, objec
     }
 
 
+_PROVIDER_EVIDENCE_MISSING = (
+    "Данные проверки провайдера для этого запуска не сохранены"
+)
+
+
+def _saved_provider_name(report: Mapping[str, object], facts: Mapping[str, object]) -> str:
+    """Prefer the probe fact, then the same report's identity. Never parse pipeline_name."""
+    for source in (facts.get("provider"), _mapping(report.get("identity")).get("provider")):
+        if isinstance(source, str) and source.strip():
+            return source.strip()
+    return "—"
+
+
+def provider_check_rows(report: Mapping[str, object]) -> list[dict[str, object]]:
+    """Project saved provider probes. A missing name does not invent OK."""
+    if _mapping(report.get("io")).get("use_cached_bronze") is True:
+        return [
+            {
+                "provider": _saved_provider_name(report, {}),
+                "check_result": _NA,
+                "evidence": _NA,
+                "observed_at": None,
+            }
+        ]
+    observations = _mapping(report.get("observations"))
+    observation = _mapping(observations.get(PROVIDER))
+    facts = _mapping(observation.get("facts"))
+    provider_name = _saved_provider_name(report, facts)
+    if not observation:
+        return [
+            {
+                "provider": provider_name,
+                "check_result": _INCOMPLETE,
+                "evidence": _PROVIDER_EVIDENCE_MISSING
+                if provider_name == "—"
+                else _INCOMPLETE,
+                "observed_at": None,
+            }
+        ]
+    verdict = str(observation.get("verdict", _INCOMPLETE))
+    if verdict not in {*_PRIORITY, _NA}:
+        verdict = _UNKNOWN
+    if provider_name == "—":
+        verdict = _INCOMPLETE
+        evidence = _INCOMPLETE
+    elif verdict == _NA:
+        evidence = _NA
+    else:
+        evidence = "PRESENT"
+    return [
+        {
+            "provider": provider_name,
+            "check_result": verdict,
+            "evidence": evidence,
+            "observed_at": facts.get("observed_at"),
+        }
+    ]
+
+
+def provider_selector_options(report: Mapping[str, object]) -> list[dict[str, str]]:
+    """Run participants for the Provider selector. All is not an option."""
+    names: list[str] = []
+    identity_name = _mapping(report.get("identity")).get("provider")
+    if isinstance(identity_name, str) and identity_name.strip():
+        names.append(identity_name.strip())
+    for row in provider_check_rows(report):
+        name = row.get("provider")
+        if isinstance(name, str) and name.strip() and name.strip() != "—":
+            if name.strip() not in names:
+                names.append(name.strip())
+    return [{"text": name, "value": name} for name in names]
+
+
 def _observed_row(domain: str, observations: Mapping[str, object]) -> dict[str, object]:
     observation = _mapping(observations.get(domain))
     verdict = str(observation.get("verdict", _INCOMPLETE))

@@ -25,6 +25,8 @@ from bioetl.domain.run_reports.selected_status import (
     RULES_VERSION,
     assess_report,
     evidence_digest,
+    provider_check_rows,
+    provider_selector_options,
     verify_snapshot,
 )
 from bioetl.interfaces.http import run_report_ops
@@ -124,6 +126,15 @@ def unavailable_status(
         ],
         "domains": rows,
         "presentation_domains": presentation_rows(rows, selection=state == _SELECT_RUN),
+        "provider_checks": [
+            {
+                "provider": "—",
+                "check_result": state,
+                "evidence": reason,
+                "observed_at": None,
+            }
+        ],
+        "provider_options": [],
         "rows": rows,
         "trust": [trust],
         **_readiness_fields(
@@ -498,6 +509,8 @@ def load_selected_run_status(
         ],
         "domains": rows,
         "presentation_domains": presentation_rows(rows),
+        "provider_checks": provider_check_rows(report),
+        "provider_options": provider_selector_options(report),
         "rows": rows,
         "trust": [trust],
         **readiness_fields,

@@ -30,12 +30,25 @@ def test_retention_does_not_repeat_hash_verification_for_header():
 def test_provider_status_uses_filtered_vectors_in_severity_order():
     dashboard = _dashboard("bioetl-provider-health-v2")
     apply_corrections(dashboard)
-    panel = next(p for p in dashboard["panels"] if p["id"] == 9401)
-    branches = panel["targets"][0]["expr"].split(" or ")
-    assert branches == [
-        f'max(bioetl_pstatus{{provider=~"$provider"}} == {code})'
-        for code in (2, 1, 3, 0)
-    ]
-    # PromQL comparisons must filter, not emit bool 0/1: the latter would
-    # keep the first branch present even when CRIT is absent.
-    assert "bool" not in panel["targets"][0]["expr"]
+    ids = {panel.get("id") for panel in dashboard["panels"]}
+    assert 9401 not in ids
+    assert 9101 not in ids
+    evidence = next(
+        panel
+        for panel in dashboard["panels"]
+        if panel.get("id") == 9462
+        for panel in panel.get("panels", [])
+        if panel.get("id") == 9460
+    )
+    assert "selected-run-status" in evidence["targets"][0]["url"]
+    assert evidence["targets"][0]["root_selector"] == "provider_checks"
+    assert all(item.get("id") != "limit" for item in evidence["transformations"])
+    organize = next(
+        item for item in evidence["transformations"] if item.get("id") == "organize"
+    )
+    assert organize["options"]["renameByName"] == {
+        "provider": "Provider",
+        "check_result": "Check result",
+        "evidence": "Evidence",
+        "observed_at": "Observed at",
+    }

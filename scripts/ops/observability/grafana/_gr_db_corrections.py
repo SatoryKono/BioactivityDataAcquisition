@@ -381,6 +381,8 @@ def _correct_provider_cause_panel(panel: dict) -> None:
 def _correct_provider(uid: object, panels: dict[int, dict]) -> None:
     if uid != "bioetl-provider-health-v2":
         return
+    if 9401 not in panels or 9101 not in panels or 9107 not in panels:
+        return
     # Sparse real counter observations (including a single zero) need a
     # marker; a line alone renders an indistinguishable empty chart.
     panels[32]["fieldConfig"]["defaults"]["custom"]["showPoints"] = "always"
