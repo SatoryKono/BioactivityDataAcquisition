@@ -136,34 +136,39 @@ def _compact_trust_evidence_table(p: dict[int, dict], panel_id: int) -> None:
 
 def _trust(p: dict[int, dict]) -> None:
     _replace_rate_intervals(p)
-    p[5]["targets"][0]["expr"] = (
-        "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total"
-        '{pipeline=~"$pipeline"}[$__rate_interval]))'
-    )
+    if 5 in p:
+        p[5]["targets"][0]["expr"] = (
+            "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total"
+            '{pipeline=~"$pipeline"}[$__rate_interval]))'
+        )
     for panel_id in (3, 104, 120, 101, 102, 103, 4, 136, 122, 137):
-        _stamp_counter_no_observations(p[panel_id])
-    p[892]["fieldConfig"]["defaults"]["thresholds"] = {
-        "mode": "absolute",
-        "steps": [{"color": "blue", "value": None}],
-    }
-    p[892]["description"] = (
-        "Last checkpoint age, informational only; age does not change readiness. "
-        "Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID."
-    )
+        if panel_id in p:
+            _stamp_counter_no_observations(p[panel_id])
+    if 892 in p:
+        p[892]["fieldConfig"]["defaults"]["thresholds"] = {
+            "mode": "absolute",
+            "steps": [{"color": "blue", "value": None}],
+        }
+        p[892]["description"] = (
+            "Last checkpoint age, informational only; age does not change readiness. "
+            "Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID."
+        )
     # An empty reasons list is valid; query failures remain explicit in Trust.
     override(p[9418], "Reasons", **{"noValue": "—"})
-    latency = p[111]
-    latency["fieldConfig"]["defaults"]["color"] = {"mode": "palette-classic"}
-    latency["options"]["legend"] = {
-        "displayMode": "table",
-        "placement": "right",
-        "showLegend": True,
-        "calcs": ["lastNotNull", "max"],
-        "width": 430,
-    }
-    latency["gridPos"]["h"] = 10
+    if 111 in p:
+        latency = p[111]
+        latency["fieldConfig"]["defaults"]["color"] = {"mode": "palette-classic"}
+        latency["options"]["legend"] = {
+            "displayMode": "table",
+            "placement": "right",
+            "showLegend": True,
+            "calcs": ["lastNotNull", "max"],
+            "width": 430,
+        }
+        latency["gridPos"]["h"] = 10
     for panel_id in (9404, 9405, 9406, 9407, 9408, 9409, 9402, 9403, 9417):
-        _compact_trust_evidence_table(p, panel_id)
+        if panel_id in p:
+            _compact_trust_evidence_table(p, panel_id)
     _bands(
         p[905],
         [
@@ -207,6 +212,10 @@ def _remap_mapping_texts(mapping: dict) -> None:
 
 
 def _overview(p: dict[int, dict]) -> None:
+    # Run ID is always selected. Fleet cards are removed before this pass on
+    # later renders; nothing here should recreate them.
+    if 214 not in p or 215 not in p:
+        return
     # Align the current verdict with the selected-run domains column below it.
     p[99]["gridPos"].update(x=0, w=16)
     p[214]["gridPos"].update(x=16, w=p[9002]["gridPos"]["w"])
@@ -414,6 +423,8 @@ def _provider(p: dict[int, dict]) -> None:
 
 
 def _dq(p: dict[int, dict]) -> None:
+    if 2 not in p:
+        return
     for panel_id in (2, 5):
         p[panel_id]["options"]["textMode"] = "value_and_name"
         p[panel_id]["fieldConfig"]["defaults"]["displayName"] = (
@@ -546,7 +557,7 @@ def apply_visual_usability(payload: dict) -> None:
     }
     if handler := handlers.get(payload["uid"]):
         handler(p)
-    if payload["uid"] == "bioetl-dq-v2":
+    if payload["uid"] == "bioetl-dq-v2" and 9103 in p:
         p[9103]["gridPos"]["h"] = 2
     if payload["uid"] == "bioetl-incident-v1":
         p[2001]["gridPos"].update(y=5, h=3)

@@ -34,7 +34,7 @@ ______________________________________________________________________
 
 ### Overview
 
-- Checkpoints store resume state for each pipeline. Resume or checkpoint recovery is not exact replay of saved inputs. Use this runbook to inspect, reset, and recover checkpoint files. Exact-replay readiness is a separate saved-evidence check and does not treat checkpoint age as a blocker when the mode does not require a checkpoint.
+- Checkpoints store resume state for each pipeline. Resume or checkpoint recovery is not exact replay of saved inputs. Pipeline checkpoint age and range counters are on Pipeline Diagnostics. Trust keeps checkpoint validation and anchor comparison for the selected Run ID only. Exact-replay readiness does not treat checkpoint age as a blocker when the mode does not require a checkpoint.
 
 ### Checkpoint Location
 

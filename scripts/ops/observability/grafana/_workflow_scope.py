@@ -11,6 +11,36 @@ _FIRST_ACTION_EXPR = (
     '"workflow","$workflow","","")'
 )
 _ACTION_HREF = "${__data.fields.action_href:raw}"
+# Run ID is always selected on Overview. These panels do not assess that run.
+_NON_RUN_PANEL_IDS = frozenset(
+    {
+        214,
+        215,
+        9600,
+        9601,
+        9030,
+        9031,
+        9018,
+        9019,
+        9020,
+        9009,
+        9010,
+        9011,
+        9015,
+        9012,
+        9006,
+        9003,
+        9004,
+        9007,
+        9005,
+        9013,
+        9021,
+        30215,
+        20215,
+        9700,
+        9701,
+    }
+)
 _FIRST_ACTION_DESCRIPTION = (
     "CURRENT · Each row keeps pipeline and run type. Workflow All uses workflow series plus "
     "standalone pipelines that have no workflow membership. A concrete workflow does not borrow "
@@ -258,22 +288,110 @@ def _apply_first_action_panel(panel: dict) -> None:
                 link["url"] = _ACTION_HREF
 
 
+def _without_non_run_panels(panels: list[dict]) -> list[dict]:
+    kept: list[dict] = []
+    for panel in panels:
+        if panel.get("id") in _NON_RUN_PANEL_IDS:
+            continue
+        nested = panel.get("panels")
+        if isinstance(nested, list):
+            panel["panels"] = _without_non_run_panels(nested)
+        if panel.get("type") == "row" and not panel.get("panels"):
+            continue
+        kept.append(panel)
+    return kept
+
+
+def _place_selected_run_window(panels: list[dict]) -> None:
+    by_id = {panel.get("id"): panel for panel in panels}
+    nav = by_id.get(1000)
+    y = 0
+    if isinstance(nav, dict) and isinstance(nav.get("gridPos"), dict):
+        y = int(nav["gridPos"]["y"]) + int(nav["gridPos"]["h"])
+    banner = by_id.get(99)
+    if isinstance(banner, dict):
+        banner["gridPos"] = {"x": 0, "y": y, "w": 24, "h": 3}
+        y += 3
+    for panel_id, x_pos in ((9603, 0), (9002, 12)):
+        panel = by_id.get(panel_id)
+        if isinstance(panel, dict):
+            panel["gridPos"] = {"x": x_pos, "y": y, "w": 12, "h": 6}
+    y += 6
+    pinned = {1000, 99, 9603, 9002}
+    rest = [panel for panel in panels if panel.get("id") not in pinned]
+    rest.sort(key=lambda panel: (panel["gridPos"]["y"], panel["gridPos"]["x"]))
+    for panel in rest:
+        height = int(panel["gridPos"]["h"])
+        panel["gridPos"].update(x=0, y=y, w=24, h=height)
+        y += height
+
+
+def _retain_selected_run_overview(payload: dict) -> None:
+    """Overview always has a Run ID. Drop panels that do not assess that run."""
+    variables = payload.setdefault("templating", {}).setdefault("list", [])
+    payload["templating"]["list"] = [
+        variable
+        for variable in variables
+        if variable.get("name") != "overview_fleet"
+    ]
+    payload["panels"] = _without_non_run_panels(payload.get("panels") or [])
+    description = str(payload.get("description") or "")
+    note = (
+        " Run ID is always selected. This page shows saved evidence for that run. "
+        "CURRENT fleet panels and TIME RANGE history are not on Overview."
+    )
+    if "Run ID is always selected" not in description:
+        payload["description"] = description.rstrip() + note
+    for panel in payload["panels"]:
+        if panel.get("id") != 99:
+            continue
+        panel["options"]["content"] = (
+            '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
+            'font-size:16px;line-height:1.2;overflow-wrap:anywhere">'
+            "SELECTED RUN · ${pipeline:text} / ${run_type:text} / ${run_id}. "
+            "This page assesses that run only.<br>"
+            "CURRENT fleet status and TIME RANGE history are not shown here. "
+            "UNKNOWN means saved evidence is missing, not a healthy fleet."
+            "</div>"
+        )
+        panel["description"] = (
+            "SELECTED RUN · Saved evidence for the selected Run ID. "
+            "CURRENT fleet status and TIME RANGE history are not on this page. "
+            "UNKNOWN means the saved assessment is missing, not a healthy empty run. "
+            "A request failure is QUERY ERROR."
+        )
+    _place_selected_run_window(payload["panels"])
+    domains = next(
+        panel for panel in payload["panels"] if panel.get("id") == 9002
+    )
+    handoff = domains.get("fieldConfig", {}).get("defaults", {}).get("links") or []
+    domains["links"] = [dict(link) for link in handoff]
+
+
 def apply_workflow_scope(payload: dict) -> None:
     """Apply scoped queries after general dashboard corrections; remain idempotent."""
     if payload.get("uid") not in {"bioetl-overview-v2", "bioetl-incident-v1"}:
         return
     panels = list(_walk(payload["panels"]))
-    if not any(
+    has_scope_card = any(
         p.get("title") in {"Monitor Scope Health", "Monitor Scope Status"}
         for p in panels
-    ):
+    )
+    if not has_scope_card and payload.get("uid") != "bioetl-overview-v2":
+        return
+    if not has_scope_card:
+        _retain_selected_run_overview(payload)
         return
     for panel in panels:
         if panel.get("type") == "text" and panel.get("id") in {99, 9400}:
             suffix = (
                 "GLOBAL tables below cover all pipelines; suspects are not verified causes."
                 if payload["uid"] == "bioetl-incident-v1"
-                else "Open First Action; VERIFY means evidence is missing. SELECTED RUN is persisted history."
+                else (
+                    "Open First Action; VERIFY means evidence is missing. "
+                    "SELECTED RUN is persisted history. "
+                    "A concrete Run ID hides this fleet card."
+                )
             )
             panel["options"]["content"] = (
                 '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
@@ -422,5 +540,8 @@ def apply_workflow_scope(payload: dict) -> None:
                 }
             )
             _apply_first_action_panel(panel)
+    if payload.get("uid") == "bioetl-overview-v2":
+        _retain_selected_run_overview(payload)
+        return
     source = next(p for p in panels if p.get("type") == "table")
     _evidence_row(payload, source)

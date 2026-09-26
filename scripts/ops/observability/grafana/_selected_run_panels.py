@@ -153,6 +153,9 @@ def _stamp_control_plane_copy(panel: dict[str, object], uid: object) -> None:
             DESCRIPTION
             + " Observed is the saved completion-time assessment. processing_status success does not imply trust_status OK."
         )
+    if panel.get("id") == 9403:
+        description = str(panel.get("description") or "")
+        panel["description"] = description.replace("SELECTED RUN · CURRENT · ", "SELECTED RUN · ")
     if panel.get("id") == 9421:
         panel["description"] = (
             DESCRIPTION + " SELECTED RUN search: find an exact persisted identity."

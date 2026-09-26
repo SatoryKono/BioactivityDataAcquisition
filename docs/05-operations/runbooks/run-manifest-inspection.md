@@ -39,7 +39,7 @@ ______________________________________________________________________
 
 ### 0. Triage order
 
-Do not treat terminal processing success or historical Trust=OK as exact-replay readiness. `Review Exact Replay Readiness` on `1. Trust` is READY only after saved artifact checks pass. READY is not a replay that already ran and not permission to write current tables. A missing or unreadable required artifact is BLOCKED. CURRENT Prometheus does not change that verdict.
+Do not treat terminal processing success or historical Trust=OK as exact-replay readiness. `Review Exact Replay Readiness` on `1. Trust` is READY only after saved artifact checks pass. READY is not a replay that already ran and not permission to write current tables. A missing or unreadable required artifact is BLOCKED. CURRENT Prometheus does not change that verdict. Range counters for replay, ledger, lineage and telemetry are on Pipeline Diagnostics. Trust keeps the selected run's manifest, checkpoint and lineage checks.
 
 1. Run outcome (`processing_status`) — data-processing result.
 2. Trust readiness (`trust_status` on `/ops/control-plane/*-validation`) — fail-closed exact-run evidence.

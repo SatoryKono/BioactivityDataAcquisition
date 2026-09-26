@@ -86,7 +86,7 @@ size option.
 | `DASH-STATE-002` | Operator states MUST use the canonical `OK/WARN/CRIT/UNKNOWN` palette; documented trust gates MAY add `INCOMPLETE`. Color MUST NOT be the only carrier of meaning. |
 | `DASH-NAV-001` | Every dashboard MUST expose the ordered `0..6` navigation bus, omit its self-link, preserve time, and pass only target-allowlisted variables. |
 | `DASH-SCOPE-001` | A data-bearing panel with `scope=selected_run` MUST use `evidence_source=ops_http`. Prometheus MUST NOT claim exact UUID scope (`DASH-DATA-002`). |
-| `DASH-SCOPE-002` | `bioetl-overview-v2` first window MUST show `Review Selected Run Summary` (`9603`) above CURRENT panels `214`/`215`. CURRENT copy MUST state it is not the selected UUID. |
+| `DASH-SCOPE-002` | `bioetl-overview-v2` first window MUST show `Review Selected Run Status` (`9603`) and `Review Run Domains` (`9002`). Run ID is always set. CURRENT fleet panels are not on this page. |
 | `DASH-ACTION-001` | Critical operator panels MUST expose an actionable dashboard or runbook CTA without duplicate or conflicting handoffs. |
 | `DASH-LAYOUT-001` | Top-level panels MUST NOT overlap or leave unexplained gaps. Additional diagnostics MUST use progressive disclosure. |
 
@@ -234,10 +234,10 @@ and are loaded by `tests/integration/_dashboard_layout_budgets.py`.
 | UID | Required answer |
 | --- | --- |
 | `bioetl-control-plane-v1` | Can the selected run be exactly replayed from saved inputs? |
-| `bioetl-overview-v2` | What is broken or degraded now, and where should the operator go first? |
+| `bioetl-overview-v2` | What is the saved assessment of the selected Run ID? |
 | `bioetl-runtime` | What currently blocks runtime delivery? |
 | `bioetl-provider-health-v2` | Which provider is degraded/failing, and why? |
-| `bioetl-dq-v2` | What is the current DQ state, its evidence scope, and first action? |
+| `bioetl-dq-v2` | What is the DQ assessment of the selected Run ID? |
 | `bioetl-incident-v1` | What is the highest-confidence active suspect? |
 | `bioetl-run-explorer-v1` | Which pipelines ran most recently, and where are their reports? |
 
@@ -249,10 +249,10 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | UID | Answer panel (title / id) | Notes |
 | --- | --- | --- |
 | `bioetl-control-plane-v1` | `Review Exact Replay Readiness` (`9422`) | exact-run readiness from saved inputs; CURRENT `9401` is not this answer |
-| `bioetl-overview-v2` | `Monitor Fleet Health` (`214`) + `Review First Action` (`215`) | CURRENT verdict + next route. `Review Selected Run Summary` (`9603`) MUST occupy the first window as SELECTED RUN context and MUST NOT replace 214/215. |
+| `bioetl-overview-v2` | `Review Selected Run Status` (`9603`) + `Review Run Domains` (`9002`) | Saved HTTP evidence for the selected Run ID. |
 | `bioetl-runtime` | `Monitor Pipeline Status` (`9401`) | trust-gated runtime verdict |
 | `bioetl-provider-health-v2` | `Monitor Fleet Severity` (`9101`) | GLOBAL provider matrix |
-| `bioetl-dq-v2` | `Monitor Current DQ Status` (`9401`) | NOW-lane verdict |
+| `bioetl-dq-v2` | `Review Selected Run Status` (`9406`) | saved HTTP evidence for the selected Run ID |
 | `bioetl-incident-v1` | `Inspect Ranked Suspects` (`2010`) | highest-confidence suspect matrix |
 | `bioetl-run-explorer-v1` | `Inspect Recent Runs` (`3010`) | Browse/select the exact run. Identity and processed records live in collapsed `Selected Run Details` (`3022`/`3023`). |
 
