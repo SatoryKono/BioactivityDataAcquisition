@@ -1342,7 +1342,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK (presence color only; PRESENT≠OK for fleet health). Fail-closed UNKNOWN/gray when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy. SELECTED PROVIDER only; it does not summarize the fleet.",
+          "description": "This telemetry presence stat shows whether a current status series exists. TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK (presence color only; PRESENT≠OK for fleet health). Fail-closed UNKNOWN/gray when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy. SELECTED PROVIDER only; it does not summarize the fleet.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1438,7 +1438,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "GLOBAL · Current fleet, independent of the selected Provider. VALID EMPTY requires every observed provider to have health evidence and current status OK. Missing coverage remains UNKNOWN; query failure is not a healthy empty fleet.",
+          "description": "This non-OK table shows providers whose current status is not OK. GLOBAL · Current fleet, independent of the selected Provider. VALID EMPTY requires every observed provider to have health evidence and current status OK. Missing coverage remains UNKNOWN; query failure is not a healthy empty fleet.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2168,7 +2168,8 @@
           "title": "Inspect Top Provider Causes",
           "type": "table"
         }
-      ]
+      ],
+      "description": "This fleet row shows non-OK providers and their top causes when expanded."
     },
     {
       "collapsed": true,
