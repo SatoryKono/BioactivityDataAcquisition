@@ -87,7 +87,7 @@ first_window_inspect_tables:
 # DASH-FIRST-001: one operator question via answer panel + next-action + basis copy.
 operator_question:
   bioetl-control-plane-v1.json:
-    answer_ids: [9401]
+    answer_ids: [9422]
     next_action_id: 9418
     basis_tokens: [CURRENT, trust_status]
     next_action_tokens: [processing_status]

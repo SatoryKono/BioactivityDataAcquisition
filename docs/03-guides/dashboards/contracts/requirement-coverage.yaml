@@ -12,9 +12,9 @@ allowed_grafana_proxy_paths:
 
 dashboards:
   bioetl-control-plane-v1:
-    question: Can control-plane evidence be trusted, and is replay/resume safe?
+    question: Can the selected run be exactly replayed from saved inputs?
     answer_panel_ids:
-      - 9401
+      - 9422
     next_action_tokens:
       - Inspect Replay Safety State
     basis_tokens:

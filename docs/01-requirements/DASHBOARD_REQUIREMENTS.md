@@ -233,7 +233,7 @@ and are loaded by `tests/integration/_dashboard_layout_budgets.py`.
 
 | UID | Required answer |
 | --- | --- |
-| `bioetl-control-plane-v1` | Can control-plane evidence be trusted, and is replay/resume safe? |
+| `bioetl-control-plane-v1` | Can the selected run be exactly replayed from saved inputs? |
 | `bioetl-overview-v2` | What is broken or degraded now, and where should the operator go first? |
 | `bioetl-runtime` | What currently blocks runtime delivery? |
 | `bioetl-provider-health-v2` | Which provider is degraded/failing, and why? |
@@ -248,7 +248,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 
 | UID | Answer panel (title / id) | Notes |
 | --- | --- | --- |
-| `bioetl-control-plane-v1` | `Monitor Current Readiness` (`9401`) | evidence-aware trust verdict |
+| `bioetl-control-plane-v1` | `Review Exact Replay Readiness` (`9422`) | exact-run readiness from saved inputs; CURRENT `9401` is not this answer |
 | `bioetl-overview-v2` | `Monitor Fleet Health` (`214`) + `Review First Action` (`215`) | CURRENT verdict + next route. `Review Selected Run Summary` (`9603`) MUST occupy the first window as SELECTED RUN context and MUST NOT replace 214/215. |
 | `bioetl-runtime` | `Monitor Pipeline Status` (`9401`) | trust-gated runtime verdict |
 | `bioetl-provider-health-v2` | `Monitor Fleet Severity` (`9101`) | GLOBAL provider matrix |

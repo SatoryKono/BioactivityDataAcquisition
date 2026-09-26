@@ -292,8 +292,8 @@ scalar_density_enforced_uids:
 
 answer_panels:
   bioetl-control-plane-v1.json:
-    - id: 9401
-      title: Monitor Readiness
+    - id: 9422
+      title: Review Exact Replay Readiness
   bioetl-overview-v2.json:
     - id: 214
       title: Monitor Scope Health
