@@ -32,14 +32,14 @@ dashboards:
       - SELECTED RUN
       - QUERY ERROR
   bioetl-runtime:
-    question: What currently blocks runtime delivery?
+    question: What is the saved runtime assessment of the selected Run ID?
     answer_panel_ids:
-      - 9401
+      - 9998
     next_action_tokens:
-      - Open Runtime Blockers
+      - Open Run Explorer
     basis_tokens:
-      - CURRENT
-      - UNKNOWN
+      - SELECTED RUN
+      - QUERY ERROR
   bioetl-provider-health-v2:
     question: Which provider is degraded/failing, and why?
     answer_panel_ids:

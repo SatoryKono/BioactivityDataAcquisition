@@ -80,7 +80,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
             "description": "SELECTED RUN · Individual checks behind Replay Readiness. Fail blocks replay; unknown means the check could not be confirmed. Evidence references point into the saved report.",
             "datasource": card["datasource"],
             "targets": [target],
-            "gridPos": {"x": 0, "y": bottom, "w": 24, "h": 12},
+            "gridPos": {"x": 0, "y": bottom, "w": 24, "h": 8},
             "options": {
                 "showHeader": True,
                 "cellHeight": "lg",

@@ -496,7 +496,7 @@
           "title": "Inspect Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 23,
+            "y": 6,
             "w": 24,
             "h": 12
           },
@@ -753,7 +753,7 @@
           "title": "Inspect Processed Records",
           "gridPos": {
             "x": 0,
-            "y": 35,
+            "y": 18,
             "w": 24,
             "h": 12
           },

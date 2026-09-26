@@ -235,7 +235,7 @@ and are loaded by `tests/integration/_dashboard_layout_budgets.py`.
 | --- | --- |
 | `bioetl-control-plane-v1` | Can the selected run be exactly replayed from saved inputs? |
 | `bioetl-overview-v2` | What is the saved assessment of the selected Run ID? |
-| `bioetl-runtime` | What currently blocks runtime delivery? |
+| `bioetl-runtime` | What is the saved runtime assessment of the selected Run ID? |
 | `bioetl-provider-health-v2` | Which provider is degraded/failing, and why? |
 | `bioetl-dq-v2` | What is the DQ assessment of the selected Run ID? |
 | `bioetl-incident-v1` | What is the highest-confidence active suspect? |
@@ -250,7 +250,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | --- | --- | --- |
 | `bioetl-control-plane-v1` | `Review Exact Replay Readiness` (`9422`) | exact-run readiness from saved inputs; CURRENT `9401` is not this answer |
 | `bioetl-overview-v2` | `Review Selected Run Status` (`9603`) + `Review Run Domains` (`9002`) | Saved HTTP evidence for the selected Run ID. |
-| `bioetl-runtime` | `Monitor Pipeline Status` (`9401`) | trust-gated runtime verdict |
+| `bioetl-runtime` | `Review Selected Run Status` (`9998`) | saved HTTP evidence for the selected Run ID |
 | `bioetl-provider-health-v2` | `Monitor Fleet Severity` (`9101`) | GLOBAL provider matrix |
 | `bioetl-dq-v2` | `Review Selected Run Status` (`9406`) | saved HTTP evidence for the selected Run ID |
 | `bioetl-incident-v1` | `Inspect Ranked Suspects` (`2010`) | highest-confidence suspect matrix |

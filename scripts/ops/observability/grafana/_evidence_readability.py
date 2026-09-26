@@ -245,7 +245,7 @@ def _trust_anchors(p: dict[int, dict]) -> None:
 def _trust_layout(p: dict[int, dict]) -> None:
     """Lay out the selected-run rows that remain on Trust."""
     if 902 in p:
-        _bands(p[902], [[(9413, 0, 24, 6)], [(9423, 0, 24, 12)]])
+        _bands(p[902], [[(9413, 0, 24, 6)], [(9423, 0, 24, 8)]])
     if 901 in p:
         _bands(p[901], [[(9414, 0, 24, 9)]])
 
