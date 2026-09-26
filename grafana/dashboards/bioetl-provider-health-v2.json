@@ -3686,7 +3686,7 @@
           ],
           "title": "Track Rate-Limiter Wait p95",
           "type": "timeseries",
-          "description": "This limiter wait trend shows the 95th percentile limiter wait in the chart range. TIME RANGE · Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
+          "description": "This limiter wait trend is not a health verdict. This limiter wait trend shows the 95th percentile limiter wait in the chart range. TIME RANGE · Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -3767,7 +3767,7 @@
           ],
           "title": "Monitor Available Rate-Limit Tokens",
           "type": "bargauge",
-          "description": "This token gauge shows the minimum remaining rate-limit tokens in the chart range. TIME RANGE · Compact optional selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK Numeric token count is primary; sequential color is secondary. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "This token gauge is not a health verdict. This token gauge shows the minimum remaining rate-limit tokens in the chart range. TIME RANGE · Compact optional selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK Numeric token count is primary; sequential color is secondary. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -3865,7 +3865,7 @@
           ],
           "title": "Monitor Global Circuit-Breaker State",
           "type": "stat",
-          "description": "This circuit-breaker stat shows adapter circuit-breaker state over the chart range. TIME RANGE · Compact cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL ADAPTER evidence: covers all adapters, independent of Provider and Pipeline."
+          "description": "This circuit-breaker stat is not the Provider selector. This circuit-breaker stat shows adapter circuit-breaker state over the chart range. TIME RANGE · Compact cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL ADAPTER evidence: covers all adapters, independent of Provider and Pipeline."
         },
         {
           "datasource": {
