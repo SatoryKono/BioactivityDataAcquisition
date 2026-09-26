@@ -297,7 +297,7 @@
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
         "mode": "html",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">BROWSE last 10 launches, newest start first; not this time range.<br>Open 1. Trust through 5. Data Quality on the left opens that launch.<br>Pipeline: ${pipeline:text}. SELECTED RUN: $run_id.<br><a href=\"/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">All pipelines · clear search</a> · Open Report for persisted evidence.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">BROWSE last 10 launches, newest start first; not this time range.<br>Columns 1. Trust through 5. Data Quality open that launch.<br>Pipeline: ${pipeline:text}. SELECTED RUN: $run_id.<br><a href=\"/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">All pipelines · clear search</a> · Open Report for persisted evidence.</div>"
       },
       "description": "Browse the latest 10 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
       "links": [
@@ -912,7 +912,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Trust"
+              "options": "1. Trust"
             },
             "properties": [
               {
@@ -1231,7 +1231,7 @@
               "status": "Processing",
               "report_label": "Report",
               "event_age_display": "Event age",
-              "trust_status": "Trust",
+              "trust_status": "1. Trust",
               "run_id": "Run",
               "overview_handoff": "2. Overview",
               "diagnostics_handoff": "3. Pipeline Diagnostics",
