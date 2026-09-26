@@ -4377,7 +4377,7 @@
           ],
           "title": "Monitor Healthy Checks",
           "type": "stat",
-          "description": "TIME RANGE · Number of HEALTHY checks completed in the selected range. `0` means none were observed or checks have not started; it is supporting evidence, not proof of current provider health. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "This healthy checks stat shows how many checks finished healthy in the chart range. TIME RANGE · Number of HEALTHY checks completed in the selected range. `0` means none were observed or checks have not started; it is supporting evidence, not proof of current provider health. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -4451,7 +4451,7 @@
           ],
           "title": "Monitor Degraded Checks",
           "type": "stat",
-          "description": "TIME RANGE · Observed degraded health checks in the selected range; historical count, not current severity. Missing evidence remains UNKNOWN."
+          "description": "This degraded checks stat shows how many checks finished degraded in the chart range. TIME RANGE · Observed degraded health checks in the selected range; historical count, not current severity. Missing evidence remains UNKNOWN."
         },
         {
           "datasource": {
@@ -4541,7 +4541,7 @@
           ],
           "title": "Track Failure Rate",
           "type": "stat",
-          "description": "TIME RANGE · Failed checks divided by all completed checks in the selected range. Warning starts at 5%; critical starts at 20%. A zero denominator is N/A rather than success. Current provider status comes from the canonical status telemetry. VALID EMPTY (no events) is not TELEMETRY MISSING."
+          "description": "This failure rate stat shows the failed-check ratio in the chart range. TIME RANGE · Failed checks divided by all completed checks in the selected range. Warning starts at 5%; critical starts at 20%. A zero denominator is N/A rather than success. Current provider status comes from the canonical status telemetry. VALID EMPTY (no events) is not TELEMETRY MISSING."
         },
         {
           "datasource": {
