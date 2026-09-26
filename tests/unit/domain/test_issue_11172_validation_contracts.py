@@ -37,20 +37,29 @@ _PROFILE_OVERRIDES = {
 }
 
 
-def test_started_at_accepts_any_aware_offset_and_rejects_naive() -> None:
-    """Aware offsets are accepted. Only naive datetimes are rejected (#11172)."""
+def test_started_at_requires_zero_utc_offset_and_rejects_naive() -> None:
+    """Only timezone-aware UTC (zero offset) timestamps are accepted (#11224)."""
     context = RunContext(
         run_id=RunID("run-1"),
         run_type=RunType.INCREMENTAL,
-        started_at=datetime(2026, 9, 25, 12, 0, tzinfo=timezone(timedelta(hours=3))),
+        started_at=datetime(2026, 9, 25, 12, 0, tzinfo=UTC),
         pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
     )
-    assert context.started_at.tzinfo is not None
-    assert context.started_at.utcoffset() == timedelta(hours=3)
+    assert context.started_at.utcoffset() == timedelta(0)
 
-    with pytest.raises(ValueError, match="timezone-aware"):
+    with pytest.raises(ValueError, match="zero UTC offset"):
+        RunContext(
+            run_id=RunID("run-1"),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime(2026, 9, 25, 12, 0, tzinfo=timezone(timedelta(hours=3))),
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+        )
+
+    with pytest.raises(ValueError, match="naive datetime"):
         RunContext(
             run_id=RunID("run-1"),
             run_type=RunType.INCREMENTAL,
@@ -59,7 +68,6 @@ def test_started_at_accepts_any_aware_offset_and_rejects_naive() -> None:
             provider="chembl",
             entity="activity",
         )
-    _ = UTC
 
 
 def test_negative_dq_counters_are_rejected() -> None:
@@ -76,12 +84,14 @@ def test_absolute_relative_path_is_rejected_before_segment_cleanup() -> None:
         _normalized_path_parts("C:/chembl/activity/batch.json")
 
 
-def test_unknown_severity_aliases_fall_back_to_info() -> None:
-    """Known aliases map into the vocabulary; unknown tokens fall back to info."""
+def test_unknown_severity_aliases_use_allowed_fallback() -> None:
+    """Known aliases map into the vocabulary; unknown tokens use allowed fallback."""
     assert normalize_severity("warning", fallback="debug") == "warning"
     assert normalize_severity("warn", fallback="debug") == "warning"
     assert normalize_severity("fatal", fallback="debug") == "error"
-    assert normalize_severity("loud", fallback="debug") == "info"
+    assert normalize_severity("critical", fallback="debug") == "error"
+    assert normalize_severity("loud", fallback="debug") == "debug"
+    assert normalize_severity("loud", fallback="not-a-level") == "info"
 
 
 def test_unknown_standard_profile_override_is_rejected() -> None:

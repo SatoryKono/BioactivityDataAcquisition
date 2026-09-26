@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import json
-
+from bioetl.domain.behavior.aggregation_validation_helpers import build_group_key
 from bioetl.domain.types import JsonDict
 
 
@@ -86,26 +85,4 @@ def aggregation_group_key(
     record: JsonDict, group_by_fields: list[str]
 ) -> tuple[tuple[str, str, str], ...]:
     """Build a type-preserving group key for aggregation validation."""
-    components: list[tuple[str, str, str]] = []
-    for field in group_by_fields:
-        if field not in record:
-            components.append(("absent", "", ""))
-            continue
-        value = record[field]
-        type_name = type(value).__name__
-        if value is None:
-            components.append(("present", "NoneType", "null"))
-        else:
-            components.append(
-                (
-                    "present",
-                    type_name,
-                    json.dumps(
-                        value,
-                        sort_keys=True,
-                        separators=(",", ":"),
-                        ensure_ascii=False,
-                    ),
-                )
-            )
-    return tuple(components)
+    return build_group_key(record, group_by_fields)

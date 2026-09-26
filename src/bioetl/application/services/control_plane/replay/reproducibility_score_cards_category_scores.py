@@ -95,10 +95,10 @@ def score_replay_readiness(summary: JsonDict) -> ScoreCardRecord:
         )
         evidence.append("exact_replay_blockers_present")
         blocker_items.extend(string_items(exact_replay_blockers))
-    if summary.get("replay_mode") == "rebuild_only":
+    if summary.get("replay_mode") == "rebuild":
         score -= 2
-        evidence.append("rebuild_only_replay_mode")
-        blocker_items.append("rebuild_only_replay_mode")
+        evidence.append("rebuild_replay_mode")
+        blocker_items.append("rebuild_replay_mode")
     if summary.get("artifact_publication_closure") not in {None, "closed"}:
         score -= 2
         evidence.append("artifact_publication_closure_not_closed")

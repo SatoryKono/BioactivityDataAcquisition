@@ -11,6 +11,7 @@ from collections.abc import Callable
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
+import threading
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition._workflow_transform_registry import (
@@ -66,6 +67,7 @@ __all__ = [
     "load_workflow_config",
 ]
 _workflow_memory_lock: LockPort | None = None
+_workflow_memory_lock_init = threading.Lock()
 _CONTROL_PLANE_MODULE = "bioetl.infrastructure.control_plane"
 
 
@@ -161,8 +163,11 @@ def get_workflow_runner_service(
 def _get_workflow_memory_lock() -> LockPort:
     """Return or lazily create the global in-memory workflow lock."""
     global _workflow_memory_lock
-    if _workflow_memory_lock is None:
-        _workflow_memory_lock = locking.MemoryLock()
+    if _workflow_memory_lock is not None:
+        return _workflow_memory_lock
+    with _workflow_memory_lock_init:
+        if _workflow_memory_lock is None:
+            _workflow_memory_lock = locking.MemoryLock()
     return _workflow_memory_lock
 
 

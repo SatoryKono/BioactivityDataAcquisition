@@ -54,8 +54,11 @@ class ProteinClassHierarchy:
     def __post_init__(self) -> None:
         if self.leaf_id < 1:
             raise ValueError(f"leaf_id must be positive, got {self.leaf_id}")
+        if self.path is not None:
+            object.__setattr__(self, "path", tuple(self.path))
         self._validate_no_gaps()
         self._validate_path()
+        self._validate_levels_match_path()
 
     def _validate_no_gaps(self) -> None:
         seen_empty = False
@@ -117,12 +120,38 @@ class ProteinClassHierarchy:
                 return False
             last = self.path[-1]
             return last.id == self.leaf_id and not last.is_empty
-        return (not self.l5.is_empty) and self.l5.id == self.leaf_id
+        last_nonempty = next(
+            (level for level in reversed(self.levels) if not level.is_empty),
+            None,
+        )
+        if last_nonempty is None:
+            return False
+        return last_nonempty.id == self.leaf_id
 
     def _validate_path(self) -> None:
         if self.path is None:
             return
         _validate_path_levels(self.path, leaf_id=self.leaf_id)
+
+    def _validate_levels_match_path(self) -> None:
+        if self.path is None:
+            return
+        for index, level in enumerate(self.levels):
+            if level.is_empty:
+                continue
+            if index >= len(self.path):
+                raise ValueError(
+                    "populated protein class hierarchy levels exceed path depth"
+                )
+            path_level = self.path[index]
+            if (
+                path_level.id != level.id
+                or path_level.name != level.name
+                or path_level.desc != level.desc
+            ):
+                raise ValueError(
+                    "protein class hierarchy levels must match path entries"
+                )
 
 
 def _validate_level_id(level_id: int | None) -> None:

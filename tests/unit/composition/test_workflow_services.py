@@ -99,3 +99,37 @@ def test_get_workflow_execution_service_injects_real_manifest_clock(
 def test_system_clock_factory_returns_timezone_aware_now() -> None:
     """Workflow ledger timestamps must come from the canonical system clock."""
     assert _workflow_services._system_clock_now()().tzinfo is not None
+
+
+def test_get_workflow_memory_lock_is_singleton_under_concurrency(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Concurrent first callers must share one lazily created MemoryLock."""
+    import threading
+
+    created: list[object] = []
+
+    def _memory_lock_factory() -> object:
+        lock = object()
+        created.append(lock)
+        return lock
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.locking.MemoryLock",
+        _memory_lock_factory,
+    )
+    _workflow_services._workflow_memory_lock = None
+
+    locks: list[object] = []
+
+    def _worker() -> None:
+        locks.append(_workflow_services._get_workflow_memory_lock())
+
+    threads = [threading.Thread(target=_worker) for _ in range(8)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    assert len(created) == 1
+    assert len({id(lock) for lock in locks}) == 1

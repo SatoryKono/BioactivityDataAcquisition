@@ -120,7 +120,7 @@ class TestRunContextValidation:
     def test_naive_datetime_raises(self) -> None:
         """Test that naive (non-timezone-aware) datetime raises ValueError."""
         naive_dt = datetime(2024, 1, 1, 12, 0, 0)  # No tzinfo
-        with pytest.raises(ValueError, match="timezone-aware"):
+        with pytest.raises(ValueError, match="naive datetime"):
             RunContext(
                 run_id=_make_run_id(),
                 run_type=RunType.INCREMENTAL,
@@ -178,18 +178,18 @@ class TestRunContextValidation:
         )
         assert ctx.started_at.tzinfo is not None
 
-    def test_non_utc_timezone_accepted(self) -> None:
-        """Test that non-UTC timezone-aware datetime is also accepted."""
+    def test_non_zero_utc_offset_rejected(self) -> None:
+        """Test that non-zero UTC offsets are rejected."""
         tz = timezone(timedelta(hours=1), name="UTC+01:00")
-        ctx = RunContext(
-            run_id=_make_run_id(),
-            run_type=RunType.INCREMENTAL,
-            started_at=datetime(2024, 1, 1, 12, 0, 0, tzinfo=tz),
-            pipeline_name="chembl_activity",
-            provider="chembl",
-            entity="activity",
-        )
-        assert ctx.started_at.tzinfo is not None
+        with pytest.raises(ValueError, match="zero UTC offset"):
+            RunContext(
+                run_id=_make_run_id(),
+                run_type=RunType.INCREMENTAL,
+                started_at=datetime(2024, 1, 1, 12, 0, 0, tzinfo=tz),
+                pipeline_name="chembl_activity",
+                provider="chembl",
+                entity="activity",
+            )
 
 
 @pytest.mark.unit
@@ -270,7 +270,7 @@ class TestRunContextFactoryMethod:
 
     def test_create_validates_naive_datetime(self) -> None:
         """Test that create() also validates timezone-aware requirement."""
-        with pytest.raises(ValueError, match="timezone-aware"):
+        with pytest.raises(ValueError, match="naive datetime"):
             RunContext.create(
                 run_id=_make_run_id(),
                 run_type=RunType.INCREMENTAL,
