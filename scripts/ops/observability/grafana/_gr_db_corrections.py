@@ -381,6 +381,8 @@ def _correct_provider_cause_panel(panel: dict) -> None:
 def _correct_provider(uid: object, panels: dict[int, dict]) -> None:
     if uid != "bioetl-provider-health-v2":
         return
+    if 9401 not in panels or 9101 not in panels or 9107 not in panels:
+        return
     # Sparse real counter observations (including a single zero) need a
     # marker; a line alone renders an indistinguishable empty chart.
     panels[32]["fieldConfig"]["defaults"]["custom"]["showPoints"] = "always"
@@ -519,12 +521,15 @@ def _correct_control_plane(uid: object, panels: dict[int, dict]) -> None:
                 }
             ],
         )
-    panels[892]["description"] = (
-        "CURRENT · Last checkpoint age, informational only; age does not change readiness. "
-        "Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID."
-    )
+    if 892 in panels:
+        panels[892]["description"] = (
+            "CURRENT · Last checkpoint age, informational only; age does not change readiness. "
+            "Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID."
+        )
     for panel_id in (3, 104, 120, 101, 102, 103, 4, 137):
-        panel = panels[panel_id]
+        panel = panels.get(panel_id)
+        if panel is None:
+            continue
         if "UNKNOWN" not in panel.get("description", ""):
             panel["description"] = panel.get("description", "") + (
                 " Missing counter evidence is UNKNOWN; measured zero means no observed events."

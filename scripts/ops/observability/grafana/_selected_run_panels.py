@@ -153,6 +153,9 @@ def _stamp_control_plane_copy(panel: dict[str, object], uid: object) -> None:
             DESCRIPTION
             + " Observed is the saved completion-time assessment. processing_status success does not imply trust_status OK."
         )
+    if panel.get("id") == 9403:
+        description = str(panel.get("description") or "")
+        panel["description"] = description.replace("SELECTED RUN · CURRENT · ", "SELECTED RUN · ")
     if panel.get("id") == 9421:
         panel["description"] = (
             DESCRIPTION + " SELECTED RUN search: find an exact persisted identity."
@@ -308,6 +311,218 @@ def _append_saved_run_evidence_row(panels: list[object]) -> None:
     )
 
 
+_PROVIDER_HEALTH_UID = "bioetl-provider-health-v2"
+_DROP_PROVIDER_PANEL_IDS = frozenset(
+    {
+        9002,
+        9401,
+        9101,
+        9104,
+        9107,
+        9102,
+        9111,
+        9112,
+        9103,
+        9113,
+        114,
+        106,
+        107,
+        108,
+        109,
+        1,
+        2,
+        7,
+        31,
+        32,
+        102,
+        104,
+        105,
+        110,
+        111,
+        112,
+        113,
+        115,
+        91,
+        9105,
+        9106,
+        9404,
+    }
+)
+
+
+def _without_panel_ids(panels: list[object], dropped: frozenset[int]) -> list[object]:
+    kept: list[object] = []
+    for panel in panels:
+        if not isinstance(panel, dict):
+            kept.append(panel)
+            continue
+        if panel.get("id") in dropped:
+            continue
+        children = panel.get("panels")
+        if isinstance(children, list):
+            panel["panels"] = _without_panel_ids(children, dropped)
+            if panel.get("type") == "row" and not panel["panels"]:
+                continue
+        kept.append(panel)
+    return kept
+
+
+def _provider_check_panel(
+    panel_id: int,
+    title: str,
+    grid: dict[str, int],
+    fields: list[str],
+    *,
+    limit: int | None,
+) -> dict:
+    panel = _panel(panel_id, title, grid, domains=False)
+    panel["description"] = (
+        "SELECTED RUN · Saved provider check for this Run ID. "
+        "PRESENT means applicable saved evidence exists, not that the check passed. "
+        "Run ID is always set on this dashboard. A report without a provider id is not OK."
+    )
+    panel["targets"][0]["root_selector"] = "provider_checks"
+    labels = {
+        "provider": "Provider",
+        "check_result": "Check result",
+        "evidence": "Evidence",
+        "observed_at": "Observed at",
+    }
+    transforms = [
+        item
+        for item in panel["transformations"]
+        if not (limit is None and item.get("id") == "limit")
+    ]
+    for item in transforms:
+        if item.get("id") == "limit" and limit is not None:
+            item["options"]["limitField"] = limit
+        if item.get("id") == "filterFieldsByName":
+            item["options"]["include"]["names"] = fields
+        if item.get("id") == "organize":
+            item["options"]["indexByName"] = {
+                name: index for index, name in enumerate(fields)
+            }
+            item["options"]["renameByName"] = {
+                name: labels[name] for name in fields
+            }
+    panel["transformations"] = transforms
+    return panel
+
+
+_PROVIDER_SELECTOR_URL = (
+    "/ops/observability/selected-run-status?pipeline=${pipeline}"
+    "&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+)
+_PROVIDER_SELECTOR_ROOT = (
+    '$exists(provider_options) and $count(provider_options) > 0 '
+    '? provider_options : [{"text":"unknown","value":"unknown"}]'
+)
+
+
+def _bind_provider_variable_to_run(variable: dict) -> None:
+    """Options come from the selected run. All is not a choice."""
+    variable["includeAll"] = False
+    variable["allValue"] = None
+    variable["type"] = "query"
+    variable["datasource"] = "BioETL Ops HTTP"
+    variable["definition"] = _PROVIDER_SELECTOR_URL
+    variable["refresh"] = 1
+    variable["sort"] = 0
+    variable["multi"] = False
+    variable["current"] = {"selected": True, "text": "unknown", "value": "unknown"}
+    variable["description"] = (
+        "Provider for the selected Run ID. Options are the saved run participants. "
+        "All is not available. Run ID is always set on this dashboard."
+    )
+    variable["query"] = {
+        "queryType": "infinity",
+        "refId": "variable",
+        "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": _PROVIDER_SELECTOR_ROOT,
+            "type": "json",
+            "source": "url",
+            "url_options": {"method": "GET", "data": ""},
+            "url": _PROVIDER_SELECTOR_URL,
+            "columns": [
+                {"selector": "text", "text": "__text", "type": "string"},
+                {"selector": "value", "text": "__value", "type": "string"},
+            ],
+        },
+    }
+
+
+def prune_provider_health_panels(payload: dict[str, object]) -> None:
+    """Drop Provider Health panels that do not assess the selected Run ID."""
+    if payload.get("uid") != _PROVIDER_HEALTH_UID:
+        return
+    panels = payload.get("panels")
+    if not isinstance(panels, list):
+        return
+    payload["panels"] = _without_panel_ids(panels, _DROP_PROVIDER_PANEL_IDS)
+    panels = payload["panels"]
+    for panel in panels:
+        if isinstance(panel, dict) and panel.get("id") == 9400:
+            options = panel.setdefault("options", {})
+            options["content"] = (
+                '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
+                "font-size:16px;line-height:1.2;white-space:normal;"
+                'overflow-wrap:anywhere;max-width:96ch">'
+                "SELECTED RUN · Provider evidence is the saved check for this Run ID. "
+                "Fleet and current telemetry are not shown here.</div>"
+            )
+            options["bioetlDisplayTitle"] = "Understand Selected Run"
+            panel["description"] = (
+                "SELECTED RUN · Run ID is always set. "
+                "Provider evidence is the saved check for this run. "
+                "Fleet and current telemetry are not shown here."
+            )
+    templating = payload.get("templating")
+    if isinstance(templating, dict):
+        variables = templating.get("list")
+        if isinstance(variables, list):
+            for variable in variables:
+                if isinstance(variable, dict) and variable.get("name") == "provider":
+                    _bind_provider_variable_to_run(variable)
+    panels[:] = [
+        panel
+        for panel in panels
+        if not isinstance(panel, dict) or panel.get("id") not in {9460, 9461, 9462}
+    ]
+    evidence = _provider_check_panel(
+        9460,
+        "Run Provider Evidence",
+        {"x": 0, "y": 0, "w": 24, "h": 8},
+        ["provider", "check_result", "evidence", "observed_at"],
+        limit=None,
+    )
+    review = _provider_check_panel(
+        9461,
+        "Review Provider Check",
+        {"x": 0, "y": 8, "w": 24, "h": 6},
+        ["check_result", "evidence"],
+        limit=1,
+    )
+    for panel in panels:
+        if not isinstance(panel, dict):
+            continue
+        if panel.get("id") == 9405:
+            panel["gridPos"]["y"] = 5
+        if panel.get("id") == 9450:
+            panel["gridPos"]["y"] = 6
+    panels.append(
+        {
+            "id": 9462,
+            "type": "row",
+            "title": "Inspect Provider Check",
+            "collapsed": True,
+            "gridPos": {"x": 0, "y": 7, "w": 24, "h": 1},
+            "panels": [evidence, review],
+        }
+    )
+
+
 def stamp_selected_run_panels(payload: dict[str, object]) -> None:
     """Replace selected-run summaries through the generator, keeping CURRENT distinct."""
     panels = payload.get("panels", [])
@@ -328,6 +543,8 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
         _preserve_existing_links(panel, old_links, old_data_links)
         _stamp_status_links(panel, uid, panels)
         _stamp_overview_derived_panels(panel, uid)
+    prune_provider_health_panels(payload)
+    panels = payload.get("panels", [])
     _append_saved_run_evidence_row(panels)
 
 

@@ -35,7 +35,7 @@ ______________________________________________________________________
 
 ### CURRENT telemetry missing after a monitoring restart
 
-`1. Trust` answers whether the selected Run ID can be exactly replayed from saved inputs. Historical Trust and CURRENT pipeline/run-type cards are different evaluations. CURRENT Monitor Readiness, Replay, Ledger and Telemetry stay available below the first-screen fold and on Pipeline Diagnostics. They do not change exact-replay readiness. Selected-run Trust can remain OK while CURRENT cards report INCOMPLETE, UNKNOWN or CRIT.
+`1. Trust` answers whether the selected Run ID can be exactly replayed from saved inputs. CURRENT Monitor Readiness, Replay, Ledger, Telemetry and coverage live on Pipeline Diagnostics. They do not change exact-replay readiness. Selected-run Trust can remain OK while those cards report INCOMPLETE, UNKNOWN or CRIT.
 
 Check Pushgateway `/api/v1/metrics` and Prometheus `push_time_seconds` first. An
 empty gateway has no retained CLI snapshots. Required coverage includes manifest

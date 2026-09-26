@@ -368,762 +368,17 @@
       "title": "",
       "gridPos": {
         "h": 3,
-        "w": 16,
+        "w": 24,
         "x": 0,
         "y": 2
       },
-      "description": "Current panels show the latest DQ verdict and reasons for the selected pipeline. Selected-run panels use HTTP-backed identity and record accounting; run ID never filters Prometheus. Selected-range panels show scores, freshness, rejects, and delivery impact. These scopes answer different questions and must not be compared as equivalent status signals. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: stage=${stage}.",
+      "description": "SELECTED RUN · This page assesses the selected Run ID from saved HTTP evidence. Prometheus current status and time-range scores are not on this page. A time-range value never proves this run.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Evidence Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Is data conformant, and what impact needs action? CURRENT = Status/reasons (up to 5). SELECTED RUN = accounting. TIME RANGE scopes are not peers.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">SELECTED RUN · Saved evidence for the selected Run ID. Current pipeline status and time-range scores are not on this page.</div></div>"
       },
       "links": []
-    },
-    {
-      "id": 9401,
-      "type": "stat",
-      "title": "Monitor Current DQ Status",
-      "gridPos": {
-        "h": 3,
-        "w": 8,
-        "x": 16,
-        "y": 2
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "CURRENT · Current DQ verdict for the selected pipeline. Mapping: `0=OK`, `1=WARN`, `2=CRIT`, `3/null=UNKNOWN`. UNKNOWN means current status evidence is missing, stale, unavailable, or not started—not healthy. Run type and stage mainly affect range evidence; run ID does not filter this verdict. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "#555555"
-                }
-              }
-            },
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "#555555"
-                }
-              }
-            }
-          ],
-          "noValue": "UNKNOWN",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none",
-          "displayName": "Monitor Current DQ Status"
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "background",
-        "dataLinks": [
-          {
-            "title": "Inspect DQ Current Status",
-            "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=9401&${__url_time_range}",
-            "targetBlank": false,
-            "includeVars": false
-          },
-          {
-            "title": "Inspect DQ Current Reasons",
-            "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=9102&${__url_time_range}",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ],
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value",
-        "text": {
-          "valueSize": 20,
-          "titleSize": 14
-        }
-      },
-      "targets": [
-        {
-          "expr": "max(bioetl_dq_current_status{pipeline=~\"$pipeline\"})",
-          "refId": "A",
-          "instant": true
-        }
-      ]
-    },
-    {
-      "id": 9103,
-      "type": "text",
-      "title": "",
-      "gridPos": {
-        "h": 2,
-        "w": 24,
-        "x": 0,
-        "y": 5
-      },
-      "options": {
-        "content": "<div style=\"font-size:16px;line-height:1.15\">OK: review run accounting. WARN/CRIT: inspect reasons. UNKNOWN: verify <a href=\"https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md\">DQ metrics, freshness and source</a>.</div>",
-        "mode": "html",
-        "bioetlDisplayTitle": "Start DQ Triage"
-      },
-      "description": "Start with Current DQ Status, Threshold State, and Current Reasons. For CRIT, inspect validation, anomaly, quarantine, and reject blockers before replay. For WARN, inspect threshold and freshness evidence. If blocked/quarantine/rejects > 0, use accounting with denominators in the Run/Range lanes. Selected-run forensics stay in Run Explorer; resume stays on Trust Review First Recovery Action. Range cards are SLA/freshness context only, not peer severity. Use selected-run accounting and selected-range evidence as supporting lanes, not competing verdicts.",
-      "links": [
-        {
-          "title": "Review current status",
-          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=9401&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "Inspect current reasons",
-          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=9102&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        }
-      ],
-      "pluginVersion": "12.2.0",
-      "transparent": true
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "TIME RANGE · CURRENT · Current DQ threshold state for the selected pipeline. Mapping: `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`. Hard-fail reasons map to CRIT, warning-only reasons map to WARN. Disabled or noop DQ monitoring is treated as WARN, not unconditional green. This is pipeline-wide; use selected-range panels below for scoped evidence. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                }
-              }
-            },
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "text"
-                }
-              }
-            }
-          ],
-          "noValue": "UNKNOWN",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "short",
-          "displayName": "Monitor DQ Threshold State"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 0,
-        "y": 7
-      },
-      "id": 9101,
-      "options": {
-        "colorMode": "value",
-        "dataLinks": [
-          {
-            "targetBlank": true,
-            "title": "Open DQ Investigation Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-dq.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-          }
-        ],
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value",
-        "text": {
-          "valueSize": 20,
-          "titleSize": 14
-        }
-      },
-      "targets": [
-        {
-          "expr": "(max(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"crit\"}>0)*2) or max(bioetl_dq_current_status{pipeline=~\"$pipeline\"})",
-          "refId": "A",
-          "instant": true
-        }
-      ],
-      "title": "Monitor DQ Threshold State",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "CURRENT · Current: Bounded reason and action rows for WARN/CRIT (up to 5). If a non-OK current status has no active reason series, a fail-safe reason_evidence_unavailable row directs the operator to verify recording rules. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. TELEMETRY MISSING is not a zero and not VALID EMPTY. An OK status adds No active reasons (OK). UNKNOWN or absent status adds Evidence unavailable (UNKNOWN). Query errors remain Grafana errors.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto",
-              "wrapText": false
-            },
-            "inspect": true,
-            "wrapText": false,
-            "minWidth": 50
-          },
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "gray",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short",
-          "noValue": "UNKNOWN — reason evidence unavailable; verify DQ metrics and recording rules.",
-          "links": [
-            {
-              "title": "Open Data Quality evidence",
-              "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&var-stage=$__all&${run_id:queryparam}&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ]
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Count"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text",
-                  "mode": "basic"
-                }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "0": {
-                        "text": "OK",
-                        "color": "green"
-                      },
-                      "1": {
-                        "text": "WARN",
-                        "color": "orange"
-                      },
-                      "2": {
-                        "text": "CRIT",
-                        "color": "red"
-                      }
-                    }
-                  },
-                  {
-                    "type": "special",
-                    "options": {
-                      "match": "null",
-                      "result": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      }
-                    }
-                  },
-                  {
-                    "type": "special",
-                    "options": {
-                      "match": "nan",
-                      "result": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "reason"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              },
-              {
-                "id": "custom.inspect",
-                "value": true
-              },
-              {
-                "id": "links",
-                "value": []
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "gold_contract_exclusions": {
-                        "text": "Gold contract exclusions"
-                      }
-                    }
-                  },
-                  {
-                    "type": "special",
-                    "options": {
-                      "match": "null",
-                      "result": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "severity"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              },
-              {
-                "id": "noValue",
-                "value": "—"
-              },
-              {
-                "id": "links",
-                "value": []
-              },
-              {
-                "id": "custom.width",
-                "value": 70
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "action_target"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Action"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text",
-                  "mode": "basic"
-                }
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "thresholds"
-                }
-              },
-              {
-                "id": "noValue",
-                "value": "—"
-              },
-              {
-                "id": "custom.inspect",
-                "value": false
-              },
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "title": "Inspect Gold exclusions",
-                    "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}&${__data.fields.action_scope:raw}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}&viewPanel=156",
-                    "targetBlank": false,
-                    "includeVars": false
-                  },
-                  {
-                    "title": "Inspect Silver rejects",
-                    "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}&${__data.fields.action_scope:raw}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}&viewPanel=121",
-                    "targetBlank": false,
-                    "includeVars": false
-                  },
-                  {
-                    "title": "Verify DQ recording rules",
-                    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
-                    "targetBlank": true
-                  }
-                ]
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "data_quality": {
-                        "text": "Rejects",
-                        "color": "orange"
-                      },
-                      "verify_dq_reason_rules": {
-                        "text": "Verify DQ rules",
-                        "color": "gray"
-                      }
-                    }
-                  },
-                  {
-                    "type": "special",
-                    "options": {
-                      "match": "null",
-                      "result": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      }
-                    }
-                  },
-                  {
-                    "type": "special",
-                    "options": {
-                      "match": "nan",
-                      "result": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Action"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 125
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Started"
-            },
-            "properties": []
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Pipeline"
-            },
-            "properties": []
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Why"
-            },
-            "properties": []
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Reason"
-            },
-            "properties": []
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Stage"
-            },
-            "properties": []
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Status"
-            },
-            "properties": []
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Severity"
-            },
-            "properties": []
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "action_dashboard_uid"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "run_type"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": false
-              },
-              {
-                "id": "displayName",
-                "value": "Pipeline"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "action_scope"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 16,
-        "x": 8,
-        "y": 7
-      },
-      "id": 9102,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true
-      },
-      "pluginVersion": "10.4.0",
-      "targets": [
-        {
-          "expr": "topk(5, bioetl_dq_first_window_reason{pipeline=~\"$pipeline\"} > 0) and on(pipeline) (bioetl_dq_current_status{pipeline=~\"$pipeline\"} < 3)",
-          "format": "table",
-          "instant": true,
-          "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
-          "refId": "A"
-        },
-        {
-          "expr": "label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 0), \"reason\", \"No active reasons (OK)\", \"\", \"\")",
-          "format": "table",
-          "instant": true,
-          "refId": "B"
-        },
-        {
-          "expr": "label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 3) or absent(bioetl_dq_current_status{pipeline=~\"$pipeline\"}), \"reason\", \"Evidence unavailable (UNKNOWN)\", \"\", \"\")",
-          "format": "table",
-          "instant": true,
-          "refId": "C"
-        }
-      ],
-      "title": "Inspect Current DQ Reasons",
-      "type": "table",
-      "transformations": [
-        {
-          "id": "merge",
-          "options": {}
-        },
-        {
-          "id": "limit",
-          "options": {
-            "limitField": 5
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true,
-              "Value": true,
-              "pipeline": false,
-              "run_type": false,
-              "Value #A": true,
-              "Value #B": true,
-              "Value #C": true,
-              "action_dashboard_uid": false,
-              "job": true,
-              "action_scope": false
-            },
-            "indexByName": {
-              "reason": 0,
-              "severity": 1,
-              "action_target": 2
-            }
-          }
-        }
-      ],
-      "links": [
-        {
-          "title": "DQ reason-rules runbook",
-          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
-          "targetBlank": true
-        }
-      ]
     },
     {
       "id": 9406,
@@ -1133,7 +388,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 5
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
@@ -1404,3168 +659,616 @@
       ]
     },
     {
-      "type": "row",
-      "title": "Selected Run · Identity & Accounting",
-      "collapsed": true,
+      "id": 9402,
+      "type": "table",
+      "title": "Inspect Run Identity",
       "gridPos": {
-        "h": 1,
-        "w": 24,
         "x": 0,
-        "y": 17
+        "y": 10,
+        "w": 12,
+        "h": 5
       },
-      "id": 9405,
-      "description": "Expand after selecting an exact Run ID for HTTP-backed identity and accounting evidence.",
-      "panels": [
-        {
-          "id": 9402,
-          "type": "table",
-          "title": "Inspect Run Identity",
-          "gridPos": {
-            "x": 0,
-            "y": 18,
-            "w": 12,
-            "h": 6
-          },
-          "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Selected run: Compact identity table showing Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, Replay [Capability.Mode], Checkpoint [Anchors], and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Inspect value opens full identifiers as selectable plain text.",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto"
-                },
-                "inspect": true
-              },
-              "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first.",
-              "links": [
-                {
-                  "title": "Check BioETL Ops HTTP health",
-                  "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
-                  "targetBlank": true
-                },
-                {
-                  "title": "Open monitoring backend setup docs",
-                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
-                  "targetBlank": true
-                }
-              ]
+      "datasource": "BioETL Ops HTTP",
+      "description": "SELECTED RUN · Selected run: Compact identity table showing Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, Replay [Capability.Mode], Checkpoint [Anchors], and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Inspect value opens full identifiers as selectable plain text.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
             },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "parameter"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Parameter"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 210
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "value"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Value"
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.inspect",
-                    "value": true
-                  },
-                  {
-                    "id": "links",
-                    "value": []
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "raw_value"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "reason"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "deadline_exceeded": {
-                            "text": "QUERY ERROR — deadline exceeded",
-                            "color": "red"
-                          },
-                          "capacity_exhausted": {
-                            "text": "QUERY ERROR — capacity exhausted",
-                            "color": "red"
-                          },
-                          "catalog_unavailable": {
-                            "text": "QUERY ERROR — catalog unavailable",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Reason"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "deadline_exceeded": {
-                            "text": "QUERY ERROR — deadline exceeded",
-                            "color": "red"
-                          },
-                          "capacity_exhausted": {
-                            "text": "QUERY ERROR — capacity exhausted",
-                            "color": "red"
-                          },
-                          "catalog_unavailable": {
-                            "text": "QUERY ERROR — catalog unavailable",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Status"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "ERROR": {
-                            "text": "ERROR",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "status"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "ERROR": {
-                            "text": "ERROR",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
+            "inspect": true
           },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "display_rows",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              }
-            }
-          ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "__name__": true,
-                  "Value": true,
-                  "raw_value": true
-                },
-                "indexByName": {
-                  "parameter": 0,
-                  "value": 1
-                },
-                "renameByName": {
-                  "parameter": "Parameter",
-                  "value": "Value",
-                  "Value": "value",
-                  "Value #A": "Series A",
-                  "Value #B": "Series B",
-                  "Value #C": "Series C"
-                }
-              }
-            }
-          ],
-          "links": []
-        },
-        {
-          "id": 9403,
-          "type": "table",
-          "title": "Inspect Processed Records",
-          "gridPos": {
-            "x": 12,
-            "y": 18,
-            "w": 12,
-            "h": 6
-          },
-          "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Selected run: Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto"
-                },
-                "inspect": true
-              },
-              "decimals": 0,
-              "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs.",
-              "links": [
-                {
-                  "title": "Check BioETL Ops HTTP health",
-                  "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
-                  "targetBlank": true
-                },
-                {
-                  "title": "Open monitoring backend setup docs",
-                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
-                  "targetBlank": true
-                }
-              ],
-              "color": {
-                "mode": "fixed",
-                "fixedColor": "text"
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "parameter"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "01 bronze_records": {
-                            "text": "bronze [total]",
-                            "color": "#cd7f32"
-                          },
-                          "02 silver_valid_records": {
-                            "text": "silver [valid]",
-                            "color": "#c0c0c0"
-                          },
-                          "03 silver_filtered_out_records": {
-                            "text": "silver [filtered out]"
-                          },
-                          "04 silver_quarantined_records": {
-                            "text": "silver [quarantined]"
-                          },
-                          "05 silver_skipped_records": {
-                            "text": "silver [skipped]"
-                          },
-                          "06 silver_deduplicated_records": {
-                            "text": "silver [deduplicated]"
-                          },
-                          "07 gold_written_records": {
-                            "text": "gold [valid]",
-                            "color": "#d4af37"
-                          },
-                          "08 gold_excluded_by_contract_records": {
-                            "text": "gold [excluded]"
-                          },
-                          "09 gold_quarantined_records": {
-                            "text": "gold [quarantined]"
-                          },
-                          "10 gold_skipped_records": {
-                            "text": "gold [skipped]"
-                          },
-                          "11 gold_deduplicated_records": {
-                            "text": "gold [deduplicated]"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "value"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "count"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 70
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "UNKNOWN"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "text"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "percentage"
-                },
-                "properties": [
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 110
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "UNKNOWN"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "text"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "row_status"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": ""
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 1
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "center"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "applyToRow": true
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "silver_deficit": {
-                            "text": "",
-                            "color": "red"
-                          },
-                          "gold_deficit": {
-                            "text": "",
-                            "color": "red"
-                          },
-                          "": {
-                            "text": "",
-                            "color": "rgba(0,0,0,0)"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "count"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "count"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 70
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "UNKNOWN"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "No data": {
-                            "text": "UNKNOWN",
-                            "color": "gray"
-                          },
-                          "UNKNOWN": {
-                            "text": "UNKNOWN",
-                            "color": "gray"
-                          }
-                        }
-                      },
-                      {
-                        "type": "special",
-                        "options": {
-                          "match": "null",
-                          "result": {
-                            "text": "UNKNOWN",
-                            "color": "gray"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "text"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "showHeader": true,
-            "sortBy": [
-              {
-                "desc": false,
-                "displayName": "parameter"
-              }
-            ],
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "rows",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              }
-            }
-          ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "row_status": true,
-                  "percintage": true
-                },
-                "indexByName": {
-                  "parameter": 0,
-                  "value": 1,
-                  "count": 1,
-                  "percentage": 2,
-                  "row_status": 3
-                },
-                "renameByName": {
-                  "parameter": "parameter",
-                  "value": "count",
-                  "percentage": "percentage",
-                  "row_status": "",
-                  "Value": "count",
-                  "Value #A": "Series A",
-                  "Value #B": "Series B",
-                  "Value #C": "Series C"
-                }
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "row",
-      "title": "Selected Range · Impact & Freshness",
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 18
-      },
-      "id": 9404,
-      "description": "Expand for selected-range impact and freshness after resolving the current reason lane.",
-      "panels": [
-        {
-          "id": 157,
-          "type": "text",
-          "title": "Review DQ Coverage",
-          "options": {
-            "mode": "markdown",
-            "content": "**Measured data only · last 7 days.** Record count below is the score denominator; entity count is observed score coverage, not expected coverage. DQ validation time is not recorded by these metrics. Data freshness is separate. Run ID does not filter these scores; 100% does not prove current completeness."
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 19,
-            "w": 24,
-            "h": 4
-          }
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "max": 1,
-              "min": 0,
-              "noValue": "UNKNOWN",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 0.8
-                  },
-                  {
-                    "color": "green",
-                    "value": 0.95
-                  }
-                ]
-              },
-              "unit": "percentunit",
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "displayName": "Measured scores · 7d lookback"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 23,
-            "w": 8,
-            "h": 4
-          },
-          "id": 2,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name",
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "expr": "((sum((last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]) * last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])))) / clamp_min(sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])), 1))",
-              "legendFormat": "Quality",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Weighted DQ",
-          "type": "stat",
-          "description": "TIME RANGE · Selected range: Latest volume-weighted DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching score and record-count samples exist in that window; absence is never coerced to 0. Review raw sample history in the adjacent trend panel. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges."
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "max": 1,
-              "min": 0,
-              "noValue": "UNKNOWN",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 0.8
-                  },
-                  {
-                    "color": "green",
-                    "value": 0.95
-                  }
-                ]
-              },
-              "unit": "percentunit",
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "displayName": "Measured scores · 7d lookback"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 8,
-            "y": 23,
-            "w": 8,
-            "h": 4
-          },
-          "id": 5,
-          "options": {
-            "colorMode": "value",
-            "dataLinks": [
-              {
-                "targetBlank": true,
-                "title": "Open DQ Investigation Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-dq.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-              }
-            ],
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name",
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "expr": "min(last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]))",
-              "legendFormat": "Worst Entity",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Worst DQ",
-          "type": "stat",
-          "description": "TIME RANGE · Selected range: Latest pipeline-scoped worst-entity DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching validation score sample exists in that window, not a successful run and not a zero score. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges."
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Worst age in hours at the selected range end, using the latest timestamp observed per series within that range. Missing series show TELEMETRY MISSING (UNKNOWN); an older non-null age is never carried forward. SLA 24/72: WARN at 24h and CRIT at 72h apply only to observed evidence. This is range evidence, not a selected-run or CURRENT completeness verdict.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 1,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "noValue": "TELEMETRY MISSING — no bioetl_data_freshness_seconds for scope",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 24
-                  },
-                  {
-                    "color": "red",
-                    "value": 72
-                  }
-                ]
-              },
-              "unit": "h",
-              "displayName": "Monitor Worst Freshness Age"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 16,
-            "y": 23,
-            "w": 8,
-            "h": 4
-          },
-          "id": 8,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "textMode": "value",
-            "justifyMode": "center",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "dataLinks": [
-              {
-                "targetBlank": true,
-                "title": "Open DQ Investigation Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-dq.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-              }
-            ],
-            "orientation": "auto",
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "expr": "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range]), 0))) / 3600",
-              "legendFormat": "Worst Freshness",
-              "refId": "A",
-              "instant": true,
-              "range": false
-            }
-          ],
-          "title": "Monitor Worst Freshness Age",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 0,
-              "noValue": "UNKNOWN",
-              "color": {
-                "mode": "thresholds"
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 27,
-            "w": 24,
-            "h": 4
-          },
-          "id": 158,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name",
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "expr": "sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d]))",
-              "legendFormat": "Records in denominator",
-              "instant": true
-            },
-            {
-              "refId": "B",
-              "expr": "count(last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]))",
-              "legendFormat": "Observed score series",
-              "instant": true
-            }
-          ],
-          "title": "Inspect DQ Sample Coverage",
-          "type": "stat",
-          "description": "TIME RANGE · Observed coverage over the fixed 7d score lookback. Not expected coverage; missing telemetry remains UNKNOWN."
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE delivery impact: Blocked-record evidence. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for denominator context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: blocked = Silver filtered_out (panel 117) plus DQ quarantine; do not treat 117 and 154 as the same KPI.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "text": "0 · valid empty range",
-                      "color": "gray"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "noValue": "None observed",
-              "displayName": "Monitor Blocked Records"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 31,
-            "w": 8,
-            "h": 3
-          },
-          "id": 154,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "value",
-            "wideLayout": true,
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "round((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))) + (sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))))",
-              "legendFormat": "blocked records",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Blocked Records",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE delivery impact: Quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "text": "0 · valid empty range",
-                      "color": "gray"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "noValue": "None observed",
-              "displayName": "Monitor Quarantined Records"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 8,
-            "y": 31,
-            "w": 8,
-            "h": 3
-          },
-          "id": 6,
-          "options": {
-            "colorMode": "value",
-            "dataLinks": [
-              {
-                "targetBlank": true,
-                "title": "Open DQ Investigation Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-dq.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-              }
-            ],
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value",
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "expr": "round((sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))))",
-              "legendFormat": "Quarantined",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Quarantined Records",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "text": "0 · valid empty range",
-                      "color": "gray"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [],
-              "noValue": "None observed",
-              "displayName": "Monitor Silver Filter Rejects"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 16,
-            "y": 31,
-            "w": 8,
-            "h": 3
-          },
-          "id": 117,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value",
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "expr": "round((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))))",
-              "instant": true,
-              "legendFormat": "Filtered Out",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Silver Filter Rejects",
-          "type": "stat",
-          "description": "TIME RANGE delivery impact: Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. VALID EMPTY (no events) is not TELEMETRY MISSING. Role: Silver filtered_out rejects only — not the blocked-records superset in Monitor Blocked Records (154)."
-        }
-      ]
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 19
-      },
-      "id": 220,
-      "title": "Selected Range · Reject Evidence",
-      "type": "row",
-      "description": "Expand for selected-range reject evidence; empty is not automatically healthy.",
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Selected range: Silver structural reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range. Gold contract and semantic reject outcomes are excluded from this guardrail. Zero or empty means none observed, not started, or not available—not bare success. Red only for validated failure. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. VALID EMPTY (no events) is not TELEMETRY MISSING.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "text": "OK",
-                      "color": "green"
-                    },
-                    "1": {
-                      "text": "CRIT",
-                      "color": "red"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [],
-              "noValue": "None observed",
-              "displayName": "Monitor Silver Reject Mismatch"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 20,
-            "w": 24,
-            "h": 3
-          },
-          "id": 152,
-          "options": {
-            "colorMode": "value",
-            "dataLinks": [
-              {
-                "targetBlank": true,
-                "title": "Open Traceability Signal Ownership Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/traceability-signal-ownership.md?pipeline=${pipeline:queryparam}&${__url_time_range}"
-              }
-            ],
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value",
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "expr": "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Silver Reject Mismatch",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisLabel": "Rejects",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                },
-                "inspect": true,
-                "cellOptions": {
-                  "type": "auto"
-                }
-              },
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null+nan",
-                    "result": {
-                      "text": "—",
-                      "color": "transparent",
-                      "index": 0
-                    }
-                  }
-                }
-              ],
-              "noValue": "No reject reason samples in range",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [],
-              "decimals": 0
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "reason_code"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 80
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Reject Reason"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 23,
-            "w": 12,
-            "h": 6
-          },
-          "id": 121,
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "expr": "topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
-              "format": "table",
-              "instant": true,
-              "legendFormat": "{{reason_code}}",
-              "refId": "A"
-            }
-          ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "__name__": true
-                },
-                "indexByName": {
-                  "reason_code": 0,
-                  "Value": 1
-                },
-                "renameByName": {
-                  "reason_code": "Reject Reason",
-                  "Value": "Rejects"
-                }
-              }
-            }
-          ],
-          "title": "Inspect Top Silver Reject Reasons",
-          "type": "table",
-          "description": "TIME RANGE · Selected range: Silver structural reject reasons ranked by count in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded reason samples were observed; it must not create a synthetic reason. For record-level evidence run `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only` with the relevant run/reason filters. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. VALID EMPTY (no events) is not TELEMETRY MISSING."
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisLabel": "Rejects",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                },
-                "inspect": true,
-                "cellOptions": {
-                  "type": "auto"
-                }
-              },
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null+nan",
-                    "result": {
-                      "text": "—",
-                      "color": "transparent",
-                      "index": 0
-                    }
-                  }
-                }
-              ],
-              "noValue": "No reject field samples in range",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [],
-              "decimals": 0
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "field"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 80
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Reject Field"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "x": 12,
-            "y": 23,
-            "w": 12,
-            "h": 6
-          },
-          "id": 122,
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "expr": "topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
-              "format": "table",
-              "instant": true,
-              "legendFormat": "{{field}}",
-              "refId": "A"
-            }
-          ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "__name__": true
-                },
-                "indexByName": {
-                  "field": 0,
-                  "Value": 1
-                },
-                "renameByName": {
-                  "field": "Reject Field",
-                  "Value": "Rejects"
-                }
-              }
-            }
-          ],
-          "title": "Inspect Top Silver Reject Fields",
-          "type": "table",
-          "description": "TIME RANGE · Selected range: Silver structural rejects grouped by schema field in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded field samples were observed. For record-level evidence use `bioetl quarantine inspect` with the relevant pipeline, run, and field filters. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. VALID EMPTY (no events) is not TELEMETRY MISSING."
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Selected range: Pipeline breakdown of Silver structural rejects from the filtered_out stage-total counter. This is a scope/distribution panel, not a reason_code summary, and it intentionally excludes Gold contract/semantic rejects. No data means no filtered_out samples were observed in the active window; the panel must not invent a synthetic pipeline row. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. VALID EMPTY (no events) is not TELEMETRY MISSING.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisLabel": "Rejects",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                },
-                "inspect": true
-              },
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null+nan",
-                    "result": {
-                      "text": "—",
-                      "color": "transparent",
-                      "index": 0
-                    }
-                  }
-                }
-              ],
-              "noValue": "No filtered-out samples in range",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [],
-              "decimals": 0
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "pipeline"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 80
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Pipeline"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 29,
-            "w": 12,
-            "h": 6
-          },
-          "id": 118,
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "expr": "sum by (pipeline) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))",
-              "format": "table",
-              "instant": true,
-              "legendFormat": "{{pipeline}}",
-              "refId": "A"
-            }
-          ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "__name__": true
-                },
-                "indexByName": {
-                  "pipeline": 0,
-                  "Value": 1
-                },
-                "renameByName": {
-                  "pipeline": "Pipeline",
-                  "Value": "Silver Rejects"
-                }
-              }
-            }
-          ],
-          "title": "Inspect Silver Rejects by Pipeline",
-          "type": "table"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Gold contract quarantine and semantic exclusion outcomes by pipeline in the selected range. These are separate from Silver structural FILTERED_OUT_SILVER rejects. Use this panel when DQ impact is not explained by Silver reject evidence. No data means no Gold reject outcome samples were observed. VALID EMPTY (no events) is not TELEMETRY MISSING.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisLabel": "Gold rejects",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                },
-                "inspect": true,
-                "minWidth": 50,
-                "wrapText": false,
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              },
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null+nan",
-                    "result": {
-                      "text": "—",
-                      "color": "transparent",
-                      "index": 0
-                    }
-                  }
-                }
-              ],
-              "noValue": "No Gold reject samples in range",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [],
-              "decimals": 0
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "pipeline"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value #A"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 70
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value #B"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 70
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Pipeline"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 200
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Quarantined records"
-                },
-                "properties": [
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "unit",
-                    "value": "locale"
-                  },
-                  {
-                    "id": "decimals",
-                    "value": 0
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 100
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Quarantined"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Excluded records"
-                },
-                "properties": [
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "unit",
-                    "value": "locale"
-                  },
-                  {
-                    "id": "decimals",
-                    "value": 0
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 80
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Excluded"
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "x": 12,
-            "y": 29,
-            "w": 12,
-            "h": 6
-          },
-          "id": 156,
-          "options": {
-            "dataLinks": [
-              {
-                "targetBlank": true,
-                "title": "Open Silver/Gold Boundary ADR",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md?pipeline=${pipeline:queryparam}&${__url_time_range}"
-              }
-            ],
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "expr": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_quarantined_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
-              "format": "table",
-              "instant": true,
-              "legendFormat": "gold_quarantined {{pipeline}}",
-              "refId": "A"
-            },
-            {
-              "expr": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_excluded_by_contract_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
-              "format": "table",
-              "instant": true,
-              "legendFormat": "gold_excluded_by_contract {{pipeline}}",
-              "refId": "B"
-            }
-          ],
-          "transformations": [
-            {
-              "id": "merge",
-              "options": {}
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "Time 1": true,
-                  "Time 2": true,
-                  "__name__": true
-                },
-                "indexByName": {
-                  "pipeline": 0,
-                  "Value #A": 1,
-                  "Value #B": 2
-                },
-                "renameByName": {
-                  "pipeline": "Pipeline",
-                  "Value": "Gold Rejects",
-                  "Value #A": "Quarantined records",
-                  "Value #B": "Excluded records"
-                }
-              }
-            }
-          ],
-          "title": "Inspect Gold Reject Outcomes by Pipeline",
-          "type": "table"
-        }
-      ]
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 20
-      },
-      "id": 221,
-      "title": "Selected Range · Validation Diagnostics",
-      "type": "row",
-      "description": "Expand for deep validation diagnostics after current and impact lanes have localized the problem.",
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Selected-range evidence only. This panel no longer drives current DQ status; use Monitor DQ Current Status for incident state. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisLabel": "Records",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "(^|.*[ /])bronze$"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "#CD7F32"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "(^|.*[ /])silver$"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "#C0C0C0"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "(^|.*[ /])gold$"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "#E0B400"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "(^|.*[ /])quarantined$"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "#B877D9"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 21,
-            "w": 24,
-            "h": 10
-          },
-          "id": 1,
-          "options": {
-            "legend": {
-              "showLegend": true,
-              "displayMode": "table",
-              "placement": "bottom",
-              "calcs": [
-                "lastNotNull",
-                "max"
-              ]
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "targets": [
-            {
-              "expr": "sum by (pipeline, stage) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"$stage\"}[$__interval]))",
-              "legendFormat": "{{pipeline}} / {{stage}}",
-              "refId": "A"
-            },
-            {
-              "expr": "sum by (invariant, status) (increase(bioetl_record_flow_invariants_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__rate_interval]))",
-              "legendFormat": "{{invariant}} / {{status}}",
-              "refId": "B"
-            }
-          ],
-          "title": "Track Record Flow by Stage",
-          "type": "timeseries",
-          "maxDataPoints": 400,
-          "interval": "1m"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Selected-range Gold output count for DQ deliverability triage. 0 means no Gold records were observed inside the active window; it does not prove the current DQ verdict is OK or UNKNOWN. Compare with Bronze denominator, blocked-share, and the shared Processed Records table before interpreting data loss TELEMETRY MISSING is not a zero and not VALID EMPTY.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "noValue": "None observed",
-              "displayName": "Monitor Gold Records"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 31,
-            "w": 24,
-            "h": 3
-          },
-          "id": 4,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value",
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])))",
-              "instant": true,
-              "legendFormat": "Gold",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Gold Records",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Selected-range Bronze denominator for DQ triage. 0 means no Bronze records were observed inside the active window; it does not prove DQ metrics are missing. Compare with Gold output and blocked-share panels below TELEMETRY MISSING is not a zero and not VALID EMPTY.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "noValue": "None observed",
-              "displayName": "Monitor Bronze Records"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 34,
-            "w": 24,
-            "h": 3
-          },
-          "id": 3,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value",
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])))",
-              "instant": true,
-              "legendFormat": "Bronze",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Bronze Records",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                }
-              },
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "noValue": "UNKNOWN",
-              "unit": "time:YYYY-MM-DD HH:mm",
-              "decimals": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
-              "displayName": "Inspect Latest Successful Data"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 37,
-            "w": 24,
-            "h": 3
-          },
-          "id": 101,
-          "options": {
-            "colorMode": "value",
-            "dataLinks": [
-              {
-                "targetBlank": true,
-                "title": "Open DQ Investigation Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-dq.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-              },
-              {
-                "targetBlank": false,
-                "title": "Open DQ Current Reasons",
-                "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=9102&${__url_time_range}",
-                "includeVars": false
-              }
-            ],
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value",
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "expr": "max(max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range])) * 1000",
-              "legendFormat": "Latest Data",
-              "refId": "A"
-            }
-          ],
-          "description": "TIME RANGE · Latest successful data timestamp for the selected pipeline scope. This is current freshness context and compact supporting evidence rather than a first-answer verdict or selected-range proof. UNKNOWN means no freshness proof is available now; next action: inspect DQ Current Reasons and the DQ investigation runbook before treating stale or blank values as healthy",
-          "title": "Inspect Latest Successful Data",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Quarantined records grouped by error type in the selected range. Use it to identify dominant quarantine signatures. No data means no matching quarantine samples were observed; it must not create a synthetic error type. For row-level evidence use `bioetl quarantine inspect`. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisLabel": "Quarantined records",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "No quarantined records in range",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "noValue": "No quarantined records in range",
-              "unit": "short",
-              "decimals": 0
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 40,
-            "w": 24,
-            "h": 7
-          },
-          "id": 9,
-          "options": {
-            "displayMode": "basic",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showUnfilled": true,
-            "text": {
-              "titleSize": 14,
-              "valueSize": 14
-            }
-          },
-          "targets": [
-            {
-              "expr": "sum by (error_type) (max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
-              "legendFormat": "{{error_type}}",
-              "refId": "A"
-            }
-          ],
-          "title": "Inspect Quarantine Error Types",
-          "type": "bargauge"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Selected-range count of canonical Silver validation failures. Non-zero means Silver validation blocked or degraded promotion and should be correlated with current DQ reasons and reject/quarantine evidence. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. VALID EMPTY (no events) is not TELEMETRY MISSING.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "text": "0",
-                      "color": "gray"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "short",
-              "noValue": "None observed",
-              "displayName": "Monitor Silver Validation Failures"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 47,
-            "w": 24,
-            "h": 3
-          },
-          "id": 12,
-          "options": {
-            "colorMode": "value",
-            "dataLinks": [
-              {
-                "targetBlank": true,
-                "title": "Open DQ Investigation Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-dq.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-              }
-            ],
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value",
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range]))))",
-              "legendFormat": "Validation Failures",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Silver Validation Failures",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Selected-range Gold strict-validation hard-fail count. Non-zero means Gold promotion was blocked. Zero means no hard-fail samples were observed in the selected window; it does not prove Gold validation ran or that Gold output exists. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. VALID EMPTY (no events) is not TELEMETRY MISSING.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "text"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
-                  }
-                ]
-              },
-              "unit": "short",
-              "noValue": "None observed",
-              "displayName": "Monitor Gold Validation Failures"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 50,
-            "w": 24,
-            "h": 3
-          },
-          "id": 151,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value",
-            "dataLinks": [
-              {
-                "targetBlank": true,
-                "title": "Open DQ Investigation Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-dq.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-              }
-            ],
-            "text": {
-              "valueSize": 20,
-              "titleSize": 14
-            }
-          },
-          "targets": [
-            {
-              "expr": "round((sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range]))))",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Gold Validation Failures",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Selected-range anomaly counts by severity and anomaly type. WARN-only anomalies indicate drift; CRIT anomalies are blocking and should be correlated with current DQ reasons before replay or promotion. No data means no anomaly events were observed in the current window; the panel must not invent a synthetic severity/type series. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisLabel": "Anomalies",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "noValue": "No anomaly samples in range; telemetry may be absent",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 53,
-            "w": 24,
-            "h": 6
-          },
-          "id": 10,
-          "options": {
-            "legend": {
-              "calcs": [
-                "lastNotNull",
-                "max"
-              ],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": false
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "targets": [
-            {
-              "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
-              "legendFormat": "{{severity}} / {{anomaly_type}}",
-              "refId": "A"
-            }
-          ],
-          "title": "Track DQ Anomalies",
-          "type": "timeseries",
-          "maxDataPoints": 400,
-          "interval": "1m"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Selected-range p95 duration of DQ checks. This is a diagnostics/performance surface, not a quality outcome; use it when DQ checks themselves look slow or noisy during an incident. Samples exist only when the runtime emitted bioetl_dq_check_duration_ms, which requires an active DQ monitor path rather than disabled/noop monitoring. No data means no DQ duration samples were observed in range or DQ timing telemetry is absent; it is not equivalent to fast checks. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisLabel": "Duration (ms)",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "always",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "noValue": "NO OBSERVATIONS — no usable histogram increments",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "ms"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 59,
-            "w": 24,
-            "h": 6
-          },
-          "id": 11,
-          "options": {
-            "legend": {
-              "calcs": [
-                "mean",
-                "max"
-              ],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": false
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "targets": [
-            {
-              "expr": "(histogram_quantile(0.95, (sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])) unless on (pipeline) (sum by (pipeline) (changes(bioetl_dq_check_duration_ms_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval]) > 0))))) >= 0",
-              "legendFormat": "{{pipeline}} p95",
-              "refId": "A"
-            }
-          ],
-          "title": "Track DQ Check Duration p95",
-          "type": "timeseries",
-          "maxDataPoints": 400,
-          "interval": "1m"
-        },
-        {
-          "description": "Lineage-reference gaps remain a replay/control-plane trust signal owned by `1. Trust`. This DQ surface keeps only a compact handoff so the trends row can stay focused on local DQ evidence. Open the canonical control-plane panels when missing lineage must be reviewed together with replay blockers, manifest / ledger evidence, and artifact identity anchors",
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 65,
-            "w": 24,
-            "h": 4
-          },
-          "id": 116,
+          "unit": "none",
+          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first.",
           "links": [
             {
-              "includeVars": false,
-              "targetBlank": false,
-              "title": "Open Control Plane lineage diagnostics",
-              "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
-              "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=904&${__url_time_range}"
+              "title": "Check BioETL Ops HTTP health",
+              "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
+              "targetBlank": true
+            },
+            {
+              "title": "Open monitoring backend setup docs",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+              "targetBlank": true
             }
-          ],
-          "options": {
-            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Lineage handoff</strong> — open the canonical <a href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Control Plane</a> for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.</div>",
-            "dataLinks": [
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parameter"
+            },
+            "properties": [
               {
-                "includeVars": false,
-                "targetBlank": false,
-                "title": "Open Control Plane lineage diagnostics",
-                "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
-                "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=904&${__url_time_range}"
-              }
-            ],
-            "mode": "html"
-          },
-          "title": "Inspect Lineage in Control Plane",
-          "type": "text"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 69,
-            "w": 24,
-            "h": 4
-          },
-          "id": 150,
-          "description": "Compact handoff note for aggregate control-plane symptoms. Keep this as footer guidance only; operational evidence still lives in `1. Trust` and its runbook surfaces",
-          "options": {
-            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Aggregate control-plane handoff</strong> — <a href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Trust</a> for store/manifest failures and fleet-wide control-plane reliability. Use when DQ impact is global. <a href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Back to top</a>.</div>",
-            "mode": "html"
-          },
-          "title": "Inspect Aggregate Control-Plane Issues",
-          "type": "text"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Observed volume-weighted DQ score, separate from current operational status and the 7d retained stat. Line and legend color use the minimum observed score in this range, with the stat's thresholds. Missing intervals remain gaps and do not recolor history. 100% does not prove current completeness. UNKNOWN / TELEMETRY MISSING means no observed samples, not zero; full identifiers remain available in the series legend and tooltip.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds",
-                "seriesBy": "min"
+                "id": "displayName",
+                "value": "Parameter"
               },
-              "decimals": 0,
-              "max": 1,
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
+              {
+                "id": "custom.width",
+                "value": 210
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Value"
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "links",
+                "value": []
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "raw_value"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reason"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
                   {
-                    "color": "gray",
-                    "value": null
-                  },
+                    "type": "value",
+                    "options": {
+                      "deadline_exceeded": {
+                        "text": "QUERY ERROR — deadline exceeded",
+                        "color": "red"
+                      },
+                      "capacity_exhausted": {
+                        "text": "QUERY ERROR — capacity exhausted",
+                        "color": "red"
+                      },
+                      "catalog_unavailable": {
+                        "text": "QUERY ERROR — catalog unavailable",
+                        "color": "red"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
                   {
-                    "color": "orange",
-                    "value": 0.8
-                  },
+                    "type": "value",
+                    "options": {
+                      "deadline_exceeded": {
+                        "text": "QUERY ERROR — deadline exceeded",
+                        "color": "red"
+                      },
+                      "capacity_exhausted": {
+                        "text": "QUERY ERROR — capacity exhausted",
+                        "color": "red"
+                      },
+                      "catalog_unavailable": {
+                        "text": "QUERY ERROR — catalog unavailable",
+                        "color": "red"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
                   {
-                    "color": "green",
-                    "value": 0.95
+                    "type": "value",
+                    "options": {
+                      "ERROR": {
+                        "text": "ERROR",
+                        "color": "red"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "ERROR": {
+                        "text": "ERROR",
+                        "color": "red"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        },
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "display_rows",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "Value": true,
+              "raw_value": true
+            },
+            "indexByName": {
+              "parameter": 0,
+              "value": 1
+            },
+            "renameByName": {
+              "parameter": "Parameter",
+              "value": "Value",
+              "Value": "value",
+              "Value #A": "Series A",
+              "Value #B": "Series B",
+              "Value #C": "Series C"
+            }
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": 9403,
+      "type": "table",
+      "title": "Inspect Processed Records",
+      "gridPos": {
+        "x": 12,
+        "y": 10,
+        "w": 12,
+        "h": 5
+      },
+      "datasource": "BioETL Ops HTTP",
+      "description": "SELECTED RUN · TIME RANGE · Selected run: Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": true
+          },
+          "decimals": 0,
+          "unit": "none",
+          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs.",
+          "links": [
+            {
+              "title": "Check BioETL Ops HTTP health",
+              "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
+              "targetBlank": true
+            },
+            {
+              "title": "Open monitoring backend setup docs",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+              "targetBlank": true
+            }
+          ],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parameter"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "01 bronze_records": {
+                        "text": "bronze [total]",
+                        "color": "#cd7f32"
+                      },
+                      "02 silver_valid_records": {
+                        "text": "silver [valid]",
+                        "color": "#c0c0c0"
+                      },
+                      "03 silver_filtered_out_records": {
+                        "text": "silver [filtered out]"
+                      },
+                      "04 silver_quarantined_records": {
+                        "text": "silver [quarantined]"
+                      },
+                      "05 silver_skipped_records": {
+                        "text": "silver [skipped]"
+                      },
+                      "06 silver_deduplicated_records": {
+                        "text": "silver [deduplicated]"
+                      },
+                      "07 gold_written_records": {
+                        "text": "gold [valid]",
+                        "color": "#d4af37"
+                      },
+                      "08 gold_excluded_by_contract_records": {
+                        "text": "gold [excluded]"
+                      },
+                      "09 gold_quarantined_records": {
+                        "text": "gold [quarantined]"
+                      },
+                      "10 gold_skipped_records": {
+                        "text": "gold [skipped]"
+                      },
+                      "11 gold_deduplicated_records": {
+                        "text": "gold [deduplicated]"
+                      }
+                    }
                   }
                 ]
               },
-              "unit": "percentunit",
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "count"
+              },
+              {
+                "id": "custom.width",
+                "value": 70
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "percentage"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "row_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": ""
+              },
+              {
+                "id": "custom.width",
+                "value": 1
+              },
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "applyToRow": true
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "silver_deficit": {
+                        "text": "",
+                        "color": "red"
+                      },
+                      "gold_deficit": {
+                        "text": "",
+                        "color": "red"
+                      },
+                      "": {
+                        "text": "",
+                        "color": "rgba(0,0,0,0)"
+                      }
                     }
                   }
-                }
-              ],
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
-              "custom": {
-                "gradientMode": "none",
-                "spanNulls": false,
-                "showPoints": "always",
-                "fillOpacity": 0
+                ]
               }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
             },
-            "overrides": []
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "count"
+              }
+            ]
           },
-          "gridPos": {
-            "x": 0,
-            "y": 73,
-            "w": 24,
-            "h": 6
-          },
-          "id": 153,
-          "options": {
-            "legend": {
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "count"
             },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 70
               },
-              "editorMode": "code",
-              "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))",
-              "legendFormat": "DQ score (color=minimum observed)",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Track Volume-Weighted DQ Score",
-          "type": "timeseries",
-          "maxDataPoints": 400,
-          "interval": "1m"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Total soft plus hard threshold events requires observations for both counters for every observed pipeline. A missing branch leaves the total UNKNOWN, not zero. Inspect each counter when coverage is incomplete; resets use increase. Tooltip and inspection expose full series labels; full identifiers remain available.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
+              {
+                "id": "custom.align",
+                "value": "right"
               },
-              "decimals": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
                   {
-                    "color": "green",
-                    "value": null
+                    "type": "value",
+                    "options": {
+                      "No data": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      },
+                      "UNKNOWN": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
                   }
                 ]
               },
-              "unit": "short",
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null+nan",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
                 }
-              ],
-              "noValue": "TELEMETRY MISSING — no series for this scope; not a zero"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 79,
-            "w": 24,
-            "h": 6
-          },
-          "id": 155,
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "parameter"
+          }
+        ],
+        "footer": {
+          "show": false
+        },
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "rows",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
           "options": {
-            "legend": {
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": false
+            "excludeByName": {
+              "Time": true,
+              "row_status": true,
+              "percintage": true
             },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
+            "indexByName": {
+              "parameter": 0,
+              "value": 1,
+              "count": 1,
+              "percentage": 2,
+              "row_status": 3
+            },
+            "renameByName": {
+              "parameter": "parameter",
+              "value": "count",
+              "percentage": "percentage",
+              "row_status": "",
+              "Value": "count",
+              "Value #A": "Series A",
+              "Value #B": "Series B",
+              "Value #C": "Series C"
             }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])))) unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))))",
-              "legendFormat": "threshold events",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Track DQ Threshold Events",
-          "type": "timeseries",
-          "maxDataPoints": 400,
-          "interval": "1m"
+          }
         }
       ]
     },
@@ -4576,7 +1279,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 21,
+        "y": 15,
         "w": 24,
         "h": 1
       },
@@ -4587,7 +1290,7 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 22,
+            "y": 16,
             "w": 24,
             "h": 12
           },
@@ -4812,7 +1515,7 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 34,
+            "y": 28,
             "w": 24,
             "h": 8
           },

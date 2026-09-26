@@ -65,3 +65,32 @@ def test_selected_and_sentinel_urls_follow_live_catalog_templates() -> None:
         template = str(panel["targets"][0]["url"])
         assert template == snapshot["url_template"]
         assert materialize_ops_url(template, snapshot["selectors"]) == snapshot["url"]
+
+
+def test_default_browse_url_is_the_unscoped_recent_page() -> None:
+    """All / All / All and run_id=- expand to one stable Ops URL."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
+    variables = {
+        item["name"]: item
+        for item in dashboard["templating"]["list"]
+        if isinstance(item, dict)
+    }
+    panel = next(
+        item for item in get_dashboard_panels(dashboard) if item.get("id") == 3010
+    )
+    url = materialize_ops_url(
+        str(panel["targets"][0]["url"]),
+        {
+            "workflow": str(variables["workflow"]["allValue"]),
+            "pipeline": str(variables["pipeline"]["allValue"]),
+            "run_type": str(variables["run_type"]["allValue"]),
+            "run_id": str(variables["run_id"]["current"]["value"]),
+            "lookup_run_id": "",
+        },
+    )
+    assert variables["run_type"]["multi"] is True
+    assert url == (
+        "/ops/observability/pipeline-run-reports"
+        "?pipeline=.*&limit=10&run_id=-&view=recent"
+        "&workflow=.*&run_type=.*&lookup_run_id="
+    )

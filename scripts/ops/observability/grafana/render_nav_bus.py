@@ -111,7 +111,7 @@ FIRST_WINDOW_PANEL_BOTTOM = 17
 _MINIMUM_FIRST_WINDOW_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-run-explorer-v1": {1: 3, 3010: 12},
     "bioetl-incident-v1": {2005: 4, 2010: 4},
-    "bioetl-dq-v2": {9102: 4, 9406: 4},
+    "bioetl-dq-v2": {9406: 5},
     "bioetl-control-plane-v1": {9418: 7, 9416: 7},
 }
 # Donors used when the provenance text rail is already at h=3. Values are the
@@ -126,22 +126,79 @@ _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9422: (18, 3, 6, 3),
     9418: (0, 6, 12, 7),
     9416: (12, 6, 12, 7),
-    9401: (0, 20, 5, 3),
-    891: (5, 20, 5, 3),
-    892: (10, 20, 5, 3),
-    893: (15, 20, 5, 3),
-    907: (20, 20, 4, 3),
 }
-_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 24
+_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
+# Runtime already owns current readiness as 9401 Monitor Pipeline Status.
+_TRUST_DROP_PANEL_IDS = frozenset({9401})
+_TRUST_MOVE_PANEL_IDS = frozenset(
+    {
+        891,
+        892,
+        893,
+        907,
+        894,
+        130,
+        3,
+        104,
+        120,
+        101,
+        102,
+        103,
+        121,
+        134,
+        5,
+        135,
+        105,
+        106,
+        908,
+        2,
+        1,
+        132,
+        133,
+        131,
+        7,
+        4,
+        136,
+        6,
+        111,
+        122,
+        137,
+        138,
+        107,
+        108,
+        109,
+        110,
+        112,
+        9491,
+    }
+)
+_TRUST_DROP_EMPTY_ROW_IDS = frozenset({903, 904, 9490})
+_RUNTIME_RANGE_ROW_ID = 8800
+_RUNTIME_PANEL_ID_REMAP = {4: 8804, 5: 8805, 6: 8806, 7: 8807}
+_MOVED_TRUST_RANGE_PANELS: list[dict[str, object]] = []
 _INCIDENT_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     2001: (0, 6, 24, 2),
     2010: (0, 8, 24, 5),
     2005: (0, 13, 24, 4),
 }
+_DQ_SELECTED_RUN_IDS = (1000, 9400, 9406, 9402, 9403)
+_DQ_SCOPE_DESCRIPTION = (
+    "SELECTED RUN · This page assesses the selected Run ID from saved HTTP "
+    "evidence. Prometheus current status and time-range scores are not on "
+    "this page. A time-range value never proves this run."
+)
+_DQ_SCOPE_HTML = (
+    '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;'
+    'line-height:1.2;white-space:normal;overflow-wrap:anywhere"><div style="max-width:96ch">'
+    "SELECTED RUN · Saved evidence for the selected Run ID. "
+    "Current pipeline status and time-range scores are not on this page."
+    "</div></div>"
+)
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9101: (0, 7, 8, 4),
-    9102: (8, 7, 16, 4),
-    9406: (0, 11, 24, 5),
+    9400: (0, 2, 24, 3),
+    9406: (0, 5, 24, 5),
+    9402: (0, 10, 12, 5),
+    9403: (12, 10, 12, 5),
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
@@ -211,8 +268,6 @@ def nav_link_tooltip(*, source_uid: str, target: dict[str, str]) -> str:
     if target_uid == "bioetl-provider-health-v2":
         if source_uid in _PROVIDER_VARIABLE_UIDS:
             preserved.append("provider")
-        else:
-            resets.append("provider=All")
         preserved.append("pipeline context")
     if target_uid in _STAGE_TARGET_UIDS:
         resets.append("stage=All")
@@ -221,6 +276,10 @@ def nav_link_tooltip(*, source_uid: str, target: dict[str, str]) -> str:
     ):
         preserved.append("visible pipeline selection")
     if not resets:
+        if "pipeline context" in preserved:
+            return (
+                f"{base}. {_PRESERVE_SCOPE_TOOLTIP} Preserves pipeline context."
+            )
         return f"{base}. {_PRESERVE_SCOPE_TOOLTIP}"
     preserve_clause = "; preserves " + ", ".join(dict.fromkeys(preserved)) + "."
     return f"{base}. Scope reset: {', '.join(resets)}{preserve_clause}"
@@ -1438,12 +1497,6 @@ def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
         return
     if current_uid == "bioetl-dq-v2":
         _apply_first_window_geometry(panels, _DQ_FIRST_WINDOW_GEOMETRY, uid=current_uid)
-        _pin_collapsed_rows_from(
-            panels,
-            target_y=17,
-            protected_ids=set(_DQ_FIRST_WINDOW_GEOMETRY),
-            uid=current_uid,
-        )
 
 
 def _reclaim_first_window_overflow(
@@ -1527,6 +1580,137 @@ def _attach_nav_bus(nav: dict[str, object], *, current_uid: str) -> None:
     nav.pop("transparent", None)
 
 
+def _detach_trust_range_panels(panels: list[object]) -> list[dict[str, object]]:
+    """Remove non-selected-run panels from a Trust panel tree."""
+    moved: list[dict[str, object]] = []
+    kept: list[object] = []
+    for panel in panels:
+        if not isinstance(panel, dict):
+            kept.append(panel)
+            continue
+        panel_id = panel.get("id")
+        if panel.get("type") == "row":
+            children = panel.get("panels")
+            nested = children if isinstance(children, list) else []
+            moved.extend(_detach_trust_range_panels(nested))
+            panel["panels"] = nested
+            if panel_id in _TRUST_DROP_EMPTY_ROW_IDS and not nested:
+                continue
+            kept.append(panel)
+            continue
+        if panel_id in _TRUST_DROP_PANEL_IDS:
+            continue
+        if panel_id in _TRUST_MOVE_PANEL_IDS:
+            remapped = _RUNTIME_PANEL_ID_REMAP.get(panel_id)
+            if isinstance(remapped, int):
+                panel["id"] = remapped
+            moved.append(panel)
+            continue
+        kept.append(panel)
+    panels[:] = kept
+    return moved
+
+
+def _stash_trust_range_panels(payload: dict[str, object]) -> None:
+    panels = payload.get("panels")
+    if not isinstance(panels, list):
+        return
+    _MOVED_TRUST_RANGE_PANELS.extend(_detach_trust_range_panels(panels))
+
+
+def _attach_trust_range_panels(payload: dict[str, object]) -> None:
+    """Park relocated Trust range panels on Pipeline Diagnostics."""
+    if not _MOVED_TRUST_RANGE_PANELS:
+        return
+    panels = payload.get("panels")
+    if not isinstance(panels, list):
+        return
+    row = next(
+        (
+            panel
+            for panel in panels
+            if isinstance(panel, dict) and panel.get("id") == _RUNTIME_RANGE_ROW_ID
+        ),
+        None,
+    )
+    if row is None:
+        bottoms = [
+            int(panel["gridPos"]["y"]) + int(panel["gridPos"]["h"])
+            for panel in panels
+            if isinstance(panel, dict)
+            and isinstance(panel.get("gridPos"), dict)
+            and isinstance(panel["gridPos"].get("y"), int)
+            and isinstance(panel["gridPos"].get("h"), int)
+        ]
+        row = {
+            "id": _RUNTIME_RANGE_ROW_ID,
+            "type": "row",
+            "title": "Inspect Pipeline Range Evidence",
+            "collapsed": True,
+            "gridPos": {"x": 0, "y": max(bottoms, default=0), "w": 24, "h": 1},
+            "panels": [],
+            "description": (
+                "CURRENT and selected-range signals moved from 1. Trust. "
+                "They do not assess one selected Run ID."
+            ),
+        }
+        panels.append(row)
+    children = row.get("panels")
+    if not isinstance(children, list):
+        children = []
+        row["panels"] = children
+    present = {
+        child.get("id") for child in children if isinstance(child, dict)
+    }
+    for panel in _MOVED_TRUST_RANGE_PANELS:
+        if panel.get("id") not in present:
+            children.append(panel)
+            present.add(panel.get("id"))
+    _MOVED_TRUST_RANGE_PANELS.clear()
+
+
+def _retain_dq_selected_run_panels(payload: dict[str, object]) -> None:
+    """Keep only panels that assess the selected Run ID.
+
+    Run ID is always set on 5. Data Quality. Prometheus CURRENT and TIME RANGE
+    panels do not read that id, so they are not part of this dashboard.
+    """
+    panels = payload.get("panels")
+    if not isinstance(panels, list):
+        return
+    found: dict[int, dict[str, object]] = {}
+
+    def _collect(items: list[object]) -> None:
+        for panel in items:
+            if not isinstance(panel, dict):
+                continue
+            panel_id = panel.get("id")
+            if panel_id in _DQ_SELECTED_RUN_IDS and panel_id not in found:
+                found[int(panel_id)] = panel
+            children = panel.get("panels")
+            if isinstance(children, list):
+                _collect(children)
+
+    _collect(panels)
+    missing = set(_DQ_SELECTED_RUN_IDS) - set(found)
+    if missing:
+        raise SystemExit(
+            "bioetl-dq-v2: missing selected-run panels " + str(sorted(missing))
+        )
+    for panel in found.values():
+        panel.pop("panels", None)
+    payload["panels"] = [found[panel_id] for panel_id in _DQ_SELECTED_RUN_IDS]
+    scope = found[9400]
+    scope["title"] = ""
+    scope["description"] = _DQ_SCOPE_DESCRIPTION
+    options = scope.setdefault("options", {})
+    if not isinstance(options, dict):
+        raise SystemExit("bioetl-dq-v2: panel 9400 options must be an object")
+    options["mode"] = "html"
+    options["bioetlDisplayTitle"] = "Understand Evidence Scope"
+    options["content"] = _DQ_SCOPE_HTML
+
+
 def apply_to_dashboard(
     path: Path, *, current_uid: str, check: bool = False, state_followup: bool = False
 ) -> bool:
@@ -1536,6 +1720,12 @@ def apply_to_dashboard(
     payload = json.loads(
         safe_path.read_text(encoding="utf-8")  # NOSONAR - confined under DASH_DIR
     )
+    if current_uid == "bioetl-control-plane-v1":
+        _stash_trust_range_panels(payload)
+    elif current_uid == "bioetl-runtime":
+        _attach_trust_range_panels(payload)
+    elif current_uid == "bioetl-dq-v2":
+        _retain_dq_selected_run_panels(payload)
     # Remove generated details before earlier layout passes measure bottom rows.
     payload["panels"] = [
         panel for panel in payload.get("panels", []) if panel.get("id") != 9450

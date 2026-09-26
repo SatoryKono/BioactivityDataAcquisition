@@ -99,11 +99,7 @@ def test_overview_selected_run_summary_is_in_first_window() -> None:
     assert panel.get("type") != "row"
     y = int((panel.get("gridPos") or {}).get("y") or 99)
     assert y < FIRST_WINDOW_Y, f"9603 must sit in first window, got y={y}"
-    fleet_y = int(next(item for item in root if item.get("id") == 214)["gridPos"]["y"])
-    action_y = int(next(item for item in root if item.get("id") == 215)["gridPos"]["y"])
-    assert fleet_y < action_y < y, (
-        "CURRENT health and action precede historical run evidence"
-    )
+    assert all(item.get("id") not in {214, 215} for item in root)
     blob = f"{panel.get('title') or ''}\n{panel.get('description') or ''}"
     assert "SELECTED RUN" in blob
     assert panel["datasource"]["uid"] == "-- Dashboard --"

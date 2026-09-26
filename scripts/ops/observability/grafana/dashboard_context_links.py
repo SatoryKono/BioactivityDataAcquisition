@@ -137,7 +137,8 @@ def build_handoff_url(
     if target_uid in {"bioetl-runtime", "bioetl-dq-v2"}:
         extra_values.setdefault("stage", stage)
     if target_uid == "bioetl-provider-health-v2":
-        extra_values.setdefault("provider", provider)
+        if provider != GRAFANA_ALL:
+            extra_values.setdefault("provider", provider)
         extra_values.setdefault("pipeline_context", pipeline_context)
     return _assemble_url(target_uid, values=values, extras=extra_values)
 
