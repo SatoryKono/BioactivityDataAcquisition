@@ -126,7 +126,7 @@ def test_dashboards_do_not_ship_empty_options_data_links_arrays() -> None:
 def test_top_level_handoff_fails_closed_when_required_link_is_removed() -> None:
     """The real policy path must reject a removed required dashboard link."""
     link: dict[str, object] = {
-        "title": "3. Pipeline Diagnostics",
+        "title": "Pipeline Diagnostics",
         "url": (
             "/d/bioetl-runtime?var-workflow=$workflow&var-pipeline=$pipeline"
             "&var-run_type=$run_type&var-run_id=$run_id&from=$__from&to=$__to"
@@ -439,8 +439,8 @@ def test_dashboard_titles_match_home_dashboard_navigation_names() -> None:
     expected_titles_by_uid = {
         "bioetl-control-plane-v1": "Replay Readiness",
         "bioetl-overview-v2": "Run Overview",
-        "bioetl-runtime": "3. Pipeline Diagnostics",
-        "bioetl-provider-health-v2": "4. Provider Health",
+        "bioetl-runtime": "Pipeline Diagnostics",
+        "bioetl-provider-health-v2": "Provider Health",
         "bioetl-dq-v2": "Data Quality",
         "bioetl-incident-v1": "6. Incident Workspace",
         "bioetl-run-explorer-v1": "0. Run Explorer",

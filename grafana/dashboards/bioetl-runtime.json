@@ -320,7 +320,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "3. Pipeline Diagnostics",
+  "title": "Pipeline Diagnostics",
   "uid": "bioetl-runtime",
   "version": 4,
   "panels": [

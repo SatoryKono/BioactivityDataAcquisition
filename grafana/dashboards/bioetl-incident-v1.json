@@ -6632,7 +6632,7 @@
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">Cross-domain action: inspect dependencies in <a href=\"/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;var-pipeline_context=${pipeline:percentencode}&amp;var-provider=${provider_for_pipeline:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\"><b>4. Provider Health</b></a>, rejects in <a href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\"><b>Data Quality</b></a>, replay in <a href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\"><b>Replay Readiness</b></a>, ranked triage in <a href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=${provider_for_pipeline:percentencode}&amp;${__url_time_range}\"><b>6. Incident Workspace</b></a>.</div>"
+            "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">Cross-domain action: inspect dependencies in <a href=\"/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;var-pipeline_context=${pipeline:percentencode}&amp;var-provider=${provider_for_pipeline:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\"><b>Provider Health</b></a>, rejects in <a href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\"><b>Data Quality</b></a>, replay in <a href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\"><b>Replay Readiness</b></a>, ranked triage in <a href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=${provider_for_pipeline:percentencode}&amp;${__url_time_range}\"><b>6. Incident Workspace</b></a>.</div>"
           },
           "transparent": true,
           "description": "Contains handoff evidence for Data Quality, Trust, Provider Health, and freshness. These panels do not diagnose the target domain; zero is conclusive only when its telemetry anchor is present"
@@ -7026,7 +7026,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
               },
               {
-                "title": "Open 4. Provider Health",
+                "title": "Open Provider Health",
                 "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=${provider_for_pipeline:percentencode}&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false,
@@ -7191,7 +7191,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
               },
               {
-                "title": "Open 4. Provider Health",
+                "title": "Open Provider Health",
                 "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=${provider_for_pipeline:percentencode}&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false,

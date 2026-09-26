@@ -145,7 +145,7 @@ _REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
 
 _TOP_LEVEL_LINK_TITLE_RE = re.compile(
-    r"^([0-6]\. .+|Replay Readiness|Run Overview|Data Quality|Silver Reject Explorer|Explore (Logs|Traces)|Observability Checklist \(runbook\))$"
+    r"^([0-6]\. .+|Replay Readiness|Run Overview|Pipeline Diagnostics|Provider Health|Data Quality|Silver Reject Explorer|Explore (Logs|Traces)|Observability Checklist \(runbook\))$"
 )
 
 _CANONICAL_GITHUB_BLOB_PREFIX = (
@@ -1427,8 +1427,8 @@ def _assert_silver_explorer_html_bus_forensic_boundary(
 _EXPECTED_CURRENT_NAV_TITLE = {
     "bioetl-control-plane-v1": "Replay Readiness",
     "bioetl-overview-v2": "Run Overview",
-    "bioetl-runtime": "3. Pipeline Diagnostics",
-    "bioetl-provider-health-v2": "4. Provider Health",
+    "bioetl-runtime": "Pipeline Diagnostics",
+    "bioetl-provider-health-v2": "Provider Health",
     "bioetl-dq-v2": "Data Quality",
     "bioetl-incident-v1": "6. Incident Workspace",
     "bioetl-run-explorer-v1": "0. Run Explorer",
@@ -1438,8 +1438,8 @@ _BASE_VISUAL_NAV_TITLES = (
     "0. Run Explorer",
     "Replay Readiness",
     "Run Overview",
-    "3. Pipeline Diagnostics",
-    "4. Provider Health",
+    "Pipeline Diagnostics",
+    "Provider Health",
     "Data Quality",
     "6. Incident Workspace",
 )
@@ -1506,7 +1506,7 @@ def _assert_visual_bus_base_content(
     description = str(panel.get("description", ""))
     assert "Sanitizer-compatible" in description
     assert "native keyboard focus" in description
-    assert "4. Provider Health" in description or "Provider Health" in description
+    assert "Provider Health" in description
     assert "Incident Workspace" in description
     assert "Run Explorer" in description
 

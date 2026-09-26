@@ -56,12 +56,12 @@ BUS: list[dict[str, str]] = [
     },
     {
         "uid": "bioetl-runtime",
-        "title": "3. Pipeline Diagnostics",
+        "title": "Pipeline Diagnostics",
         "path": "3-pipeline-diagnostics",
     },
     {
         "uid": "bioetl-provider-health-v2",
-        "title": "4. Provider Health",
+        "title": "Provider Health",
         "path": "4-provider-health",
     },
     {
@@ -206,10 +206,10 @@ _DQ_SCOPE_HTML = (
     "</div></div>"
 )
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 2, 24, 2),
-    9406: (0, 4, 24, 4),
-    9402: (0, 8, 12, 8),
-    9403: (12, 8, 12, 8),
+    9400: (0, 2, 10, 3),
+    9406: (10, 2, 14, 3),
+    9402: (0, 5, 12, 8),
+    9403: (12, 5, 12, 13),
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'

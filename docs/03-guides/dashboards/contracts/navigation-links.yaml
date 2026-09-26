@@ -49,50 +49,50 @@ selection_serialization:
 required_top_level_links_by_uid:
   bioetl-control-plane-v1:
   - Run Overview
-  - 3. Pipeline Diagnostics
-  - 4. Provider Health
+  - Pipeline Diagnostics
+  - Provider Health
   - Data Quality
   - 6. Incident Workspace
   - 0. Run Explorer
   bioetl-overview-v2:
   - Replay Readiness
-  - 3. Pipeline Diagnostics
-  - 4. Provider Health
+  - Pipeline Diagnostics
+  - Provider Health
   - Data Quality
   - 6. Incident Workspace
   - 0. Run Explorer
   bioetl-runtime:
   - Replay Readiness
   - Run Overview
-  - 4. Provider Health
+  - Provider Health
   - Data Quality
   - 6. Incident Workspace
   - 0. Run Explorer
   bioetl-provider-health-v2:
   - Replay Readiness
   - Run Overview
-  - 3. Pipeline Diagnostics
+  - Pipeline Diagnostics
   - Data Quality
   - 6. Incident Workspace
   - 0. Run Explorer
   bioetl-dq-v2:
   - Replay Readiness
   - Run Overview
-  - 3. Pipeline Diagnostics
-  - 4. Provider Health
+  - Pipeline Diagnostics
+  - Provider Health
   - 6. Incident Workspace
   - 0. Run Explorer
   bioetl-incident-v1:
   - Replay Readiness
   - Run Overview
-  - 3. Pipeline Diagnostics
-  - 4. Provider Health
+  - Pipeline Diagnostics
+  - Provider Health
   - Data Quality
   - 0. Run Explorer
   bioetl-run-explorer-v1: []
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
-  - title: 3. Pipeline Diagnostics
+  - title: Pipeline Diagnostics
     target_uid: bioetl-runtime
     priority: primary
     semantics: scoped_runtime_handoff
@@ -105,7 +105,7 @@ top_level_link_priority_by_uid:
     priority: contextual
     semantics: scoped_dq_handoff
   bioetl-provider-health-v2:
-  - title: 3. Pipeline Diagnostics
+  - title: Pipeline Diagnostics
     target_uid: bioetl-runtime
     priority: primary
     semantics: runtime_cross_scope_all_defaults
@@ -307,7 +307,7 @@ required_panel_links_by_uid:
   - panel_id: 6
     target_uid: bioetl-provider-health-v2
     link_titles:
-    - Open 4. Provider Health
+    - Open Provider Health
   - panel_id: 7
     target_uid: bioetl-dq-v2
     link_titles:
@@ -340,7 +340,7 @@ required_panel_links_by_uid:
   - panel_id: 110
     target_uid: bioetl-runtime
     link_titles:
-    - Open 3. Pipeline Diagnostics
+    - Open Pipeline Diagnostics
   - panel_id: 110
     target_uid: bioetl-control-plane-v1
     link_titles:
@@ -574,8 +574,8 @@ navigation_transition_contract:
 visual_bus_titles_ordered:
 - Replay Readiness
 - Run Overview
-- 3. Pipeline Diagnostics
-- 4. Provider Health
+- Pipeline Diagnostics
+- Provider Health
 - Data Quality
 - 6. Incident Workspace
 - 0. Run Explorer

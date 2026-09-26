@@ -70,7 +70,7 @@ dashboards:
       - run_id
       - run_type
   - uid: bioetl-runtime
-    title: 3. Pipeline Diagnostics
+    title: Pipeline Diagnostics
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/pipeline-failure-critical.md
     family: primary
@@ -113,7 +113,7 @@ dashboards:
       - run_type
       - stage
   - uid: bioetl-provider-health-v2
-    title: 4. Provider Health
+    title: Provider Health
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/incident-response.md
     family: primary

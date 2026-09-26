@@ -394,8 +394,8 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 2,
-        "w": 24,
+        "h": 3,
+        "w": 10,
         "x": 0,
         "y": 2
       },
@@ -412,10 +412,10 @@
       "type": "table",
       "title": "Review Selected Run Status",
       "gridPos": {
-        "h": 4,
-        "w": 24,
-        "x": 0,
-        "y": 4
+        "h": 3,
+        "w": 14,
+        "x": 10,
+        "y": 2
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
@@ -691,7 +691,7 @@
       "title": "Inspect Run Identity",
       "gridPos": {
         "x": 0,
-        "y": 8,
+        "y": 5,
         "w": 12,
         "h": 8
       },
@@ -947,12 +947,12 @@
       "title": "Inspect Processed Records",
       "gridPos": {
         "x": 12,
-        "y": 8,
+        "y": 5,
         "w": 12,
-        "h": 8
+        "h": 13
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · TIME RANGE · Selected run: Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
+      "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator. Missing counts remain UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1043,7 +1043,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
-                  "wrapText": true
+                  "wrapText": false
                 }
               }
             ]
@@ -1056,7 +1056,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "count"
+                "value": "count out"
               },
               {
                 "id": "custom.width",
@@ -1073,7 +1073,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": false
                 }
               },
               {
@@ -1096,17 +1097,14 @@
                 "value": "right"
               },
               {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
                 "id": "noValue",
                 "value": "UNKNOWN"
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": false
                 }
               },
               {
@@ -1115,6 +1113,10 @@
                   "mode": "fixed",
                   "fixedColor": "text"
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 100
               }
             ]
           },
@@ -1140,7 +1142,8 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
-                  "applyToRow": true
+                  "applyToRow": true,
+                  "wrapText": false
                 }
               },
               {
@@ -1175,7 +1178,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "count"
+                "value": "count out"
               }
             ]
           },
@@ -1200,7 +1203,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": false
                 }
               },
               {
@@ -1239,6 +1243,38 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "count in"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "count out"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              }
+            ]
           }
         ]
       },
@@ -1252,14 +1288,14 @@
         ],
         "footer": {
           "show": false,
-          "enablePagination": true
+          "enablePagination": false
         },
         "cellHeight": "sm"
       },
       "targets": [
         {
           "format": "table",
-          "parser": "backend",
+          "parser": "uql",
           "refId": "A",
           "root_selector": "rows",
           "source": "url",
@@ -1268,34 +1304,45 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          }
+          },
+          "uql": "parse-json | scope \"rows\""
+        },
+        {
+          "refId": "StageInput",
+          "type": "json",
+          "source": "url",
+          "parser": "uql",
+          "format": "table",
+          "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "uql": "parse-json | jsonata \"($f := funnel; $map(['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','05 silver_skipped_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','10 gold_skipped_records','11 gold_deduplicated_records'], function($p) { ($stage := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $stage].records_in}) }))\""
         }
       ],
       "transformations": [
         {
+          "id": "joinByField",
+          "options": {
+            "byField": "parameter",
+            "mode": "outer"
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Time": true,
-              "row_status": true,
-              "percintage": true
+              "row_status": true
             },
             "indexByName": {
               "parameter": 0,
-              "value": 1,
-              "count": 1,
-              "percentage": 2,
-              "row_status": 3
+              "count in": 1,
+              "value": 2,
+              "percentage": 3
             },
             "renameByName": {
-              "parameter": "parameter",
-              "value": "count",
-              "percentage": "percentage",
-              "row_status": "",
-              "Value": "count",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
+              "value": "count out"
             }
           }
         }
@@ -1309,7 +1356,7 @@
       "description": "Expand for saved stage rows, then domain trust reasons, for the selected Run ID.",
       "gridPos": {
         "x": 0,
-        "y": 16,
+        "y": 18,
         "w": 24,
         "h": 1
       },
@@ -1320,7 +1367,7 @@
           "title": "Inspect Selected Run Stages",
           "gridPos": {
             "x": 0,
-            "y": 17,
+            "y": 19,
             "w": 24,
             "h": 8
           },
@@ -1379,7 +1426,7 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 25,
+            "y": 27,
             "w": 24,
             "h": 12
           },
@@ -1604,7 +1651,7 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 37,
+            "y": 39,
             "w": 24,
             "h": 8
           },

@@ -9,11 +9,15 @@ from pathlib import Path
 TITLES = {
     "bioetl-control-plane-v1": "Replay Readiness",
     "bioetl-overview-v2": "Run Overview",
+    "bioetl-runtime": "Pipeline Diagnostics",
+    "bioetl-provider-health-v2": "Provider Health",
     "bioetl-dq-v2": "Data Quality",
 }
 _RENAMES = {
     "1. Trust": "Replay Readiness",
     "2. Overview": "Run Overview",
+    "3. Pipeline Diagnostics": "Pipeline Diagnostics",
+    "4. Provider Health": "Provider Health",
     "5. Data Quality": "Data Quality",
 }
 _COLORS = {

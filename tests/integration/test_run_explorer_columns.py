@@ -56,6 +56,8 @@ def test_ten_columns_keep_full_identity_for_handoffs():
     [
         ("bioetl-control-plane-v1", "Replay Readiness"),
         ("bioetl-overview-v2", "Run Overview"),
+        ("bioetl-runtime", "Pipeline Diagnostics"),
+        ("bioetl-provider-health-v2", "Provider Health"),
         ("bioetl-dq-v2", "Data Quality"),
     ],
 )
