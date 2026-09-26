@@ -1106,7 +1106,7 @@
         "h": 3
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "Do not read this row as live fleet status. Check result is the stored verdict. A missing provider name is not an OK result. The chart time range does not change the saved check. This is the short form of Review Provider Evidence. An empty table means the report did not store provider_checks. The row comes from provider_checks on the saved report. It shows one saved provider-check row. This table keeps only Check result and Evidence. SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
+      "description": "This row does not launch a new provider probe. Open Review Provider Evidence for the provider name and time. The table does not repeat Provider or Observed at. Do not read this row as live fleet status. Check result is the stored verdict. A missing provider name is not an OK result. The chart time range does not change the saved check. This is the short form of Review Provider Evidence. An empty table means the report did not store provider_checks. The row comes from provider_checks on the saved report. It shows one saved provider-check row. This table keeps only Check result and Evidence. SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
       "options": {
         "showHeader": true,
         "cellHeight": "sm",
