@@ -1193,7 +1193,7 @@
           "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
           "gridPos": {
             "x": 0,
-            "y": 33,
+            "y": 16,
             "w": 24,
             "h": 8
           },
@@ -1234,7 +1234,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 16,
+        "y": 24,
         "w": 24,
         "h": 1
       },
@@ -1245,7 +1245,7 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 17,
+            "y": 25,
             "w": 24,
             "h": 8
           },
@@ -1470,7 +1470,7 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 25,
+            "y": 33,
             "w": 24,
             "h": 8
           },
