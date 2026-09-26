@@ -265,6 +265,54 @@ def _stamp_overview_derived_panels(panel: dict[str, object], uid: object) -> Non
         ).removeprefix(_CURRENT_PREFIX)
 
 
+def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
+    """Saved stage rows for the selected Run ID. They precede domain evidence."""
+    return {
+        "id": 9460,
+        "type": "table",
+        "title": "Inspect Selected Run Stages",
+        "gridPos": grid,
+        "datasource": "BioETL Ops HTTP",
+        "description": (
+            "SELECTED RUN · Saved stage rows for the exact Run ID. "
+            "SUCCESS with missing stage evidence stays INCOMPLETE. "
+            "A recorded zero stays 0. An unknown count is empty, not 0. "
+            "UNFINISHED means no terminal event. Prometheus does not change this table."
+        ),
+        "options": {
+            "showHeader": True,
+            "cellHeight": "sm",
+            "footer": {"show": False},
+        },
+        "fieldConfig": {
+            "defaults": {
+                "noValue": "UNKNOWN",
+                "unit": "none",
+                "custom": {
+                    "align": "left",
+                    "cellOptions": {"type": "auto", "wrapText": False},
+                    "inspect": True,
+                },
+            },
+            "overrides": [],
+        },
+        "targets": [
+            {
+                "refId": "A",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "root_selector": "stage_diagnostics",
+                "url": STATUS_URL,
+                "url_options": {"method": "GET", "data": ""},
+            }
+        ],
+        "transformations": [{"id": "limit", "options": {"limitField": 12}}],
+        "links": [],
+    }
+
+
 def _append_saved_run_evidence_row(
     panels: list[object], *, include_identity: bool = True
 ) -> None:
@@ -280,19 +328,20 @@ def _append_saved_run_evidence_row(
         ),
         default=0,
     )
+    stages = _stage_panel({"x": 0, "y": y + 1, "w": 24, "h": 8})
     details = _panel(
         9451,
         "Inspect Selected Run Domains",
-        {"x": 0, "y": y + 1, "w": 24, "h": 10},
+        {"x": 0, "y": y + 9, "w": 24, "h": 10},
         domains=True,
     )
     _detail_fields(details, ["domain", "verdict", "reason", "action", "evidence_ref"])
-    children: list[object] = [details]
+    children: list[object] = [stages, details]
     if include_identity:
         summary = _panel(
             9452,
             "Inspect Selected Run Identity",
-            {"x": 0, "y": y + 11, "w": 24, "h": 8},
+            {"x": 0, "y": y + 19, "w": 24, "h": 8},
             domains=False,
         )
         _detail_fields(
@@ -505,7 +554,7 @@ def prune_provider_health_panels(payload: dict[str, object]) -> None:
     ]
     evidence = _provider_check_panel(
         9460,
-        "Run Provider Evidence",
+        "Review Provider Evidence",
         {"x": 0, "y": 0, "w": 24, "h": 8},
         ["provider", "check_result", "evidence", "observed_at"],
         limit=None,

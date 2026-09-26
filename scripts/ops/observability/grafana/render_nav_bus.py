@@ -178,7 +178,8 @@ _RUNTIME_PANEL_ID_REMAP = {4: 8804, 5: 8805, 6: 8806, 7: 8807}
 _MOVED_TRUST_RANGE_PANELS: list[dict[str, object]] = []
 _MOVED_RUNTIME_FLEET: list[dict[str, object]] = []
 _RUNTIME_SELECTED_IDS = (1000, 9400, 9998, 9402, 9403)
-_RUNTIME_DROP_IDS = frozenset({22460})
+_RUNTIME_DROP_IDS = frozenset({22460, 9451, 9452, 9460})
+_RUNTIME_FLEET_ID_REMAP = {9401: 18940}
 _RUNTIME_FLEET_ROW_ID = 8808
 _RUNTIME_SELECTED_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 2, 24, 3),
@@ -1939,6 +1940,12 @@ def _retain_dq_selected_run_panels(payload: dict[str, object]) -> None:
 def _stamp_runtime_fleet_panel(panel: dict[str, object]) -> None:
     panel_id = panel.get("id")
     description = str(panel.get("description") or "")
+    if panel.get("id") == 18940:
+        panel["title"] = "Monitor Pipeline Status"
+        panel["description"] = (
+            "CURRENT · Pipeline / Run Type readiness. Mapping: 0=OK, 1=WARN, "
+            "2=CRIT, 3/null=UNKNOWN. This is not the selected Run ID verdict."
+        )
     if panel_id == 9102 and "evidence confidence" not in description.lower():
         panel["description"] = (
             description.rstrip()
@@ -2035,6 +2042,9 @@ def _retain_runtime_selected_run(payload: dict[str, object]) -> None:
                     panel.pop("panels", None)
                     found[int(panel_id)] = panel
                 continue
+            if panel_id in _RUNTIME_FLEET_ID_REMAP:
+                panel["id"] = _RUNTIME_FLEET_ID_REMAP[panel_id]
+                panel_id = panel["id"]
             if panel_id not in moved_ids:
                 moved.append(panel)
                 moved_ids.add(panel_id)
@@ -2105,6 +2115,9 @@ def _attach_runtime_fleet_row(payload: dict[str, object]) -> None:
         if panel.get("id") not in present:
             children.append(panel)
             present.add(panel.get("id"))
+    for child in children:
+        if isinstance(child, dict):
+            _stamp_runtime_fleet_panel(child)
 
 
 def apply_to_dashboard(

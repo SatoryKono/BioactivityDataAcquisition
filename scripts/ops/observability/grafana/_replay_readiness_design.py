@@ -11,7 +11,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
     row = next((p for p in panels if p.get("id") == 902), None)
     if card is None or row is None:
         return
-    card.update(type="stat", title="Replay Readiness")
+    card.update(type="stat", title="Review Exact Replay Readiness")
     card["options"] = {
         "reduceOptions": {
             "values": False,

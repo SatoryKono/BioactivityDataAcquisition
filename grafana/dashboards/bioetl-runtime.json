@@ -1213,12 +1213,71 @@
       },
       "panels": [
         {
+          "id": 9460,
+          "type": "table",
+          "title": "Inspect Selected Run Stages",
+          "gridPos": {
+            "x": 0,
+            "y": 16,
+            "w": 24,
+            "h": 8
+          },
+          "datasource": "BioETL Ops HTTP",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "unit": "none",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "root_selector": "stage_diagnostics",
+              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "limit",
+              "options": {
+                "limitField": 12
+              }
+            }
+          ],
+          "links": []
+        },
+        {
           "id": 9451,
           "type": "table",
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 16,
+            "y": 24,
             "w": 24,
             "h": 12
           },
@@ -1443,7 +1502,7 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 28,
+            "y": 36,
             "w": 24,
             "h": 8
           },
