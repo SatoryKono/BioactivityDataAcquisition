@@ -2807,7 +2807,7 @@
     },
     {
       "collapsed": true,
-      "description": "This provider details row shows latency, retries, and limits for the selected provider over the chart range. Select a bounded provider from fleet evidence, then expand for latency, retry, network, throttling, and adapter diagnostics. Unknown selection is not a fleet verdict.",
+      "description": "This provider details row is not the current-status card. This provider details row shows latency, retries, and limits for the selected provider over the chart range. Select a bounded provider from fleet evidence, then expand for latency, retry, network, throttling, and adapter diagnostics. Unknown selection is not a fleet verdict.",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -2915,7 +2915,7 @@
           ],
           "title": "Track Health Failures & Degradation",
           "type": "timeseries",
-          "description": "This failure trend shows how failures and degradation moved over the selected time range. TIME RANGE · Selected-range evidence: failure/degraded probe trend over the active Grafana interval A measured zero means no events (VALID EMPTY); absent series mean TELEMETRY MISSING. Query failures remain QUERY ERROR. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
+          "description": "This failure trend is not current status. This failure trend shows how failures and degradation moved over the selected time range. TIME RANGE · Selected-range evidence: failure/degraded probe trend over the active Grafana interval A measured zero means no events (VALID EMPTY); absent series mean TELEMETRY MISSING. Query failures remain QUERY ERROR. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -3020,7 +3020,7 @@
           ],
           "title": "Track Failure Share",
           "type": "table",
-          "description": "This failure share table shows the share of failed checks in the selected time range. TIME RANGE · Selected-range evidence: provider share of failed probes in the active Grafana range. The full share chart is collapsed by default and should be expanded only when total failures are non-zero A measured zero means no events (VALID EMPTY); absent series mean TELEMETRY MISSING. Query failures remain QUERY ERROR."
+          "description": "This failure share table is not a lifetime total. This failure share table shows the share of failed checks in the selected time range. TIME RANGE · Selected-range evidence: provider share of failed probes in the active Grafana range. The full share chart is collapsed by default and should be expanded only when total failures are non-zero A measured zero means no events (VALID EMPTY); absent series mean TELEMETRY MISSING. Query failures remain QUERY ERROR."
         },
         {
           "datasource": {
