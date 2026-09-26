@@ -27,7 +27,6 @@ from bioetl.composition.runtime_builders._run_manifest_replay_support import (
     resolve_replay_parentage,
     validate_exact_replay_boundary as _validate_exact_replay_boundary,
 )
-from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,

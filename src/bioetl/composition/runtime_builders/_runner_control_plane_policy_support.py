@@ -13,8 +13,6 @@ from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy 
     validate_strict_data_root_policy as _validate_strict_data_root_policy,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
-    STRICT_PERSISTENCE_PROFILES,
-    normalize_required_persistence_profile,
     validate_required_persistence_profile as domain_validate_required_persistence_profile,
 )
 

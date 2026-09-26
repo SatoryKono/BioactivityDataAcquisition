@@ -54,6 +54,7 @@ async def test_periodic_checkpoint_uses_confirmed_bronze_after_flush() -> None:
         raw_record={"id": "1"},
         shutdown_requested=False,
         records_fetched=0,
+        update_batch_size=memory_manager.check_pressure,
         iteration_context=iteration_context,
     )
 
@@ -91,6 +92,7 @@ async def test_periodic_checkpoint_skipped_when_batch_not_flushed() -> None:
         raw_record={"id": "1"},
         shutdown_requested=False,
         records_fetched=0,
+        update_batch_size=memory_manager.check_pressure,
         iteration_context=iteration_context,
     )
 
