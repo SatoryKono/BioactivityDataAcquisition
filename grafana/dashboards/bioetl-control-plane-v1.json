@@ -399,7 +399,7 @@
       "title": "",
       "gridPos": {
         "h": 3,
-        "w": 16,
+        "w": 15,
         "x": 0,
         "y": 2
       },
@@ -6550,8 +6550,8 @@
       "title": "Review Exact Replay Readiness",
       "gridPos": {
         "h": 3,
-        "w": 8,
-        "x": 16,
+        "w": 9,
+        "x": 15,
         "y": 2
       },
       "datasource": "BioETL Ops HTTP",
