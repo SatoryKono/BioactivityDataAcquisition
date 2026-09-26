@@ -653,7 +653,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 75
+                "value": 145
               }
             ]
           },
@@ -755,7 +755,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 52
+                "value": 80
               }
             ]
           },
@@ -815,7 +815,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 60
+                "value": 90
               }
             ]
           },
@@ -962,7 +962,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 120
               }
             ]
           },
@@ -985,10 +985,6 @@
               {
                 "id": "noValue",
                 "value": "Open"
-              },
-              {
-                "id": "custom.width",
-                "value": 72
               }
             ]
           },
@@ -1011,10 +1007,6 @@
               {
                 "id": "noValue",
                 "value": "Open"
-              },
-              {
-                "id": "custom.width",
-                "value": 72
               }
             ]
           },
@@ -1037,10 +1029,6 @@
               {
                 "id": "noValue",
                 "value": "Open"
-              },
-              {
-                "id": "custom.width",
-                "value": 72
               }
             ]
           },
@@ -1063,10 +1051,6 @@
               {
                 "id": "noValue",
                 "value": "Open"
-              },
-              {
-                "id": "custom.width",
-                "value": 72
               }
             ]
           },
@@ -1144,7 +1128,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 60
+                "value": 100
               }
             ]
           }
