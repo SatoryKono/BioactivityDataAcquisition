@@ -691,14 +691,16 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
 - `overview.id=214 (Status)`: `CRIT` при runtime blocker `>0`, DQ hard fail `>0`, blocking data-validation lifecycle или control-plane blocker `>0`; `WARN` при non-fatal warning-only сигналах; `UNKNOWN` при no recent samples. Panel links route directly to Runtime / Control Plane / Data Quality / Provider Health / Workflow with the current time range.
 - `overview.id=215 (Review First Action)`: shows at most **two** positive
-  routes after `max without(run_type)` merges identical action/object/reason
-  rows. Column order is **Priority → Pipeline → Why → Action**. Priority is
-  routing urgency, not alert severity: `0=UNKNOWN`, `5=WATCH`, `10=REVIEW`,
-  `20/30=HIGH`, `35/40/50=URGENT`. Different pipelines remain distinct.
-  An absence-only `bioetl_l0_next_action_no_route` fallback preserves UNKNOWN.
-  Action links use the row's `action_dashboard_uid` and pipeline, preserving
-  workflow, run type, run ID and time range. Provider Health clears an unknown
-  provider to `provider=unknown` while retaining `pipeline_context`.
+  routes. Rows keep pipeline and run type. Column order is **Priority →
+  Workflow → Why → Action**. Priority is routing urgency, not health and not
+  alert severity: `1=—` (No action required), `15=VERIFY`, `10=REVIEW`,
+  `20/30=HIGH`, `35/40/50=URGENT`, `60=CRIT`. Workflow All adds standalone
+  pipelines that are outside `bioetl_workflow_scope_universe`. A concrete
+  missing workflow does not fall through to another workflow or to pipeline
+  routes; `bioetl_fa_gap` is VERIFY with the selected scope kept on the link.
+  Confirmed health is `No action required` with no diagnostic link. Run ID does
+  not change CURRENT. `UNKNOWN` stays a Monitor Scope Health state. Provider
+  routes for a selected pipeline are scope-local, not a global degradation flag.
   First Action occupies `w=16`, paired with Domain Status at `w=8`.
   Inspect retains routing metadata; no healthy zero is manufactured.
 - `overview` first-screen selected-scope cards normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading `bioetl_l0_*` / `bioetl_l1_*` summary recording rules. For example, `workflow_chembl_assay` resolves to the same current-state summary rows as `chembl_assay`.

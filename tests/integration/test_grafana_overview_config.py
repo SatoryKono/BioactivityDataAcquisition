@@ -196,7 +196,7 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     next_action_expr = _panel_expr(next_action)
     description = str(next_action.get("description", ""))
     assert next_action.get("type") == "table"
-    assert "bioetl_workflow_scope_action" in next_action_expr
+    assert "bioetl_first_action" in next_action_expr
     # Keep the full response for the detail table; bound only the sorted summary.
     assert "topk(" not in next_action_expr
     transformations = next_action["transformations"]
@@ -207,16 +207,12 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     assert 'pipeline=~"$pipeline"' in next_action_expr
     assert 'run_type=~"$run_type"' in next_action_expr
     assert "$__range" not in next_action_expr
-    assert "NO_ROUTE" in description or "no_route" in next_action_expr
-    # #6574: compact recording-rule fallback (preferred) or legacy label_replace.
-    assert (
-        "bioetl_l0_next_action_no_route" in next_action_expr
-        or "selected_scope_not_present" in next_action_expr
-    )
-    # #8748: no_route only when the selected scope has no route series.
-    assert "or on() bioetl_l0_next_action_no_route" in next_action_expr
-    assert "max without(run_type)" in next_action_expr
-    assert "or bioetl_l0_next_action_no_route)" not in next_action_expr
+    assert "VERIFY" in description
+    assert "bioetl_first_action" in next_action_expr
+    assert "bioetl_fa_gap" in next_action_expr
+    assert "or on() label_replace" in next_action_expr
+    assert "max without(run_type)" not in next_action_expr
+    assert "bioetl_l0_next_action_no_route" not in next_action_expr
     assert len(next_action_expr) <= 200
 
 
@@ -276,8 +272,7 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
         if mapping.get("type") == "value":
             priority_maps.update(mapping.get("options") or {})
     for score, badge in {
-        "0": "UNKNOWN",
-        "5": "WATCH",
+        "1": "—",
         "10": "REVIEW",
         "15": "VERIFY",
         "20": "HIGH",
@@ -326,8 +321,8 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
         "control_plane": "Trust",
         "dq": "Data Quality",
         "provider": "Provider Health",
-        "monitor": "Monitor",
-        "no_route": "No route",
+        "none": "—",
+        "inspect_evidence": "Inspect evidence",
         "workflow": "Diagnose",
     }.items():
         assert key in action_maps, f"missing Action map for {key}"
@@ -337,10 +332,8 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
     links = action_props.get("links") or []
     assert links, "Action column must expose row-aware board links"
     assert any(
-        "${__data.fields.action_dashboard_uid}" in str(link.get("url", ""))
-        and "${__data.fields.action_scope:raw}" in str(link.get("url", ""))
-        for link in links
-    ), "Action links must pass the row pipeline into target dashboards"
+        link.get("url") == "${__data.fields.action_href:raw}" for link in links
+    ), "Action links must use the row href, empty when no action is required"
     assert "var-provider=$$__all&var-pipeline_context=$1" in Path(
         "grafana/prometheus-rules/bioetl_observability.yml"
     ).read_text(encoding="utf-8")
@@ -583,7 +576,7 @@ def test_overview_queries_are_backed_by_expected_records_and_metrics() -> None:
 
     for required_token in (
         "bioetl_workflow_scope_priority",
-        "bioetl_workflow_scope_action",
+        "bioetl_first_action",
         "bioetl_l0_input_status_selected",
         "bioetl_l1_gold_lifecycle_status",
         "bioetl_pipeline_runs_total",

@@ -52,11 +52,9 @@ def test_action_navigation_uses_responsible_workflow_even_when_selector_is_all()
         for prop in override["properties"]
         if prop["id"] == "links"
         for link in prop["value"]
-        if "${__data.fields.action_scope" in link.get("url", "")
+        if "${__data.fields.action_href" in link.get("url", "")
     ]
     assert links
-    assert all(
-        "var-workflow=${__data.fields.Workflow:percentencode}" in link["url"]
-        for link in links
-    )
-    assert all("${run_id:queryparam}" in link["url"] for link in links)
+    assert all(link["url"] == "${__data.fields.action_href:raw}" for link in links)
+    assert "bioetl_first_action" in panel["targets"][0]["expr"]
+    assert len(panel["targets"][0]["expr"]) <= 200
