@@ -195,22 +195,9 @@ def test_pfill_12_workflow_browser_is_not_panel_3010() -> None:
     assert "workflow-run-reports" not in str(browse_url)
 
 
-def test_pfill_11_dq_freshness_missing_series_is_explicit() -> None:
+def test_pfill_11_dq_freshness_is_not_a_selected_run_panel() -> None:
     data = json.loads((DASH / "bioetl-dq-v2.json").read_text(encoding="utf-8"))
-    freshness = next(
-        panel for panel in _walk(data.get("panels")) if panel.get("id") == 8
-    )
-    defaults = (freshness.get("fieldConfig") or {}).get("defaults") or {}
-    expressions = [
-        str(target.get("expr") or "") for target in freshness.get("targets") or []
-    ]
-
-    assert defaults.get("noValue") == (
-        "TELEMETRY MISSING — no bioetl_data_freshness_seconds for scope"
-    )
-    assert any("bioetl_data_freshness_seconds" in expr for expr in expressions)
-    assert all("or vector(0)" not in expr for expr in expressions)
-    assert "telemetry missing" in str(freshness.get("description") or "").lower()
+    assert all(panel.get("id") != 8 for panel in _walk(data.get("panels")))
 
 
 def test_pfill_10_provider_missing_series_has_reason_and_action() -> None:
