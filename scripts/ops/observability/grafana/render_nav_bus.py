@@ -1674,6 +1674,27 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "It lists replay signals that stay outside saved-run evidence."
         )
         _set_panel_no_value(uncovered, "—")
+    request_empty = (
+        "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
+    )
+    for panel_id in (9402, 9405, 9406, 9407, 9408, 9409, 9410, 9411):
+        panel = by_id.get(panel_id)
+        if isinstance(panel, dict):
+            _set_panel_no_value(panel, request_empty)
+    summary = by_id.get(9402)
+    if isinstance(summary, dict):
+        summary["description"] = (
+            "SELECTED RUN · Identity card for this Run ID: pipeline, run type, status, "
+            "and saved identifiers. This is not the replay-readiness verdict."
+        )
+    anchors = by_id.get(9408)
+    if isinstance(anchors, dict):
+        anchors["description"] = (
+            "SELECTED RUN · Anchor list behind Review Exact Replay Readiness: "
+            "source configuration, DQ policy, input snapshots, replay blockers, "
+            "lineage, artifacts, and ledger watermark. The verdict is the readiness stat, "
+            "not this table."
+        )
     trust = by_id.get(9418)
     if isinstance(trust, dict):
         trust["description"] = (

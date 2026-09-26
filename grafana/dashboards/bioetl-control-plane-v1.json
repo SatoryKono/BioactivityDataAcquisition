@@ -2420,7 +2420,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
             },
             "overrides": [
               {
@@ -2984,7 +2984,7 @@
           "datasource": null,
           "fieldConfig": {
             "defaults": {
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
             },
             "overrides": []
           },
@@ -3015,7 +3015,7 @@
           "datasource": null,
           "fieldConfig": {
             "defaults": {
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no rows for this table."
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
             },
             "overrides": []
           },
@@ -3056,7 +3056,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
             },
             "overrides": [
               {
@@ -3618,7 +3618,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Shows the primary evidence required for replay: source configuration, DQ policy, input snapshots, replay blockers, lineage, artifacts, and ledger watermark. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · Anchor list behind Review Exact Replay Readiness: source configuration, DQ policy, input snapshots, replay blockers, lineage, artifacts, and ledger watermark. The verdict is the readiness stat, not this table.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3632,7 +3632,7 @@
                 "wrapText": false
               },
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if this run has no replay anchors."
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
             },
             "overrides": [
               {
@@ -4239,7 +4239,7 @@
                 "wrapText": false
               },
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if this run has no checkpoint comparison.",
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
               "links": []
             },
             "overrides": [
@@ -4852,7 +4852,7 @@
                 "wrapText": false
               },
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if this run has no extra forensic anchors."
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
             },
             "overrides": [
               {
@@ -5490,7 +5490,7 @@
             "h": 12
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Shows identity details for the selected run. An exact Run ID resolves one run; an aggregate pipeline scope does not guess a manifest. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · Identity card for this Run ID: pipeline, run type, status, and saved identifiers. This is not the replay-readiness verdict.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -5504,7 +5504,7 @@
                 "minWidth": 50
               },
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
               "links": [
                 {
                   "title": "Check BioETL Ops HTTP health",
@@ -6668,7 +6668,7 @@
           },
           "fieldConfig": {
             "defaults": {
-              "noValue": "—",
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
               "custom": {
                 "cellOptions": {
                   "type": "auto",
