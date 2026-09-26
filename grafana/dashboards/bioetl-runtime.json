@@ -490,6 +490,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 125
               }
             ]
           },
@@ -516,6 +520,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 125
               }
             ]
           },
@@ -918,13 +926,8 @@
           "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs.",
           "links": [
             {
-              "title": "Check BioETL Ops HTTP health",
-              "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
-              "targetBlank": true
-            },
-            {
-              "title": "Open monitoring backend setup docs",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+              "title": "Open saved run report",
+              "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
               "targetBlank": true
             }
           ],
@@ -1511,6 +1514,21 @@
                         "options": {
                           "selection_required": {
                             "text": "Choose a run to inspect saved evidence"
+                          },
+                          "execution_success": {
+                            "text": "Processing completed"
+                          },
+                          "standalone_pipeline": {
+                            "text": "Standalone pipeline; no workflow applies"
+                          },
+                          "run_dq_threshold_evaluation": {
+                            "text": "Saved data-quality threshold evaluation"
+                          },
+                          "run_preflight_provider_observation": {
+                            "text": "Saved provider preflight check"
+                          },
+                          "run_gold_schema_validation": {
+                            "text": "Saved Gold schema validation"
                           }
                         }
                       }

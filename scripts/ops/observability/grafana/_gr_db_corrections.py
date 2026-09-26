@@ -845,7 +845,39 @@ def _strip_named_widths(panel: dict, names: tuple[str, ...]) -> None:
             ]
 
 
+def _correct_runtime_evidence_actions(panels: dict[int, dict]) -> None:
+    """Explain saved evidence without changing its verdict or raw report."""
+    if 9451 in panels:
+        reasons = {
+            "execution_success": "Processing completed",
+            "standalone_pipeline": "Standalone pipeline; no workflow applies",
+            "run_dq_threshold_evaluation": "Saved data-quality threshold evaluation",
+            "run_preflight_provider_observation": "Saved provider preflight check",
+            "run_gold_schema_validation": "Saved Gold schema validation",
+        }
+        _override(
+            panels[9451],
+            "Reason",
+            "mappings",
+            [{"type": "value", "options": {
+                code: {"text": label} for code, label in reasons.items()
+            }}],
+        )
+    if 9403 in panels:
+        panels[9403]["fieldConfig"]["defaults"]["links"] = [{
+            "title": "Open saved run report",
+            "url": (
+                "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/"
+                "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}"
+                "&run_id=${run_id:percentencode}&format=pipeline_run_report_json"
+            ),
+            "targetBlank": True,
+        }]
+
+
 def _correct_runtime(uid: object, panels: dict[int, dict]) -> None:
+    if uid == "bioetl-runtime":
+        _correct_runtime_evidence_actions(panels)
     if uid == "bioetl-runtime" and 9998 in panels:
         # Reserve room for long verdicts; evidence uses the remaining panel width.
         _override(panels[9998], "Result", _WIDTH, 125)
