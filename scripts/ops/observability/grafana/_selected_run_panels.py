@@ -150,8 +150,11 @@ def _stamp_control_plane_copy(panel: dict[str, object], uid: object) -> None:
             target["url"] = STATUS_URL
             target["root_selector"] = "trust"
         panel["description"] = (
-            DESCRIPTION
-            + " Processing result is the saved ETL outcome. Saved trust verdict is the historical Trust assessment. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded."
+            "SELECTED RUN · Processing result is the saved ETL outcome. "
+            "Saved trust verdict is the historical Trust assessment and does not "
+            "authorize replay. Reason count is the number of saved remarks. "
+            "Assessed at is when that assessment was recorded. "
+            "The time range does not change these values."
         )
     if panel.get("id") == 9403:
         description = str(panel.get("description") or "")
@@ -367,6 +370,10 @@ def _append_saved_run_evidence_row(
             "type": "row",
             "title": "Inspect Saved Run Evidence",
             "collapsed": True,
+            "description": (
+                "Expand for saved stage rows, then domain trust reasons, "
+                "for the selected Run ID."
+            ),
             "gridPos": {"x": 0, "y": y, "w": 24, "h": 1},
             "panels": children,
         }
