@@ -707,7 +707,7 @@
             "inspect": true
           },
           "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first.",
+          "noValue": "UNKNOWN",
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
@@ -964,7 +964,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs.",
+          "noValue": "UNKNOWN",
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
