@@ -59,11 +59,6 @@ first_window_inspect_tables:
     rationale: First-window worst-four fleet severity table.
     retire_when: 9101 is no longer a first-window table
   - dashboard: bioetl-overview-v2.json
-    id: 215
-    owner: "@bioetl-observability"
-    rationale: Overview next-action table (Review First Action).
-    retire_when: 215 leaves the first window
-  - dashboard: bioetl-overview-v2.json
     id: 9002
     owner: "@bioetl-observability"
     rationale: Overview domain-status answer table.
@@ -92,10 +87,10 @@ operator_question:
     basis_tokens: [CURRENT, trust_status]
     next_action_tokens: [processing_status]
   bioetl-overview-v2.json:
-    answer_ids: [214, 215]
-    next_action_id: 215
-    basis_tokens: [CURRENT]
-    next_action_tokens: [Open Runtime]
+    answer_ids: [9603, 9002]
+    next_action_id: 9603
+    basis_tokens: [SELECTED RUN]
+    next_action_tokens: [Open Run Explorer]
   bioetl-runtime.json:
     answer_ids: [9401]
     next_action_id: 9400

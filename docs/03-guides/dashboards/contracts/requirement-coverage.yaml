@@ -22,15 +22,15 @@ dashboards:
       - processing_status
       - trust_status
   bioetl-overview-v2:
-    question: What is broken or degraded now, and where should the operator go first?
+    question: What is the saved assessment of the selected Run ID?
     answer_panel_ids:
-      - 214
-      - 215
+      - 9603
+      - 9002
     next_action_tokens:
-      - Review First Action
+      - Open Run Explorer
     basis_tokens:
-      - CURRENT
-      - TELEMETRY MISSING
+      - SELECTED RUN
+      - QUERY ERROR
   bioetl-runtime:
     question: What currently blocks runtime delivery?
     answer_panel_ids:

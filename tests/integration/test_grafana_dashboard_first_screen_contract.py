@@ -334,9 +334,7 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
             "Review Run Domains": "selected-run-status",
         },
         "bioetl-control-plane-v1.json": {
-            "Monitor Replay": "bioetl_replay_safety_blockers_15m",
-            "Monitor Ledger": "bioetl_manifest_ledger_failures_15m",
-            "Monitor Telemetry": "bioetl_control_plane_telemetry_missing_5m",
+            "Review Exact Replay Readiness": "selected-run-status",
         },
     }
 

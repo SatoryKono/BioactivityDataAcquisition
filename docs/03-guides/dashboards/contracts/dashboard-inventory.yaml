@@ -50,20 +50,20 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 35
+    panel_count: 10
     key_panels:
-      - id: 214
-        title: Monitor Scope Health
-        type: stat
-        description: Current system status summary
-      - id: 215
-        title: Review First Action
+      - id: 9603
+        title: Review Selected Run Status
         type: table
-        description: Recommended first action for current state
-      - id: 1000
-        title: Navigate Dashboards
-        type: text
-        description: Theme-safe wrapping navigation bus (0-6 shipped surface)
+        description: Saved assessment of the selected Run ID
+      - id: 9002
+        title: Review Run Domains
+        type: table
+        description: Saved domain status for the selected Run ID
+      - id: 9300
+        title: Review Run Identity
+        type: table
+        description: HTTP identity for the selected Run ID
     selector_variables:
       - workflow
       - pipeline
