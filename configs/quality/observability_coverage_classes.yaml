@@ -150,6 +150,10 @@ metric_coverage_classes:
   bioetl_trust_replay_blocker_integrity: required_current
   bioetl_workflow_publication_scope_status: required_current
   bioetl_workflow_runs_total: event_optional
+  bioetl_workflow_scope_input_status: required_current
+  bioetl_workflow_scope_published_seconds: required_current
+  bioetl_workflow_scope_qualified_status: required_current
+  bioetl_workflow_scope_status: required_current
   bioetl_workflow_step_events_total: event_optional
   bioetl_workflow_universe: required_current
   prometheus_rule_group_last_evaluation_timestamp_seconds: required_current
