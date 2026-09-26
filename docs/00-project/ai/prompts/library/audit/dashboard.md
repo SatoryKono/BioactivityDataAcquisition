@@ -9,27 +9,27 @@ runtimes:
 - codex
 - any
 params:
-- N
-- REPO
-- BASE_BRANCH
-- WORK_BRANCH
-- SCOPE
-- MODE
-- DEPTH
-- AUDIT_MODE
-- CONTOURS
-- VIEWPORT
-- THEME
-- ZOOM
-- USER_ROLE
-- MONITORING
-- INCLUDE_PIPELINE
-- ALLOW_ISSUE_WRITE
-- ALLOW_PUSH
-- ALLOW_MERGE
-- ALLOW_CLOSE
-- MAX_ISSUES_PER_ITERATION
-- LANGUAGE
+- N = 5
+- REPO = SatoryKono/BioactivityDataAcquisition
+- BASE_BRANCH = main
+- WORK_BRANCH = fix/dashboard-audit-cycle-YYMMDD-<shortsha>
+- SCOPE = grafana/dashboards
+- MODE = full
+- DEPTH = full
+- AUDIT_MODE = full
+- CONTOURS = render,density-area,density-scalar,fill,fit,reflow,visual,layout,data,copy,safety`
+- VIEWPORT = 1920×1040
+- THEME = dark
+- ZOOM = 100%
+- USER_ROLE = operator
+- MONITORING = true
+- INCLUDE_PIPELINE = true
+- ALLOW_ISSUE_WRITE = true
+- ALLOW_PUSH = true
+- ALLOW_MERGE = true
+- ALLOW_CLOSE = true
+- MAX_ISSUES_PER_ITERATION = 10
+- LANGUAGE = ru
 includes:
 - fragments/git-safety.md
 - fragments/debt-budget-ban.md

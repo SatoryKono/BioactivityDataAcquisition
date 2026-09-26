@@ -15,6 +15,7 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
+    validate_exact_replay_boundary as domain_validate_exact_replay_boundary,
 )
 
 if TYPE_CHECKING:
@@ -36,13 +37,9 @@ def validate_exact_replay_boundary(
     context: ManifestReproducibilityContext,
 ) -> None:
     """Reject exact replay outside the published support boundary."""
-    if not bool(getattr(ctx, "exact_replay", False)):
-        return
-    if context.strict_exact_replay_supported:
-        return
-    raise RuntimeError(
-        "Pipeline execution is outside the published strict exact-replay "
-        "support boundary for this run family"
+    domain_validate_exact_replay_boundary(
+        exact_replay=bool(getattr(ctx, "exact_replay", False)),
+        strict_exact_replay_supported=bool(context.strict_exact_replay_supported),
     )
 
 

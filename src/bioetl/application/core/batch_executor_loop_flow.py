@@ -62,10 +62,14 @@ async def flush_batch_if_needed(
     loop_state: _BatchLoopStateProtocol,
     records_fetched: int,
     flush_context: _BatchFlushContextProtocol,
-) -> None:
-    """Flush the current batch when the adaptive size threshold is reached."""
+) -> bool:
+    """Flush the current batch when the adaptive size threshold is reached.
+
+    Returns:
+        ``True`` when a buffered batch was flushed (confirmed Bronze write path).
+    """
     if len(loop_state.batch) < loop_state.current_batch_size:
-        return
+        return False
     await flush_context.process_batch(
         loop_state.batch,
         build_start_index(
@@ -81,6 +85,7 @@ async def flush_batch_if_needed(
         progress_service=flush_context.progress_service,
         state=flush_context.progress_state,
     )
+    return True
 
 
 async def flush_remaining_batch(
@@ -110,11 +115,17 @@ async def process_extracted_record_iteration(
     update_batch_size: Callable[[int], int],
     iteration_context: _BatchIterationContextProtocol,
 ) -> int:
-    """Run one extraction-loop iteration in the canonical execution order."""
+    """Run one extraction-loop iteration in the canonical execution order.
+
+    Checkpoint payloads keep the historical ``records_fetched`` field name but
+    receive the confirmed Bronze count so resume cannot skip uncommitted rows
+    (#11221).
+    """
+    confirmed_bronze = iteration_context.progress_state.records_bronze
     await ensure_extraction_not_shutdown(
         shutdown_requested=shutdown_requested,
         checkpoint_recovery_service=iteration_context.checkpoint_recovery_service,
-        records_fetched=records_fetched,
+        records_fetched=confirmed_bronze,
         resume_offset=iteration_context.resume_offset,
     )
     next_records_fetched = records_fetched + 1
@@ -124,15 +135,17 @@ async def process_extracted_record_iteration(
         progress_service=iteration_context.progress_service,
         state=iteration_context.progress_state,
     )
-    await flush_batch_if_needed(
+    flushed = await flush_batch_if_needed(
         loop_state=loop_state,
         records_fetched=next_records_fetched,
         flush_context=iteration_context,
     )
-    await save_periodic_checkpoint_for_loop(
-        checkpoint_recovery_service=iteration_context.checkpoint_recovery_service,
-        records_fetched=next_records_fetched,
-        resume_offset=iteration_context.resume_offset,
-        checkpoint_interval=iteration_context.checkpoint_interval,
-    )
+    # Periodic checkpoints only after a flush so buffered rows are confirmed.
+    if flushed:
+        await save_periodic_checkpoint_for_loop(
+            checkpoint_recovery_service=iteration_context.checkpoint_recovery_service,
+            records_fetched=iteration_context.progress_state.records_bronze,
+            resume_offset=iteration_context.resume_offset,
+            checkpoint_interval=iteration_context.checkpoint_interval,
+        )
     return next_records_fetched

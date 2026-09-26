@@ -15,6 +15,7 @@ from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy 
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
+    validate_required_persistence_profile as domain_validate_required_persistence_profile,
 )
 
 if TYPE_CHECKING:
@@ -93,41 +94,19 @@ def validate_required_persistence_profile(
     missing_artifact_lineage_layers: tuple[str, ...] = (),
 ) -> None:
     """Fail closed when static control-plane flags cannot satisfy required profile."""
-    profile = normalize_required_persistence_profile(required_profile)
-    if profile in STRICT_PERSISTENCE_PROFILES and not manifest_enabled:
-        raise RuntimeError(
-            f"{execution_label} requires run manifests for required persistence "
-            f"profile '{profile}'; set "
-            "pipeline.control_plane.run_manifest_enabled=true"
-        )
-    if (
-        profile in STRICT_PERSISTENCE_PROFILES
-        and not exact_replay_execution_context_supported
-    ):
-        raise RuntimeError(
-            f"{execution_label} cannot satisfy required persistence profile "
-            f"'{profile}' because this execution context is outside the strict "
-            "exact-replay support boundary"
-        )
-    if profile == "forensic_grade" and not composite_resume_rich_replay_supported:
-        raise RuntimeError(
-            f"{execution_label} cannot satisfy required persistence profile "
-            f"'{profile}' because composite forensic replay requires rich "
-            "checkpoint evidence that is not persisted by the current resume model"
-        )
-    if profile in STRICT_PERSISTENCE_PROFILES and not ledger_enabled:
-        raise RuntimeError(
-            f"{execution_label} requires run ledgers for required persistence "
-            f"profile '{profile}'; set pipeline.control_plane.run_ledger_enabled=true"
-        )
-    if profile in STRICT_PERSISTENCE_PROFILES and missing_artifact_lineage_layers:
-        layers = ", ".join(missing_artifact_lineage_layers)
-        raise RuntimeError(
-            f"{execution_label} requires metadata sidecars / lineage persistence "
-            f"for active layers [{layers}] to satisfy required persistence profile "
-            f"'{profile}'; enable sink.<layer>.save_metadata for each active "
-            "published layer"
-        )
+    domain_validate_required_persistence_profile(
+        manifest_enabled=manifest_enabled,
+        ledger_enabled=ledger_enabled,
+        required_profile=required_profile,
+        execution_label=execution_label,
+        exact_replay_execution_context_supported=(
+            exact_replay_execution_context_supported
+        ),
+        composite_resume_rich_replay_supported=(
+            composite_resume_rich_replay_supported
+        ),
+        missing_artifact_lineage_layers=missing_artifact_lineage_layers,
+    )
 
 
 def validate_strict_data_root_policy(

@@ -17,8 +17,7 @@ from bioetl.composition.runtime_builders._run_manifest_context_updates import (
 from bioetl.domain.control_plane import RunSourceRef
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
-    STRICT_PERSISTENCE_PROFILES,
-    normalize_required_persistence_profile,
+    require_input_snapshots,
 )
 
 if TYPE_CHECKING:
@@ -87,18 +86,11 @@ def build_run_source_refs(
         provider=provider,
         entity=entity,
     )
-    required_profile = normalize_required_persistence_profile(
-        required_persistence_profile
+    require_input_snapshots(
+        exact_replay=bool(getattr(ctx, "exact_replay", False)),
+        required_persistence_profile=required_persistence_profile,
+        input_snapshots=input_snapshots,
     )
-    strict_snapshot_required = bool(getattr(ctx, "exact_replay", False)) or (
-        required_profile in STRICT_PERSISTENCE_PROFILES
-    )
-    if strict_snapshot_required and not input_snapshots:
-        raise RuntimeError(
-            "Exact replay and strict persistence profiles require immutable "
-            "input snapshots; no snapshot-backed source refs were resolved "
-            f"for required persistence profile '{required_profile}'"
-        )
     return (
         RunSourceRef(
             provider=provider,

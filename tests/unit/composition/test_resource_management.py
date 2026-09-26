@@ -55,7 +55,7 @@ class TestGetQuarantineRuntimeService:
 
         with (
             patch(
-                "bioetl.composition._resource_management._ensure_registrations"
+                "bioetl.composition._resource_management._ensure_provider_registrations"
             ) as mock_ensure,
             patch(
                 "bioetl.composition._resource_management.bootstrap_quarantine_runtime_service",
@@ -77,7 +77,7 @@ class TestGetQuarantineRuntimeService:
         expected = MagicMock(name="QuarantineRuntimeServiceMock")
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
+            patch("bioetl.composition._resource_management._ensure_provider_registrations"),
             patch(
                 "bioetl.composition._resource_management.bootstrap_quarantine_runtime_service",
                 return_value=expected,
@@ -94,7 +94,7 @@ class TestGetQuarantineRuntimeService:
     def test_passes_pipeline_name_to_bootstrap(self) -> None:
         """Test that pipeline name is forwarded to bootstrap function."""
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
+            patch("bioetl.composition._resource_management._ensure_provider_registrations"),
             patch(
                 "bioetl.composition._resource_management.bootstrap_quarantine_runtime_service"
             ) as mock_bootstrap,
@@ -123,7 +123,7 @@ class TestGetCheckpointRuntimeService:
 
         with (
             patch(
-                "bioetl.composition._resource_management._ensure_registrations"
+                "bioetl.composition._resource_management._ensure_provider_registrations"
             ) as mock_ensure,
             patch(
                 "bioetl.composition._resource_management.bootstrap_checkpoint_runtime_service",
@@ -143,7 +143,7 @@ class TestGetCheckpointRuntimeService:
     def test_runtime_service__name_to_bootstrap__872020d5(self) -> None:
         """Test that pipeline name is forwarded to bootstrap function."""
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
+            patch("bioetl.composition._resource_management._ensure_provider_registrations"),
             patch(
                 "bioetl.composition._resource_management.bootstrap_checkpoint_runtime_service"
             ) as mock_bootstrap,
@@ -172,7 +172,7 @@ class TestGetLifecycleService:
 
         with (
             patch(
-                "bioetl.composition._resource_management._ensure_registrations"
+                "bioetl.composition._resource_management._ensure_provider_registrations"
             ) as mock_ensure,
             patch(
                 "bioetl.composition._resource_management.bootstrap_lifecycle_service",
@@ -350,7 +350,7 @@ class TestPreviewCleanup:
         mock_cleanup_service.preview = AsyncMock(return_value=mock_preview)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
+            patch("bioetl.composition._resource_management._ensure_provider_registrations"),
             patch(
                 "bioetl.composition._resource_management.load_pipeline_config",
                 return_value=mock_pipeline_cfg,
@@ -380,7 +380,7 @@ class TestPreviewCleanup:
         mock_cleanup_service.preview = AsyncMock(return_value=mock_preview)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
+            patch("bioetl.composition._resource_management._ensure_provider_registrations"),
             patch(
                 "bioetl.composition._resource_management.load_pipeline_config",
                 return_value=mock_pipeline_cfg,
@@ -413,7 +413,7 @@ class TestPreviewCleanup:
         mock_cleanup_service.preview = AsyncMock(return_value=mock_preview)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
+            patch("bioetl.composition._resource_management._ensure_provider_registrations"),
             patch(
                 "bioetl.composition._resource_management.load_pipeline_config",
                 return_value=mock_pipeline_cfg,

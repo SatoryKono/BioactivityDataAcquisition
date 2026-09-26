@@ -177,15 +177,16 @@ class BatchExecutionLifecycleService:
             memory_decision_trace=memory_decision_trace,
         )
         if shutdown:
+            # Confirmed Bronze count only (#11221); kwarg name is historical.
             await self._checkpoint_recovery_service.save_checkpoint_on_shutdown(
-                records_fetched=finalization_context.total_fetched,
+                records_fetched=finalization_context.total_bronze,
                 resume_offset=finalization_context.resume_offset,
             )
             self._tracing_manager.end_span_with_shutdown(finalization_context.root_span)
             return
         if error is not None:
             await self._checkpoint_recovery_service.save_checkpoint_on_exception(
-                records_fetched=finalization_context.total_fetched,
+                records_fetched=finalization_context.total_bronze,
                 resume_offset=finalization_context.resume_offset,
                 error=error,
             )

@@ -13,7 +13,10 @@ from typing import TYPE_CHECKING, cast
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,
     VacuumOptions,
-    _ensure_registrations,
+)
+from bioetl.composition._registration import (
+    RuntimeRegistrationScope,
+    ensure_runtime_registrations,
 )
 from bioetl.composition.bootstrap.cli import checkpoint as _checkpoint_cli
 from bioetl.composition.bootstrap.cli import storage as _storage_cli
@@ -76,14 +79,19 @@ def load_pipeline_config(pipeline: str) -> PipelineYamlConfig:
     return impl(pipeline)
 
 
+def _ensure_provider_registrations() -> None:
+    """Load provider adapters without requiring a pipeline registry (#11222)."""
+    ensure_runtime_registrations(scope=RuntimeRegistrationScope.PROVIDERS)
+
+
 def _bootstrap_registered_resource[**P, T](
     bootstrap_fn: Callable[P, T],
     /,
     *args: P.args,
     **kwargs: P.kwargs,
 ) -> T:
-    """Run registration bootstrap before delegating to a resource builder."""
-    _ensure_registrations()
+    """Run provider registration bootstrap before delegating to a resource builder."""
+    _ensure_provider_registrations()
     return bootstrap_fn(*args, **kwargs)
 
 
@@ -207,7 +215,7 @@ async def preview_cleanup(pipeline: str) -> CleanupPreviewProtocol:
         >>> preview.total_files  # Number of files to clear
         42
     """
-    _ensure_registrations()
+    _ensure_provider_registrations()
     pipeline_cfg = load_pipeline_config(pipeline)
     cleanup_service = bootstrap_cleanup_service()
     silver_table = (

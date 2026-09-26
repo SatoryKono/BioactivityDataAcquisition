@@ -122,6 +122,9 @@ async def test_finalize_execution_shutdown_saves_checkpoint(
     )
     checkpoint.save_checkpoint_on_shutdown.assert_awaited_once()
     tracing.end_span_with_shutdown.assert_called_once_with(lifecycle.root_span)
+    kwargs = checkpoint.save_checkpoint_on_shutdown.await_args.kwargs
+    assert kwargs["records_fetched"] == _Counters.records_bronze
+    assert kwargs["resume_offset"] == 0
 
 
 @pytest.mark.asyncio
@@ -148,6 +151,9 @@ async def test_finalize_execution_error_saves_exception_checkpoint(
     )
     checkpoint.save_checkpoint_on_exception.assert_awaited_once()
     tracing.end_span.assert_called_once_with(lifecycle.root_span, err)
+    kwargs = checkpoint.save_checkpoint_on_exception.await_args.kwargs
+    assert kwargs["records_fetched"] == _Counters.records_bronze
+    assert kwargs["error"] is err
 
 
 @pytest.mark.asyncio

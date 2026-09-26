@@ -32,6 +32,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
     resolve_replay_capability,
+    resolve_replay_reconstructability_status as domain_resolve_replay_reconstructability_status,
 )
 from bioetl.domain.ports import MetricsPort
 
@@ -119,34 +120,12 @@ def _resolve_replay_reconstructability_status(
     precomputed: Mapping[str, object] | None,
 ) -> tuple[str, bool]:
     """Return (status, effective_strict_requirement)."""
-    if precomputed is not None:
-        strict_requirement = bool(
-            precomputed.get("strict_requirement_requested", strict_requirement)
-        )
-        assessment_capability = precomputed.get("replay_capability")
-        capability_value = (
-            assessment_capability
-            if isinstance(assessment_capability, str)
-            else request.replay_capability.value
-        )
-        supported = bool(
-            precomputed.get(
-                "strict_exact_replay_supported", strict_exact_replay_supported
-            )
-        )
-        not_ok = strict_requirement and (
-            not supported
-            or capability_value != ReplayCapability.EXACT_REPLAY_SUPPORTED.value
-        )
-        return (
-            "not_reconstructable" if not_ok else "reconstructable",
-            strict_requirement,
-        )
-    not_ok = strict_requirement and (
-        not strict_exact_replay_supported
-        or request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
+    return domain_resolve_replay_reconstructability_status(
+        replay_capability=request.replay_capability,
+        strict_exact_replay_supported=strict_exact_replay_supported,
+        strict_requirement=strict_requirement,
+        precomputed=dict(precomputed) if precomputed is not None else None,
     )
-    return ("not_reconstructable" if not_ok else "reconstructable", strict_requirement)
 
 
 def emit_replay_reconstructability_metric(
