@@ -393,6 +393,7 @@ async def handle_processed_records_table(
         payload = await run_bounded_forensic_operation(
             limiter=host._forensic_endpoint_limiter,
             operation_factory=lambda: asyncio.to_thread(operation),
+            endpoint="processed-records",
         )
     except ForensicEndpointUnavailable as exc:
         await host._send_payload_response(

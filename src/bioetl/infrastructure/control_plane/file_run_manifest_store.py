@@ -295,9 +295,11 @@ class FileRunManifestStore(RawRunManifestInspectionMixin, RunManifestPort):
     def _load_manifest(self, manifest_id: str) -> RunManifest | None:
         """Load one manifest payload without emitting public lookup metrics."""
         manifest_path = self.base_path / f"{manifest_id}.json"
-        if not manifest_path.exists():
+        try:
+            raw = manifest_path.read_text(encoding="utf-8")
+        except FileNotFoundError:
             return None
-        manifest = _decode_manifest(manifest_path.read_text(encoding="utf-8"))
+        manifest = _decode_manifest(raw)
         indexed_manifest_id = self._load_manifest_id_for_run_id(manifest.run_id)
         if indexed_manifest_id != manifest.manifest_id:
             raise RunManifestStoreCorruptionError(
@@ -310,9 +312,10 @@ class FileRunManifestStore(RawRunManifestInspectionMixin, RunManifestPort):
     def _load_manifest_id_for_run_id(self, run_id: RunID) -> str | None:
         """Return the indexed manifest identifier for one run when present."""
         run_index_path = self.base_path / "_by_run_id" / f"{run_id}.txt"
-        if not run_index_path.exists():
+        try:
+            manifest_id = run_index_path.read_text(encoding="utf-8").strip()
+        except FileNotFoundError:
             return None
-        manifest_id = run_index_path.read_text(encoding="utf-8").strip()
         return manifest_id or None
 
     def _latest_scope_index_path(

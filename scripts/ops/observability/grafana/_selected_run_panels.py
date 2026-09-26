@@ -640,6 +640,11 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
             panel.get("fieldConfig", {}).get("defaults", {}).get("links", [])
         )
         _stamp_control_plane_copy(panel, uid)
+        if uid == "bioetl-runtime" and panel.get("id") == 9403:
+            panel.setdefault("fieldConfig", {}).setdefault("defaults", {})["noValue"] = (
+                "No records response. If a Run ID is selected, inspect the panel error. "
+                "Otherwise choose a run in Run Explorer."
+            )
         if uid == _OVERVIEW_UID and panel.get("id") in {9006, 9003, 9004, 9005, 9013}:
             panel["description"] = str(panel.get("description", "")).replace(
                 "as Review Domain Status", "as Review All Domain Status (CURRENT)"

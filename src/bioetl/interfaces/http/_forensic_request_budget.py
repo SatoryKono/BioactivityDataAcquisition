@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Callable, Coroutine, Mapping
+from contextvars import ContextVar
 from functools import partial
 from secrets import token_hex
 from time import perf_counter
@@ -19,6 +20,14 @@ FORENSIC_ENDPOINT_QUEUE_TIMEOUT_SECONDS = 0.25
 FORENSIC_ENDPOINT_TIMEOUT_SECONDS = 12.0
 FORENSIC_ENDPOINT_ERROR_CONTRACT = "forensic_endpoint_error_v1"
 _LOGGER = logging.getLogger(__name__)
+_deadline: ContextVar[float | None] = ContextVar("forensic_deadline", default=None)
+
+
+def check_forensic_deadline() -> None:
+    """Stop scheduling further request-owned reads after the response deadline."""
+    deadline = _deadline.get()
+    if deadline is not None and perf_counter() >= deadline:
+        raise ForensicEndpointUnavailable(reason="deadline_exceeded", status_code=504)
 
 
 def _log_stage(request_id: str, endpoint: str, stage: str, elapsed: float) -> None:
@@ -147,12 +156,15 @@ async def run_bounded_forensic_operation[ResultT](
     started_at = perf_counter()
     queue_seconds = started_at - queued_at
 
+    token = _deadline.set(started_at + timeout_seconds)
     try:
         with observe_evidence_stages(partial(_log_stage, request_id, endpoint)):
             operation_task = asyncio.create_task(operation_factory())
     except BaseException:
         limiter.release()
         raise
+    finally:
+        _deadline.reset(token)
     release_deferred = False
 
     def release_after_completion(completed_task: asyncio.Task[ResultT]) -> None:

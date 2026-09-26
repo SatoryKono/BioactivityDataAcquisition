@@ -16,6 +16,7 @@ from bioetl.domain.control_plane.run_ledger import (
     RUN_STARTED_EVENT,
 )
 from bioetl.domain.types import RunID
+from bioetl.interfaces.http._forensic_request_budget import check_forensic_deadline
 from bioetl.interfaces.http._processed_records_value_support import (
     _is_all_scope as _is_all_scope_token,
 )
@@ -81,12 +82,14 @@ def _read_selector_records(
             for index, manifest in islice(remaining, 4)
         }
         while pending:
+            check_forensic_deadline()
             completed, _ = wait(pending, return_when=FIRST_COMPLETED)
             # Resolve the whole batch before refilling, so failures stop new reads.
             loaded = {pending[future]: future.result() for future in completed}
             records.update(loaded)
             for future in completed:
                 del pending[future]
+            check_forensic_deadline()
             pending.update(
                 (
                     executor.submit(

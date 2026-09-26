@@ -17,6 +17,7 @@ from bioetl.domain.ports import (
 )
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
+    check_forensic_deadline,
     forensic_unavailable_payload,
     run_bounded_forensic_operation,
 )
@@ -254,6 +255,7 @@ async def _filter_options_payload(
             host._run_manifest_port,
             host._workflow_manifest_port,
         )
+        check_forensic_deadline()
         return await asyncio.to_thread(
             build_selector_filter_options_payload,
             manifests=manifests,
@@ -281,6 +283,7 @@ async def _filter_options_payload(
         else asyncio.sleep(0, result=[]),
     )
     if include_reports:
+        check_forensic_deadline()
         payload = await asyncio.to_thread(
             supplement_report_options,
             payload,

@@ -50,6 +50,47 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
+async def test_expired_thread_stops_before_next_read_and_releases_slot() -> None:
+    from threading import Event
+
+    from bioetl.interfaces.http._forensic_request_budget import check_forensic_deadline
+
+    started, release, finished = Event(), Event(), Event()
+    reads: list[str] = []
+    limiter = asyncio.Semaphore(1)
+
+    def operation() -> None:
+        started.set()
+        try:
+            assert release.wait(5)
+            check_forensic_deadline()
+            reads.append("unexpected second read")
+        finally:
+            finished.set()
+
+    request = asyncio.create_task(
+        run_bounded_forensic_operation(
+            limiter=limiter,
+            operation_factory=lambda: asyncio.to_thread(operation),
+            timeout_seconds=0.05,
+        )
+    )
+    try:
+        assert await asyncio.to_thread(started.wait, 5)
+        with pytest.raises(ForensicEndpointUnavailable):
+            await request
+        assert limiter.locked()
+        release.set()
+        assert await asyncio.to_thread(finished.wait, 5)
+        await asyncio.wait_for(limiter.acquire(), timeout=1)
+        limiter.release()
+        assert reads == []
+        check_forensic_deadline()  # The caller does not inherit the expired budget.
+    finally:
+        release.set()
+
+
+@pytest.mark.asyncio
 async def test_stage_context_crosses_threads_without_crossing_requests(caplog) -> None:
     from bioetl.application.observability.control_plane_evidence.timing import (
         evidence_stage,

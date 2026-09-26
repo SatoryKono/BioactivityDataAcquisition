@@ -177,18 +177,21 @@ class FileWorkflowManifestStore(WorkflowManifestPort):
 
     def _load_manifest(self, manifest_id: str) -> WorkflowManifest | None:
         manifest_path = self.base_path / f"{manifest_id}.json"
-        if not manifest_path.exists():
+        try:
+            raw = manifest_path.read_text(encoding="utf-8")
+        except FileNotFoundError:
             return None
-        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload = json.loads(raw)
         if not isinstance(payload, dict):
             raise ValueError("Workflow manifest payload must be a JSON object")
         return WorkflowManifest.from_dict(payload)
 
     def _load_manifest_id_for_run_id(self, workflow_run_id: RunID) -> str | None:
         run_index_path = self.base_path / "_by_run_id" / f"{workflow_run_id}.txt"
-        if not run_index_path.exists():
+        try:
+            manifest_id = run_index_path.read_text(encoding="utf-8").strip()
+        except FileNotFoundError:
             return None
-        manifest_id = run_index_path.read_text(encoding="utf-8").strip()
         return manifest_id or None
 
     @staticmethod

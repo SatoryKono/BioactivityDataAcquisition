@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import cast
 from uuid import UUID
 
+from bioetl.application.observability.control_plane_evidence.timing import (
+    evidence_stage,
+)
 from bioetl.application.observability.reason_aliases import (
     display_reason,
     display_reasons_text,
@@ -34,6 +37,7 @@ from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostic
 from bioetl.interfaces.http import run_report_ops
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
+    check_forensic_deadline,
     run_bounded_forensic_operation,
 )
 from bioetl.interfaces.http._health_server_observability_protocols import (
@@ -162,9 +166,7 @@ def unavailable_status(
                 reason=reason,
             )
         ),
-        **project_stage_diagnostics(
-            None, request_state=state, request_reason=reason
-        ),
+        **project_stage_diagnostics(None, request_state=state, request_reason=reason),
     }
 
 
@@ -240,6 +242,7 @@ def _artifact_probes(
     root = run_root.resolve()
     probes: list[dict[str, str]] = []
     for index, item in enumerate(artifacts):
+        check_forensic_deadline()
         ref = f"#/artifacts/{index}"
         code = f"artifact_{index}"
         if not isinstance(item, dict):
@@ -300,7 +303,15 @@ def _artifact_probes(
                 }
             )
             continue
-        actual = hashlib.sha256(candidate.read_bytes()).hexdigest()
+        digest_state = hashlib.sha256()
+        with candidate.open("rb") as stream:
+            while True:
+                check_forensic_deadline()
+                chunk = stream.read(1024 * 1024)
+                if not chunk:
+                    break
+                digest_state.update(chunk)
+        actual = digest_state.hexdigest()
         if actual != digest.strip().lower():
             probes.append(
                 {
@@ -516,9 +527,10 @@ def load_selected_run_status(
     if not path.is_file():
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
     try:
-        report, identity, assessment, availability, revision = _load_report_assessment(
-            path, pipeline, run_id
-        )
+        with evidence_stage("selected_run_assessment"):
+            report, identity, assessment, availability, revision = (
+                _load_report_assessment(path, pipeline, run_id)
+            )
     except _IdentityMismatchError:
         return unavailable_status(pipeline, run_id, "ERROR", "identity_mismatch")
     except _RevisionMissingError:
@@ -543,10 +555,15 @@ def load_selected_run_status(
         "heartbeat_now": _NOT_EVALUATED,
         "reason": "Saved run evidence; CURRENT and chart coverage are separate",
     }
-    probes, inventory_present = _artifact_probes(report, path.parent)
+    with evidence_stage("selected_run_artifacts"):
+        check_forensic_deadline()
+        probes, inventory_present = _artifact_probes(report, path.parent)
+    with evidence_stage("selected_run_manifest"):
+        check_forensic_deadline()
+        manifest_snapshot = _manifest_snapshot(manifest_port, run_id)
     projection = project_selected_run_replay_readiness(
         identity=identity,
-        manifest=_manifest_snapshot(manifest_port, run_id),
+        manifest=manifest_snapshot,
         artifact_probes=probes,
         inventory_present=inventory_present,
         evidence_revision=revision,

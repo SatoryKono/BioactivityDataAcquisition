@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
+from functools import partial
 from time import monotonic
 
+from bioetl.application.observability.control_plane_evidence.timing import (
+    evidence_stage,
+)
 from bioetl.application.services.run_reports.query import ReportIndexEntry
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
 from bioetl.domain.ports import RunManifestPort, WorkflowManifestPort
@@ -14,6 +18,11 @@ SelectorCatalogSnapshot = tuple[tuple[RunManifest, ...], tuple[WorkflowManifest,
 SELECTOR_ENDPOINT_CONCURRENCY = 4
 SELECTOR_CATALOG_TTL_SECONDS = 5.0
 SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS = 2.0
+
+
+def _measured_read[ResultT](stage: str, reader: Callable[[], ResultT]) -> ResultT:
+    with evidence_stage(stage):
+        return reader()
 
 
 class SelectorCatalog:
@@ -52,7 +61,13 @@ class SelectorCatalog:
             return snapshot[1]
         if key not in self._report_tasks:
             self._report_snapshot = None
-            task = asyncio.create_task(asyncio.to_thread(loader, {"pipeline": key}))
+            task = asyncio.create_task(
+                asyncio.to_thread(
+                    _measured_read,
+                    "selector_report_catalog",
+                    partial(loader, {"pipeline": key}),
+                )
+            )
             self._report_tasks[key] = task
             task.add_done_callback(lambda result: self._complete_reports(key, result))
         return await asyncio.shield(self._report_tasks[key])
@@ -92,9 +107,15 @@ class SelectorCatalog:
     ) -> SelectorCatalogSnapshot:
         # Drain both reads on failure before permitting a retry; a thread-backed
         # read cannot be cancelled when its sibling fails.
-        manifest_task = asyncio.create_task(asyncio.to_thread(manifests.list_all))
+        manifest_task = asyncio.create_task(
+            asyncio.to_thread(
+                _measured_read, "selector_manifest_catalog", manifests.list_all
+            )
+        )
         workflow_task = asyncio.create_task(
-            asyncio.to_thread(workflows.list_all)
+            asyncio.to_thread(
+                _measured_read, "selector_workflow_catalog", workflows.list_all
+            )
             if workflows is not None
             else asyncio.sleep(0, result=())
         )

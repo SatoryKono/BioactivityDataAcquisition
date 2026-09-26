@@ -915,7 +915,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs.",
+          "noValue": "No records response. If a Run ID is selected, inspect the panel error. Otherwise choose a run in Run Explorer.",
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
