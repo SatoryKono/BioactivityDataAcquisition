@@ -349,7 +349,7 @@ def _apply_overview(
 ) -> None:
         p = panels[215]
         p["targets"][0]["expr"] = (
-            'max without(run_type)(bioetl_l0_next_action_route{pipeline=~"$pipeline",run_type=~"$run_type"}>0) or on() bioetl_l0_next_action_no_route'
+            'bioetl_first_action{workflow=~"$workflow",pipeline=~"$pipeline",run_type=~"$run_type"}>0 or on() label_replace(label_replace(bioetl_fa_gap,"pipeline","$pipeline","",""),"workflow","$workflow","","")'
         )
         p["description"] = p["description"].replace(
             "before the two-row limit", "with all routes available through pagination"

@@ -5,6 +5,22 @@ from __future__ import annotations
 from copy import deepcopy
 
 _SCOPE = 'workflow=~"$workflow",pipeline=~"$pipeline",run_type=~"$run_type"'
+_FIRST_ACTION_EXPR = (
+    'bioetl_first_action{workflow=~"$workflow",pipeline=~"$pipeline",run_type=~"$run_type"}>0'
+    ' or on() label_replace(label_replace(bioetl_fa_gap,"pipeline","$pipeline","",""),'
+    '"workflow","$workflow","","")'
+)
+_ACTION_HREF = "${__data.fields.action_href:raw}"
+_FIRST_ACTION_DESCRIPTION = (
+    "CURRENT · Each row keeps pipeline and run type. Workflow All uses workflow series plus "
+    "standalone pipelines that have no workflow membership. A concrete workflow does not borrow "
+    "another workflow or a pipeline fallback. VERIFY means required telemetry is missing, "
+    "publication evidence is stale, or the selected scope has no current series. "
+    "No action required means every applicable check is confirmed. "
+    "REVIEW, HIGH, URGENT, and CRIT are confirmed problems. "
+    "Run ID does not change CURRENT. A datasource error stays a query error. "
+    "UNKNOWN remains a health state on Monitor Scope Health, not a First Action priority."
+)
 _PRIORITIES = {
     "0": {"text": "OK", "color": "green"},
     "1": {"text": "UNKNOWN", "color": "#555555"},
@@ -89,6 +105,7 @@ def _evidence_row(payload: dict, source: dict) -> None:
         "defaults": {
             "custom": {
                 "wrapText": True,
+                "inspect": True,
                 "cellOptions": {"type": "auto", "wrapText": True},
             },
             "noValue": "UNKNOWN",
@@ -134,6 +151,111 @@ def _evidence_row(payload: dict, source: dict) -> None:
             "panels": [evidence],
         }
     )
+
+
+def _mapping_options(panel: dict, field: str | None) -> list[dict]:
+    if field is None:
+        mappings = panel["fieldConfig"]["defaults"].get("mappings", [])
+    else:
+        mappings = []
+        for override in panel.get("fieldConfig", {}).get("overrides", []):
+            if override.get("matcher", {}).get("options") != field:
+                continue
+            for prop in override.get("properties", []):
+                if prop.get("id") == "mappings":
+                    mappings.extend(prop.get("value", []))
+    return [
+        mapping["options"]
+        for mapping in mappings
+        if mapping.get("type") == "value" and isinstance(mapping.get("options"), dict)
+    ]
+
+
+def _apply_first_action_panel(panel: dict) -> None:
+    """Point Review First Action at scoped routes and VERIFY, not UNKNOWN."""
+    for target in panel.get("targets", []):
+        if "expr" in target:
+            target["expr"] = _FIRST_ACTION_EXPR
+    panel["description"] = _FIRST_ACTION_DESCRIPTION
+    panel["fieldConfig"]["defaults"]["noValue"] = "Selected scope has no current evidence"
+    for options in _mapping_options(panel, None):
+        options.pop("0", None)
+        options.pop("5", None)
+        options["1"] = {"text": "—", "color": "text"}
+        options["15"] = {"text": "VERIFY", "color": "#8e8e8e"}
+    for options in _mapping_options(panel, "action_target"):
+        options["none"] = {"text": "—", "color": "text"}
+        options["inspect_evidence"] = {"text": "Inspect evidence", "color": "text"}
+        options.pop("no_route", None)
+        options.pop("monitor", None)
+    for options in _mapping_options(panel, "action_reason"):
+        options["no_action_required"] = {"text": "No action required"}
+        options["selected_scope_not_present"] = {
+            "text": "Selected scope has no current evidence"
+        }
+        options["workflow_evidence_stale"] = {"text": "Current evidence is stale"}
+        options.pop("no_recent_activity_or_unknown_state", None)
+        for domain, label in (
+            ("runtime", "Runtime"),
+            ("control_plane", "Trust"),
+            ("gold", "Gold"),
+            ("dq", "DQ"),
+            ("provider", "Provider"),
+            ("workflow", "Workflow"),
+        ):
+            options[f"{domain}_evidence_missing"] = {"text": f"{label}: telemetry missing"}
+    for transform in panel.get("transformations", []):
+        if transform.get("id") != "sortBy":
+            continue
+        transform["options"]["sort"] = [
+            {"field": "Value", "desc": True},
+            {"field": "action_reason", "desc": False},
+        ]
+    overrides = panel["fieldConfig"]["overrides"]
+    for override in overrides:
+        if override.get("matcher", {}).get("options") != "run_type":
+            continue
+        override["properties"] = [
+            prop
+            for prop in override.get("properties", [])
+            if not (prop.get("id") == "custom.hidden" and prop.get("value") is True)
+        ]
+    if not any(item.get("matcher", {}).get("options") == "Workflow" for item in overrides):
+        overrides.append(
+            {"matcher": {"id": "byName", "options": "Workflow"}, "properties": []}
+        )
+    for override in overrides:
+        if override.get("matcher", {}).get("options") != "Workflow":
+            continue
+        props = override.setdefault("properties", [])
+        if not any(prop.get("id") == "mappings" for prop in props):
+            props.append(
+                {
+                    "id": "mappings",
+                    "value": [
+                        {
+                            "type": "value",
+                            "options": {"__standalone__": {"text": "—"}},
+                        }
+                    ],
+                }
+            )
+        for prop in props:
+            if prop.get("id") != "links":
+                continue
+            for link in prop.get("value", []):
+                if "action_scope" in link.get("url", "") or "action_href" in link.get(
+                    "url", ""
+                ):
+                    link["url"] = _ACTION_HREF
+    for override in overrides:
+        if override.get("matcher", {}).get("options") != "action_target":
+            continue
+        for prop in override.get("properties", []):
+            if prop.get("id") != "links":
+                continue
+            for link in prop.get("value", []):
+                link["url"] = _ACTION_HREF
 
 
 def apply_workflow_scope(payload: dict) -> None:
@@ -299,5 +421,6 @@ def apply_workflow_scope(payload: dict) -> None:
                     ],
                 }
             )
+            _apply_first_action_panel(panel)
     source = next(p for p in panels if p.get("type") == "table")
     _evidence_row(payload, source)

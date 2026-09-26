@@ -667,7 +667,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed. States: OK/WARN/CRIT/UNKNOWN.",
+      "description": "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -832,14 +832,6 @@
             {
               "type": "value",
               "options": {
-                "0": {
-                  "text": "UNKNOWN",
-                  "color": "#555555"
-                },
-                "5": {
-                  "text": "WATCH",
-                  "color": "#555555"
-                },
                 "10": {
                   "text": "REVIEW",
                   "color": "green"
@@ -871,6 +863,10 @@
                 "60": {
                   "text": "CRIT",
                   "color": "red"
+                },
+                "1": {
+                  "text": "—",
+                  "color": "text"
                 }
               }
             },
@@ -907,7 +903,7 @@
             ]
           },
           "unit": "none",
-          "noValue": "No route for this scope"
+          "noValue": "Selected scope has no current evidence"
         },
         "overrides": [
           {
@@ -942,9 +938,8 @@
                 "value": [
                   {
                     "title": "Open routed diagnostics",
-                    "url": "/d/${__data.fields.action_dashboard_uid}/?var-workflow=${__data.fields.Workflow:percentencode}&${__data.fields.action_scope:raw}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-                    "targetBlank": false,
-                    "includeVars": false
+                    "url": "${__data.fields.action_href:raw}",
+                    "targetBlank": false
                   }
                 ]
               },
@@ -954,14 +949,6 @@
                   {
                     "type": "value",
                     "options": {
-                      "0": {
-                        "text": "UNKNOWN",
-                        "color": "#555555"
-                      },
-                      "5": {
-                        "text": "WATCH",
-                        "color": "#555555"
-                      },
                       "10": {
                         "text": "REVIEW",
                         "color": "green"
@@ -994,20 +981,24 @@
                         "text": "CRIT",
                         "color": "red"
                       },
+                      "1": {
+                        "text": "—",
+                        "color": "text"
+                      },
+                      "0": {
+                        "text": "UNKNOWN",
+                        "color": "#555555"
+                      },
+                      "5": {
+                        "text": "WATCH",
+                        "color": "#555555"
+                      },
                       "control_plane": {
                         "text": "Trust",
                         "color": "text"
                       },
                       "dq": {
                         "text": "Data Quality",
-                        "color": "text"
-                      },
-                      "monitor": {
-                        "text": "Monitor",
-                        "color": "text"
-                      },
-                      "no_route": {
-                        "text": "No route",
                         "color": "text"
                       },
                       "provider": {
@@ -1020,6 +1011,14 @@
                       },
                       "workflow": {
                         "text": "Diagnose",
+                        "color": "text"
+                      },
+                      "none": {
+                        "text": "—",
+                        "color": "text"
+                      },
+                      "inspect_evidence": {
+                        "text": "Inspect evidence",
                         "color": "text"
                       }
                     }
@@ -1093,14 +1092,6 @@
                   {
                     "type": "value",
                     "options": {
-                      "0": {
-                        "text": "UNKNOWN",
-                        "color": "#555555"
-                      },
-                      "5": {
-                        "text": "WATCH",
-                        "color": "#555555"
-                      },
                       "10": {
                         "text": "REVIEW",
                         "color": "green"
@@ -1133,17 +1124,26 @@
                         "text": "CRIT",
                         "color": "red"
                       },
+                      "1": {
+                        "text": "—",
+                        "color": "text"
+                      },
+                      "0": {
+                        "text": "UNKNOWN",
+                        "color": "#555555"
+                      },
+                      "5": {
+                        "text": "WATCH",
+                        "color": "#555555"
+                      },
                       "control_plane_guardrail_active": {
                         "text": "Replay guardrail active"
                       },
                       "dq_threshold_or_validation_signal": {
                         "text": "DQ threshold / validation"
                       },
-                      "no_recent_activity_or_unknown_state": {
-                        "text": "No recent activity"
-                      },
                       "selected_scope_not_present": {
-                        "text": "No active route; verify telemetry"
+                        "text": "Selected scope has no current evidence"
                       },
                       "provider_global_degradation": {
                         "text": "GLOBAL provider degraded"
@@ -1158,28 +1158,34 @@
                         "text": "Workflow review"
                       },
                       "runtime_evidence_missing": {
-                        "text": "Runtime: no evidence"
+                        "text": "Runtime: telemetry missing"
                       },
                       "control_plane_evidence_missing": {
-                        "text": "Trust: no evidence"
+                        "text": "Trust: telemetry missing"
                       },
                       "gold_evidence_missing": {
-                        "text": "Gold: no evidence"
+                        "text": "Gold: telemetry missing"
                       },
                       "dq_evidence_missing": {
-                        "text": "Dq: no evidence"
+                        "text": "DQ: telemetry missing"
                       },
                       "provider_evidence_missing": {
-                        "text": "Provider: no evidence"
+                        "text": "Provider: telemetry missing"
                       },
                       "workflow_evidence_missing": {
-                        "text": "Workflow: no evidence"
+                        "text": "Workflow: telemetry missing"
                       },
                       "provider_scope_degradation": {
                         "text": "Provider degraded"
                       },
                       "workflow_scope_critical": {
                         "text": "Workflow CRIT"
+                      },
+                      "no_action_required": {
+                        "text": "No action required"
+                      },
+                      "workflow_evidence_stale": {
+                        "text": "Current evidence is stale"
                       }
                     }
                   },
@@ -1299,12 +1305,7 @@
               "id": "byName",
               "options": "run_type"
             },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
+            "properties": []
           },
           {
             "matcher": {
@@ -1338,6 +1339,19 @@
               {
                 "id": "custom.inspect",
                 "value": true
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "__standalone__": {
+                        "text": "—"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
@@ -1345,7 +1359,7 @@
       },
       "targets": [
         {
-          "expr": "max without(run_type)(bioetl_workflow_scope_action{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0) or on() bioetl_l0_next_action_no_route",
+          "expr": "bioetl_first_action{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0 or on() label_replace(label_replace(bioetl_fa_gap,\"pipeline\",\"$pipeline\",\"\",\"\"),\"workflow\",\"$workflow\",\"\",\"\")",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1399,6 +1413,10 @@
               {
                 "field": "Value",
                 "desc": true
+              },
+              {
+                "field": "action_reason",
+                "desc": false
               }
             ]
           }
@@ -1442,7 +1460,7 @@
           }
         }
       ],
-      "description": "CURRENT · Fresh pipeline/run_type telemetry only. CURRENT selected-pipeline routes across selected run types; not a SELECTED RUN verdict. One row per pipeline and action/reason, taking the highest urgency across run types with all routes available through pagination. Open Action on the top row first. Priority is routing urgency: URGENT > HIGH > REVIEW > WATCH, not inferred alert severity. Provider degradation is GLOBAL; confirm the provider in Provider Health. Only positive routes participate. NO_ROUTE is an absence-only fallback when no positive route survives (or on()); it is not a healthy zero or VALID EMPTY. Verify telemetry and selection before a health conclusion. TELEMETRY MISSING is not zero. TIME RANGE sets current evaluation time. UNKNOWN routes are VERIFY, not claims of degradation. Confirmed incidents retain their domain priority.",
+      "description": "CURRENT · Each row keeps pipeline and run type. Workflow All uses workflow series plus standalone pipelines that have no workflow membership. A concrete workflow does not borrow another workflow or a pipeline fallback. VERIFY means required telemetry is missing, publication evidence is stale, or the selected scope has no current series. No action required means every applicable check is confirmed. REVIEW, HIGH, URGENT, and CRIT are confirmed problems. Run ID does not change CURRENT. A datasource error stays a query error. UNKNOWN remains a health state on Monitor Scope Health, not a First Action priority.",
       "links": [
         {
           "title": "Open Runtime",
@@ -4853,14 +4871,6 @@
                 {
                   "type": "value",
                   "options": {
-                    "0": {
-                      "text": "UNKNOWN",
-                      "color": "#555555"
-                    },
-                    "5": {
-                      "text": "WATCH",
-                      "color": "#555555"
-                    },
                     "10": {
                       "text": "REVIEW",
                       "color": "green"
@@ -4892,6 +4902,10 @@
                     "60": {
                       "text": "CRIT",
                       "color": "red"
+                    },
+                    "1": {
+                      "text": "—",
+                      "color": "text"
                     }
                   }
                 },
@@ -4928,7 +4942,7 @@
                 ]
               },
               "unit": "none",
-              "noValue": "No route for this scope"
+              "noValue": "Selected scope has no current evidence"
             },
             "overrides": [
               {
@@ -4955,14 +4969,6 @@
                             "text": "Data Quality",
                             "color": "text"
                           },
-                          "monitor": {
-                            "text": "Monitor",
-                            "color": "text"
-                          },
-                          "no_route": {
-                            "text": "No route",
-                            "color": "text"
-                          },
                           "provider": {
                             "text": "Provider Health",
                             "color": "text"
@@ -4973,6 +4979,14 @@
                           },
                           "workflow": {
                             "text": "Diagnose",
+                            "color": "text"
+                          },
+                          "none": {
+                            "text": "—",
+                            "color": "text"
+                          },
+                          "inspect_evidence": {
+                            "text": "Inspect evidence",
                             "color": "text"
                           }
                         }
@@ -4990,25 +5004,25 @@
                     "value": [
                       {
                         "title": "Open Runtime",
-                        "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                        "url": "${__data.fields.action_href:raw}",
                         "targetBlank": false,
                         "includeVars": false
                       },
                       {
                         "title": "Open Control Plane",
-                        "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                        "url": "${__data.fields.action_href:raw}",
                         "targetBlank": false,
                         "includeVars": false
                       },
                       {
                         "title": "Open Data Quality",
-                        "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                        "url": "${__data.fields.action_href:raw}",
                         "targetBlank": false,
                         "includeVars": false
                       },
                       {
                         "title": "Open Provider Health",
-                        "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline}&${run_type:queryparam}&${run_id:queryparam}&var-provider=$__all&var-pipeline_context=${__data.fields.pipeline}&${__url_time_range}",
+                        "url": "${__data.fields.action_href:raw}",
                         "targetBlank": false,
                         "includeVars": false
                       }
@@ -5081,11 +5095,8 @@
                           "dq_threshold_or_validation_signal": {
                             "text": "DQ threshold / validation"
                           },
-                          "no_recent_activity_or_unknown_state": {
-                            "text": "No recent activity"
-                          },
                           "selected_scope_not_present": {
-                            "text": "No active route; verify telemetry"
+                            "text": "Selected scope has no current evidence"
                           },
                           "provider_global_degradation": {
                             "text": "GLOBAL provider degraded"
@@ -5100,28 +5111,34 @@
                             "text": "Workflow review"
                           },
                           "runtime_evidence_missing": {
-                            "text": "Runtime: no evidence"
+                            "text": "Runtime: telemetry missing"
                           },
                           "control_plane_evidence_missing": {
-                            "text": "Trust: no evidence"
+                            "text": "Trust: telemetry missing"
                           },
                           "gold_evidence_missing": {
-                            "text": "Gold: no evidence"
+                            "text": "Gold: telemetry missing"
                           },
                           "dq_evidence_missing": {
-                            "text": "Dq: no evidence"
+                            "text": "DQ: telemetry missing"
                           },
                           "provider_evidence_missing": {
-                            "text": "Provider: no evidence"
+                            "text": "Provider: telemetry missing"
                           },
                           "workflow_evidence_missing": {
-                            "text": "Workflow: no evidence"
+                            "text": "Workflow: telemetry missing"
                           },
                           "provider_scope_degradation": {
                             "text": "Provider degraded"
                           },
                           "workflow_scope_critical": {
                             "text": "Workflow CRIT"
+                          },
+                          "no_action_required": {
+                            "text": "No action required"
+                          },
+                          "workflow_evidence_stale": {
+                            "text": "Current evidence is stale"
                           }
                         }
                       }
@@ -5200,12 +5217,7 @@
                   "id": "byName",
                   "options": "run_type"
                 },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
+                "properties": []
               },
               {
                 "matcher": {
@@ -5239,6 +5251,19 @@
                   {
                     "id": "custom.inspect",
                     "value": true
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "__standalone__": {
+                            "text": "—"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               }
@@ -5300,6 +5325,10 @@
                   {
                     "field": "Value",
                     "desc": true
+                  },
+                  {
+                    "field": "action_reason",
+                    "desc": false
                   }
                 ]
               }
@@ -5335,7 +5364,7 @@
               }
             }
           ],
-          "description": "CURRENT · CURRENT selected-pipeline routes across selected run types; not a SELECTED RUN verdict. One row per pipeline and action/reason, taking the highest urgency across run types with all routes available through pagination. Open Action on the top row first. Priority is routing urgency: URGENT > HIGH > REVIEW > WATCH, not inferred alert severity. Provider degradation is GLOBAL; confirm the provider in Provider Health. Only positive routes participate. NO_ROUTE is an absence-only fallback when no positive route survives (or on()); it is not a healthy zero or VALID EMPTY. Verify telemetry and selection before a health conclusion. TELEMETRY MISSING is not zero. TIME RANGE sets current evaluation time. UNKNOWN routes are VERIFY, not claims of degradation. Confirmed incidents retain their domain priority.",
+          "description": "CURRENT · Each row keeps pipeline and run type. Workflow All uses workflow series plus standalone pipelines that have no workflow membership. A concrete workflow does not borrow another workflow or a pipeline fallback. VERIFY means required telemetry is missing, publication evidence is stale, or the selected scope has no current series. No action required means every applicable check is confirmed. REVIEW, HIGH, URGENT, and CRIT are confirmed problems. Run ID does not change CURRENT. A datasource error stays a query error. UNKNOWN remains a health state on Monitor Scope Health, not a First Action priority.",
           "links": [
             {
               "title": "Open Runtime",
@@ -5815,6 +5844,7 @@
             "defaults": {
               "custom": {
                 "wrapText": true,
+                "inspect": true,
                 "cellOptions": {
                   "type": "auto",
                   "wrapText": true

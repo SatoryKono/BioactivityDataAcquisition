@@ -1560,8 +1560,9 @@ def test_overview_routes_and_timelines_exclude_inactive_fallbacks() -> None:
     overview = _load("bioetl-overview-v2.json")
     route = _panel(overview, 215)["targets"][0]["expr"]
     assert route.count(">0") == 1
-    assert "max without(run_type)" in route
-    assert "or on() bioetl_l0_next_action_no_route" in route
+    assert "bioetl_first_action" in route
+    assert "or on() label_replace" in route
+    assert "max without(run_type)" not in route
     for panel_id in (9018, 9019, 9020):
         panel = _panel(overview, panel_id)
         assert "or on()" in panel["targets"][0]["expr"]
