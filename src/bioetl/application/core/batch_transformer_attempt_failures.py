@@ -103,8 +103,16 @@ def handle_filtered_out_error(
     debug_export_service = handling_context.debug_export_service
     index = handling_context.index
     batch_metrics.track_processed_records("filtered_out", 1)
-    batch_metrics.track_silver_filter_rejection(error.details or None)
     policy = _resolve_invalid_record_policy(dq_config)
+    # Durable quarantine write owns accounting. Skip/fail never persist a
+    # filtered row, so the rejection path must record the removal itself.
+    if policy in {"skip", "fail"}:
+        batch_metrics.track_silver_filter_rejection(
+            error.details or None,
+            account=True,
+        )
+    else:
+        batch_metrics.track_silver_filter_rejection(error.details or None)
     if debug_export_service is not None:
         debug_export_service.record_filtered_out(
             raw_record=raw_record,

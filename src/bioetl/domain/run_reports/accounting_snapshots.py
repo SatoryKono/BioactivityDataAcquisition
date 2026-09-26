@@ -155,8 +155,13 @@ class StageAccountingSnapshotsMixin:
         High-volume hooks may over-count ``records_out`` (e.g. gold batch
         metrics). Layer totals from RunResult remain the coarse SoT for
         funnel geometry; removal reason maps still come from the bucket.
+
+        Over-accounted removals (``removed_mapped`` above the layer budget)
+        MUST remain visible as FAILING — do not rewrite geometry to hide them.
         """
         if records_in == records_out + removed_total:
+            return records_in, records_out, removed_total
+        if removed_mapped > default_removed > 0:
             return records_in, records_out, removed_total
         layer_removed = removed_mapped if removed_mapped > 0 else default_removed
         if default_in > 0 and default_in == default_out + layer_removed:

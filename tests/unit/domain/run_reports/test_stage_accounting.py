@@ -125,6 +125,35 @@ def test_overcount_is_failing_not_silently_balanced() -> None:
     assert silver.balance_status.value == "FAILING"
 
 
+def test_over_accounted_removals_stay_failing_without_clamp() -> None:
+    """Mapped removals above the layer budget must not be silently repaired."""
+    acc = StageAccountingAccumulator()
+    acc.mark_instrumented(StageId.SILVER.value)
+    acc.record_in(StageId.SILVER.value, 1)
+    acc.record_out(StageId.SILVER.value, 0)
+    acc.record_removal(
+        StageId.SILVER.value,
+        outcome="filtered_out",
+        reason_code="required_field_missing",
+        count=1,
+    )
+    acc.record_removal(
+        StageId.SILVER.value,
+        outcome="filtered_out",
+        reason_code="FILTERED_OUT_SILVER",
+        count=1,
+    )
+    layers = acc.snapshot_layers_from_metrics(
+        {"records_bronze": 1, "records_filtered_out": 1}
+    )
+    assert layers.silver_filtered_out == 2
+    silver = acc.snapshot_funnel(layers)[2]
+    assert sum(r.count for r in silver.removals) == 2
+    assert silver.removed_total == 2
+    assert silver.removed_total == sum(r.count for r in silver.removals)
+    assert silver.balance_status.value == "FAILING"
+
+
 def test_gold_layer_defaults_repair_bucket_overcount() -> None:
     """Coarse gold_written repairs inflated batch records_out when removals match."""
     acc = StageAccountingAccumulator()

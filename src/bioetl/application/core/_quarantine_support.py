@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.core._quarantine_metrics_support import (
     FILTERED_OUT_SILVER,
+    filtered_reason_code_from_details,
     iter_dq_quarantine_parts,
     record_filtered_quarantine_metrics,
     track_processed_quarantined,
@@ -162,6 +164,15 @@ async def persist_dq_quarantine_requests(
         )
 
 
+def _filtered_reason_code_from_request(request: QuarantineWriteRequest) -> str:
+    """Resolve accounting reason from quarantine request metadata."""
+    metadata = request.get("metadata")
+    details = None
+    if isinstance(metadata, dict):
+        details = metadata.get("error_details")
+    return filtered_reason_code_from_details(details)
+
+
 async def persist_filtered_quarantine_request(
     ports: QuarantineRuntimeDependencies,
     *,
@@ -187,7 +198,8 @@ async def persist_filtered_quarantine_request(
         metrics=ports.metrics,
         pipeline_metrics=ports.pipeline_metrics,
         count=1,
-        record_accounting=ports.batch_metrics is None,
+        reason_code=_filtered_reason_code_from_request(request),
+        record_accounting=True,
     )
 
 
@@ -212,9 +224,24 @@ async def persist_filtered_quarantine_requests(
         run_id=run_id,
         ingestion_ts=ingestion_ts,
     )
+    # Durable write owns filtered removals: one pipeline metric + per-reason rows.
+    reason_counts = Counter(
+        _filtered_reason_code_from_request(request) for request in requests
+    )
     record_filtered_quarantine_metrics(
         metrics=ports.metrics,
         pipeline_metrics=ports.pipeline_metrics,
         count=len(requests),
-        record_accounting=ports.batch_metrics is None,
+        reason_code=FILTERED_OUT_SILVER,
+        record_accounting=False,
+        emit_pipeline_metric=True,
     )
+    for reason_code, count in sorted(reason_counts.items()):
+        record_filtered_quarantine_metrics(
+            metrics=ports.metrics,
+            pipeline_metrics=ports.pipeline_metrics,
+            count=count,
+            reason_code=reason_code,
+            record_accounting=True,
+            emit_pipeline_metric=False,
+        )

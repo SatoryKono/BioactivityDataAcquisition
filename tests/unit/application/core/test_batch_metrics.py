@@ -508,7 +508,7 @@ class TestTrackSilverFilterRejection:
         recorder_no_metrics: BatchMetricsRecorderService,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """Prometheus is skipped when metrics are unset; accounting still runs."""
+        """Prometheus is skipped when metrics are unset; accounting opt-in only."""
         accounting_calls: list[dict[str, object]] = []
 
         def _capture_accounting(**kwargs: object) -> None:
@@ -522,6 +522,12 @@ class TestTrackSilverFilterRejection:
             {"reason_code": "required_field_missing"}
         )
         assert recorder_no_metrics._metrics is None
+        assert accounting_calls == []
+
+        recorder_no_metrics.track_silver_filter_rejection(
+            {"reason_code": "required_field_missing"},
+            account=True,
+        )
         assert accounting_calls == [
             {
                 "outcome": "filtered_out",

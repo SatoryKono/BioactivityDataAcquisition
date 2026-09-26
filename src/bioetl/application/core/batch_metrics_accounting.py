@@ -64,8 +64,10 @@ def _record_filtered_out_stage_metrics(
         outcome="filtered_out",
         count=count,
     )
-    # Detailed rejection handling owns removal accounting. These two counters
-    # are projections of that same event, not additional discarded records.
+    # Durable quarantine write owns removal accounting for filtered_out.
+    # Skip/fail policies account at the rejection call site instead.
+    # These two counters are projections of that same event, not additional
+    # discarded records.
 
 
 def _record_processed_stage_accounting(stage: str, count: int) -> None:
