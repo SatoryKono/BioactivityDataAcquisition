@@ -92,10 +92,10 @@ operator_question:
     basis_tokens: [SELECTED RUN]
     next_action_tokens: [Open Run Explorer]
   bioetl-runtime.json:
-    answer_ids: [9401]
-    next_action_id: 9400
-    basis_tokens: [CURRENT]
-    next_action_tokens: [active blocker]
+    answer_ids: [9998]
+    next_action_id: 9998
+    basis_tokens: [SELECTED RUN]
+    next_action_tokens: [Open Run Explorer]
   bioetl-provider-health-v2.json:
     answer_ids: [9101]
     next_action_id: 9002
