@@ -418,17 +418,42 @@ def _correct_provider(uid: object, panels: dict[int, dict]) -> None:
     _override(panels[9107], "Provider", _WIDTH, 95)
     _override(panels[9107], "Source state", _WIDTH, 105)
     _override(panels[9107], "Status", _WIDTH, 100)
-    selected = 'bioetl_pstatus{provider=~"$provider"}'
-    # Status codes are categories, not severity order: UNKNOWN=3 must not
-    # hide a confirmed CRIT=2 or WARN=1 in a multi-provider selection.
-    panels[9401]["targets"][0]["expr"] = " or ".join(
-        f"max({selected} == {code})" for code in (2, 1, 3, 0)
-    )
+    panels[9401]["targets"] = [
+        {
+            "expr": 'count(bioetl_pstatus{provider=~"$provider"} == 0)',
+            "legendFormat": "OK",
+            "instant": True,
+            "refId": "A",
+        },
+        {
+            "expr": 'count(bioetl_pstatus{provider=~"$provider"} == 1)',
+            "legendFormat": "WARN",
+            "instant": True,
+            "refId": "B",
+        },
+        {
+            "expr": 'count(bioetl_pstatus{provider=~"$provider"} == 2)',
+            "legendFormat": "CRIT",
+            "instant": True,
+            "refId": "C",
+        },
+        {
+            "expr": 'count(bioetl_pstatus{provider=~"$provider"} == 3)',
+            "legendFormat": "UNKNOWN",
+            "instant": True,
+            "refId": "D",
+        },
+    ]
+    panels[9401]["fieldConfig"]["defaults"]["mappings"] = []
+    panels[9401]["title"] = "Текущий статус (${provider})"
+    panels[9401]["fieldConfig"]["defaults"]["noValue"] = "TELEMETRY MISSING"
     panels[9401]["description"] = (
-        "CURRENT / SELECTED PROVIDER · Confirmed CRIT takes precedence, then WARN, "
-        "UNKNOWN and OK. UNKNOWN means an observation is missing or invalid. "
-        "Inspect Health Evidence lists observation availability for every provider; "
-        "this aggregate is not proof of complete fleet evidence."
+        "CURRENT · выбранный провайдер, не история Run ID. "
+        "Run ID — контекст навигации. "
+        "UNKNOWN: нет или недостоверно наблюдение (в том числе invalid_health_timestamp). "
+        "TELEMETRY MISSING: нет серии. QUERY ERROR: сбой запроса. "
+        "Если провайдер не определён — выберите его. "
+        "All — общий текущий статус; одна серия не означает полноту всего набора."
     )
     fleet = "max by (provider) (bioetl_provider_current_status)"
     health = "max by (provider) (bioetl_provider_health_status)"

@@ -566,8 +566,8 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
             },
         },
         "bioetl-provider-health-v2.json": {
-            "Understand Selected Run": {
-                "tokens": ("selected run", "run id is always set", "fleet"),
+            "Understand Current Provider": {
+                "tokens": ("текущий статус", "run id", "все провайдеры"),
                 "max_y": 4,
                 "panel_id": 9400,
             },

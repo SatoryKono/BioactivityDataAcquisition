@@ -312,11 +312,15 @@ def _provider(p: dict[int, dict]) -> None:
         target = p[pid]["targets"][0]
         if target["expr"].startswith("topk(3, ") and target["expr"].endswith(")"):
             target["expr"] = target["expr"][8:-1]
+        p[pid]["title"] = (
+            "Все провайдеры · статус"
+            if pid == 9101
+            else "Все провайдеры · evidence"
+        )
         p[pid]["description"] = (
-            "GLOBAL / CURRENT · All observed provider status series, paginated; independent of "
-            "Pipeline and Run ID; independent of the selected Provider. Missing series are not proof of "
-            "health. Status is the current assessment; evidence describes observation "
-            "availability, not the selected historical run."
+            "CURRENT · Все провайдеры. Этот раздел не фильтруется выбранным Provider. "
+            "Выбранный Run ID — только контекст навигации и не доказывает историческую "
+            "работоспособность. UNKNOWN означает отсутствие или недостоверность наблюдения."
         )
     _override(p[9101], "Severity", "displayName", "Status")
     _override(p[9101], "Provider", "custom.wrapText", True)
@@ -358,9 +362,9 @@ def _provider(p: dict[int, dict]) -> None:
         p[9111], "Provider", _CELL, {"type": "auto", "wrapText": False}
     )
     for pid in (9101, 9107):
-        p[pid]["gridPos"].update(y=7, h=8)
+        p[pid]["gridPos"].update(y=20, h=8)
         p[pid]["options"].setdefault("footer", {})["enablePagination"] = True
-    p[9104]["gridPos"].update(y=15, h=3)
+    p[9104]["gridPos"].update(y=28, h=3)
     p[9104]["options"]["colorMode"] = "value"
     _stack(p[9404], {114: 10, 1: 10, 2: 3, 105: 3, 104: 3, 7: 3})
     _table(
