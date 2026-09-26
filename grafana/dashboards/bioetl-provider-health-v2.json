@@ -470,7 +470,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "This status card shows how many providers sit in each current status. CURRENT. UNKNOWN: missing or unreliable observation. TELEMETRY MISSING: no series. QUERY ERROR: query failed. All shows how many providers are in each status, not one number.",
+      "description": "This status card is not a historical failure rate. This status card shows how many providers sit in each current status. CURRENT. UNKNOWN: missing or unreliable observation. TELEMETRY MISSING: no series. QUERY ERROR: query failed. All shows how many providers are in each status, not one number.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -568,7 +568,7 @@
       "id": 9002,
       "type": "text",
       "title": "",
-      "description": "This section break shows where the selected provider ends and the fleet list begins. CURRENT · boundary between the selected provider and the fleet overview.",
+      "description": "This section break is not a query result. This section break shows where the selected provider ends and the fleet list begins. CURRENT · boundary between the selected provider and the fleet overview.",
       "gridPos": {
         "h": 2,
         "w": 24,
@@ -613,7 +613,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "This fleet status table shows the current status of every provider. CURRENT · All providers. Not filtered by the selected Provider. Run ID is navigation context.",
+      "description": "This fleet status table is not a filter of the Provider selector. This fleet status table shows the current status of every provider. CURRENT · All providers. Not filtered by the selected Provider. Run ID is navigation context.",
       "fieldConfig": {
         "defaults": {
           "color": {
