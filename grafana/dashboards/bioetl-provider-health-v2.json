@@ -3154,7 +3154,7 @@
           ],
           "title": "Inspect Exhausted Retries",
           "type": "table",
-          "description": "This exhausted retries table is not current status. This exhausted retries table shows retries exhausted in the chart range. TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected-range evidence: retries exhausted by provider and operation in the active Grafana range. Non-zero rows identify where retry budgets were consumed, not raw provider-health enum state TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: snapshot table of exhausted retries over $__range; the interval trend is Track Exhausted Retries (109).",
+          "description": "The chart time range changes this exhausted retries table. It does not change the current-status card. This exhausted retries table is not current status. This exhausted retries table shows retries exhausted in the chart range. TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected-range evidence: retries exhausted by provider and operation in the active Grafana range. Non-zero rows identify where retry budgets were consumed, not raw provider-health enum state TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: snapshot table of exhausted retries over $__range; the interval trend is Track Exhausted Retries (109).",
           "transformations": [
             {
               "id": "organize",
@@ -3248,7 +3248,7 @@
           ],
           "title": "Track Exhausted Retries",
           "type": "timeseries",
-          "description": "This exhausted retries trend is not current status. This exhausted retries trend shows the retry-exhaustion trend over the chart range. TIME RANGE · Selected-range evidence: retry exhaustion trend by provider and operation over the active Grafana interval. Rising non-zero series point to persistent retry-budget pressure TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: $__interval trend of exhausted retries; the snapshot table is Inspect Exhausted Retries (108). Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
+          "description": "The chart time range changes this exhausted retries trend. It does not change the current-status card. This exhausted retries trend is not current status. This exhausted retries trend shows the retry-exhaustion trend over the chart range. TIME RANGE · Selected-range evidence: retry exhaustion trend by provider and operation over the active Grafana interval. Rising non-zero series point to persistent retry-budget pressure TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: $__interval trend of exhausted retries; the snapshot table is Inspect Exhausted Retries (108). Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -3340,7 +3340,7 @@
           ],
           "title": "Inspect Health p95",
           "type": "stat",
-          "description": "This health latency stat is not zero latency. This health latency stat shows the 95th percentile health-check latency in the chart range. TIME RANGE · Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: range snapshot stat of health-check p95; the interval trend is Track Health-Check Latency p95 (1). Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency."
+          "description": "The chart time range changes this health latency stat. It does not change the current-status card. This health latency stat is not zero latency. This health latency stat shows the 95th percentile health-check latency in the chart range. TIME RANGE · Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: range snapshot stat of health-check p95; the interval trend is Track Health-Check Latency p95 (1). Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency."
         },
         {
           "datasource": {
