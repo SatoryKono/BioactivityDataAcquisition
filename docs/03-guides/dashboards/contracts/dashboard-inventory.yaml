@@ -12,30 +12,28 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 72
+    panel_count: 30
     key_panels:
-      - id: 891
-        title: "Monitor Replay"
-        type: stat
-        description: Current replay safety state for selected pipeline
-      - id: 130
-        title: "Track Replay Blockers"
-        type: stat
-        description: Replay and resume blockers in selected time range
+      - id: 9422
+        title: Review Exact Replay Readiness
+        type: table
+        description: Exact-replay readiness of the selected Run ID
+      - id: 9418
+        title: Review Selected-Run Trust
+        type: table
+        description: Saved Trust verdict for the selected Run ID
+      - id: 9416
+        title: Review Retention Compliance
+        type: table
+        description: Retention and archive evidence for the selected Run ID
+      - id: 9415
+        title: Review Lineage Validation
+        type: table
+        description: Lineage closure for the selected Run ID
       - id: 9402
         title: Review Run Summary
         type: table
         description: Shared shell panel for run/manifest identity
-      - id: 9403
-        title: Review Processed Records
-        type: table
-        description: Shared shell panel for Bronze/Silver/Gold accounting
-      - id: 9401
-        title: Monitor Readiness
-        type: stat
-        description:
-          Evidence-aware replay/resume verdict; required evidence gaps render
-          INCOMPLETE
     selector_variables:
       - workflow
       - pipeline
@@ -81,7 +79,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 50
+    panel_count: 89
     key_panels:
       - id: 9401
         title: Monitor Pipeline Status

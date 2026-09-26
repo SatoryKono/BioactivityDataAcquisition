@@ -131,10 +131,7 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
         "* 3",
     ):
         assert token in control_expr
-    assert "bioetl_control_plane_current_status_trusted" in str(
-        _panel(control, 9401).get("targets")
-    )
-    assert _mapping_text(_panel(control, 9401), "3") == "INCOMPLETE"
+    assert all(panel.get("id") != 9401 for panel in control.get("panels", []))
 
     runtime_expr = _record_expr(
         OBSERVABILITY_RULES, "bioetl_runtime_current_status_trusted"
@@ -159,10 +156,7 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
 
 
 def test_rf001_shared_headline_vocabulary_is_fail_closed() -> None:
-    trusted_headlines = (
-        _panel(_load("bioetl-control-plane-v1.json"), 9401),
-        _panel(_load("bioetl-runtime.json"), 9401),
-    )
+    trusted_headlines = (_panel(_load("bioetl-runtime.json"), 9401),)
     for panel in trusted_headlines:
         assert _mapping_result(panel, "0") == {"text": "OK", "color": "green"}
         assert _mapping_result(panel, "1") == {"text": "WARN", "color": "orange"}

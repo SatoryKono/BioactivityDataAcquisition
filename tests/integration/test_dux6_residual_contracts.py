@@ -245,7 +245,7 @@ def test_percent_scores_integer_precision() -> None:
 
 def test_primary_status_documents_unknown_class() -> None:
     for path, status_id in (
-        (DASH / "bioetl-control-plane-v1.json", 9401),
+        (DASH / "bioetl-runtime.json", 9401),
         (DASH / "bioetl-dq-v2.json", 9401),
         (DASH / "bioetl-overview-v2.json", 214),
     ):

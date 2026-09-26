@@ -126,13 +126,56 @@ _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9422: (18, 3, 6, 3),
     9418: (0, 6, 12, 7),
     9416: (12, 6, 12, 7),
-    9401: (0, 20, 5, 3),
-    891: (5, 20, 5, 3),
-    892: (10, 20, 5, 3),
-    893: (15, 20, 5, 3),
-    907: (20, 20, 4, 3),
 }
-_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 24
+_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
+# Runtime already owns current readiness as 9401 Monitor Pipeline Status.
+_TRUST_DROP_PANEL_IDS = frozenset({9401})
+_TRUST_MOVE_PANEL_IDS = frozenset(
+    {
+        891,
+        892,
+        893,
+        907,
+        894,
+        130,
+        3,
+        104,
+        120,
+        101,
+        102,
+        103,
+        121,
+        134,
+        5,
+        135,
+        105,
+        106,
+        908,
+        2,
+        1,
+        132,
+        133,
+        131,
+        7,
+        4,
+        136,
+        6,
+        111,
+        122,
+        137,
+        138,
+        107,
+        108,
+        109,
+        110,
+        112,
+        9491,
+    }
+)
+_TRUST_DROP_EMPTY_ROW_IDS = frozenset({903, 904, 9490})
+_RUNTIME_RANGE_ROW_ID = 8800
+_RUNTIME_PANEL_ID_REMAP = {4: 8804, 5: 8805, 6: 8806, 7: 8807}
+_MOVED_TRUST_RANGE_PANELS: list[dict[str, object]] = []
 _INCIDENT_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     2001: (0, 6, 24, 2),
     2010: (0, 8, 24, 5),
@@ -1527,6 +1570,95 @@ def _attach_nav_bus(nav: dict[str, object], *, current_uid: str) -> None:
     nav.pop("transparent", None)
 
 
+def _detach_trust_range_panels(panels: list[object]) -> list[dict[str, object]]:
+    """Remove non-selected-run panels from a Trust panel tree."""
+    moved: list[dict[str, object]] = []
+    kept: list[object] = []
+    for panel in panels:
+        if not isinstance(panel, dict):
+            kept.append(panel)
+            continue
+        panel_id = panel.get("id")
+        if panel.get("type") == "row":
+            children = panel.get("panels")
+            nested = children if isinstance(children, list) else []
+            moved.extend(_detach_trust_range_panels(nested))
+            panel["panels"] = nested
+            if panel_id in _TRUST_DROP_EMPTY_ROW_IDS and not nested:
+                continue
+            kept.append(panel)
+            continue
+        if panel_id in _TRUST_DROP_PANEL_IDS:
+            continue
+        if panel_id in _TRUST_MOVE_PANEL_IDS:
+            remapped = _RUNTIME_PANEL_ID_REMAP.get(panel_id)
+            if isinstance(remapped, int):
+                panel["id"] = remapped
+            moved.append(panel)
+            continue
+        kept.append(panel)
+    panels[:] = kept
+    return moved
+
+
+def _stash_trust_range_panels(payload: dict[str, object]) -> None:
+    panels = payload.get("panels")
+    if not isinstance(panels, list):
+        return
+    _MOVED_TRUST_RANGE_PANELS.extend(_detach_trust_range_panels(panels))
+
+
+def _attach_trust_range_panels(payload: dict[str, object]) -> None:
+    """Park relocated Trust range panels on Pipeline Diagnostics."""
+    if not _MOVED_TRUST_RANGE_PANELS:
+        return
+    panels = payload.get("panels")
+    if not isinstance(panels, list):
+        return
+    row = next(
+        (
+            panel
+            for panel in panels
+            if isinstance(panel, dict) and panel.get("id") == _RUNTIME_RANGE_ROW_ID
+        ),
+        None,
+    )
+    if row is None:
+        bottoms = [
+            int(panel["gridPos"]["y"]) + int(panel["gridPos"]["h"])
+            for panel in panels
+            if isinstance(panel, dict)
+            and isinstance(panel.get("gridPos"), dict)
+            and isinstance(panel["gridPos"].get("y"), int)
+            and isinstance(panel["gridPos"].get("h"), int)
+        ]
+        row = {
+            "id": _RUNTIME_RANGE_ROW_ID,
+            "type": "row",
+            "title": "Inspect Pipeline Range Evidence",
+            "collapsed": True,
+            "gridPos": {"x": 0, "y": max(bottoms, default=0), "w": 24, "h": 1},
+            "panels": [],
+            "description": (
+                "CURRENT and selected-range signals moved from 1. Trust. "
+                "They do not assess one selected Run ID."
+            ),
+        }
+        panels.append(row)
+    children = row.get("panels")
+    if not isinstance(children, list):
+        children = []
+        row["panels"] = children
+    present = {
+        child.get("id") for child in children if isinstance(child, dict)
+    }
+    for panel in _MOVED_TRUST_RANGE_PANELS:
+        if panel.get("id") not in present:
+            children.append(panel)
+            present.add(panel.get("id"))
+    _MOVED_TRUST_RANGE_PANELS.clear()
+
+
 def apply_to_dashboard(
     path: Path, *, current_uid: str, check: bool = False, state_followup: bool = False
 ) -> bool:
@@ -1536,6 +1668,10 @@ def apply_to_dashboard(
     payload = json.loads(
         safe_path.read_text(encoding="utf-8")  # NOSONAR - confined under DASH_DIR
     )
+    if current_uid == "bioetl-control-plane-v1":
+        _stash_trust_range_panels(payload)
+    elif current_uid == "bioetl-runtime":
+        _attach_trust_range_panels(payload)
     # Remove generated details before earlier layout passes measure bottom rows.
     payload["panels"] = [
         panel for panel in payload.get("panels", []) if panel.get("id") != 9450

@@ -158,9 +158,7 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
         expected_header_ids = header_ids
         if dashboard_name == "bioetl-control-plane-v1.json":
             expected_header_ids = (9400, 9422)
-            current = panels.get(9401)
-            assert current is not None
-            assert current.get("gridPos", {}).get("y", 0) >= 18
+            assert 9401 not in panels
         for panel_id in expected_header_ids:
             panel = panels.get(panel_id)
             assert panel is not None, (
