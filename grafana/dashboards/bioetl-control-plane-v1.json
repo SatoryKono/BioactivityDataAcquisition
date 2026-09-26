@@ -937,7 +937,7 @@
             "inspect": true
           },
           "unit": "none",
-          "noValue": "No retention-compliance rows. Valid empty if the selected run has no retention checks. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK.",
+          "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed. HTTP 504 is a query error, not an empty result.",
           "links": []
         },
         "overrides": [
@@ -1591,7 +1591,7 @@
                 "wrapText": false
               },
               "unit": "none",
-              "noValue": "No lineage-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as OK."
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
             },
             "overrides": [
               {
@@ -1854,7 +1854,7 @@
                 "wrapText": false
               },
               "unit": "none",
-              "noValue": "No checkpoint-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as OK."
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
             },
             "overrides": [
               {
@@ -2183,7 +2183,7 @@
                 "wrapText": false
               },
               "unit": "none",
-              "noValue": "No manifest-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as OK."
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
             },
             "overrides": [
               {
@@ -2990,7 +2990,7 @@
           "pluginVersion": "12.0.2",
           "targets": [],
           "type": "text",
-          "description": "Shown when no identity rows are returned. This can mean no matching run, unresolved scope, or an unavailable backend; it is not a critical verdict by itself.",
+          "description": "Shown when Inspect Identity Values has no rows for this Run ID. SELECT RUN means no run is selected. QUERY ERROR means the request failed. An empty table is not a failed identity check.",
           "gridPos": {
             "x": 0,
             "y": 29,
@@ -5456,10 +5456,10 @@
           },
           "title": "Review Uncovered Replay Signals",
           "type": "text",
-          "description": "Lists the residual semantic-drift evidence that is intentionally kept out of bounded Prometheus labels; duplicate/overwrite write risk is now instrumented.",
+          "description": "This note is not a verdict for the selected Run ID. It lists replay signals that stay outside saved-run evidence.",
           "fieldConfig": {
             "defaults": {
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no rows for this table."
+              "noValue": "—"
             }
           }
         }
@@ -6252,7 +6252,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "No bounded failure-reason rows. Select an exact run and verify backend health; backend unavailable must not be treated as zero failures."
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
             },
             "overrides": [
               {
