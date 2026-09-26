@@ -12,9 +12,10 @@
 
 from __future__ import annotations
 
-import pytest
-
+import re
 from pathlib import Path
+
+import pytest
 
 
 pytestmark = pytest.mark.architecture
@@ -29,7 +30,11 @@ def test_root_hygiene_workflow_is_called_once_by_pr_coordinator() -> None:
     assert "push:" in workflow
     assert "workflow_dispatch:" in workflow
     assert "paths-ignore:" not in workflow
-    assert "uses: ./.github/workflows/root-hygiene.yml" in coordinator
+    assert re.search(
+        r"uses:\s*SatoryKono/BioactivityDataAcquisition/"
+        r"\.github/workflows/root-hygiene\.yml@[0-9a-f]{40}",
+        coordinator,
+    ), "pr-required must pin root-hygiene.yml to a full commit SHA (#11232)"
 
 
 def test_root_hygiene_workflow_uses_strict_audit_and_unit_tests() -> None:

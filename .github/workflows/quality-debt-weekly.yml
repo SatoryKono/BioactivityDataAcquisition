@@ -10,8 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  schedule:
-    - cron: "45 4 * * 1"
+  # schedule removed (#11234). Cron must not spend minutes while billing is off.
   workflow_dispatch:
 
 env:
@@ -22,6 +21,7 @@ jobs:
   quality-debt-weekly:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    if: ${{ false }}
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

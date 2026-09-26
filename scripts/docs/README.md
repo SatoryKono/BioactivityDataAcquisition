@@ -96,12 +96,17 @@ Remaining compatibility surfaces (not top-level Python shims):
 
 ## Canonical Workbook
 
-The single canonical ChEMBL workbook artifact is:
+The operator-local ChEMBL matrix workbook (gitignored under `docs/reports/`) is:
 
-- [chembl_pipeline_silver_matrices_v12.xlsx](../../docs/reports/chembl_pipeline_silver_matrices_v12.xlsx)
+- `docs/reports/chembl_pipeline_silver_matrices_v12.xlsx` (not tracked in git)
 
 Older `v2`-`v11` files are historical snapshots only and should not be edited.
 Use **repo-relative** paths only (no machine-local absolute mounts).
+
+**CI source of truth** for matrix structural policy is the tracked export checked
+by `python -m scripts.docs export-matrix-structural-contract --check` (see
+`.github/workflows/tests.yml`). The XLSX is an operator editing surface, not the
+only CI-canonical artifact.
 
 ## Canonical Workbook Update Workflow
 

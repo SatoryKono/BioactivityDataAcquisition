@@ -5,7 +5,10 @@ name: PR Gate Complete
 # not enable the ruleset. A required check that cannot run would block main.
 # Each pull request has one owner invocation per gate and one fail-closed result.
 # Classify and aggregate check out the base ref. The PR head SHA is only a
-# diff argument (#11181). The workflow YAML itself still comes from the PR.
+# diff argument (#11181). Leaf reusable workflows are pinned to a full commit
+# SHA of trusted main (#11232). Coordinator YAML may still come from the PR, so
+# a hostile PR can rewrite these uses: lines; residual risk until org ruleset
+# requires workflows from the default branch (blocked while billing is off).
 
 on:
   pull_request:
@@ -114,35 +117,35 @@ jobs:
   lint-arch:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['lint-arch'] == 'required' }}
-    uses: ./.github/workflows/import-linter.yml
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/import-linter.yml@55307990f2a12256d4833126d5b8327473d453a0
     permissions:
       contents: read
 
   tests:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['tests'] == 'required' }}
-    uses: ./.github/workflows/tests.yml
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/tests.yml@55307990f2a12256d4833126d5b8327473d453a0
     permissions:
       contents: read
 
   type-checking:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['type-checking'] == 'required' }}
-    uses: ./.github/workflows/type-checking.yml
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/type-checking.yml@55307990f2a12256d4833126d5b8327473d453a0
     permissions:
       contents: read
 
   security:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['security'] == 'required' }}
-    uses: ./.github/workflows/security.yml
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/security.yml@55307990f2a12256d4833126d5b8327473d453a0
     permissions:
       contents: read
 
   codeql:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['codeql'] == 'required' }}
-    uses: ./.github/workflows/codeql.yml
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/codeql.yml@55307990f2a12256d4833126d5b8327473d453a0
     permissions:
       contents: read
       security-events: write
@@ -150,7 +153,7 @@ jobs:
   docker:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['docker'] == 'required' }}
-    uses: ./.github/workflows/docker.yml
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@55307990f2a12256d4833126d5b8327473d453a0
     # The reusable workflow declares a main-push-only GHCR job. The PR path
     # never schedules it, and every executable PR job narrows its own token.
     permissions:
@@ -187,21 +190,21 @@ jobs:
   duplication:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['duplication'] == 'required' }}
-    uses: ./.github/workflows/duplication-complexity.yml
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/duplication-complexity.yml@55307990f2a12256d4833126d5b8327473d453a0
     permissions:
       contents: read
 
   root-hygiene:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['root-hygiene'] == 'required' }}
-    uses: ./.github/workflows/root-hygiene.yml
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/root-hygiene.yml@55307990f2a12256d4833126d5b8327473d453a0
     permissions:
       contents: read
 
   generated-artifacts:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['generated-artifacts'] == 'required' }}
-    uses: ./.github/workflows/schema-governance.yml
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/schema-governance.yml@55307990f2a12256d4833126d5b8327473d453a0
     permissions:
       contents: read
 
@@ -232,14 +235,14 @@ jobs:
   compiled-artifacts:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['compiled-artifacts'] == 'required' }}
-    uses: ./.github/workflows/compiled-artifacts-block.yml
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/compiled-artifacts-block.yml@55307990f2a12256d4833126d5b8327473d453a0
     permissions:
       contents: read
 
   commit-governance:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['commit-governance'] == 'required' }}
-    uses: ./.github/workflows/commit-lint.yml
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/commit-lint.yml@55307990f2a12256d4833126d5b8327473d453a0
     permissions:
       contents: read
 
@@ -270,7 +273,7 @@ jobs:
   docs-governance:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['docs-governance'] == 'required' }}
-    uses: ./.github/workflows/docs.yml
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@55307990f2a12256d4833126d5b8327473d453a0
     permissions:
       contents: read
 

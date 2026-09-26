@@ -8,21 +8,22 @@ name: Labeler
 # secrets beyond GITHUB_TOKEN with pull-requests: write.
 # Documented zizmor exception: .github/zizmor.yml (dangerous-triggers).
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened]
+  # pull_request_target removed (#11234). Dangerous trigger must stay off.
+  workflow_dispatch:
 
 permissions:
   contents: read
   pull-requests: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   label:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    if: ${{ false }}
     steps:
       - uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13 # v7.0.0
         with:

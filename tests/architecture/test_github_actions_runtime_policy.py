@@ -885,8 +885,9 @@ def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
     assert zizmor_step["with"]["min-severity"] == "high"
     assert zizmor_step["with"]["min-confidence"] == "high"
     assert zizmor_step["with"]["version"] == "1.29.0"
-    assert "pull_request_target" in labeler
+    assert "pull_request_target removed (#11234)" in labeler
     assert "does not checkout untrusted PR HEAD" in labeler
+    assert "if: ${{ false }}" in labeler
     assert ".github/workflows/labeler.yml" in zizmor_config
 
 

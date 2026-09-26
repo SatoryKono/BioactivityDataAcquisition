@@ -1,8 +1,9 @@
 # Canonical required-check catalog for pr-gate-complete aggregator.
 # RF-001 of #9975. One source of truth for GitHub PR gate decisions.
-# GitHub ruleset 13643213 required context is job name `pr-gate-complete`
-# from .github/workflows/pr-required.yml, not leaf names and not
-# `PR Gate Complete / …`.
+# GitHub ruleset 13643213 names job `pr-gate-complete` from
+# .github/workflows/pr-required.yml (not leaf names / `PR Gate Complete / …`).
+# Ruleset enforcement is DISABLED (#11180, Actions billing). Catalog `status`
+# values are advisory until billing and ruleset 13643213 are restored.
 schema_version: 1
 version: 2
 aggregator: pr-gate-complete
@@ -12,6 +13,10 @@ policy:
   allow_cancelled_as_success: false
   require_sha_binding: true
   not_applicable_requires_reason: true
+  github_ruleset_13643213_enforcement: disabled
+  github_ruleset_enforcement_disabled_reason: "Actions billing will not return (#11180); enabling would block main without runnable checks."
+  catalog_check_status: advisory
+  catalog_advisory_until: "GitHub Actions billing and ruleset 13643213 enforcement are restored"
 canonical_checks:
   - id: ruff
     owner_workflow: .github/workflows/import-linter.yml

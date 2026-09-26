@@ -210,6 +210,21 @@ def _parsed_uses_reference(line: str) -> tuple[str, str] | None:
     return uses_ref, uses_ref.partition("@")[0]
 
 
+_OWN_REPO_WORKFLOW_PREFIX = (
+    "SatoryKono/BioactivityDataAcquisition/.github/workflows/"
+)
+
+
+def _is_own_repo_reusable_workflow(action: str) -> bool:
+    """Allow same-repo reusable workflows pinned by full SHA (#11232)."""
+    if not action.startswith(_OWN_REPO_WORKFLOW_PREFIX):
+        return False
+    workflow_name = action.removeprefix(_OWN_REPO_WORKFLOW_PREFIX)
+    if not workflow_name or "/" in workflow_name or "\\" in workflow_name:
+        return False
+    return (WORKFLOWS_DIR / workflow_name).is_file()
+
+
 def _validate_allowed_uses_ref(uses_ref: str, action: str) -> str | None:
     if "@" not in uses_ref:
         return f"external action {uses_ref} must include an immutable ref"
@@ -225,6 +240,8 @@ def _validate_allowed_uses_ref(uses_ref: str, action: str) -> str | None:
         return f"disallowed {uses_ref}; expected one of {sorted(allowed_refs)}"
     if not FULL_SHA_PATTERN.fullmatch(ref):
         return f"external action {uses_ref} must be pinned by full 40-character SHA"
+    if _is_own_repo_reusable_workflow(action):
+        return None
     allowed_refs = ALLOWED_USES.get(action)
     if allowed_refs is None:
         return f"unrecognized external action {action}; add an approved SHA to ALLOWED_USES"
