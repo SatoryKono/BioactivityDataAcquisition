@@ -1,0 +1,9 @@
+{
+  "phase": "C",
+  "actions": [
+    "ports vs adapters ADR-017/019",
+    "NoOp tracing ADR-022",
+    "hyphenated names",
+    "histogram/counter misuse scan"
+  ]
+}

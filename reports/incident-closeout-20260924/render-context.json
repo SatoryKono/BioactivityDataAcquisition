@@ -1,0 +1,31 @@
+{
+  "uid": "bioetl-incident-v1",
+  "version": 9,
+  "panels_equal": true,
+  "local_sha256": "9f860c5a2854fb59eda0129de93145fe14e4d9f9f9d1e0193688e71573075ab3",
+  "time_range_utc": [
+    "2026-09-24T00:00:00Z",
+    "2026-09-24T10:40:00Z"
+  ],
+  "viewports": [
+    [
+      1011,
+      920
+    ],
+    [
+      1366,
+      768
+    ]
+  ],
+  "theme": "dark",
+  "zoom": "100% browser default; not independently measured",
+  "device_scale_factor": "NOT_VERIFIED",
+  "kiosk": false,
+  "collapsed_rows": true,
+  "capture": "viewport",
+  "BioETL Ops HTTP": {
+    "uid": "bioetl-ops-http",
+    "type": "yesoreyeram-infinity-datasource",
+    "url": "http://bioetl:8000"
+  }
+}

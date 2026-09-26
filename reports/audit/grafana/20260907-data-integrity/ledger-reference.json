@@ -1,0 +1,207 @@
+{
+  "path": "data\\output\\control\\run_ledger\\c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d.jsonl",
+  "source_sha256": "d41b71c5675247eb98bbbbdaa255ffbea6755c36f46a90cf298f3734d181c23b",
+  "projection": [
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "manifest_created",
+      "stage": null,
+      "status": "created",
+      "occurred_at": "2026-09-06T12:20:57.374981Z",
+      "metrics_snapshot": null
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "run_started",
+      "stage": null,
+      "status": "running",
+      "occurred_at": "2026-09-06T12:20:58.097080Z",
+      "metrics_snapshot": null
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "stage_started",
+      "stage": "preflight",
+      "status": "running",
+      "occurred_at": "2026-09-06T12:20:58.390129Z",
+      "metrics_snapshot": null
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "stage_completed",
+      "stage": "preflight",
+      "status": "completed",
+      "occurred_at": "2026-09-06T12:20:58.537560Z",
+      "metrics_snapshot": {
+        "records_bronze": 0,
+        "records_fetched": 0,
+        "records_filtered_out": 0,
+        "records_gold": 0,
+        "records_gold_excluded_by_contract": 0,
+        "records_quarantined": 0,
+        "records_silver": 0
+      }
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "stage_started",
+      "stage": "prepare_medallion_layers",
+      "status": "running",
+      "occurred_at": "2026-09-06T12:20:58.794034Z",
+      "metrics_snapshot": null
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "stage_completed",
+      "stage": "prepare_medallion_layers",
+      "status": "completed",
+      "occurred_at": "2026-09-06T12:20:58.900140Z",
+      "metrics_snapshot": {
+        "records_bronze": 0,
+        "records_fetched": 0,
+        "records_filtered_out": 0,
+        "records_gold": 0,
+        "records_gold_excluded_by_contract": 0,
+        "records_quarantined": 0,
+        "records_silver": 0
+      }
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "stage_started",
+      "stage": "execute_pipeline",
+      "status": "running",
+      "occurred_at": "2026-09-06T12:20:59.074807Z",
+      "metrics_snapshot": null
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "artifact_published",
+      "stage": "bronze",
+      "status": "published",
+      "occurred_at": "2026-09-06T12:20:59.378803Z",
+      "metrics_snapshot": null
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "input_snapshot_published",
+      "stage": "bronze",
+      "status": "published",
+      "occurred_at": "2026-09-06T12:20:59.715848Z",
+      "metrics_snapshot": null
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "artifact_published",
+      "stage": "silver",
+      "status": "published",
+      "occurred_at": "2026-09-06T12:21:09.768957Z",
+      "metrics_snapshot": null
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "artifact_published",
+      "stage": "gold",
+      "status": "published",
+      "occurred_at": "2026-09-06T12:21:11.471270Z",
+      "metrics_snapshot": null
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "stage_completed",
+      "stage": "execute_pipeline",
+      "status": "completed",
+      "occurred_at": "2026-09-06T12:21:12.203888Z",
+      "metrics_snapshot": {
+        "records_bronze": 1000,
+        "records_fetched": 1000,
+        "records_filtered_out": 0,
+        "records_gold": 983,
+        "records_gold_excluded_by_contract": 17,
+        "records_quarantined": 0,
+        "records_silver": 1000
+      }
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "stage_started",
+      "stage": "postrun",
+      "status": "running",
+      "occurred_at": "2026-09-06T12:21:12.259567Z",
+      "metrics_snapshot": null
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "stage_completed",
+      "stage": "postrun",
+      "status": "completed",
+      "occurred_at": "2026-09-06T12:21:15.097533Z",
+      "metrics_snapshot": {
+        "records_bronze": 1000,
+        "records_fetched": 1000,
+        "records_filtered_out": 0,
+        "records_gold": 983,
+        "records_gold_excluded_by_contract": 17,
+        "records_quarantined": 0,
+        "records_silver": 1000
+      }
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "stage_started",
+      "stage": "checkpoint_finalize",
+      "status": "running",
+      "occurred_at": "2026-09-06T12:21:15.508008Z",
+      "metrics_snapshot": null
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "stage_completed",
+      "stage": "checkpoint_finalize",
+      "status": "completed",
+      "occurred_at": "2026-09-06T12:21:15.570068Z",
+      "metrics_snapshot": {
+        "records_bronze": 1000,
+        "records_fetched": 1000,
+        "records_filtered_out": 0,
+        "records_gold": 983,
+        "records_gold_excluded_by_contract": 17,
+        "records_quarantined": 0,
+        "records_silver": 1000
+      }
+    },
+    {
+      "run_id": "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "manifest_id": "c5c5f1ad-9fe2-5b45-9945-5f29805f8a3d",
+      "event_type": "run_finished",
+      "stage": null,
+      "status": "success",
+      "occurred_at": "2026-09-06T12:21:15.626682Z",
+      "metrics_snapshot": {
+        "records_bronze": 1000,
+        "records_fetched": 1000,
+        "records_filtered_out": 0,
+        "records_gold": 983,
+        "records_gold_excluded_by_contract": 17,
+        "records_quarantined": 0,
+        "records_silver": 1000
+      }
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+{"number":9803,"title":"[req][GAP][P1] Requirements traceability drift","requirement_id":"GAP","priority":"P1","finding_id":"REQ-TRACE-003"}
+{"number":9805,"title":"[req][REQ-GOV-001][P2] 132 REQ orphan in tests","requirement_id":"REQ-GOV-001","priority":"P2","finding_id":"REQ-TRACE-002"}
+{"number":9806,"title":"[req][GAP][P2] Crosswalk orphan generic","requirement_id":"GAP","priority":"P2","finding_id":"REQ-TRACE-001"}

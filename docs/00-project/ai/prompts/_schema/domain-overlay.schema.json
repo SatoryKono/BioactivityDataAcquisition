@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bioetl.local/schemas/domain-overlay.schema.json",
+  "title": "BioETL Domain Overlay Definition",
+  "description": "Domain overlay that extends the Cyclic Kernel v3 with OBJECT/SCOPE/SSOT/AUDIT_CONTOURS etc. Overlay MUST NOT weaken kernel guards: any ALLOW_* property is rejected. Append-only semantics not applicable; overlay is declarative and validated before render.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "domain",
+    "id",
+    "OBJECT",
+    "SCOPE"
+  ],
+  "patternProperties": {
+    "^ALLOW_.*": {
+      "not": {},
+      "description": "Rejected: overlay MUST NOT declare ALLOW_* (fail-closed). Any ALLOW_* causes validation failure."
+    }
+  },
+  "properties": {
+    "domain": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Domain slug, e.g. medallion, dq-contracts, control-plane"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^prompt\\.audit\\..+$",
+      "description": "Overlay prompt ID, e.g. prompt.audit.project.new2.medallion"
+    },
+    "OBJECT": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Audit object / subject statement"
+    },
+    "SCOPE": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "File/glob scope for this domain"
+    },
+    "SSOT": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Single sources of truth (RULES, REQUIREMENTS, ADRs, etc.)"
+    },
+    "AUDIT_CONTOURS": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "MANDATORY_EVIDENCE": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "VALIDATION": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "DOMAIN_STOP": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "OUTPUT_EXTRAS": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "successor": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Successor prompt ID if superseded"
+    }
+  },
+  "not": {
+    "anyOf": [
+      {
+        "required": [
+          "ALLOW_ISSUE_WRITE"
+        ]
+      },
+      {
+        "required": [
+          "ALLOW_PUSH"
+        ]
+      },
+      {
+        "required": [
+          "ALLOW_MERGE"
+        ]
+      },
+      {
+        "required": [
+          "ALLOW_CLOSE"
+        ]
+      },
+      {
+        "required": [
+          "ALLOW_NETWORK"
+        ]
+      },
+      {
+        "required": [
+          "ALLOW_FULL_SUITE"
+        ]
+      }
+    ]
+  }
+}

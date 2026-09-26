@@ -1,0 +1,19 @@
+{
+  "viewport": {
+    "width": 1366,
+    "height": 768
+  },
+  "found": true,
+  "headerText": "Understand Run ScopeWhich exact run should be inspected?Scope: BROWSE = last 4 reports in the table below · SELECTED RUN = identity and counts for the run you pick · FULL PATHS = report artifacts, not triage bodiesEmpty list: pipeline=unknown and run_id=- mean nothing is selected — not a missing store and not a healthy run.Coverage: IN RANGE / OUT OF RANGE / UNKNOWN compares that run to the time picker. Live Prometheus is not that UUID. Refresh 60s · timezone: browser",
+  "innerText": "Which exact run should be inspected?\nScope: BROWSE = last 4 reports in the table below · SELECTED RUN = identity and counts for the run you pick · FULL PATHS = report artifacts, not triage bodies\nEmpty list: pipeline=unknown and run_id=- mean nothing is selected — not a missing store and not a healthy run.\nCoverage: IN RANGE / OUT OF RANGE / UNKNOWN compares that run to the time picker. Live Prometheus is not that UUID. Refresh 60s · timezone: browser",
+  "clientHeight": 110,
+  "scrollHeight": 110,
+  "clientWidth": 1032,
+  "scrollWidth": 1032,
+  "overflowY": "visible",
+  "overflowX": "visible",
+  "containerClientHeight": 144,
+  "containerScrollHeight": 144,
+  "verticalOverflowPx": 0,
+  "horizontalOverflowPx": 0
+}

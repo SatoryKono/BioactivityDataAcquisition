@@ -1,0 +1,213 @@
+[
+  {
+    "capture_id": "bioetl-run-explorer-v1-3010-normal-6h",
+    "panel_id": 3010,
+    "scope": "chembl_assay",
+    "limit": 10,
+    "independent_sort": "started_at descending from persisted report identity",
+    "source_report_count": 150,
+    "dated_report_count": 150,
+    "actual_ids": [
+      "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "c405a5d8-4fda-51d2-b77f-f461ca3b2dbc",
+      "d7861cba-585a-52e7-a9fa-43956f23b7ed",
+      "ac4467ce-20a0-53b6-9546-6e48156039d6",
+      "9aa83170-7cc9-5a85-b0de-a0a548f7137c",
+      "27b7a819-6454-56d3-bcb5-88a43ab038f8",
+      "990d1560-989b-57c1-9b82-4a9bcaae7b58",
+      "a860b401-454e-5ee0-a451-b7b92608b849",
+      "ffaf2616-eeb4-5c2b-a575-b23dbbefd3cb",
+      "f13e7813-b433-55e2-902d-cd04600e42e4"
+    ],
+    "expected_dated_ids": [
+      "a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8",
+      "c405a5d8-4fda-51d2-b77f-f461ca3b2dbc",
+      "d7861cba-585a-52e7-a9fa-43956f23b7ed",
+      "ac4467ce-20a0-53b6-9546-6e48156039d6",
+      "9aa83170-7cc9-5a85-b0de-a0a548f7137c",
+      "27b7a819-6454-56d3-bcb5-88a43ab038f8",
+      "990d1560-989b-57c1-9b82-4a9bcaae7b58",
+      "a860b401-454e-5ee0-a451-b7b92608b849",
+      "ffaf2616-eeb4-5c2b-a575-b23dbbefd3cb",
+      "f13e7813-b433-55e2-902d-cd04600e42e4"
+    ],
+    "source_paths": [
+      {
+        "path": "reports/run-reports/pipeline/chembl_assay/a72f6bc0-d3cb-5e9f-bd7d-00763ec963c8/pipeline-run-report.json",
+        "sha256": "070e38d74328150f07458c7996c9aa36fab0bb0d688b5a0337536f0811894758"
+      },
+      {
+        "path": "reports/run-reports/pipeline/chembl_assay/c405a5d8-4fda-51d2-b77f-f461ca3b2dbc/pipeline-run-report.json",
+        "sha256": "f16a02ac042178cedf3db24584b1d18d8b299754a08c12288a29405829cc447b"
+      },
+      {
+        "path": "reports/run-reports/pipeline/chembl_assay/d7861cba-585a-52e7-a9fa-43956f23b7ed/pipeline-run-report.json",
+        "sha256": "961a568c01abe6b5a292f25a26ad32c36d329479fb42ca574d0e808cb6798544"
+      },
+      {
+        "path": "reports/run-reports/pipeline/chembl_assay/ac4467ce-20a0-53b6-9546-6e48156039d6/pipeline-run-report.json",
+        "sha256": "739c6ec60fcc14be84daf97a3ba92d9cac37d3646e5e629a8cef60fd6334ad50"
+      },
+      {
+        "path": "reports/run-reports/pipeline/chembl_assay/9aa83170-7cc9-5a85-b0de-a0a548f7137c/pipeline-run-report.json",
+        "sha256": "91c44e4cb07826b99bd788c78fe3aabf735a196e3d9a901363892907705f729e"
+      },
+      {
+        "path": "reports/run-reports/pipeline/chembl_assay/27b7a819-6454-56d3-bcb5-88a43ab038f8/pipeline-run-report.json",
+        "sha256": "6ab0b484f2f736c8b304a4b1e66bb89d53abcb3f9c78744661cb735aef1cd28c"
+      },
+      {
+        "path": "reports/run-reports/pipeline/chembl_assay/990d1560-989b-57c1-9b82-4a9bcaae7b58/pipeline-run-report.json",
+        "sha256": "bc9446f7c037c4aae7b3923c7d33cc8d34681aa62404a76b29e0e6c2ecedbc79"
+      },
+      {
+        "path": "reports/run-reports/pipeline/chembl_assay/a860b401-454e-5ee0-a451-b7b92608b849/pipeline-run-report.json",
+        "sha256": "cdae7ade37b335ccc6b75262fd739d009f622915e80f598381bb404e79e24654"
+      },
+      {
+        "path": "reports/run-reports/pipeline/chembl_assay/ffaf2616-eeb4-5c2b-a575-b23dbbefd3cb/pipeline-run-report.json",
+        "sha256": "fa3a69fdaef5f8f85782a9165aa7fc8b6e2e11dbb35ab2aeeb561f4496b8e0cc"
+      },
+      {
+        "path": "reports/run-reports/pipeline/chembl_assay/f13e7813-b433-55e2-902d-cd04600e42e4/pipeline-run-report.json",
+        "sha256": "7ed8dc3499d1a8ef59d09f03df8ca89c1d603c5b76251b12a4b7269c812a9990"
+      }
+    ],
+    "dated_prefix_matches": true,
+    "status": "PASS",
+    "note": "Exact latest-N membership and order match."
+  },
+  {
+    "capture_id": "bioetl-run-explorer-v1-3020-normal-6h",
+    "panel_id": 3020,
+    "scope": "chembl_baseline",
+    "limit": 20,
+    "independent_sort": "completed_at descending from persisted report identity",
+    "source_report_count": 159,
+    "dated_report_count": 19,
+    "actual_ids": [
+      "741edaad-96fc-52d6-99ab-5999046208cb",
+      "34242ce9-edca-53b8-b8e1-6071f2d6818d",
+      "c5e1fd51-42b8-5ac1-8710-a0a3a91a2931",
+      "88b73a56-c25e-5dd8-862e-13af76528643",
+      "15e0bd6e-29de-5669-ae30-0fb8dadb53d8",
+      "7ceaa38a-10df-51fe-8026-0dea5f0efcf8",
+      "fc0eea21-b446-5797-8534-ac20e05d719c",
+      "3e287ef7-684d-5313-9e6b-60cc35c5ad1c",
+      "cbbaebd2-381d-515c-82b3-534805afc77d",
+      "5490b8b8-b468-5177-b25d-dca9183237bd",
+      "e1ce6c45-63b4-572a-9b4e-c796d718bc80",
+      "65725411-cf5c-54b7-af69-e91de336b70a",
+      "37ae9af3-e0af-5adf-9433-ba075714237b",
+      "77f19ba1-6cfc-515b-803d-3aea57ebb58f",
+      "5fe49ce7-3f74-5b3d-9690-077c9ea13ab2",
+      "44b7d8b3-8384-533a-8ac7-87deb38c4964",
+      "b8ec8e06-3c49-54bc-9348-e03eaa2759ea",
+      "207d6db5-74e1-5471-b691-89801ce8e5a9",
+      "67eb89d8-59e8-5287-b54c-e1083e90a726",
+      "bef098bb-92a7-5588-83a5-3f32a9581da9"
+    ],
+    "expected_dated_ids": [
+      "741edaad-96fc-52d6-99ab-5999046208cb",
+      "34242ce9-edca-53b8-b8e1-6071f2d6818d",
+      "c5e1fd51-42b8-5ac1-8710-a0a3a91a2931",
+      "88b73a56-c25e-5dd8-862e-13af76528643",
+      "15e0bd6e-29de-5669-ae30-0fb8dadb53d8",
+      "7ceaa38a-10df-51fe-8026-0dea5f0efcf8",
+      "fc0eea21-b446-5797-8534-ac20e05d719c",
+      "3e287ef7-684d-5313-9e6b-60cc35c5ad1c",
+      "cbbaebd2-381d-515c-82b3-534805afc77d",
+      "5490b8b8-b468-5177-b25d-dca9183237bd",
+      "e1ce6c45-63b4-572a-9b4e-c796d718bc80",
+      "65725411-cf5c-54b7-af69-e91de336b70a",
+      "37ae9af3-e0af-5adf-9433-ba075714237b",
+      "77f19ba1-6cfc-515b-803d-3aea57ebb58f",
+      "5fe49ce7-3f74-5b3d-9690-077c9ea13ab2",
+      "44b7d8b3-8384-533a-8ac7-87deb38c4964",
+      "b8ec8e06-3c49-54bc-9348-e03eaa2759ea",
+      "207d6db5-74e1-5471-b691-89801ce8e5a9",
+      "67eb89d8-59e8-5287-b54c-e1083e90a726"
+    ],
+    "source_paths": [
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/741edaad-96fc-52d6-99ab-5999046208cb/workflow-run-report.json",
+        "sha256": "a75cb8741710080f801f27718f4a71d7ccc7aeefb2ff59848b1ad6c1305d9a8a"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/34242ce9-edca-53b8-b8e1-6071f2d6818d/workflow-run-report.json",
+        "sha256": "3087acd81c02ca9fa5a4a4bd068a9432b1cc0c50323328a39bf89a2b20473695"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/c5e1fd51-42b8-5ac1-8710-a0a3a91a2931/workflow-run-report.json",
+        "sha256": "b52c99b85fc54291aac63c2003d42e7de16962a23bf8c8d1b532ff5e233f150c"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/88b73a56-c25e-5dd8-862e-13af76528643/workflow-run-report.json",
+        "sha256": "6c8a25dab71903393cc81d6aa057c040856063463d0414e4f53f2d481229103e"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/15e0bd6e-29de-5669-ae30-0fb8dadb53d8/workflow-run-report.json",
+        "sha256": "82ae233e8194a1688af610c2a8f92c168dfce5805c0c38bd52f6f5376cbbaa58"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/7ceaa38a-10df-51fe-8026-0dea5f0efcf8/workflow-run-report.json",
+        "sha256": "76cbde7f1bbde4146c165830e8be85ca93593de570b006a2c5854a469279ab9c"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/fc0eea21-b446-5797-8534-ac20e05d719c/workflow-run-report.json",
+        "sha256": "679811fd232fde9aa7ee6306d7a08ab0e4816dde7777712be1c173a657129358"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/3e287ef7-684d-5313-9e6b-60cc35c5ad1c/workflow-run-report.json",
+        "sha256": "ca215d462b6c92134506a3b69449e23faba28374fb91411f14fdc7efd411b5ea"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/cbbaebd2-381d-515c-82b3-534805afc77d/workflow-run-report.json",
+        "sha256": "d016a84b23eb617aac45d166ceaf161f026c36ce7e8156faa4e96c5ba78fcd50"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/5490b8b8-b468-5177-b25d-dca9183237bd/workflow-run-report.json",
+        "sha256": "a79c03d600d6111873ef40c98da16a243c0f267e20c9d8293bcbd2c265e84601"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/e1ce6c45-63b4-572a-9b4e-c796d718bc80/workflow-run-report.json",
+        "sha256": "a87179124a5cd8b6ba8e9aa38db82d84e100bba26fedfb34177122e91ec318ad"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/65725411-cf5c-54b7-af69-e91de336b70a/workflow-run-report.json",
+        "sha256": "b91577411c67b8103648b9b7a3874bd416ef74a6d04dea6eb4a777799cc95057"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/37ae9af3-e0af-5adf-9433-ba075714237b/workflow-run-report.json",
+        "sha256": "4cee12f693de213d36f1471f8a087b4145f2e252765c75b2252ca9abc1b397dd"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/77f19ba1-6cfc-515b-803d-3aea57ebb58f/workflow-run-report.json",
+        "sha256": "45ea465ad8b9840419729fa1b62d2e0966968571f17b0ae0ddd68bbd7bf3961b"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/5fe49ce7-3f74-5b3d-9690-077c9ea13ab2/workflow-run-report.json",
+        "sha256": "938e780a93b92b7836d9d9bf21f31d83bf02b3add93ae35f4e3efbfe9fdd2884"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/44b7d8b3-8384-533a-8ac7-87deb38c4964/workflow-run-report.json",
+        "sha256": "778d1848809b87d9ad43af1062c524d8ae7272ffae113ec62907a84433626f1a"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/b8ec8e06-3c49-54bc-9348-e03eaa2759ea/workflow-run-report.json",
+        "sha256": "033b44abd7306463dfa8e378727dedd5ad1db3e3c17cdab505827bb59ff9a30f"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/207d6db5-74e1-5471-b691-89801ce8e5a9/workflow-run-report.json",
+        "sha256": "304794d1966584b026e06a7e381539e43bc8710b6a493aced1ab84d85a63dcf4"
+      },
+      {
+        "path": "reports/run-reports/workflow/chembl_baseline/67eb89d8-59e8-5287-b54c-e1083e90a726/workflow-run-report.json",
+        "sha256": "ab128628e4c581d04fa007c5ab605b6db04552d5ad081c56d43326692313298d"
+      }
+    ],
+    "dated_prefix_matches": true,
+    "status": "PARTIAL",
+    "note": "Undated reports do not provide an independent ordering for the remaining row; no tie-break rule is assumed."
+  }
+]

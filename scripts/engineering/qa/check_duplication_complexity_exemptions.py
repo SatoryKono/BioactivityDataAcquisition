@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""Validate duplication/complexity workflow exemptions against a registry."""
+
+from __future__ import annotations
+
+import ast
+import re
+import sys
+from datetime import UTC, date, datetime
+from pathlib import Path
+
+import yaml
+
+ROOT = Path(__file__).resolve().parents[3]
+WORKFLOW_PATH = ROOT / ".github" / "workflows" / "duplication-complexity.yml"
+REGISTRY_PATH = ROOT / "configs" / "quality" / "duplication_complexity_exemptions.yaml"
+
+
+def _extract_literal(text: str, name: str) -> object:
+    match = re.search(rf"{name}\s*=\s*(\{{.*?\n\s*\}})", text, re.DOTALL)
+    if match is None:
+        raise ValueError(f"Could not find {name} literal in {WORKFLOW_PATH}")
+    return ast.literal_eval(match.group(1))
+
+
+def _extract_xenon_excludes(text: str) -> set[str]:
+    match = re.search(r'--exclude "([^"]+)" src', text)
+    if match is None:
+        raise ValueError(f"Could not find xenon --exclude list in {WORKFLOW_PATH}")
+    return {item.strip() for item in match.group(1).split(",") if item.strip()}
+
+
+def _normalize_path_pattern(path: str) -> str:
+    return path.removesuffix("*")
+
+
+def _load_registry() -> dict[str, object]:
+    payload = yaml.safe_load(REGISTRY_PATH.read_text(encoding="utf-8")) or {}
+    if not isinstance(payload, dict):
+        raise ValueError(f"Expected mapping payload in {REGISTRY_PATH}")
+    return payload
+
+
+def _entry_metadata_errors(
+    entry: dict[str, object],
+    *,
+    label: str,
+    today: date,
+    seen: set[tuple[str, tuple[str, ...]]],
+) -> list[str]:
+    errors: list[str] = []
+    raw_scopes = entry.get("scopes")
+    scopes = (
+        tuple(sorted(str(scope) for scope in raw_scopes))
+        if isinstance(raw_scopes, list)
+        else ()
+    )
+    key = (str(entry.get("path") or entry.get("name")), scopes)
+    if key in seen:
+        errors.append(f"duplicate {label} registry row: {key[0]} scopes={list(scopes)}")
+    seen.add(key)
+    if not str(entry.get("owner", "")).strip().startswith("@bioetl-"):
+        errors.append(f"{label} {key[0]} missing @bioetl-* owner")
+    if not str(entry.get("removal_step", "")).strip():
+        errors.append(f"{label} {key[0]} missing removal_step")
+    if not str(entry.get("progress_note", "")).strip():
+        errors.append(f"{label} {key[0]} missing progress_note")
+    if not str(entry.get("rationale", "")).strip():
+        errors.append(f"{label} {key[0]} missing rationale")
+    expiry = str(entry.get("expiry", "")).strip()
+    try:
+        expiry_date = datetime.fromisoformat(expiry).date()
+    except ValueError:
+        return [*errors, f"{label} {key[0]} has invalid expiry {expiry!r}"]
+    if expiry_date < today:
+        errors.append(
+            f"{label} {key[0]} exemption expired on {expiry} without review renewal: "
+            "renew via a dated owner review (extend expiry and refresh "
+            "removal_step/progress_note) or remove the entry"
+        )
+    return errors
+
+
+def _validate_metadata(entries: list[dict[str, object]], *, label: str) -> list[str]:
+    errors: list[str] = []
+    today = datetime.now(UTC).date()
+    seen: set[tuple[str, tuple[str, ...]]] = set()
+    for entry in entries:
+        errors.extend(
+            _entry_metadata_errors(entry, label=label, today=today, seen=seen)
+        )
+    return errors
+
+
+MAX_SHARED_EXPIRY_ENTRIES = 6
+
+
+def _validate_expiry_spread(entries: list[dict[str, object]]) -> list[str]:
+    """Fail when exemptions re-form a synchronized expiry cliff (#10527)."""
+    counts: dict[str, int] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        expiry = str(entry.get("expiry", "")).strip()
+        if expiry:
+            counts[expiry] = counts.get(expiry, 0) + 1
+    return [
+        f"synchronized exemption cliff: {count} entries share expiry {expiry} "
+        f"(max {MAX_SHARED_EXPIRY_ENTRIES}); stagger expiries per owner group"
+        for expiry, count in sorted(counts.items())
+        if count > MAX_SHARED_EXPIRY_ENTRIES
+    ]
+
+
+def main() -> None:
+    workflow_text = WORKFLOW_PATH.read_text(encoding="utf-8")
+    registry = _load_registry()
+
+    path_entries = registry.get("path_entries")
+    function_entries = registry.get("function_entries")
+    if not isinstance(path_entries, list) or not isinstance(function_entries, list):
+        raise SystemExit("Registry must define path_entries and function_entries lists")
+
+    typed_path_entries = [entry for entry in path_entries if isinstance(entry, dict)]
+    typed_function_entries = [
+        entry for entry in function_entries if isinstance(entry, dict)
+    ]
+
+    errors = [
+        *_validate_metadata(typed_path_entries, label="path"),
+        *_validate_metadata(typed_function_entries, label="function"),
+    ]
+
+    errors.extend(
+        _validate_expiry_spread([*typed_path_entries, *typed_function_entries])
+    )
+
+    workflow_xenon_paths = _extract_xenon_excludes(workflow_text)
+    raw_critical_paths = _extract_literal(workflow_text, "EXEMPT_PATHS")
+    workflow_critical_paths = (
+        set(raw_critical_paths)
+        if isinstance(raw_critical_paths, (list, set))
+        else set()
+    )
+    workflow_critical_functions = _extract_literal(workflow_text, "EXEMPT_FUNCTIONS")
+    if not isinstance(workflow_critical_functions, dict):
+        errors.append("EXEMPT_FUNCTIONS must stay a dict literal in workflow")
+        workflow_critical_functions = {}
+
+    registry_xenon_paths = {
+        str(entry["path"])
+        for entry in typed_path_entries
+        if "xenon" in {str(scope) for scope in entry.get("scopes", [])}
+    }
+    registry_critical_paths = {
+        str(entry["path"])
+        for entry in typed_path_entries
+        if "critical_check" in {str(scope) for scope in entry.get("scopes", [])}
+    }
+    registry_critical_functions = {
+        str(entry["name"]): int(entry["max_complexity"])
+        for entry in typed_function_entries
+        if "critical_check" in {str(scope) for scope in entry.get("scopes", [])}
+    }
+
+    normalized_workflow_xenon = {
+        _normalize_path_pattern(path) for path in workflow_xenon_paths
+    }
+    normalized_registry_xenon = {
+        _normalize_path_pattern(path) for path in registry_xenon_paths
+    }
+    normalized_workflow_critical = {
+        _normalize_path_pattern(path) for path in workflow_critical_paths
+    }
+    normalized_registry_critical = {
+        _normalize_path_pattern(path) for path in registry_critical_paths
+    }
+
+    if normalized_workflow_xenon != normalized_registry_xenon:
+        errors.append(
+            "xenon exclude registry drifted: "
+            f"workflow_only={sorted(normalized_workflow_xenon - normalized_registry_xenon)} "
+            f"registry_only={sorted(normalized_registry_xenon - normalized_workflow_xenon)}"
+        )
+    if normalized_workflow_critical != normalized_registry_critical:
+        errors.append(
+            "critical-check exempt path registry drifted: "
+            f"workflow_only={sorted(normalized_workflow_critical - normalized_registry_critical)} "
+            f"registry_only={sorted(normalized_registry_critical - normalized_workflow_critical)}"
+        )
+    if workflow_critical_functions != registry_critical_functions:
+        errors.append(
+            "critical-check exempt function registry drifted: "
+            f"workflow={workflow_critical_functions} registry={registry_critical_functions}"
+        )
+
+    if errors:
+        print("Duplication/complexity exemption registry errors:", file=sys.stderr)
+        for error in errors:
+            print(f"  - {error}", file=sys.stderr)
+        raise SystemExit(1)
+
+    print(
+        "[OK] duplication/complexity exemptions registry matches workflow and has current metadata"
+    )
+
+
+if __name__ == "__main__":
+    main()

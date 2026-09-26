@@ -1,0 +1,86 @@
+%% BioETL — Simplified High-Level Hexagonal Architecture
+%% Simplified overview of Ports & Adapters pattern with essential layers only.
+
+%% @version 1.0.0
+%% @date    2026-07-03
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   13
+%% @reference Simplified version of 01-high-level-hexagonal.mmd (46 nodes → 13 nodes)
+%% Legend: docs/02-architecture/diagrams/views/00-legend.mermaid
+
+flowchart TB
+    subgraph External["External Systems"]
+        EXT_API["External APIs<br/>(ChEMBL, PubMed, UniProt, etc.)"]:::size-md
+        STORAGE_FS["File System<br/>(Delta Lake / Parquet)"]:::size-md
+        OBS_SYS["Observability<br/>(Prometheus, OpenTelemetry)"]:::size-md
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        CLI["CLI Commands"]:::size-md
+    end
+
+    subgraph Composition["Composition Layer"]
+        BOOTSTRAP["Bootstrap / Assembly"]:::size-md
+    end
+
+    subgraph Application["Application Layer"]
+        CORE["Core Pipeline<br/>(Executor, Transformer, Writer)"]:::size-md
+        SERVICES["Services<br/>(DQ, Export, Health)"]:::size-md
+    end
+
+    subgraph Domain["Domain Layer"]
+        PORTS["Port Protocols<br/>(Data & Storage Ports)"]:::size-md
+        ENTITIES["Entities & Config<br/>(Batch, PipelineRun, Config)"]:::size-md
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        ADAPTERS["HTTP Adapters<br/>(Provider Implementations)"]:::size-md
+        STORAGE["Storage Writers<br/>(Bronze, Silver, Gold)"]:::size-md
+        OBS_INFRA["Observability<br/>(Logging, Metrics, Tracing)"]:::size-md
+    end
+
+    %% External → Infrastructure
+    EXT_API -.->|REST/HTTP| ADAPTERS
+    STORAGE_FS -.-> STORAGE
+    OBS_SYS -.-> OBS_INFRA
+
+    %% Interfaces → Composition
+    CLI --> BOOTSTRAP
+
+    %% Composition → Application
+    BOOTSTRAP --> CORE
+    BOOTSTRAP --> SERVICES
+
+    %% Composition → Infrastructure
+    BOOTSTRAP --> ADAPTERS
+    BOOTSTRAP --> STORAGE
+    BOOTSTRAP --> OBS_INFRA
+
+    %% Application → Domain
+    CORE --> PORTS
+    CORE --> ENTITIES
+    SERVICES --> PORTS
+
+    %% Infrastructure → Domain (implements Ports)
+    ADAPTERS -->|implements| PORTS
+    STORAGE -->|implements| PORTS
+    OBS_INFRA -->|implements| PORTS
+
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef comp fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef iface fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef ext fill:#f1f5f9,stroke:#64748b,stroke-width:1px
+
+    class PORTS,ENTITIES domain
+    class CORE,SERVICES app
+    class ADAPTERS,STORAGE,OBS_INFRA infra
+    class BOOTSTRAP comp
+    class CLI iface
+    class EXT_API,STORAGE_FS,OBS_SYS ext
+
+    linkStyle default stroke:#666,stroke-width:1px,color:#666
+    linkStyle 0,1,2 stroke-dasharray: 5 5
+    linkStyle 12,13,14 stroke:#dc2626,stroke-width:2px

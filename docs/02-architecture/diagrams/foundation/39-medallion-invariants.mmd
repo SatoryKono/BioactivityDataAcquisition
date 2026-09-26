@@ -1,0 +1,82 @@
+%% Title: Medallion Architecture Invariants (ARCH-007)
+%% Covers: RULES.md §2.1 (Medallion), ARCH-007 clear policy
+%% Rank: 14 (Score 8.19) — Critical data safety rules
+%% Updated: 2026-07-31
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @nodes   23
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%% @uniform width=272 height=112 max_title_len=27 max_desc_lines=4
+flowchart TB
+%% keep-orphan: E3, E4, E5
+    subgraph RunTypes["RunType Enum (domain/types.py)"]
+        INC["RunType.INCREMENTAL<br/>'Fetch new data since last run'"]
+        BF["RunType.BACKFILL<br/>'Re-fetch a date range'"]
+        RB["RunType.REBUILD<br/>'Full clean rebuild'"]
+    end
+
+    subgraph Policy["MedallionLifecycleService\n(application/services/medallion_lifecycle.py)"]
+        CHECK{{"Check RunType"}}
+    end
+
+    subgraph IncPath["INCREMENTAL Path"]
+        I1["❌ DO NOT clear Silver"]
+        I2["❌ DO NOT clear Gold"]
+        I3["Silver: merge/upsert<br/>(content_hash dedup)"]
+        I4["Gold: merge/append"]
+    end
+
+    subgraph BFPath["BACKFILL Path"]
+        B1["✅ MUST clear Silver<br/>SilverWriter.clear()"]
+        B2["✅ MUST clear Gold<br/>GoldWriter.clear()"]
+        B3["Silver: full reload"]
+        B4["Gold: full reload"]
+    end
+
+    subgraph RBPath["REBUILD Path"]
+        R1["✅ MUST clear Silver<br/>SilverWriter.clear()"]
+        R2["✅ MUST clear Gold<br/>GoldWriter.clear()"]
+        R3["Silver: full rebuild<br/>from Bronze/API"]
+        R4["Gold: full rebuild<br/>from Silver"]
+    end
+
+    subgraph Enforcement["Enforcement"]
+        E1["PipelineRunner checks<br/>run_type before execution"]
+        E2["MedallionLifecycleService<br/>enforces clear policy"]
+        E3["ClearResult tracks<br/>what was cleared"]
+        E4["Tests verify:<br/>INCREMENTAL never clears"]
+        E5["ADR-031: full_scan_only<br/>mandatory for publications"]
+    end
+
+    subgraph Bronze["Bronze Layer (Always Append)"]
+        BZ["BronzeWriter.write_bronze()<br/>always append-only<br/>never cleared by run_type<br/>retention: 90d"]
+    end
+
+    %% Flow
+    INC --> CHECK
+    BF --> CHECK
+    RB --> CHECK
+
+    CHECK -->|"INCREMENTAL"| I1
+    I1 --> I2 --> I3 --> I4
+
+    CHECK -->|"BACKFILL"| B1
+    B1 --> B2 --> B3 --> B4
+
+    CHECK -->|"REBUILD"| R1
+    R1 --> R2 --> R3 --> R4
+
+    E1 -.-> CHECK
+    E2 -.-> Policy
+
+    BZ -.->|"type agnostic"| Bronze
+
+    %% Styling
+    style IncPath fill:#f0fdf4,stroke:#16a34a
+    style BFPath fill:#fff7ed,stroke:#f59e0b
+    style RBPath fill:#ffe4e6,stroke:#dc2626
+    style Bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
+    style Policy fill:#eff6ff,stroke:#2563eb

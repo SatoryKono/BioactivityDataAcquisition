@@ -1,0 +1,27 @@
+%% Title: Package Family: domain/ports/config
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/ports/config; modules: config_loader_port, config_port, publication_vocabulary_port.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-09-02
+%% @level   Package Family / Inventory Slice
+%% @nodes   7
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace config_loader_port {
+        class DomainConfigMapperPort
+        class PipelineConfigLoaderPort
+        class SettingsLoaderPort
+    }
+
+    namespace config_port {
+        class PipelineSettingsPort
+        class PipelineYamlConfigPort
+        class SettingsPort
+    }
+
+    namespace publication_vocabulary_port {
+        class PublicationVocabularyPort
+    }
+

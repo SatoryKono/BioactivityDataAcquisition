@@ -1,0 +1,293 @@
+version: 2.2.0
+provider: chembl
+entity: target_protein_classification
+pipeline:
+  pipeline_name: chembl_target_protein_classification
+  provider: chembl
+  entity_type: target_protein_classification
+  description: Derived ChEMBL target-to-protein-classification relation rows
+  field_policy: {}
+  business_primary_keys:
+  - entity_id
+  batch_size: 500
+  checkpoint_interval: 500
+
+  sink:
+    silver:
+      partition_by:
+      - classification_status
+    gold:
+      mode: scd2
+      idempotency_contract: scd2
+      scd_config:
+        valid_from_col: _valid_from
+        valid_to_col: _valid_to
+        current_flag_col: _is_current
+        version_col: _version
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+  - name: business
+    fields:
+    - target_id
+    - component_id
+    - leaf_id
+    - path_ids
+    - path_names
+    - path_labels
+    - depth
+    - root_id
+    - is_leaf
+    - l1_id
+    - l1_name
+    - l1_desc
+    - l2_id
+    - l2_name
+    - l2_desc
+    - l3_id
+    - l3_name
+    - l3_desc
+    - l4_id
+    - l4_name
+    - l4_desc
+    - l5_id
+    - l5_name
+    - l5_desc
+    - canonical_l1
+    - l1_counts_for_target_type
+    - l1_mapping_version
+    - target_type_rule_version
+    - l1_normalization_status
+    - l1_normalization_notes
+    - dataset_version
+    - source_url
+    - chembl_release
+    - chembl_api_version
+    - source_manifest_status
+    - source_snapshot_fingerprint
+    - target_snapshot_row_count
+    - target_component_snapshot_row_count
+    - protein_class_snapshot_row_count
+    - classification_status
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+quality:
+  version: 2.2.0
+  provider: chembl
+  entity: target_protein_classification
+  entity_field_validations:
+  - field: target_id
+    type: required
+    nullable: false
+    error_message: target_id is required
+  - field: classification_status
+    type: enum
+    allowed:
+    - resolved
+    - missing_classification
+    - quarantined
+    nullable: false
+    error_message: classification_status must be a valid status
+  - field: dataset_version
+    type: required
+    nullable: false
+    error_message: dataset_version is required for dictionary manifest traceability
+  - field: source_snapshot_fingerprint
+    type: pattern
+    pattern: ^[a-f0-9]{64}$
+    nullable: false
+    error_message: source_snapshot_fingerprint must be a SHA-256 hex digest
+  - field: depth
+    type: range
+    min: 0
+    nullable: true
+    error_message: depth must be non-negative when present
+  - field: root_id
+    type: range
+    min: 1
+    nullable: true
+    error_message: root_id must be positive when present
+  - field: target_snapshot_row_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: target_snapshot_row_count must be non-negative
+  - field: target_component_snapshot_row_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: target_component_snapshot_row_count must be non-negative
+  - field: protein_class_snapshot_row_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: protein_class_snapshot_row_count must be non-negative
+  - field: canonical_l1
+    type: pattern
+    pattern: ^[a-z][a-z0-9_]*$
+    nullable: true
+    error_message: canonical_l1 must be a stable snake_case token when present
+  - field: l1_mapping_version
+    type: pattern
+    pattern: ^protein_class_l1_map_v[0-9]+$
+    nullable: true
+    error_message: l1_mapping_version must identify the versioned L1 mapping
+  - field: target_type_rule_version
+    type: pattern
+    pattern: ^target_type_rule_v[0-9]+$
+    nullable: true
+    error_message: target_type_rule_version must identify the target type rule version
+  - field: l1_normalization_status
+    type: enum
+    allowed:
+    - ok
+    - non_counting
+    - missing
+    - fallback
+    - failed
+    nullable: true
+    error_message: l1_normalization_status must be a reviewed normalization status
+  entity_cross_field_validations: []
+  entity_conditional_validations: []
+  key_nullability:
+  - field: entity_id
+    key_type: merge
+    nullable: false
+  - field: classification_status
+    key_type: partition
+    nullable: false
+filters:
+  version: 2.2.0
+  provider: chembl
+  entity: target_protein_classification
+  input_filter:
+    enabled: false
+    source_path: data/input/target_protein_classification.csv
+    column_name: target_id
+    filter_field: target_id
+    batch_size: 1000
+    checkpoint_interval: 1000
+    fallback_column: target_id
+  extraction_params: {}
+  silver_filters:
+    exclude_if_present: []
+    required_fields:
+    - target_id
+    - classification_status
+    - dataset_version
+    - source_snapshot_fingerprint
+  gold_filters:
+    list_contains: {}
+    list_lengths: {}
+    ranges: {}
+    columns: {}
+    required_fields:
+    - target_id
+    - classification_status
+    - dataset_version
+    - source_snapshot_fingerprint
+    exclude_if_present: []
+contracts:
+  primary_key:
+  - entity_id
+  merge_keys:
+  - entity_id
+  hash_include: []
+  hash_exclude: []
+  hash_datetime_policy: v2_datetime_utc
+  contract_ref: chembl.target_protein_classification
+  active_version: 2.2.0
+  rollout:
+    mode: single
+    read_order:
+    - 2.2.0
+    write_versions:
+    - 2.2.0
+    affects_hash: false
+hash_policy:
+  provider: chembl
+  entity: target_protein_classification
+  contract:
+    version: 2.2.0
+    migration_note: 'Path-first relation contract: path_ids/path_names/path_labels are canonical; L1-L5 fields remain backward-compatible projections; canonical_l1 fields add deterministic target_protein_class_type evidence.'
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - target_id
+    - classification_status
+    - component_id
+    - leaf_id
+    - path_ids
+    - path_names
+    - path_labels
+    - depth
+    - root_id
+    - is_leaf
+    - l1_id
+    - l1_name
+    - l1_desc
+    - l2_id
+    - l2_name
+    - l2_desc
+    - l3_id
+    - l3_name
+    - l3_desc
+    - l4_id
+    - l4_name
+    - l4_desc
+    - l5_id
+    - l5_name
+    - l5_desc
+    - canonical_l1
+    - l1_counts_for_target_type
+    - l1_mapping_version
+    - target_type_rule_version
+    - l1_normalization_status
+    - l1_normalization_notes
+    exclude_fields:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_warn
+    - _dq_error
+    - _source_batch_id
+    - _index
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

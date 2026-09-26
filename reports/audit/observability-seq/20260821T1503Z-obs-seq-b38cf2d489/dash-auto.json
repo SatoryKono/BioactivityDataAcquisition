@@ -1,0 +1,456 @@
+[
+  {
+    "uid": "bioetl-control-plane-v1",
+    "file": "bioetl-control-plane-v1.json",
+    "title": "0. Trust",
+    "schemaVersion": 30,
+    "grafana_version_plugin_hint": 2,
+    "leaf": 58,
+    "row": 7,
+    "leaf_plus_row": 65,
+    "walk_nodes": 65,
+    "auto": {
+      "DASH-AUTO-001": "PASS",
+      "DASH-AUTO-002": "PASS",
+      "DASH-AUTO-003": "PASS",
+      "DASH-AUTO-004": "PASS",
+      "DASH-AUTO-005": "PASS",
+      "DASH-AUTO-006": "PASS",
+      "DASH-AUTO-007": "PASS",
+      "DASH-AUTO-008": "PASS",
+      "DASH-AUTO-009": "PASS",
+      "DASH-AUTO-010": "PASS",
+      "DASH-AUTO-011": "FAIL",
+      "DASH-AUTO-012": "PASS",
+      "DASH-AUTO-013": "PASS",
+      "DASH-AUTO-014": "PASS",
+      "DASH-AUTO-015": "FAIL",
+      "DASH-AUTO-016": "PASS",
+      "DASH-AUTO-017": "PASS",
+      "DASH-AUTO-018": "PASS"
+    },
+    "issues": [
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9418,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9416,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9415,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9413,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9414,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9404,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9407,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9405,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9406,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9408,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9409,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9402,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9403,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9417,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-015",
+        "panel": 1000,
+        "len": 3776
+      }
+    ],
+    "issue_count": 15
+  },
+  {
+    "uid": "bioetl-dq-v2",
+    "file": "bioetl-dq-v2.json",
+    "title": "4. Data Quality",
+    "schemaVersion": 30,
+    "grafana_version_plugin_hint": 4,
+    "leaf": 33,
+    "row": 4,
+    "leaf_plus_row": 37,
+    "walk_nodes": 37,
+    "auto": {
+      "DASH-AUTO-001": "PASS",
+      "DASH-AUTO-002": "PASS",
+      "DASH-AUTO-003": "PASS",
+      "DASH-AUTO-004": "PASS",
+      "DASH-AUTO-005": "PASS",
+      "DASH-AUTO-006": "PASS",
+      "DASH-AUTO-007": "PASS",
+      "DASH-AUTO-008": "PASS",
+      "DASH-AUTO-009": "PASS",
+      "DASH-AUTO-010": "PASS",
+      "DASH-AUTO-011": "FAIL",
+      "DASH-AUTO-012": "PASS",
+      "DASH-AUTO-013": "PASS",
+      "DASH-AUTO-014": "PASS",
+      "DASH-AUTO-015": "FAIL",
+      "DASH-AUTO-016": "PASS",
+      "DASH-AUTO-017": "PASS",
+      "DASH-AUTO-018": "PASS"
+    },
+    "issues": [
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9402,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9403,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9406,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-015",
+        "panel": 1000,
+        "len": 3766
+      }
+    ],
+    "issue_count": 4
+  },
+  {
+    "uid": "bioetl-incident-v1",
+    "file": "bioetl-incident-v1.json",
+    "title": "5. Incident Workspace",
+    "schemaVersion": 39,
+    "grafana_version_plugin_hint": 3,
+    "leaf": 12,
+    "row": 3,
+    "leaf_plus_row": 15,
+    "walk_nodes": 15,
+    "auto": {
+      "DASH-AUTO-001": "PASS",
+      "DASH-AUTO-002": "PASS",
+      "DASH-AUTO-003": "PASS",
+      "DASH-AUTO-004": "PASS",
+      "DASH-AUTO-005": "PASS",
+      "DASH-AUTO-006": "PASS",
+      "DASH-AUTO-007": "PASS",
+      "DASH-AUTO-008": "PASS",
+      "DASH-AUTO-009": "PASS",
+      "DASH-AUTO-010": "PASS",
+      "DASH-AUTO-011": "FAIL",
+      "DASH-AUTO-012": "PASS",
+      "DASH-AUTO-013": "PASS",
+      "DASH-AUTO-014": "PASS",
+      "DASH-AUTO-015": "FAIL",
+      "DASH-AUTO-016": "PASS",
+      "DASH-AUTO-017": "PASS",
+      "DASH-AUTO-018": "PASS"
+    },
+    "issues": [
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 2101,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-015",
+        "panel": 1000,
+        "len": 3783
+      }
+    ],
+    "issue_count": 2
+  },
+  {
+    "uid": "bioetl-overview-v2",
+    "file": "bioetl-overview-v2.json",
+    "title": "1. Overview",
+    "schemaVersion": 30,
+    "grafana_version_plugin_hint": 2,
+    "leaf": 23,
+    "row": 5,
+    "leaf_plus_row": 28,
+    "walk_nodes": 28,
+    "auto": {
+      "DASH-AUTO-001": "PASS",
+      "DASH-AUTO-002": "PASS",
+      "DASH-AUTO-003": "PASS",
+      "DASH-AUTO-004": "PASS",
+      "DASH-AUTO-005": "PASS",
+      "DASH-AUTO-006": "PASS",
+      "DASH-AUTO-007": "PASS",
+      "DASH-AUTO-008": "PASS",
+      "DASH-AUTO-009": "PASS",
+      "DASH-AUTO-010": "PASS",
+      "DASH-AUTO-011": "FAIL",
+      "DASH-AUTO-012": "PASS",
+      "DASH-AUTO-013": "PASS",
+      "DASH-AUTO-014": "PASS",
+      "DASH-AUTO-015": "FAIL",
+      "DASH-AUTO-016": "PASS",
+      "DASH-AUTO-017": "PASS",
+      "DASH-AUTO-018": "PASS"
+    },
+    "issues": [
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9603,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9300,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9301,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-015",
+        "panel": 1000,
+        "len": 3781
+      }
+    ],
+    "issue_count": 4
+  },
+  {
+    "uid": "bioetl-provider-health-v2",
+    "file": "bioetl-provider-health-v2.json",
+    "title": "3. Provider Health",
+    "schemaVersion": 30,
+    "grafana_version_plugin_hint": 8,
+    "leaf": 32,
+    "row": 5,
+    "leaf_plus_row": 37,
+    "walk_nodes": 37,
+    "auto": {
+      "DASH-AUTO-001": "PASS",
+      "DASH-AUTO-002": "PASS",
+      "DASH-AUTO-003": "PASS",
+      "DASH-AUTO-004": "PASS",
+      "DASH-AUTO-005": "PASS",
+      "DASH-AUTO-006": "PASS",
+      "DASH-AUTO-007": "PASS",
+      "DASH-AUTO-008": "PASS",
+      "DASH-AUTO-009": "PASS",
+      "DASH-AUTO-010": "PASS",
+      "DASH-AUTO-011": "FAIL",
+      "DASH-AUTO-012": "PASS",
+      "DASH-AUTO-013": "PASS",
+      "DASH-AUTO-014": "PASS",
+      "DASH-AUTO-015": "FAIL",
+      "DASH-AUTO-016": "PASS",
+      "DASH-AUTO-017": "PASS",
+      "DASH-AUTO-018": "PASS"
+    },
+    "issues": [
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9402,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9403,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-015",
+        "panel": 1000,
+        "len": 3762
+      }
+    ],
+    "issue_count": 3
+  },
+  {
+    "uid": "bioetl-run-explorer-v1",
+    "file": "bioetl-run-explorer-v1.json",
+    "title": "6. Run Explorer",
+    "schemaVersion": 39,
+    "grafana_version_plugin_hint": 2,
+    "leaf": 11,
+    "row": 2,
+    "leaf_plus_row": 13,
+    "walk_nodes": 13,
+    "auto": {
+      "DASH-AUTO-001": "PASS",
+      "DASH-AUTO-002": "PASS",
+      "DASH-AUTO-003": "PASS",
+      "DASH-AUTO-004": "PASS",
+      "DASH-AUTO-005": "PASS",
+      "DASH-AUTO-006": "PASS",
+      "DASH-AUTO-007": "PASS",
+      "DASH-AUTO-008": "PASS",
+      "DASH-AUTO-009": "FAIL",
+      "DASH-AUTO-010": "PASS",
+      "DASH-AUTO-011": "FAIL",
+      "DASH-AUTO-012": "PASS",
+      "DASH-AUTO-013": "PASS",
+      "DASH-AUTO-014": "PASS",
+      "DASH-AUTO-015": "FAIL",
+      "DASH-AUTO-016": "PASS",
+      "DASH-AUTO-017": "PASS",
+      "DASH-AUTO-018": "PASS"
+    },
+    "issues": [
+      {
+        "id": "DASH-AUTO-009",
+        "y": 67,
+        "prev_bottom": 19,
+        "gap": 48
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 3010,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 3022,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 3023,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 3011,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 3012,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 3015,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 3013,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 3014,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 3020,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-015",
+        "panel": 1000,
+        "len": 3777
+      }
+    ],
+    "issue_count": 11
+  },
+  {
+    "uid": "bioetl-runtime",
+    "file": "bioetl-runtime.json",
+    "title": "2. Pipeline Diagnostics",
+    "schemaVersion": 30,
+    "grafana_version_plugin_hint": 4,
+    "leaf": 37,
+    "row": 6,
+    "leaf_plus_row": 43,
+    "walk_nodes": 43,
+    "auto": {
+      "DASH-AUTO-001": "PASS",
+      "DASH-AUTO-002": "PASS",
+      "DASH-AUTO-003": "PASS",
+      "DASH-AUTO-004": "PASS",
+      "DASH-AUTO-005": "PASS",
+      "DASH-AUTO-006": "PASS",
+      "DASH-AUTO-007": "PASS",
+      "DASH-AUTO-008": "PASS",
+      "DASH-AUTO-009": "PASS",
+      "DASH-AUTO-010": "PASS",
+      "DASH-AUTO-011": "FAIL",
+      "DASH-AUTO-012": "PASS",
+      "DASH-AUTO-013": "PASS",
+      "DASH-AUTO-014": "PASS",
+      "DASH-AUTO-015": "FAIL",
+      "DASH-AUTO-016": "PASS",
+      "DASH-AUTO-017": "PASS",
+      "DASH-AUTO-018": "PASS"
+    },
+    "issues": [
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9402,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9403,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-011",
+        "panel": 9998,
+        "type": "BioETL Ops HTTP"
+      },
+      {
+        "id": "DASH-AUTO-015",
+        "panel": 1000,
+        "len": 3764
+      }
+    ],
+    "issue_count": 4
+  }
+]

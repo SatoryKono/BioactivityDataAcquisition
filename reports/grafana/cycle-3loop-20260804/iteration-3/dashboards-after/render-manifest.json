@@ -1,0 +1,87 @@
+{
+  "actual": {
+    "themes": {
+      "bioetl-dq-v2": "unverified",
+      "bioetl-runtime": "unverified"
+    },
+    "viewports": {
+      "bioetl-dq-v2": {
+        "height": 1080,
+        "width": 1920
+      },
+      "bioetl-runtime": {
+        "height": 1080,
+        "width": 1920
+      }
+    }
+  },
+  "backend_applicability": {
+    "quarantine_explorer": {
+      "reason": "Quarantine Explorer HTTP/UI surface is retired from shipping.",
+      "state": "NOT_APPLICABLE"
+    }
+  },
+  "base_url": "http://127.0.0.1:3000",
+  "dashboards": [
+    {
+      "screenshot": "bioetl-dq-v2.png",
+      "title": "4. Data Quality",
+      "uid": "bioetl-dq-v2",
+      "url": "/d/bioetl-dq-v2/4-data-quality"
+    },
+    {
+      "screenshot": "bioetl-runtime.png",
+      "title": "2. Pipeline Diagnostics",
+      "uid": "bioetl-runtime",
+      "url": "/d/bioetl-runtime/2-pipeline-diagnostics"
+    }
+  ],
+  "engine": "grafana-render-api",
+  "generated_at": "2026-08-05T04:50:09.245911+00:00",
+  "height": 1080,
+  "occurrence_id": "",
+  "render_results": [
+    {
+      "error": null,
+      "screenshot": "bioetl-dq-v2.png",
+      "status": "rendered",
+      "title": "4. Data Quality",
+      "uid": "bioetl-dq-v2",
+      "url": "/d/bioetl-dq-v2/4-data-quality"
+    },
+    {
+      "error": null,
+      "screenshot": "bioetl-runtime.png",
+      "status": "rendered",
+      "title": "2. Pipeline Diagnostics",
+      "uid": "bioetl-runtime",
+      "url": "/d/bioetl-runtime/2-pipeline-diagnostics"
+    }
+  ],
+  "requested": {
+    "browser_zoom": 100,
+    "capture_surface": "full",
+    "kiosk_mode": "off",
+    "theme": "dark",
+    "viewport": {
+      "height": 1080,
+      "width": 1920
+    }
+  },
+  "scope": {
+    "pipeline": "",
+    "range_hours": 12,
+    "run_id": "",
+    "run_type": "",
+    "workflow": ""
+  },
+  "selected_uids": [
+    "bioetl-dq-v2",
+    "bioetl-runtime"
+  ],
+  "terminal_state_validation": {
+    "reason": "Grafana Render API captures pixels but cannot prove panel terminal states; use --fallback playwright for auditable evidence.",
+    "status": "not-checked"
+  },
+  "width": 1920
+}

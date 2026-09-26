@@ -1,0 +1,86 @@
+%% Title: ChEMBL Data Transformation Flow
+%% Description: Data transformation flow diagram for ChEMBL provider showing raw API response processing, field mapping, data normalization, validation, and domain entity creation. Covers ChEMBL-specific data transformation patterns.
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type flowchart
+%% @level system
+%% @nodes   35
+%% @adr ADR-023,ADR-034,ADR-040
+
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type flowchart
+%% @level system
+%%{init: {'layout': 'elk'}}%%
+flowchart TD
+    Start([ChEMBL Data Transformation Start]) --> Raw[Receive Raw API Response]
+    
+    Raw --> Parse[Parse JSON Response]
+    Parse --> ParseValid{Valid JSON?}
+    ParseValid -->|Yes| Extract[Extract Records]
+    ParseValid -->|No| Error[Parse Error]
+    
+    Extract --> ActivityType{Data Type?}
+    ActivityType -->|Activity| Activity[Activity Records]
+    ActivityType -->|Target| Target[Target Records]
+    ActivityType -->|Compound| Compound[Compound Records]
+    
+    Activity --> FieldMap[Field Mapping]
+    Target --> FieldMap
+    Compound --> FieldMap
+    
+    FieldMap --> ActivityMap[Activity Field Mapping]
+    FieldMap --> TargetMap[Target Field Mapping]
+    FieldMap --> CompoundMap[Compound Field Mapping]
+    
+    ActivityMap --> ActivityNorm[Activity Normalization]
+    TargetMap --> TargetNorm[Target Normalization]
+    CompoundMap --> CompoundNorm[Compound Normalization]
+    
+    ActivityNorm --> ActivityStand[Standardize Activity Types]
+    ActivityStand --> ActivityTarget[Map Target Proteins]
+    ActivityStand --> ActivityUnit[Standardize Units]
+    
+    TargetNorm --> TargetClass[Classify Targets]
+    TargetClass --> TargetOrg[Map Organisms]
+    TargetClass --> TargetFamily[Map Protein Families]
+    
+    CompoundNorm --> CompoundStd[Standardize Identifiers]
+    CompoundStd --> CompoundName[Standardize Names]
+    CompoundStd --> CompoundStruct[Parse Structures]
+    
+    ActivityTarget --> Validate[Schema Validation]
+    ActivityUnit --> Validate
+    TargetOrg --> Validate
+    TargetFamily --> Validate
+    CompoundStd --> Validate
+    CompoundName --> Validate
+    CompoundStruct --> Validate
+    
+    Validate --> ValidCheck{Validation Passes?}
+    ValidCheck -->|Yes| Domain[Create Domain Entity]
+    ValidCheck -->|No| Error
+    
+    ActivityTarget --> ActivityEntity[Activity Entity]
+    TargetOrg --> TargetEntity[Target Entity]
+    CompoundStd --> CompoundEntity[Compound Entity]
+    
+    ActivityEntity --> ActivityType[Activity Domain Type]
+    TargetEntity --> TargetType[Target Domain Type]
+    CompoundEntity --> CompoundType[Compound Domain Type]
+    
+    ActivityType --> Complete[Transformation Complete]
+    TargetType --> Complete
+    CompoundType --> Complete
+    
+    Error --> Log[Log Validation Errors]
+    Log --> Metrics[Emit Error Metrics]
+    Metrics --> Fail[Transformation Failed]
+    
+    Complete --> Success[Emit Success Metrics]
+    Success --> End([ChEMBL Data Transformation End])
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px

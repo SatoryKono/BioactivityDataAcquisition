@@ -1,0 +1,44 @@
+name: Validate vendored Mermaid assets
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+    pull_request:
+      paths:
+        - 'assets/javascripts/mermaid*'
+        - 'assets/stylesheets/mermaid*'
+        - '.github/workflows/validate-vendored-mermaid-assets.yml'
+    push:
+      branches: [ main ]
+      paths:
+        - 'assets/javascripts/mermaid*'
+        - 'assets/stylesheets/mermaid*'
+        - '.github/workflows/validate-vendored-mermaid-assets.yml'
+
+jobs:
+    check-mermaid:
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+                with:
+                  persist-credentials: false
+
+            -   name: Require MkDocs mermaid extra assets
+                run: |
+                    set -euo pipefail
+                    files=(
+                      "docs/assets/javascripts/mermaid-init.js"
+                      "docs/assets/stylesheets/mermaid-responsive.css"
+                    )
+                    for f in "${files[@]}"; do
+                      if [ ! -f "$f" ]; then
+                        echo "::error::Missing MkDocs mermaid asset: $f"
+                        exit 1
+                      fi
+                    done

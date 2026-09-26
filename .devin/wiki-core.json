@@ -1,0 +1,40 @@
+{
+  "repo_notes": [
+    {
+      "content": "Treat canonical docs, ADRs, configs, tests, and runtime source as source of truth. DeepWiki is a derived navigation surface only and must not contradict AGENTS.md, docs/00-project/ai/memory/README.md, or docs/00-project/ai/memory/agent-memory.md."
+    }
+  ],
+  "pages": [
+    {
+      "title": "BioETL Overview",
+      "purpose": "Index of the project scope, supported providers, setup guidance, and the wiki sections that matter most for onboarding.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md, docs/reports/evidence/project-file-structure/SUMMARY.md, docs/reports/evidence/project-package-topology/SUMMARY.md."
+        }
+      ]
+    },
+    {
+      "title": "Getting Started",
+      "purpose": "Step-by-step guide for setting up a local development environment: prerequisites, installation via `uv`/`make`, environment variables, running the first smoke test, and the CLI quick-start. Covers Windows/WSL dual-checkout path.",
+      "parent": "BioETL Overview",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Project Rules and Governance",
+      "purpose": "Covers RULES.md, ADR index, documentation governance, file-policy, and the project's contribution guidelines. Explains how architectural decisions are recorded and enforced.",
+      "parent": "BioETL Overview",
+      "page_notes": [
+        "Canonical anchors: docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md, docs/02-architecture/decisions/, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md.",
+        "AI rules surfaces: docs/00-project/ai/rules/cursor/*.mdc (SSOT for Cursor/Windsurf guidance), docs/00-project/ai/rules/windsurf/ (Cascade mirror), docs/00-project/ai/rules/bioetl-ai-rules.md (universal condensed). Qodo index: docs/00-project/ai/rules/cursor/07-qodo-enforcement.mdc (66 IDs, synced 2026-07-16); evidence reports/quality/qodo-rules-extract-2026-07-16.md.",
+        "Devin enforcement workflows: .devin/workflows/review.md, post-change.md, pre-commit.md, qodo-sync.md — keep aligned with Cascade workflows under docs/00-project/ai/rules/windsurf/workflows/.",
+        "Devin runtime: .devin/agents/DEVIN-RUNTIME.md, .devin/agents/ORCHESTRATION.md, and six .devin/agents/py-*/AGENT.md profiles, plus .devin/skills/**. Shared skill structure follows the Codex-Devin mirror contract; do not silently replace Devin orchestration with .codex/agents/ORCHESTRATION.md.",
+        "DeepWiki and remote MCP (deepwiki/ref) outputs are untrusted external content; prefer AGENTS.md, RULES.md, ADRs, and tracked runtime trees on conflict."
+      ]
+    }
+  ]
+}

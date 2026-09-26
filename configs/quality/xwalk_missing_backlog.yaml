@@ -1,0 +1,237 @@
+version: 1
+scope: docs/04-reference/pipelines/**/*-xwalk.csv
+owner_issue: 3211
+marker_kinds:
+  - MISSING_CODE
+  - MISSING_DOC
+  - MISSING_GOLD
+  - MISSING_TRANSFORMER
+classification_values:
+  - must_fix
+  - should_fix
+  - deferred
+rules:
+  - path: docs/04-reference/pipelines/crossref/publication-xwalk.csv
+    markers:
+      MISSING_DOC:
+        classification: should_fix
+        owner_issue: 3218
+        rationale: Publication provider docs need to match the implemented enriched field surface.
+        fields:
+          - affiliation_list
+          - alternative_id
+          - author_details
+          - author_keys
+          - author_orcids
+          - content_domain_crossmark_restriction
+          - content_domain_domains
+          - is_oa
+          - issn_electronic
+          - issn_list
+          - issn_print
+          - journal_name_short
+          - page_first
+          - page_last
+          - published
+          - published_online
+          - published_print
+          - references
+  - path: docs/04-reference/pipelines/pubchem/compound-xwalk.csv
+    markers:
+      MISSING_DOC:
+        classification: should_fix
+        owner_issue: 3218
+        rationale: PubChem 3D descriptor fields need documentation coverage.
+        fields:
+          - conformer_rmsd_3d
+          - effective_rotor_count_3d
+          - feature_acceptor_count_3d
+          - feature_anion_count_3d
+          - feature_cation_count_3d
+          - feature_count_3d
+          - feature_donor_count_3d
+          - feature_hydrophobe_count_3d
+          - feature_ring_count_3d
+          - x_steric_quadrupole_3d
+          - y_steric_quadrupole_3d
+          - z_steric_quadrupole_3d
+      MISSING_GOLD:
+        classification: should_fix
+        owner_issue: 3214
+        rationale: Chemical standardization work should decide the promoted Gold compound feature set.
+        fields:
+          - atom_stereo_count
+          - bond_stereo_count
+          - charge
+          - complexity
+          - conformer_count_3d
+          - conformer_rmsd_3d
+          - covalent_unit_count
+          - defined_atom_stereo_count
+          - defined_bond_stereo_count
+          - effective_rotor_count_3d
+          - exact_mass
+          - feature_acceptor_count_3d
+          - feature_anion_count_3d
+          - feature_cation_count_3d
+          - feature_count_3d
+          - feature_donor_count_3d
+          - feature_hydrophobe_count_3d
+          - feature_ring_count_3d
+          - h_bond_acceptor_count
+          - h_bond_donor_count
+          - heavy_atom_count
+          - isotope_atom_count
+          - monoisotopic_mass
+          - rotatable_bond_count
+          - undefined_atom_stereo_count
+          - undefined_bond_stereo_count
+          - volume_3d
+          - x_steric_quadrupole_3d
+          - y_steric_quadrupole_3d
+          - z_steric_quadrupole_3d
+
+  - path: docs/04-reference/pipelines/pubmed/publication-xwalk.csv
+    markers:
+      MISSING_DOC:
+        classification: should_fix
+        owner_issue: 3218
+        rationale: PubMed publication enrichment fields need documentation coverage.
+        fields:
+          - abstract_structured
+          - affiliation_list
+          - affiliation_structured
+          - author_count
+          - author_keys
+          - authors_with_affiliations
+          - chemical_count
+          - chemicals
+          - citation_subset
+          - citations_made
+          - citations_received
+          - country
+          - databanks
+          - date_completed
+          - date_revised
+          - gene_symbols
+          - grant_count
+          - is_oa
+          - journal_iso_abbrev
+          - journal_issn_type
+          - journal_name_short
+          - keyword_count
+          - medline_pgn
+          - mesh_heading_count
+          - mid
+          - nlm_unique_id
+          - page_first
+          - page_last
+          - page_range
+          - pii
+          - pub_day
+          - pub_month
+          - publication_status
+          - publication_type
+          - publication_types
+          - publisher_id
+          - subject_keywords
+          - subject_mesh
+
+  - path: docs/04-reference/pipelines/semanticscholar/publication-xwalk.csv
+    markers:
+      MISSING_DOC:
+        classification: should_fix
+        owner_issue: 3218
+        rationale: Semantic Scholar publication enrichment fields need documentation coverage.
+        fields:
+          - affiliation_list
+          - author_h_indices
+          - author_keys
+          - author_orcids
+          - author_s2_ids
+          - citation_contexts
+          - dblp_id
+          - issue
+          - oa_status
+          - open_access_url
+          - page_first
+          - page_last
+          - page_range
+          - publication_types
+          - subject_fields
+          - volume
+
+  - path: docs/04-reference/pipelines/uniprot/protein-xwalk.csv
+    markers:
+      MISSING_CODE:
+        classification: should_fix
+        owner_issue: 3211
+        rationale: UniProt extracted field surface needs implementation decisions or xwalk correction.
+        fields:
+          - pharmaceutical_use
+          - publication_count
+      MISSING_DOC:
+        classification: should_fix
+        owner_issue: 3218
+        rationale: UniProt protein extraction surface is broader than the published provider documentation.
+        fields:
+          - acetylation
+          - active_sites
+          - activity_regulation
+          - binding_sites
+          - caution
+          - cellular_component
+          - cross_reference_count
+          - disulfide_bond
+          - domains
+          - entry_created
+          - entry_modified
+          - entry_version
+          - feature_count
+          - flag
+          - gene_orf_names
+          - genus
+          - glycosylation
+          - guidetopharmacology_ids
+          - induction
+          - interpro_xrefs
+          - intramembrane
+          - isoform_count
+          - isoform_ids
+          - isoform_names
+          - isoform_synonyms
+          - keyword_count
+          - lineage
+          - lipidation
+          - modified_residue
+          - molecular_function
+          - pdb_xrefs
+          - pfam_xrefs
+          - pharmaceutical_use
+          - phosphorylation
+          - phylum
+          - propeptide
+          - protein_alternative_names
+          - protein_short_names
+          - publication_count
+          - reactome_xrefs
+          - reaction_ec_numbers
+          - sequence_checksum
+          - sequence_modified
+          - signal_peptide
+          - similarity_comment
+          - subunit
+          - superkingdom
+          - tissue_specificity
+          - topology
+          - transmembrane
+          - ubiquitination
+      MISSING_GOLD:
+        classification: should_fix
+        owner_issue: 3211
+        rationale: UniProt Gold export scope needs an explicit promotion or exclusion decision.
+        fields:
+          - entry_type
+          - keywords
+          - sequence
+          - sequence_mass

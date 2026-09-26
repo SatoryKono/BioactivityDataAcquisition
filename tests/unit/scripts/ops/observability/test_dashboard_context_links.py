@@ -1,0 +1,193 @@
+"""Unit tests for canonical Grafana dashboard context URLs."""
+
+from __future__ import annotations
+
+import pytest
+
+from scripts.ops.observability.grafana.dashboard_context_links import (
+    DashboardContext,
+    RunIdError,
+    build_handoff_url,
+    normalize_run_id,
+    preserves_time_window,
+    rewrite_dashboard_handoff_url,
+    urls_for_context,
+)
+
+from scripts.ops.observability.grafana.action_target_routes import (
+    ACTION_DASHBOARD_UID_BY_TARGET,
+    dashboard_uid_for_target,
+    row_aware_dashboard_url,
+)
+
+pytestmark = pytest.mark.unit
+
+
+def test_normalize_run_id_trims_and_rejects_internal_space() -> None:
+    assert normalize_run_id("  abc-def  ") == "abc-def"
+    with pytest.raises(RunIdError):
+        normalize_run_id("  ")
+    with pytest.raises(RunIdError):
+        normalize_run_id("ab cd")
+
+
+def test_rewrite_fills_missing_run_id_and_time() -> None:
+    url = rewrite_dashboard_handoff_url(
+        "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline"
+    )
+    assert "var-run_id=$run_id" in url
+    assert preserves_time_window(url)
+    viewpanel = rewrite_dashboard_handoff_url(
+        "/d/bioetl-runtime/bioetl-runtime?viewPanel=9401&var-pipeline=$pipeline"
+        "&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
+    )
+    assert "var-run_id=" not in viewpanel
+    assert preserves_time_window(viewpanel)
+
+
+def test_rewrite_trims_concrete_run_id() -> None:
+    url = rewrite_dashboard_handoff_url(
+        "/d/bioetl-control-plane-v1/bioetl-control-plane-v1"
+        "?var-run_id=%20%2068c11d41-1d2f-5dc9-b041-9265bc485046"
+    )
+    assert "var-run_id=68c11d41-1d2f-5dc9-b041-9265bc485046" in url
+
+
+def test_template_handoff_preserves_visible_pipeline_from_provider_board() -> None:
+    url = build_handoff_url(
+        "bioetl-overview-v2",
+        source_uid="bioetl-provider-health-v2",
+        template=True,
+    )
+    assert "${pipeline:queryparam}" in url
+    assert "pipeline_context" not in url
+    assert "${run_id:queryparam}" in url
+
+
+def test_urls_for_context_do_not_keep_a_foreign_uuid() -> None:
+    context = DashboardContext(
+        workflow="wf",
+        pipeline="chembl_assay",
+        run_type="backfill",
+        run_id="68c11d41-1d2f-5dc9-b041-9265bc485046",
+    )
+    urls = urls_for_context(context)
+    assert "64927" not in "".join(urls.values())
+    assert all(
+        "var-run_id=68c11d41-1d2f-5dc9-b041-9265bc485046" in url
+        for url in urls.values()
+    )
+
+
+def test_action_targets_use_allowlisted_dashboard_routes() -> None:
+    assert dashboard_uid_for_target("runtime") == "bioetl-runtime"
+    assert dashboard_uid_for_target("data_quality") == "bioetl-dq-v2"
+    assert dashboard_uid_for_target("verify_dq_reason_rules") is None
+    assert dashboard_uid_for_target("unknown") is None
+    assert ACTION_DASHBOARD_UID_BY_TARGET["provider"] == "bioetl-provider-health-v2"
+
+    url = row_aware_dashboard_url()
+    assert "${__data.fields.action_dashboard_uid}" in url
+    assert "var-run_id=${__data.fields.run_id}" in url
+    assert "${__url_time_range}" in url
+
+
+def test_action_normalization_preserves_rank_query_and_visible_column() -> None:
+    """A navigation refresh must not erase confidence or hide the Action field."""
+    from copy import deepcopy
+
+    from scripts.ops.observability.grafana.dashboard_context_links import (
+        normalize_dashboard_actions,
+    )
+
+    panel = {
+        "id": 2010,
+        "targets": [{"expr": "rank_with_confidence"}],
+        "transformations": [
+            {
+                "id": "organize",
+                "options": {
+                    "renameByName": {"action": "Action"},
+                    "indexByName": {"action": 0, "domain": 1},
+                },
+            }
+        ],
+        "fieldConfig": {
+            "overrides": [
+                {
+                    "matcher": {"id": "byName", "options": "Action"},
+                    "properties": [
+                        {"id": "custom.width", "value": 105},
+                        {"id": "custom.hidden", "value": False},
+                    ],
+                }
+            ],
+        },
+    }
+    dashboard = {"uid": "bioetl-incident-v1", "panels": [panel]}
+    normalize_dashboard_actions(dashboard)
+    first = deepcopy(dashboard)
+    normalize_dashboard_actions(dashboard)
+    assert dashboard == first
+    assert panel["targets"][0]["expr"] == "rank_with_confidence"
+    properties = panel["fieldConfig"]["overrides"][0]["properties"]
+    assert {"id": "custom.hidden", "value": False} in properties
+    assert {"id": "custom.width", "value": 105} in properties
+    link = next(prop["value"][0] for prop in properties if prop["id"] == "links")
+    assert "${__data.fields.route_pipeline}" in link["url"]
+
+
+@pytest.mark.parametrize(
+    "uid, slug",
+    [
+        ("bioetl-run-explorer-v1", "0-run-explorer"),
+        ("bioetl-control-plane-v1", "1-trust"),
+        ("bioetl-overview-v2", "2-overview"),
+        ("bioetl-runtime", "3-pipeline-diagnostics"),
+        ("bioetl-provider-health-v2", "4-provider-health"),
+        ("bioetl-dq-v2", "5-data-quality"),
+        ("bioetl-incident-v1", "6-incident-workspace"),
+    ],
+)
+def test_handoff_uses_canonical_numbered_slug(uid: str, slug: str) -> None:
+    assert build_handoff_url(uid).startswith(f"/d/{uid}/{slug}?")
+
+
+def test_late_links_are_finalized_without_rewriting_row_context() -> None:
+    from copy import deepcopy
+    from scripts.ops.observability.grafana.dashboard_context_links import (
+        finalize_dashboard_links,
+    )
+
+    url = "/d/${__data.fields.action_dashboard_uid}/?var-pipeline=${__data.fields.pipeline:percentencode}"
+    link = {"url": url, "includeVars": True}
+    payload = {
+        "panels": [{"panels": [{"options": {"dataLinks": []}, "links": [link]}]}]
+    }
+    finalize_dashboard_links(payload)
+    assert link == {"url": url, "includeVars": False}
+    assert payload["panels"][0]["panels"][0]["options"] == {}
+    first = deepcopy(payload)
+    finalize_dashboard_links(payload)
+    assert payload == first
+
+
+@pytest.mark.parametrize("color", ["text", "#A3A3A3", "#555555", "gray"])
+def test_neutral_status_colors_remain_neutral(color: str) -> None:
+    from scripts.engineering.qa.check_dashboard_visual_semantics import (
+        _semantic_palette,
+    )
+
+    assert _semantic_palette({"text": "UNKNOWN", "color": color}) == {
+        "text": "UNKNOWN",
+        "color": "gray",
+    }
+
+
+@pytest.mark.parametrize("color", ["green", "red", "orange", "yellow"])
+def test_severity_colors_are_never_normalized_to_unknown(color: str) -> None:
+    from scripts.engineering.qa.check_dashboard_visual_semantics import (
+        _semantic_palette,
+    )
+
+    assert _semantic_palette({"text": "UNKNOWN", "color": color})["color"] == color

@@ -1,0 +1,27 @@
+%% Title: CrossRef Medallion Layer Flow
+%% Description: Medallion Bronze/Silver/Gold flow for CrossRef.
+%% @version 1.0.0
+%% @date 2026-07-28
+%% @type flowchart
+%% @level system
+%% @nodes   35
+%% @adr ADR-014,ADR-018,ADR-040
+
+%% @version 1.0.0
+%% @date 2026-07-28
+%% @type flowchart
+%% @level system
+%%{init: {'layout': 'elk'}}%%
+flowchart TD
+    API[Provider API] --> B[Bronze JSONL+zstd append-only]
+    B --> T[Transform + normalize]
+    T --> DQ[DQ / schema gates]
+    DQ -->|pass| S[Silver Delta merge sort_by]
+    DQ -->|fail| Q[Quarantine]
+    S --> G[Gold strict contract when enabled]
+    G --> C[Consumers / exports]
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px

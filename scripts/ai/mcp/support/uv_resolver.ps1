@@ -1,0 +1,502 @@
+#!/usr/bin/env pwsh
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+$script:BioetlProxyEnvironmentNames = @(
+    "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
+    "http_proxy", "https_proxy", "all_proxy",
+    "NO_PROXY", "no_proxy"
+)
+
+function Get-BioetlProxyEnvironmentSnapshot {
+    # Suppress enumeration so callers receive one case-sensitive map
+    # (PowerShell otherwise unwraps IDictionary enumeration on return).
+    # Proxy variables are case-sensitive on POSIX. A normal PowerShell
+    # hashtable is case-insensitive and would let a missing ``https_proxy``
+    # overwrite a populated ``HTTPS_PROXY`` entry.
+    $snapshot = [System.Collections.Generic.Dictionary[string, object]]::new(
+        [System.StringComparer]::Ordinal
+    )
+    foreach ($name in $script:BioetlProxyEnvironmentNames) {
+        $snapshot[$name] = [Environment]::GetEnvironmentVariable(
+            $name,
+            [EnvironmentVariableTarget]::Process
+        )
+    }
+    # Unary comma + NoEnumerate: Dictionary implements IEnumerable and is
+    # otherwise expanded into KeyValuePair items across the pipeline (#7520).
+    return , $snapshot
+}
+
+function Copy-BioetlDictionaryEnvironmentMap {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Snapshot,
+
+        [Parameter(Mandatory = $true)]
+        $Map
+    )
+    foreach ($key in @($Snapshot.Keys)) {
+        $Map[[string]$key] = $Snapshot[$key]
+    }
+}
+
+function Copy-BioetlEnumerableEnvironmentMap {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Snapshot,
+
+        [Parameter(Mandatory = $true)]
+        $Map
+    )
+    foreach ($item in $Snapshot) {
+        if ($null -eq $item) {
+            continue
+        }
+        $itemProps = $item.PSObject.Properties
+        if ($null -ne $itemProps['Key'] -and $null -ne $itemProps['Value']) {
+            $Map[[string]$item.Key] = $item.Value
+        }
+        elseif ($null -ne $itemProps['Name'] -and $null -ne $itemProps['Value']) {
+            $Map[[string]$item.Name] = $item.Value
+        }
+    }
+}
+
+function Copy-BioetlObjectEnvironmentMap {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Snapshot,
+
+        [Parameter(Mandatory = $true)]
+        $Map
+    )
+    foreach ($prop in $Snapshot.PSObject.Properties) {
+        $Map[[string]$prop.Name] = $prop.Value
+    }
+}
+
+function ConvertTo-BioetlCaseSensitiveEnvironmentMap {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Snapshot
+    )
+
+    # Normalize to a dictionary whether callers pass Hashtable, OrderedDictionary,
+    # or a PSCustomObject-wrapped map from PowerShell pipeline unwrapping.
+    $map = [System.Collections.Generic.Dictionary[string, object]]::new(
+        [System.StringComparer]::Ordinal
+    )
+    if ($Snapshot -is [System.Collections.IDictionary]) {
+        Copy-BioetlDictionaryEnvironmentMap -Snapshot $Snapshot -Map $map
+    }
+    elseif (
+        $null -ne $Snapshot -and
+        $Snapshot -is [System.Collections.IEnumerable] -and
+        -not ($Snapshot -is [string])
+    ) {
+        Copy-BioetlEnumerableEnvironmentMap -Snapshot $Snapshot -Map $map
+    }
+    elseif ($null -ne $Snapshot) {
+        Copy-BioetlObjectEnvironmentMap -Snapshot $Snapshot -Map $map
+    }
+    return , $map
+}
+
+function Remove-BioetlProcessEnvironmentVariable {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Name
+    )
+
+    [Environment]::SetEnvironmentVariable(
+        $Name,
+        $null,
+        [EnvironmentVariableTarget]::Process
+    )
+    Remove-Item -LiteralPath "Env:$Name" -ErrorAction SilentlyContinue
+}
+
+function Set-BioetlProcessEnvironmentVariable {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Value
+    )
+
+    Set-Item -LiteralPath "Env:$Name" -Value $Value
+    [Environment]::SetEnvironmentVariable(
+        $Name,
+        $Value,
+        [EnvironmentVariableTarget]::Process
+    )
+}
+
+function Restore-BioetlProxyEnvironment {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Snapshot
+    )
+
+    $map = ConvertTo-BioetlCaseSensitiveEnvironmentMap -Snapshot $Snapshot
+
+    # PowerShell's Env: provider is case-insensitive even on Linux runners, so
+    # removing an empty ``https_proxy`` alias can clear a restored
+    # ``HTTPS_PROXY``. Wipe every known proxy name first, then re-apply only
+    # the names that had a real value in the pre-bypass snapshot (#7520).
+    foreach ($name in $script:BioetlProxyEnvironmentNames) {
+        Remove-BioetlProcessEnvironmentVariable -Name $name
+    }
+
+    foreach ($name in $script:BioetlProxyEnvironmentNames) {
+        if (-not $map.ContainsKey($name)) {
+            continue
+        }
+        $value = $map[$name]
+        if ($null -ne $value -and "$value" -ne "") {
+            Set-BioetlProcessEnvironmentVariable -Name $name -Value ([string]$value)
+        }
+    }
+}
+
+function Enable-BioetlUvxNetworkBypass {
+    <#
+    .SYNOPSIS
+      Bypass a broken Windows system HTTP proxy for uv/uvx package downloads.
+
+    .NOTES
+      Set BIOETL_UVX_DIRECT_NETWORK=1 to opt into direct traffic on hosts whose
+      configured proxy is known to be broken. The default preserves egress.
+    #>
+    if ($env:BIOETL_UVX_DIRECT_NETWORK -ne "1") {
+        return
+    }
+    foreach ($name in @("NO_PROXY", "no_proxy")) {
+        Set-BioetlProcessEnvironmentVariable -Name $name -Value "*"
+    }
+    foreach ($name in @(
+            "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
+            "http_proxy", "https_proxy", "all_proxy"
+        )) {
+        Remove-BioetlProcessEnvironmentVariable -Name $name
+    }
+}
+
+function Invoke-BioetlUvxWithScopedBypass {
+    <#
+    .SYNOPSIS
+      Resolve a uvx package without leaking the local proxy bypass to the MCP server.
+
+    .DESCRIPTION
+      uvx needs the direct-network workaround while it resolves the package. It
+      launches a Python trampoline inside the resolved tool environment; the
+      trampoline restores the original proxy variables before it starts the
+      requested MCP command. The caller's process environment is restored in a
+      finally block, including package-resolution failures.
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$UvxPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Package,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Command,
+
+        [string[]]$UvxArguments = @(),
+
+        [string[]]$CommandArguments = @()
+    )
+
+    $snapshotVariable = "BIOETL_UVX_PROXY_ENV_B64"
+    # Freeze immediately into a case-sensitive map so later restore cannot see
+    # a Dictionary that was accidentally unwrapped into KeyValuePair items.
+    $snapshot = ConvertTo-BioetlCaseSensitiveEnvironmentMap `
+        -Snapshot (Get-BioetlProxyEnvironmentSnapshot)
+    $originalSnapshotValue = [Environment]::GetEnvironmentVariable(
+        $snapshotVariable,
+        [EnvironmentVariableTarget]::Process
+    )
+    $snapshotJson = $snapshot | ConvertTo-Json -Compress
+    $snapshotBytes = [Text.Encoding]::UTF8.GetBytes($snapshotJson)
+    $encodedSnapshot = [Convert]::ToBase64String($snapshotBytes)
+    $trampoline = @'
+import base64
+import json
+import os
+import subprocess
+import sys
+
+snapshot_name = 'BIOETL_UVX_PROXY_ENV_B64'
+snapshot = json.loads(base64.b64decode(os.environ.pop(snapshot_name)).decode('utf-8'))
+for name, value in snapshot.items():
+    if value is None:
+        os.environ.pop(name, None)
+    else:
+        os.environ[name] = value
+raise SystemExit(subprocess.call(sys.argv[1:]))
+'@
+
+    try {
+        [Environment]::SetEnvironmentVariable(
+            $snapshotVariable,
+            $encodedSnapshot,
+            [EnvironmentVariableTarget]::Process
+        )
+        Enable-BioetlUvxNetworkBypass
+
+        $arguments = @()
+        $arguments += $UvxArguments
+        $arguments += @("--from", $Package, "python", "-c", $trampoline, $Command)
+        $arguments += $CommandArguments
+        & $UvxPath @arguments
+    }
+    finally {
+        Restore-BioetlProxyEnvironment -Snapshot $snapshot
+        [Environment]::SetEnvironmentVariable(
+            $snapshotVariable,
+            $originalSnapshotValue,
+            [EnvironmentVariableTarget]::Process
+        )
+    }
+}
+
+function Add-BioetlTrimmedString {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Collections.IList]$Target,
+
+        $Value
+    )
+
+    $item = "$Value".Trim()
+    if (-not [string]::IsNullOrWhiteSpace($item)) {
+        [void]$Target.Add($item)
+    }
+}
+
+function Add-BioetlFlattenedStrings {
+    <#
+    .SYNOPSIS
+      Flatten nested string collections without walking string characters.
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Collections.IList]$Target,
+
+        $Value
+    )
+
+    if ($null -eq $Value) {
+        return
+    }
+
+    $pending = [System.Collections.ArrayList]::new()
+    [void]$pending.Add($Value)
+    while ($pending.Count -gt 0) {
+        $current = $pending[0]
+        $pending.RemoveAt(0)
+        if ($null -eq $current) {
+            continue
+        }
+        if ($current -is [string]) {
+            Add-BioetlTrimmedString -Target $Target -Value $current
+            continue
+        }
+        if ($current -is [System.Collections.IEnumerable]) {
+            foreach ($nested in $current) {
+                [void]$pending.Add($nested)
+            }
+            continue
+        }
+        Add-BioetlTrimmedString -Target $Target -Value $current
+    }
+}
+
+function Get-BioetlPathEntries {
+    <#
+    .SYNOPSIS
+      Split PATH without turning ``E:\tools`` into ``E`` + ``\tools``.
+    #>
+    if ([string]::IsNullOrWhiteSpace($env:PATH)) {
+        return [string[]]@()
+    }
+
+    $raw = $env:PATH
+    # Windows PATH uses ';' and drive-letter prefixes. Splitting those values
+    # on ':' is correct for POSIX pwsh, but it corrupts ``E:\github\...``.
+    $windowsStyle = $raw.Contains(';') -or ($raw -match '^[A-Za-z]:[\\/]')
+    if ($windowsStyle) {
+        # ``-split`` avoids Windows PowerShell 5.1 binding String.Split(char[],
+        # StringSplitOptions) to Split(char[], int count).
+        $parts = $raw -split ';'
+    }
+    else {
+        $separators = [regex]::Escape([string][IO.Path]::PathSeparator)
+        if ([IO.Path]::PathSeparator -ne ':') {
+            $separators = "$separators|:"
+        }
+        $parts = $raw -split $separators
+    }
+
+    $entries = [System.Collections.Generic.List[string]]::new()
+    foreach ($part in $parts) {
+        $item = $part.Trim()
+        if (-not [string]::IsNullOrWhiteSpace($item)) {
+            $entries.Add($item) | Out-Null
+        }
+    }
+    # Typed string[] still enumerates through the pipeline. Callers should use
+    # ``@(Get-BioetlPathEntries)`` so 0/1/N entries stay a collection.
+    return [string[]]$entries.ToArray()
+}
+
+function Resolve-BioetlUvxBin {
+    <#
+    .SYNOPSIS
+      Locate uvx even when Scripts/ is not on PATH.
+    #>
+    $pathEntries = [System.Collections.Generic.List[string]]::new()
+    # Unary-comma array wraps plus ``@(Get-BioetlPathEntries)`` nest the whole
+    # PATH as one object. ``Path.Combine`` then joins entries with spaces and
+    # probes a non-existent ``C:\Program Files\... C:\other\uvx.exe``.
+    Add-BioetlFlattenedStrings -Target $pathEntries -Value (Get-BioetlPathEntries)
+
+    $candidates = [System.Collections.Generic.List[string]]::new()
+    # Prefer explicit PATH probes first so test fakes (uvx.ps1) and non-Windows
+    # pwsh path separators are honored before host-wide installs.
+    foreach ($entry in $pathEntries) {
+        foreach ($name in @("uvx.exe", "uvx.cmd", "uvx.ps1", "uvx")) {
+            try {
+                $candidates.Add([System.IO.Path]::Combine($entry, $name)) | Out-Null
+            }
+            catch {
+                Write-Verbose "Skipping unusable PATH entry '${entry}': $($_.Exception.Message)"
+            }
+        }
+    }
+
+    Add-BioetlFlattenedStrings -Target $candidates -Value (Get-BioetlUvxCommandCandidates)
+    Add-BioetlFlattenedStrings -Target $candidates -Value (Get-BioetlUvxInstallCandidates)
+
+    foreach ($candidate in $candidates) {
+        if ($candidate -and (Test-Path -LiteralPath $candidate)) {
+            return (Resolve-Path -LiteralPath $candidate).Path
+        }
+    }
+
+    # Fall back to bare name (caller may still fail with a clear message).
+    return "uvx"
+}
+
+function Get-BioetlUvxCommandCandidates {
+    $candidates = @()
+    $fromPath = Get-Command uvx -ErrorAction SilentlyContinue
+    if ($fromPath -and $fromPath.Source) {
+        $candidates += $fromPath.Source
+    }
+
+    $fromUv = Get-Command uv -ErrorAction SilentlyContinue
+    if ($fromUv -and $fromUv.Source) {
+        $uvDir = Split-Path -Parent $fromUv.Source
+        if (-not [string]::IsNullOrWhiteSpace($uvDir)) {
+            foreach ($name in @("uvx.exe", "uvx.cmd", "uvx")) {
+                try {
+                    $candidates += [System.IO.Path]::Combine($uvDir, $name)
+                } catch {
+                    Write-Verbose "Skipping unusable uv sibling path: $($_.Exception.Message)"
+                }
+            }
+        }
+    }
+    return [string[]]$candidates
+}
+
+function Test-BioetlWindowsRuntime {
+    if ($PSVersionTable.PSEdition -eq "Desktop") {
+        return $true
+    }
+    if (Get-Variable -Name IsWindows -ErrorAction SilentlyContinue) {
+        return [bool]$IsWindows
+    }
+    return ($env:OS -like "*Windows*")
+}
+
+function Add-BioetlPathCandidates {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Collections.IList]$Candidates,
+        [Parameter(Mandatory = $true)]
+        [string]$BasePath,
+        [Parameter(Mandatory = $true)]
+        [string[]]$RelativePaths,
+        [Parameter(Mandatory = $true)]
+        [string]$SkipLabel
+    )
+    if ([string]::IsNullOrWhiteSpace($BasePath)) {
+        return
+    }
+    foreach ($rel in $RelativePaths) {
+        try {
+            $Candidates.Add([System.IO.Path]::Combine($BasePath, $rel)) | Out-Null
+        } catch {
+            Write-Verbose "Skipping ${SkipLabel} uvx candidate '${rel}': $($_.Exception.Message)"
+        }
+    }
+}
+
+function Get-BioetlWindowsUvxInstallCandidates {
+    $candidates = [System.Collections.Generic.List[string]]::new()
+    $localAppData = [Environment]::GetFolderPath("LocalApplicationData")
+    if (-not [string]::IsNullOrWhiteSpace($localAppData)) {
+        foreach ($py in @("Python313", "Python312", "Python311")) {
+            try {
+                $candidates.Add([System.IO.Path]::Combine(
+                    $localAppData,
+                    "Programs",
+                    "Python",
+                    $py,
+                    "Scripts",
+                    "uvx.exe"
+                )) | Out-Null
+            } catch {
+                Write-Verbose "Skipping LocalAppData uvx candidate for ${py}: $($_.Exception.Message)"
+            }
+        }
+    }
+    Add-BioetlPathCandidates `
+        -Candidates $candidates `
+        -BasePath ($env:USERPROFILE) `
+        -RelativePaths @(".local\bin\uvx.exe", ".cargo\bin\uvx.exe") `
+        -SkipLabel "user-profile"
+    return [string[]]$candidates.ToArray()
+}
+
+function Get-BioetlUnixUvxInstallCandidates {
+    $candidates = [System.Collections.Generic.List[string]]::new()
+    Add-BioetlPathCandidates `
+        -Candidates $candidates `
+        -BasePath ($env:HOME) `
+        -RelativePaths @(".local/bin/uvx", ".cargo/bin/uvx") `
+        -SkipLabel "home"
+    return [string[]]$candidates.ToArray()
+}
+
+function Get-BioetlUvxInstallCandidates {
+    if (Test-BioetlWindowsRuntime) {
+        return [string[]]@(Get-BioetlWindowsUvxInstallCandidates)
+    }
+    return [string[]]@(Get-BioetlUnixUvxInstallCandidates)
+}
+
+function Test-BioetlUvxAvailable {
+    $uvx = Resolve-BioetlUvxBin
+    if ($uvx -eq "uvx") {
+        $cmd = Get-Command uvx -ErrorAction SilentlyContinue
+        return [bool]$cmd
+    }
+    return (Test-Path -LiteralPath $uvx)
+}

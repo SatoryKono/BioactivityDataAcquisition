@@ -1,0 +1,32 @@
+{
+  "campaign": "CR-FULL-20260813",
+  "base_sha": "7f38a25f1e022e4f2cf5353fc07f08c39025b002",
+  "started_utc": "2026-08-13T19:47:36.796649+00:00",
+  "results": {
+    "S01-domain-config": {
+      "id": "S01-domain-config",
+      "wave": "A",
+      "files": 12,
+      "status": "rate_limit",
+      "reason": "CodeRabbit rate limit",
+      "exit_code": 1,
+      "log": "reports/quality/coderabbit/20260813/review_A_S01-domain-config.log",
+      "bytes": 815,
+      "elapsed_s": 164.7,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/da5cf5eea209b081bda5794269f237a7d2b1fee011b4f7254d6628409df9027c/AGENTS.md",
+        "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/da5cf5eea209b081bda5794269f237a7d2b1fee011b4f7254d6628409df9027c/.coderabbit.yaml",
+        "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/da5cf5eea209b081bda5794269f237a7d2b1fee011b4f7254d6628409df9027c/reports/quality/coderabbit/20260813/02-review-prompt.md"
+      ]
+    }
+  },
+  "updated_utc": "2026-08-13T19:52:41.685584+00:00"
+}

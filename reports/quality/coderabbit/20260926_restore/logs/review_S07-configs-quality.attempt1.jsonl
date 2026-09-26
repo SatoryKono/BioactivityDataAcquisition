@@ -1,0 +1,4 @@
+{"type":"review_context","reviewType":"all","currentBranch":"cr-leaf-S07-configs-quality","baseBranch":"main","baseCommit":"d2502709fc3e3379605fd6f307516bc71dd04078","workingDirectory":"/home/fedor/bioetl-cr-restore-wt/configs/quality"}
+{"type":"status","phase":"connecting","status":"connecting_to_review_service"}
+{"type":"status","phase":"setup","status":"setting_up"}
+{"type":"error","errorType":"review","message":"Review failed: All files are ignored\nPrevious local review has no stored findings.","recoverable":false,"details":{}}

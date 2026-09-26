@@ -1,0 +1,9 @@
+docs/00-project/00-map.md
+docs/00-project/NORMATIVE_SOURCES.md
+docs/00-project/RULES.md
+docs/00-project/TOOLS.md
+docs/00-project/architecture-index.md
+docs/00-project/extended-docs-index.md
+docs/00-project/glossary.md
+docs/00-project/index.md
+docs/00-project/rules-summary.md

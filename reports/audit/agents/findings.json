@@ -1,0 +1,405 @@
+{
+  "domain_id": "agents-runtime",
+  "prompt_id": "prompt.audit.agents-runtime",
+  "surface_score": 2,
+  "blocked": false,
+  "proven_count": 10,
+  "p0_p1_count": 0,
+  "audit_date": "2026-09-26",
+  "mode": "audit",
+  "baseline_commit": "e1c184857e46",
+  "read_worktree": ".worktrees/nine-domain-audit-9f71c6444175",
+  "scope": [
+    "AGENTS.md",
+    ".codex/**",
+    ".junie/**",
+    ".devin/**",
+    "docs/00-project/ai/**"
+  ],
+  "summary_ru": "Runtime Codex/Junie/Devin согласован, зеркала и skills parity автоматизированы; Gemini не SSOT. Основные пробелы — битая ссылка в nine-domain pack index, устаревший docs-mirror orchestration policy и упрощённые зоны записи ролей, не совпадающие с ORCHESTRATION.",
+  "top_remediations": [
+    "Исправить путь карты domain 5 в docs/00-project/ai/prompts/library/audit/generic-nine.pack.md на library/audit/github-actions.md.",
+    "Обновить docs/00-project/ai/agents/policy/agent-orchestration-rules.md: версия, Last verified, зоны записи по runtime ORCHESTRATION.",
+    "Документировать gemini-memory.json в memory/README.md и убрать дубликаты матрицы ролей.",
+    "Снять misleading «active runtime source» с docs-mirror ORCHESTRATION при сохранении mirror banner.",
+    "Добавить CI/hygiene проверку существования путей в pack index tables."
+  ],
+  "checks": {
+    "junie_mirror": "OK",
+    "skills_mirror": "OK",
+    "prompts_check": "OK"
+  },
+  "findings": [
+    {
+      "id": "AGRT-001",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.98,
+      "status": "PROVEN",
+      "category": "prompts-navigation",
+      "path": "docs/00-project/ai/prompts/library/audit/generic-nine.pack.md:25",
+      "observation": "Nine-domain pack index maps prompt.audit.github-actions to library/tests/cycle.md, which does not exist.",
+      "method": "Read generic-nine.pack.md; Glob library/tests/cycle.md under docs/00-project/ai/prompts",
+      "expected": "Row 5 card path resolves to library/audit/github-actions.md (canonical card prompt.audit.github-actions).",
+      "actual": "Row 5 points at library/tests/cycle.md; file missing. Canonical card exists at library/audit/github-actions.md.",
+      "impact": "Operator nine-domain fan-out and manual routing to domain 5 fail or land on wrong card.",
+      "root_cause": "Stale index row; preflight for run 20260926T084327Z-e1c184857e46-nine already recorded the drift.",
+      "remediation": "Replace library/tests/cycle.md with library/audit/github-actions.md in generic-nine.pack.md row 5.",
+      "effort": "S",
+      "automation": "Extend scripts.ai.prompts check to validate pack index card paths",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/prompts/library/audit/generic-nine.pack.md",
+          "line": 25,
+          "command": "read pack index table",
+          "observation": "library/tests/cycle.md reference"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/library/audit/github-actions.md",
+          "line": 1,
+          "command": "file exists",
+          "observation": "canonical github-actions audit card present"
+        }
+      ],
+      "validation": [
+        "test path exists: docs/00-project/ai/prompts/library/audit/github-actions.md",
+        "python -m scripts.ai.prompts check (after index fix + optional lint extension)"
+      ]
+    },
+    {
+      "id": "AGRT-002",
+      "requirement_id": "REQ-GOV-*",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "docs-runtime-drift",
+      "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md:31-38",
+      "observation": "Docs mirror lists narrow write zones (e.g. py-config-bot configs/ only) while runtime ORCHESTRATION grants workspace write for schema and contract remediation.",
+      "method": "Compare agent-orchestration-rules.md subagent table vs .codex/agents/ORCHESTRATION.md governed roles",
+      "expected": "Published orchestration mirror matches runtime authority columns or explicitly defers without contradicting them.",
+      "actual": "Mirror table restricts py-config-bot to configs/, py-test-bot to tests/, py-doc-bot to docs/; runtime uses workspace write with broader remediation scopes.",
+      "impact": "Agents reading the docs mirror may under-scope legitimate config/schema/doc fixes or conflict with native descriptors.",
+      "root_cause": "Legacy simplified Russian mirror table not refreshed after ORCHESTRATION workspace-write semantics.",
+      "remediation": "Replace Зона записи column with runtime ORCHESTRATION authority text or mark mirror as historical and link only.",
+      "effort": "S",
+      "automation": "Optional docs drift test comparing mirror tables to .codex/agents/ORCHESTRATION.md",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md",
+          "line": 37,
+          "command": "read subagent table",
+          "observation": "py-config-bot zone configs/"
+        },
+        {
+          "path": ".codex/agents/ORCHESTRATION.md",
+          "line": 32,
+          "command": "read governed roles",
+          "observation": "py-config-bot workspace write for schema and contract remediation"
+        }
+      ],
+      "validation": [
+        "Manual diff agent-orchestration-rules.md vs .codex/agents/ORCHESTRATION.md authority column"
+      ]
+    },
+    {
+      "id": "AGRT-003",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "category": "docs-metadata",
+      "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md:3-18",
+      "observation": "Front matter Version 2.1.0 and Last verified 2026-03-31 contradict in-body Версия 2.2.0 pointer-only contract.",
+      "method": "Read policy header and body version lines",
+      "expected": "Single version stamp and Last verified aligned with runtime ORCHESTRATION and AGENTS.md guardrails.",
+      "actual": "Header Version 2.1.0 / Last verified 2026-03-31 vs body Версия 2.2.0 dated implicitly newer.",
+      "impact": "Contributors cannot trust freshness of orchestration guidance; stale Cursor-specific Agent tool instructions may persist.",
+      "root_cause": "Partial edit updated body pointer without refreshing YAML-style header metadata.",
+      "remediation": "Unify version to 2.2.0 (or bump once), set Last verified to current review date, trim Cursor-only Agent tool wording or label as Cursor-only appendix.",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md",
+          "line": 3,
+          "command": "read header",
+          "observation": "Version: 2.1.0"
+        },
+        {
+          "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md",
+          "line": 18,
+          "command": "read body",
+          "observation": "Версия: 2.2.0 pointer only"
+        }
+      ],
+      "validation": [
+        "grep Version / Версия / Last verified in agent-orchestration-rules.md after edit"
+      ]
+    },
+    {
+      "id": "AGRT-004",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "mirror-discoverability",
+      "path": "docs/00-project/ai/agents/agents/ORCHESTRATION.md:16",
+      "observation": "Docs mirror banner states non-canonical mirror, but body still opens with Status: active runtime source.",
+      "method": "Read mirror banner and status line; compare to AI_RUNTIME_MIRROR_OWNERSHIP unacceptable drift rules",
+      "expected": "Mirror copy avoids claiming runtime SSOT; runtime file .codex/agents/ORCHESTRATION.md holds status.",
+      "actual": "Lines 1-4 declare mirror; line 16 repeats active runtime source wording copied from canonical file.",
+      "impact": "Discoverability risk: operators may edit docs path believing it is authoritative runtime.",
+      "root_cause": "Mirror sync copies runtime header verbatim without normalizing status for published mirror layer.",
+      "remediation": "Replace status line in docs mirror with mirror-specific status or omit; keep edit-runtime-first banner.",
+      "effort": "S",
+      "automation": "Optional mirror lint forbidding 'active runtime source' under docs/00-project/ai/agents/agents/",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/agents/ORCHESTRATION.md",
+          "line": 1,
+          "command": "read banner",
+          "observation": "not a canonical runtime surface"
+        },
+        {
+          "path": "docs/00-project/ai/agents/agents/ORCHESTRATION.md",
+          "line": 16,
+          "command": "read status",
+          "observation": "Status: active runtime source"
+        }
+      ],
+      "validation": [
+        "Body from # BioETL Codex orchestration remains identical to .codex/agents/ORCHESTRATION.md after header tweak"
+      ]
+    },
+    {
+      "id": "AGRT-005",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.97,
+      "status": "PROVEN",
+      "category": "docs-hygiene",
+      "path": "docs/00-project/ai/memory/README.md:32-42",
+      "observation": "Role Memory Coverage Matrix contains duplicate rows for py-audit-bot (three times) and py-test-bot (twice).",
+      "method": "Read Role Memory Coverage Matrix table",
+      "expected": "One row per governed py-* role profile.",
+      "actual": "Duplicates inflate matrix and obscure coverage truth.",
+      "impact": "Navigation noise; operators may assume extra memory sheets exist.",
+      "root_cause": "Copy-paste error during matrix expansion.",
+      "remediation": "Deduplicate table to six unique py-* roles matching runtime profiles.",
+      "effort": "S",
+      "automation": "Optional markdown table uniqueness test",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 34,
+          "command": "read matrix",
+          "observation": "py-audit-bot listed repeatedly"
+        }
+      ],
+      "validation": [
+        "Count distinct roles in matrix equals six py-* profiles"
+      ]
+    },
+    {
+      "id": "AGRT-006",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "category": "memory-surface",
+      "path": "docs/00-project/ai/memory/README.md:50-53",
+      "observation": "memory/README documents mcp-memory.json as machine-readable artifact but omits gemini-memory.json although AGENTS.md lists both as non-human SSOT.",
+      "method": "Read memory README surface model; read AGENTS.md guardrails; confirm gemini-memory.json tracked",
+      "expected": "All tracked machine-readable memory JSON files listed with not-SSOT classification.",
+      "actual": "Only mcp-memory.json described; gemini-memory.json present under docs/00-project/ai/memory/ without README entry.",
+      "impact": "Operators may treat undocumented JSON as missing or accidentally promote it to human SSOT.",
+      "root_cause": "gemini-memory.json added without mirror README update.",
+      "remediation": "Add gemini-memory.json bullet mirroring AGENTS.md non-SSOT wording next to mcp-memory.json.",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "AGENTS.md",
+          "line": 143,
+          "command": "read guardrails",
+          "observation": "gemini-memory.json machine-readable, not human SSOT"
+        },
+        {
+          "path": "docs/00-project/ai/memory/gemini-memory.json",
+          "line": 1,
+          "command": "file exists",
+          "observation": "tracked JSON present"
+        }
+      ],
+      "validation": [
+        "grep gemini-memory.json docs/00-project/ai/memory/README.md after update"
+      ]
+    },
+    {
+      "id": "AGRT-007",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "status": "PROVEN",
+      "category": "prompts-automation-gap",
+      "path": "docs/00-project/ai/prompts/library/audit/generic-nine.pack.md:25",
+      "observation": "python -m scripts.ai.prompts check reports OK while pack index contains a broken card path.",
+      "method": "Run scripts.ai.prompts check; independently verify missing library/tests/cycle.md",
+      "expected": "Prompt hygiene gate fails or warns on non-resolving pack index paths.",
+      "actual": "check exits 0 with zero warnings; broken path remains undetected.",
+      "impact": "Repeatable operator kit misroutes until manual preflight catches drift.",
+      "root_cause": "Prompt check scope covers registry cards but not pack index tables.",
+      "remediation": "Add pack index path validation to scripts.ai.prompts check or dedicated lint.",
+      "effort": "M",
+      "automation": "CI extension on scripts.ai.prompts check",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/prompts/library/audit/generic-nine.pack.md",
+          "line": 25,
+          "command": "missing path",
+          "observation": "library/tests/cycle.md absent"
+        }
+      ],
+      "validation": [
+        "python -m scripts.ai.prompts check (currently passes)",
+        "future: check fails when index path missing"
+      ]
+    },
+    {
+      "id": "AGRT-008",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "medium",
+      "confidence_score": 0.75,
+      "status": "PROVEN",
+      "category": "docs-freshness",
+      "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md:10",
+      "observation": "AI_RUNTIME_MIRROR_OWNERSHIP Last verified 2026-08-06 lags recent runtime parity contract and Junie/Devin ownership edits on main.",
+      "method": "Read Last verified header; compare to junie-mirror-contract.json version 1.1.0 and skills-consistency workflow paths",
+      "expected": "Ownership contract re-verified after material runtime mirror policy changes.",
+      "actual": "Last verified date predates several 2026-09 runtime doc updates (e.g. agents README 2026-09-25).",
+      "impact": "Stale verification stamp weakens trust in ownership matrix during contributor onboarding.",
+      "root_cause": "Policy doc not bumped on adjacent runtime changes.",
+      "remediation": "Re-read ownership matrix against current trees; bump Last verified after review.",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
+          "line": 10,
+          "command": "read header",
+          "observation": "Last verified: 2026-08-06"
+        },
+        {
+          "path": "docs/00-project/ai/agents/README.md",
+          "line": 10,
+          "command": "read header",
+          "observation": "Last verified: 2026-09-25"
+        }
+      ],
+      "validation": [
+        "Update Last verified after manual ownership review"
+      ]
+    },
+    {
+      "id": "AGRT-009",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "runtime-platform-hints",
+      "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md:29",
+      "observation": "Docs mirror instructs use of Cursor-specific Agent tool and subagent_type table though file claims pointer-only to Codex ORCHESTRATION.",
+      "method": "Read agent-orchestration-rules.md; rg Agent tool in .codex/agents",
+      "expected": "Platform-specific invocation lives in Cursor rules or runtime files, not generic orchestration policy mirror.",
+      "actual": "Agent tool guidance present in docs policy; absent from .codex/agents runtime tree.",
+      "impact": "Junie/Codex/Devin sessions may follow inapplicable tooling instructions if they load this mirror first.",
+      "root_cause": "Historical Cursor-centric orchestration doc retained after runtime split.",
+      "remediation": "Move Agent tool section to docs/00-project/ai/rules/cursor/ or label section Cursor-only; keep policy mirror as link-only.",
+      "effort": "M",
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/policy/agent-orchestration-rules.md",
+          "line": 29,
+          "command": "read text",
+          "observation": "используй субагентов через Agent tool"
+        },
+        {
+          "path": ".codex/agents/ORCHESTRATION.md",
+          "line": 23,
+          "command": "rg Agent tool",
+          "observation": "no Agent tool references in runtime ORCHESTRATION"
+        }
+      ],
+      "validation": [
+        "rg 'Agent tool' docs/00-project/ai/agents/policy/agent-orchestration-rules.md after refactor"
+      ]
+    },
+    {
+      "id": "AGRT-010",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.93,
+      "status": "PROVEN",
+      "category": "gemini-ssot-guard",
+      "path": "AGENTS.md:137-139",
+      "observation": "Gemini anti-SSOT guard is present in AGENTS.md and guides/GEMINI.md; tracked helper scripts under scripts/ai/gemini/ exist for local convenience only.",
+      "method": "Glob root GEMINI.md and .gemini/agents; read AGENTS.md Gemini guard; list scripts/ai/gemini",
+      "expected": "No tracked Gemini behavior tree; optional local helpers clearly subordinate to AGENTS.md.",
+      "actual": "No root GEMINI.md or tracked .gemini/agents; scripts/ai/gemini/* present; docs guide GEMINI.md states not a runtime.",
+      "impact": "Low discoverability risk only: helpers could be mistaken for SSOT without reading AGENTS.md (mitigated by guide).",
+      "root_cause": "Intentional local helper surface coexistence with explicit governance ban on tracked Gemini tree.",
+      "remediation": "Add one-line cross-link from scripts/ai/gemini/README (if present) or setup scripts to docs/.../guides/GEMINI.md anti-SSOT notice.",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "AGENTS.md",
+          "line": 137,
+          "command": "read guardrails",
+          "observation": "Gemini is not a project runtime"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/GEMINI.md",
+          "line": 5,
+          "command": "read guide",
+          "observation": "Gemini CLI is not a supported runtime"
+        }
+      ],
+      "validation": [
+        "Confirm no tracked .gemini/agents on main",
+        "bash scripts/ai/junie/check_junie_mirror.sh --check"
+      ]
+    }
+  ]
+}

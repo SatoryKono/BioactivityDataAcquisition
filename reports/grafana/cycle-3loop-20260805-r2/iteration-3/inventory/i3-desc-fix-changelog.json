@@ -1,0 +1,83 @@
+[
+  {
+    "uid": "bioetl-control-plane-v1",
+    "panels": [
+      {
+        "id": 130,
+        "title": "Track Replay Blockers",
+        "before": "Counts replay, checkpoint, manifest, ledger, drift, and lineage blockers during the selected time range. Zero means no blocker events were recorded; verify telemetry coverage before treating it as safe.",
+        "after": "Counts replay, checkpoint, manifest, ledger, drift, and lineage blockers during the selected time range. Zero means no blocker events were recorded; verify telemetry coverage before treating it as safe. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
+      },
+      {
+        "id": 103,
+        "title": "Track Global Checkpoint Admin Failures",
+        "before": "Counts failed checkpoint administration operations across all pipelines during the selected range. Pipeline and Run Type filters do not affect this panel. Zero means no failures were recorded in the selected range; it does not prove telemetry completeness.",
+        "after": "Counts failed checkpoint administration operations across all pipelines during the selected range. Pipeline and Run Type filters do not affect this panel. Zero means no failures were recorded in the selected range; it does not prove telemetry completeness. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
+      }
+    ]
+  },
+  {
+    "uid": "bioetl-dq-v2",
+    "panels": [
+      {
+        "id": 7,
+        "title": "Monitor Silver Validation Failures (range composite)",
+        "before": "Selected-range count of Silver validation failures. Non-zero means Silver validation blocked or degraded promotion in the active window, and this can drive current CRIT even when filtered_out stays zero. Correlate with current DQ reasons and quarantine evidence before replay",
+        "after": "Selected-range count of Silver validation failures. Non-zero means Silver validation blocked or degraded promotion in the active window, and this can drive current CRIT even when filtered_out stays zero. Correlate with current DQ reasons and quarantine evidence before replay. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
+      },
+      {
+        "id": 12,
+        "title": "Monitor Silver Validation Failures",
+        "before": "Selected-range count of canonical Silver validation failures. Non-zero means Silver validation blocked or degraded promotion and should be correlated with current DQ reasons and reject/quarantine evidence",
+        "after": "Selected-range count of canonical Silver validation failures. Non-zero means Silver validation blocked or degraded promotion and should be correlated with current DQ reasons and reject/quarantine evidence. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
+      },
+      {
+        "id": 151,
+        "title": "Monitor Gold Validation Failures",
+        "before": "Selected-range Gold strict-validation hard-fail count. Non-zero means Gold promotion was blocked. Zero means no hard-fail samples were observed in the selected window; it does not prove Gold validation ran or that Gold output exists",
+        "after": "Selected-range Gold strict-validation hard-fail count. Non-zero means Gold promotion was blocked. Zero means no hard-fail samples were observed in the selected window; it does not prove Gold validation ran or that Gold output exists. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
+      },
+      {
+        "id": 154,
+        "title": "Monitor Blocked Records",
+        "before": "TIME RANGE delivery impact. Selected-range blocked-record evidence only. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds in Grafana. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for the denominator/magnitude context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State (bioetl_dq_current_* recording rules) for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window",
+        "after": "TIME RANGE delivery impact. Selected-range blocked-record evidence only. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds in Grafana. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for the denominator/magnitude context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State (bioetl_dq_current_* recording rules) for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
+      },
+      {
+        "id": 6,
+        "title": "Monitor Quarantined Records",
+        "before": "TIME RANGE delivery impact. Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. TIME RANGE evidence only — not a peer verdict with Now",
+        "after": "TIME RANGE delivery impact. Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. TIME RANGE evidence only — not a peer verdict with Now. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
+      }
+    ]
+  },
+  {
+    "uid": "bioetl-runtime",
+    "panels": [
+      {
+        "id": 230,
+        "title": "Monitor Pipeline Alert Conditions",
+        "before": "Summarizes Runtime-owned preflight, infrastructure, failed-run, and error-rate conditions for Pipeline and Run Type. Zero means no condition is firing only when coverage and selected scope exist; UNKNOWN is inconclusive. Review active blocker detail next",
+        "after": "Summarizes Runtime-owned preflight, infrastructure, failed-run, and error-rate conditions for Pipeline and Run Type. Zero means no condition is firing only when coverage and selected scope exist; UNKNOWN is inconclusive. Review active blocker detail next. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
+      },
+      {
+        "id": 4,
+        "title": "Inspect DQ Alert Conditions",
+        "before": "Shows Data Quality handoff conditions for the selected Pipeline. Zero means no condition is firing only when DQ telemetry is present; UNKNOWN is inconclusive. Open Data Quality for rule, threshold, and Silver reject evidence",
+        "after": "Shows Data Quality handoff conditions for the selected Pipeline. Zero means no condition is firing only when DQ telemetry is present; UNKNOWN is inconclusive. Open Data Quality for rule, threshold, and Silver reject evidence. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
+      },
+      {
+        "id": 9996,
+        "title": "Track Failed Workflow Runs",
+        "before": "Counts failed Workflow runs in the selected range for Workflow and Pipeline. Zero means no matching failures, not current Workflow or Pipeline Health; missing telemetry remains UNKNOWN. Use runtime localization or Trust evidence when non-zero",
+        "after": "Counts failed Workflow runs in the selected range for Workflow and Pipeline. Zero means no matching failures, not current Workflow or Pipeline Health; missing telemetry remains UNKNOWN. Use runtime localization or Trust evidence when non-zero. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
+      },
+      {
+        "id": 9997,
+        "title": "Track Failed Workflow Steps",
+        "before": "Counts failed Workflow pipeline steps in the selected range for Workflow and Pipeline. The metric has no Stage label; zero means no matching failures, not stage success or current Pipeline Health. Use runtime localization or Trust evidence when non-zero",
+        "after": "Counts failed Workflow pipeline steps in the selected range for Workflow and Pipeline. The metric has no Stage label; zero means no matching failures, not stage success or current Pipeline Health. Use runtime localization or Trust evidence when non-zero. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
+      }
+    ]
+  }
+]

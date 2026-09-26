@@ -1,0 +1,17 @@
+{
+  "dashboard_suite": {
+    "tests": "846",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "8",
+    "time": "28.059"
+  },
+  "ruff": "PASS",
+  "prometheus_gate": "PASS",
+  "generator_check": "PASS",
+  "scenes_parity": "PASS",
+  "reason_alias_tests": "PASS",
+  "ci": "NOT_YET_VERIFIED",
+  "selector_10981": "UNRESOLVED",
+  "acceptance_10982": "BLOCKED"
+}

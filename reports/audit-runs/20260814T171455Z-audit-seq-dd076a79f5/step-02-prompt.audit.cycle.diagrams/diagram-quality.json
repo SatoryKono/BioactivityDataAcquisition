@@ -1,0 +1,44 @@
+{
+  "checked_files": 5,
+  "hard_failures": 0,
+  "warning_failures": 0,
+  "rules": [
+    {
+      "rule_id": "DIAG-T018",
+      "hard_gate": true,
+      "passed": true,
+      "violations": 0
+    },
+    {
+      "rule_id": "DIAG-T019",
+      "hard_gate": false,
+      "passed": true,
+      "violations": 0
+    },
+    {
+      "rule_id": "DIAG-T020",
+      "hard_gate": true,
+      "passed": true,
+      "violations": 0
+    },
+    {
+      "rule_id": "DIAG-T021",
+      "hard_gate": true,
+      "passed": true,
+      "violations": 0
+    },
+    {
+      "rule_id": "DIAG-T022",
+      "hard_gate": false,
+      "passed": true,
+      "violations": 0
+    },
+    {
+      "rule_id": "DIAG-T023",
+      "hard_gate": false,
+      "passed": true,
+      "violations": 0
+    }
+  ],
+  "violations": []
+}

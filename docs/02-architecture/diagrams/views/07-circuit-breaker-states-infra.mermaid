@@ -1,0 +1,65 @@
+%% View: Infrastructure-Mapping | Parent: 07-circuit-breaker-states-full.mermaid
+%% @uniform width=152 height=56 max_title_len=14 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N18, N19, N20
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N20["HP"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["Blocking"]
+        N2["*"]
+        N3["CLOSED"]
+        N4["ProcessRequest"]
+        N5["OPEN"]
+        N6["HALF_OPEN"]
+        N7["SendProbe"]
+        N8["Success"]
+        N9["Failure"]
+        N10["Waiting"]
+        N11["Operational"]
+        N12["RecordSuccess"]
+        N13["RecordFailure"]
+        N14["Expired"]
+        N15["Probing"]
+        N16["ProbeSuccess"]
+        N17["ProbeFailure"]
+        N18["CH"]
+        N19["OT"]
+    end
+
+    N2 --> N3
+    N2 --> N11
+    N2 --> N4
+    N4 --> N8
+    N4 --> N9
+    N8 --> N12
+    N9 --> N13
+    N3 --> N5
+    N2 --> N1
+    N2 --> N10
+    N10 --> N14
+    N5 --> N6
+    N2 --> N15
+    N2 --> N7
+    N7 --> N16
+    N7 --> N17
+    N6 --> N3
+    N6 --> N5
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    %% linkStyle: primary=16 edge(s) | secondary=2 edge(s)
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 16,17 stroke:#16a34a,stroke-width:2px

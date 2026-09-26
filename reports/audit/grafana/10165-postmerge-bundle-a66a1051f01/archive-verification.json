@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "archive_sha256": "b04a9d459461d268c7ff63891aa0fe6095e0206efeeed8b2a5ca6614b287c11d",
+  "archive_bytes": 36481283,
+  "hashed_inputs": 422,
+  "primary_pngs": 28,
+  "zip_crc": "PASS",
+  "all_input_sha256": "PASS"
+}

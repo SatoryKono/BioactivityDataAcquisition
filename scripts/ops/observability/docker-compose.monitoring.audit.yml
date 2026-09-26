@@ -1,0 +1,6 @@
+# Audit overlay for the OPT-IN monitoring stack.
+# Loki, Promtail, Tempo, and Quarantine Explorer were removed from shipping.
+# This file is retained only as a thin marker / future extension point.
+# Prefer: docker compose -f docker-compose.monitoring.yml ...
+
+services: {}

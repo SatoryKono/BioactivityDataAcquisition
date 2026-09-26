@@ -1,0 +1,110 @@
+"""Shared scope and payload helpers for control-plane evidence services."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, replace
+
+from bioetl.application.observability.control_plane_evidence.checks import (
+    EvidenceCheckResult,
+)
+from bioetl.application.observability.control_plane_evidence.models import (
+    evidence_payload,
+)
+from bioetl.application.observability.control_plane_evidence.timing import (
+    evidence_stage,
+)
+from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+from bioetl.domain.ports import RunLedgerPort
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceScopeContext:
+    """Resolved selector context passed from the HTTP interface."""
+
+    requested_pipeline: str
+    selected_run_id: str | None
+    selected_run_types: tuple[str, ...]
+    resolved_via: str
+    manifest: RunManifest | None
+
+
+def service_payload(
+    *,
+    endpoint: str,
+    scope: EvidenceScopeContext,
+    checks: tuple[EvidenceCheckResult, ...],
+    additional_data: dict[str, object] | None = None,
+    ledger_entries: tuple[RunLedgerEntry, ...] = (),
+) -> dict[str, object]:
+    """Build the shared service payload from one resolved selector scope."""
+    return evidence_payload(
+        endpoint=endpoint,
+        checks=checks,
+        requested_pipeline=scope.requested_pipeline,
+        selected_run_id=scope.selected_run_id,
+        selected_run_types=scope.selected_run_types,
+        resolved_via=scope.resolved_via,
+        manifest=scope.manifest,
+        additional_fields=additional_data,
+        ledger_entries=ledger_entries,
+    )
+
+
+def sanitized_manifest_payload_scope(
+    scope: EvidenceScopeContext,
+    checks: tuple[EvidenceCheckResult, ...],
+) -> EvidenceScopeContext:
+    """Discard coerced manifest identity when raw parse/schema evidence failed."""
+    identity_untrusted = any(
+        check.status == "ERROR" and check.check in {"parse", "schema"}
+        for check in checks
+    )
+    return replace(scope, manifest=None) if identity_untrusted else scope
+
+
+def source_error_payload(
+    *,
+    endpoint: str,
+    scope: EvidenceScopeContext,
+    reason: str,
+    check: str,
+) -> dict[str, object]:
+    """Return a stable source-read failure without raw exception text.
+
+    Read/unavailable failures use ``UNKNOWN`` (folds to trust ``INCOMPLETE``),
+    not ``ERROR``. A failed trust verdict is reserved for evaluated evidence that
+    explicitly failed checks — not for "could not read the source".
+    """
+    return service_payload(
+        endpoint=endpoint,
+        scope=scope,
+        checks=(
+            EvidenceCheckResult(
+                check,
+                "UNKNOWN",
+                reason,
+                "Persisted control-plane evidence is UNAVAILABLE "
+                "(could not be read or parsed).",
+            ),
+        ),
+    )
+
+
+def ledger_entries(
+    port: RunLedgerPort | None,
+    manifest: RunManifest,
+) -> tuple[RunLedgerEntry, ...]:
+    """Load one manifest ledger as an immutable tuple."""
+    if port is None:
+        return ()
+    with evidence_stage("ledger_read"):
+        return tuple(port.list_entries(manifest.manifest_id))
+
+
+__all__ = [
+    "EvidenceScopeContext",
+    "ledger_entries",
+    "sanitized_manifest_payload_scope",
+    "service_payload",
+    "source_error_payload",
+]

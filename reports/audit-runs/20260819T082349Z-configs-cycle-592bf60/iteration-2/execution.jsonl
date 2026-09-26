@@ -1,0 +1,1 @@
+{"iteration":2,"commands":["jq -e . configs/_schema/*.json","python -m scripts.schema generate-pipeline --check","python -m scripts.schema validate-configs","python -m scripts.schema check-invariants"],"outcome":"pass","findings":[]}

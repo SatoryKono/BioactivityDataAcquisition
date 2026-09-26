@@ -1,0 +1,10 @@
+family,mmd,mermaid,svg,png,canonical_role
+root,1,0,0,0,template
+architecture,89,0,89,0,canonical architecture sources
+class-diagrams,94,0,94,0,canonical class sources
+foundation,55,0,55,0,canonical foundation sources
+providers,28,0,28,0,canonical provider sources
+sequence,5,0,5,0,canonical sequence sources
+state-machines,5,0,5,0,canonical state sources
+views,0,165,165,0,decomposed views
+TOTAL,277,165,441,0,text sources and tracked SVG artifacts

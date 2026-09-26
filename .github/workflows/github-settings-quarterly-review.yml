@@ -1,0 +1,56 @@
+name: Quarterly GitHub Settings Review
+
+on:
+  schedule:
+    - cron: "23 6 1 1,4,7,10 *"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  deployments: read
+  security-events: read
+
+concurrency:
+  group: github-settings-review
+  cancel-in-progress: false
+
+jobs:
+  review:
+    name: Read-only GitHub settings review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out the discovered review source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Collect read-only settings evidence
+        run: >-
+          python -m scripts.engineering.repo github-settings-review
+          --json-out "$RUNNER_TEMP/github-settings-review.json"
+          --markdown-out "$RUNNER_TEMP/github-settings-review.md"
+
+      - name: Publish review summary
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f "$RUNNER_TEMP/github-settings-review.md" ]]; then
+            cat "$RUNNER_TEMP/github-settings-review.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "GitHub settings review did not produce Markdown evidence." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload review evidence
+        if: always() && !cancelled()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: github-settings-review-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/github-settings-review.json
+            ${{ runner.temp }}/github-settings-review.md
+          if-no-files-found: warn
+          retention-days: 30

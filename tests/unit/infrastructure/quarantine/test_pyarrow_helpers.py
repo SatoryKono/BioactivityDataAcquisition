@@ -1,0 +1,68 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# pyright: reportUndefinedVariable=false
+# pyright: reportPossiblyUnboundVariable=false
+# pyright: reportTypedDictNotRequiredAccess=false
+# pyright: reportOptionalSubscript=false
+# pyright: reportOptionalOperand=false
+# pyright: reportOptionalCall=false
+# pyright: reportOptionalIterable=false
+# pyright: reportIncompatibleMethodOverride=false
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportReturnType=false
+# pyright: reportInvalidCast=false
+# pyright: reportAssignmentType=false
+# pyright: reportImplicitAbstractClass=false
+# pyright: reportFunctionMemberAccess=false
+# pyright: reportConstantRedefinition=false
+# pyright: reportInvalidTypeForm=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+"""Tests for quarantine PyArrow compute helper seams."""
+
+from __future__ import annotations
+
+import pytest
+
+from bioetl.infrastructure.quarantine import _pyarrow_helpers
+
+pytestmark = pytest.mark.unit
+
+
+class _FakePyArrowCompute:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, object, object]] = []
+
+    def equal(self, left: object, right: object) -> str:
+        self.calls.append(("equal", left, right))
+        return "equal-mask"
+
+    def and_(self, left: object, right: object) -> str:
+        self.calls.append(("and", left, right))
+        return "and-mask"
+
+
+def test_equal_and_and_masks_delegate_to_pyarrow_compute(monkeypatch) -> None:
+    compute = _FakePyArrowCompute()
+    monkeypatch.setattr(_pyarrow_helpers, "pc", compute)
+
+    assert _pyarrow_helpers.equal_mask("left", "right") == "equal-mask"
+    assert _pyarrow_helpers.and_mask("first", "second") == "and-mask"
+    assert compute.calls == [
+        ("equal", "left", "right"),
+        ("and", "first", "second"),
+    ]
+
+
+def test_require_pyarrow_compute_reports_missing_dependency(monkeypatch) -> None:
+    monkeypatch.setattr(_pyarrow_helpers, "pc", None)
+
+    with pytest.raises(RuntimeError, match=r"require pyarrow\.compute"):
+        _pyarrow_helpers._require_pyarrow_compute()

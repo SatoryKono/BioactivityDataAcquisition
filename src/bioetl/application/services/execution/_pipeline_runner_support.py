@@ -1,0 +1,397 @@
+"""Private helper functions for :mod:`pipeline_runner_service`."""
+
+from __future__ import annotations
+
+from collections.abc import Awaitable, Callable
+from dataclasses import replace
+from datetime import datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, cast
+from uuid import UUID
+
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunOptions,
+    RunResult,
+)
+from bioetl.application.services.run_reports.enrichment import (
+    build_artifacts_from_result,
+    build_dq_summary,
+    build_failure_block,
+    build_http_summary,
+    build_io_block,
+    build_quarantine_block,
+    build_schema_versions,
+    build_stage_timings,
+)
+from bioetl.application.services.run_reports.observations import run_observations
+from bioetl.application.services.run_reports.writer import write_pipeline_run_report
+from bioetl.domain.ports import RunReportStorePort
+from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
+from bioetl.domain.run_reports.context import (
+    get_stage_accounting,
+)
+from bioetl.domain.run_reports.models import StageId
+from bioetl.domain.run_reports.pipeline_builder import (
+    PipelineRunReportOptionalBlocks,
+    build_pipeline_run_report,
+)
+from bioetl.domain.types import RunID
+
+if TYPE_CHECKING:
+    from bioetl.application.services.execution.pipeline_run_execution_service import (
+        PipelineExecutionResult,
+    )
+    from bioetl.domain.ports import (
+        AuditPort,
+        ClockPort,
+        ExecutionMetricsRunnerPort,
+        LoggerPort,
+    )
+
+
+def build_dry_run_result(
+    *,
+    clock: ClockPort,
+    pipeline_name: str,
+    run_id: RunID,
+    options: RunOptions,
+    started_at: datetime,
+    run_logger: LoggerPort,
+) -> RunResult | None:
+    """Build dry-run result when execution is intentionally skipped."""
+    if not options.dry_run:
+        return None
+    run_logger.info("Dry-run mode: no execution performed")
+    return RunResult(
+        status=PipelineRunResult.DRY_RUN,
+        pipeline_name=pipeline_name,
+        run_id=str(run_id),
+        run_type=options.run_type,
+        started_at=started_at,
+        completed_at=clock.now(),
+    )
+
+
+def _seed_gold_removals_from_metrics(
+    accounting: StageAccountingAccumulator,
+    metrics: dict[str, Any],  # Any: report/json payload shape is dynamic
+) -> None:
+    """Fail when Gold exclusions were counted without a per-record reason."""
+    excluded = int(metrics.get("records_gold_excluded_by_contract", 0) or 0)
+    if excluded <= 0:
+        return
+    accounted = accounting.sum_outcome(StageId.GOLD.value, "excluded_by_contract")
+    if accounted != excluded:
+        raise ValueError(
+            "gold exclusions lack a per-record reason: "
+            f"records_gold_excluded_by_contract={excluded} accounted={accounted}"
+        )
+
+
+def _result_duration_seconds(result: RunResult) -> float | None:
+    try:
+        return result.duration_seconds
+    except Exception:
+        return None
+
+
+def _identity_from_result(
+    result: RunResult,
+    *,
+    options: RunOptions | None,
+    duration: float | None,
+) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
+    identity: dict[str, Any] = {  # Any: report/json payload shape is dynamic
+        "run_id": result.run_id,
+        "manifest_id": result.manifest_id,
+        "pipeline_name": result.pipeline_name,
+        "provider": None,
+        "entity": None,
+        "run_type": result.run_type,
+        "status": result.status.value,
+        "started_at": (
+            result.started_at.isoformat() if result.started_at is not None else None
+        ),
+        "completed_at": (
+            result.completed_at.isoformat() if result.completed_at is not None else None
+        ),
+        "duration_seconds": duration,
+        "workflow_id": options.workflow_id if options is not None else None,
+        "workflow_run_id": options.workflow_run_id if options is not None else None,
+        "workflow_step_id": options.workflow_step_id if options is not None else None,
+    }
+    if "_" in result.pipeline_name:
+        provider, _sep, entity = result.pipeline_name.partition("_")
+        identity["provider"] = provider or None
+        identity["entity"] = entity or None
+    return identity
+
+
+def _require_run_result(value: object) -> RunResult:
+    """Return a concrete run result after validating replacement output."""
+    if not isinstance(value, RunResult):
+        raise TypeError("dataclass replacement did not preserve RunResult")
+    return value
+
+
+def finalize_pipeline_run_report(
+    *,
+    result: RunResult,
+    options: RunOptions | None = None,
+    report_root: Path | None = None,
+    stage_timings: dict[str, float | int | None] | None = None,
+    http_summary: dict[str, Any] | None = None,  # Any: dynamic HTTP report payload
+    store: RunReportStorePort,
+) -> RunResult:
+    """Build and persist pipeline run report; attach paths onto result."""
+    accounting = get_stage_accounting()
+    metrics = {
+        "records_fetched": result.records_fetched,
+        "records_bronze": result.records_bronze,
+        "records_silver": result.records_silver,
+        "records_gold": result.records_gold,
+        "records_gold_excluded_by_contract": result.records_gold_excluded_by_contract,
+        "records_quarantined": result.records_quarantined,
+        "records_filtered_out": result.records_filtered_out,
+    }
+    if accounting is not None:
+        _seed_gold_removals_from_metrics(accounting, metrics)
+
+    identity = _identity_from_result(
+        result,
+        options=options,
+        duration=_result_duration_seconds(result),
+    )
+    try:
+        package_version = _package_version()
+        # Build a preliminary report to materialize reasons, then enrich.
+        draft = build_pipeline_run_report(
+            identity=identity,
+            metrics=metrics,
+            accounting=accounting,
+            artifacts=build_artifacts_from_result(result),
+        )
+        reasons = draft.reasons_top_n
+        report = build_pipeline_run_report(
+            identity=identity,
+            metrics=metrics,
+            accounting=accounting,
+            artifacts=build_artifacts_from_result(result),
+            optional_blocks=PipelineRunReportOptionalBlocks(
+                failure=build_failure_block(result),
+                io=build_io_block(result, options=options),
+                quarantine=build_quarantine_block(result, reasons_top_n=reasons),
+                dq_summary=build_dq_summary(result, reasons_top_n=reasons),
+                schema_versions=build_schema_versions(
+                    reason_catalog_version=draft.reason_catalog_version,
+                    package_version=package_version,
+                ),
+                stage_timings=build_stage_timings(stage_timings),
+                http_summary=build_http_summary(http_summary),
+            ),
+        )
+        report = replace(
+            report,
+            observations={} if options and options.dry_run else run_observations(),
+        )
+        written = write_pipeline_run_report(report, root=report_root, store=store)
+    except Exception as exc:
+        return _require_run_result(
+            replace(
+                result,
+                run_report_error=f"{type(exc).__name__}: {exc}",
+            )
+        )
+
+    return _require_run_result(
+        replace(
+            result,
+            run_report_json_path=str(written.json_path),
+            run_report_markdown_path=str(written.markdown_path),
+            run_report_funnel=report.funnel,
+        )
+    )
+
+
+def _package_version() -> str | None:
+    try:
+        from bioetl import __version__
+
+        return str(__version__)
+    except Exception:
+        return None
+
+
+def build_pipeline_run_result(
+    *,
+    outcome: PipelineExecutionResult,
+    runner: ExecutionMetricsRunnerPort,
+    pipeline_name: str,
+    run_id: RunID,
+    run_type: str,
+    started_at: datetime,
+    options: RunOptions | None = None,
+    write_report: bool = True,
+    store: RunReportStorePort,
+) -> RunResult:
+    """Convert execution outcome to the public RunResult contract."""
+    status = PipelineRunResult(outcome.status)
+    metrics = outcome.metrics
+    result = RunResult(
+        status=status,
+        pipeline_name=pipeline_name,
+        run_id=str(run_id),
+        manifest_id=getattr(runner, "manifest_id", None),
+        run_type=run_type,
+        records_fetched=metrics.get("records_fetched", 0),
+        records_bronze=metrics.get("records_bronze", 0),
+        records_silver=metrics.get("records_silver", 0),
+        records_gold=metrics.get("records_gold", 0),
+        records_gold_excluded_by_contract=metrics.get(
+            "records_gold_excluded_by_contract",
+            0,
+        ),
+        records_quarantined=metrics.get("records_quarantined", 0),
+        records_filtered_out=metrics.get("records_filtered_out", 0),
+        started_at=started_at,
+        completed_at=outcome.completed_at,
+        error_message=outcome.error_message,
+        error_type=outcome.error_type,
+        debug_export_uri=getattr(runner, "debug_export_uri", None),
+        debug_export_hash=getattr(runner, "debug_export_hash", None),
+    )
+    if write_report:
+        return finalize_pipeline_run_report(result=result, options=options, store=store)
+    return result
+
+
+async def complete_pipeline_dry_run(
+    *,
+    audit: AuditPort,
+    pipeline_name: str,
+    run_id: RunID,
+    options: RunOptions,
+    dry_run_result: RunResult,
+    record_event: Callable[..., Awaitable[None]],
+) -> RunResult:
+    """Record dry-run completion before the service finalizes its report."""
+    await record_event(
+        audit,
+        event_name="PipelineRunCompleted",
+        pipeline_name=pipeline_name,
+        run_id=run_id,
+        run_type=options.run_type,
+        status=dry_run_result.status.value,
+        timestamp=dry_run_result.completed_at,
+    )
+    return dry_run_result
+
+
+async def create_execution_runner_audited(
+    create_runner: Callable[[], ExecutionMetricsRunnerPort],
+    *,
+    record_failure: Callable[[Exception], Awaitable[None]],
+) -> ExecutionMetricsRunnerPort:
+    """Create a runner and audit unexpected constructor failures."""
+    try:
+        return create_runner()
+    except Exception as exc:
+        await record_failure(exc)
+        raise
+
+
+def _require_execution_runner(runner: object) -> ExecutionMetricsRunnerPort:
+    """Validate producer output before pipeline side effects begin."""
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort
+
+    if not isinstance(runner, ExecutionMetricsRunnerPort):
+        raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
+    return runner
+
+
+def constructor_failure_recorder(
+    *,
+    audit: AuditPort,
+    clock: ClockPort,
+    pipeline_name: str,
+    run_id: RunID,
+    options: RunOptions,
+    started_at: datetime,
+    finalize: Callable[[RunResult, RunOptions | None], RunResult],
+    record_event: Callable[..., Awaitable[None]],
+) -> Callable[[Exception], Awaitable[None]]:
+    """Build an audited finalizer for failures before the runner can execute."""
+
+    async def record(exc: Exception) -> None:
+        completed_at = clock.now()
+        await record_event(
+            audit,
+            event_name="PipelineRunCompleted",
+            pipeline_name=pipeline_name,
+            run_id=run_id,
+            run_type=options.run_type,
+            status="failed",
+            timestamp=completed_at,
+            error_type=type(exc).__name__,
+        )
+        finalize(
+            RunResult(
+                status=PipelineRunResult.FAILED,
+                pipeline_name=pipeline_name,
+                run_id=str(run_id),
+                run_type=options.run_type,
+                started_at=started_at,
+                completed_at=completed_at,
+                error_type=type(exc).__name__,
+            ),
+            options,
+        )
+
+    return record
+
+
+async def record_pipeline_audit_event(
+    audit: AuditPort,
+    *,
+    event_name: str,
+    pipeline_name: str,
+    run_id: RunID,
+    run_type: str,
+    status: str,
+    timestamp: datetime,
+    manifest_id: str | None = None,
+    error_type: str | None = None,
+) -> None:
+    """Record pipeline lifecycle outcome via the audit port abstraction."""
+    event_data = {
+        "pipeline": pipeline_name,
+        "run_id": str(run_id),
+        "run_type": run_type,
+        "status": status,
+    }
+    if manifest_id is not None:
+        event_data["manifest_id"] = manifest_id
+    if error_type is not None:
+        event_data["error_type"] = error_type
+    await audit.log_event(event_name, event_data, timestamp=timestamp)
+
+
+def resolve_effective_run_id(
+    *,
+    run_id: UUID | None,
+    options: RunOptions,
+    run_id_factory: Callable[[], RunID | UUID | str],
+) -> RunID:
+    if run_id is not None:
+        return cast(RunID, run_id)
+    if options.exact_replay:
+        raise ValueError("exact replay requires explicit run_id")
+    generated_run_id = run_id_factory()
+    if isinstance(generated_run_id, UUID):
+        return cast(RunID, generated_run_id)
+    return cast(RunID, UUID(str(generated_run_id)))
+
+
+def missing_run_id_factory() -> RunID:
+    raise RuntimeError("pipeline run_id_factory must be supplied by composition root")

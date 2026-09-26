@@ -1,0 +1,17 @@
+# PubChem controlled vocabulary values
+# Source: BioETL chemical standardization contract
+# Last synced: 2026-05-02
+#
+# Canonical non-ChEMBL enum source for PubChem compound normalization policy.
+
+version: "pubchem_basic_v1"
+
+compound:
+    chemical_standardization_statuses:
+        - standardized
+        - partial
+        - invalid
+        - missing_structure
+
+    chemical_standardization_policy_versions:
+        - pubchem-basic-v1

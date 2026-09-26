@@ -1,0 +1,68 @@
+%% View: Domain-Focus | Parent: 28-composition-root-di-graph-full.mermaid
+%% @uniform width=140 height=56 max_title_len=4 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N19, N20
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N1["DQF"]
+        N2["BOOT"]
+        N3["SB"]
+        N4["BL"]
+        N5["HCF"]
+        N6["DSF"]
+        N7["STF"]
+        N8["STA"]
+        N11["RF"]
+        N13["SLL"]
+        N14["UHC"]
+        N15["ADP"]
+        N17["PS"]
+        N18["RUN"]
+        N19["GPF"]
+        N20["PR"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N9["SW"]
+        N10["GW"]
+        N16["BW"]
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        direction TB
+        N12["CLI"]
+    end
+
+    N12 ==> N2
+    N2 --> N4
+    N4 --> N13
+    N2 --> N5
+    N5 --> N14
+    N2 --> N6
+    N6 --> N15
+    N2 --> N7
+    N7 --> N8
+    N8 --> N16
+    N8 --> N9
+    N8 --> N10
+    N2 --> N1
+    N2 --> N3
+    N3 --> N9
+    N3 --> N10
+    N3 --> N17
+    N2 --> N11
+    N11 --> N18
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#475569,stroke-width:2px,stroke-dasharray:5

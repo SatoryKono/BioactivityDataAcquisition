@@ -1,0 +1,63 @@
+name: Branch Hygiene
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  schedule:
+    - cron: "15 3 * * 1"
+  workflow_dispatch:
+
+jobs:
+  validate-pr-branch-name:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Validate PR head branch name
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          pattern='^(feat|fix|refactor|docs|test|chore|ci)/[a-z0-9]+([.-][a-z0-9]+)*$'
+          master_pattern='^master[0-9-]+$'
+          automation='^(dependabot|renovate|devin|bolt|copilot|codex)/.+'
+          if [[ ! "$HEAD_REF" =~ $pattern && ! "$HEAD_REF" =~ $master_pattern && ! "$HEAD_REF" =~ $automation ]]; then
+            echo "Non-compliant branch name: $HEAD_REF" >&2
+            echo "Use <type>/<lowercase-kebab-description> or an approved automation prefix (dependabot/, renovate/, devin/, bolt/, copilot/, codex/)." >&2
+            exit 1
+          fi
+
+  inventory:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+      - name: Generate report-only branch inventory
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          uv run --frozen --no-build python -m scripts.engineering.repo \
+            generate-branch-cleanup-inventory \
+            --output reports/quality/branch-hygiene-latest.json
+      - name: Upload branch inventory
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: branch-hygiene-inventory
+          path: reports/quality/branch-hygiene-latest.json
+          if-no-files-found: error
+          retention-days: 14
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}

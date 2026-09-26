@@ -1,0 +1,179 @@
+{
+  "actual": {
+    "themes": {
+      "bioetl-control-plane-v1": "unverified",
+      "bioetl-dq-v2": "unverified",
+      "bioetl-incident-v1": "unverified",
+      "bioetl-overview-v2": "unverified",
+      "bioetl-provider-health-v2": "unverified",
+      "bioetl-run-explorer-v1": "unverified",
+      "bioetl-runtime": "unverified"
+    },
+    "viewports": {
+      "bioetl-control-plane-v1": {
+        "height": 1080,
+        "width": 1920
+      },
+      "bioetl-dq-v2": {
+        "height": 1080,
+        "width": 1920
+      },
+      "bioetl-incident-v1": {
+        "height": 1080,
+        "width": 1920
+      },
+      "bioetl-overview-v2": {
+        "height": 1080,
+        "width": 1920
+      },
+      "bioetl-provider-health-v2": {
+        "height": 1080,
+        "width": 1920
+      },
+      "bioetl-run-explorer-v1": {
+        "height": 1080,
+        "width": 1920
+      },
+      "bioetl-runtime": {
+        "height": 1080,
+        "width": 1920
+      }
+    }
+  },
+  "backend_applicability": {
+    "quarantine_explorer": {
+      "reason": "Quarantine Explorer HTTP/UI surface is retired from shipping.",
+      "state": "NOT_APPLICABLE"
+    }
+  },
+  "base_url": "http://localhost:3000",
+  "dashboards": [
+    {
+      "screenshot": "bioetl-control-plane-v1.png",
+      "title": "0. Trust",
+      "uid": "bioetl-control-plane-v1",
+      "url": "/d/bioetl-control-plane-v1/0-trust"
+    },
+    {
+      "screenshot": "bioetl-dq-v2.png",
+      "title": "4. Data Quality",
+      "uid": "bioetl-dq-v2",
+      "url": "/d/bioetl-dq-v2/4-data-quality"
+    },
+    {
+      "screenshot": "bioetl-incident-v1.png",
+      "title": "5. Incident Workspace",
+      "uid": "bioetl-incident-v1",
+      "url": "/d/bioetl-incident-v1/5-incident-workspace"
+    },
+    {
+      "screenshot": "bioetl-overview-v2.png",
+      "title": "1. Overview",
+      "uid": "bioetl-overview-v2",
+      "url": "/d/bioetl-overview-v2/1-overview"
+    },
+    {
+      "screenshot": "bioetl-provider-health-v2.png",
+      "title": "3. Provider Health",
+      "uid": "bioetl-provider-health-v2",
+      "url": "/d/bioetl-provider-health-v2/3-provider-health"
+    },
+    {
+      "screenshot": "bioetl-run-explorer-v1.png",
+      "title": "6. Run Explorer",
+      "uid": "bioetl-run-explorer-v1",
+      "url": "/d/bioetl-run-explorer-v1/6-run-explorer"
+    },
+    {
+      "screenshot": "bioetl-runtime.png",
+      "title": "2. Pipeline Diagnostics",
+      "uid": "bioetl-runtime",
+      "url": "/d/bioetl-runtime/2-pipeline-diagnostics"
+    }
+  ],
+  "engine": "grafana-render-api",
+  "generated_at": "2026-08-05T04:43:28.108884+00:00",
+  "height": 1080,
+  "occurrence_id": "",
+  "render_results": [
+    {
+      "error": null,
+      "screenshot": "bioetl-control-plane-v1.png",
+      "status": "rendered",
+      "title": "0. Trust",
+      "uid": "bioetl-control-plane-v1",
+      "url": "/d/bioetl-control-plane-v1/0-trust"
+    },
+    {
+      "error": null,
+      "screenshot": "bioetl-dq-v2.png",
+      "status": "rendered",
+      "title": "4. Data Quality",
+      "uid": "bioetl-dq-v2",
+      "url": "/d/bioetl-dq-v2/4-data-quality"
+    },
+    {
+      "error": null,
+      "screenshot": "bioetl-incident-v1.png",
+      "status": "rendered",
+      "title": "5. Incident Workspace",
+      "uid": "bioetl-incident-v1",
+      "url": "/d/bioetl-incident-v1/5-incident-workspace"
+    },
+    {
+      "error": null,
+      "screenshot": "bioetl-overview-v2.png",
+      "status": "rendered",
+      "title": "1. Overview",
+      "uid": "bioetl-overview-v2",
+      "url": "/d/bioetl-overview-v2/1-overview"
+    },
+    {
+      "error": null,
+      "screenshot": "bioetl-provider-health-v2.png",
+      "status": "rendered",
+      "title": "3. Provider Health",
+      "uid": "bioetl-provider-health-v2",
+      "url": "/d/bioetl-provider-health-v2/3-provider-health"
+    },
+    {
+      "error": null,
+      "screenshot": "bioetl-run-explorer-v1.png",
+      "status": "rendered",
+      "title": "6. Run Explorer",
+      "uid": "bioetl-run-explorer-v1",
+      "url": "/d/bioetl-run-explorer-v1/6-run-explorer"
+    },
+    {
+      "error": null,
+      "screenshot": "bioetl-runtime.png",
+      "status": "rendered",
+      "title": "2. Pipeline Diagnostics",
+      "uid": "bioetl-runtime",
+      "url": "/d/bioetl-runtime/2-pipeline-diagnostics"
+    }
+  ],
+  "requested": {
+    "browser_zoom": 100,
+    "capture_surface": "full",
+    "kiosk_mode": "off",
+    "theme": "dark",
+    "viewport": {
+      "height": 1080,
+      "width": 1920
+    }
+  },
+  "scope": {
+    "pipeline": "",
+    "range_hours": 12,
+    "run_id": "",
+    "run_type": "",
+    "workflow": ""
+  },
+  "selected_uids": [],
+  "terminal_state_validation": {
+    "reason": "Grafana Render API captures pixels but cannot prove panel terminal states; use --fallback playwright for auditable evidence.",
+    "status": "not-checked"
+  },
+  "width": 1920
+}

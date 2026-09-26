@@ -1,0 +1,70 @@
+%% BioETL — Layer Dependency Matrix (ARCH-001)
+%% Enforced import boundaries between architectural layers.
+
+%% @version 1.0.0
+%% @date    2026-07-31
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   5
+%% @uniform width=184 height=96 max_title_len=14 max_desc_lines=3
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph LR
+%% keep-orphan: FORBIDDEN, OK
+    subgraph Legend
+        direction TB
+        OK["✅ Allowed<br/><br/>"]:::size-md
+        FORBIDDEN["❌ Forbidden<br/><br/>"]:::size-md
+    end
+
+    subgraph Layers["Architectural Layers"]
+        direction TB
+        DOMAIN["domain<br/>(pure business logic,<br/>no I/O, no frameworks)"]:::size-md
+        APP["application<br/>(use cases, orchestration,<br/>transformers)"]:::size-md
+        INFRA["infrastructure<br/>(adapters, storage,<br/>observability)"]:::size-md
+        COMP["composition<br/>(DI wiring, factories,<br/>bootstrap)"]:::size-md
+        IFACE["interfaces<br/>(CLI, HTTP,<br/>orchestration)"]:::size-md
+    end
+
+    %% Allowed dependencies (solid arrows)
+    IFACE -->|"imports"| COMP
+    IFACE -->|"imports"| APP
+    IFACE -->|"imports"| INFRA
+    IFACE -->|"imports"| DOMAIN
+
+    COMP -->|"imports"| INFRA
+    COMP -->|"imports"| APP
+    COMP -->|"imports"| DOMAIN
+
+    APP -->|"imports"| DOMAIN
+
+    INFRA -->|"imports"| DOMAIN
+
+    %% Self-references
+    DOMAIN -.->|"self"| DOMAIN
+    APP -.->|"self"| APP
+    INFRA -.->|"self"| INFRA
+    COMP -.->|"self"| COMP
+    IFACE -.->|"self"| IFACE
+
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:3px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef comp fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef iface fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    class DOMAIN domain
+    class APP app
+    class INFRA infra
+    class COMP comp
+    class IFACE iface

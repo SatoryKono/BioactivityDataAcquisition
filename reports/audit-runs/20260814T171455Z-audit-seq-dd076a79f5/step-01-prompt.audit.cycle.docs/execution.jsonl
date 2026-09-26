@@ -1,0 +1,2 @@
+{"wave":"W1","issue":8824,"finding":"DOCS-SEQ-001","outcome":"resolved","command":".venv/bin/python -m scripts.docs generate-cleanup-inventory --update","validation":"generate-cleanup-inventory --check: PASS"}
+{"wave":"W2","issue":8825,"finding":"DOCS-SEQ-002","outcome":"resolved","changes":"anchors=warn, attr_list explicit stable IDs, 35 link targets repaired, regression test added","validation":"strict MkDocs build and focused tests: PASS"}

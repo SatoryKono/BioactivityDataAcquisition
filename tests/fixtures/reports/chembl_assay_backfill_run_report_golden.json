@@ -1,0 +1,99 @@
+{
+  "schema_version": "pipeline_run_report_v1",
+  "reason_catalog_version": "reason_catalog_v1",
+  "identity": {
+    "run_id": "00000000-0000-4000-8000-000000000017",
+    "manifest_id": "manifest-chembl-assay-backfill-001",
+    "pipeline_name": "chembl_assay",
+    "provider": "chembl",
+    "entity": "assay",
+    "run_type": "backfill",
+    "status": "success",
+    "started_at": "2026-08-17T00:00:00+00:00",
+    "completed_at": "2026-08-17T00:01:00+00:00",
+    "duration_seconds": 60.0,
+    "workflow_id": null,
+    "workflow_run_id": null,
+    "workflow_step_id": null
+  },
+  "funnel": [
+    {
+      "stage_id": "extract",
+      "records_in": 1000,
+      "records_out": 1000,
+      "removed_total": 0,
+      "removals": [],
+      "balance_status": "OK",
+      "tracking": "full",
+      "unaccounted": 0
+    },
+    {
+      "stage_id": "bronze",
+      "records_in": 1000,
+      "records_out": 1000,
+      "removed_total": 0,
+      "removals": [],
+      "balance_status": "OK",
+      "tracking": "full",
+      "unaccounted": 0
+    },
+    {
+      "stage_id": "silver",
+      "records_in": 1000,
+      "records_out": 1000,
+      "removed_total": 0,
+      "removals": [],
+      "balance_status": "OK",
+      "tracking": "full",
+      "unaccounted": 0
+    },
+    {
+      "stage_id": "gold",
+      "records_in": 1000,
+      "records_out": 983,
+      "removed_total": 17,
+      "removals": [
+        {
+          "outcome": "excluded_by_contract",
+          "reason_code": "gold_contract_schema_failure",
+          "reason_family": "contract",
+          "count": 17
+        }
+      ],
+      "balance_status": "OK",
+      "tracking": "full",
+      "unaccounted": 0
+    }
+  ],
+  "layers": {
+    "bronze_records": 1000,
+    "silver_valid": 1000,
+    "silver_filtered_out": 0,
+    "silver_quarantined": 0,
+    "silver_skipped": 0,
+    "silver_deduplicated": 0,
+    "gold_written": 983,
+    "gold_excluded_by_contract": 17,
+    "gold_quarantined": 0,
+    "gold_skipped": 0,
+    "gold_deduplicated": 0
+  },
+  "reasons_top_n": [
+    {
+      "reason_code": "gold_contract_schema_failure",
+      "outcome": "excluded_by_contract",
+      "reason_family": "contract",
+      "count": 17
+    }
+  ],
+  "artifacts": [],
+  "reconciliation": {
+    "silver_vs_bronze_status": "OK",
+    "gold_vs_silver_status": "OK",
+    "silver_accounted": 1000,
+    "gold_accounted": 1000,
+    "silver_delta": 0,
+    "gold_delta": 0
+  },
+  "tracking_coverage": "full"
+}

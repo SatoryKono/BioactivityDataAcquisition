@@ -1,0 +1,28 @@
+%% View: Dataflow | Parent: 05-layers-interaction-full.mermaid
+%% @uniform width=168 height=56 max_title_len=18 max_desc_lines=0
+flowchart LR
+    CLI["CLI"]
+    Builder["build_pipeline_runner"]
+    Runner["PipelineRunner"]
+    Executor["BatchExecutor"]
+    Processing["BatchProcessingService"]
+    TransformWrite["BatchTransformer / BatchWriter"]
+    Services["PipelineService"]
+    Ports["Domain ports"]
+    Infra["Infra adapters"]
+
+    CLI --> Builder --> Runner --> Executor --> Processing --> TransformWrite
+    Runner --> Services
+    Processing --> Services
+    Services --> Ports
+    Infra -.->|"implements"| Ports
+
+    style CLI fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style Builder fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Runner fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Executor fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Processing fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style TransformWrite fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Services fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Ports fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px

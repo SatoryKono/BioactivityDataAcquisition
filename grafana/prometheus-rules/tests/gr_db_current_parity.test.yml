@@ -1,0 +1,69 @@
+rule_files:
+- ../bioetl_observability.yml
+- ../bioetl_control_plane_current_status.yml
+evaluation_interval: 1m
+tests:
+- name: publication-gate-0-shared-by-trust-and-overview-missing-checkpoint-is-incomplete
+  interval: 1m
+  input_series:
+  - series: bioetl_scope_publication_status{pipeline="audit",run_type="backfill"}
+    values: 0+0x4
+  promql_expr_test:
+  - expr: bioetl_control_plane_current_status_trusted{pipeline="audit",run_type="backfill"}
+    eval_time: 3m
+    exp_samples:
+    - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="audit",run_type="backfill"}'
+      value: 3
+  - expr: bioetl_l0_input_status_selected{pipeline="audit",run_type="backfill",input="control_plane"}
+    eval_time: 3m
+    exp_samples:
+    - labels: '{__name__="bioetl_l0_input_status_selected",pipeline="audit",run_type="backfill",input="control_plane"}'
+      value: 3
+- name: publication-gate-1-shared-by-trust-and-overview-missing-checkpoint-is-incomplete
+  interval: 1m
+  input_series:
+  - series: bioetl_scope_publication_status{pipeline="audit",run_type="backfill"}
+    values: 1+0x4
+  promql_expr_test:
+  - expr: bioetl_control_plane_current_status_trusted{pipeline="audit",run_type="backfill"}
+    eval_time: 3m
+    exp_samples:
+    - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="audit",run_type="backfill"}'
+      value: 3
+  - expr: bioetl_l0_input_status_selected{pipeline="audit",run_type="backfill",input="control_plane"}
+    eval_time: 3m
+    exp_samples:
+    - labels: '{__name__="bioetl_l0_input_status_selected",pipeline="audit",run_type="backfill",input="control_plane"}'
+      value: 3
+- name: publication-gate-2-shared-by-trust-and-overview-missing-checkpoint-is-incomplete
+  interval: 1m
+  input_series:
+  - series: bioetl_scope_publication_status{pipeline="audit",run_type="backfill"}
+    values: 2+0x4
+  promql_expr_test:
+  - expr: bioetl_control_plane_current_status_trusted{pipeline="audit",run_type="backfill"}
+    eval_time: 3m
+    exp_samples:
+    - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="audit",run_type="backfill"}'
+      value: 3
+  - expr: bioetl_l0_input_status_selected{pipeline="audit",run_type="backfill",input="control_plane"}
+    eval_time: 3m
+    exp_samples:
+    - labels: '{__name__="bioetl_l0_input_status_selected",pipeline="audit",run_type="backfill",input="control_plane"}'
+      value: 3
+- name: publication-gate-3-shared-by-trust-and-overview-missing-checkpoint-is-incomplete
+  interval: 1m
+  input_series:
+  - series: bioetl_scope_publication_status{pipeline="audit",run_type="backfill"}
+    values: 3+0x4
+  promql_expr_test:
+  - expr: bioetl_control_plane_current_status_trusted{pipeline="audit",run_type="backfill"}
+    eval_time: 3m
+    exp_samples:
+    - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="audit",run_type="backfill"}'
+      value: 3
+  - expr: bioetl_l0_input_status_selected{pipeline="audit",run_type="backfill",input="control_plane"}
+    eval_time: 3m
+    exp_samples:
+    - labels: '{__name__="bioetl_l0_input_status_selected",pipeline="audit",run_type="backfill",input="control_plane"}'
+      value: 3

@@ -1,0 +1,9 @@
+{
+  "changed_count": 0,
+  "changed_paths": [],
+  "checked_count": 6,
+  "errors": [],
+  "manifest": "/tmp/bioetl-audit-seq-dd076a79f5/docs/02-architecture/diagrams/manifests/visual-smoke.txt",
+  "schema_version": "diagram-visual-smoke-report-v1",
+  "status": "passed"
+}

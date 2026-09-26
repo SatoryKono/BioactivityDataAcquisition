@@ -1,0 +1,173 @@
+{
+  "campaign": "CR-FULL-20260806-full",
+  "leaf": "S01-domain-value_objects",
+  "branch": "grok-260807-108155",
+  "closed_at": "2026-08-07T06:57:32.640620+00:00",
+  "issue_range": "#8096-#8130 (selected gaps excluded per pack list)",
+  "counts": {
+    "total": 30,
+    "fixed": 26,
+    "rejected": 4
+  },
+  "fixed": [
+    8097,
+    8098,
+    8099,
+    8100,
+    8101,
+    8102,
+    8103,
+    8105,
+    8106,
+    8107,
+    8109,
+    8111,
+    8113,
+    8114,
+    8115,
+    8116,
+    8118,
+    8119,
+    8120,
+    8122,
+    8123,
+    8124,
+    8127,
+    8128,
+    8129,
+    8130
+  ],
+  "rejected": [
+    8096,
+    8104,
+    8108,
+    8126
+  ],
+  "dispositions": {
+    "8096": {
+      "status": "reject",
+      "note": "Public activity exports do not require residual version-bump/ADR packaging; no runtime defect."
+    },
+    "8097": {
+      "status": "fixed",
+      "note": "ConfidenceScore rejects bool before int range validation."
+    },
+    "8098": {
+      "status": "fixed",
+      "note": "InChI requires version+layer after InChI= prefix."
+    },
+    "8099": {
+      "status": "fixed",
+      "note": "MolecularWeight rounds before exclusive range validation."
+    },
+    "8100": {
+      "status": "fixed",
+      "note": "PublicationFieldGroup.from_string documents ValueError for unknown groups."
+    },
+    "8101": {
+      "status": "fixed",
+      "note": "SchemaDriftResult deep-freezes type_changes mappings via MappingProxyType."
+    },
+    "8102": {
+      "status": "fixed",
+      "note": "Bronze/Silver/Gold DQ reports require timezone-aware timestamps."
+    },
+    "8103": {
+      "status": "fixed",
+      "note": "ValueObject immutability uses explicit _initialized flag; custom-init subclasses updated."
+    },
+    "8104": {
+      "status": "reject",
+      "note": "PublicationYear.__eq__ already requires same concrete class via isinstance; no defect."
+    },
+    "8105": {
+      "status": "fixed",
+      "note": "PubMedId.from_raw delegates coercion without premature str() wrapping."
+    },
+    "8106": {
+      "status": "fixed",
+      "note": "PChemblValue.__lt__ annotates other as object."
+    },
+    "8107": {
+      "status": "fixed",
+      "note": "ColumnQualifier.parse/is_qualified split with maxsplit=2 preserving field dots."
+    },
+    "8108": {
+      "status": "reject",
+      "note": "Module coverage inventory refresh is ops hygiene, not a column_order product defect."
+    },
+    "8109": {
+      "status": "fixed",
+      "note": "Completeness/FK/statistical DQ result dict fields frozen with MappingProxyType."
+    },
+    "8111": {
+      "status": "fixed",
+      "note": "DQResult freezes rule_outcomes lists to tuples."
+    },
+    "8113": {
+      "status": "fixed",
+      "note": "is_valid_numeric catches OverflowError from float() on oversized ints."
+    },
+    "8114": {
+      "status": "fixed",
+      "note": "ProteinClassHierarchy.is_leaf reflects path/leaf identity state."
+    },
+    "8115": {
+      "status": "fixed",
+      "note": "Bounded descriptor from_raw return annotations use Self | None."
+    },
+    "8116": {
+      "status": "fixed",
+      "note": "FieldGroupConfig snapshots field_groups via MappingProxyType."
+    },
+    "8118": {
+      "status": "fixed",
+      "note": "PubChemCid._validate accepts int | str input signature."
+    },
+    "8119": {
+      "status": "fixed",
+      "note": "Concentration rejects non-finite values (NaN/Inf) and non-numeric types."
+    },
+    "8120": {
+      "status": "fixed",
+      "note": "Concentration unit conversion uses single base-10 exponent delta."
+    },
+    "8122": {
+      "status": "fixed",
+      "note": "SMILES.from_raw narrows blank/None without assert."
+    },
+    "8123": {
+      "status": "fixed",
+      "note": "ISSN and ORCID validate ISO checksum digits after format normalization; fixed corrupted orcid URL prefixes."
+    },
+    "8124": {
+      "status": "fixed",
+      "note": "BronzeWriteResult rejects relative paths without provider/entity segments and path traversal."
+    },
+    "8126": {
+      "status": "reject",
+      "note": "compression_ratio already guards zero compressed/uncompressed sizes (pre-existing)."
+    },
+    "8127": {
+      "status": "fixed",
+      "note": "validate_taxonomy_id doctest uses is None comparisons for None returns."
+    },
+    "8128": {
+      "status": "fixed",
+      "note": "CompoundId raises on unsupported CompoundSource."
+    },
+    "8129": {
+      "status": "fixed",
+      "note": "BatchDQMetrics freezes column_stats via MappingProxyType."
+    },
+    "8130": {
+      "status": "fixed",
+      "note": "dq_metrics compatibility aliases reduced to test-used _compute_column_stats/_extract_numeric_values."
+    }
+  },
+  "tests": [
+    "tests/unit/domain/value_objects/test_domain_value_objects_cr_residuals_8096_8130.py",
+    "tests/unit/domain/value_objects (full suite green)"
+  ],
+  "tech_debt_budgets": "unchanged"
+}

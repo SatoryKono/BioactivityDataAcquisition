@@ -1,0 +1,107 @@
+{
+  "snapshot_at": "2026-08-31T06:49:22.711Z",
+  "baseline_sha": "52f3a664070ed15e028f0f03d67a889777580dd9",
+  "scope": {
+    "files": 57,
+    "workflows": 47,
+    "local_action_files": 9,
+    "dependabot_files": 1
+  },
+  "checks": [
+    {
+      "id": "scope-non-empty",
+      "status": "PASS",
+      "evidence": "57 tracked files"
+    },
+    {
+      "id": "trust-matrix-complete",
+      "status": "PASS",
+      "evidence": "47/47 workflows parsed"
+    },
+    {
+      "id": "immutable-action-pins",
+      "status": "PASS",
+      "evidence": "231/231 external uses have full 40-hex SHA"
+    },
+    {
+      "id": "untrusted-pr-isolation",
+      "status": "PASS",
+      "evidence": ".github/workflows/labeler.yml: pull_request_target, no checkout, no direct payload interpolation"
+    },
+    {
+      "id": "least-privilege",
+      "status": "PASS",
+      "evidence": "no permissions: write-all; write grants are job/event scoped"
+    },
+    {
+      "id": "pr-concurrency",
+      "status": "PASS",
+      "evidence": "29/29 PR-facing workflows declare concurrency"
+    },
+    {
+      "id": "artifact-retention",
+      "status": "PASS",
+      "evidence": "71/71 uploads have retention-days 1..30; always uploads include !cancelled()"
+    },
+    {
+      "id": "cache-keys",
+      "status": "PASS",
+      "evidence": "7 cache surfaces are OS/version plus lock/source fingerprint scoped"
+    },
+    {
+      "id": "dependabot-coverage",
+      "status": "PASS",
+      "evidence": "github-actions / plus npm /.github/actions/setup-mermaid"
+    },
+    {
+      "id": "workflow-catalog",
+      "status": "PASS",
+      "evidence": "47 live workflows == policy and reference catalog"
+    },
+    {
+      "id": "required-check-mapping",
+      "status": "PASS",
+      "evidence": "policy maps checks-complete and root-hygiene to unfiltered PR workflows"
+    },
+    {
+      "id": "required-check-enforcement",
+      "status": "FAIL",
+      "evidence": "main protected=false; ruleset 15730586 disabled; live contexts empty"
+    },
+    {
+      "id": "yaml-schema-local",
+      "status": "DEGRADED",
+      "evidence": "local PowerShell could not start: batch file arguments are invalid"
+    },
+    {
+      "id": "main-ci",
+      "status": "FAIL",
+      "evidence": "Root Hygiene 33365034000: unexpected arch_hash.txt; Type Checking 33365034014: unused-ignore debug_export_ops.py:161"
+    }
+  ],
+  "overall": "BLOCK",
+  "iteration": 2,
+  "post_audit": {
+    "pull_request": 9874,
+    "validated_sha": "e9f88e6777176691c3329d4f8432122c3baff421",
+    "status": "BLOCK",
+    "completed_success": [
+      "Branch Hygiene",
+      "Dashboard first-window no-scroll",
+      "Commit Lint"
+    ],
+    "completed_failure": [
+      "Root Hygiene",
+      "consolidation-gates",
+      "Type Checking (Strict)"
+    ],
+    "still_running_at_stop": [
+      "Tests",
+      "Lint and Architecture Gates",
+      "Security Scans",
+      "CodeQL",
+      "Duplication and Complexity Checks"
+    ],
+    "reason": "failure terminal condition reached; merge and close guards engaged"
+  }
+}

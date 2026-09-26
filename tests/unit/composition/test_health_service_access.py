@@ -1,0 +1,165 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# pyright: reportUndefinedVariable=false
+# pyright: reportPossiblyUnboundVariable=false
+# pyright: reportTypedDictNotRequiredAccess=false
+# pyright: reportOptionalSubscript=false
+# pyright: reportOptionalOperand=false
+# pyright: reportOptionalCall=false
+# pyright: reportOptionalIterable=false
+# pyright: reportIncompatibleMethodOverride=false
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportReturnType=false
+# pyright: reportInvalidCast=false
+# pyright: reportAssignmentType=false
+# pyright: reportImplicitAbstractClass=false
+# pyright: reportFunctionMemberAccess=false
+# pyright: reportConstantRedefinition=false
+# pyright: reportInvalidTypeForm=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+from __future__ import annotations
+
+from importlib import import_module
+from pathlib import Path
+from unittest.mock import MagicMock, patch, sentinel
+
+import pytest
+
+from bioetl.composition import health_service_access
+
+
+pytestmark = pytest.mark.unit
+
+
+def _owner_module(module_suffix: str) -> object:
+    return import_module("bioetl.composition" + module_suffix)
+
+
+def test_get_health_server_dependencies_delegates_to_services_owner() -> None:
+    expected = MagicMock(name="HealthServerDependencies")
+    owner_module = _owner_module("._services")
+
+    with patch.object(
+        owner_module,
+        "get_health_server_dependencies",
+        return_value=expected,
+    ) as mock_impl:
+        result = health_service_access.get_health_server_dependencies()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()
+
+
+def test_health_owner_access_forwards_explicit_data_root() -> None:
+    """Explicit roots must reach both health and quarantine owner seams."""
+    data_root = Path("synthetic-data-root")
+    owner_module = _owner_module("._services")
+
+    with (
+        patch.object(
+            owner_module,
+            "get_health_server_dependencies",
+            return_value=sentinel.health,
+        ) as health_impl,
+        patch.object(
+            owner_module,
+            "get_quarantine_service",
+            return_value=sentinel.quarantine,
+        ) as quarantine_impl,
+    ):
+        assert (
+            health_service_access.get_health_server_dependencies(data_root=data_root)
+            is sentinel.health
+        )
+        assert (
+            health_service_access.get_quarantine_service(data_root=data_root)
+            is sentinel.quarantine
+        )
+
+    health_impl.assert_called_once_with(data_root=data_root)
+    quarantine_impl.assert_called_once_with(data_root=data_root)
+
+
+def test_get_health_service_delegates_to_services_owner() -> None:
+    expected = MagicMock(name="HealthService")
+    owner_module = _owner_module("._services")
+
+    with patch.object(
+        owner_module,
+        "get_health_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = health_service_access.get_health_service()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()
+
+
+def test_get_quarantine_runtime_service_delegates_to_resource_management_owner() -> (
+    None
+):
+    expected = MagicMock(name="QuarantineRuntimeService")
+    owner_module = _owner_module("._resource_management")
+
+    with patch.object(
+        owner_module,
+        "get_quarantine_runtime_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = health_service_access.get_quarantine_runtime_service("chembl_activity")
+
+    assert result is expected
+    mock_impl.assert_called_once_with("chembl_activity")
+
+
+def test_get_quarantine_service_delegates_to_services_owner() -> None:
+    expected = MagicMock(name="QuarantineService")
+    owner_module = _owner_module("._services")
+
+    with patch.object(
+        owner_module,
+        "get_quarantine_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = health_service_access.get_quarantine_service()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()
+
+
+def test_rehydrate_provider_health_gauges_delegates_to_preflight_owner() -> None:
+    metrics = MagicMock(name="MetricsPort")
+    owner_module = _owner_module(".factories.pipeline._preflight_health_monitor")
+
+    with patch.object(
+        owner_module,
+        "rehydrate_provider_health_gauges",
+        return_value=3,
+    ) as mock_impl:
+        result = health_service_access.rehydrate_provider_health_gauges(metrics)
+
+    assert result == 3
+    mock_impl.assert_called_once_with(metrics)
+
+
+def test_get_bronze_cleanup_service_delegates_to_services_owner() -> None:
+    expected = MagicMock(name="BronzeCleanupService")
+    owner_module = _owner_module("._services")
+
+    with patch.object(
+        owner_module,
+        "get_bronze_cleanup_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = health_service_access.get_bronze_cleanup_service()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()

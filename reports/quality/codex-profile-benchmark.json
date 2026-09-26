@@ -1,0 +1,414 @@
+{
+  "benchmark_definition": {
+    "categories": [
+      "code navigation",
+      "focused fix",
+      "planning",
+      "test diagnosis",
+      "high-risk architecture review"
+    ],
+    "prompt_sha256": {
+      "architecture_review": "e09ecd25e6a44544441e8e8619041bcf8194f5e7ed71bdb4e2df0a7765a2dea1",
+      "code_navigation": "55845c12927a2cf45e19814e10e3eb9d70040ba34840fe630a9356a34a8b9f07",
+      "focused_fix": "6d2df431c0e10ec7a4714f1a991f5fab792755d0c78f8a2c7115918684e9cdfc",
+      "planning": "235967e04d078d62cabb234d46a0c2779d71a9894cd972b067bd824c061dbe0d",
+      "test_diagnosis": "b3da7bf8a0243d07a0030e3fe6a788bc91d972195f3cc1c39ccecfd147880116"
+    },
+    "rubric": "60 correctness + 40 validation completeness",
+    "secrets_in_inputs": false,
+    "source": "scripts/ai/codex/profile_benchmark.py"
+  },
+  "environment": {
+    "architecture": "x86_64",
+    "codex_cli": "codex-cli 0.147.0",
+    "os": "Linux",
+    "plugins": "disabled",
+    "repository_commit": "e1c71bc3bb697b3852ffd85d4335a00f15a532fb",
+    "sandbox": "read-only",
+    "session_persistence": "ephemeral",
+    "task_count": 5,
+    "timeout_seconds": 180.0,
+    "user_config": "ignored"
+  },
+  "privacy": {
+    "credentials_retained": false,
+    "model_outputs_retained": false,
+    "stderr_retained": false,
+    "user_paths_retained": false
+  },
+  "profiles": {
+    "balanced": {
+      "model": "gpt-5.6-sol",
+      "name": "balanced",
+      "reasoning_effort": "high",
+      "use_case": "default focused implementation and review"
+    },
+    "deep": {
+      "model": "gpt-5.6-sol",
+      "name": "deep",
+      "reasoning_effort": "max",
+      "use_case": "V4 architecture and difficult diagnosis"
+    },
+    "fast": {
+      "model": "gpt-5.6-luna",
+      "name": "fast",
+      "reasoning_effort": "low",
+      "use_case": "navigation and low-risk iteration"
+    }
+  },
+  "recommendation": {
+    "agents_max_threads": 3,
+    "deep_noninferior_to_default": true,
+    "deep_score": 96,
+    "default": "balanced",
+    "equivalent_quality_margin": 5,
+    "fast_default_eligible": false,
+    "quality_reference_score": 100,
+    "selection_order": [
+      "quality",
+      "median_wall_time",
+      "billable_token_proxy"
+    ]
+  },
+  "results": {
+    "balanced": [
+      {
+        "category": "code navigation",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "code_navigation",
+        "tokens": {
+          "billable_proxy": 14112,
+          "cached_input": 0,
+          "input": 14053,
+          "output": 59,
+          "reasoning_output": 0
+        },
+        "wall_time_ms": 19808
+      },
+      {
+        "category": "focused fix",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "focused_fix",
+        "tokens": {
+          "billable_proxy": 5128,
+          "cached_input": 8960,
+          "input": 14051,
+          "output": 37,
+          "reasoning_output": 0
+        },
+        "wall_time_ms": 17259
+      },
+      {
+        "category": "planning",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "planning",
+        "tokens": {
+          "billable_proxy": 14119,
+          "cached_input": 0,
+          "input": 14082,
+          "output": 37,
+          "reasoning_output": 0
+        },
+        "wall_time_ms": 9424
+      },
+      {
+        "category": "test diagnosis",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "test_diagnosis",
+        "tokens": {
+          "billable_proxy": 14090,
+          "cached_input": 0,
+          "input": 14056,
+          "output": 34,
+          "reasoning_output": 0
+        },
+        "wall_time_ms": 10374
+      },
+      {
+        "category": "high-risk architecture review",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "architecture_review",
+        "tokens": {
+          "billable_proxy": 14093,
+          "cached_input": 0,
+          "input": 14057,
+          "output": 36,
+          "reasoning_output": 0
+        },
+        "wall_time_ms": 10076
+      }
+    ],
+    "deep": [
+      {
+        "category": "code navigation",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "code_navigation",
+        "tokens": {
+          "billable_proxy": 14112,
+          "cached_input": 0,
+          "input": 14053,
+          "output": 59,
+          "reasoning_output": 0
+        },
+        "wall_time_ms": 12026
+      },
+      {
+        "category": "focused fix",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "focused_fix",
+        "tokens": {
+          "billable_proxy": 1032,
+          "cached_input": 13056,
+          "input": 14051,
+          "output": 37,
+          "reasoning_output": 0
+        },
+        "wall_time_ms": 7955
+      },
+      {
+        "category": "planning",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "planning",
+        "tokens": {
+          "billable_proxy": 14119,
+          "cached_input": 0,
+          "input": 14082,
+          "output": 37,
+          "reasoning_output": 0
+        },
+        "wall_time_ms": 13882
+      },
+      {
+        "category": "test diagnosis",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 80,
+          "validation_completeness": 20
+        },
+        "status": "passed",
+        "task": "test_diagnosis",
+        "tokens": {
+          "billable_proxy": 1029,
+          "cached_input": 13056,
+          "input": 14056,
+          "output": 29,
+          "reasoning_output": 0
+        },
+        "wall_time_ms": 12493
+      },
+      {
+        "category": "high-risk architecture review",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "architecture_review",
+        "tokens": {
+          "billable_proxy": 14228,
+          "cached_input": 0,
+          "input": 14057,
+          "output": 171,
+          "reasoning_output": 133
+        },
+        "wall_time_ms": 13608
+      }
+    ],
+    "fast": [
+      {
+        "category": "code navigation",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "code_navigation",
+        "tokens": {
+          "billable_proxy": 575,
+          "cached_input": 12032,
+          "input": 12545,
+          "output": 62,
+          "reasoning_output": 0
+        },
+        "wall_time_ms": 13294
+      },
+      {
+        "category": "focused fix",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "focused_fix",
+        "tokens": {
+          "billable_proxy": 12580,
+          "cached_input": 0,
+          "input": 12543,
+          "output": 37,
+          "reasoning_output": 0
+        },
+        "wall_time_ms": 8004
+      },
+      {
+        "category": "planning",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "planning",
+        "tokens": {
+          "billable_proxy": 607,
+          "cached_input": 12032,
+          "input": 12574,
+          "output": 65,
+          "reasoning_output": 26
+        },
+        "wall_time_ms": 13128
+      },
+      {
+        "category": "test diagnosis",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "test_diagnosis",
+        "tokens": {
+          "billable_proxy": 12591,
+          "cached_input": 0,
+          "input": 12548,
+          "output": 43,
+          "reasoning_output": 0
+        },
+        "wall_time_ms": 14623
+      },
+      {
+        "category": "high-risk architecture review",
+        "output_retained": false,
+        "retries": 0,
+        "scores": {
+          "correctness": 60,
+          "total": 100,
+          "validation_completeness": 40
+        },
+        "status": "passed",
+        "task": "architecture_review",
+        "tokens": {
+          "billable_proxy": 12695,
+          "cached_input": 0,
+          "input": 12549,
+          "output": 146,
+          "reasoning_output": 108
+        },
+        "wall_time_ms": 11791
+      }
+    ]
+  },
+  "schema_version": "bioetl-codex-profile-benchmark-v1",
+  "summaries": {
+    "balanced": {
+      "failed_runs": 0,
+      "mean_correctness": 60,
+      "mean_score": 100,
+      "mean_validation_completeness": 40,
+      "median_wall_time_ms": 10374,
+      "retry_rate": 0.0,
+      "runs": 5,
+      "total_billable_token_proxy": 61542
+    },
+    "deep": {
+      "failed_runs": 0,
+      "mean_correctness": 60,
+      "mean_score": 96,
+      "mean_validation_completeness": 36,
+      "median_wall_time_ms": 12493,
+      "retry_rate": 0.0,
+      "runs": 5,
+      "total_billable_token_proxy": 44520
+    },
+    "fast": {
+      "failed_runs": 0,
+      "mean_correctness": 60,
+      "mean_score": 100,
+      "mean_validation_completeness": 40,
+      "median_wall_time_ms": 13128,
+      "retry_rate": 0.0,
+      "runs": 5,
+      "total_billable_token_proxy": 39048
+    }
+  }
+}

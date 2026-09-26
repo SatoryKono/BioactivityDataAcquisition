@@ -1,0 +1,47 @@
+%% View: Domain-Focus | Parent: 04-domain-layer-class-diagram-full.mermaid
+%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N10, N11, N12, N13, N14, N15, N16, N17, N18, N8
+
+    N1["BaseEntity"]
+    N2["TableConfig"]
+    N3["PublicationEntityBase"]
+    N4["PipelineConfig"]
+    N5["DataSourcePort"]
+    N6["FilterableDataSourcePort"]
+    N7["ChemblPublication"]
+    N8["RuntimeConfig"]
+    N9["DQConfig"]
+    N10["Bronze/Silver/Gold/MergedStoragePorts"]
+    N11["LockPort"]
+    N12["CheckpointPort"]
+    N13["QuarantinePort"]
+    N14["MetricsPort"]
+    N15["TracingPort"]
+    N16["LoggerPort"]
+    N17["CircuitBreakerPort"]
+    N18["RateLimiterPort"]
+    N19["Activity"]
+    N20["Molecule"]
+
+    N1 --> N19
+    N1 --> N20
+    N1 --> N3
+    N3 --> N7
+    N6 --> N5
+    N4 --> N2
+    N4 --> N9
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5

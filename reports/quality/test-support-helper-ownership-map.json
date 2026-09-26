@@ -1,0 +1,140 @@
+{
+  "schema_version": "test-support-helper-ownership-map-v1",
+  "issue": 6044,
+  "mapped_on": "2026-07-07",
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "support_module_count": 10,
+  "consolidation_policy": {
+    "global_conftest_move_allowed": false,
+    "deduplicate_only_when_shared_semantics_match": true,
+    "preserve_domain_specific_builders": true,
+    "requires_consumer_update_plan": true
+  },
+  "modules": [
+    {
+      "path": "tests/unit/application/composite/fsm_test_support.py",
+      "owner_scope": "composite runner FSM fixtures",
+      "mutable_state": "uses composite runner support factories and per-test pytest fixtures",
+      "decision": "retain_local_plugin",
+      "consumers": [
+        "tests/unit/application/composite/test_runner_fsm_logging.py",
+        "tests/unit/application/composite/test_runner_enrichment_fsm.py"
+      ]
+    },
+    {
+      "path": "tests/unit/application/composite/merge_test_support.py",
+      "owner_scope": "composite merge and join planner builders",
+      "mutable_state": "builds merge services and in-memory collaborators per test",
+      "decision": "retain_domain_helper",
+      "consumers": [
+        "tests/unit/application/composite/test_coalesce_qualified.py",
+        "tests/unit/application/composite/test_join_planner.py",
+        "tests/unit/application/composite/test_merger.py"
+      ]
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/runner_pkg_test_support.py",
+      "owner_scope": "composite runner package mixin fixtures",
+      "mutable_state": "builds runner package support doubles per test",
+      "decision": "retain_package_helper",
+      "consumers": [
+        "tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py",
+        "tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py",
+        "tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py",
+        "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py"
+      ]
+    },
+    {
+      "path": "tests/unit/application/composite/runner_test_support.py",
+      "owner_scope": "composite runner service fixtures",
+      "mutable_state": "creates run ids, checkpoint state, and in-memory runner collaborators",
+      "decision": "retain_domain_helper",
+      "consumers": [
+        "tests/unit/application/composite/fsm_test_support.py",
+        "tests/unit/application/composite/test_runner.py",
+        "tests/unit/application/composite/test_runner_checkpoint_resume.py",
+        "tests/unit/application/composite/test_runner_enrichment_fsm.py",
+        "tests/unit/application/composite/test_runner_fsm.py",
+        "tests/unit/application/composite/test_runner_fsm_logging.py",
+        "tests/unit/application/composite/test_runner_robustness.py"
+      ]
+    },
+    {
+      "path": "tests/unit/application/core/normalization_test_support.py",
+      "owner_scope": "record normalization profile fixtures",
+      "mutable_state": "pure expected-value helpers with profile-specific examples",
+      "decision": "retain_domain_helper",
+      "consumers": [
+        "tests/unit/application/core/test_record_normalization_core.py",
+        "tests/unit/application/core/test_record_normalization_hash_invariants.py",
+        "tests/unit/application/core/test_record_normalization_next_wave.py",
+        "tests/unit/application/core/test_record_normalization_profiles.py"
+      ]
+    },
+    {
+      "path": "tests/unit/application/core/postrun_test_support.py",
+      "owner_scope": "postrun service doubles",
+      "mutable_state": "creates mutable fake ports and postrun service collaborators",
+      "decision": "retain_domain_helper",
+      "consumers": [
+        "tests/unit/application/core/test_dq_report_integration.py",
+        "tests/unit/application/core/test_postrun_service.py"
+      ]
+    },
+    {
+      "path": "tests/unit/application/core/record_processor_test_support.py",
+      "owner_scope": "record processor fixtures",
+      "mutable_state": "creates in-memory storage and DQ collaborators per test",
+      "decision": "retain_domain_helper",
+      "consumers": [
+        "tests/integration/application/core/test_record_processor.py"
+      ]
+    },
+    {
+      "path": "tests/unit/application/core/runner_test_support.py",
+      "owner_scope": "pipeline runner fixtures",
+      "mutable_state": "builds pipeline runner instances and per-test collaborators",
+      "decision": "retain_domain_helper",
+      "consumers": [
+        "tests/unit/application/core/test_otel_spans.py",
+        "tests/unit/application/core/test_runner.py"
+      ]
+    },
+    {
+      "path": "tests/unit/application/core/transformer_test_support.py",
+      "owner_scope": "batch transformer pytest plugin fixtures",
+      "mutable_state": "creates deterministic run context and in-memory ports per test",
+      "decision": "retain_local_plugin",
+      "consumers": [
+        "tests/unit/application/core/test_batch_transformer.py",
+        "tests/integration/application/core/test_record_processor.py",
+        "tests/unit/application/core/test_streaming_batch.py"
+      ]
+    },
+    {
+      "path": "tests/unit/application/services/run_manifest_test_support.py",
+      "owner_scope": "run manifest and replay service fixtures",
+      "mutable_state": "creates manifest payloads and replay metadata per test",
+      "decision": "retain_domain_helper",
+      "consumers": [
+        "tests/unit/application/services/control_plane/forensic/test_diagnostics_support.py",
+        "tests/unit/application/services/control_plane/replay/test_bundle_descriptor_payloads.py",
+        "tests/unit/application/services/control_plane/test_helper_module_coverage.py",
+        "tests/unit/application/services/control_plane/test_historical_replay_certification_service.py",
+        "tests/unit/application/services/control_plane/test_historical_replay_closure_service.py",
+        "tests/unit/application/services/control_plane/test_historical_replay_corpus_service.py",
+        "tests/unit/application/services/control_plane/test_historical_replay_universe_service.py",
+        "tests/integration/application/services/test_forensic_diff_service.py",
+        "tests/unit/application/services/test_replay_taxonomy_projection.py",
+        "tests/unit/application/services/test_run_manifest_diagnostics.py",
+        "tests/unit/application/services/test_run_manifest_inspection_service.py",
+        "tests/unit/application/services/test_run_manifest_inspection_verification.py"
+      ]
+    }
+  ],
+  "closeout_decision": {
+    "status": "closed-ready",
+    "decision": "map_before_consolidation",
+    "rationale": "The support helpers are intentionally scoped to different mutable test domains. Consolidation is allowed only after a consumer-by-consumer plan proves equivalent semantics and does not move mutable builders into global fixtures."
+  }
+}

@@ -1,0 +1,36 @@
+version: 1
+policy_scope: pipeline_contract_exclusion_policy
+owner: "@bioetl-contracts"
+linked_issue: "#5678"
+review_date: "2026-06-30"
+allowed_reasons:
+  - gold_runtime_disabled
+exclusions: {}
+resolved_exclusions:
+  - contract_ref: chembl.cell_line
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: chembl.compound_record
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: chembl.subcellular_fraction
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: chembl.tissue
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: crossref.publication
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: openalex.publication
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: pubchem.compound
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: semanticscholar.publication
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: uniprot.idmapping
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime

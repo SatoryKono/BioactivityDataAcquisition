@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""Zed-safe mypy gate matching CI type-checking scope.
+
+CI (``.github/workflows/type-checking.yml``) runs::
+
+    mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory
+
+``src/memory/**`` is type-checked like product code (AUD-004).
+Prefer this wrapper from Zed Type check so results match the merge gate.
+"""
+
+from __future__ import annotations
+
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.engineering.dev.zed_env_doctor import ensure_ready
+
+
+def main(argv: list[str] | None = None) -> int:
+    del argv
+    os.chdir(REPO_ROOT)
+    ensure_ready(modules=("mypy",))
+    # Match CI type-checking.yml product gate (AUD-004: memory included).
+    cmd = [
+        sys.executable,
+        "-m",
+        "mypy",
+        "--config-file",
+        "pyproject.toml",
+        "--no-pretty",
+        "src/bioetl",
+        "src/memory",
+    ]
+    print("[zed_mypy] CI-aligned type gate:", " ".join(cmd), flush=True)
+    print(
+        "[zed_mypy] scope=src/bioetl + src/memory (AUD-004 strict)",
+        flush=True,
+    )
+    completed = subprocess.run(cmd, cwd=REPO_ROOT, check=False)
+    return int(completed.returncode)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,30 @@
+[
+  {
+    "id": "TELE-005",
+    "priority": "P3",
+    "severity": "Low",
+    "confidence": "high",
+    "confidence_score": 0.99,
+    "status": "PROVEN",
+    "category": "scope-path",
+    "evidence": [
+      {
+        "path": "src/bioetl/infrastructure/observability",
+        "line": 1,
+        "command": "Test-Path src/bioetl/observability ; Test-Path src/bioetl/infrastructure/observability",
+        "observation": "SCOPE lists src/bioetl/observability which does not exist; canonical code is src/bioetl/infrastructure/observability. Remaining SCOPE paths exist. Not empty SCOPE."
+      }
+    ],
+    "expected": "Audit SCOPE paths exist or are documented aliases",
+    "actual": "src/bioetl/observability is missing; instrumentation lives under infrastructure/observability (hexagonal)",
+    "impact": "Future telemetry cycles may skip the real tree if they treat the missing path as empty SCOPE STOP. This cycle continued because other SCOPE paths exist.",
+    "root_cause": "Prompt SCOPE uses a historical package path; code moved under infrastructure/",
+    "remediation": "Update prompt.audit.cycle.telemetry default SCOPE to src/bioetl/infrastructure/observability only",
+    "effort": "S",
+    "dependencies": [],
+    "validation": [
+      "Test-Path src/bioetl/infrastructure/observability"
+    ],
+    "automated_fix_possible": false
+  }
+]

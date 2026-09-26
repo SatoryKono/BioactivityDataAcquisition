@@ -1,0 +1,30 @@
+# Qodo repository-level configuration.
+# Official docs: https://docs.qodo.ai/install-and-configure/configuration-overview/configuration-file
+
+[github_app]
+pr_commands = [
+    "/agentic_describe",
+    "/agentic_review",
+]
+handle_push_trigger = true
+push_commands = [
+    "/agentic_review",
+]
+
+[review_agent]
+comments_location_policy = "both"
+inline_comments_severity_threshold = 3
+demand_self_review = true
+issues_user_guidelines = """
+Follow AGENTS.md as the repository operating contract. Treat BioETL as local-only by default, do not introduce Docker/Redis/external orchestration requirements unless explicitly requested, and never create, edit, rename, move, overwrite, or delete .env files.
+"""
+compliance_user_guidelines = """
+Enforce the BioETL guardrails from AGENTS.md, especially: do not increase technical-debt budgets or exemption limits; preserve architecture boundaries; keep runtime source-of-truth before docs mirrors; require explicit validation evidence for source/config/runtime changes.
+"""
+
+[config]
+ignore_pr_title = [
+    "^\\[Auto\\]",
+    "^Auto",
+    "^\\[Bump\\]",
+]

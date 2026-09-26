@@ -1,0 +1,19 @@
+
+===> CodeRabbit connectivity
+CodeRabbit Doctor
+
+Version: 0.7.5
+Machine ID: cli/2b78ac6fa31f4f438503e84aab35dcb2
+Last doctor run: 2026-09-14T06:31:02.051Z
+
+[pass] CLI runtime          0.7.5 on linux-x64
+[pass] Storage              /home/fedor/.coderabbit is writable
+[pass] Service URLs         Required service URLs are configured.
+[pass] Authentication       API key authentication is configured.
+[pass] Auth environment     Browser sign-in is available.
+[pass] Git repository       Repository ready on main.
+[pass] Update policy        Auto-update is eligible.
+[pass] Backend reachable    https://app.coderabbit.ai reachable.
+[pass] WebSocket reachable  wss://ide.coderabbit.ai/ws reachable.
+
+Summary: 9 passed, 0 warnings, 0 failed

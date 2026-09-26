@@ -1,0 +1,7 @@
+{
+  "url": "https://raw.githubusercontent.com/grafana/grafana/v12.0.0/packages/grafana-prometheus/src/result_transformer.ts",
+  "sha256": "d627ac6453ad2625d566f1da054f3ef0c03b63e728d77d7d100debc9aa075837",
+  "bytes": 14581,
+  "license": "AGPL-3.0-only",
+  "note": "Reference to upstream source used in the replay; original file is not vendored in this evidence bundle."
+}

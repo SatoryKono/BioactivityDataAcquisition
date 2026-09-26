@@ -1,0 +1,1998 @@
+{
+  "governance": {
+    "cadence": "quarterly and after repository-setting migrations",
+    "migration": {
+      "delete_not_before": "2026-11-30",
+      "rule": "Do not delete legacy labels during the migration window. Remove a label only after local automation, open issues and pull requests, saved-search owners, and known external integrations have been reviewed.",
+      "started_on": "2026-08-30"
+    },
+    "owner": "@SatoryKono",
+    "wiki": {
+      "decision": "GitHub Wiki is disabled. Repository documentation is the only normative documentation surface; docs/00-project/NORMATIVE_SOURCES.md defines precedence.",
+      "expected_enabled": false,
+      "owner": "BioETL Team"
+    }
+  },
+  "review": {
+    "automation_mutated_github": false,
+    "controls": [
+      {
+        "decision": "Track remediation in existing issue #9800.",
+        "due_date": "2026-09-29",
+        "evidence": "active rulesets: none",
+        "id": "GH-RULESET-001",
+        "known_issue": 9800,
+        "owner": "Repository administrators",
+        "risk": "high",
+        "status": "drift",
+        "title": "At least one active ruleset protects the discovered default branch"
+      },
+      {
+        "decision": "No action required.",
+        "due_date": "2026-09-13",
+        "evidence": "sha_pinning_required=True",
+        "id": "GH-ACTIONS-001",
+        "known_issue": 9784,
+        "owner": "Security lane",
+        "risk": "high",
+        "status": "pass",
+        "title": "GitHub Actions requires full-SHA pinning"
+      },
+      {
+        "decision": "Track remediation in existing issue #9785.",
+        "due_date": "2026-09-29",
+        "evidence": "missing=none; unprotected=['staging']",
+        "id": "GH-ENV-001",
+        "known_issue": 9785,
+        "owner": "Release engineering",
+        "risk": "high",
+        "status": "drift",
+        "title": "Publishing and deployment environments have protection rules"
+      },
+      {
+        "decision": "No action required.",
+        "due_date": "2026-09-13",
+        "evidence": "alerts=True; security_updates=True",
+        "id": "GH-DEPENDABOT-001",
+        "known_issue": 9783,
+        "owner": "Security lane",
+        "risk": "high",
+        "status": "pass",
+        "title": "Dependabot alerts and security updates are enabled"
+      },
+      {
+        "decision": "No action required.",
+        "due_date": "2026-09-13",
+        "evidence": ".github/workflows/codeql.yml exists=True",
+        "id": "GH-CODEQL-001",
+        "known_issue": 9786,
+        "owner": "Security lane",
+        "risk": "high",
+        "status": "pass",
+        "title": "Advanced CodeQL workflow is present"
+      },
+      {
+        "decision": "No action required.",
+        "due_date": "2026-09-13",
+        "evidence": "secret_scanning=enabled",
+        "id": "GH-SECRET-001",
+        "known_issue": 9796,
+        "owner": "Security lane",
+        "risk": "high",
+        "status": "pass",
+        "title": "Secret scanning is enabled"
+      },
+      {
+        "decision": "No action required.",
+        "due_date": "2026-09-29",
+        "evidence": "path=.github/CODEOWNERS",
+        "id": "GH-CODEOWNERS-001",
+        "known_issue": null,
+        "owner": "BioETL Team",
+        "risk": "medium",
+        "status": "pass",
+        "title": "CODEOWNERS exists on the reviewed default branch"
+      },
+      {
+        "decision": "No action required.",
+        "due_date": "2026-09-29",
+        "evidence": "squash=True; merge_commit=False; rebase=False",
+        "id": "GH-MERGE-001",
+        "known_issue": null,
+        "owner": "Repository administrators",
+        "risk": "medium",
+        "status": "pass",
+        "title": "Squash is the only enabled merge method"
+      },
+      {
+        "decision": "Track remediation in existing issue #9787.",
+        "due_date": "2026-09-29",
+        "evidence": "has_wiki=True",
+        "id": "GH-WIKI-001",
+        "known_issue": 9787,
+        "owner": "BioETL Team",
+        "risk": "low",
+        "status": "drift",
+        "title": "GitHub Wiki is disabled in favor of normative repository docs"
+      },
+      {
+        "decision": "No action required.",
+        "due_date": "2026-09-29",
+        "evidence": "forms=['bug_report.yml', 'feature_request.yml', 'retention_sensitive_cleanup.yml']; config_exists=True",
+        "id": "GH-INTAKE-001",
+        "known_issue": 9787,
+        "owner": "BioETL Team",
+        "risk": "medium",
+        "status": "pass",
+        "title": "Issue intake uses the governed GitHub Issue Forms set"
+      },
+      {
+        "decision": "Track remediation in existing issue #9787.",
+        "due_date": "2026-09-29",
+        "evidence": "missing=['api-change', 'automated', 'contract-failure']",
+        "id": "GH-LABELS-001",
+        "known_issue": 9787,
+        "owner": "BioETL Team",
+        "risk": "medium",
+        "status": "drift",
+        "title": "Every automation-required canonical label exists"
+      }
+    ],
+    "counts": {
+      "drift": 4,
+      "pass": 7
+    },
+    "overall": "drift"
+  },
+  "schema_version": "1.0",
+  "snapshot": {
+    "actions_permissions": {
+      "available": true,
+      "payload": {
+        "allowed_actions": "all",
+        "enabled": true,
+        "sha_pinning_required": true
+      }
+    },
+    "codeowners": {
+      "exists": true,
+      "path": ".github/CODEOWNERS"
+    },
+    "codeql": {
+      "advanced_workflow_exists": true,
+      "default_setup": {
+        "available": true,
+        "payload": {
+          "languages": [
+            "actions",
+            "javascript",
+            "javascript-typescript",
+            "python",
+            "typescript"
+          ],
+          "query_suite": "default",
+          "runner_label": null,
+          "runner_type": "standard",
+          "schedule": null,
+          "state": "not-configured",
+          "threat_model": "remote",
+          "updated_at": null
+        }
+      }
+    },
+    "dependabot": {
+      "alerts": {
+        "available": true,
+        "enabled": true,
+        "reason": ""
+      },
+      "security_updates": {
+        "available": true,
+        "enabled": true,
+        "reason": ""
+      }
+    },
+    "environments": [
+      {
+        "deployment_branch_policy": null,
+        "name": "copilot",
+        "protection_rules": []
+      },
+      {
+        "deployment_branch_policy": {
+          "custom_branch_policies": true,
+          "protected_branches": false
+        },
+        "name": "ghcr-publish",
+        "protection_rules": [
+          {
+            "id": 64097767,
+            "node_id": "GA_kwDOQgiqDs4D0g3n",
+            "prevent_self_review": false,
+            "reviewers": [
+              {
+                "reviewer": {
+                  "avatar_url": "https://avatars.githubusercontent.com/u/13055362?v=4",
+                  "events_url": "https://api.github.com/users/SatoryKono/events{/privacy}",
+                  "followers_url": "https://api.github.com/users/SatoryKono/followers",
+                  "following_url": "https://api.github.com/users/SatoryKono/following{/other_user}",
+                  "gists_url": "https://api.github.com/users/SatoryKono/gists{/gist_id}",
+                  "gravatar_id": "",
+                  "html_url": "https://github.com/SatoryKono",
+                  "id": 13055362,
+                  "login": "SatoryKono",
+                  "node_id": "MDQ6VXNlcjEzMDU1MzYy",
+                  "organizations_url": "https://api.github.com/users/SatoryKono/orgs",
+                  "received_events_url": "https://api.github.com/users/SatoryKono/received_events",
+                  "repos_url": "https://api.github.com/users/SatoryKono/repos",
+                  "site_admin": false,
+                  "starred_url": "https://api.github.com/users/SatoryKono/starred{/owner}{/repo}",
+                  "subscriptions_url": "https://api.github.com/users/SatoryKono/subscriptions",
+                  "type": "User",
+                  "url": "https://api.github.com/users/SatoryKono",
+                  "user_view_type": "public"
+                },
+                "type": "User"
+              }
+            ],
+            "type": "required_reviewers"
+          },
+          {
+            "id": 64097768,
+            "node_id": "GA_kwDOQgiqDs4D0g3o",
+            "type": "branch_policy"
+          }
+        ]
+      },
+      {
+        "deployment_branch_policy": {
+          "custom_branch_policies": true,
+          "protected_branches": false
+        },
+        "name": "observability-render-host",
+        "protection_rules": [
+          {
+            "id": 64097774,
+            "node_id": "GA_kwDOQgiqDs4D0g3u",
+            "prevent_self_review": false,
+            "reviewers": [
+              {
+                "reviewer": {
+                  "avatar_url": "https://avatars.githubusercontent.com/u/13055362?v=4",
+                  "events_url": "https://api.github.com/users/SatoryKono/events{/privacy}",
+                  "followers_url": "https://api.github.com/users/SatoryKono/followers",
+                  "following_url": "https://api.github.com/users/SatoryKono/following{/other_user}",
+                  "gists_url": "https://api.github.com/users/SatoryKono/gists{/gist_id}",
+                  "gravatar_id": "",
+                  "html_url": "https://github.com/SatoryKono",
+                  "id": 13055362,
+                  "login": "SatoryKono",
+                  "node_id": "MDQ6VXNlcjEzMDU1MzYy",
+                  "organizations_url": "https://api.github.com/users/SatoryKono/orgs",
+                  "received_events_url": "https://api.github.com/users/SatoryKono/received_events",
+                  "repos_url": "https://api.github.com/users/SatoryKono/repos",
+                  "site_admin": false,
+                  "starred_url": "https://api.github.com/users/SatoryKono/starred{/owner}{/repo}",
+                  "subscriptions_url": "https://api.github.com/users/SatoryKono/subscriptions",
+                  "type": "User",
+                  "url": "https://api.github.com/users/SatoryKono",
+                  "user_view_type": "public"
+                },
+                "type": "User"
+              }
+            ],
+            "type": "required_reviewers"
+          },
+          {
+            "id": 64097775,
+            "node_id": "GA_kwDOQgiqDs4D0g3v",
+            "type": "branch_policy"
+          }
+        ]
+      },
+      {
+        "deployment_branch_policy": {
+          "custom_branch_policies": true,
+          "protected_branches": false
+        },
+        "name": "pypi",
+        "protection_rules": [
+          {
+            "id": 64097779,
+            "node_id": "GA_kwDOQgiqDs4D0g3z",
+            "prevent_self_review": false,
+            "reviewers": [
+              {
+                "reviewer": {
+                  "avatar_url": "https://avatars.githubusercontent.com/u/13055362?v=4",
+                  "events_url": "https://api.github.com/users/SatoryKono/events{/privacy}",
+                  "followers_url": "https://api.github.com/users/SatoryKono/followers",
+                  "following_url": "https://api.github.com/users/SatoryKono/following{/other_user}",
+                  "gists_url": "https://api.github.com/users/SatoryKono/gists{/gist_id}",
+                  "gravatar_id": "",
+                  "html_url": "https://github.com/SatoryKono",
+                  "id": 13055362,
+                  "login": "SatoryKono",
+                  "node_id": "MDQ6VXNlcjEzMDU1MzYy",
+                  "organizations_url": "https://api.github.com/users/SatoryKono/orgs",
+                  "received_events_url": "https://api.github.com/users/SatoryKono/received_events",
+                  "repos_url": "https://api.github.com/users/SatoryKono/repos",
+                  "site_admin": false,
+                  "starred_url": "https://api.github.com/users/SatoryKono/starred{/owner}{/repo}",
+                  "subscriptions_url": "https://api.github.com/users/SatoryKono/subscriptions",
+                  "type": "User",
+                  "url": "https://api.github.com/users/SatoryKono",
+                  "user_view_type": "public"
+                },
+                "type": "User"
+              }
+            ],
+            "type": "required_reviewers"
+          },
+          {
+            "id": 64097780,
+            "node_id": "GA_kwDOQgiqDs4D0g30",
+            "type": "branch_policy"
+          }
+        ]
+      },
+      {
+        "deployment_branch_policy": null,
+        "name": "staging",
+        "protection_rules": []
+      },
+      {
+        "deployment_branch_policy": {
+          "custom_branch_policies": true,
+          "protected_branches": false
+        },
+        "name": "testpypi",
+        "protection_rules": [
+          {
+            "id": 64097782,
+            "node_id": "GA_kwDOQgiqDs4D0g32",
+            "prevent_self_review": false,
+            "reviewers": [
+              {
+                "reviewer": {
+                  "avatar_url": "https://avatars.githubusercontent.com/u/13055362?v=4",
+                  "events_url": "https://api.github.com/users/SatoryKono/events{/privacy}",
+                  "followers_url": "https://api.github.com/users/SatoryKono/followers",
+                  "following_url": "https://api.github.com/users/SatoryKono/following{/other_user}",
+                  "gists_url": "https://api.github.com/users/SatoryKono/gists{/gist_id}",
+                  "gravatar_id": "",
+                  "html_url": "https://github.com/SatoryKono",
+                  "id": 13055362,
+                  "login": "SatoryKono",
+                  "node_id": "MDQ6VXNlcjEzMDU1MzYy",
+                  "organizations_url": "https://api.github.com/users/SatoryKono/orgs",
+                  "received_events_url": "https://api.github.com/users/SatoryKono/received_events",
+                  "repos_url": "https://api.github.com/users/SatoryKono/repos",
+                  "site_admin": false,
+                  "starred_url": "https://api.github.com/users/SatoryKono/starred{/owner}{/repo}",
+                  "subscriptions_url": "https://api.github.com/users/SatoryKono/subscriptions",
+                  "type": "User",
+                  "url": "https://api.github.com/users/SatoryKono",
+                  "user_view_type": "public"
+                },
+                "type": "User"
+              }
+            ],
+            "type": "required_reviewers"
+          },
+          {
+            "id": 64097783,
+            "node_id": "GA_kwDOQgiqDs4D0g33",
+            "type": "branch_policy"
+          }
+        ]
+      }
+    ],
+    "generated_at": "2026-08-30T15:53:38.157131+00:00",
+    "issue_intake": {
+      "config_exists": true,
+      "files": [
+        "bug_report.md",
+        "bug_report.yml",
+        "config.yml",
+        "feature_request.md",
+        "feature_request.yml",
+        "retention_sensitive_cleanup.yml"
+      ],
+      "forms": [
+        "bug_report.yml",
+        "feature_request.yml",
+        "retention_sensitive_cleanup.yml"
+      ]
+    },
+    "labels": {
+      "classification_counts": {
+        "canonical": 31,
+        "deprecated": 43,
+        "retained": 136
+      },
+      "count": 210,
+      "items": [
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "__probe__",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "adapters",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "adr",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "ADR-040",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "ai",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "ai-runtime",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "0B1F3A",
+          "description": "Application layer",
+          "name": "application",
+          "replacement": "layer:application"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "application-layer",
+          "replacement": "layer:application"
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "architecture",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "architecture-tests",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "archive",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "audit",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "audit-tooling",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "automation",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "backend",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "behavior",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "bootstrap",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "boundaries",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "BRC CNLD",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "B60205",
+          "description": "Requires migration or config update",
+          "name": "breaking-change",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "B60205",
+          "description": "Breaking changes management",
+          "name": "breaking-changes",
+          "replacement": "breaking-change"
+        },
+        {
+          "classification": "canonical",
+          "color": "d73a4a",
+          "description": "Something isn't working",
+          "name": "bug",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "cardinality",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "chembl",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "ci",
+          "replacement": "ci/cd"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "ci-cd",
+          "replacement": "ci/cd"
+        },
+        {
+          "classification": "canonical",
+          "color": "BFD4F2",
+          "description": "GitHub Actions, workflows",
+          "name": "ci/cd",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "2acd5b",
+          "description": "",
+          "name": "cleanup",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "cli",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "code-quality",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "coderabbit",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "codex",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "compatibility",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "completed",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "008080",
+          "description": "Composite pipeline",
+          "name": "composite",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "BFDADC",
+          "description": "Composition / DI",
+          "name": "composition",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "concurrency",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "C5DEF5",
+          "description": "Pipeline/filter/schema YAML configs",
+          "name": "config",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "BFDADC",
+          "description": "Configuration changes",
+          "name": "configs",
+          "replacement": "config"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "configuration",
+          "replacement": "config"
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "contract",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "contracts",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "control-plane",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "coordination",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "core",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "correctness",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "coverage",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "critical",
+          "replacement": "priority:critical"
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "dashboard",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "dashboard-design",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "dashboards",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "Dashbord",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "0E8A16",
+          "description": "Data provenance and lineage tracking",
+          "name": "data-lineage",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "D4C5F9",
+          "description": "DQ rules, validation, schemas",
+          "name": "data-quality",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "datasource",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "ddd",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "dead-code",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "Debit",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "debt-scoring",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "demo",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "0366d6",
+          "description": "Pull requests that update a dependency file",
+          "name": "dependencies",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "deployment",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "determinism",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "FBCA04",
+          "description": "Developer experience improvements",
+          "name": "developer-experience",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "devin",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "diagrams",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "docker",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "docs",
+          "replacement": "documentation"
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "docs-drift",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "0075ca",
+          "description": "Improvements or additions to documentation",
+          "name": "documentation",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "domain",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "done",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "dq",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "This issue or pull request already exists",
+          "name": "duplicate",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "duplication",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "e2e",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "enforcement",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "a2eeef",
+          "description": "New feature or request",
+          "name": "enhancement",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "evidence",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "export",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "final",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "final-report",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "full-audit",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "gitignore",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "gold",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "golden",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "7057ff",
+          "description": "Good for newcomers",
+          "name": "good first issue",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "5319E7",
+          "description": "Governance / policy / registries",
+          "name": "governance",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "grafana",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "ededed",
+          "description": "",
+          "name": "guardrails",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "guides",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "008672",
+          "description": "Extra attention is needed",
+          "name": "help wanted",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "hexagonal-architecture",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "high-priority",
+          "replacement": "priority:high"
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "high-risk",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "Higiene",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "hotspot",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "http",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "hygiene",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "imports",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "0e8a16",
+          "description": "Infrastructure layer changes",
+          "name": "infrastructure",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "0B1F3A",
+          "description": "Interfaces layer",
+          "name": "interfaces",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "e4e669",
+          "description": "This doesn't seem right",
+          "name": "invalid",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "168700",
+          "description": "Pull requests that update javascript code",
+          "name": "javascript",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "knowledge",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "6A5ACD",
+          "description": "Application layer",
+          "name": "layer:application",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "1E90FF",
+          "description": "Composition layer",
+          "name": "layer:composition",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "7B68EE",
+          "description": "Domain layer",
+          "name": "layer:domain",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "4169E1",
+          "description": "Infrastructure layer",
+          "name": "layer:infrastructure",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "00BFFF",
+          "description": "Interfaces / CLI layer",
+          "name": "layer:interfaces",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "lifecycle",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "linting",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "loki",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "low-risk",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "mcp",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "medium-priority",
+          "replacement": "priority:medium"
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "medium-risk",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "memory-sync",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "meta",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "metrics",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "monitoring",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "naming",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "neo4j",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "observability",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "operations",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "optimization",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "P0",
+          "replacement": "priority:critical"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "P1",
+          "replacement": "priority:high"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "P2",
+          "replacement": "priority:medium"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "P3",
+          "replacement": "priority:low"
+        },
+        {
+          "classification": "retained",
+          "color": "E6B800",
+          "description": "Speed, memory, optimization",
+          "name": "performance",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "phase-1",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "phase-2",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "phase-3",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "phase-4",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "phase-4-6",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "phase-5",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "phase-6",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "pipeline",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "pipelines",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "priority/P1",
+          "replacement": "priority:high"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "priority/P2",
+          "replacement": "priority:medium"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "priority/P3",
+          "replacement": "priority:low"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "priority/P4",
+          "replacement": "priority:low"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "priority/P5",
+          "replacement": "priority:low"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "priority/P6",
+          "replacement": "priority:low"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "priority/P7",
+          "replacement": "priority:low"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "priority/P8",
+          "replacement": "priority:low"
+        },
+        {
+          "classification": "canonical",
+          "color": "B60205",
+          "description": "Must fix immediately",
+          "name": "priority:critical",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "D93F0B",
+          "description": "Should fix soon",
+          "name": "priority:high",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "0E8A16",
+          "description": "Nice to have",
+          "name": "priority:low",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "FBCA04",
+          "description": "Normal priority",
+          "name": "priority:medium",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "priority:P0",
+          "replacement": "priority:critical"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "priority:P1",
+          "replacement": "priority:high"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "priority:P2",
+          "replacement": "priority:medium"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "priority:P3",
+          "replacement": "priority:low"
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "process",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "prometheus",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "promql",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "provider-health",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "2E8B57",
+          "description": "ChEMBL pipeline",
+          "name": "provider:chembl",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "20B2AA",
+          "description": "CrossRef pipeline",
+          "name": "provider:crossref",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "5F9EA0",
+          "description": "OpenAlex pipeline",
+          "name": "provider:openalex",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "3CB371",
+          "description": "PubChem pipeline",
+          "name": "provider:pubchem",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "8FBC8F",
+          "description": "PubMed pipeline",
+          "name": "provider:pubmed",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "2F4F4F",
+          "description": "Semantic Scholar pipeline",
+          "name": "provider:semantic-scholar",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "66CDAA",
+          "description": "UniProt pipeline",
+          "name": "provider:uniprot",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "providers",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "2b67c6",
+          "description": "Pull requests that update python:uv code",
+          "name": "python:uv",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "quality",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "quarantine",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "d876e3",
+          "description": "Further information is requested",
+          "name": "question",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "C2E0C6",
+          "description": "Refactoring / cleanup",
+          "name": "refactor",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "FEF2C0",
+          "description": "Code restructuring, no functional change",
+          "name": "refactoring",
+          "replacement": "refactor"
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "release-blocker",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "replay",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "replay-safety",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "reporting",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "D93F0B",
+          "description": "Scientific reproducibility",
+          "name": "reproducibility",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "requirements",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "resource-management",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "runbook",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "runtime",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "1D76DB",
+          "description": "Schema versioning and evolution",
+          "name": "schema-evolution",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "scripts",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "ededed",
+          "description": "",
+          "name": "security",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "skills",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "sonarqube",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "ededed",
+          "description": "",
+          "name": "stale",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "static-analysis",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "synchronization",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "tech debt",
+          "replacement": "technical-debt"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "tech-debt",
+          "replacement": "technical-debt"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "technical debt",
+          "replacement": "technical-debt"
+        },
+        {
+          "classification": "canonical",
+          "color": "D93F0B",
+          "description": "Tech debt / refactor",
+          "name": "technical-debt",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "test",
+          "replacement": "testing"
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "test-coverage",
+          "replacement": null
+        },
+        {
+          "classification": "canonical",
+          "color": "ededed",
+          "description": "",
+          "name": "testing",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "tests",
+          "replacement": "testing"
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "tooling",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "tracing",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "typing",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "ux",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "validation",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "vcr",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "vcr-record",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ededed",
+          "description": "",
+          "name": "verification",
+          "replacement": null
+        },
+        {
+          "classification": "retained",
+          "color": "ffffff",
+          "description": "This will not be worked on",
+          "name": "wontfix",
+          "replacement": null
+        },
+        {
+          "classification": "deprecated",
+          "color": "cfd3d7",
+          "description": "autocreated by triage",
+          "name": "workflow",
+          "replacement": "ci/cd"
+        },
+        {
+          "classification": "deprecated",
+          "color": "ededed",
+          "description": "",
+          "name": "workflows",
+          "replacement": "ci/cd"
+        }
+      ]
+    },
+    "repository": {
+      "archived": false,
+      "default_branch": "main",
+      "name_with_owner": "SatoryKono/BioactivityDataAcquisition",
+      "visibility": "public"
+    },
+    "rulesets": [
+      {
+        "enforcement": "disabled",
+        "id": 13643213,
+        "name": "main",
+        "target": "branch"
+      },
+      {
+        "enforcement": "disabled",
+        "id": 15730586,
+        "name": "root-hygiene-required-check",
+        "target": "branch"
+      }
+    ],
+    "schema_version": "1.0",
+    "settings": {
+      "allow_merge_commit": false,
+      "allow_rebase_merge": false,
+      "allow_squash_merge": true,
+      "delete_branch_on_merge": true,
+      "has_wiki": true,
+      "secret_scanning": "enabled",
+      "secret_scanning_push_protection": "enabled"
+    },
+    "source": {
+      "git_head": "4f817cdd916544823cc58e6c03b01150e7bebedf",
+      "git_ref": "HEAD",
+      "policy_sha256": "3a54af9cf365d26be5e44df8926fc2eb4689ab288bcbe69878a0ca165751248b",
+      "tool_sha256": "9c89d437f564e301071ad9433157e744487674ccfa55a5b8adea3ea7c9d7114b"
+    },
+    "workflow_health": {
+      "conclusions": {
+        "cancelled": 51,
+        "failure": 4,
+        "in_progress": 15,
+        "pending": 2,
+        "queued": 13,
+        "success": 15
+      },
+      "recent_non_successful": [
+        {
+          "conclusion": "cancelled",
+          "name": "OpenSSF Scorecard",
+          "started_at": "2026-08-30T15:49:58Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320742487"
+        },
+        {
+          "conclusion": "cancelled",
+          "name": "Type Checking (Strict)",
+          "started_at": "2026-08-30T15:49:58Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320742458"
+        },
+        {
+          "conclusion": "cancelled",
+          "name": "Root Hygiene",
+          "started_at": "2026-08-30T15:49:58Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320742444"
+        },
+        {
+          "conclusion": "cancelled",
+          "name": "Dashboard first-window no-scroll",
+          "started_at": "2026-08-30T15:49:58Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320742443"
+        },
+        {
+          "conclusion": "cancelled",
+          "name": "Duplication and Complexity Checks",
+          "started_at": "2026-08-30T15:49:58Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320742438"
+        },
+        {
+          "conclusion": "cancelled",
+          "name": "Security Scans",
+          "started_at": "2026-08-30T15:49:58Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320742429"
+        },
+        {
+          "conclusion": "cancelled",
+          "name": "Security Scans",
+          "started_at": "2026-08-30T15:47:14Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320615988"
+        },
+        {
+          "conclusion": "cancelled",
+          "name": "Root Hygiene",
+          "started_at": "2026-08-30T15:47:14Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320615959"
+        },
+        {
+          "conclusion": "cancelled",
+          "name": "OpenSSF Scorecard",
+          "started_at": "2026-08-30T15:47:14Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320615938"
+        },
+        {
+          "conclusion": "cancelled",
+          "name": "Dashboard first-window no-scroll",
+          "started_at": "2026-08-30T15:47:14Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320615937"
+        }
+      ],
+      "sample_size": 100
+    }
+  }
+}

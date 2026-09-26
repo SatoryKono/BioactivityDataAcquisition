@@ -1,0 +1,39 @@
+{
+  "captured_at_utc": "2026-09-10T00:00:00+00:00",
+  "source": "GET GitHub REST, pre-PUT for #10267",
+  "repository": "SatoryKono/BioactivityDataAcquisition",
+  "default_branch": "main",
+  "allow_auto_merge": true,
+  "applied_rules_main": [],
+  "rulesets": [
+    {
+      "id": 13643213,
+      "name": "main",
+      "enforcement": "disabled",
+      "updated_at": "2026-09-02T09:24:27.854+03:00",
+      "include": ["refs/heads/main"],
+      "bypass_actors": [],
+      "current_user_can_bypass": "never",
+      "rules": [
+        "deletion",
+        "non_fast_forward",
+        "pull_request",
+        "required_status_checks"
+      ],
+      "required_approving_review_count": 1,
+      "required_status_checks": ["checks-complete", "root-hygiene"],
+      "strict_required_status_checks_policy": true
+    },
+    {
+      "id": 15730586,
+      "name": "root-hygiene-required-check",
+      "enforcement": "disabled",
+      "updated_at": "2026-09-02T09:41:27.708+03:00",
+      "include": ["refs/heads/main"],
+      "bypass_actors": [],
+      "current_user_can_bypass": "never",
+      "required_status_checks": ["checks-complete", "root-hygiene"],
+      "strict_required_status_checks_policy": true
+    }
+  ]
+}

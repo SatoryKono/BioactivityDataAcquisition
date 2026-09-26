@@ -1,0 +1,4174 @@
+{
+  "schema_version": "cast-any-typing-census-v1",
+  "linked_issue": "#10596",
+  "policy": {
+    "scope": "src/bioetl",
+    "statement_window_lines": 3,
+    "justified_markers": [
+      "PD3",
+      "PD6",
+      "TYPE-002",
+      "Any: mixin host",
+      "Any: host attr",
+      "Any: JSON",
+      "as_mixin_host("
+    ],
+    "ratchet": "configs/quality/cast_any_unjustified_budget.yaml",
+    "ratchet_policy": "shrink_only"
+  },
+  "summary": {
+    "total_cast_any_count": 374,
+    "justified_count": 243,
+    "unjustified_count": 131,
+    "by_category": {
+      "pd3_host_attr_default": 131,
+      "pd6_host_attr_default": 90,
+      "type_002_policy": 3,
+      "any_mixin_host": 3,
+      "any_host_attr": 16,
+      "any_json": 0,
+      "as_mixin_host_call": 0,
+      "unjustified": 131
+    },
+    "by_layer": {
+      "application": {
+        "total": 181,
+        "unjustified": 56
+      },
+      "composition": {
+        "total": 22,
+        "unjustified": 8
+      },
+      "domain": {
+        "total": 12,
+        "unjustified": 2
+      },
+      "infrastructure": {
+        "total": 156,
+        "unjustified": 64
+      },
+      "interfaces": {
+        "total": 3,
+        "unjustified": 1
+      }
+    },
+    "unjustified_by_subcategory": {
+      "pd4_host_default_pending_protocol": 60,
+      "free_form_reason": 70,
+      "no_reason_tag": 1
+    },
+    "file_count": 117
+  },
+  "top_files": [
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "total": 11,
+      "unjustified": 11,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
+      "total": 8,
+      "unjustified": 8,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
+      "total": 8,
+      "unjustified": 8,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_io_mixin.py",
+      "total": 6,
+      "unjustified": 6,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
+      "total": 6,
+      "unjustified": 6,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_output_mixin.py",
+      "total": 5,
+      "unjustified": 5,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
+      "total": 5,
+      "unjustified": 5,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
+      "total": 5,
+      "unjustified": 5,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/services/medallion/medallion_lifecycle.py",
+      "total": 4,
+      "unjustified": 4,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/infrastructure/quality/exemptions_registry.py",
+      "total": 4,
+      "unjustified": 4,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/composite/join_planner_delegation_mixin.py",
+      "total": 3,
+      "unjustified": 3,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/core/postrun/_failure_policy.py",
+      "total": 3,
+      "unjustified": 3,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/export_execution.py",
+      "total": 3,
+      "unjustified": 3,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/infrastructure/observability/observability_backend_process.py",
+      "total": 3,
+      "unjustified": 3,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_metrics_mixin.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/core/batch_writer_columns_mixin.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/services/ops/health_service.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/composition/services/versioning.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/decorators/_circuit_breaker_snapshot.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/writer_metrics.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/lineage_persistence.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    }
+  ],
+  "unjustified_reason_tags": [
+    {
+      "reason": "host default (PD4)",
+      "count": 60
+    },
+    {
+      "reason": "dynamic compat patch target",
+      "count": 4
+    },
+    {
+      "reason": "Windows STARTUPINFO duck-type",
+      "count": 3
+    },
+    {
+      "reason": "export port accepts Arrow/table duck-type",
+      "count": 3
+    },
+    {
+      "reason": "pyarrow Table after read boundary",
+      "count": 3
+    },
+    {
+      "reason": "pyarrow.Table returned via executor is untyped to mypy",
+      "count": 3
+    },
+    {
+      "reason": "DeltaTable runtime type has no complete type stubs",
+      "count": 2
+    },
+    {
+      "reason": "external mutation summary compatibility",
+      "count": 2
+    },
+    {
+      "reason": "gold write request duck-type",
+      "count": 2
+    },
+    {
+      "reason": "lineage bundle duck-type",
+      "count": 2
+    },
+    {
+      "reason": "reconciliation mutation helper uses structural host",
+      "count": 2
+    },
+    {
+      "reason": "structural FK reconcile result port",
+      "count": 2
+    },
+    {
+      "reason": "CSV exporter Arrow table duck-type",
+      "count": 1
+    },
+    {
+      "reason": "DQ metrics .dict() duck-type",
+      "count": 1
+    },
+    {
+      "reason": "asdict over caller-guaranteed dataclass",
+      "count": 1
+    },
+    {
+      "reason": "builder protocol compatibility",
+      "count": 1
+    },
+    {
+      "reason": "cast for nullable numeric coercion",
+      "count": 1
+    },
+    {
+      "reason": "concrete BatchWriter supplies the host context",
+      "count": 1
+    },
+    {
+      "reason": "concrete host injects an optional async validator",
+      "count": 1
+    },
+    {
+      "reason": "concrete host supplies the classifier",
+      "count": 1
+    },
+    {
+      "reason": "concrete host supplies the metrics recorder",
+      "count": 1
+    },
+    {
+      "reason": "delta schema boundary",
+      "count": 1
+    },
+    {
+      "reason": "duck-type model_dump on config object",
+      "count": 1
+    },
+    {
+      "reason": "duck-type version attr on config object",
+      "count": 1
+    },
+    {
+      "reason": "duck-typed Pandera schema class",
+      "count": 1
+    },
+    {
+      "reason": "duck-typed async HTTP client context",
+      "count": 1
+    },
+    {
+      "reason": "duck-typed async context manager",
+      "count": 1
+    },
+    {
+      "reason": "duck-typed lineage fragment without CP import",
+      "count": 1
+    },
+    {
+      "reason": "dynamic provider class attribute",
+      "count": 1
+    },
+    {
+      "reason": "export writer accepts Arrow table duck-type",
+      "count": 1
+    },
+    {
+      "reason": "factory schema Protocol→concrete",
+      "count": 1
+    },
+    {
+      "reason": "heterogeneous factory config union",
+      "count": 1
+    },
+    {
+      "reason": "heterogeneous schema adapter",
+      "count": 1
+    },
+    {
+      "reason": "host method duck-type",
+      "count": 1
+    },
+    {
+      "reason": "inspect accepts arbitrary callables",
+      "count": 1
+    },
+    {
+      "reason": "legacy breaker attribute",
+      "count": 1
+    },
+    {
+      "reason": "legacy breaker duck type",
+      "count": 1
+    },
+    {
+      "reason": "openpyxl Workbook duck-type",
+      "count": 1
+    },
+    {
+      "reason": "openpyxl Worksheet duck-type",
+      "count": 1
+    },
+    {
+      "reason": "optional column-order service",
+      "count": 1
+    },
+    {
+      "reason": "optional substance field",
+      "count": 1
+    },
+    {
+      "reason": "payload = dict(vars(ctx))",
+      "count": 1
+    },
+    {
+      "reason": "phased postrun methods are supplied by mixins",
+      "count": 1
+    },
+    {
+      "reason": "pyarrow StructType lacks __iter__ in stubs",
+      "count": 1
+    },
+    {
+      "reason": "pyarrow Table after isinstance gate",
+      "count": 1
+    },
+    {
+      "reason": "pyarrow dataset duck-type",
+      "count": 1
+    },
+    {
+      "reason": "pydantic model_dump duck-type",
+      "count": 1
+    },
+    {
+      "reason": "pydantic narrowing at runtime",
+      "count": 1
+    },
+    {
+      "reason": "runtime config mapping unpack",
+      "count": 1
+    },
+    {
+      "reason": "schema columns duck-type",
+      "count": 1
+    },
+    {
+      "reason": "structural boundary cast",
+      "count": 1
+    },
+    {
+      "reason": "structural host callback",
+      "count": 1
+    },
+    {
+      "reason": "structural to_dict duck-type",
+      "count": 1
+    },
+    {
+      "reason": "tracing port returns an OTel-compatible runtime object",
+      "count": 1
+    }
+  ],
+  "findings": [
+    {
+      "path": "src/bioetl/application/composite/_preflight_orchestration.py",
+      "line": 30,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/_preflight_reporting.py",
+      "line": 20,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/coordinator_result_mixin.py",
+      "line": 18,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/coordinator_result_mixin.py",
+      "line": 19,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_dq_config: CompositeDQConfig = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py",
+      "line": 112,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "pyarrow Table after isinstance gate",
+      "snippet": "table = cast(Any, pa_table)  # Any: pyarrow Table after isinstance gate"
+    },
+    {
+      "path": "src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py",
+      "line": 173,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "pyarrow Table after read boundary",
+      "snippet": "cast(Any, pa_table)  # Any: pyarrow Table after read boundary"
+    },
+    {
+      "path": "src/bioetl/application/composite/join_planner_delegation_mixin.py",
+      "line": 26,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_join_key_resolver: JoinKeyResolverProtocol = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/join_planner_delegation_mixin.py",
+      "line": 29,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_dependency_joiner: DependencyJoinerProtocol = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/join_planner_delegation_mixin.py",
+      "line": 32,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_join_executor: JoinExecutorProtocol = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/key_extractor.py",
+      "line": 80,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "pyarrow Table after read boundary",
+      "snippet": "cast(Any, pa_table)  # Any: pyarrow Table after read boundary"
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_input_mixin.py",
+      "line": 153,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "pyarrow Table after read boundary",
+      "snippet": "cast(Any, arrow_table)  # Any: pyarrow Table after read boundary"
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_io_mixin.py",
+      "line": 41,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_config: MergeConfig = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_io_mixin.py",
+      "line": 42,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_io_mixin.py",
+      "line": 43,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_field_group_registry: FieldGroupRegistry | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_io_mixin.py",
+      "line": 46,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_cross_validator: EnrichmentCrossValidator | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_io_mixin.py",
+      "line": 49,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_gold_schema: Any | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_io_mixin.py",
+      "line": 50,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_join_planner: JoinPlannerService = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_metrics_mixin.py",
+      "line": 22,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_config: MergeConfig = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_metrics_mixin.py",
+      "line": 23,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_output_mixin.py",
+      "line": 23,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_config: MergeConfig = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_output_mixin.py",
+      "line": 24,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_output_mixin.py",
+      "line": 25,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_storage: MergedStoragePort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_output_mixin.py",
+      "line": 26,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_field_group_registry: FieldGroupRegistry | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_output_mixin.py",
+      "line": 29,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_gold_schema: Any | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_control_plane_mixin.py",
+      "line": 47,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_run_ledger_service: RunLedgerService | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_control_plane_mixin.py",
+      "line": 50,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_manifest_id: str | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py",
+      "line": 47,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_runtime: CompositeRuntimeConfig = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py",
+      "line": 48,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_fsm: FSMStateHelperService = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py",
+      "line": 49,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py",
+      "line": 50,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_config: CompositeConfig = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py",
+      "line": 51,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_run_id_str: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py",
+      "line": 52,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_merger: CompositeMergerProtocol = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py",
+      "line": 53,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_checkpoint_manager: CompositeCheckpointService = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py",
+      "line": 38,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_config: CompositeConfig = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py",
+      "line": 39,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py",
+      "line": 40,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_run_id_str: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py",
+      "line": 41,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_run_id: RunID = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py",
+      "line": 42,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_runtime: object = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py",
+      "line": 43,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_started_at: datetime | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py",
+      "line": 44,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_dq_report_service: DQReportService | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py",
+      "line": 47,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_quarantine_port: QuarantinePort | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py",
+      "line": 50,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py",
+      "line": 51,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_run_ledger_service: RunLedgerService | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py",
+      "line": 28,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_config: CompositeConfig = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py",
+      "line": 29,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py",
+      "line": 30,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_run_id_str: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py",
+      "line": 31,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_run_id: RunID = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py",
+      "line": 32,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_dq_report_service: DQReportService | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py",
+      "line": 35,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_quarantine_port: QuarantinePort | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py",
+      "line": 38,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 47,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_config: CompositeConfig = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 48,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_runtime: CompositeRuntimeConfig = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 49,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort] = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 52,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_checkpoint_manager: CompositeCheckpointService = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 55,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 56,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 57,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_tracing: TracingPort | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 58,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_observer: CompositeLifecycleObserverService = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 61,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_run_id_str: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 62,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_clock: ClockPort | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 63,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_start_time: float | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 64,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_started_at: datetime | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 65,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_original_run_id: str | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 66,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_preflight_validator: CompositePreflightValidationService | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "line": 69,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_fsm: FSMStateHelperService = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_quarantine_manager_support.py",
+      "line": 47,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_pipeline_name: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_quarantine_manager_support.py",
+      "line": 48,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_quarantine: QuarantinePort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_quarantine_manager_support.py",
+      "line": 49,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_domain_event_emitter: DomainEventEmitterProtocol | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/_quarantine_manager_support.py",
+      "line": 52,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_quarantine_manager_support.py",
+      "line": 53,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_batch_metrics: BatchMetricsRecorderService | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/_quarantine_manager_support.py",
+      "line": 56,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_pipeline_metrics: PipelineMetricsRecorder = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/_quarantine_manager_support.py",
+      "line": 59,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_run_type: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "line": 23,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "set_like_fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "line": 24,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "hash_included_fields: frozenset[str] = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "line": 27,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "hash_excluded_fields: frozenset[str] = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "line": 30,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "line": 31,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "field_aliases: Mapping[str, str] = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "line": 39,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "content_hash_policy_by_version: ContentHashPolicyByVersion | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "line": 42,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "content_hash_policy_authoritative: bool = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "line": 45,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "content_hash_include_fields: frozenset[str] = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "line": 48,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "content_hash_exclude_fields: frozenset[str] = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "line": 51,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "profile: _NormalizationProfileLike | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "line": 54,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "provider: str = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 52,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_postrun_service: PostrunService = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 53,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_tracer: TracingPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 54,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_services: PipelineRunnerServicesProtocol = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 57,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 58,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_executor: BatchExecutor = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 66,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_postrun_service: PostrunService = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 67,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_tracer: TracingPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 68,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_services: PipelineRunnerServicesProtocol = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 71,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 72,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_executor: BatchExecutor = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 82,
+      "layer": "application",
+      "category": "any_mixin_host",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "mixin host protocol bridge",
+      "snippet": "await cast(Any, self._postrun_service).cleanup("
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 144,
+      "layer": "application",
+      "category": "any_mixin_host",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "mixin host protocol bridge",
+      "snippet": "postrun_service = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/base_transformer/base.py",
+      "line": 144,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "structural boundary cast",
+      "snippet": "identity_service=cast("
+    },
+    {
+      "path": "src/bioetl/application/core/batch_executor_runtime_state.py",
+      "line": 43,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_runtime_state: BatchExecutorRuntimeState = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/batch_processing_support.py",
+      "line": 203,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "structural host callback",
+      "snippet": "execute_with_span=cast("
+    },
+    {
+      "path": "src/bioetl/application/core/batch_writer_columns_mixin.py",
+      "line": 24,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "optional column-order service",
+      "snippet": "_column_orderer: Any = cast(Any, None)  # Any: optional column-order service"
+    },
+    {
+      "path": "src/bioetl/application/core/batch_writer_columns_mixin.py",
+      "line": 25,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "heterogeneous schema adapter",
+      "snippet": "_data_schema: Any = cast(Any, None)  # Any: heterogeneous schema adapter"
+    },
+    {
+      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
+      "line": 25,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "concrete host injects an optional async validator",
+      "snippet": "_lock_validator: Any = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
+      "line": 30,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "concrete BatchWriter supplies the host context",
+      "snippet": "_context: Any = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
+      "line": 33,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "tracing port returns an OTel-compatible runtime object",
+      "snippet": "_tracer: Any = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
+      "line": 36,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "concrete host supplies the classifier",
+      "snippet": "_error_classifier: Any = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
+      "line": 39,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "concrete host supplies the metrics recorder",
+      "snippet": "_batch_metrics: Any = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/postrun/_failure_policy.py",
+      "line": 113,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_runtime: object = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/core/postrun/_failure_policy.py",
+      "line": 124,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/core/postrun/_failure_policy.py",
+      "line": 125,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_FAILURE_POLICY: PostrunFailurePolicySpec = cast("
+    },
+    {
+      "path": "src/bioetl/application/core/postrun/service.py",
+      "line": 172,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "phased postrun methods are supplied by mixins",
+      "snippet": "host = cast(Any, self)  # Any: phased postrun methods are supplied by mixins"
+    },
+    {
+      "path": "src/bioetl/application/core/preflight/service.py",
+      "line": 58,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "inspect accepts arbitrary callables",
+      "snippet": "cast(Any, validate_fn)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_event_mixin.py",
+      "line": 17,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_event_mixin.py",
+      "line": 18,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_event_mixin.py",
+      "line": 19,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "provider_name: str = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_event_mixin.py",
+      "line": 20,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "pipeline_name: str = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_event_mixin.py",
+      "line": 21,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "run_id: str = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_event_mixin.py",
+      "line": 22,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "manifest_id: str | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_event_mixin.py",
+      "line": 23,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "entity: str | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_event_mixin.py",
+      "line": 24,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "run_type: str | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_event_mixin.py",
+      "line": 25,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "effective_config_hash: str | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_event_mixin.py",
+      "line": 26,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "contract_ref: str | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_event_mixin.py",
+      "line": 27,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "contract_version: str | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_event_mixin.py",
+      "line": 28,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "composite_run_id: str | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_health_mixin.py",
+      "line": 20,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "pipeline_name: str = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_health_mixin.py",
+      "line": 21,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_health_mixin.py",
+      "line": 23,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "emit_event: Callable[..., None] = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_postrun_mixin.py",
+      "line": 19,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "pipeline_name: str = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_postrun_mixin.py",
+      "line": 20,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/observability/observer_postrun_mixin.py",
+      "line": 21,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "emit_event: Callable[..., None] = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py",
+      "line": 115,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "cast for nullable numeric coercion",
+      "snippet": "cast(Any, assay_count)  # Any: cast for nullable numeric coercion"
+    },
+    {
+      "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
+      "line": 48,
+      "layer": "application",
+      "category": "type_002_policy",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "TYPE-002 kwargs bridge",
+      "snippet": "transformer, provider, **cast(Any, dict(kwargs))"
+    },
+    {
+      "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
+      "line": 60,
+      "layer": "application",
+      "category": "type_002_policy",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "TYPE-002 MRO host",
+      "snippet": "super(cast(Any, owner_type), transformer).__init__(  # Any: TYPE-002 MRO host"
+    },
+    {
+      "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
+      "line": 62,
+      "layer": "application",
+      "category": "type_002_policy",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "TYPE-002 kwargs bridge",
+      "snippet": "**cast(Any, dict(kwargs)),  # Any: TYPE-002 kwargs bridge"
+    },
+    {
+      "path": "src/bioetl/application/services/control_plane/manifest/_service_hydration.py",
+      "line": 41,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_manifest_id_factory: Callable[[], str] = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/control_plane/manifest/_service_hydration.py",
+      "line": 44,
+      "layer": "application",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "schema_version: str = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/application/services/control_plane/manifest/_service_support.py",
+      "line": 39,
+      "layer": "application",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "schema_version: str = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/application/services/control_plane/replay/historical_closure_models.py",
+      "line": 77,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "structural to_dict duck-type",
+      "snippet": "cast(Any, inventory).to_dict()  # Any: structural to_dict duck-type"
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_gold_mixin.py",
+      "line": 33,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_run_id: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_gold_mixin.py",
+      "line": 34,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_workflow_id: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_gold_mixin.py",
+      "line": 35,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_pipeline_id: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_gold_mixin.py",
+      "line": 36,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_provider_id: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_gold_mixin.py",
+      "line": 37,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_gold_rejected_rows: list[dict[str, object]] = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_gold_mixin.py",
+      "line": 40,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_lineage_rows: list[dict[str, object]] = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_transform_mixin.py",
+      "line": 37,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_run_id: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_transform_mixin.py",
+      "line": 38,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_workflow_id: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_transform_mixin.py",
+      "line": 39,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_pipeline_id: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_transform_mixin.py",
+      "line": 40,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_provider_id: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_transform_mixin.py",
+      "line": 41,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_bronze_rows: list[dict[str, object]] = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_transform_mixin.py",
+      "line": 44,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_silver_full_rows: list[dict[str, object]] = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_transform_mixin.py",
+      "line": 47,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_silver_rejected_rows: list[dict[str, object]] = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_transform_mixin.py",
+      "line": 50,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_silver_quarantine_rows: list[dict[str, object]] = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_transform_mixin.py",
+      "line": 53,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_gold_full_rows: list[dict[str, object]] = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_transform_mixin.py",
+      "line": 56,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_gold_rejected_rows: list[dict[str, object]] = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_collector_transform_mixin.py",
+      "line": 59,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_gold_record_index_by_hash: dict[str, int] = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_service_recording_mixin.py",
+      "line": 21,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_collector: DebugExportCollector = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/debug_export_service_recording_mixin.py",
+      "line": 22,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_created_at_factory: Callable[[], datetime] = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/export_execution.py",
+      "line": 108,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "export port accepts Arrow/table duck-type",
+      "snippet": "table=cast("
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/export_execution.py",
+      "line": 119,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "export port accepts Arrow/table duck-type",
+      "snippet": "table=cast(Any, export_table),  # Any: export port accepts Arrow/table duck-type"
+    },
+    {
+      "path": "src/bioetl/application/services/export_lineage/export_execution.py",
+      "line": 170,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "export port accepts Arrow/table duck-type",
+      "snippet": "table=cast(Any, table),  # Any: export port accepts Arrow/table duck-type"
+    },
+    {
+      "path": "src/bioetl/application/services/medallion/medallion_lifecycle.py",
+      "line": 70,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "storage: MedallionStorageProtocol = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/services/medallion/medallion_lifecycle.py",
+      "line": 71,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/services/medallion/medallion_lifecycle.py",
+      "line": 158,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "storage: MedallionStorageProtocol = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/services/medallion/medallion_lifecycle.py",
+      "line": 159,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/services/medallion/medallion_maintenance_mixin.py",
+      "line": 29,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "storage: StorageMaintenancePort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/medallion/medallion_maintenance_mixin.py",
+      "line": 30,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/ops/health_service.py",
+      "line": 291,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "duck-typed async context manager",
+      "snippet": "return cast(Any, adapter)  # Any: duck-typed async context manager"
+    },
+    {
+      "path": "src/bioetl/application/services/ops/health_service.py",
+      "line": 305,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "duck-typed async HTTP client context",
+      "snippet": "return cast(Any, http_client)  # Any: duck-typed async HTTP client context"
+    },
+    {
+      "path": "src/bioetl/application/services/quality/_quarantine_service_sync_mixin.py",
+      "line": 28,
+      "layer": "application",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "clock: ClockPort = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/application/services/quality/data_quality_thresholds.py",
+      "line": 20,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_config: DQConfig = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/quality/data_quality_thresholds.py",
+      "line": 21,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/quality/data_quality_thresholds.py",
+      "line": 22,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/quality/data_quality_thresholds.py",
+      "line": 23,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_pipeline_name: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/quality/data_quality_thresholds.py",
+      "line": 24,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_pipeline_metrics: PipelineMetricsRecorder = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/quality/data_quality_thresholds.py",
+      "line": 27,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_run_type: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
+      "line": 41,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
+      "line": 42,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
+      "line": 43,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_bronze_analyzer: BronzeDQAnalyzerPort | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
+      "line": 46,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_silver_analyzer: SilverDQAnalyzerPort | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
+      "line": 49,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_gold_analyzer: GoldDQAnalyzerPort | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
+      "line": 52,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_report_writer: DQReportWriterPort | None = cast("
+    },
+    {
+      "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
+      "line": 67,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "structural FK reconcile result port",
+      "snippet": "r = cast(Any, result)  # Any: structural FK reconcile result port"
+    },
+    {
+      "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
+      "line": 118,
+      "layer": "application",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "structural FK reconcile result port",
+      "snippet": "r = cast(Any, result)  # Any: structural FK reconcile result port"
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/_registry_factory_catalog.py",
+      "line": 47,
+      "layer": "composition",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "heterogeneous factory config union",
+      "snippet": "cast(Any, config)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/registry_core.py",
+      "line": 57,
+      "layer": "composition",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "factory schema Protocol→concrete",
+      "snippet": "silver_schema=cast("
+    },
+    {
+      "path": "src/bioetl/composition/factories/services/pipeline_batch_executor_builder.py",
+      "line": 193,
+      "layer": "composition",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "builder protocol compatibility",
+      "snippet": "execution_state_service=cast("
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/clear_mixin.py",
+      "line": 21,
+      "layer": "composition",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/clear_mixin.py",
+      "line": 22,
+      "layer": "composition",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/health_mixin.py",
+      "line": 25,
+      "layer": "composition",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "bronze: BronzeWriter = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/health_mixin.py",
+      "line": 26,
+      "layer": "composition",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/health_mixin.py",
+      "line": 27,
+      "layer": "composition",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/maintenance_mixin.py",
+      "line": 33,
+      "layer": "composition",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "bronze: BronzeWriter = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/maintenance_mixin.py",
+      "line": 34,
+      "layer": "composition",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/maintenance_mixin.py",
+      "line": 35,
+      "layer": "composition",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/merged_mixin.py",
+      "line": 38,
+      "layer": "composition",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/merged_mixin.py",
+      "line": 39,
+      "layer": "composition",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/write_mixin.py",
+      "line": 29,
+      "layer": "composition",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "bronze: BronzeWriter = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/write_mixin.py",
+      "line": 30,
+      "layer": "composition",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/composition/factories/storage/write_mixin.py",
+      "line": 31,
+      "layer": "composition",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/composition/providers/decorators.py",
+      "line": 73,
+      "layer": "composition",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "dynamic provider class attribute",
+      "snippet": "cast(Any, cls).__provider_name__ = name  # Any: dynamic provider class attribute"
+    },
+    {
+      "path": "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py",
+      "line": 64,
+      "layer": "composition",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "no_reason_tag",
+      "reason_tag": null,
+      "snippet": "return cast(\"T\", replace(cast(Any, ctx), cached_bronze=cached_bronze))  # Any:"
+    },
+    {
+      "path": "src/bioetl/composition/runtime_builders/_run_manifest_context_updates.py",
+      "line": 48,
+      "layer": "composition",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "manifest_id: str | None = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/composition/runtime_builders/runner_input_assembly.py",
+      "line": 124,
+      "layer": "composition",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "payload = dict(vars(ctx))",
+      "snippet": "return cast(\"T\", replace(cast(Any, ctx), cached_bronze=resolved))  # Any:"
+    },
+    {
+      "path": "src/bioetl/composition/services/versioning.py",
+      "line": 270,
+      "layer": "composition",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "duck-type model_dump on config object",
+      "snippet": "host = cast(Any, config)  # Any: duck-type model_dump on config object"
+    },
+    {
+      "path": "src/bioetl/composition/services/versioning.py",
+      "line": 313,
+      "layer": "composition",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "duck-type version attr on config object",
+      "snippet": "host = cast(Any, config)  # Any: duck-type version attr on config object"
+    },
+    {
+      "path": "src/bioetl/domain/behavior/normalization_service.py",
+      "line": 70,
+      "layer": "domain",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "config: NormalizationConfig = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/domain/behavior/normalization_service.py",
+      "line": 71,
+      "layer": "domain",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "converter: UnitConverter = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/domain/behavior/normalization_service.py",
+      "line": 72,
+      "layer": "domain",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "validator: ValueValidator = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/domain/behavior/normalization_service.py",
+      "line": 169,
+      "layer": "domain",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "config: NormalizationConfig = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/domain/behavior/normalization_service.py",
+      "line": 170,
+      "layer": "domain",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "aggregator: ActivityAggregator = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/domain/composite/config_merge.py",
+      "line": 204,
+      "layer": "domain",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "runtime config mapping unpack",
+      "snippet": "ColumnGroupConfig(**cast(Any, g))  # Any: runtime config mapping unpack"
+    },
+    {
+      "path": "src/bioetl/domain/mixin_host.py",
+      "line": 16,
+      "layer": "domain",
+      "category": "any_mixin_host",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "mixin host",
+      "snippet": "return cast(Any, obj)  # Any: mixin host"
+    },
+    {
+      "path": "src/bioetl/domain/normalization/json.py",
+      "line": 204,
+      "layer": "domain",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "asdict over caller-guaranteed dataclass",
+      "snippet": "dataclass_value = cast(Any, value)  # Any: asdict over caller-guaranteed dataclass"
+    },
+    {
+      "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
+      "line": 23,
+      "layer": "domain",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_catalog: ReasonCatalog = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
+      "line": 24,
+      "layer": "domain",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host field",
+      "snippet": "_instrumented_stages: frozenset[str] = cast(Any, None)  # Any: host field"
+    },
+    {
+      "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
+      "line": 25,
+      "layer": "domain",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_stages: dict[str, _StageBucket] = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
+      "line": 26,
+      "layer": "domain",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_touched_instrumented: bool = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
+      "line": 78,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "http_client: UnifiedHTTPClient = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
+      "line": 79,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
+      "line": 80,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "provider_name: str = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
+      "line": 81,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
+      "line": 82,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_page_size: int = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
+      "line": 83,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_adapter_metrics: AdapterMetricsRecorder = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
+      "line": 86,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_last_probe_health_status: HealthStatus | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/chembl/metadata.py",
+      "line": 29,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_request_collector: APIRequestCollector = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/chembl/metadata.py",
+      "line": 32,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_extraction_params: ExtractionParams = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/crossref/_client_fallback_policy.py",
+      "line": 34,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_fallback_handler: CrossRefTitleFallbackHandler = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/crossref/_client_fallback_policy.py",
+      "line": 37,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_fallback_decorator: ComposableFallbackDecorator | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/crossref/_client_fallback_policy.py",
+      "line": 40,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_fetch_flow: CrossRefFetchFlow | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/decorators/_circuit_breaker_snapshot.py",
+      "line": 16,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "legacy breaker duck type",
+      "snippet": "return float(cast(Any, getter()))  # Any: legacy breaker duck type"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/decorators/_circuit_breaker_snapshot.py",
+      "line": 18,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "legacy breaker attribute",
+      "snippet": "cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/filterable_mixin.py",
+      "line": 98,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3) Must be defined by the adapter class",
+      "snippet": "provider_name: str = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
+      "line": 49,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "retry_config: RetryConfig = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
+      "line": 50,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
+      "line": 51,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "provider: str = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
+      "line": 52,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "logger: LoggerPort | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
+      "line": 53,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "rate_limiter: RateLimiterPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
+      "line": 54,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "circuit_breaker: CircuitBreakerPort = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
+      "line": 57,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_tracer: TracingPort | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
+      "line": 58,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "run_id: RunID | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/openalex/client_helpers_adapter_mixin.py",
+      "line": 39,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "mailto: str | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/openalex/client_helpers_adapter_mixin.py",
+      "line": 40,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "api_key: str | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/openalex/client_helpers_adapter_mixin.py",
+      "line": 41,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_request_collector: APIRequestCollector = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py",
+      "line": 43,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py",
+      "line": 44,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py",
+      "line": 45,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_query_executor: OpenAlexQueryExecutor = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py",
+      "line": 48,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_cursor_flow: OpenAlexCursorFlow = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py",
+      "line": 49,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_fallback_orchestrator: OpenAlexFallbackOrchestrator = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubchem/_client_fetch_surface.py",
+      "line": 24,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_strategies: PubChemFetchStrategies = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_identifiers.py",
+      "line": 40,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "FETCH_STRATEGY_ERRORS: tuple[type[BaseException], ...] = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_identifiers.py",
+      "line": 43,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_identifiers.py",
+      "line": 44,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_provider_name: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_identifiers.py",
+      "line": 45,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_fetch_flow: PubChemFetchFlow = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_identifiers.py",
+      "line": 46,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_response_mapper: PubChemResponseMapper = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_search.py",
+      "line": 34,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_fetch_flow: PubChemFetchFlow = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_search.py",
+      "line": 35,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_response_mapper: PubChemResponseMapper = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubchem/client_model_mixin.py",
+      "line": 32,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_request_collector: APIRequestCollector = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubchem/client_model_mixin.py",
+      "line": 35,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "rate_limiter: TokenBucketRateLimiter = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubchem/entity_mapper.py",
+      "line": 162,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "optional substance field",
+      "snippet": "\"cids\": cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_client_fallback_policy.py",
+      "line": 33,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_fallback_handler: PubMedTitleFallbackHandler = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_state.py",
+      "line": 20,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "http_client: UnifiedHTTPClient = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_state.py",
+      "line": 21,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_state.py",
+      "line": 22,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "email: str = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_state.py",
+      "line": 23,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "api_key: str | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_state.py",
+      "line": 24,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_state.py",
+      "line": 25,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_adapter_metrics: AdapterMetricsRecorder = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_state.py",
+      "line": 28,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_request_collector: APIRequestCollector = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_state.py",
+      "line": 31,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_error_handler: ErrorHandlerPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_state.py",
+      "line": 32,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "provider_name: str = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_state.py",
+      "line": 33,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "batch_size: int = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_state.py",
+      "line": 34,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/semanticscholar/_client_fallback_policy.py",
+      "line": 44,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_fallback_handler: SemanticScholarTitleFallbackHandler = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/uniprot/feature_sequence_adapter_mixin.py",
+      "line": 176,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "api_key: str | None = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/uniprot/feature_sequence_adapter_mixin.py",
+      "line": 177,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "base_url: str = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/adapters/uniprot/feature_sequence_adapter_mixin.py",
+      "line": 178,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_request_collector: APIRequestCollector = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/audit/_file_audit_io.py",
+      "line": 22,
+      "layer": "infrastructure",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "base_path: Path = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py",
+      "line": 32,
+      "layer": "infrastructure",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5)",
+      "snippet": "base_path: Path = cast(Any, None)  # Any: host attr default (PD5)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/control_plane/_file_lineage_queries.py",
+      "line": 23,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "base_path: Path = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/control_plane/_file_lineage_queries.py",
+      "line": 24,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/control_plane/_file_run_ledger_queries.py",
+      "line": 31,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "base_path: Path = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/control_plane/_file_run_ledger_queries.py",
+      "line": 32,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/export/debug_export_adapter.py",
+      "line": 201,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "duck-typed lineage fragment without CP import",
+      "snippet": "frag = cast(Any, fragment)  # Any: duck-typed lineage fragment without CP import"
+    },
+    {
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "line": 130,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "openpyxl Worksheet duck-type",
+      "snippet": "sheet = cast(Any, worksheet)  # Any: openpyxl Worksheet duck-type"
+    },
+    {
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "line": 144,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "openpyxl Workbook duck-type",
+      "snippet": "book = cast(Any, workbook)  # Any: openpyxl Workbook duck-type"
+    },
+    {
+      "path": "src/bioetl/infrastructure/export/export_writer_adapter.py",
+      "line": 32,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "export writer accepts Arrow table duck-type",
+      "snippet": "arrow_table = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/observability/observability_backend_process.py",
+      "line": 225,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "Windows STARTUPINFO duck-type",
+      "snippet": "cast(Any, startupinfo).dwFlags"
+    },
+    {
+      "path": "src/bioetl/infrastructure/observability/observability_backend_process.py",
+      "line": 230,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "Windows STARTUPINFO duck-type",
+      "snippet": "cast(Any, startupinfo).dwFlags = (  # Any: Windows STARTUPINFO duck-type"
+    },
+    {
+      "path": "src/bioetl/infrastructure/observability/observability_backend_process.py",
+      "line": 234,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "Windows STARTUPINFO duck-type",
+      "snippet": "cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/quality/exemptions_registry.py",
+      "line": 41,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "dynamic compat patch target",
+      "snippet": "policy_module = cast(Any, _policy_module)  # Any: dynamic compat patch target"
+    },
+    {
+      "path": "src/bioetl/infrastructure/quality/exemptions_registry.py",
+      "line": 54,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "dynamic compat patch target",
+      "snippet": "targets_module = cast(Any, _targets_module)  # Any: dynamic compat patch target"
+    },
+    {
+      "path": "src/bioetl/infrastructure/quality/exemptions_registry.py",
+      "line": 69,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "dynamic compat patch target",
+      "snippet": "policy_module = cast(Any, _policy_module)  # Any: dynamic compat patch target"
+    },
+    {
+      "path": "src/bioetl/infrastructure/quality/exemptions_registry.py",
+      "line": 70,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "dynamic compat patch target",
+      "snippet": "targets_module = cast(Any, _targets_module)  # Any: dynamic compat patch target"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/base_delta_writer_access.py",
+      "line": 21,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "base_path: str = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/base_delta_writer_access.py",
+      "line": 48,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "delta schema boundary",
+      "snippet": "return cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "line": 30,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "base_path: Path = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "line": 31,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "line": 32,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "line": 33,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "line": 34,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "COMPRESSION_LEVEL: int = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "line": 35,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "COMPRESSION_THREADS: int = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "line": 36,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "COMPRESSION_CHUNK_SIZE: int = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "line": 37,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_flat_structure: bool = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "line": 38,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_resolve_bronze_path: Callable[[str, str, str, str], str] = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_builders.py",
+      "line": 111,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "pydantic narrowing at runtime",
+      "snippet": "\"source\": cast(Any, resolved_source),  # Any: pydantic narrowing at runtime"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+      "line": 25,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "base_path: Path = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+      "line": 26,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_flat_structure: bool = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+      "line": 27,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+      "line": 28,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
+      "line": 38,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
+      "line": 39,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_metadata_writer: MetadataWriterPort = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
+      "line": 42,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_metadata_coordinator: MetadataCoordinatorPort | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
+      "line": 45,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_lineage_store: LineageStorePort | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
+      "line": 48,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_flat_structure: bool = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
+      "line": 49,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_metrics: MetricsPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
+      "line": 50,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "base_path: Path = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
+      "line": 51,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/validation_mixin.py",
+      "line": 18,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_flat_structure: bool = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze/validation_mixin.py",
+      "line": 19,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/delta/arrow_converter.py",
+      "line": 158,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "pyarrow StructType lacks __iter__ in stubs",
+      "snippet": "cast(Any, dtype),  # Any: pyarrow StructType lacks __iter__ in stubs"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+      "line": 82,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "pyarrow dataset duck-type",
+      "snippet": "scanner = cast(Any, dataset).scanner("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/io_delta_runtime.py",
+      "line": 130,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "CSV exporter Arrow table duck-type",
+      "snippet": "cast(Any, prepared.arrow_data),  # Any: CSV exporter Arrow table duck-type"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "line": 42,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "line": 43,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "line": 44,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_metadata_coordinator: MetadataCoordinatorPort | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "line": 47,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_lineage_store: LineageStorePort | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "line": 48,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_metadata_writer: MetadataWriterPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "line": 49,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "line": 50,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_flat_structure: bool = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "line": 51,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_transform_version: str | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "line": 52,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_transform_steps: tuple[str, ...] = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "line": 53,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_load_gold_writer_module: Callable[[], ModuleType] = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "line": 56,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_run_in_executor: Callable[..., Awaitable[object]] = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
+      "line": 106,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "DeltaTable runtime type has no complete type stubs",
+      "snippet": "dt = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
+      "line": 111,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "pyarrow.Table returned via executor is untyped to mypy",
+      "snippet": "arrow_table = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
+      "line": 116,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "pyarrow.Table returned via executor is untyped to mypy",
+      "snippet": "arrow_table = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
+      "line": 149,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "DeltaTable runtime type has no complete type stubs",
+      "snippet": "dt = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
+      "line": 153,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "pyarrow.Table returned via executor is untyped to mypy",
+      "snippet": "arrow_table = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/writer_metrics.py",
+      "line": 56,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "gold write request duck-type",
+      "snippet": "cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/writer_metrics.py",
+      "line": 64,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "gold write request duck-type",
+      "snippet": "cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold/writer_schema_helpers.py",
+      "line": 31,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "schema columns duck-type",
+      "snippet": "columns = cast(Any, schema).columns  # Any: schema columns duck-type"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/lineage_persistence.py",
+      "line": 211,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "lineage bundle duck-type",
+      "snippet": "cast(Any, bundle).metadata,  # Any: lineage bundle duck-type"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/lineage_persistence.py",
+      "line": 215,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "lineage bundle duck-type",
+      "snippet": "cast(Any, bundle).lineage_fragment,  # Any: lineage bundle duck-type"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/metadata/metadata_helpers.py",
+      "line": 92,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "duck-typed Pandera schema class",
+      "snippet": "host = cast(Any, gold_schema)  # Any: duck-typed Pandera schema class"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/maintenance_mixin.py",
+      "line": 26,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/maintenance_mixin.py",
+      "line": 27,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "csv_exporter: CsvExporterProtocol | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/maintenance_mixin.py",
+      "line": 30,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "_retention_manager: RetentionPolicy = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/maintenance_mixin.py",
+      "line": 33,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "get_table_path: Callable[[str], Path] = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/maintenance_mixin.py",
+      "line": 36,
+      "layer": "infrastructure",
+      "category": "pd6_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD6)",
+      "snippet": "read_table: Callable[..., Awaitable[list[BronzeRecord]]] = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/delta_operations.py",
+      "line": 42,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/delta_operations.py",
+      "line": 43,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/delta_operations.py",
+      "line": 44,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_merge_resilience_policy: SilverMergeResiliencePolicy = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/delta_operations.py",
+      "line": 160,
+      "layer": "infrastructure",
+      "category": "any_host_attr",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD5 product zero hold)",
+      "snippet": "default=cast(Any, None),  # Any: host attr default (PD5 product zero hold)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
+      "line": 44,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
+      "line": 45,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
+      "line": 46,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
+      "line": 47,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_metadata_writer: object | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
+      "line": 48,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_metadata_coordinator: MetadataCoordinatorPort | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
+      "line": 51,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_lineage_store: LineageStorePort | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
+      "line": 52,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_dq_calculator: DQMetricsCalculator | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
+      "line": 55,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_host: object | None = cast(Any, None)  # Any: host default (PD4)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
+      "line": 228,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "DQ metrics .dict() duck-type",
+      "snippet": "\"dq_metrics\": cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/writer_metadata_facade.py",
+      "line": 54,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "pd4_host_default_pending_protocol",
+      "reason_tag": "host default (PD4)",
+      "snippet": "_metadata: SilverMetadataOperations | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/writer_runtime_facade.py",
+      "line": 67,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_validation: SilverValidationOperations | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/writer_runtime_facade.py",
+      "line": 70,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_delta: SilverDeltaOperations | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/writer_runtime_facade.py",
+      "line": 73,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_postwrite: SilverPostwriteOperations | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/writer_runtime_facade.py",
+      "line": 76,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_merged: SilverMergedOperations | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/writer_runtime_facade.py",
+      "line": 79,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_host: object | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/writer_runtime_invocation.py",
+      "line": 166,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "host method duck-type",
+      "snippet": "if cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver/writer_runtime_validation_facade.py",
+      "line": 35,
+      "layer": "infrastructure",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_validation: SilverValidationOperations | None = cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py",
+      "line": 194,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "reconciliation mutation helper uses structural host",
+      "snippet": "cast(Any, host),  # Any: reconciliation mutation helper uses structural host"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py",
+      "line": 217,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "external mutation summary compatibility",
+      "snippet": "mutation_mode=cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "line": 399,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "reconciliation mutation helper uses structural host",
+      "snippet": "cast(Any, host),  # Any: reconciliation mutation helper uses structural host"
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "line": 422,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "external mutation summary compatibility",
+      "snippet": "mutation_mode=cast("
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/config.py",
+      "line": 72,
+      "layer": "interfaces",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "pydantic model_dump duck-type",
+      "snippet": "model_dump = cast(Any, config).model_dump  # Any: pydantic model_dump duck-type"
+    },
+    {
+      "path": "src/bioetl/interfaces/http/health_server_http_mixin.py",
+      "line": 30,
+      "layer": "interfaces",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort | None = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/interfaces/http/health_server_state_mixin.py",
+      "line": 15,
+      "layer": "interfaces",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
+      "snippet": "_health_monitor: HealthMonitorPort | None = cast("
+    }
+  ]
+}

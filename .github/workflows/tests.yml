@@ -1,0 +1,2140 @@
+# Note: Previously had a duplicate in project-automation.yml (removed)
+name: Tests
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+  push:
+    branches: [main, master, develop]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - ".ai/**"
+      - "LICENSE"
+# Workflow-level token is read-only; jobs may only narrow this further.
+
+concurrency:
+  group: tests-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Use CI hypothesis profile for faster property-based tests (10 examples instead of 50)
+  HYPOTHESIS_PROFILE: ci
+  # Optimize Python for CI
+  PYTHONDONTWRITEBYTECODE: 1
+  PYTHONUNBUFFERED: 1
+  # Quality exemptions: expiry is always blocking for merge safety.
+  QUALITY_EXEMPTIONS_GATE_MODE: block
+  # Growth uses staged warn->block rollout from debt_scorecard.yaml sections.
+  QUALITY_EXEMPTIONS_GROWTH_MODE: auto
+  # Temporary exception windows are budget-only and timeboxed.
+  QUALITY_EXEMPTIONS_TEMP_WINDOW_MODE: budget-only
+  QUALITY_EXEMPTIONS_MAX_GRACE_WINDOW_DAYS: 45
+  QUALITY_EXEMPTIONS_REGISTRY: configs/quality/architecture_metric_exemptions.yaml
+  QUALITY_EXEMPTIONS_SCORECARD: configs/quality/debt_scorecard.yaml
+
+jobs:
+  dependency-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Check uv lock drift
+        run: |
+          mkdir -p reports/ci
+          set -o pipefail
+          {
+            echo "Dependency preflight diagnostics"
+            echo "Timestamp (UTC): $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+            echo
+            echo "Running: uv lock --check"
+            uv lock --check
+          } 2>&1 | tee reports/ci/dependency-preflight.log
+
+      - name: Upload dependency preflight diagnostics
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dependency-preflight
+          path: reports/ci/dependency-preflight.log
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Publish dependency preflight summary
+        if: always()
+        run: |
+          {
+            echo "## Dependency preflight"
+            echo "Diagnostic artifact: dependency-preflight/reports/ci/dependency-preflight.log"
+          } >> "$GITHUB_STEP_SUMMARY"
+  # Minimal dependency smoke: keep test lanes unblocked by unrelated governance checks
+  smoke-check:
+    needs: dependency-preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Keep smoke free of Git LFS so an exhausted LFS data pack cannot
+          # block the entire Tests matrix. VCR content checks live in vcr-preflight.
+          lfs: false
+
+      - name: Install uv + cache + dependencies
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Validate version consistency
+        run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions
+
+      - name: Smoke check (dependencies + core imports)
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.smoke
+        run: |
+          set +e
+          mkdir -p reports/coverage
+          uv run --frozen --no-build pytest tests/smoke/ -m "not memory" -v --tb=short \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Smoke coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
+
+      - name: Upload smoke coverage shard
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-data-smoke
+          path: reports/coverage/.coverage.smoke
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  vcr-preflight:
+    needs: dependency-preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Cassettes are git blobs. Keep lfs: false so an exhausted GitHub
+          # LFS budget cannot block checkout; pointer stubs fail below.
+          lfs: false
+
+      - name: Reject Git LFS pointer cassettes
+        id: vcr_pointer_guard
+        run: |
+          set -euo pipefail
+          # Fail-closed (#7493): cassette payloads must be git blobs. GitHub
+          # LFS quota is exhausted and will not be increased.
+          if git grep -q 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr; then
+            echo "::error::VCR cassette is still a Git LFS pointer. Store the full YAML in git and re-run."
+            git grep -l 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr
+            exit 1
+          fi
+
+      - name: Install uv + cache + dependencies
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Validate VCR cassette placement
+        run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement
+
+      - name: Validate VCR filename policy
+        run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming
+
+      - name: Validate full VCR metadata inventory
+        run: uv run --frozen --no-build python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check
+
+      - name: Validate VCR metadata stale-age policy
+        run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90
+
+      - name: Validate VCR metadata catalog
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-vcr-metadata --check
+
+  control-plane-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: dependency-preflight
+    permissions:
+      contents: read
+    env:
+      BIOETL_TEST_MODE: "true"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # PubChem VCR smoke uses git-stored cassettes. Fail closed when a
+          # leftover Git LFS pointer is present (#7493).
+          lfs: false
+
+      - name: Reject Git LFS pointer cassettes
+        id: vcr_pointer_guard
+        run: |
+          set -euo pipefail
+          # Fail-closed (#7493): blocking control-plane confidence lane
+          # must not succeed without replay-critical VCR evidence in git.
+          if git grep -q 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr; then
+            echo "::error::VCR cassette is still a Git LFS pointer. Store the full YAML in git and re-run control-plane-e2e."
+            git grep -l 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr
+            exit 1
+          fi
+          cassette="tests/fixtures/vcr/pubchem/test_pubchem_compound_full_cycle.yaml"
+          if [ -f "$cassette" ] && head -n 1 "$cassette" | grep -q 'git-lfs.github.com/spec/v1'; then
+            echo "::error::PubChem VCR cassette is still an LFS pointer. Store the full YAML in git and re-run control-plane-e2e."
+            exit 1
+          fi
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Run control-plane completeness smoke
+        run: |
+          mkdir -p reports/e2e
+          # Keep the helper-facing environment mode and the explicit RULES §4.2
+          # replay-only CLI contract aligned. Root conftest supplies the flag
+          # fallback when pytest-recording is not active (#7515-#7521 closeout).
+          VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
+            tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle \
+            -q --tb=short \
+            --vcr-record=none \
+            --junitxml=reports/e2e/control-plane-completeness.xml
+
+      - name: Upload control-plane completeness artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ always() && !cancelled() }}
+        with:
+          name: control-plane-completeness
+          path: reports/e2e/control-plane-completeness.xml
+          if-no-files-found: error
+          retention-days: 3
+
+  # Blocking offline-confidence lane that also contributes a coverage shard.
+  # Live provider contracts stay in the scheduled contract-tests workflow and
+  # remain outside this aggregate path.
+  contract-confidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: dependency-preflight
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-contract-confidence"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/contract/**/*.py', 'tests/unit/contracts/**/*.py', 'tests/conftest.py', 'tests/contract/conftest.py', 'pyproject.toml') }}
+
+      - name: Run offline contract confidence lane
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.contract-confidence
+        run: |
+          set +e
+          mkdir -p reports/test-telemetry
+          mkdir -p reports/coverage
+          uv run --frozen --no-build pytest \
+            tests/contract/ tests/unit/contracts/ \
+            -m "no_api or not network" \
+            -q --tb=short \
+            --junitxml=reports/test-telemetry/junit-contract-confidence.xml \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Contract confidence coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
+
+      - name: Upload contract confidence telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-telemetry-contract-confidence
+          path: reports/test-telemetry/junit-contract-confidence.xml
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Upload contract confidence coverage shard
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-data-contract-confidence
+          path: reports/coverage/.coverage.contract-confidence
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  flaky-telemetry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: dependency-preflight
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      # determinism-critical shard: N=3, seeds 17, 73, and 113, exactly
+      # tests/contract/test_semanticscholar_contract.py and
+      # tests/architecture/test_determinism_identity_policy.py.
+      # An empty curated flaky inventory is not proof of no flakes.
+      - name: Run determinism-critical shard telemetry
+        shell: bash
+        run: |
+          mkdir -p reports/test-telemetry/flaky-runs
+          for seed in 17 73 113; do
+            run_id="seed-${seed}"
+            BIOETL_RANDOM_ORDER_SEED="${seed}" VCR_RECORD_MODE=none \
+              uv run --frozen --no-build pytest \
+                tests/contract/test_semanticscholar_contract.py \
+                tests/architecture/test_determinism_identity_policy.py \
+                -m "not pilot_soak and not network" \
+                -p no:xdist --no-cov -q --tb=short \
+                --junitxml="reports/test-telemetry/flaky-runs/junit-${run_id}.xml"
+            uv run --frozen --no-build python -c 'import json,pathlib,sys; from scripts.engineering.qa.report_flaky_test_burndown_review import compute_replay_tree_sha256; payload={"run_id":sys.argv[2],"seed":int(sys.argv[3]),"source_sha":sys.argv[4],"order_mode":"seeded-random","shard_id":"determinism-critical","replay_tree_sha256":compute_replay_tree_sha256(pathlib.Path.cwd())}; pathlib.Path(sys.argv[1]).write_text(json.dumps(payload,sort_keys=True)+"\n",encoding="utf-8")' \
+              "reports/test-telemetry/flaky-runs/run-${run_id}.json" \
+              "${run_id}" "${seed}" "${GITHUB_SHA}"
+          done
+          uv run --frozen --no-build python -m scripts.engineering.qa report-flaky-test-burndown-review \
+            --empirical-run-dir reports/test-telemetry/flaky-runs \
+            --empirical-json-out reports/test-telemetry/flaky-test-empirical.json
+
+      - name: Upload empirical flaky telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: flaky-test-empirical
+          path: |
+            reports/test-telemetry/flaky-test-empirical.json
+            reports/test-telemetry/flaky-runs/
+          if-no-files-found: warn
+          retention-days: 7
+
+  governance-preflight:
+    needs: dependency-preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          lfs: false
+
+      - name: Reject Git LFS pointer cassettes
+        id: vcr_pointer_guard
+        run: |
+          set -euo pipefail
+          # Fail-closed (#7493): VCR-bound governance preflight must not
+          # hash Git LFS pointer stubs. Cassette payloads live in git.
+          if git grep -q 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr; then
+            echo "::error::VCR cassette is still a Git LFS pointer. Store the full YAML in git and re-run governance-preflight."
+            git grep -l 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr
+            exit 1
+          fi
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Validate quality exemptions registry (owner/reason/expiry metadata)
+        run: |
+          uv run --frozen --no-build python -m scripts.engineering.qa check-exemptions \
+            --registry "${QUALITY_EXEMPTIONS_REGISTRY}" \
+            --scorecard "${QUALITY_EXEMPTIONS_SCORECARD}" \
+            --mode "${QUALITY_EXEMPTIONS_GATE_MODE}" \
+            --growth-mode "${QUALITY_EXEMPTIONS_GROWTH_MODE}" \
+            --trend-report on \
+            --temp-window-mode "${QUALITY_EXEMPTIONS_TEMP_WINDOW_MODE}" \
+            --max-grace-window-days "${QUALITY_EXEMPTIONS_MAX_GRACE_WINDOW_DAYS}"
+
+      - name: Validate duplication/complexity exemption renewals (no expiry cliff)
+        run: uv run --frozen --no-build python -m scripts.engineering.qa check-duplication-complexity-exemptions
+
+      - name: Validate scripts inventory + lifecycle governance
+        run: |
+          uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \
+            --check \
+            --manifest configs/quality/scripts_inventory_manifest.json \
+            --check-lifecycle \
+            --forbid-evaluate-active \
+            --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
+
+      - name: Validate scripts catalog governance policy
+        run: uv run --frozen --no-build python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml
+
+      - name: Test governance closeout preflight (VCR/LFS fail-fast)
+        run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict
+
+      - name: Validate committed test-governance snapshots
+        run: |
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit \
+            --check \
+            --json-out reports/quality/test-governance-current.json \
+            --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
+
+      - name: Validate flaky-test burndown review evidence
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-flaky-test-burndown-review --check
+
+      - name: Validate config/contract/registry artifact duplication audit
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-artifact-duplication-audit --check
+
+      - name: Validate deterministic Neo4j memory ontology invariants
+        run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory
+
+      - name: Validate hotspot-family baseline artifacts
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-family-baseline --check
+
+      - name: Validate contract coverage matrix artifact
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-contract-coverage-matrix --check
+
+      - name: Validate Domain I/O taint inventory artifact
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-domain-io-taint-inventory --check
+
+      - name: Validate port-adapter-factory coverage map artifact
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-port-adapter-factory-coverage --check
+
+      - name: Validate domain aggregate invariant registry
+        run: uv run --frozen --no-build pytest tests/architecture/test_domain_aggregate_invariant_registry.py -q --tb=short
+
+      - name: Validate compatibility importer census artifacts
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-compatibility-importer-census --check
+
+      - name: Validate technical-debt freeze ratchets
+        run: |
+          uv run --frozen --no-build pytest \
+            tests/architecture/test_removed_surface_freeze_guards.py \
+            tests/architecture/test_public_surface_importer_census_governance.py \
+            tests/architecture/test_runtime_uuid_seam_inventory.py \
+            tests/architecture/test_silver_filter_identity_surface.py \
+            tests/architecture/test_quality_debt_scorecard.py \
+            -q --tb=short
+
+      - name: Validate dead-code inventory artifacts
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-dead-code-inventory --check
+
+      - name: Validate config discrepancy baseline artifacts
+        run: uv run --frozen --no-build python -m scripts.schema generate-config-matrix --check
+
+      - name: Validate Silver/Gold filter parity artifact
+        run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check
+
+      - name: Validate xwalk missing backlog
+        run: uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
+
+      - name: Pre-merge naming/package consistency gate
+        run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming-pkg --check
+
+      - name: Pre-merge naming convention audit
+        run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming --check
+
+      - name: Validate ADR enforcement matrix artifacts
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-adr-enforcement-matrix --check
+
+      - name: Validate remote-main architecture debt baseline
+        run: |
+          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
+          uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
+
+      - name: Validate debt-governance fail-fast gates
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref refs/remotes/origin/main
+
+      - name: Dashboard navigation contract sync gate
+        run: |
+          uv run --frozen --no-build pytest \
+            tests/integration/test_grafana_dashboard_links.py::test_cross_dashboard_links_pass_only_target_scoped_variables \
+            tests/integration/test_grafana_dashboard_links.py::test_dashboard_top_level_navigation_contract_by_uid \
+            tests/integration/test_dashboard_navigation_contract_sync.py \
+            -q --tb=short
+
+      - name: Dashboard semantic release policy gate (token-free)
+        run: |
+          mkdir -p reports/observability/ci
+          uv run --frozen --no-build python -m scripts.engineering.qa report-observability-metric-inventory \
+            --check \
+            --json \
+            --review-json-out reports/observability/runtime_cardinality_review_pr.json \
+            --allow-local-cardinality-fallback
+          uv run --frozen --no-build pytest \
+            tests/architecture/test_observability_dashboard_contracts.py \
+            tests/architecture/test_observability_dashboard_tooling.py \
+            tests/architecture/test_observability_docs_drift.py \
+            tests/architecture/test_observability_metric_governance.py \
+            tests/integration/ci/test_dashboard_active_docs_sync.py \
+            tests/integration/test_dashboard_no_data_policy.py \
+            tests/integration/test_dashboard_operator_readability.py \
+            tests/integration/test_dashboard_first_window_noscroll.py \
+            tests/integration/test_dashboard_qa_check_gates.py \
+            tests/integration/test_dashboard_requirement_coverage.py \
+            tests/integration/test_dashboard_requirement_gates.py \
+            tests/integration/test_grafana_config.py \
+            tests/integration/test_grafana_datasource_provisioning.py \
+            tests/integration/test_grafana_selector_contract.py \
+            tests/integration/test_grafana_surface_contracts.py \
+            tests/integration/test_grafana_variable_reference.py \
+            -q --tb=short \
+            --junitxml=reports/observability/ci/dashboard-semantic-policy.xml
+
+      - name: Upload dashboard semantic policy evidence
+        # always(): keep evidence when the gate fails; do not dual-fail solely because
+        # junit/json were not materialised (#7519 / CI-C1-007). The gate step
+        # above remains the blocking status signal.
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dashboard-semantic-policy
+          path: |
+            reports/observability/ci/dashboard-semantic-policy.xml
+            reports/observability/runtime_cardinality_review_pr.json
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Prometheus rules syntax + promtool test vectors
+        run: uv run --frozen --no-build python -m scripts.engineering.qa check-prometheus-rules --runner docker
+
+      - name: "Quality ratchet (fail-fast: domain)"
+        run: |
+          uv run --frozen --no-build pytest \
+            tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_domain_files_under_limit \
+            tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_domain_complexity \
+            -q --tb=short
+
+      - name: "Quality ratchet (fail-fast: application)"
+        run: |
+          uv run --frozen --no-build pytest \
+            tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_application_files_under_limit \
+            tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_application_complexity \
+            -q --tb=short
+
+      - name: "Quality ratchet (fail-fast: infrastructure)"
+        run: |
+          uv run --frozen --no-build pytest \
+            tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_infrastructure_files_under_limit \
+            tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_infrastructure_complexity \
+            -q --tb=short
+
+  neo4j-memory-live-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # This live audit consumes no governance-preflight outputs; start after the
+    # shared dependency integrity check so the blocking gate runs in parallel.
+    needs: dependency-preflight
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Cache Neo4j image
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: /tmp/neo4j-community.tar
+          key: neo4j-5.15-community-d9e2fb1ba398536e50d22ebc3d5d585baa086c1c0cf8e5b96bdc9e11e87e002a
+
+      - name: Load or pull pinned Neo4j image
+        run: |
+          set -euo pipefail
+          image='neo4j:5.15-community@sha256:d9e2fb1ba398536e50d22ebc3d5d585baa086c1c0cf8e5b96bdc9e11e87e002a'
+          if [[ -f /tmp/neo4j-community.tar ]]; then
+            docker load -i /tmp/neo4j-community.tar
+          else
+            docker pull "${image}"
+            docker save -o /tmp/neo4j-community.tar "${image}"
+          fi
+
+      - name: Start local Neo4j for live audit
+        env:
+          NEO4J_USERNAME: neo4j
+          # CI-only placeholder; live audit talks to the local compose stack.
+          NEO4J_PASSWORD: ci-neo4j-live-audit
+        run: |
+          set -euo pipefail
+          docker network create bioetl-runtime >/dev/null 2>&1 || true
+          docker compose -f docker-compose.neo4j.yml -f .github/compose/neo4j-ci-overlay.yml up -d --wait --wait-timeout 120 neo4j
+
+      - name: Apply sync and validate live Neo4j audit
+        env:
+          NEO4J_USERNAME: neo4j
+          NEO4J_PASSWORD: ci-neo4j-live-audit
+        run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live --batch-size 50
+
+      - name: Stop local Neo4j
+        if: always()
+        env:
+          NEO4J_USERNAME: neo4j
+          NEO4J_PASSWORD: ci-neo4j-live-audit
+        run: docker compose -f docker-compose.neo4j.yml down -v neo4j
+
+  config-schema-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Validate pipeline configs + schema links (blocking)
+        run: uv run --frozen --no-build python -m scripts.schema validate-configs
+
+      - name: Validate config invariants (blocking)
+        run: uv run --frozen --no-build python -m scripts.schema check-invariants
+
+      - name: Validate silver required_fields coverage (blocking)
+        run: uv run --frozen --no-build python -m scripts.schema check-required-fields --verbose
+
+      - name: Validate effective_optional_v1 resolution (blocking)
+        run: uv run --frozen --no-build python -m scripts.schema audit-optionality --check
+
+      - name: Check matrix structural contract export freshness (blocking)
+        run: uv run --frozen --no-build python -m scripts.docs export-matrix-structural-contract --check
+
+      - name: Check generated config schemas are up to date
+        run: uv run --frozen --no-build python -m scripts.schema generate-pipeline --check
+
+      - name: Check architecture dependency docs drift
+        run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check
+
+      - name: Check docs drift (forbidden patterns)
+        run: uv run --frozen --no-build python -m scripts.engineering.qa check-docs-drift
+
+      - name: Validate docker-compose.yml syntax
+        env:
+          # Placeholders only for `docker compose config` interpolation.
+          # Runtime stacks still require real secrets from operator env.
+          NEO4J_PASSWORD: ci-compose-config-validation
+        run: docker compose config > /dev/null
+
+      - name: Validate docker-compose.monitoring.yml syntax
+        env:
+          GF_SECURITY_ADMIN_PASSWORD: ci-compose-config-validation
+          GF_RENDERING_RENDERER_TOKEN: ci-compose-config-validation
+          BIOETL_OPS_HTTP_URL: http://bioetl:8000
+        run: docker compose -f docker-compose.monitoring.yml config > /dev/null
+
+  track-d-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: dependency-preflight
+    permissions:
+      contents: read
+    env:
+      BIOETL_TEST_MODE: "true"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
+      BIOETL_TEST_RELAXED_DQ: "1"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Run Track D fail-fast gate (runtime linkage)
+        run: |
+          mkdir -p reports/test-telemetry
+          uv run --frozen --no-build pytest \
+            tests/integration/ci/test_track_d_fixture_control_plane_linkage.py \
+            -q --tb=short --maxfail=1 \
+            --junitxml=reports/test-telemetry/junit-track-d.xml
+
+      - name: Upload Track D telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-telemetry-track-d
+          path: reports/test-telemetry/junit-track-d.xml
+          if-no-files-found: warn
+          retention-days: 3
+
+  dq-consistency-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: governance-preflight
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Run DQ consistency validation
+        run: uv run --frozen --no-build python -m scripts.engineering.qa validate-dq-consistency
+
+  quality-metrics-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Quality metrics read the checked-in governance sources directly and do
+    # not consume governance-preflight outputs.
+    needs: dependency-preflight
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+
+      - name: Compute quality metrics and enforce integral score gate
+        run: |
+          make qa-debt \
+            QUALITY_EXEMPTIONS_REGISTRY="${QUALITY_EXEMPTIONS_REGISTRY}" \
+            QUALITY_EXEMPTIONS_SCORECARD="${QUALITY_EXEMPTIONS_SCORECARD}" \
+            QUALITY_REPORT_OUTPUT="reports/quality/ci-quality-metrics.json" \
+            QUALITY_SUMMARY_OUT="$GITHUB_STEP_SUMMARY" \
+            QUALITY_ARCHITECTURE_OWNER="lint-architecture-workflow"
+
+      - name: Review observability runtime cardinality evidence (static)
+        run: |
+          uv run --frozen --no-build python -m scripts.engineering.qa report-observability-metric-inventory \
+            --check \
+            --write-evidence reports/observability/runtime_cardinality_inventory.json \
+            --review-json-out reports/observability/runtime_cardinality_review.json \
+            --summary-out "$GITHUB_STEP_SUMMARY"
+
+      - name: Review observability runtime cardinality evidence (live)
+        if: >-
+          github.event_name != 'pull_request' &&
+          vars.BIOETL_OBSERVABILITY_PROMETHEUS_URL != ''
+        env:
+          BIOETL_OBSERVABILITY_PROMETHEUS_URL: ${{ vars.BIOETL_OBSERVABILITY_PROMETHEUS_URL }}
+          BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN: ${{ secrets.BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN }}
+        run: |
+          uv run --frozen --no-build python -m scripts.engineering.qa report-observability-metric-inventory \
+            --check \
+            --write-evidence reports/observability/runtime_cardinality_inventory.json \
+            --review-json-out reports/observability/runtime_cardinality_review.json \
+            --summary-out "$GITHUB_STEP_SUMMARY" \
+            --fail-on-degraded-live-review
+
+      - name: Upload quality metrics artifact
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ci-quality-metrics
+          path: reports/quality/ci-quality-metrics.json
+          retention-days: 7
+
+      - name: Upload Silver/Gold filter parity artifact
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: silver-gold-filter-parity-report
+          path: reports/quality/silver-gold-filter-parity-report.json
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload observability review artifacts
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: observability-runtime-cardinality-review
+          path: |
+            reports/observability/runtime_cardinality_inventory.json
+            reports/observability/runtime_cardinality_review.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  # Fast tests run first for quick feedback.
+  # CPython 3.12 fail-fast compatibility lane (BioETL baseline). No coverage.
+  # Unit paths overlap test-matrix by interpreter split, not by duplicate 3.13
+  # full-tree: test-matrix unit-* shards are 3.13-only for coverage-verify (#9740).
+  test-fast:
+    name: Unit fast (${{ matrix.test-group.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: dependency-preflight
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        test-group:
+          - name: unit-domain
+            path: tests/unit/domain/
+          - name: unit-application
+            path: tests/unit/application/
+          - name: unit-infrastructure
+            path: tests/unit/infrastructure/
+          - name: unit-other
+            path: tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/scripts/ --ignore=tests/unit/repo_backed/
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-fast-${{ matrix.test-group.name }}"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/unit/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
+
+      - name: Run canonical unit-fast lane
+        run: |
+          mkdir -p reports/test-telemetry
+          # Quick feedback: canonical unit-fast lane (test_matrix.yaml); excludes scripts + repo_backed (#8327/#8328).
+          # serial_or_bounded (#9729): do not inherit pytest-xdist.
+          # Uses HYPOTHESIS_PROFILE=fast for minimal property-based examples
+          HYPOTHESIS_PROFILE=fast \
+          uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
+            -m "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" \
+            -p no:xdist \
+            -q --tb=short \
+            --junitxml=reports/test-telemetry/junit-fast.${{ matrix.test-group.name }}.xml
+
+      - name: Upload fast test telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-telemetry-fast-${{ matrix.test-group.name }}
+          path: reports/test-telemetry/junit-fast.${{ matrix.test-group.name }}.xml
+          if-no-files-found: warn
+          retention-days: 3
+
+  # Checked-in repository contracts are unit-owned but intentionally serial.
+  repo-backed-unit:
+    name: Repo-backed unit (${{ matrix.test-group.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: dependency-preflight
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        test-group:
+          - name: product
+            path: tests/unit/repo_backed/application/ tests/unit/repo_backed/composition/ tests/unit/repo_backed/contracts/ tests/unit/repo_backed/coverage_gap/ tests/unit/repo_backed/domain/ tests/unit/repo_backed/infrastructure/ tests/unit/repo_backed/interfaces/
+          - name: tooling
+            path: tests/unit/repo_backed/scripts/ tests/unit/repo_backed/tools/ --ignore=tests/unit/repo_backed/scripts/ops/
+          - name: ops
+            path: tests/unit/repo_backed/scripts/ops/
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-repo-backed-unit-${{ matrix.test-group.name }}"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/unit/repo_backed/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
+
+      - name: Run canonical repo-backed-unit lane
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.repo-backed-unit-${{ matrix.test-group.name }}
+        run: |
+          set +e
+          mkdir -p reports/test-telemetry
+          mkdir -p reports/coverage
+          uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
+            -m "repo_backed and not slow and not benchmark and not memory" \
+            -p no:xdist -q --tb=short \
+            --junitxml=reports/test-telemetry/junit-repo-backed-unit.${{ matrix.test-group.name }}.xml \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Repo-backed unit coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
+
+      - name: Upload repo-backed unit telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-telemetry-repo-backed-unit-${{ matrix.test-group.name }}
+          path: reports/test-telemetry/junit-repo-backed-unit.${{ matrix.test-group.name }}.xml
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Upload repo-backed unit coverage shard
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-data-repo-backed-unit-${{ matrix.test-group.name }}
+          path: reports/coverage/.coverage.repo-backed-unit-${{ matrix.test-group.name }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  # Tooling/script unit tests (passport projector, ops scripts). Single canonical lane (#8327/#8328).
+  unit-scripts-tooling:
+    name: Unit scripts tooling (${{ matrix.test-group.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: dependency-preflight
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        test-group:
+          - name: passport
+            path: tests/unit/scripts/docs/passports/
+          - name: debt-governance
+            path: tests/unit/scripts/qa/test_report_debt_governance_gates.py
+          - name: other
+            path: tests/unit/scripts/ --ignore=tests/unit/scripts/docs/passports/ --ignore=tests/unit/scripts/qa/test_report_debt_governance_gates.py
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-unit-scripts-tooling-${{ matrix.test-group.name }}"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/unit/scripts/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
+
+      - name: Run canonical unit-scripts-tooling lane
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.unit-scripts-tooling-${{ matrix.test-group.name }}
+        run: |
+          set +e
+          mkdir -p reports/test-telemetry
+          mkdir -p reports/coverage
+          # Serial: passport projector and many script tests use repo FS/subprocess.
+          uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
+            -m "not slow and not benchmark and not memory" \
+            -p no:xdist -q --tb=short \
+            --junitxml=reports/test-telemetry/junit-unit-scripts-tooling.${{ matrix.test-group.name }}.xml \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Unit scripts tooling coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
+
+      - name: Upload unit-scripts-tooling telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-telemetry-unit-scripts-tooling-${{ matrix.test-group.name }}
+          path: reports/test-telemetry/junit-unit-scripts-tooling.${{ matrix.test-group.name }}.xml
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Upload unit scripts tooling coverage shard
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-data-unit-scripts-tooling-${{ matrix.test-group.name }}
+          path: reports/coverage/.coverage.unit-scripts-tooling-${{ matrix.test-group.name }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  # Serial filesystem-contract lane (test_matrix unit-filesystem-contracts).
+  # Classified modules are auto-marked fs_contract in tests/conftest.py and must
+  # not run under test-matrix xdist shards.
+  unit-filesystem-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: dependency-preflight
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-unit-filesystem-contracts"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/unit/infrastructure/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
+
+      - name: Run canonical unit-filesystem-contracts lane
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.unit-filesystem-contracts
+        run: |
+          set +e
+          mkdir -p reports/test-telemetry
+          mkdir -p reports/coverage
+          uv run --frozen --no-build pytest tests/unit/ \
+            -m "fs_contract and not slow and not benchmark and not memory" \
+            -p no:xdist -q --tb=short \
+            --junitxml=reports/test-telemetry/junit-unit-filesystem-contracts.xml \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Unit filesystem-contracts coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
+
+      - name: Upload unit-filesystem-contracts telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-telemetry-unit-filesystem-contracts
+          path: reports/test-telemetry/junit-unit-filesystem-contracts.xml
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Upload unit filesystem-contracts coverage shard
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-data-unit-filesystem-contracts
+          path: reports/coverage/.coverage.unit-filesystem-contracts
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  # Serial subprocess-backed unit helpers outside unit-scripts-tooling.
+  # Excluded from test-matrix xdist; scripts path remains owned by unit-scripts-tooling.
+  unit-subprocess-backed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: dependency-preflight
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-unit-subprocess-backed"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/unit/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
+
+      - name: Run serial unit subprocess_backed (non-scripts) lane
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.unit-subprocess-backed
+        run: |
+          set +e
+          mkdir -p reports/test-telemetry
+          mkdir -p reports/coverage
+          uv run --frozen --no-build pytest tests/unit/ \
+            --ignore=tests/unit/scripts \
+            --ignore=tests/unit/repo_backed \
+            -m "subprocess_backed and not slow and not benchmark and not memory" \
+            -p no:xdist -q --tb=short \
+            --junitxml=reports/test-telemetry/junit-unit-subprocess-backed.xml \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Unit subprocess-backed coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
+
+      - name: Upload unit-subprocess-backed telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-telemetry-unit-subprocess-backed
+          path: reports/test-telemetry/junit-unit-subprocess-backed.xml
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Upload unit subprocess-backed coverage shard
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-data-unit-subprocess-backed
+          path: reports/coverage/.coverage.unit-subprocess-backed
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  # Coverage-bound shards on CPython 3.13 only. Not a leaf GitHub required
+  # check. Gate tests is always_required, so this job runs on every PR that
+  # materializes pr-gate-complete, including docs-only
+  # (05-github-policy.md). Version split vs test-fast (3.12) is intentional
+  # compatibility vs coverage (#9740). Do not drop coverage-verify.
+  test-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: dependency-preflight
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.13"]
+        test-group:
+          - name: unit-domain
+            path: tests/unit/domain/
+            cache_glob: tests/unit/domain/**/*.py
+            xdist_args: "-n auto --dist loadscope --max-worker-restart=0"
+          - name: unit-application
+            path: tests/unit/application/
+            cache_glob: tests/unit/application/**/*.py
+            xdist_args: "-n auto --dist loadscope --max-worker-restart=0"
+          - name: unit-infrastructure
+            path: tests/unit/infrastructure/
+            cache_glob: tests/unit/infrastructure/**/*.py
+            xdist_args: "-n auto --dist loadscope --max-worker-restart=0"
+          - name: unit-other
+            path: tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/repo_backed/ --ignore=tests/unit/scripts/
+            cache_glob: tests/unit/**/*.py
+            xdist_args: "-n auto --dist loadscope --max-worker-restart=0"
+          - name: integration
+            path: tests/integration/
+            cache_glob: tests/integration/**/*.py
+            # VCR integration-replay is serial_or_bounded (#9729).
+            xdist_args: "-p no:xdist"
+          - name: security
+            path: tests/security/
+            cache_glob: tests/security/**/*.py
+            xdist_args: "-n auto --dist loadscope --max-worker-restart=0"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-${{ matrix.python-version }}-${{ matrix.test-group.name }}"
+          pytest-cache-fingerprint: ${{ hashFiles(matrix.test-group.cache_glob, 'tests/conftest.py', 'pyproject.toml') }}
+
+      - name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
+        id: run-tests
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.${{ matrix.test-group.name }}
+        run: |
+          set +e
+          mkdir -p reports/coverage
+          mkdir -p reports/test-telemetry
+          export COVERAGE_FILE="reports/coverage/.coverage.${{ matrix.test-group.name }}"
+          uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
+            -m "not serial and not memory and not fs_contract and not subprocess_backed" \
+            ${{ matrix.test-group.xdist_args }} \
+            -q --tb=short \
+            --junitxml=reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "reports/coverage/.coverage.${{ matrix.test-group.name }}" 2>/dev/null || true
+          if [ ! -s "reports/coverage/.coverage.${{ matrix.test-group.name }}" ]; then
+            echo "::error::Test matrix coverage shard was not produced."
+            exit 1
+          fi
+          ls -la reports/coverage/ 2>/dev/null || true
+          exit $TEST_EXIT
+
+      - name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.13)
+        if: ${{ always() && !cancelled() && matrix.python-version == '3.13' && steps.run-tests.outcome != 'skipped' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-data-${{ matrix.test-group.name }}
+          path: reports/coverage/.coverage.${{ matrix.test-group.name }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.13)
+        if: ${{ always() && !cancelled() && matrix.python-version == '3.13' && steps.run-tests.outcome != 'skipped' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-telemetry-${{ matrix.test-group.name }}
+          path: reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml
+          if-no-files-found: warn
+          retention-days: 3
+
+  memory-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: dependency-preflight
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-memory"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/smoke/test_neo4j_memory*.py', 'tests/conftest.py', 'pyproject.toml') }}
+
+      - name: Run dedicated Neo4j memory test lane
+        run: |
+          mkdir -p reports/test-telemetry
+          uv run --frozen --no-build pytest tests/smoke/test_neo4j_memory_mcp_smoke.py \
+            -m "memory" \
+            -q --tb=short \
+            --junitxml=reports/test-telemetry/junit-memory.xml
+
+      - name: Upload memory test telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-telemetry-memory
+          path: reports/test-telemetry/junit-memory.xml
+          if-no-files-found: warn
+          retention-days: 3
+
+  performance-budgets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: dependency-preflight
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          uv-extras: "dev tracing performance"
+
+      - name: Run performance budget gates (hotspots)
+        run: |
+          mkdir -p reports/performance
+          uv run --frozen --no-build pytest tests/performance/test_hotspot_budgets.py \
+            -m "benchmark and performance" \
+            -p no:xdist \
+            -q --tb=short \
+            --perf-obs-out reports/performance/hotspot-observations.jsonl \
+            --junitxml=reports/performance/hotspot-budgets.xml
+
+      - name: Build hotspot degradation report
+        if: always()
+        run: |
+          mkdir -p reports/performance
+          if [ ! -f reports/performance/hotspot-observations.jsonl ]; then
+            echo "::error::Hotspot observations file is missing."
+            exit 1
+          fi
+          uv run --frozen --no-build python -m scripts.engineering.qa.generate_hotspot_degradation_report \
+            --observations reports/performance/hotspot-observations.jsonl \
+            --budgets tests/performance/hotspot_budgets.json \
+            --window-size 5 \
+            --json-out reports/performance/hotspot-degradation.json \
+            --markdown-out reports/performance/hotspot-degradation.md
+
+      - name: Publish hotspot degradation summary
+        if: always()
+        run: |
+          if [ -f reports/performance/hotspot-degradation.md ]; then
+            cat reports/performance/hotspot-degradation.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Gate on degradation report
+        if: always()
+        run: |
+          if [ ! -f reports/performance/hotspot-degradation.json ]; then
+            echo "::error::Hotspot degradation report is missing."
+            exit 1
+          fi
+          python3 -c "
+          import json, sys
+          data = json.load(open('reports/performance/hotspot-degradation.json'))
+          failed = data.get('summary', {}).get('failed', 0)
+          if failed > 0:
+              print(f'FAIL: {failed} benchmark(s) over budget')
+              sys.exit(1)
+          print('PASS: all benchmarks within budget')
+          "
+
+      - name: Upload performance budget report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ always() && !cancelled() }}
+        with:
+          name: performance-hotspot-budgets
+          path: |
+            reports/performance/hotspot-budgets.xml
+            reports/performance/hotspot-observations.jsonl
+            reports/performance/hotspot-degradation.json
+            reports/performance/hotspot-degradation.md
+            tests/performance/hotspot_budgets.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  serial-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: dependency-preflight
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-serial-coverage"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
+
+      - name: Run serial-only coverage producer
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.serial
+        run: |
+          set +e
+          mkdir -p reports/coverage reports/pytest/serial-coverage reports/test-telemetry
+          uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \
+            --target tests/ \
+            --reports-dir reports/pytest/serial-coverage \
+            --parallel-marker "serial and not e2e and not benchmark and not memory" \
+            --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
+            --skip-serial-pass
+          TEST_EXIT=$?
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Serial coverage shard was not produced."
+            exit 1
+          fi
+          if [ ! -s reports/pytest/serial-coverage/junit_parallel.xml ]; then
+            echo "::error::Serial coverage JUnit telemetry was not produced."
+            exit 1
+          fi
+          cp reports/pytest/serial-coverage/junit_parallel.xml \
+            reports/test-telemetry/junit-serial-coverage.xml
+          exit "$TEST_EXIT"
+
+      - name: Upload serial coverage telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-telemetry-serial-coverage
+          path: reports/test-telemetry/junit-serial-coverage.xml
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Upload serial coverage shard
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-data-serial
+          path: reports/coverage/.coverage.serial
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  # Final coverage verification combines producer artifacts only.
+  coverage-verify:
+    if: ${{ always() && !cancelled() }}
+    runs-on: ubuntu-latest
+    needs:
+      - smoke-check
+      - contract-confidence
+      - test-fast
+      - repo-backed-unit
+      - unit-scripts-tooling
+      - unit-filesystem-contracts
+      - unit-subprocess-backed
+      - test-matrix
+      - serial-coverage
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-coverage"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
+
+      - name: Download coverage shards
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: coverage-data-*
+          path: reports/coverage
+          merge-multiple: true
+
+      - name: Verify required blocking-lane coverage shards
+        shell: bash
+        run: |
+          set -euo pipefail
+          required_shards=(
+            reports/coverage/.coverage.smoke
+            reports/coverage/.coverage.contract-confidence
+            reports/coverage/.coverage.repo-backed-unit-product
+            reports/coverage/.coverage.repo-backed-unit-tooling
+            reports/coverage/.coverage.repo-backed-unit-ops
+            reports/coverage/.coverage.unit-scripts-tooling-passport
+            reports/coverage/.coverage.unit-scripts-tooling-debt-governance
+            reports/coverage/.coverage.unit-scripts-tooling-other
+            reports/coverage/.coverage.unit-filesystem-contracts
+            reports/coverage/.coverage.unit-subprocess-backed
+            reports/coverage/.coverage.unit-domain
+            reports/coverage/.coverage.unit-application
+            reports/coverage/.coverage.unit-infrastructure
+            reports/coverage/.coverage.unit-other
+            reports/coverage/.coverage.integration
+            reports/coverage/.coverage.security
+            reports/coverage/.coverage.serial
+          )
+          for shard in "${required_shards[@]}"; do
+            if [ ! -s "$shard" ]; then
+              echo "::error::Required coverage shard is missing or empty: $shard"
+              exit 1
+            fi
+          done
+
+      - name: Combine coverage shards and build SHA-bound candidate
+        run: |
+          uv run --frozen --no-build python -m coverage combine --keep reports/coverage
+          uv run --frozen --no-build python -m coverage xml -o reports/coverage/coverage.xml
+          uv run --frozen --no-build python -m scripts.engineering.qa report-module-coverage \
+            --coverage-xml reports/coverage/coverage.xml \
+            --json-out reports/quality/module-coverage-inventory.candidate.json \
+            --baseline-json reports/quality/module-coverage-inventory.json \
+            --refresh-from-coverage-xml \
+            --enforce-module-thresholds block-regression \
+            --fail-on-regression
+
+      - name: Enforce hard coverage thresholds
+        run: |
+          uv run --frozen --no-build python -m coverage report --show-missing --fail-under=85
+          uv run --frozen --no-build python -m scripts.engineering.qa check-branch-coverage \
+            --coverage-xml reports/coverage/coverage.xml \
+            --min-percent 85
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ always() && !cancelled() }}
+        with:
+          name: coverage-report
+          path: |
+            reports/coverage/coverage.xml
+            reports/quality/module-coverage-inventory.json
+            reports/quality/module-coverage-inventory.candidate.json
+          retention-days: 7
+
+  # Keep candidate production independently green and SHA-bound. This required
+  # gate fails closed when the committed inventory has not consumed it yet.
+  coverage-inventory-currentness:
+    runs-on: ubuntu-latest
+    needs: coverage-verify
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download trusted coverage report
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: coverage-report
+          path: reports
+
+      - name: Verify committed module coverage inventory is current
+        run: |
+          set -euo pipefail
+          test -s reports/quality/module-coverage-inventory.candidate.json
+          if ! cmp --silent \
+            <(jq -S 'del(.coverage_xml_sha256, .snapshot_date)' reports/quality/module-coverage-inventory.json) \
+            <(jq -S 'del(.coverage_xml_sha256, .snapshot_date)' reports/quality/module-coverage-inventory.candidate.json); then
+            echo "Committed module coverage inventory is stale."
+            echo "Download module-coverage-inventory.candidate.json from the successful SHA-bound coverage-verify producer."
+            exit 1
+          fi
+
+  tests-complete:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs:
+      - vcr-preflight
+      - control-plane-e2e
+      - flaky-telemetry
+      - neo4j-memory-live-audit
+      - config-schema-preflight
+      - track-d-gates
+      - dq-consistency-gate
+      - quality-metrics-gate
+      - memory-tests
+      - performance-budgets
+      - coverage-inventory-currentness
+    permissions:
+      contents: read
+    steps:
+      - name: Fail closed on every blocking Tests lane
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          if ! jq -e 'all(.[]; .result == "success")' <<< "$NEEDS_JSON"; then
+            echo "::error::One or more blocking Tests lanes failed, were cancelled, or were skipped."
+            jq -r 'to_entries[] | "\(.key)=\(.value.result)"' <<< "$NEEDS_JSON"
+            exit 1
+          fi
+          echo "All blocking Tests lanes completed successfully."
+  duration-telemetry:
+    if: always()
+    runs-on: ubuntu-latest
+    permissions: { contents: read }
+    needs:
+      - contract-confidence
+      - flaky-telemetry
+      - track-d-gates
+      - test-fast
+      - repo-backed-unit
+      - serial-coverage
+      - unit-scripts-tooling
+      - unit-filesystem-contracts
+      - unit-subprocess-backed
+      - test-matrix
+      - memory-tests
+      - repo-backed-unit
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Download JUnit telemetry shards
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        continue-on-error: true
+        with:
+          pattern: test-telemetry-*
+          path: reports/test-telemetry/raw
+          merge-multiple: true
+
+      - name: Build test-health summaries
+        shell: bash
+        run: |
+          mkdir -p reports/quality/test-runs
+          mkdir -p reports/test-telemetry/raw
+          shopt -s nullglob
+
+          unit_junit=()
+          for junit_path in reports/test-telemetry/raw/junit-fast.*.xml; do
+            unit_junit+=("$junit_path")
+          done
+          for junit_path in reports/test-telemetry/raw/junit.unit-*.xml; do
+            unit_junit+=("$junit_path")
+          done
+          if [ "${#unit_junit[@]}" -gt 0 ]; then
+            junit_args=()
+            for junit_path in "${unit_junit[@]}"; do
+              junit_args+=(--junit "$junit_path")
+            done
+            uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+              --suite unit-fast \
+              --run-id "unit-fast-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+              --reports-dir reports/quality/test-runs \
+              --command "tests.yml unit-fast shards" \
+              "${junit_args[@]}"
+          fi
+
+          repo_junit=()
+          for junit_path in reports/test-telemetry/raw/junit-repo-backed-unit.*.xml; do
+            repo_junit+=(--junit "$junit_path")
+          done
+          if [ "${#repo_junit[@]}" -gt 0 ]; then
+            uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+              --suite repo-backed-unit \
+              --run-id "repo-backed-unit-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+              --reports-dir reports/quality/test-runs \
+              --command "tests.yml repo-backed-unit shards" \
+              "${repo_junit[@]}"
+          fi
+
+          scripts_junit=()
+          for junit_path in reports/test-telemetry/raw/junit-unit-scripts-tooling.*.xml; do
+            scripts_junit+=(--junit "$junit_path")
+          done
+          if [ "${#scripts_junit[@]}" -gt 0 ]; then
+            uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+              --suite unit-scripts-tooling \
+              --run-id "unit-scripts-tooling-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+              --reports-dir reports/quality/test-runs \
+              --command "tests.yml unit-scripts-tooling shards" \
+              "${scripts_junit[@]}"
+          fi
+
+          if [ -f reports/test-telemetry/raw/junit.integration.xml ]; then
+            uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+              --suite integration-replay \
+              --run-id "integration-replay-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+              --reports-dir reports/quality/test-runs \
+              --junit reports/test-telemetry/raw/junit.integration.xml \
+              --command "tests.yml integration shard"
+          fi
+
+          if [ -f reports/test-telemetry/raw/junit.security.xml ]; then
+            uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+              --suite security \
+              --run-id "security-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+              --reports-dir reports/quality/test-runs \
+              --junit reports/test-telemetry/raw/junit.security.xml \
+              --command "tests.yml security shard"
+          fi
+
+          if [ -f reports/test-telemetry/raw/junit-memory.xml ]; then
+            uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+              --suite memory \
+              --run-id "memory-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+              --reports-dir reports/quality/test-runs \
+              --junit reports/test-telemetry/raw/junit-memory.xml \
+              --command "tests.yml memory lane"
+          fi
+
+          if [ -f reports/test-telemetry/raw/junit-contract-confidence.xml ]; then
+            uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+              --suite contracts \
+              --run-id "contracts-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+              --reports-dir reports/quality/test-runs \
+              --junit reports/test-telemetry/raw/junit-contract-confidence.xml \
+              --command "tests.yml contract confidence lane"
+          fi
+
+          if [ -f reports/test-telemetry/raw/junit-track-d.xml ]; then
+            uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+              --suite track-d \
+              --run-id "track-d-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+              --reports-dir reports/quality/test-runs \
+              --junit reports/test-telemetry/raw/junit-track-d.xml \
+              --command "tests.yml track-d gates"
+          fi
+
+          if [ -f reports/test-telemetry/raw/junit-serial-coverage.xml ]; then
+            uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+              --suite serial-coverage \
+              --run-id "serial-coverage-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+              --reports-dir reports/quality/test-runs \
+              --junit reports/test-telemetry/raw/junit-serial-coverage.xml \
+              --command "tests.yml serial coverage producer"
+          fi
+
+          uv run --frozen --no-build python -m scripts.engineering.qa test-health \
+            --reports-dir reports/quality/test-runs \
+            --last 100 \
+            --markdown-out reports/quality/test-runs/rollup.md \
+            --github-step-summary
+
+      - name: Build slow-test duration summary
+        shell: bash
+        run: |
+          mkdir -p reports/test-telemetry
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          import os
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          raw_dir = Path("reports/test-telemetry/raw")
+          rows: list[dict[str, object]] = []
+          junit_paths = sorted(raw_dir.rglob("*.xml"))
+          junit_testcase_duration_sum_s: dict[str, float] = {}
+          lane_wall_time_s: dict[str, float] = {}
+          for junit_path in junit_paths:
+              root = ET.parse(junit_path).getroot()
+              suites = [root] if root.tag == "testsuite" else list(root.findall("testsuite"))
+              lane_wall_time_s[junit_path.name] = round(
+                  sum(float(suite.attrib.get("time", "0") or 0.0) for suite in suites),
+                  3,
+              )
+              junit_testcase_duration_sum_s[junit_path.name] = round(
+                  sum(
+                      float(case.attrib.get("time", "0") or 0.0)
+                      for case in root.iter("testcase")
+                  ),
+                  3,
+              )
+              for testcase in root.iter("testcase"):
+                  case_name = testcase.attrib.get("name", "")
+                  class_name = testcase.attrib.get("classname", "")
+                  duration = float(testcase.attrib.get("time", "0") or 0.0)
+                  if duration <= 0:
+                      continue
+                  full_name = (
+                      f"{class_name}::{case_name}" if class_name else case_name
+                  )
+                  rows.append(
+                      {
+                          "source": junit_path.name,
+                          "test": full_name,
+                          "duration_s": round(duration, 3),
+                      }
+                  )
+
+          rows.sort(key=lambda row: row["duration_s"], reverse=True)
+          top_rows = rows[:25]
+
+          md_path = Path("reports/test-telemetry/slowest-tests.md")
+          json_path = Path("reports/test-telemetry/slowest-tests.json")
+
+          lines = [
+              "# Slowest Tests",
+              "",
+              f"Collected test cases: `{len(rows)}`",
+              "",
+          ]
+          if top_rows:
+              lines.extend(
+                  [
+                      "| Rank | Duration (s) | Test | Source |",
+                      "|---:|---:|---|---|",
+                  ]
+              )
+              for idx, row in enumerate(top_rows, start=1):
+                  lines.append(
+                      f"| {idx} | {row['duration_s']:.3f} | `{row['test']}` | `{row['source']}` |"
+                  )
+          else:
+              lines.append("No JUnit test-case durations were collected.")
+
+          markdown = "\n".join(lines) + "\n"
+          md_path.write_text(markdown, encoding="utf-8")
+          payload = {
+              "source_commit": os.environ.get("GITHUB_SHA"),
+              "source_run_id": (
+                  f"github-{os.environ.get('GITHUB_RUN_ID', 'unknown')}-"
+                  f"{os.environ.get('GITHUB_RUN_ATTEMPT', '1')}"
+              ),
+              "total_cases": len(rows),
+              "top_slowest": top_rows,
+              "execution_context": {
+                  "junit_source_count": len(junit_paths),
+                  "junit_sources": [path.name for path in junit_paths],
+                  "executed_count": len(rows),
+                  "worker_mode": (
+                      "mixed: xdist unit/integration; serial "
+                      "contracts/repo-backed/memory"
+                  ),
+                  "junit_testcase_duration_sum_s": (
+                      junit_testcase_duration_sum_s
+                  ),
+                  "lane_wall_time_s": lane_wall_time_s,
+                  "lane_wall_time_source": "junit_testsuite_time",
+                  "explicit_exclusions": [
+                      {
+                          "lane": "live-provider-contracts",
+                          "reason": "scheduled network-owned workflow",
+                      },
+                      {
+                          "lane": "performance",
+                          "reason": "benchmark-owned non-blocking workflow",
+                      },
+                      {
+                          "lane": "manual-e2e",
+                          "reason": "operator-triggered external-runtime lane",
+                      },
+                  ],
+              },
+          }
+          json_path.write_text(
+              json.dumps(payload, indent=2, sort_keys=True)
+              + "\n",
+              encoding="utf-8",
+          )
+
+          summary_path = os.getenv("GITHUB_STEP_SUMMARY")
+          if summary_path:
+              with Path(summary_path).open("a", encoding="utf-8") as handle:
+                  handle.write(markdown)
+          PY
+
+      - name: Publish CI confidence accounting summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo
+            echo "### CI confidence accounting"
+            echo "- Hard coverage gate: \`coverage-verify\` (85%)"
+            echo "- Dual-purpose coverage + confidence lane: \`contract-confidence\`"
+            echo "- Blocking confidence lanes outside hard coverage: \`control-plane-e2e\`, \`memory-tests\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload slow-test telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-duration-telemetry
+          path: |
+            reports/test-telemetry/slowest-tests.md
+            reports/test-telemetry/slowest-tests.json
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload test-health telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-health-telemetry
+          path: reports/quality/test-runs/
+          if-no-files-found: warn
+          retention-days: 7
+
+  proof-or-stop-advisory:
+    name: Proof-or-Stop advisory closeout
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    needs:
+      - dependency-preflight
+      - governance-preflight
+      - quality-metrics-gate
+      - test-fast
+      - repo-backed-unit
+      - unit-scripts-tooling
+      - unit-filesystem-contracts
+      - unit-subprocess-backed
+      - test-matrix
+      - memory-tests
+      - coverage-verify
+      - duration-telemetry
+    env:
+      PROOF_OR_STOP_RUN_ID: github-${{ github.run_id }}-${{ github.run_attempt }}
+      PROOF_OR_STOP_TASK_ID: github-${{ github.run_id }}-${{ github.run_attempt }}
+      PROOF_OR_STOP_CLAIM: ready_to_merge
+      PROOF_OR_STOP_TRUST_TIER: ci
+      PROOF_OR_STOP_CI_RUN_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          lfs: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Download existing test-health evidence
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: test-health-telemetry
+          path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/upstream/test-health
+
+      - name: Download existing quality evidence
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ci-quality-metrics
+          path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/upstream/quality
+
+      - name: Download existing coverage evidence
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: coverage-report
+          path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/upstream/coverage
+
+      - name: Record upstream job identities
+        env:
+          UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+        run: |
+          mkdir -p "reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream"
+          printf '%s\n' "$UPSTREAM_NEEDS" > \
+            "reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream/needs.json"
+
+      - name: Run docs and runtime parity evidence producer
+        id: docs_runtime
+        shell: bash
+        run: |
+          set +e
+          mkdir -p "reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream"
+          log="reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream/docs-runtime.log"
+          uv run --frozen --no-build python -m scripts.docs verify --skip-build > "$log" 2>&1
+          verify_rc=$?
+          bash scripts/ai/junie/check_junie_mirror.sh --check >> "$log" 2>&1
+          mirror_rc=$?
+          set -e
+          rc=0
+          if [[ "$verify_rc" != "0" ]]; then
+            rc="$verify_rc"
+          elif [[ "$mirror_rc" != "0" ]]; then
+            rc="$mirror_rc"
+          fi
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit "$rc"
+
+      - name: Run adversarial Proof-or-Stop pilot
+        run: >-
+          uv run --frozen --no-build python -m scripts.engineering.qa
+          proof-or-stop pilot --repo-root "$GITHUB_WORKSPACE"
+
+      - name: Normalize required producer receipts
+        if: ${{ always() && !cancelled() }}
+        shell: bash
+        env:
+          GOVERNANCE_RESULT: ${{ needs.governance-preflight.result }}
+          QUALITY_RESULT: ${{ needs.quality-metrics-gate.result }}
+          TEST_RESULTS: >-
+            ${{ needs.test-fast.result }} ${{ needs.repo-backed-unit.result }}
+            ${{ needs.unit-scripts-tooling.result }}
+            ${{ needs.unit-filesystem-contracts.result }}
+            ${{ needs.unit-subprocess-backed.result }}
+            ${{ needs.test-matrix.result }}
+            ${{ needs.memory-tests.result }} ${{ needs.coverage-verify.result }}
+            ${{ needs.duration-telemetry.result }}
+          DOCS_RUNTIME_RC: ${{ steps.docs_runtime.outputs.rc }}
+        run: |
+          set -euo pipefail
+          needs_path="reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream/needs.json"
+          docs_path="reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream/docs-runtime.log"
+
+          capture_receipt() {
+            local producer="$1"
+            local kind="$2"
+            local command_text="$3"
+            local result="$4"
+            local output_path="$5"
+            local status="pass"
+            local -a outcome_args=(--exit-code 0)
+            if [[ "$result" == *failure* ]]; then
+              status="fail"
+              outcome_args=(--exit-code 1)
+            elif [[ "$result" == *cancelled* || "$result" == *skipped* ]]; then
+              status="unavailable"
+              outcome_args=(
+                --skip-reason "required CI producer did not complete"
+                --follow-up "rerun the complete Tests workflow"
+              )
+            fi
+            uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop receipt \
+              --run-id "$PROOF_OR_STOP_RUN_ID" \
+              --task-id "$PROOF_OR_STOP_TASK_ID" \
+              --claim "$PROOF_OR_STOP_CLAIM" \
+              --producer "$producer" \
+              --receipt-id "${producer}-${GITHUB_JOB}" \
+              --evidence-kind "$kind" \
+              --command "$command_text" \
+              --status "$status" \
+              --trust-tier "$PROOF_OR_STOP_TRUST_TIER" \
+              --ci-run-id "$PROOF_OR_STOP_CI_RUN_ID" \
+              --output-artifact "$output_path" \
+              "${outcome_args[@]}"
+          }
+
+          capture_receipt \
+            test_health tests \
+            "python -m scripts.engineering.qa run-tests" \
+            "$TEST_RESULTS" "$needs_path"
+          capture_receipt \
+            pretest_guardrails governance \
+            "bash scripts/engineering/dev/pretest_guardrails.sh" \
+            "$GOVERNANCE_RESULT" "$needs_path"
+          capture_receipt \
+            debt_governance_gates debt \
+            "python -m scripts.engineering.qa report-debt-governance-gates" \
+            "$GOVERNANCE_RESULT" "$needs_path"
+          capture_receipt \
+            quality_integral_gate quality \
+            "python -m scripts.engineering.ci.quality_integral_gate" \
+            "$QUALITY_RESULT" "$needs_path"
+
+          docs_result="success"
+          if [[ "$DOCS_RUNTIME_RC" != "0" ]]; then
+            docs_result="failure"
+          fi
+          capture_receipt \
+            docs_runtime_checks docs_runtime \
+            "python -m scripts.docs verify --skip-build" \
+            "$docs_result" "$docs_path"
+
+      - name: Assemble and verify the closeout bundle
+        id: proof_verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_dir="reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}"
+          receipt_args=()
+          while IFS= read -r -d '' receipt_path; do
+            receipt_args+=(--receipt "$receipt_path")
+          done < <(find "$run_dir/receipts" -type f -name '*.json' -print0 | sort -z)
+
+          uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop assemble \
+            --run-id "$PROOF_OR_STOP_RUN_ID" \
+            --task-id "$PROOF_OR_STOP_TASK_ID" \
+            --claim "$PROOF_OR_STOP_CLAIM" \
+            --actor github-actions \
+            --runtime github-actions \
+            --trust-tier "$PROOF_OR_STOP_TRUST_TIER" \
+            --ci-run-id "$PROOF_OR_STOP_CI_RUN_ID" \
+            "${receipt_args[@]}"
+
+          set +e
+          uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop verify \
+            --bundle "$run_dir/bundle.json"
+          rc=$?
+          set -e
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Publish Proof-or-Stop summary
+        if: always()
+        shell: bash
+        run: |
+          run_dir="reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}"
+          if [[ -f "$run_dir/verification.json" ]]; then
+            outcome="$(uv run --frozen --no-build python -c 'import json,sys; print(json.load(open(sys.argv[1]))["outcome"])' "$run_dir/verification.json")"
+          else
+            outcome="STOP"
+          fi
+          {
+            echo "## Proof-or-Stop closeout"
+            echo "Outcome: **${outcome}**"
+            echo "Enforcement is controlled by configs/quality/staged_enforcement_policy_registry.yaml."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Proof-or-Stop bundle
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: proof-or-stop-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Apply staged Proof-or-Stop enforcement
+        if: always()
+        env:
+          VERIFY_RC: ${{ steps.proof_verify.outputs.rc }}
+        run: |
+          stage="$(uv run --frozen --no-build python -c 'import yaml; data=yaml.safe_load(open("configs/quality/staged_enforcement_policy_registry.yaml")); print(next(item["current_stage"] for item in data["policies"] if item["check_name"] == "proof_or_stop_closeout"))')"
+          if [[ "${VERIFY_RC:-2}" == "0" ]]; then
+            exit 0
+          fi
+          if [[ "$stage" == "hard_fail" ]]; then
+            echo "::error::Proof-or-Stop blocked the closeout."
+            exit "${VERIFY_RC:-2}"
+          fi
+          if [[ "$stage" == "soft_fail" ]]; then
+            echo "::warning::Proof-or-Stop closeout is not admitted (soft_fail stage)."
+          else
+            echo "::notice::Proof-or-Stop closeout is advisory (observe stage)."
+          fi

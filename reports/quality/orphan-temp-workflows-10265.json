@@ -1,0 +1,105 @@
+{
+  "deletion_applied": false,
+  "generated_at": "2026-09-09T19:29:09Z",
+  "issue": "#10265",
+  "method": "PUT /actions/workflows/{id}/disable",
+  "note": "GitHub-only orphan objects. Not tracked workflow files and not canonical PR gates.",
+  "workflows": [
+    {
+      "id": 348464441,
+      "path": ".github/workflows/codex-baseline-diagnostic.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 348449565,
+      "path": ".github/workflows/codex-ci-diagnostic.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 348472435,
+      "path": ".github/workflows/codex-inventory-diagnostic.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 349060658,
+      "path": ".github/workflows/codex-temp-coverage-inventory-diff.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 348870616,
+      "path": ".github/workflows/codex-test-governance-refresh.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 349397659,
+      "path": ".github/workflows/temp-trivy-artifact-diagnosis.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 349312647,
+      "path": ".github/workflows/temporary-governance-artifact-9977.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 349328204,
+      "path": ".github/workflows/temporary-governance-log-9977.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 349405434,
+      "path": ".github/workflows/temporary-pr-10037-telemetry-refresh.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 346434904,
+      "path": ".github/workflows/tmp-canonical-governance.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 346403953,
+      "path": ".github/workflows/tmp-canonical-refresh.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 346429358,
+      "path": ".github/workflows/tmp-canonical-test-governance.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 346596417,
+      "path": ".github/workflows/tmp-final-pr9889-remote-baseline.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 346467453,
+      "path": ".github/workflows/tmp-pr-9880-ci-repair.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 346590707,
+      "path": ".github/workflows/tmp-pr-9889-final-governance.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    },
+    {
+      "id": 349108333,
+      "path": ".github/workflows/tmp-remote-main-baseline-hashes.yml",
+      "state_after": "disabled_manually",
+      "state_before": "active"
+    }
+  ]
+}

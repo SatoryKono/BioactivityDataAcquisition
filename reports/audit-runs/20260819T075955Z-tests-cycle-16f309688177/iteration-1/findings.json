@@ -1,0 +1,26 @@
+[
+  {
+    "id": "TEST-SYS-001",
+    "path": "docs/00-project/governance/05-github-policy.md:207",
+    "observation": "Документированный always-on merge gate не соответствует live GitHub state.",
+    "method": "GitHub REST API: required_status_checks, rulesets, Actions workflow/runs",
+    "expected": "Required checks реально блокируют merge в main и Tests публикует SHA-bound artifacts.",
+    "actual": "Branch protection API returned 404; rulesets main and root-hygiene-required-check are disabled; newest Tests run is 2026-07-17 failure.",
+    "impact": "Изменения могут попасть в main без regression gates; coverage/telemetry нельзя доказательно обновить.",
+    "confidence": "high",
+    "confidence_score": 0.99,
+    "status": "PROVEN",
+    "priority": "P1",
+    "severity": "High",
+    "category": "merge_enforcement",
+    "evidence": [{"path": "docs/00-project/governance/05-github-policy.md", "line": 207, "command": "gh api + gh run list", "observation": "Policy says active; live enforcement is disabled."}],
+    "root_cause": "Live repository ruleset state regressed after #8619 closeout.",
+    "remediation": "Restore enforced rulesets and obtain a successful Tests run for current main.",
+    "effort": "M",
+    "automation": "Repository ruleset plus required Actions checks",
+    "automated_fix_possible": false,
+    "dependencies": ["GitHub repository admin"],
+    "validation": ["gh api repos/SatoryKono/BioactivityDataAcquisition/rulesets", "gh run list --workflow tests.yml --branch main"],
+    "resolution_state": "OPEN:#8619"
+  }
+]

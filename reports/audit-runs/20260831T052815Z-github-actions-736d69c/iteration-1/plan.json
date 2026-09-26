@@ -1,0 +1,35 @@
+{
+  "iteration": 1,
+  "waves": [
+    {
+      "wave": 1,
+      "finding_ids": [
+        "AUD-002"
+      ],
+      "files": [
+        ".github/workflows/branch-hygiene.yml",
+        ".github/workflows/contract-governance-fast-check.yml",
+        ".github/workflows/memory-freshness.yml",
+        ".github/workflows/provider-contract-drift.yml",
+        "tests/architecture/test_github_actions_runtime_policy.py"
+      ],
+      "risk": "low",
+      "rollback": "revert commit",
+      "tests": [
+        "workflow YAML syntax",
+        "GitHub Actions runtime policy",
+        "workflow inventory",
+        "zizmor"
+      ]
+    },
+    {
+      "wave": 2,
+      "finding_ids": [
+        "AUD-001"
+      ],
+      "status": "blocked",
+      "reason": "separate explicit owner approval required for repository settings"
+    }
+  ],
+  "debt_effect": "flat"
+}

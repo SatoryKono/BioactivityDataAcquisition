@@ -1,0 +1,4 @@
+interface:
+  display_name: "Py Audit Bot"
+  short_description: "Run BioETL audit workflow profile"
+  default_prompt: "Use $py-audit-bot to run a baseline, final, or targeted BioETL audit with evidence-backed findings."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Py Plan Bot"
+  short_description: "Run BioETL planning profile"
+  default_prompt: "Use $py-plan-bot to sequence a scoped BioETL implementation, refactor, or audit-remediation plan."

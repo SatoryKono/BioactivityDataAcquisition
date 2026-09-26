@@ -1,0 +1,21 @@
+rule_files:
+  - ../bioetl_control_plane_current_status.yml
+evaluation_interval: 1m
+tests:
+  - name: checkpoint-timestamps-must-be-valid-but-need-not-be-recent
+    interval: 1m
+    input_series:
+      - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="old"}'
+        values: '1+0x70'
+      - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="zero"}'
+        values: '0+0x70'
+      - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="future"}'
+        values: '999999+0x70'
+      - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="negative"}'
+        values: '-1+0x70'
+    promql_expr_test:
+      - expr: bioetl_checkpoint_age_seconds
+        eval_time: 70m
+        exp_samples:
+          - labels: '{__name__="bioetl_checkpoint_age_seconds",pipeline="old"}'
+            value: 4199

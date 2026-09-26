@@ -1,0 +1,25 @@
+[
+  {
+    "id": "TEST-SYS-007",
+    "path": "reports/quality/module-coverage-inventory.json",
+    "observation": "Committed module coverage inventory initially omitted four source modules.",
+    "method": "pytest test_module_coverage_inventory_freshness.py plus report-module-coverage check",
+    "expected": "Inventory paths equal every src/bioetl Python module.",
+    "actual": "Four health/metrics modules were absent before upstream refresh.",
+    "impact": "Per-module coverage regression enforcement had blind spots.",
+    "confidence": "high",
+    "status": "PROVEN",
+    "priority": "P2",
+    "severity": "Medium",
+    "category": "coverage_inventory",
+    "evidence": [{"path": "reports/quality/module-coverage-inventory.json", "command": "pytest module coverage architecture tests", "observation": "Final 2431 source modules; zero unmeasured/uncovered."}],
+    "root_cause": "Source modules landed without consuming a fresh candidate inventory.",
+    "remediation": "Consume SHA-bound candidate rows; refresh hash without fabricating coverage.",
+    "effort": "M",
+    "automation": "coverage-inventory-currentness plus architecture exact-path test",
+    "automated_fix_possible": false,
+    "dependencies": ["coverage-verify artifact producer"],
+    "validation": ["pytest tests/architecture/test_module_coverage_inventory.py tests/architecture/test_module_coverage_inventory_freshness.py -q"],
+    "resolution_state": "RESOLVED_UPSTREAM_DURING_RUN"
+  }
+]

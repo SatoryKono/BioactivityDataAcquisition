@@ -1,0 +1,203 @@
+{
+  "_dq_error": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality errors.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_dq_warn": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality warnings.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_index": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Sequential index of the record in the pipeline run.",
+    "dtype": "int64",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_ingestion_ts": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)?$"
+      }
+    ],
+    "coerce": false,
+    "description": "Timestamp when the record was ingested (UTC, ISO 8601 format).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Correlation ID for the pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Type of pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_source_batch_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Batch context ID from the source.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "class_level": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Class level.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "content_hash": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^[a-f0-9]{64}$"
+      }
+    ],
+    "coerce": false,
+    "description": "SHA256 hash of canonical record representation (64 hex chars).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "definition": {
+    "checks": [],
+    "coerce": false,
+    "description": "Definition.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "downgraded": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Downgraded flag.",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "entity_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Unique business identifier for the entity.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "parent_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "FK to parent classification.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "pref_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "Preferred name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "protein_class_desc": {
+    "checks": [],
+    "coerce": false,
+    "description": "Description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "protein_class_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Primary key.",
+    "dtype": "int64",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "replaced_by": {
+    "checks": [],
+    "coerce": false,
+    "description": "FK to replacement classification.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "short_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "Short name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "sort_order": {
+    "checks": [],
+    "coerce": false,
+    "description": "Sort order.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  }
+}

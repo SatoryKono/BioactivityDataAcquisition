@@ -1,0 +1,1 @@
+{"iteration":5,"commands":["SHA-256 snapshot of configs/quality","python -m scripts.engineering.qa check-exemptions","pytest test_quality_debt_scorecard.py"],"outcome":"pass_flat","findings":[]}

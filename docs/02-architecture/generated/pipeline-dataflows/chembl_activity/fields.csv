@@ -1,0 +1,144 @@
+pipeline,layer,ordinal,field,data_type,nullable,required,group,schema_source,description
+chembl_activity,silver,1,entity_id,string,true,true,system,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Unique business identifier for the entity.
+chembl_activity,silver,2,content_hash,string,true,true,system,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,SHA256 hash of canonical record representation (64 hex chars).
+chembl_activity,silver,3,_run_id,string,true,true,system,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Correlation ID for the pipeline run.
+chembl_activity,silver,4,_run_type,string,true,true,system,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Type of pipeline run.
+chembl_activity,silver,5,_source_batch_id,string,false,true,system,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Batch context ID from the source.
+chembl_activity,silver,6,_ingestion_ts,string,true,true,system,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,"Timestamp when the record was ingested (UTC, ISO 8601 format)."
+chembl_activity,silver,7,_index,int64,true,true,system,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Sequential index of the record in the pipeline run.
+chembl_activity,silver,8,_state,string,false,true,system,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Processing state for the activity record.
+chembl_activity,silver,9,activity_id,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Primary key.
+chembl_activity,silver,10,assay_id,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Foreign key to assay.
+chembl_activity,silver,11,molecule_id,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Foreign key to molecule.
+chembl_activity,silver,12,target_id,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Foreign key to target.
+chembl_activity,silver,13,publication_id,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Foreign key to document.
+chembl_activity,silver,14,standard_relation,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Standardized operator.
+chembl_activity,silver,15,standard_value,double,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Standardized value.
+chembl_activity,silver,16,standard_units,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Standardized units.
+chembl_activity,silver,17,standard_type,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Standardized measurement type.
+chembl_activity,silver,18,standard_flag,int64,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Standardization flag.
+chembl_activity,silver,19,pchembl_value,double,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,-log10 of molar activity.
+chembl_activity,silver,20,data_validity_comment,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Data quality comment.
+chembl_activity,silver,21,activity_comment,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Textual comment.
+chembl_activity,silver,22,potential_duplicate,int64,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Duplicate flag.
+chembl_activity,silver,23,bao_endpoint,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,BAO ID.
+chembl_activity,silver,24,bao_endpoint_iri,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Persistent IRI for the BAO endpoint ID.
+chembl_activity,silver,25,bao_endpoint_mapping_status,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,BAO endpoint IRI mapping status.
+chembl_activity,silver,26,uo_units,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Units Ontology ID.
+chembl_activity,silver,27,uo_unit_iri,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Persistent IRI for the Units Ontology unit ID.
+chembl_activity,silver,28,uo_unit_mapping_status,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Units Ontology IRI mapping status.
+chembl_activity,silver,29,uo_ontology_version,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Units Ontology release/version used for IRI mapping.
+chembl_activity,silver,30,qudt_units,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,QUDT unit.
+chembl_activity,silver,31,qudt_unit_iri,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Persistent QUDT unit IRI.
+chembl_activity,silver,32,qudt_unit_mapping_status,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,QUDT unit IRI mapping status.
+chembl_activity,silver,33,qudt_ontology_version,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,QUDT ontology release/version used for IRI mapping.
+chembl_activity,silver,34,src_id,int64,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Source ID.
+chembl_activity,silver,35,record_id,int64,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,FK to compound_record.
+chembl_activity,silver,36,activity_type,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Original type.
+chembl_activity,silver,37,activity_relation,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Original operator.
+chembl_activity,silver,38,activity_value,double,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Original value.
+chembl_activity,silver,39,units,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Original units.
+chembl_activity,silver,40,text_value,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Text value.
+chembl_activity,silver,41,standard_text_value,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Standardized text value.
+chembl_activity,silver,42,upper_value,double,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Upper bound.
+chembl_activity,silver,43,standard_upper_value,double,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Standardized upper bound.
+chembl_activity,silver,44,toid,double,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Test Occasion ID (float for nullable int).
+chembl_activity,silver,45,manual_curation_flag,int64,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Manual curation flag.
+chembl_activity,silver,46,original_activity_id,double,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Original activity ID (float for nullable int).
+chembl_activity,silver,47,data_validity_description,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Human-readable data validity explanation.
+chembl_activity,silver,48,ligand_efficiency_bei,double,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Binding Efficiency Index (BEI).
+chembl_activity,silver,49,ligand_efficiency_le,double,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Ligand Efficiency (LE).
+chembl_activity,silver,50,ligand_efficiency_lle,double,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Lipophilic Ligand Efficiency (LLE).
+chembl_activity,silver,51,ligand_efficiency_sei,double,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Surface Efficiency Index (SEI).
+chembl_activity,silver,52,action_type,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Action type classification.
+chembl_activity,silver,53,action_type_description,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Action type description.
+chembl_activity,silver,54,action_type_parent_type,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Parent action type category.
+chembl_activity,silver,55,activity_properties,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,JSON string of activity properties.
+chembl_activity,silver,56,canonical_smiles,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Canonical SMILES of molecule.
+chembl_activity,silver,57,molecule_pref_name,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Molecule preferred name.
+chembl_activity,silver,58,parent_molecule_id,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Parent molecule ChEMBL ID.
+chembl_activity,silver,59,target_pref_name,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Target preferred name.
+chembl_activity,silver,60,target_organism,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Target organism.
+chembl_activity,silver,61,target_taxonomy_id,int64,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Target taxonomy ID.
+chembl_activity,silver,62,assay_type,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Assay type (B/F/A/T/P/U).
+chembl_activity,silver,63,assay_description,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Assay description text.
+chembl_activity,silver,64,assay_variant_accession,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Assay variant protein accession.
+chembl_activity,silver,65,assay_variant_mutation,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Assay variant mutation description.
+chembl_activity,silver,66,bao_format,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,BioAssay Ontology format ID.
+chembl_activity,silver,67,bao_format_iri,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Persistent IRI for the BAO format ID.
+chembl_activity,silver,68,bao_format_mapping_status,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,BAO format IRI mapping status.
+chembl_activity,silver,69,bao_label,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,BioAssay Ontology label.
+chembl_activity,silver,70,bao_ontology_version,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,BAO ontology release/version used for IRI mapping.
+chembl_activity,silver,71,journal,string,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Journal name.
+chembl_activity,silver,72,publication_doi,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Publication DOI.
+chembl_activity,silver,73,publication_pmid,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Publication PMID.
+chembl_activity,silver,74,publication_pmc_id,string,true,false,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Publication PMC ID.
+chembl_activity,silver,75,publication_year,int64,false,true,business,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Publication year.
+chembl_activity,silver,76,_dq_error,bool,true,true,dq,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Flag for data quality errors.
+chembl_activity,silver,77,_dq_warn,bool,true,true,dq,bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA,Flag for data quality warnings.
+chembl_activity,gold,1,entity_id,string,false,true,system,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,2,content_hash,string,false,true,system,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,3,activity_id,string,false,true,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,4,assay_id,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,5,molecule_id,string,false,true,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,6,target_id,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,7,publication_id,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,8,standard_relation,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,9,standard_value,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,10,standard_units,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,11,standard_type,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,12,standard_flag,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,13,pchembl_value,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,14,data_validity_comment,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,15,activity_comment,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,16,potential_duplicate,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,17,bao_endpoint,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,18,bao_endpoint_iri,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,19,bao_endpoint_mapping_status,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,20,uo_units,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,21,uo_unit_iri,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,22,uo_unit_mapping_status,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,23,uo_ontology_version,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,24,qudt_units,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,25,qudt_unit_iri,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,26,qudt_unit_mapping_status,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,27,qudt_ontology_version,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,28,src_id,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,29,record_id,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,30,units,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,31,text_value,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,32,standard_text_value,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,33,upper_value,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,34,standard_upper_value,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,35,toid,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,36,manual_curation_flag,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,37,original_activity_id,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,38,data_validity_description,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,39,ligand_efficiency_bei,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,40,ligand_efficiency_le,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,41,ligand_efficiency_lle,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,42,ligand_efficiency_sei,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,43,action_type,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,44,action_type_description,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,45,action_type_parent_type,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,46,activity_properties,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,47,canonical_smiles,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,48,molecule_pref_name,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,49,parent_molecule_id,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,50,target_pref_name,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,51,target_organism,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,52,target_taxonomy_id,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,53,assay_type,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,54,assay_description,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,55,assay_variant_accession,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,56,assay_variant_mutation,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,57,bao_format,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,58,bao_format_iri,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,59,bao_format_mapping_status,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,60,bao_label,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,61,bao_ontology_version,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,62,journal,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,63,publication_doi,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,64,publication_pmid,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,65,publication_pmc_id,string|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,
+chembl_activity,gold,66,publication_year,number|null,true,false,business,bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema,

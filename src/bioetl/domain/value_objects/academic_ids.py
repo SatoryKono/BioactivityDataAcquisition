@@ -1,0 +1,221 @@
+"""Validated and normalized academic identifier value objects."""
+
+from __future__ import annotations
+
+import re
+
+from bioetl.domain.value_objects.base import ValueObject
+from bioetl.domain.value_objects.orcid import ORCID
+
+__all__ = [
+    "ISSN",
+    "ORCID",
+    "OpenAlexId",
+    "SemanticScholarId",
+]
+
+
+class OpenAlexId(ValueObject[str]):
+    """OpenAlex Work ID.
+
+    OpenAlex assigns unique identifiers to works (papers, articles, etc.)
+    in the format Wxxxx... where x is a digit.
+    Can also be extracted from OpenAlex URLs.
+
+    Examples: W2741809807, https://openalex.org/W2741809807
+
+    Invariants:
+        - Starts with "W" followed by one or more digits
+        - Normalized to uppercase
+        - URL prefixes are automatically stripped
+    """
+
+    __slots__ = ()
+    _value: str
+    _PATTERN = re.compile(r"^W\d+$")
+    _URL_PREFIX = "https://openalex.org/"
+
+    def _strip_openalex_prefix(self, normalized: str) -> str:
+        # Extract from URL if needed
+        if normalized.lower().startswith(self._URL_PREFIX.lower()):
+            return normalized[len(self._URL_PREFIX) :]
+        return normalized
+
+    def _validate(self, value: str) -> str:
+        """Validate and normalize OpenAlex ID."""
+        if not isinstance(value, str):
+            raise ValueError(f"OpenAlexId must be str, got {type(value).__name__}")
+
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("OpenAlexId cannot be empty")
+
+        normalized = self._strip_openalex_prefix(normalized).strip().upper()
+        if self._PATTERN.match(normalized):
+            return normalized
+        raise ValueError(f"Invalid OpenAlex ID format: {value!r}. Expected: W<digits>")
+
+    @property
+    def url(self) -> str:
+        """Get the full OpenAlex URL for web access."""
+        return f"{self._URL_PREFIX}{self._value}"
+
+    @property
+    def numeric_id(self) -> int:
+        """Get the numeric part of the OpenAlex ID."""
+        return int(self._value[1:])
+
+    @classmethod
+    def from_raw(cls, raw: str | None) -> OpenAlexId | None:
+        """Create OpenAlexId from raw string with normalization.
+
+        Args:
+            raw: Raw input value.
+
+        Returns:
+            New instance constructed from the input.
+        """
+        if raw is None:
+            return None
+        if not raw.strip():
+            return None
+        try:
+            return cls(raw)
+        except ValueError:
+            return None
+
+
+class SemanticScholarId(ValueObject[str]):
+    """Semantic Scholar Paper ID.
+
+    Semantic Scholar assigns 40-character hexadecimal identifiers
+    to papers (CorpusId format has been deprecated).
+
+    Example: 649def34f8be52c8b66281af98ae884c09aef38b
+
+    Invariants:
+        - Exactly 40 hexadecimal characters
+        - Normalized to lowercase
+    """
+
+    __slots__ = ()
+    _value: str
+    _PATTERN = re.compile(r"^[0-9a-f]{40}$")
+
+    def _validate(self, value: str) -> str:
+        """Validate and normalize Semantic Scholar ID."""
+        if not isinstance(value, str):
+            raise ValueError(
+                f"SemanticScholarId must be str, got {type(value).__name__}"
+            )
+
+        normalized = value.strip().lower()
+        if not normalized:
+            raise ValueError("SemanticScholarId cannot be empty")
+
+        if self._PATTERN.match(normalized):
+            return normalized
+        raise ValueError(
+            f"Invalid Semantic Scholar ID format: {value!r}. "
+            f"Expected: 40-character hexadecimal string"
+        )
+
+    @classmethod
+    def from_raw(cls, raw: str | None) -> SemanticScholarId | None:
+        """Create SemanticScholarId from raw string with normalization.
+
+        Args:
+            raw: Raw input value.
+
+        Returns:
+            New instance constructed from the input.
+        """
+        if raw is None:
+            return None
+        if not raw.strip():
+            return None
+        try:
+            return cls(raw)
+        except ValueError:
+            return None
+
+
+class ISSN(ValueObject[str]):
+    """International Standard Serial Number.
+
+    ISSN is a unique identifier for serial publications (journals, magazines).
+    Format: NNNN-NNNN where N is a digit (last digit can be 'X' for checksum 10).
+
+    Examples: 0378-5955, 2049-3630, 0317-847X
+
+    Invariants:
+        - Eight characters in total (with or without hyphen)
+        - First seven characters are digits
+        - Last character is a digit or 'X' (check digit)
+        - Normalized to include hyphen and uppercase X
+    """
+
+    __slots__ = ()
+    _value: str
+    _PATTERN = re.compile(r"^(\d{4})-?(\d{3}[\dXx])$")
+
+    @staticmethod
+    def _require_str(value: object) -> str:
+        if isinstance(value, str):
+            return value
+        raise ValueError(f"ISSN must be str, got {type(value).__name__}")
+
+    @staticmethod
+    def _issn_check_digit(body: str) -> str:
+        total = sum((8 - i) * int(digit) for i, digit in enumerate(body))
+        remainder = total % 11
+        expected_num = 0 if remainder == 0 else 11 - remainder
+        if expected_num == 10:
+            return "X"
+        return str(expected_num)
+
+    def _validate(self, value: str) -> str:
+        """Validate and normalize ISSN."""
+        text = self._require_str(value)
+        normalized = text.strip()
+        if not normalized:
+            raise ValueError("ISSN cannot be empty")
+
+        match = self._PATTERN.match(normalized)
+        if not match:
+            raise ValueError(f"Invalid ISSN format: {value!r}. Expected: NNNN-NNNN")
+
+        first_part = match.group(1)
+        second_part = match.group(2).upper()
+        body = first_part + second_part[:3]
+        check = second_part[3]
+        expected = self._issn_check_digit(body)
+        if check != expected:
+            raise ValueError(
+                f"Invalid ISSN checksum: {value!r} (expected check digit {expected})"
+            )
+        return f"{first_part}-{second_part}"
+
+    @property
+    def compact(self) -> str:
+        """Get ISSN without hyphen."""
+        return self._value.replace("-", "")
+
+    @classmethod
+    def from_raw(cls, raw: str | None) -> ISSN | None:
+        """Create ISSN from raw string with normalization.
+
+        Args:
+            raw: Raw input value.
+
+        Returns:
+            New instance constructed from the input.
+        """
+        if raw is None:
+            return None
+        if not raw.strip():
+            return None
+        try:
+            return cls(raw)
+        except ValueError:
+            return None

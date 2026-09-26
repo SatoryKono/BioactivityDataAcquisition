@@ -1,0 +1,67 @@
+{
+  "from_ms": 1790208000000,
+  "to_ms": 1790246400000,
+  "timezone": "UTC",
+  "theme": "dark",
+  "zoom": "default; not independently measured",
+  "device_scale_factor": "NOT_VERIFIED",
+  "viewports_requested": [
+    "1011x920",
+    "1366x768"
+  ],
+  "capture": "viewport; browser chrome excluded, Grafana chrome included; actual encoded dimensions recorded",
+  "variables": {
+    "workflow": "$__all",
+    "pipeline": "semanticscholar_publication",
+    "run_type": "incremental",
+    "run_id": "4dc5e1d1-c3fc-5fb6-a02b-27fd9fe741e1",
+    "provider": "semanticscholar"
+  },
+  "assets": [
+    {
+      "file": "followup-incident-1011x920.jpg",
+      "sha256": "ebed0072175d3bfd0995ee80b175ad82ce4ec3f747c6f0f26572e8764c63b625",
+      "format": "JPEG",
+      "dimensions": [
+        996,
+        906
+      ]
+    },
+    {
+      "file": "followup-incident-1366x768.jpg",
+      "sha256": "b1bab9e919d999a2717504f7b4ea2289e752d85747aecb88fcca0be46c142e7e",
+      "format": "JPEG",
+      "dimensions": [
+        1351,
+        760
+      ]
+    },
+    {
+      "file": "followup-measurements-1011x920.jpg",
+      "sha256": "dd863ad6848abeb6b05264086df5280ecfd362b3abfeb1eea1d6346534345c02",
+      "format": "JPEG",
+      "dimensions": [
+        1011,
+        920
+      ]
+    },
+    {
+      "file": "followup-measurements-1366x768.jpg",
+      "sha256": "131322ab7c7c392fbfa9479ac993a80dd28f051500fdc87d9105557e1acd2efd",
+      "format": "JPEG",
+      "dimensions": [
+        1366,
+        768
+      ]
+    },
+    {
+      "file": "followup-overview-1011x920.jpg",
+      "sha256": "e78d9c0f1a52e799879e5f6679abb9bb5028de44137ca456af03ececa457c44e",
+      "format": "JPEG",
+      "dimensions": [
+        996,
+        906
+      ]
+    }
+  ]
+}

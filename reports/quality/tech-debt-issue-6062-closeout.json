@@ -1,0 +1,120 @@
+{
+  "schema_version": "tech-debt-issue-6062-closeout-v1",
+  "issue": 6062,
+  "status": "closeable",
+  "debt_outcome": "improved",
+  "budget_growth_allowed": false,
+  "closed_on": "2026-07-08",
+  "scope": {
+    "primary_file": "src/bioetl/infrastructure/storage/gold_writer.py",
+    "support_files": [
+      "src/bioetl/infrastructure/storage/gold/writer_implementation.py",
+      "src/bioetl/infrastructure/storage/gold/writer_request.py"
+    ],
+    "target_metric": "function_scoped_imports"
+  },
+  "before": {
+    "function_scoped_import_count": 12,
+    "inventory": [
+      {
+        "scope": "_normalize_scd_config",
+        "import": "from bioetl.infrastructure.storage.gold.writer_facade_runtime import normalize_scd_config",
+        "classification": "compatibility patch-point",
+        "outcome": "reduced_to_top_level_direct_helper_import"
+      },
+      {
+        "scope": "delta_table",
+        "import": "from deltalake import DeltaTable as _DeltaTable",
+        "classification": "optional dependency and compatibility patch-point",
+        "outcome": "retained_lazy"
+      },
+      {
+        "scope": "write_deltalake",
+        "import": "from deltalake import write_deltalake as _write_deltalake",
+        "classification": "optional dependency and compatibility patch-point",
+        "outcome": "retained_lazy"
+      },
+      {
+        "scope": "GoldWriter.__init__",
+        "import": "from bioetl.infrastructure.storage.gold.writer_support import _resolve_runtime_services",
+        "classification": "accidental hidden coupling",
+        "outcome": "hoisted_to_top_level_focused_runtime_module"
+      },
+      {
+        "scope": "GoldWriter.write_gold",
+        "import": "from bioetl.domain.ports.noop import _NoOpSpan",
+        "classification": "accidental hidden coupling",
+        "outcome": "hoisted_to_top_level"
+      },
+      {
+        "scope": "GoldWriter.write_gold",
+        "import": "from bioetl.domain.types import GoldSchemaPolicyByVersion, ScdConfig, resolve_gold_contract_version",
+        "classification": "accidental hidden coupling",
+        "outcome": "hoisted_to_top_level"
+      },
+      {
+        "scope": "GoldWriter.write_gold",
+        "import": "from bioetl.infrastructure.storage.gold.writer_support import _build_gold_write_request, _resolve_active_gold_schema",
+        "classification": "accidental hidden coupling",
+        "outcome": "replaced_with_top_level_imports_from_focused_modules"
+      },
+      {
+        "scope": "GoldWriter._write_dual_targets",
+        "import": "from bioetl.infrastructure.storage.gold.writer_facade_runtime import write_dual_targets as _write_dual_targets",
+        "classification": "accidental hidden coupling",
+        "outcome": "replaced_with_top_level_writer_implementation_import"
+      },
+      {
+        "scope": "GoldWriter._write_single_target",
+        "import": "from bioetl.infrastructure.storage.gold.writer_facade_runtime import write_single_target as _write_single_target",
+        "classification": "accidental hidden coupling",
+        "outcome": "replaced_with_top_level_writer_implementation_import"
+      },
+      {
+        "scope": "GoldWriter._prepare_write_gold",
+        "import": "from bioetl.infrastructure.storage.gold.pipeline_helpers import prepare_gold_write as _prepare_write_gold_impl",
+        "classification": "accidental hidden coupling",
+        "outcome": "hoisted_to_top_level"
+      },
+      {
+        "scope": "GoldWriter._post_write_gold",
+        "import": "from bioetl.infrastructure.storage.gold.pipeline_helpers import post_write_gold as _post_write_gold_impl",
+        "classification": "accidental hidden coupling",
+        "outcome": "hoisted_to_top_level"
+      },
+      {
+        "scope": "GoldWriter._set_write_span_attributes",
+        "import": "from bioetl.infrastructure.storage.gold.pipeline_helpers import set_gold_write_span_attributes as _set_write_span_attributes_impl",
+        "classification": "accidental hidden coupling",
+        "outcome": "hoisted_to_top_level"
+      }
+    ]
+  },
+  "after": {
+    "function_scoped_import_count": 2,
+    "retained": [
+      {
+        "scope": "delta_table",
+        "import": "from deltalake import DeltaTable as _DeltaTable",
+        "classification": "optional dependency and compatibility patch-point",
+        "rationale": "Preserves Delta object laziness and canonical monkeypatch path bioetl.infrastructure.storage.gold_writer.delta_table."
+      },
+      {
+        "scope": "write_deltalake",
+        "import": "from deltalake import write_deltalake as _write_deltalake",
+        "classification": "optional dependency and compatibility patch-point",
+        "rationale": "Preserves Delta writer laziness and canonical monkeypatch path bioetl.infrastructure.storage.gold_writer.write_deltalake."
+      }
+    ],
+    "accidental_hidden_coupling_count": 0
+  },
+  "support_cleanup": [
+    "Hoisted GoldWriteRequest import in gold/writer_request.py.",
+    "Reused the existing _GoldWriteRequest top-level alias in gold/writer_implementation.py."
+  ],
+  "validation": [
+    "pytest tests/architecture/test_runtime_import_scc.py -q",
+    "pytest tests/architecture/test_tech_debt_issue_6062_closeout.py -q",
+    "pytest tests/unit/infrastructure/storage/test_gold_writer.py tests/unit/infrastructure/storage/test_gold_writer_integration.py tests/integration/infrastructure/storage/test_gold_writer_versioning.py tests/integration/infrastructure/storage/test_gold_writer_read_cleanup.py -q"
+  ]
+}

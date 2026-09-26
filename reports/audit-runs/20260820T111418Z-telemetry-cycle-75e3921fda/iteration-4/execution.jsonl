@@ -1,0 +1,2 @@
+{"cmd": "pytest tests/unit/scripts/qa/test_check_prometheus_rules.py", "result": "9 passed"}
+{"cmd": "git commit 75e3921fda", "result": "5 fixtures + MIN_TESTED_ALERTS=43"}

@@ -1,0 +1,8 @@
+context,source,configured,enforced,branch_evidence,issue
+"checks-complete","ruleset 15730586","true","false","main protected=false","#9800"
+"root-hygiene","ruleset 15730586","true","false","main protected=false","#9800"
+"coverage-verify","GitHub policy path-scoped gate","documented","false","not in active ruleset","#9800"
+"schema-governance-status","GitHub policy path-scoped gate","documented","false","not in active ruleset","#9800"
+"detect-secrets","GitHub policy path-scoped gate","documented","false","not in active ruleset","#9800"
+"commit-lint","GitHub policy path-scoped gate","documented","false","not in active ruleset","#9800"
+"type-check","GitHub policy path-scoped gate","documented","false","not in active ruleset","#9800"

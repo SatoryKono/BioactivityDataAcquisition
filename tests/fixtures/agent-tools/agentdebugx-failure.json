@@ -1,0 +1,25 @@
+{
+  "trace_id": "bioetl-agentdebugx-fixture",
+  "task_id": "fixture-failure",
+  "goal": "Diagnose a deterministic provider failure",
+  "framework": "generic",
+  "started_at": "2026-08-09T00:00:00+00:00",
+  "ended_at": "2026-08-09T00:00:01+00:00",
+  "metadata": {},
+  "events": [
+    {
+      "event_id": "fixture-event-1",
+      "trace_id": "bioetl-agentdebugx-fixture",
+      "agent_name": "bioetl-fixture",
+      "event_type": "error",
+      "step_index": 0,
+      "timestamp": "2026-08-09T00:00:01+00:00",
+      "input": {"operation": "fetch"},
+      "output": null,
+      "error": "HTTP 503 from fixture provider",
+      "duration_ms": 1000,
+      "metadata": {},
+      "artifacts": []
+    }
+  ]
+}

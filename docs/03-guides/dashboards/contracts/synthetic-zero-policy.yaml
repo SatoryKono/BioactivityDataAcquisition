@@ -1,0 +1,53 @@
+# Synthetic-zero PromQL policy for shipped Grafana dashboards (#6730, #7558).
+# Source of truth for panels that MUST NOT use masking `or vector(0)`:
+# tests/integration/grafana_contract_specs.py → SUMMARY_NO_VECTOR_ZERO_FALLBACK_PANELS
+#
+# Policy (AUD-OBS-20260727 + GRA-CYCLE vector(0) strip):
+# - First-screen Status / run counters MUST prefer empty/No data when the
+#   source series is absent (do not mask absence as a healthy zero).
+# - Explicit incomplete encodings (trusted status=3, telemetry_missing) are
+#   preferred over synthetic zero for trust gates.
+# - Display-level empty text (fieldConfig.noValue) may still render operator-
+#   facing zeros without PromQL `or vector(0)`.
+# - New panels MUST NOT add `or vector(0)` without an explicit exception in
+#   this file and matching contract tests in the same change.
+
+version: 1
+policy: prefer_absence_over_synthetic_zero
+first_screen_no_synthetic_zero:
+  - dashboard: bioetl-overview-v2
+    panels:
+      - Status
+      - First Action
+      - failed/success run increase panels on bioetl_pipeline_runs_total
+  - dashboard: bioetl-control-plane-v1
+    panels:
+      - Status
+      - Compare Global Audit Write Outcomes
+      - Compare Global Audit Query Outcomes
+  - dashboard: bioetl-runtime
+    panels:
+      - Status
+      - Track Records by Stage / Interval
+      - Track Global Shutdown Starts
+      - Track Global Shutdown Completions
+      - Track Failed Workflow Runs
+      - Track Failed Workflow Steps
+  - dashboard: bioetl-provider-health-v2
+    panels:
+      - Monitor Healthy Checks
+      - Monitor Health Checks
+# Documented zero-valid event-counter placeholders (#9204 / DASH-ZERO-001).
+# Status, cause, freshness, latency, and trust panels MUST NOT be listed here.
+allowed_or_vector_zero:
+  - dashboard: bioetl-control-plane-v1.json
+    id: 5
+    owner: "@bioetl-observability"
+    rationale: >-
+      Compare Checkpoint Outcomes uses `or label_replace(vector(0), disposition=no_events)`
+      as a documented empty-event placeholder series, not a healthy status.
+    retire_when: Grafana can render an explicit no_events series without PromQL vector(0)
+contract_symbol: SUMMARY_NO_VECTOR_ZERO_FALLBACK_PANELS
+notes:
+  - Operators must use trust/telemetry_missing signals when data-plane is empty.
+  - Pushgateway + health scrape topology is documented in grafana/README.md.

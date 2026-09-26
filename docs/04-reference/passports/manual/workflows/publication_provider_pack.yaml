@@ -1,0 +1,6 @@
+owner: BioETL Team
+owner_approved: true
+purpose: Run publication providers as an explicit multi-provider workflow.
+rationale: Separate pipeline identities are retained while workflow-level ordering and recovery stay visible.
+known_limitations:
+  - Provider coverage and freshness can differ without implying cross-provider equivalence.

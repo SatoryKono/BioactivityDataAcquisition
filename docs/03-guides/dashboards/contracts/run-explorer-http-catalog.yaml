@@ -1,0 +1,68 @@
+# Canonical Run Explorer Infinity HTTP targets (V5 R-B).
+# Source of truth for panel URL / root_selector / empty-state taxonomy.
+# Dashboard JSON stays hand-edited for layout; CI fails if a target drifts.
+
+schema_version: 1
+dashboard_uid: bioetl-run-explorer-v1
+dashboard_path: grafana/dashboards/bioetl-run-explorer-v1.json
+
+infinity:
+  type: json
+  source: url
+  format: table
+  parser: backend
+  method: GET
+
+# Shared URL templates. Panels bind to one endpoint; duplicates must share
+# the same endpoint_id so identity/accounting/report slices cannot drift apart.
+endpoints:
+  pipeline_run_reports:
+    path: /ops/observability/pipeline-run-reports
+    required_query: [pipeline]
+    # view=recent merges manifest/ledger launches and report previews, filters
+    # Workflow/Run Type, and ranks started_at before a global limit.
+    # List items include identity peeks started_at, run_type, workflow_id,
+    # workflow_run_id so panel 3010 can bind var-run_type from the row.
+    # Recent rows also expose report_url (Grafana Ops proxy, exact row identity),
+    # report_format (md/json artifact token, null when absent), and report_label.
+    # Open report prefers an existing Markdown file, falling back to JSON.
+    # REPORT MISSING links to the exact lookup with explicit 404 feedback:
+    # Grafana 12 applies native data links to the entire Report column.
+  identity_table:
+    path: /ops/control-plane/identity-table
+    required_query: [pipeline, run_type, run_id]
+  processed_records:
+    path: /ops/observability/processed-records
+    required_query: [pipeline, run_type, run_id]
+  pipeline_run_report:
+    path: /ops/observability/pipeline-run-report
+    required_query: [pipeline, run_id]
+  workflow_run_reports:
+    path: /ops/observability/workflow-run-reports
+    required_query: [workflow]
+  selected_run_status:
+    path: /ops/observability/selected-run-status
+    required_query: [pipeline, run_id, run_type, workflow]
+
+panels:
+  - id: 3010
+    title: Inspect Recent Runs (last 10)
+    endpoint: pipeline_run_reports
+    url: /ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}
+    root_selector: 'index_state = "valid_empty" and $exists(items) and $count(items) = 0 ? [{"pipeline": "VALID EMPTY"}] : items'
+    no_value_tokens: [UNKNOWN]
+    copy_tokens: [VALID EMPTY, TREE_MISSING, LAYOUT_UNHEALTHY]
+  - id: 9451
+    title: Inspect Selected Run Domains
+    endpoint: selected_run_status
+    url: /ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}
+    root_selector: presentation_domains
+    no_value_tokens: [UNKNOWN]
+    copy_tokens: [SELECT RUN, QUERY ERROR, VALID EMPTY, INCOMPLETE]
+  - id: 9452
+    title: Inspect Selected Run Identity
+    endpoint: selected_run_status
+    url: /ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}
+    root_selector: presentation_summary
+    no_value_tokens: [UNKNOWN]
+    copy_tokens: [SELECT RUN, QUERY ERROR, VALID EMPTY, INCOMPLETE]

@@ -1,0 +1,3 @@
+# Legacy VCR cassette files without .yaml extension.
+# Policy: no new extensionless VCR files should be added.
+# Existing entries are allowlisted for gradual migration.

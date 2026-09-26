@@ -1,0 +1,15 @@
+{
+  "contract": "dashboard_state_fixture_v1",
+  "case": "crit",
+  "classification": "CRIT",
+  "http_status": 200,
+  "message": "Current evidence shows an operationally critical condition.",
+  "next_action": "Open the dashboard runbook and triage the blocking cause.",
+  "rows": [
+    {
+      "state": "CRIT",
+      "message": "Current evidence shows an operationally critical condition.",
+      "next_action": "Open the dashboard runbook and triage the blocking cause."
+    }
+  ]
+}

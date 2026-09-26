@@ -1,0 +1,68 @@
+version: "1.0.0"
+provider: composite
+entity: publication
+
+dq_overrides:
+  soft_fail_threshold: 0.10
+  hard_fail_threshold: 0.50
+  required_fields:
+    - publication_id
+    - title
+  field_validations:
+    - field: publication_id
+      type: required
+      nullable: false
+      error_message: composite_publication requires the seed publication identifier
+    - field: title
+      type: required
+      nullable: false
+      error_message: composite_publication requires a canonical publication title
+    - field: doi
+      type: pattern
+      pattern: '^10\.[^/\s]+/.+$'
+      nullable: true
+      error_message: doi must remain in canonical DOI format when present
+    - field: pmid
+      type: pattern
+      pattern: '^[1-9]\d*$'
+      nullable: true
+      error_message: pmid must remain a canonical positive integer string when present
+    - field: pmc_id
+      type: pattern
+      pattern: '^PMC[1-9]\d*$'
+      nullable: true
+      error_message: pmc_id must remain a canonical PMC identifier when present
+    - field: publication_year
+      type: range
+      min: 1500
+      max: 2100
+      nullable: true
+      error_message: publication_year must remain within the governed publication range
+    - field: citations_received
+      type: range
+      min: 0
+      max: 100000000
+      nullable: true
+      error_message: citations_received must remain non-negative
+    - field: influential_citation_count
+      type: range
+      min: 0
+      max: 100000000
+      nullable: true
+      error_message: influential_citation_count must remain non-negative
+  cross_field_validations:
+    - name: publication_identity_anchor
+      fields:
+        - doi
+        - pmid
+        - title
+      condition: any_present
+      error_message: composite_publication must retain DOI, PMID, or title as an identity anchor
+    - name: page_range_pairing
+      fields:
+        - page_first
+        - page_last
+      condition: conditional_required
+      trigger_field: page_first
+      required_field: page_last
+      error_message: page_last is required when page_first is populated

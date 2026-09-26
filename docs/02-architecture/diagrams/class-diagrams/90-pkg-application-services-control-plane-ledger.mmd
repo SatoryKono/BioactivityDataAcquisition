@@ -1,0 +1,39 @@
+%% Title: Package Family: application/services/control_plane/ledger
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/control_plane/ledger; modules: core_events, entry_diagnostic_details, entry_support, rich_events, service.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-09-25
+%% @level   Package Family / Inventory Slice
+%% @nodes   9
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace core_events {
+        class _RunLedgerCoreEventAppender
+        class _RunLedgerCorrelationFields
+    }
+
+    namespace entry_diagnostic_details {
+        class RunLedgerCorrelationFieldsProtocol
+        class _RunLedgerDiagnosticRequest
+    }
+
+    namespace entry_support {
+        class RunLedgerEntryRequest
+        class _RunLedgerServiceEntryProtocol
+    }
+
+    namespace rich_events {
+        class RunLedgerRichEventRecordingMixin
+        class _RunLedgerAppender
+    }
+
+    namespace service {
+        class RunLedgerService
+    }
+
+    RunLedgerCorrelationFieldsProtocol <|-- _RunLedgerServiceEntryProtocol
+    RunLedgerRichEventRecordingMixin <|-- RunLedgerService
+    _RunLedgerCorrelationFields <|-- _RunLedgerCoreEventAppender
+

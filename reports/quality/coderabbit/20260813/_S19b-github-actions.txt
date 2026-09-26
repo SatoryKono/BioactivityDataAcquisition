@@ -1,0 +1,5 @@
+.github/actions/architecture-governance-cache/action.yml
+.github/actions/setup-mermaid/action.yml
+.github/actions/setup-mermaid/package-lock.json
+.github/actions/setup-mermaid/package.json
+.github/actions/setup-python-uv/action.yml

@@ -1,0 +1,202 @@
+name: Skills Consistency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      approve_runtime_sync:
+        description: "Approve one-way Codex to Junie/Devin skill synchronization"
+        required: true
+        default: false
+        type: boolean
+  push:
+    branches: [ main ]
+    paths:
+      - ".codex/skills/**"
+      - ".codex/agents/**"
+      - ".codex/config.toml"
+      - ".agents/skills/**"
+      - ".gitignore"
+      - ".junie/agents/**"
+      - ".junie/skills/**"
+      - "AGENTS.md"
+      - ".junie/guidelines.md"
+      - "docs/00-project/NORMATIVE_SOURCES.md"
+      - ".devin/skills/**"
+      - "docs/00-project/ai/skills/local/**"
+      - "docs/00-project/ai/skills/global/**"
+      - "docs/00-project/ai/skills/_references/**"
+      - "docs/00-project/ai/skills/README.md"
+      - "docs/00-project/ai/skills/SKILLS-CATALOG.md"
+      - "scripts/ai/codex/check_skills_mirror.sh"
+      - "scripts/ai/codex/doctor.py"
+      - "scripts/ai/codex/mcp_profile_contract.py"
+      - "scripts/ai/codex/native_runtime_contract.py"
+      - "scripts/ai/codex/setup_mcp.py"
+      - "scripts/ai/mcp/wrappers.py"
+      - "scripts/engineering/common/platform.py"
+      - "scripts/ai/codex/setup_agents.sh"
+      - "scripts/ai/codex/setup_skills.sh"
+      - "scripts/ai/codex/sync_native_skills.py"
+      - "scripts/ai/codex/helper/ensure-mcp.sh"
+      - "scripts/ai/codex/run-codex.sh"
+      - "scripts/ops/runtime/mcp/health-shared.sh"
+      - "scripts/ops/runtime/mcp/shared-servers.json"
+      - "tests/architecture/test_codex_native_runtime.py"
+      - "scripts/ai/codex/skills-mirror-contract.json"
+      - "scripts/ai/junie/check_junie_mirror.py"
+      - "scripts/ai/junie/check_junie_mirror.sh"
+      - "scripts/ai/junie/junie-mirror-contract.json"
+      - "scripts/ai/sync/governance.py"
+      - "scripts/ai/sync/runtime_skills.py"
+      - "scripts/ops/support/skills/check_skills_mirror.sh"
+      - "scripts/ops/support/skills/check_ai_skills_layout.sh"
+      - "tests/unit/scripts/test_sync_ai_governance.py"
+      - "tests/unit/scripts/test_runtime_skill_sync.py"
+      - ".github/workflows/skills-consistency.yml"
+  pull_request:
+    branches: [ main ]
+    paths:
+      - ".codex/skills/**"
+      - ".codex/agents/**"
+      - ".codex/config.toml"
+      - ".agents/skills/**"
+      - ".gitignore"
+      - ".junie/agents/**"
+      - ".junie/skills/**"
+      - "AGENTS.md"
+      - ".junie/guidelines.md"
+      - "docs/00-project/NORMATIVE_SOURCES.md"
+      - ".devin/skills/**"
+      - "docs/00-project/ai/skills/local/**"
+      - "docs/00-project/ai/skills/global/**"
+      - "docs/00-project/ai/skills/_references/**"
+      - "docs/00-project/ai/skills/README.md"
+      - "docs/00-project/ai/skills/SKILLS-CATALOG.md"
+      - "scripts/ai/codex/check_skills_mirror.sh"
+      - "scripts/ai/codex/doctor.py"
+      - "scripts/ai/codex/mcp_profile_contract.py"
+      - "scripts/ai/codex/native_runtime_contract.py"
+      - "scripts/ai/codex/setup_mcp.py"
+      - "scripts/ai/mcp/wrappers.py"
+      - "scripts/engineering/common/platform.py"
+      - "scripts/ai/codex/setup_agents.sh"
+      - "scripts/ai/codex/setup_skills.sh"
+      - "scripts/ai/codex/sync_native_skills.py"
+      - "scripts/ai/codex/helper/ensure-mcp.sh"
+      - "scripts/ai/codex/run-codex.sh"
+      - "scripts/ops/runtime/mcp/health-shared.sh"
+      - "scripts/ops/runtime/mcp/shared-servers.json"
+      - "tests/architecture/test_codex_native_runtime.py"
+      - "scripts/ai/codex/skills-mirror-contract.json"
+      - "scripts/ai/junie/check_junie_mirror.py"
+      - "scripts/ai/junie/check_junie_mirror.sh"
+      - "scripts/ai/junie/junie-mirror-contract.json"
+      - "scripts/ai/sync/governance.py"
+      - "scripts/ai/sync/runtime_skills.py"
+      - "scripts/ops/support/skills/check_skills_mirror.sh"
+      - "scripts/ops/support/skills/check_ai_skills_layout.sh"
+      - "tests/unit/scripts/test_sync_ai_governance.py"
+      - "tests/unit/scripts/test_runtime_skill_sync.py"
+      - ".github/workflows/skills-consistency.yml"
+
+jobs:
+  verify-native-codex-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Verify static native discovery and MCP matrices
+        run: python3 scripts/ai/codex/doctor.py static --no-write
+
+      - name: Verify catalog-driven MCP wrapper pairs
+        run: python3 -m scripts.ai.mcp wrappers check
+
+  detect-runtime-skill-drift:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Generate runtime skill drift report
+        run: >-
+          python -m scripts.ai.sync.runtime_skills
+          --mode check
+          --report reports/ai/runtime-skill-drift.json
+
+      - name: Upload drift report
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: runtime-skill-drift
+          path: reports/ai/runtime-skill-drift.json
+          retention-days: 3
+
+  approved-runtime-skill-sync:
+    if: github.event_name == 'workflow_dispatch' && inputs.approve_runtime_sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run approved one-way runtime skill sync
+        run: >-
+          python -m scripts.ai.sync.runtime_skills
+          --mode sync
+          --approved
+          --report reports/ai/runtime-skill-sync.json
+
+      - name: Capture owner-reviewed sync patch
+        run: git diff --binary > runtime-skill-sync.patch
+
+      - name: Upload sync report and patch
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: runtime-skill-sync
+          path: |
+            reports/ai/runtime-skill-sync.json
+            runtime-skill-sync.patch
+          retention-days: 3
+
+  verify-codex-junie-runtime-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Verify Codex–Junie runtime parity
+        run: bash scripts/ai/junie/check_junie_mirror.sh --check
+
+  verify-local-skills-mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Verify docs mirror and Codex-Devin parity
+        run: bash scripts/ops/support/skills/check_skills_mirror.sh --check
+
+      - name: Verify ai/skills canonical layout
+        run: bash scripts/ops/support/skills/check_ai_skills_layout.sh

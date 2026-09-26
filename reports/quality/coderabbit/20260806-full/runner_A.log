@@ -1,0 +1,4 @@
+plan_leaves=31
+Preparing worktree (detached HEAD aa3e3819d3)
+Updating files:  11% (1274/10644)Updating files:  12% (1278/10644)error: reset died of signal 1
+reports/quality/coderabbit/20260806-full/run_residual_wsl.sh: line 77: cd: /tmp/bioetl-cr-full-wt: No such file or directory

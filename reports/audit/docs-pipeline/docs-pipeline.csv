@@ -1,0 +1,5 @@
+id,priority,status,path,requirement_id,observation
+DOCS-PIPE-001,P2,PROVEN,.github/workflows/tests.yml:647-654,REQ-DOC-001,"Workbook xlsx gitignored и отсутствует; CI sync --check при отсутствии файла делает exit 0."
+DOCS-PIPE-002,P2,PROVEN,scripts/docs/matrix/build_matrix_dicts.py:285-290,REQ-DOC-001,"Dictionaries заявлены tracked curated, но gitignored, без --check в verify, с datetime.now и абсолютным source_workbook."
+DOCS-PIPE-003,P3,NOT_PROVEN,scripts/docs/checks/verify.py:74-88,GAP,"verify не передаёт --ai-surfaces; чекер вызывается отдельным pytest в docs-governance."
+DOCS-PIPE-004,P3,NOT_PROVEN,scripts/docs/checks/documentation_cleanup_inventory.py:1573-1582,GAP,"Без --check/--update generate-cleanup-inventory пишет inventory. Этот прогон передал --check."

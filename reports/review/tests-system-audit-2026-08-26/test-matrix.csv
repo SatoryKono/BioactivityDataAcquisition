@@ -1,0 +1,23 @@
+lane,suite_name,paths,marker_expression,coverage_gate,replay_mode,ci_job,parallel_class,notes
+smoke,smoke,tests/smoke/,not benchmark and not memory,none,not_applicable,tests.yml:smoke-check,serial_or_bounded,excludes memory-marked smoke
+unit-fast,unit-fast,tests/unit/,not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory,none,not_applicable,tests.yml:test-fast,serial_or_bounded,"CI uses -n auto (TEST-SYS-003); ignores scripts+repo_backed"
+unit-filesystem-contracts,unit-filesystem-contracts,tests/unit/,fs_contract and not slow and not benchmark and not memory,none,not_applicable,tests.yml:unit-filesystem-contracts,serial_or_bounded,classified_modules list in test_matrix.yaml
+repo-backed-unit,repo-backed-unit,tests/unit/repo_backed/,repo_backed and not slow and not benchmark and not memory,none,not_applicable,tests.yml:repo-backed-unit,serial_or_bounded,no:xdist in CI
+unit-scripts-tooling,unit-scripts-tooling,tests/unit/scripts/,not slow and not benchmark and not memory,none,not_applicable,tests.yml:unit-scripts-tooling,serial_or_bounded,passport projector owner
+unit-parallel-safe,unit-parallel-safe,tests/unit/,not fs_contract and not repo_backed and not subprocess_backed and not slow and not serial and not benchmark and not memory,none,not_applicable,sharded runner S1-S4/S6,explicit_parallel,not the tests.yml test-fast job
+integration-replay,integration-replay,tests/integration/,not slow and not benchmark and not memory,none,vcr_replay_only,tests.yml:test-matrix group integration,serial_or_bounded,"CI -n auto (TEST-SYS-003)"
+integration-determinism,integration-determinism,tests/integration/determinism/,integration and not slow and not benchmark and not memory,none,mixed,not a dedicated tests.yml job,serial_or_bounded,maxfail=1
+integration-idempotency,integration-idempotency,tests/integration/idempotency/,integration and not slow and not benchmark and not memory,none,mixed,not a dedicated tests.yml job,serial_or_bounded,maxfail=1
+integration-composite-resume,integration-composite-resume,tests/integration/composite_resume/,integration and not slow and not benchmark and not memory,none,mixed,not a dedicated tests.yml job,serial_or_bounded,maxfail=1
+security,security,tests/security/,security and not benchmark and not memory,none,not_applicable,tests.yml:test-matrix group security,serial_or_bounded,slow sanitization class deselected by addopts
+contracts,contracts,tests/contract/;tests/unit/contracts/,not slow and not benchmark and not memory,none,replay_or_no_api,tests.yml:contract-confidence,serial_or_bounded,live monthly contract-tests.yml
+architecture,architecture,tests/architecture/,not slow and not benchmark and not memory,none,not_applicable,import-linter.yml:arch-tests,explicit_parallel,PR uses not slow
+architecture-fast-boundary,architecture-fast-boundary,tests/architecture/,architecture and not slow and not benchmark and not memory,none,not_applicable,import-linter.yml:arch-tests subset,explicit_parallel,local default
+architecture-slow-governance,architecture-slow-governance,tests/architecture/,architecture and not benchmark and not memory,none,not_applicable,S7-crosscutting-architecture-guardrails,explicit_parallel,addopts still excludes pytest.mark.slow
+architecture-read-only-audit,architecture-read-only-audit,tests/architecture/test_runtime_import_scc.py,architecture and not benchmark and not memory,none,not_applicable,scripts/engineering/qa/run_architecture_audit_read_only.py,serial_or_bounded,read_only
+e2e,e2e,tests/e2e/,e2e and not benchmark and not memory,none,mixed,not PR-full,serial_or_bounded,slow e2e still excluded by addopts
+e2e-smoke,e2e-smoke,tests/e2e/test_chembl_activity_e2e.py;tests/e2e/test_pipeline_matrix_e2e.py,e2e_smoke and not benchmark and not memory,none,vcr_none,e2e-matrix-health.yml:matrix-smoke-blocking,serial_or_bounded,3x rerun diagnostic
+e2e-nightly-full,e2e-nightly-full,tests/e2e/,e2e and not e2e_smoke and not benchmark and not memory,none,mixed,e2e-matrix-health.yml schedule,serial_or_bounded,skip SLO advisory
+memory,memory,tests/smoke/test_neo4j_memory_mcp_smoke.py,memory and not benchmark,none,not_applicable,tests.yml:memory-tests,serial_or_bounded,outside coverage combine
+performance,performance,tests/performance/,benchmark and performance,none,not_applicable,tests.yml:performance-budgets,serial_or_bounded,no:xdist; needs -p benchmark to undo addopts no:benchmark
+coverage-verify,coverage-verify,tests/,not e2e and not benchmark and not memory,repo-wide,replay_or_no_api,tests.yml:coverage-verify,explicit_parallel,fail-under=85 line+branch

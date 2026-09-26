@@ -1,0 +1,110 @@
+%% View: Infrastructure-Mapping | Parent: 31-pipeline-run-lifecycle-full.mermaid
+%% @uniform width=168 height=56 max_title_len=16 max_desc_lines=0
+%%{init: {
+%%  'layout': 'elk',
+%%  'theme': 'base',
+%%  'flowchart': {
+%%    'defaultRenderer': 'elk',
+%%    'nodeSpacing': 64,
+%%    'rankSpacing': 84,
+%%    'padding': 20,
+%%    'curve': 'linear'
+%%  },
+%%  'elk': {
+%%    'mergeEdges': true,
+%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
+%%    'cycleBreakingStrategy': 'GREEDY',
+%%    'direction': 'DOWN',
+%%    'spacing.nodeNode': 44,
+%%    'spacing.edgeNode': 34,
+%%    'spacing.edgeEdge': 24,
+%%    'edgeRouting': 'ORTHOGONAL'
+%%  }
+%%}}%%
+flowchart TB
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N11["VALIDATING"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction LR
+        N8["PREFLIGHT"]
+        N19["POSTRUN"]
+        N9["PREFLIGHT_PASSED"]
+        N10["TRANSFORMING"]
+        N18["BATCH_DONE"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["LOCKING"]
+        N2["CHECKPOINTING"]
+        N3["LOCKED"]
+        N4["CHECKPOINT_SAVED"]
+        N5["EXTRACTING"]
+        N6["FAILED"]
+        N7["WRITING"]
+        N12["DRAINING"]
+        N13["RELEASING"]
+        N14["*"]
+        N15["PENDING"]
+        N16["CLEARING"]
+        N17["QUARANTINING"]
+        N20["COMPLETED"]
+    end
+
+    N14 -->|"start run"| N15
+    N15 -->|"acquire lock"| N1
+    N1 -->|"lock acquired"| N3
+    N1 -.->|"lock timeout"| N6
+    N3 -->|"enter preflight"| N8
+    N8 -->|"preflight passed"| N9
+    N8 -.->|"preflight failed"| N6
+    N9 -->|"clear old checkpoint"| N16
+    N9 -->|"start extraction"| N5
+    N16 -->|"checkpoint cleared"| N5
+    N5 -->|"extract complete"| N10
+    N10 -->|"transform complete"| N11
+    N11 -->|"validation pass"| N7
+    N11 -.->|"validation warn"| N17
+    N17 -->|"route allowed records"| N7
+    N7 -->|"persist checkpoint"| N2
+    N2 -->|"next batch"| N5
+    N2 -->|"batch finished"| N18
+    N18 -->|"postrun checks"| N19
+    N19 -->|"finalized"| N20
+    N5 ==>|"shutdown signal"| N12
+    N10 ==>|"shutdown signal"| N12
+    N12 ==>|"state saved"| N4
+    N7 -.->|"write failure"| N6
+    N5 -.->|"extract failure"| N6
+    N20 -->|"release lock"| N13
+    N6 -.->|"release lock"| N13
+    N13 -->|"return to idle"| N14
+
+    %% Alignment hints
+    N1 ~~~ N2
+    N3 ~~~ N4
+    N5 ~~~ N10
+    N10 ~~~ N11
+    N11 ~~~ N7
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.5px;
+    classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:1.5px;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1.5px;
+    classDef process fill:#f8fafc,stroke:#475569,stroke-width:1px;
+
+    class N11 port;
+    class N8,N9,N10,N18,N19 service;
+    class N1,N2,N3,N4,N5,N6,N7,N12,N13,N14,N15,N16,N17,N20 adapter;
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    %% Semantic styles are encoded by arrow operators:
+    %%   -->  primary lifecycle transitions
+    %%   -.-> error/warn branches and failure-release path
+    %%   ==>  shutdown/drain critical path

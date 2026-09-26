@@ -1,0 +1,639 @@
+{
+  "domain_id": "tests-system",
+  "prompt_id": "prompt.audit.tests-system",
+  "prompt_version": "1.2.0",
+  "mode": "audit",
+  "audit_mode": "full",
+  "scope": ["tests/", "configs/quality/"],
+  "read_root": ".worktrees/nine-domain-audit-9f71c6444175",
+  "commit": "e1c184857e46",
+  "audit_date": "2026-09-26",
+  "surface_score": 2,
+  "blocked": false,
+  "full_suite_ran": false,
+  "flaky_labeled": false,
+  "proven_count": 18,
+  "p0_p1_count": 2,
+  "summary_ru": "Тестовая система BioETL зрелая: ~2935 test_*.py, 530 architecture-guards, канонические lanes в test_matrix.yaml, inventory skip/flaky/VCR, CI test-matrix + coverage-verify 85%. Слабые места: GitHub ruleset pr-gate отключён (каталог advisory), на PR не гоняется e2e-nightly-full при MUST e2e для composition/interfaces; flaky-телеметрия узкая (N=3, два файла). Локально Windows/WSL — шесть architecture platform skip.",
+  "top_remediations": [
+    "После восстановления Actions billing включить ruleset 13643213 или явно документировать альтернативный merge-blocker (#11180).",
+    "Не ослаблять PR e2e-smoke: держать e2e-matrix-health.yml matrix-smoke-blocking зелёным; планировать nightly e2e-nightly-full-replay как release confidence.",
+    "Расширять flaky-telemetry только с бюджетом минут и новым inventory owner — не трактовать пустой flaky_test_inventory как доказательство стабильности.",
+    "Windows-разработчикам опираться на architecture-fast-boundary + CI Linux как merge-truth (#10418 skips).",
+    "Продолжать кампанию slim VCR для четырёх allowlist_oversized кассет (>10 MiB)."
+  ],
+  "findings": [
+    {
+      "id": "TESTS-GHA-001",
+      "requirement_id": "REQ-GOV-001",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "category": "ci-gate",
+      "path": "configs/quality/github_required_checks.yaml:16",
+      "method": "read configs/quality/github_required_checks.yaml policy block",
+      "observation": "github_ruleset_13643213_enforcement: disabled; catalog_check_status: advisory.",
+      "expected": "GitHub ruleset pr-gate-complete физически блокирует merge при падении canonical checks.",
+      "actual": "Enforcement disabled из-за Actions billing (#11180); статусы каталога advisory до восстановления billing.",
+      "impact": "Merge в main может не иметь принудительной GitHub ruleset-блокировки; дисциплина merge опирается на добровольный прогон workflow, а не на ruleset.",
+      "root_cause": "Actions billing (#11180) — включение ruleset заблокировало бы main без runnable checks.",
+      "remediation": "Восстановить billing → включить ruleset 13643213; до этого держать pr-required.yml и локальный pr_gate.py как операционный контракт.",
+      "effort": "L",
+      "dependencies": ["#11180", ".github/workflows/pr-required.yml"],
+      "validation": ["grep github_ruleset_13643213_enforcement configs/quality/github_required_checks.yaml"],
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/github_required_checks.yaml",
+          "line": 16,
+          "command": "inspection",
+          "observation": "github_ruleset_13643213_enforcement: disabled"
+        },
+        {
+          "path": "configs/quality/github_required_checks.yaml",
+          "line": 18,
+          "command": "inspection",
+          "observation": "catalog_check_status: advisory"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-E2E-001",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "coverage-gap",
+      "path": "configs/quality/test_matrix.yaml:620",
+      "method": "read test_matrix e2e-nightly-full and layers.composition/interfaces e2e MUST",
+      "observation": "e2e-nightly-full-replay skipped on pull_request; layers mark e2e MUST for composition and interfaces.",
+      "expected": "Критичный offline cassette-replay E2E сигнал до merge или эквivalent blocking PR satellite.",
+      "actual": "Полный e2e-nightly-full только schedule/workflow_dispatch; PR satellite e2e_smoke не входит в pr-gate-complete.",
+      "impact": "Регрессии полной cassette-replay цепочки pipeline могут попасть в main до nightly.",
+      "root_cause": "Сознательный cost/latency trade-off (variant B / #10412).",
+      "remediation": "Сохранить e2e-matrix-health matrix-smoke-blocking; мониторить skip-rate SLO; не ослаблять e2e-smoke без ADR.",
+      "effort": "M",
+      "dependencies": [".github/workflows/e2e-matrix-health.yml"],
+      "validation": ["read configs/quality/test_matrix.yaml lanes e2e-nightly-full and layers"],
+      "automation": "e2e-matrix-health.yml",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 626,
+          "command": "inspection",
+          "observation": "skipped on pull_request for e2e-nightly-full"
+        },
+        {
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 777,
+          "command": "inspection",
+          "observation": "composition layer e2e: MUST; PR satellite e2e_smoke not required merge check"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-E2E-002",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "category": "ci-gate",
+      "path": "configs/quality/test_matrix.yaml:592",
+      "method": "inspection test_matrix e2e-smoke description",
+      "observation": "e2e-smoke явно not a GitHub-required merge check and not pr-gate-complete owner.",
+      "expected": "Документированный advisory статус и отдельный CI owner (GHA-017 satellite).",
+      "actual": "Соответствует описанию; owner e2e-matrix-health.yml matrix-smoke-blocking.",
+      "impact": "PR merge не требует e2e-smoke; регрессии matrix smoke возможны без блокировки pr-gate-complete.",
+      "root_cause": "Policy #10412 / GHA-017 satellite model.",
+      "remediation": "Операторы должны смотреть e2e-matrix-health на PR; не добавлять e2e_smoke в pr-gate без ADR.",
+      "effort": "S",
+      "dependencies": ["#10412"],
+      "validation": ["grep e2e-smoke configs/quality/test_matrix.yaml"],
+      "automation": ".github/workflows/e2e-matrix-health.yml",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 596,
+          "command": "inspection",
+          "observation": "Not a GitHub-required merge check"
+        },
+        {
+          "path": "pyproject.toml",
+          "line": 236,
+          "command": "inspection",
+          "observation": "e2e_smoke marker documents same advisory policy"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-FLAKE-001",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "status": "PROVEN",
+      "category": "flaky-observability",
+      "path": "configs/quality/flaky_test_inventory.yaml:55",
+      "method": "read flaky_test_inventory reviewed_flaky_tests and review_notes",
+      "observation": "reviewed_flaky_tests: []; review_notes warn empty list is not proof of no flakes; CI N=3 on two paths only.",
+      "expected": "Repeated-run telemetry или явный scope limitation в audit.",
+      "actual": "flaky-telemetry job runs 3 seeds on semanticscholar contract + determinism_identity_policy only.",
+      "impact": "Intermittent failures вне shard могут оставаться незамеченными до полного CI или локального прогона.",
+      "root_cause": "Actions minutes budget (#11187).",
+      "remediation": "Расширять shard только с inventory owner; использовать SWARM/local test-health для диагностики.",
+      "effort": "M",
+      "dependencies": [".github/workflows/tests.yml job flaky-telemetry"],
+      "validation": ["read configs/quality/flaky_test_inventory.yaml review_notes"],
+      "automation": "tests.yml flaky-telemetry",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/flaky_test_inventory.yaml",
+          "line": 55,
+          "command": "inspection",
+          "observation": "reviewed_flaky_tests: []"
+        },
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 326,
+          "command": "inspection",
+          "observation": "N=3 determinism-critical shard comment"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-WIN-001",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "local-repro",
+      "path": "configs/quality/test_skip_inventory.yaml:19",
+      "method": "count architecture_platform_skips entries",
+      "observation": "Six architecture tests skip on NTFS/WSL mounted worktree timeout; CI Linux is merge-truth.",
+      "expected": "Документированные platform guards с owner и permanent_policy.",
+      "actual": "Six entries #10418 with review_date 2026-09-14/25.",
+      "impact": "Windows-local полный architecture governance feedback неполный; риск ложного зелёного локально.",
+      "root_cause": "Filesystem/git census latency on NTFS/WSL mounts.",
+      "remediation": "Локально: architecture-fast-boundary; merge decisions — CI Linux.",
+      "effort": "S",
+      "dependencies": ["#10418"],
+      "validation": ["grep architecture_platform_skips configs/quality/test_skip_inventory.yaml"],
+      "automation": "tests/architecture/test_test_skip_inventory.py",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/test_skip_inventory.yaml",
+          "line": 20,
+          "command": "inspection",
+          "observation": "test_public_surface_importer_census_governance.py platform skip"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 31,
+          "command": "inspection",
+          "observation": "Prefer architecture-fast-boundary locally (#8331)"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-COV-001",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "category": "coverage-policy",
+      "path": "configs/quality/test_matrix.yaml:739",
+      "method": "read coverage-verify marker_expression",
+      "observation": "coverage-verify excludes e2e, benchmark, memory from repo-wide 85% gate.",
+      "expected": "Единственная lane с coverage_gate repo-wide; exclusions documented.",
+      "actual": "marker: not e2e and not benchmark and not memory; pyproject.toml omits fail_under for shard partial runs.",
+      "impact": "E2E/memory/perf paths не входят в 85% merge gate — регрессии там ловятся другими lanes.",
+      "root_cause": "ADR-042 lane model — intentional separation.",
+      "remediation": "Не смешивать e2e в coverage-verify без lane redesign; держать e2e SLO и nightly replay.",
+      "effort": "S",
+      "dependencies": ["ADR-042"],
+      "validation": ["grep coverage-verify configs/quality/test_matrix.yaml"],
+      "automation": ".github/workflows/tests.yml coverage-verify",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 739,
+          "command": "inspection",
+          "observation": "not e2e and not benchmark and not memory"
+        },
+        {
+          "path": "pyproject.toml",
+          "line": 308,
+          "command": "inspection",
+          "observation": "fail_under NOT set; CI uses --cov-fail-under=85"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-PROMPT-001",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.87,
+      "status": "PROVEN",
+      "category": "coverage-gap",
+      "path": "configs/quality/test_matrix.yaml:667",
+      "method": "read prompt-tests-nightly lane",
+      "observation": "prompt-tests-nightly runs tests/prompts/ only schedule/manual; not on pull_request.",
+      "expected": "Nightly aggregate fail-closed for prompt library contracts.",
+      "actual": "Lane description matches; no github_required_checks entry for prompts.",
+      "impact": "Prompt-library regressions могут пройти PR без блокировки.",
+      "root_cause": "Cost — prompt tests joined into nightly E2E aggregate only.",
+      "remediation": "Запускать prompt-tests-nightly на schedule; при изменении tests/prompts — локальный lane.",
+      "effort": "S",
+      "dependencies": ["tests/prompts/"],
+      "validation": ["grep prompt-tests-nightly configs/quality/test_matrix.yaml"],
+      "automation": "e2e-nightly-complete aggregate",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 671,
+          "command": "inspection",
+          "observation": "without running on pull requests"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-SKIP-001",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.8,
+      "status": "PROVEN",
+      "category": "skip-governance",
+      "path": "configs/quality/test_skip_inventory.yaml:10",
+      "method": "rg pytest.skip( tests -g *.py -c file count; read inventory policy",
+      "observation": "123 test modules contain pytest.skip(; only 2 files use @pytest.mark.skip outside architecture meta-tests; unit_unconditional_skips: [].",
+      "expected": "Runtime skips in integration/contract/e2e listed in test_skip_inventory entries.",
+      "actual": "Inventory documents contract/integration skips; unit conditional skips excluded from census by design.",
+      "impact": "Большой объём runtime skip calls требует дисциплины inventory sync (architecture test_test_skip_inventory).",
+      "root_cause": "Opt-in live/VCR/LFS guards implemented as pytest.skip not decorators.",
+      "remediation": "При добавлении unconditional skip in unit — list in unit_unconditional_skips (#11173).",
+      "effort": "M",
+      "dependencies": ["tests/architecture/test_test_skip_inventory.py"],
+      "validation": ["rg @pytest.mark.skip tests -g *.py -c", "rg pytest.skip( tests -g *.py -c"],
+      "automation": "tests/architecture/test_test_skip_inventory.py",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/test_skip_inventory.yaml",
+          "line": 18,
+          "command": "rg @pytest.mark.skip + pytest.skip counts in worktree",
+          "observation": "unit_unconditional_skips empty; 123 files with pytest.skip("
+        }
+      ]
+    },
+    {
+      "id": "TESTS-LIVE-001",
+      "requirement_id": "REQ-CONTRACT-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.86,
+      "status": "PROVEN",
+      "category": "contract-live",
+      "path": "tests/contract/conftest.py:170",
+      "method": "read pytest_collection_modifyitems live opt-in",
+      "observation": "Contract tests skip without BIOETL_LIVE_API_TESTS; network-marked modules use connectivity probe.",
+      "expected": "Default CI/dev runs replay-only; live opt-in explicit.",
+      "actual": "Seven contract modules use pytestmark network; flaky-telemetry excludes -m network.",
+      "impact": "Live provider outages produce skips not failures in opt-in runs — может скрыть деградацию если live gate слабый.",
+      "root_cause": "live_endpoint_unavailability category in skip inventory.",
+      "remediation": "Merge-blocking paths must stay VCR/replay; live canaries only scheduled/opt-in.",
+      "effort": "S",
+      "dependencies": ["configs/quality/test_skip_inventory.yaml entries live_endpoint_unavailability"],
+      "validation": ["read tests/contract/conftest.py pytest_collection_modifyitems"],
+      "automation": "tests/architecture/test_integration_vcr_policy.py",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "tests/contract/conftest.py",
+          "line": 173,
+          "command": "inspection",
+          "observation": "Skip contract tests if BIOETL_LIVE_API_TESTS is not set"
+        },
+        {
+          "path": "tests/contract/test_chembl_contract.py",
+          "line": 98,
+          "command": "inspection",
+          "observation": "pytestmark = pytest.mark.network"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-VCR-001",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "fixture-debt",
+      "path": "configs/quality/vcr_cassette_size_budget.yaml:16",
+      "method": "read allowlist_oversized",
+      "observation": "Four chembl VCR cassettes exceed 10 MiB budget with removal_condition re-record.",
+      "expected": "New cassettes blocked >10 MiB; legacy allowlisted with owner.",
+      "actual": "allowlist_oversized lists 4 paths tied to e2e chain/matrix tests.",
+      "impact": "Repo size and replay latency; not a merge blocker if lanes pass.",
+      "root_cause": "Historical multi-entity chain recordings (#6776).",
+      "remediation": "Re-record slim cassettes per removal_condition; do not raise max_new_cassette_bytes.",
+      "effort": "L",
+      "dependencies": ["#6776"],
+      "validation": ["read configs/quality/vcr_cassette_size_budget.yaml"],
+      "automation": "tests/architecture VCR budget guards",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/vcr_cassette_size_budget.yaml",
+          "line": 17,
+          "command": "inspection",
+          "observation": "test_all_chembl_pipelines_chain.yaml allowlisted"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-GOV-001",
+      "requirement_id": "REQ-GOV-001",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.93,
+      "status": "PROVEN",
+      "category": "governance-strength",
+      "path": "configs/quality/test_governance_audit.yaml:68",
+      "method": "read budgets markerless_test_functions_max and architecture assertions",
+      "observation": "markerless_test_functions_max: 0; architecture tests assert markerless_test_functions == 0 in closeouts.",
+      "expected": "No unmarked test functions in governed surface.",
+      "actual": "Budgets explicit no-growth ratchets in test_governance_audit.yaml.",
+      "impact": "Positive — reduces unclassified tests slipping into wrong lanes.",
+      "root_cause": "Epic test governance program (#4161 et al.).",
+      "remediation": "Maintain report_test_governance_audit refresh on test surface changes.",
+      "effort": "S",
+      "dependencies": ["tests/architecture/test_test_governance_audit.py"],
+      "validation": ["pytest tests/architecture/test_test_governance_audit.py::test_test_governance_budgets_are_explicit_no_growth_ratchets"],
+      "automation": "tests/architecture/test_test_governance_audit.py",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/test_governance_audit.yaml",
+          "line": 74,
+          "command": "inspection",
+          "observation": "markerless_test_functions_max: 0"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-PYTEST-001",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.91,
+      "status": "PROVEN",
+      "category": "isolation",
+      "path": "pyproject.toml:221",
+      "method": "read tool.pytest.ini_options",
+      "observation": "strict-markers, strict-config, importlib mode, filterwarnings error, timeout 60s thread method.",
+      "expected": "Deterministic local defaults; serial default (no global xdist in addopts).",
+      "actual": "Matches test_matrix parallel_execution_policy forbid_global_xdist_addopts.",
+      "impact": "Reduces hang/flake from warnings and unknown markers.",
+      "root_cause": "Project testing standards.",
+      "remediation": "Keep CI explicit xdist only in sharded lanes.",
+      "effort": "S",
+      "dependencies": ["configs/quality/test_matrix.yaml"],
+      "validation": ["read pyproject.toml tool.pytest.ini_options"],
+      "automation": "CI test-matrix shard definitions",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "pyproject.toml",
+          "line": 225,
+          "command": "inspection",
+          "observation": "--strict-markers --strict-config"
+        },
+        {
+          "path": "pyproject.toml",
+          "line": 267,
+          "command": "inspection",
+          "observation": "timeout = 60"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-E2E-SLO-001",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.84,
+      "status": "PROVEN",
+      "category": "e2e-governance",
+      "path": "configs/quality/e2e_skip_rate_slo.yaml:23",
+      "method": "read slo max_skip_rate_percent and forbid_retries",
+      "observation": "E2E skip-rate SLO blocking 15% on evaluation lanes; forbid_retries_to_heal_flakes: true.",
+      "expected": "Skips observed not healed by pytest reruns (#9729).",
+      "actual": "Policy matches flaky_test_inventory remediation_workflow.",
+      "impact": "High skip rate on e2e lanes should fail CI when evaluated.",
+      "root_cause": "T-08 / #6604 governance.",
+      "remediation": "Triage skip categories in telemetry artifact e2e-skip-rate-telemetry.",
+      "effort": "S",
+      "dependencies": ["configs/quality/flaky_test_inventory.yaml"],
+      "validation": ["read configs/quality/e2e_skip_rate_slo.yaml"],
+      "automation": "e2e-matrix-health skip rate gate",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/e2e_skip_rate_slo.yaml",
+          "line": 12,
+          "command": "inspection",
+          "observation": "forbid_retries_to_heal_flakes: true"
+        },
+        {
+          "path": "configs/quality/e2e_skip_rate_slo.yaml",
+          "line": 27,
+          "command": "inspection",
+          "observation": "max_skip_rate_percent: 15.0"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-MEMORY-001",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "category": "lane-isolation",
+      "path": "configs/quality/test_matrix.yaml:689",
+      "method": "read memory lane and tests.yml memory-tests job",
+      "observation": "Dedicated memory lane for Neo4j MCP smoke; excluded from coverage-verify.",
+      "expected": "memory marker isolates optional Neo4j dependency from unit-fast/coverage.",
+      "actual": "tests.yml memory-tests job runs test_neo4j_memory_mcp_smoke.py with -m memory.",
+      "impact": "Positive isolation; memory failures don't dilute coverage gate.",
+      "root_cause": "Sidecar Neo4j project-memory surface.",
+      "remediation": "Keep memory out of default local unit-fast invocations.",
+      "effort": "S",
+      "dependencies": [".github/workflows/tests.yml"],
+      "validation": ["grep memory-tests .github/workflows/tests.yml"],
+      "automation": "tests.yml memory-tests",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 691,
+          "command": "inspection",
+          "observation": "excluded from coverage verification"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-DISABLED-001",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "category": "governance-strength",
+      "path": "tests/architecture/test_no_disabled_test_modules.py:30",
+      "method": "read architecture guard module",
+      "observation": "Architecture test forbids tracked *.disabled test modules bypassing collection and skip inventory.",
+      "expected": "No *.disabled under tests/.",
+      "actual": "Guard documented with rationale in module docstring.",
+      "impact": "Prevents ungoverned hidden tests.",
+      "root_cause": "Past anti-pattern of renaming to .disabled.",
+      "remediation": "Keep test_no_disabled_test_modules in architecture lane.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["pytest tests/architecture/test_no_disabled_test_modules.py"],
+      "automation": "tests/architecture/test_no_disabled_test_modules.py",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "tests/architecture/test_no_disabled_test_modules.py",
+          "line": 30,
+          "command": "inspection",
+          "observation": "test_no_tracked_disabled_test_modules"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-CI-001",
+      "requirement_id": "REQ-GOV-001",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "ci-design",
+      "path": "configs/quality/github_required_checks.yaml:131",
+      "method": "read gates.tests owner_jobs",
+      "observation": "Canonical tests gate lists smoke-check, governance-preflight, test-fast, test-matrix, coverage-verify as always_required.",
+      "expected": "Multi-job test pipeline before coverage-verify 85%.",
+      "actual": "integration canonical_check id maps to test-matrix shard in catalog.",
+      "impact": "Positive — layered feedback before aggregate coverage.",
+      "root_cause": "RF-001 #9975 catalog design.",
+      "remediation": "When ruleset restored, align live check names with catalog ids.",
+      "effort": "S",
+      "dependencies": [".github/workflows/tests.yml"],
+      "validation": ["read github_required_checks.yaml gates.tests"],
+      "automation": "pr-required.yml coordinator",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/github_required_checks.yaml",
+          "line": 134,
+          "command": "inspection",
+          "observation": "owner_jobs include test-matrix and coverage-verify"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-VCR-POL-001",
+      "requirement_id": "REQ-TEST-001",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.89,
+      "status": "PROVEN",
+      "category": "integration-policy",
+      "path": "configs/quality/integration_vcr_policy.yaml:1",
+      "method": "read integration_vcr_policy supported_scopes",
+      "observation": "Canonical integration roots and VCR replay provider families documented with cassette paths.",
+      "expected": "Single policy for integration vs live default.",
+      "actual": "Links test_matrix, fixture_governance_ledger, test_skip_inventory.",
+      "impact": "Positive — reduces ad-hoc live HTTP in integration lanes.",
+      "root_cause": "Issue #2598 policy consolidation.",
+      "remediation": "Architecture test_integration_vcr_policy stays in governance preflight.",
+      "effort": "S",
+      "dependencies": ["tests/architecture/test_integration_vcr_policy.py"],
+      "validation": ["read configs/quality/integration_vcr_policy.yaml"],
+      "automation": "tests/architecture/test_integration_vcr_policy.py",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/integration_vcr_policy.yaml",
+          "line": 11,
+          "command": "inspection",
+          "observation": "supported_scopes.integration canonical_test_roots listed"
+        }
+      ]
+    },
+    {
+      "id": "TESTS-SCALE-001",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "medium",
+      "confidence_score": 0.75,
+      "status": "PROVEN",
+      "category": "inventory",
+      "path": "tests/",
+      "method": "Get-ChildItem tests -Recurse -Filter test_*.py | Measure-Object",
+      "observation": "~2935 test_*.py files; ~530 under tests/architecture; 44 contract; 28 e2e module files counted.",
+      "expected": "Large architecture governance surface documented for operators.",
+      "actual": "Counts from worktree e1c184857e46 file inventory.",
+      "impact": "Full local architecture suite slow on Windows (#10418); CI sharding required.",
+      "root_cause": "Governance-heavy test strategy ADR-042/049.",
+      "remediation": "Use pytest_shards.yaml S1–S7 and test_health wrappers for local runs.",
+      "effort": "S",
+      "dependencies": ["configs/quality/pytest_shards.yaml"],
+      "validation": ["Get-ChildItem tests -Recurse -Filter test_*.py | Measure-Object"],
+      "automation": "scripts/engineering/dev/run_pytest_sharded.sh",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/pytest_shards.yaml",
+          "line": 40,
+          "command": "file count in worktree",
+          "observation": "2935 test_*.py total; sharded runner canonical"
+        }
+      ]
+    }
+  ]
+}

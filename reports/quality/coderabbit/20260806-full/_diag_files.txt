@@ -1,0 +1,13 @@
+scripts/quality/coderabbit/build_matrix.py
+scripts/quality/coderabbit/run_leaves.py
+src/bioetl/application/core/_base_transformer_structural_support.py
+src/bioetl/application/core/batch_executor_runtime_state.py
+src/bioetl/application/core/preflight/service.py
+src/bioetl/composition/bootstrap/cli/health.py
+src/bioetl/composition/factories/services/common_service_wiring.py
+src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py
+src/bioetl/domain/ports/quality/silver_dq_request.py
+src/bioetl/infrastructure/storage/delta/arrow_converter.py
+src/bioetl/infrastructure/storage/delta_reader.py
+tests/unit/application/core/test_batch_execution_lifecycle.py
+tests/unit/application/core/test_stream2_critical_residuals.py

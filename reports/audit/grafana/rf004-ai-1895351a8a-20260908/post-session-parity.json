@@ -1,0 +1,52 @@
+{
+  "captured_at": "2026-09-08T12:43:48.286232+00:00",
+  "candidate_ref": "1895351a8a95f2ca451115be6639b10afba16e03",
+  "status": "PASS",
+  "source_hashes_unchanged": true,
+  "python_files": 2469,
+  "dashboards": [
+    {
+      "uid": "bioetl-control-plane-v1",
+      "equal_except_id_version": true
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "equal_except_id_version": true
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "equal_except_id_version": true
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "equal_except_id_version": true
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "equal_except_id_version": true
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "equal_except_id_version": true
+    },
+    {
+      "uid": "bioetl-runtime",
+      "equal_except_id_version": true
+    }
+  ],
+  "containers": [
+    {
+      "name": "bioetl-stream-b-backend",
+      "id": "f63c8c6e8e5f294f7882f9c2174a18f6c50ff431f98b9c4931bd5da0dabfb6ed",
+      "image": "sha256:c9beb715a263d816f755d27b706cac2bc94f32f49b08b41a3d1fbf079f29787f",
+      "running": true
+    },
+    {
+      "name": "bioetl-stream-b-grafana",
+      "id": "a2326c297d95929dd1d1adee380cd4045c0646788e5fdbba85021fe685beb857",
+      "image": "sha256:263cbefd5d9b179893c47c415daab4da5c1f3d6770154741eca4f45c81119884",
+      "running": true
+    }
+  ],
+  "scope": "Endpoint identities and source bytes verified before and after session; this does not establish final Stream A parity."
+}

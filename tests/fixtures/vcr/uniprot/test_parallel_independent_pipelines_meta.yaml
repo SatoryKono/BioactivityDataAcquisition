@@ -1,0 +1,8 @@
+schema_version: 1
+provider: uniprot
+cassette_rel_path: tests/fixtures/vcr/uniprot/test_parallel_independent_pipelines.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 25c7e0d41da893e2975d8aaa02c5b076bd83128fc787d35e1976586085ee22c6
+recorded_at: '2026-07-03'
+staleness_ready: true

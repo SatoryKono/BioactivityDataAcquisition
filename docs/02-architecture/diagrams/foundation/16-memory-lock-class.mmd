@@ -1,0 +1,155 @@
+%% Title: MemoryLock Class Diagram
+%% Covers: RULES.md §3.3 (Locking), ADR-010
+%% Updated: 2026-07-31
+%% Components: LockPort, MemoryLock, LockEntry, LockResult, LockNotHeldError, LockRuntimeService, BackfillLock
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    classDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   7
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform class width=168 height=240 max_title_len=16 max_desc_lines=15
+classDiagram
+    direction TB
+
+    class LockPort {
+        <<Protocol>>
+        +acquire(key: str, owner_id: str, ttl: int, wait: bool, timeout: int, exclusive: bool) bool
+        +release(key: str, owner_id: str, exclusive: bool) bool
+        +heartbeat(key: str, owner_id: str, exclusive: bool) bool
+        +validate_owner(key: str, owner_id: str) bool
+        +aclose() None
+
+
+
+
+
+
+
+
+
+    }
+
+    class MemoryLock {
+        -_locks: dict~str, LockEntry~
+        -_lock: asyncio.Lock
+        -_ttl_check_interval: float = 1.0
+        -_ttl_task: asyncio.Task | None
+        -_running: bool = True
+        +acquire(key: str, owner_id: str, ttl: int = 90, wait: bool = False, timeout: int = 300, exclusive: bool = False) bool
+        +release(key: str, owner_id: str, exclusive: bool = False) bool
+        +heartbeat(key: str, owner_id: str, exclusive: bool = False) bool
+        +validate_owner(key: str, owner_id: str) bool
+        +aclose() None
+        -_start_ttl_checker() None
+        -_ttl_checker_loop() None
+        -_cleanup_expired() None
+        -_is_expired(entry: LockEntry) bool
+        -_wait_for_lock(key: str, timeout: int) bool
+    }
+
+    class LockEntry {
+        <<dataclass>>
+        +owner_id: str
+        +lock: asyncio.Lock
+        +expires_at: float
+        +original_ttl: int
+        +exclusive: bool = False
+
+
+
+
+
+
+
+
+
+    }
+
+    class LockResult {
+        <<dataclass>>
+        +acquired: bool
+        +owner_id: str
+        +key: str
+        +ttl: int
+        +message: str | None
+
+
+
+
+
+
+
+
+
+    }
+
+    class LockNotHeldError {
+        <<Exception>>
+        +key: str
+        +expected_owner: str
+        +actual_owner: str | None
+        +message: str
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class LockRuntimeService {
+        -_lock: LockPort
+        -_logger: LoggerPort
+        -_ttl: int = 90
+        -_heartbeat_interval: int = 30
+        -_wait_for_lock: bool = False
+        -_wait_timeout: int = 300
+        -_heartbeat_task: asyncio.Task | None
+        +acquire_lock(resource: str, owner_id: str) LockResult
+        +release_lock(resource: str, owner_id: str) bool
+        +refresh_lock(resource: str, owner_id: str) bool
+        +start_heartbeat(resource: str, owner_id: str) None
+        +stop_heartbeat() None
+        -_heartbeat_loop(resource: str, owner_id: str) None
+        -_build_lock_key(resource: str) str
+
+    }
+
+    class BackfillLock {
+        -_lock: LockPort
+        -_run_type: RunType
+        -_logger: LoggerPort
+        +acquire_exclusive(resource: str, owner_id: str, wait_timeout: int) bool
+        +release_exclusive(resource: str, owner_id: str) bool
+        +get_lock_key(provider: str, entity: str, run_type: RunType)$ str
+
+
+
+
+
+
+
+
+
+    }
+
+    %% Relationships
+    LockPort <|.. MemoryLock : implements
+    MemoryLock --> LockEntry : stores
+    MemoryLock ..> LockNotHeldError : throws
+
+    LockRuntimeService --> LockPort : uses
+    LockRuntimeService --> LockResult : returns
+    BackfillLock --> LockPort : uses
+
+    note for MemoryLock "Local-only lock<br/>single-process runtime<br/>TTL expiry + heartbeat<br/>defaults: ttl=90s, hb=30s"
+
+    note for LockRuntimeService "Lock wrapper<br/>heartbeat + key build<br/>log integration<br/>key: lock:{provider}_{entity}"
+
+    note for BackfillLock "Exclusive BACKFILL/REBUILD lock<br/>prevents concurrent modification<br/>suffix: :exclusive"

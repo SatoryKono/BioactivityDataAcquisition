@@ -1,0 +1,9 @@
+{
+  "contract": "dashboard_state_fixture_v1",
+  "case": "telemetry_absent",
+  "classification": "TELEMETRY_ABSENT",
+  "http_status": 200,
+  "rows": [],
+  "message": "Required telemetry is absent; this is not a healthy zero.",
+  "next_action": "Verify scraping, recording rules, and the local metrics endpoint."
+}

@@ -1,0 +1,15 @@
+{
+  "contract": "dashboard_state_fixture_v1",
+  "case": "ok",
+  "classification": "OK",
+  "http_status": 200,
+  "message": "Current evidence supports an operationally healthy verdict.",
+  "next_action": "Continue normal monitoring.",
+  "rows": [
+    {
+      "state": "OK",
+      "message": "Current evidence supports an operationally healthy verdict.",
+      "next_action": "Continue normal monitoring."
+    }
+  ]
+}

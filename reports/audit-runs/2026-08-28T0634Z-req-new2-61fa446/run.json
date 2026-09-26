@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-08-28T0634Z-req-new2-61fa446",
+  "prompt_id": "prompt.audit.project.new2.requirements-trace",
+  "source_commit": "3aba8559a58038cd9ff9a90621f19ea39b930a2f",
+  "params": {
+    "N": 10,
+    "SCOPE": "docs/01-requirements/ tests/ src/bioetl/",
+    "MODE": "full",
+    "AUDIT_MODE": "full",
+    "ALLOW_ISSUE_WRITE": true,
+    "ALLOW_PUSH": true,
+    "ALLOW_MERGE": true,
+    "ALLOW_CLOSE": true,
+    "MAX_ISSUES_PER_ITERATION": 5,
+    "BASE_BRANCH": "main",
+    "REPO": "SatoryKono/BioactivityDataAcquisition",
+    "WORK_BRANCH": "fix/req-trace-cycle-new2-61fa446"
+  },
+  "baseline": {
+    "sha": "61fa4461deef61e124c5a590323aa40c21050c95",
+    "csv_rows": 172,
+    "uniq": 172,
+    "dups": [],
+    "status": "166 confirmed 6 updated",
+    "open_issues": 17,
+    "open_prs": 2
+  },
+  "created_at": "2026-08-28T06:48:21.177326+00:00"
+}

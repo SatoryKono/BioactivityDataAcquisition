@@ -1,0 +1,5193 @@
+{
+  "generated_at": "2026-07-29T17:14:18.764276+00:00",
+  "occurrence_id": "",
+  "engine": "playwright",
+  "base_url": "http://localhost:3000",
+  "scope_query": "from=now-12h&to=now&timezone=UTC&theme=light",
+  "timeout_ms": 90000,
+  "capture_timeout_ms": 180000,
+  "requested": {
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "theme": "light",
+    "capture_surface": "full",
+    "kiosk_mode": "off",
+    "browser_zoom": 100
+  },
+  "actual": {
+    "viewports": {
+      "bioetl-control-plane-v1": {
+        "width": 1024,
+        "height": 12000
+      },
+      "bioetl-dq-v2": {
+        "width": 1024,
+        "height": 12000
+      },
+      "bioetl-incident-v1": {
+        "width": 1024,
+        "height": 12000
+      },
+      "bioetl-overview-v2": {
+        "width": 1024,
+        "height": 12000
+      },
+      "bioetl-provider-health-v2": {
+        "width": 1024,
+        "height": 12000
+      },
+      "bioetl-run-explorer-v1": {
+        "width": 1024,
+        "height": 12000
+      },
+      "bioetl-runtime": {
+        "width": 1024,
+        "height": 12000
+      }
+    },
+    "themes": {
+      "bioetl-control-plane-v1": "light",
+      "bioetl-dq-v2": "light",
+      "bioetl-incident-v1": "light",
+      "bioetl-overview-v2": "light",
+      "bioetl-provider-health-v2": "light",
+      "bioetl-run-explorer-v1": "light",
+      "bioetl-runtime": "light"
+    }
+  },
+  "terminal_state_validation": {
+    "status": "ok",
+    "dashboards": {
+      "bioetl-control-plane-v1": "ok",
+      "bioetl-dq-v2": "ok",
+      "bioetl-incident-v1": "ok",
+      "bioetl-overview-v2": "ok",
+      "bioetl-provider-health-v2": "ok",
+      "bioetl-run-explorer-v1": "ok",
+      "bioetl-runtime": "ok"
+    }
+  },
+  "expand_collapsed_rows": true,
+  "backend_applicability": {
+    "quarantine_explorer": {
+      "state": "NOT_APPLICABLE",
+      "reason": "Quarantine Explorer HTTP/UI surface is retired from shipping."
+    }
+  },
+  "dashboards": [
+    {
+      "uid": "bioetl-control-plane-v1",
+      "title": "0. Trust",
+      "url": "/d/bioetl-control-plane-v1/0-trust",
+      "file": "bioetl-control-plane-v1.png",
+      "requiredPanels": [
+        {
+          "id": 1000,
+          "title": "Navigation",
+          "type": "text"
+        },
+        {
+          "id": 9400,
+          "title": "Provenance",
+          "type": "text"
+        },
+        {
+          "id": 9401,
+          "title": "Status",
+          "type": "stat"
+        },
+        {
+          "id": 906,
+          "title": "Primary recovery",
+          "type": "text"
+        },
+        {
+          "id": 891,
+          "title": "Monitor: Replay Safety State",
+          "type": "stat"
+        },
+        {
+          "id": 892,
+          "title": "Monitor: Checkpoint Freshness Lag (seconds)",
+          "type": "stat"
+        },
+        {
+          "id": 893,
+          "title": "Monitor: Manifest / Ledger Integrity",
+          "type": "stat"
+        },
+        {
+          "id": 907,
+          "title": "Inspect: Telemetry Missing",
+          "type": "stat"
+        },
+        {
+          "id": 894,
+          "title": "Inspect: Known Blind Spots",
+          "type": "text"
+        },
+        {
+          "id": 130,
+          "title": "Track: Replay / Resume Blockers in Range",
+          "type": "stat"
+        },
+        {
+          "id": 3,
+          "title": "Monitor: Checkpoint Incompatibilities",
+          "type": "stat"
+        },
+        {
+          "id": 104,
+          "title": "Monitor: Replay Not Reconstructable",
+          "type": "stat"
+        },
+        {
+          "id": 120,
+          "title": "Monitor: Replay Drift",
+          "type": "stat"
+        },
+        {
+          "id": 101,
+          "title": "Monitor: Checkpoint Load Failures",
+          "type": "stat"
+        },
+        {
+          "id": 102,
+          "title": "Monitor: Checkpoint Save Failures",
+          "type": "stat"
+        },
+        {
+          "id": 103,
+          "title": "Monitor: GLOBAL Checkpoint Operator Failures",
+          "type": "stat"
+        },
+        {
+          "id": 121,
+          "title": "Track: Replay Lag Seconds",
+          "type": "stat"
+        },
+        {
+          "id": 5,
+          "title": "Track: Checkpoint Compatibility Outcomes",
+          "type": "timeseries"
+        },
+        {
+          "id": 134,
+          "title": "Track: Replay Drift by Type",
+          "type": "timeseries"
+        },
+        {
+          "id": 135,
+          "title": "Track: Replay Lag Trend",
+          "type": "timeseries"
+        },
+        {
+          "id": 105,
+          "title": "Track: Checkpoint Save Latency p50/p95/p99",
+          "type": "timeseries"
+        },
+        {
+          "id": 106,
+          "title": "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
+          "type": "timeseries"
+        },
+        {
+          "id": 908,
+          "title": "Inspect: Terminal Run Events by Status in Range",
+          "type": "table"
+        },
+        {
+          "id": 1,
+          "title": "Monitor: Manifest Write Failures",
+          "type": "stat"
+        },
+        {
+          "id": 2,
+          "title": "Monitor: Ledger Append Failures",
+          "type": "stat"
+        },
+        {
+          "id": 131,
+          "title": "Track: Manifest Writes by Status",
+          "type": "timeseries"
+        },
+        {
+          "id": 7,
+          "title": "Track: Ledger Appends by Event Type / Status",
+          "type": "timeseries"
+        },
+        {
+          "id": 132,
+          "title": "Monitor: Manifest Write Failure Ratio",
+          "type": "stat"
+        },
+        {
+          "id": 133,
+          "title": "Monitor: Ledger Append Failure Ratio",
+          "type": "stat"
+        },
+        {
+          "id": 4,
+          "title": "Monitor: GLOBAL Control-Plane Read Failures",
+          "type": "stat"
+        },
+        {
+          "id": 136,
+          "title": "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
+          "type": "stat"
+        },
+        {
+          "id": 6,
+          "title": "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
+          "type": "timeseries"
+        },
+        {
+          "id": 111,
+          "title": "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
+          "type": "timeseries"
+        },
+        {
+          "id": 122,
+          "title": "Monitor: Lineage Refs Missing",
+          "type": "stat"
+        },
+        {
+          "id": 137,
+          "title": "Monitor: Lineage Fragment Persistence Failures",
+          "type": "stat"
+        },
+        {
+          "id": 138,
+          "title": "Inspect: Missing Lineage Refs by Layer / Type",
+          "type": "table"
+        },
+        {
+          "id": 107,
+          "title": "Track: GLOBAL Audit Write Outcomes",
+          "type": "timeseries"
+        },
+        {
+          "id": 108,
+          "title": "Track: GLOBAL Audit Query Outcomes",
+          "type": "timeseries"
+        },
+        {
+          "id": 109,
+          "title": "Track: GLOBAL Audit Write Latency p50/p95/p99",
+          "type": "timeseries"
+        },
+        {
+          "id": 110,
+          "title": "Track: GLOBAL Audit Query Latency p50/p95/p99",
+          "type": "timeseries"
+        },
+        {
+          "id": 112,
+          "title": "Track: Lineage Fragment Outcomes",
+          "type": "timeseries"
+        },
+        {
+          "id": 9407,
+          "title": "Inspect: Copyable Identity Handoffs",
+          "type": "table"
+        },
+        {
+          "id": 9404,
+          "title": "Inspect: Overview Identity Anchors",
+          "type": "table"
+        },
+        {
+          "id": 9410,
+          "title": "ID Empty State",
+          "type": "text"
+        },
+        {
+          "id": 9411,
+          "title": "Processed Records Empty State",
+          "type": "text"
+        },
+        {
+          "id": 9405,
+          "title": "Inspect: Identity Gaps",
+          "type": "table"
+        },
+        {
+          "id": 9406,
+          "title": "Inspect: Checkpoint Anchor Compare",
+          "type": "table"
+        },
+        {
+          "id": 9408,
+          "title": "Inspect: P1 Replay and Evidence Anchors",
+          "type": "table"
+        },
+        {
+          "id": 9409,
+          "title": "Inspect: P2 Forensic Anchors",
+          "type": "table"
+        },
+        {
+          "id": 139,
+          "title": "Review: Remaining Replay-Safety Signals",
+          "type": "text"
+        },
+        {
+          "id": 9402,
+          "title": "ID",
+          "type": "table"
+        },
+        {
+          "id": 9403,
+          "title": "Processed Records",
+          "type": "table"
+        }
+      ],
+      "requiredTerminalPanelIds": [],
+      "collapsedRowTitles": [
+        "Incident Drilldown: Replay Safety (Checkpoint / Replay)",
+        "Incident Drilldown: Manifest / Ledger Integrity",
+        "Incident Drilldown: Global Control-Plane Store Reliability",
+        "Incident Drilldown: Audit / Lineage Completeness",
+        "Identity evidence and remaining replay-safety signals",
+        "Run context (thin) -> Run Explorer hub"
+      ],
+      "renderedPanelCount": 52,
+      "renderedPanelSelector": "[data-testid^=\"data-testid Panel header\"]",
+      "captureHeight": 8264,
+      "requestedViewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "actualViewport": {
+        "width": 1024,
+        "height": 12000
+      },
+      "requestedTheme": "light",
+      "actualTheme": "light",
+      "browserState": {
+        "requestedZoom": 100,
+        "cssZoom": "1",
+        "visualViewportScale": 1,
+        "devicePixelRatio": 1,
+        "requestedKiosk": "off",
+        "actualKiosk": "off",
+        "kioskParam": null,
+        "visibleGrafanaChrome": false
+      },
+      "layoutGeometry": {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "documentWidth": 1024,
+        "horizontalOverflow": false,
+        "panelGeometry": {
+          "1": {
+            "x": 516,
+            "y": 3034,
+            "width": 492,
+            "height": 220
+          },
+          "2": {
+            "x": 16,
+            "y": 3034,
+            "width": 492,
+            "height": 220
+          },
+          "3": {
+            "x": 16,
+            "y": 1096,
+            "width": 492,
+            "height": 220
+          },
+          "4": {
+            "x": 16,
+            "y": 4288,
+            "width": 492,
+            "height": 220
+          },
+          "5": {
+            "x": 516,
+            "y": 1780,
+            "width": 492,
+            "height": 220
+          },
+          "6": {
+            "x": 16,
+            "y": 4516,
+            "width": 992,
+            "height": 220
+          },
+          "7": {
+            "x": 16,
+            "y": 3528,
+            "width": 992,
+            "height": 258
+          },
+          "101": {
+            "x": 516,
+            "y": 1324,
+            "width": 492,
+            "height": 220
+          },
+          "102": {
+            "x": 16,
+            "y": 1552,
+            "width": 492,
+            "height": 220
+          },
+          "103": {
+            "x": 516,
+            "y": 1552,
+            "width": 492,
+            "height": 220
+          },
+          "104": {
+            "x": 516,
+            "y": 1096,
+            "width": 492,
+            "height": 220
+          },
+          "105": {
+            "x": 16,
+            "y": 2236,
+            "width": 992,
+            "height": 258
+          },
+          "106": {
+            "x": 16,
+            "y": 2502,
+            "width": 992,
+            "height": 258
+          },
+          "107": {
+            "x": 16,
+            "y": 5732,
+            "width": 992,
+            "height": 258
+          },
+          "108": {
+            "x": 16,
+            "y": 5998,
+            "width": 992,
+            "height": 258
+          },
+          "109": {
+            "x": 16,
+            "y": 6264,
+            "width": 992,
+            "height": 258
+          },
+          "110": {
+            "x": 16,
+            "y": 6530,
+            "width": 992,
+            "height": 258
+          },
+          "111": {
+            "x": 16,
+            "y": 4744,
+            "width": 992,
+            "height": 258
+          },
+          "112": {
+            "x": 516,
+            "y": 6796,
+            "width": 492,
+            "height": 220
+          },
+          "120": {
+            "x": 16,
+            "y": 1324,
+            "width": 492,
+            "height": 220
+          },
+          "121": {
+            "x": 16,
+            "y": 1780,
+            "width": 492,
+            "height": 220
+          },
+          "122": {
+            "x": 16,
+            "y": 5048,
+            "width": 992,
+            "height": 220
+          },
+          "130": {
+            "x": 16,
+            "y": 868,
+            "width": 992,
+            "height": 220
+          },
+          "131": {
+            "x": 16,
+            "y": 3262,
+            "width": 992,
+            "height": 258
+          },
+          "132": {
+            "x": 16,
+            "y": 3794,
+            "width": 992,
+            "height": 220
+          },
+          "133": {
+            "x": 16,
+            "y": 4022,
+            "width": 992,
+            "height": 220
+          },
+          "134": {
+            "x": 16,
+            "y": 2008,
+            "width": 492,
+            "height": 220
+          },
+          "135": {
+            "x": 516,
+            "y": 2008,
+            "width": 492,
+            "height": 220
+          },
+          "136": {
+            "x": 516,
+            "y": 4288,
+            "width": 492,
+            "height": 220
+          },
+          "137": {
+            "x": 516,
+            "y": 5276,
+            "width": 492,
+            "height": 220
+          },
+          "138": {
+            "x": 16,
+            "y": 5504,
+            "width": 992,
+            "height": 220
+          },
+          "139": {
+            "x": 16,
+            "y": 7822,
+            "width": 992,
+            "height": 144
+          },
+          "891": {
+            "x": 16,
+            "y": 412,
+            "width": 242,
+            "height": 144
+          },
+          "892": {
+            "x": 266,
+            "y": 412,
+            "width": 242,
+            "height": 144
+          },
+          "893": {
+            "x": 516,
+            "y": 412,
+            "width": 242,
+            "height": 144
+          },
+          "894": {
+            "x": 16,
+            "y": 678,
+            "width": 992,
+            "height": 182
+          },
+          "906": {
+            "x": 16,
+            "y": 564,
+            "width": 992,
+            "height": 68
+          },
+          "907": {
+            "x": 766,
+            "y": 412,
+            "width": 242,
+            "height": 144
+          },
+          "908": {
+            "x": 16,
+            "y": 2806,
+            "width": 992,
+            "height": 220
+          },
+          "1000": {
+            "x": 16,
+            "y": 184,
+            "width": 992,
+            "height": 106
+          },
+          "9400": {
+            "x": 16,
+            "y": 298,
+            "width": 659,
+            "height": 106
+          },
+          "9401": {
+            "x": 683,
+            "y": 298,
+            "width": 325,
+            "height": 106
+          },
+          "9402": {
+            "x": 16,
+            "y": 8012,
+            "width": 492,
+            "height": 220
+          },
+          "9403": {
+            "x": 516,
+            "y": 8012,
+            "width": 492,
+            "height": 220
+          },
+          "9404": {
+            "x": 16,
+            "y": 7062,
+            "width": 992,
+            "height": 144
+          },
+          "9405": {
+            "x": 16,
+            "y": 7518,
+            "width": 492,
+            "height": 144
+          },
+          "9406": {
+            "x": 516,
+            "y": 7518,
+            "width": 492,
+            "height": 144
+          },
+          "9407": {
+            "x": 16,
+            "y": 7214,
+            "width": 992,
+            "height": 144
+          },
+          "9408": {
+            "x": 16,
+            "y": 7670,
+            "width": 492,
+            "height": 144
+          },
+          "9409": {
+            "x": 516,
+            "y": 7670,
+            "width": 492,
+            "height": 144
+          },
+          "9410": {
+            "x": 16,
+            "y": 7366,
+            "width": 492,
+            "height": 144
+          },
+          "9411": {
+            "x": 516,
+            "y": 7366,
+            "width": 492,
+            "height": 144
+          }
+        }
+      },
+      "terminalStateValidation": {
+        "status": "ok",
+        "checkedPanelCount": 52,
+        "requiredPanelCount": 52,
+        "requiredTerminalPanelIds": [],
+        "classificationCounts": {
+          "healthy": 44,
+          "incomplete": 8
+        },
+        "panelStates": [
+          {
+            "id": 1000,
+            "title": "Navigation",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-1000\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0. Trust (current) 1. Overview 2. Pipeline Diagnostics 3. Provider Health 4. Data Quality 5. Incident Workspace 6. Run Explorer",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9400,
+            "title": "Provenance",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-9400\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Replay trust \u00b7 Status \u2192 Reason \u2192 Action \u00b7 chembl_baseline/chembl_activity/backfill, incremental/run - UNKNOWN = evidence incomplete \u2014 not OK. Open Primary recovery or Run Explorer.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9401,
+            "title": "Status",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-9401\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "INCOMPLETE",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 906,
+            "title": "Primary recovery",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-906\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Primary recovery: 1) Status + Replay Safety/Checkpoint \u00b7 2) UNKNOWN/INCOMPLETE \u2192 verify scrape \u00b7 3) Open blockers \u00b7 4) Run Explorer identity",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 891,
+            "title": "Monitor: Replay Safety State",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-891\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "OK",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 892,
+            "title": "Monitor: Checkpoint Freshness Lag (seconds)",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-892\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 893,
+            "title": "Monitor: Manifest / Ledger Integrity",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-893\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "OK",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 907,
+            "title": "Inspect: Telemetry Missing",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-907\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "OK",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 894,
+            "title": "Inspect: Known Blind Spots",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-894\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Known blind spots Replay duplicate/overwrite risk signal is not instrumented yet. Manifest-to-ledger referential integrity ratio is not instrumented yet.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 130,
+            "title": "Track: Replay / Resume Blockers in Range",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-130\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 3,
+            "title": "Monitor: Checkpoint Incompatibilities",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-3\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 104,
+            "title": "Monitor: Replay Not Reconstructable",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-104\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 120,
+            "title": "Monitor: Replay Drift",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-120\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 101,
+            "title": "Monitor: Checkpoint Load Failures",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-101\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 102,
+            "title": "Monitor: Checkpoint Save Failures",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-102\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 103,
+            "title": "Monitor: GLOBAL Checkpoint Operator Failures",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-103\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 121,
+            "title": "Track: Replay Lag Seconds",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-121\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0 s",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 5,
+            "title": "Track: Checkpoint Compatibility Outcomes",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-5\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "no_events",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 134,
+            "title": "Track: Replay Drift by Type",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-134\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No replay drift samples",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 135,
+            "title": "Track: Replay Lag Trend",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-135\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "exact_replay_supported / ready",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 105,
+            "title": "Track: Checkpoint Save Latency p50/p95/p99",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-105\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No optional latency samples in range. Treat this as telemetry absence, not proof of a healthy control-plane path.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 106,
+            "title": "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-106\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No GLOBAL checkpoint operator latency samples in range. This is optional admin/operator telemetry, not pipeline success evidence.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 908,
+            "title": "Inspect: Terminal Run Events by Status in Range",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-908\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Time success 2026-07-29 17:06:34 0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 1,
+            "title": "Monitor: Manifest Write Failures",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-1\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 2,
+            "title": "Monitor: Ledger Append Failures",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-2\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 131,
+            "title": "Track: Manifest Writes by Status",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-131\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "backfill / success incremental / success",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 7,
+            "title": "Track: Ledger Appends by Event Type / Status",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-7\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "artifact_published / success input_snapshot_published / success manifest_created / success run_finished / success run_started / success stage_completed / success stage_started / success",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 132,
+            "title": "Monitor: Manifest Write Failure Ratio",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-132\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 133,
+            "title": "Monitor: Ledger Append Failure Ratio",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-133\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 4,
+            "title": "Monitor: GLOBAL Control-Plane Read Failures",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-4\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 136,
+            "title": "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-136\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 6,
+            "title": "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-6\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "manifest / get_by_run_id / success manifest / get_latest_for_scope / success manifest / list_all / success workflow_manifest / list_all / success ledger / list_entries / success ledger / list_entries_by_run_id / success",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 111,
+            "title": "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-111\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 122,
+            "title": "Monitor: Lineage Refs Missing",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-122\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 137,
+            "title": "Monitor: Lineage Fragment Persistence Failures",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-137\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 138,
+            "title": "Inspect: Missing Lineage Refs by Layer / Type",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-138\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 107,
+            "title": "Track: GLOBAL Audit Write Outcomes",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-107\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "/ /",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 108,
+            "title": "Track: GLOBAL Audit Query Outcomes",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-108\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "/",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 109,
+            "title": "Track: GLOBAL Audit Write Latency p50/p95/p99",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-109\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No GLOBAL audit write latency samples in range. Empty means no audit writes were timed or audit telemetry is absent, not zero latency.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 110,
+            "title": "Track: GLOBAL Audit Query Latency p50/p95/p99",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-110\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No GLOBAL audit query latency samples in range. Empty means no audit queries were timed or audit telemetry is absent, not zero latency.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 112,
+            "title": "Track: Lineage Fragment Outcomes",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-112\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "bronze / success",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9407,
+            "title": "Inspect: Copyable Identity Handoffs",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9407\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "copy copy_mode copy_value drilldown drilldown_label drilldown_target drilldown_type format identity_gap label missing_severity name present priority rendering source source_quality source_type status ui_status value_full value_short why true full_value 2357e5ab-2802-5b3e-a821-0bfca6e64e4a Run Manifest details; ledger by run_id; Loki/Tempo links Run manifest by run_id manifest.by_run_id:2357e5ab-2802-5b3e-a821-0bfca6e64e4a run_manifest UUID v4 false Run ID OK run_id true P0 overview: short; detai",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9404,
+            "title": "Inspect: Overview Identity Anchors",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9404\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "anchor short value full value status severity source type source quality drilldown type drilldown target drilldown copy copy_mode drilldown_label identity_gap name present priority source status Run ID 2357e5ab-280 2357e5ab-2802-5b3e-a821-0bfca6e64e4a OK OK run_manifest authoritative run_manifest manifest.by_run_id:2357e5ab-2802-5b3e-a821-0bfca6e64e4a Run Manifest details; ledger by run_id; Loki/Tempo links true full_value Run manifest by run_id false run_id true P0 RunManifest.run_id; identity ",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9410,
+            "title": "ID Empty State",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-9410\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Identity table guardrail. If no rows are visible, check /health/live, selector scope, and a concrete pipeline/run_id before treating the empty state as expected.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9411,
+            "title": "Processed Records Empty State",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-9411\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Accounting table guardrail. Visible rows are backend accounting evidence; if this table becomes empty, verify backend health and scope before reading it as zero records.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9405,
+            "title": "Inspect: Identity Gaps",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9405\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "copy copy_mode copy_value drilldown drilldown_label drilldown_target drilldown_type format identity_gap label missing_severity name present priority rendering source source_quality source_type status ui_status value_full value_short why false none No identity gap rows for this forensic view. Use the summary cards above, then verify backend health and selected run scope before treating this as expected empty. Input snapshots details Input snapshot closure input_snapshots.fingerprint:missing input",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9406,
+            "title": "Inspect: Checkpoint Anchor Compare",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9406\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "anchor checkpoint_value_full checkpoint_value_short current_value_full current_value_short drilldown_target drilldown_type source_quality source_type status ui_status manifest_id 493c3a10-0969-5421-9c5d-a9e138e42ccc 493c3a10-096 291251d6-9158-599d-a249-54209ae3b5d6 291251d6-915 checkpoint.compare:manifest_id checkpoint_compare derived checkpoint_metadata_compare MISMATCH CRIT execution_fingerprint 31b0d697987a009c979c0700f15a49b2e4935a2b40574c0bf13ccb5de4b0e76d 31b0d697987a 7fa193f516aad80218572",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9408,
+            "title": "Inspect: P1 Replay and Evidence Anchors",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9408\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "copy copy_mode copy_value drilldown drilldown_label drilldown_target drilldown_type format identity_gap label missing_severity name present priority rendering source source_quality source_type status ui_status value_full value_short why true full_value 5aff0e707040a8a86e6bda85c86473ae7b175bba344e5c895e5fde5494a3cde9 Manifest/config diff Resolved declarative config diff manifest.code_provenance.resolved_config_hash:5aff0e707040a8a86e6bda85c86473ae7b175bba344e5c895e5fde5494a3cde9 manifest_section ",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9409,
+            "title": "Inspect: P2 Forensic Anchors",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9409\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "copy copy_mode copy_value drilldown drilldown_label drilldown_target drilldown_type format identity_gap label missing_severity name present priority rendering source source_quality source_type status ui_status value_full value_short why false none No P2 forensic anchors for this scope. Use the summary cards above, then select an exact run_id or verify backend health before treating this as expected empty. Manifest launch_context Launch context manifest.launch_context manifest_section derived sha",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 139,
+            "title": "Review: Remaining Replay-Safety Signals",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-139\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Remaining replay-safety signals: duplicate-record evidence and occurrence-only vs semantic drift classification. Keep high-cardinality IDs out of Prometheus. Use identity evidence, manifests, ledger/checkpoint diagnostics, and artifact lineage for exact proof.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9402,
+            "title": "ID",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9402\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "parameter Count Run ID [Pipeline] 2357e5ab-2802-5b3e-a821-0bfca6e64e4a Manifest ID [Control Plane] 291251d6-9158-599d-a249-54209ae3b5d6 Provider.Entity [Version] chembl.activity [1.2.0] Contract [Schema] chembl.activity.1.0.0 [324651bc17fbcdae6688f2aed5bb1e80f70e3b4bc00eee70d1ee86af0e818f36] Execution [Type|Context|Git] incremental | isolated | git=6cf8cda81035eca612036d4278964a7120d4e8e2",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9403,
+            "title": "Processed Records",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9403\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "parameter Count percentage row_status percintage bronze [total] 90 100% 100% silver [valid] 0 0.0% 0.0% silver [filtered out] 90 100% 100% silver [quarantined] 0 0% 0% silver [skipped] 0 0% 0% silver [deduplicated] 0 0% 0%",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          }
+        ]
+      },
+      "screenshotEvidence": {
+        "file": "bioetl-control-plane-v1.png",
+        "bytes": 709820,
+        "sha256": "a8caa067602cb2894097ecb7b94bbfbf565915e1edd097dd1bf508ff412b0293",
+        "width": 1024,
+        "height": 8264,
+        "capturedAt": "2026-07-29T17:07:23.979Z"
+      },
+      "renderStatus": "rendered"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "title": "4. Data Quality",
+      "url": "/d/bioetl-dq-v2/4-data-quality",
+      "file": "bioetl-dq-v2.png",
+      "requiredPanels": [
+        {
+          "id": 1000,
+          "title": "Navigation",
+          "type": "text"
+        },
+        {
+          "id": 9400,
+          "title": "Provenance",
+          "type": "text"
+        },
+        {
+          "id": 9401,
+          "title": "Status",
+          "type": "stat"
+        },
+        {
+          "id": 9103,
+          "title": "Review: First Action",
+          "type": "text"
+        },
+        {
+          "id": 9101,
+          "title": "Now \u00b7 DQ Threshold State",
+          "type": "stat"
+        },
+        {
+          "id": 9102,
+          "title": "Now \u00b7 DQ Current Reasons",
+          "type": "table"
+        },
+        {
+          "id": 152,
+          "title": "Monitor: Silver Filter Reject Accounting Mismatch",
+          "type": "stat"
+        },
+        {
+          "id": 121,
+          "title": "Inspect: Top Silver Reject Reasons (Pareto)",
+          "type": "bargauge"
+        },
+        {
+          "id": 122,
+          "title": "Inspect: Top Silver Reject Fields",
+          "type": "bargauge"
+        },
+        {
+          "id": 118,
+          "title": "Inspect: Silver Filter Rejects by Pipeline",
+          "type": "bargauge"
+        },
+        {
+          "id": 156,
+          "title": "Inspect: Gold Reject Outcomes by Pipeline",
+          "type": "bargauge"
+        },
+        {
+          "id": 1,
+          "title": "Track Range Evidence: Bronze -> Silver -> Gold",
+          "type": "timeseries"
+        },
+        {
+          "id": 3,
+          "title": "Track: Source Records in Range (Bronze)",
+          "type": "stat"
+        },
+        {
+          "id": 4,
+          "title": "Track: Clean Records in Range (Gold)",
+          "type": "stat"
+        },
+        {
+          "id": 7,
+          "title": "Track: Silver Validation Failures in Range",
+          "type": "stat"
+        },
+        {
+          "id": 101,
+          "title": "Review: Latest Successful Data Timestamp",
+          "type": "stat"
+        },
+        {
+          "id": 9,
+          "title": "Inspect: Quarantine by Error Type",
+          "type": "bargauge"
+        },
+        {
+          "id": 12,
+          "title": "Monitor: Silver Validation Failures",
+          "type": "stat"
+        },
+        {
+          "id": 151,
+          "title": "Monitor: Gold Strict Validation Failures",
+          "type": "stat"
+        },
+        {
+          "id": 10,
+          "title": "Track: Anomalies Detected",
+          "type": "timeseries"
+        },
+        {
+          "id": 11,
+          "title": "Track: DQ Check Duration (p95)",
+          "type": "timeseries"
+        },
+        {
+          "id": 155,
+          "title": "Track: DQ Threshold Events in Range Trend",
+          "type": "timeseries"
+        },
+        {
+          "id": 153,
+          "title": "Track: Data Quality Score Trend (Volume-weighted)",
+          "type": "timeseries"
+        },
+        {
+          "id": 116,
+          "title": "Review: Lineage Handoff to Control Plane",
+          "type": "text"
+        },
+        {
+          "id": 150,
+          "title": "Review: Aggregate Control-plane Handoff",
+          "type": "text"
+        },
+        {
+          "id": 2,
+          "title": "Monitor: Data Quality Score (Volume-weighted)",
+          "type": "stat"
+        },
+        {
+          "id": 5,
+          "title": "Monitor: Worst-Entity DQ Score",
+          "type": "stat"
+        },
+        {
+          "id": 8,
+          "title": "Time Range \u00b7 Worst Freshness Age (hours; SLA 24/72)",
+          "type": "gauge"
+        },
+        {
+          "id": 154,
+          "title": "Track: DQ Blocked Records in Range (Evidence)",
+          "type": "stat"
+        },
+        {
+          "id": 6,
+          "title": "Range \u00b7 Records Quarantined",
+          "type": "stat"
+        },
+        {
+          "id": 117,
+          "title": "Range \u00b7 Silver Filter Rejects",
+          "type": "stat"
+        },
+        {
+          "id": 9402,
+          "title": "ID",
+          "type": "table"
+        },
+        {
+          "id": 9403,
+          "title": "Processed Records",
+          "type": "table"
+        }
+      ],
+      "requiredTerminalPanelIds": [],
+      "collapsedRowTitles": [
+        "Run lane \u00b7 Silver/Gold rejects",
+        "Now lane \u00b7 validation diagnostics",
+        "Range lane \u00b7 debug evidence",
+        "Run context (thin) -> Run Explorer hub"
+      ],
+      "renderedPanelCount": 33,
+      "renderedPanelSelector": "[data-testid^=\"data-testid Panel header\"]",
+      "captureHeight": 4046,
+      "requestedViewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "actualViewport": {
+        "width": 1024,
+        "height": 12000
+      },
+      "requestedTheme": "light",
+      "actualTheme": "light",
+      "browserState": {
+        "requestedZoom": 100,
+        "cssZoom": "1",
+        "visualViewportScale": 1,
+        "devicePixelRatio": 1,
+        "requestedKiosk": "off",
+        "actualKiosk": "off",
+        "kioskParam": null,
+        "visibleGrafanaChrome": false
+      },
+      "layoutGeometry": {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "documentWidth": 1024,
+        "horizontalOverflow": false,
+        "panelGeometry": {
+          "1": {
+            "x": 16,
+            "y": 1970,
+            "width": 992,
+            "height": 182
+          },
+          "2": {
+            "x": 16,
+            "y": 716,
+            "width": 325,
+            "height": 144
+          },
+          "3": {
+            "x": 516,
+            "y": 2160,
+            "width": 492,
+            "height": 220
+          },
+          "4": {
+            "x": 16,
+            "y": 2160,
+            "width": 492,
+            "height": 220
+          },
+          "5": {
+            "x": 516,
+            "y": 716,
+            "width": 325,
+            "height": 144
+          },
+          "6": {
+            "x": 16,
+            "y": 1058,
+            "width": 492,
+            "height": 182
+          },
+          "7": {
+            "x": 516,
+            "y": 2388,
+            "width": 492,
+            "height": 220
+          },
+          "8": {
+            "x": 16,
+            "y": 868,
+            "width": 325,
+            "height": 182
+          },
+          "9": {
+            "x": 516,
+            "y": 2616,
+            "width": 492,
+            "height": 220
+          },
+          "10": {
+            "x": 16,
+            "y": 2844,
+            "width": 492,
+            "height": 220
+          },
+          "11": {
+            "x": 516,
+            "y": 3072,
+            "width": 492,
+            "height": 220
+          },
+          "12": {
+            "x": 16,
+            "y": 2616,
+            "width": 492,
+            "height": 220
+          },
+          "101": {
+            "x": 16,
+            "y": 2388,
+            "width": 492,
+            "height": 220
+          },
+          "116": {
+            "x": 16,
+            "y": 3452,
+            "width": 992,
+            "height": 144
+          },
+          "117": {
+            "x": 516,
+            "y": 1058,
+            "width": 492,
+            "height": 182
+          },
+          "118": {
+            "x": 16,
+            "y": 1704,
+            "width": 492,
+            "height": 220
+          },
+          "121": {
+            "x": 16,
+            "y": 1476,
+            "width": 492,
+            "height": 220
+          },
+          "122": {
+            "x": 516,
+            "y": 1476,
+            "width": 492,
+            "height": 220
+          },
+          "150": {
+            "x": 16,
+            "y": 3604,
+            "width": 992,
+            "height": 144
+          },
+          "151": {
+            "x": 516,
+            "y": 2844,
+            "width": 492,
+            "height": 220
+          },
+          "152": {
+            "x": 16,
+            "y": 1286,
+            "width": 992,
+            "height": 182
+          },
+          "153": {
+            "x": 516,
+            "y": 3300,
+            "width": 492,
+            "height": 144
+          },
+          "154": {
+            "x": 349,
+            "y": 868,
+            "width": 659,
+            "height": 182
+          },
+          "155": {
+            "x": 16,
+            "y": 3072,
+            "width": 492,
+            "height": 220
+          },
+          "156": {
+            "x": 516,
+            "y": 1704,
+            "width": 492,
+            "height": 220
+          },
+          "1000": {
+            "x": 16,
+            "y": 184,
+            "width": 992,
+            "height": 106
+          },
+          "9101": {
+            "x": 16,
+            "y": 488,
+            "width": 325,
+            "height": 144
+          },
+          "9102": {
+            "x": 349,
+            "y": 488,
+            "width": 659,
+            "height": 182
+          },
+          "9103": {
+            "x": 16,
+            "y": 412,
+            "width": 992,
+            "height": 68
+          },
+          "9400": {
+            "x": 16,
+            "y": 298,
+            "width": 659,
+            "height": 106
+          },
+          "9401": {
+            "x": 683,
+            "y": 298,
+            "width": 325,
+            "height": 106
+          },
+          "9402": {
+            "x": 16,
+            "y": 3794,
+            "width": 492,
+            "height": 220
+          },
+          "9403": {
+            "x": 516,
+            "y": 3794,
+            "width": 492,
+            "height": 220
+          }
+        }
+      },
+      "terminalStateValidation": {
+        "status": "ok",
+        "checkedPanelCount": 33,
+        "requiredPanelCount": 33,
+        "requiredTerminalPanelIds": [],
+        "classificationCounts": {
+          "healthy": 29,
+          "incomplete": 4
+        },
+        "panelStates": [
+          {
+            "id": 1000,
+            "title": "Navigation",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-1000\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0. Trust 1. Overview 2. Pipeline Diagnostics 3. Provider Health 4. Data Quality (current) 5. Incident Workspace 6. Run Explorer",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9400,
+            "title": "Provenance",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-9400\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Is data conformant, and what delivery impact needs action? Scope: CURRENT = Status/reasons \u00b7 SELECTED RUN = ID/Processed Records \u00b7 TIME RANGE = score, freshness and impact cards below. Do not compare different badges as peers.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9401,
+            "title": "Status",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-9401\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "WARN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9103,
+            "title": "Review: First Action",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-9103\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Data trust \u2014 next actions (<=4) Read Status + Now \u00b7 DQ Threshold/Reasons (not range zeros). If blocked/quarantine/rejects > 0, use accounting with denominators (expand Run/Range lanes). Selected run -> Run Explorer hub; resume -> Trust Primary recovery. Range cards are SLA/freshness context only \u2014 not peer severity.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9101,
+            "title": "Now \u00b7 DQ Threshold State",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-9101\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "WARN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9102,
+            "title": "Now \u00b7 DQ Current Reasons",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9102\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Time __name__ action_target pipeline reason severity Count 2026-07-29 17:07:33 bioetl_dq_current_reason data_quality chembl_activity silver_filter_rejects warn 1",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 152,
+            "title": "Monitor: Silver Filter Reject Accounting Mismatch",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-152\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "2",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 121,
+            "title": "Inspect: Top Silver Reject Reasons (Pareto)",
+            "type": "bargauge",
+            "selector": "[data-viz-panel-key=\"panel-121\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 122,
+            "title": "Inspect: Top Silver Reject Fields",
+            "type": "bargauge",
+            "selector": "[data-viz-panel-key=\"panel-122\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 118,
+            "title": "Inspect: Silver Filter Rejects by Pipeline",
+            "type": "bargauge",
+            "selector": "[data-viz-panel-key=\"panel-118\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "90",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 156,
+            "title": "Inspect: Gold Reject Outcomes by Pipeline",
+            "type": "bargauge",
+            "selector": "[data-viz-panel-key=\"panel-156\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "gold_quarantined chembl_activity 0 gold_excluded_by_contract chembl_activity 0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 1,
+            "title": "Track Range Evidence: Bronze -> Silver -> Gold",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-1\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 3,
+            "title": "Track: Source Records in Range (Bronze)",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-3\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "90",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 4,
+            "title": "Track: Clean Records in Range (Gold)",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-4\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 7,
+            "title": "Track: Silver Validation Failures in Range",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-7\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 101,
+            "title": "Review: Latest Successful Data Timestamp",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-101\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 9,
+            "title": "Inspect: Quarantine by Error Type",
+            "type": "bargauge",
+            "selector": "[data-viz-panel-key=\"panel-9\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No quarantined records in range",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 12,
+            "title": "Monitor: Silver Validation Failures",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-12\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 151,
+            "title": "Monitor: Gold Strict Validation Failures",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-151\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 10,
+            "title": "Track: Anomalies Detected",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-10\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No anomaly events in range",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 11,
+            "title": "Track: DQ Check Duration (p95)",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-11\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 155,
+            "title": "Track: DQ Threshold Events in Range Trend",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-155\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 153,
+            "title": "Track: Data Quality Score Trend (Volume-weighted)",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-153\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 116,
+            "title": "Review: Lineage Handoff to Control Plane",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-116\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Lineage handoff \u2014 open the canonical Control Plane for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 150,
+            "title": "Review: Aggregate Control-plane Handoff",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-150\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Aggregate control-plane handoff \u2014 open Trust for store/manifest failures and fleet-wide control-plane reliability. Use when DQ impact is global.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 2,
+            "title": "Monitor: Data Quality Score (Volume-weighted)",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-2\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "100%",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 5,
+            "title": "Monitor: Worst-Entity DQ Score",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-5\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "100%",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 8,
+            "title": "Time Range \u00b7 Worst Freshness Age (hours; SLA 24/72)",
+            "type": "gauge",
+            "selector": "[data-viz-panel-key=\"panel-8\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 154,
+            "title": "Track: DQ Blocked Records in Range (Evidence)",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-154\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "90",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 6,
+            "title": "Range \u00b7 Records Quarantined",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-6\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0 \u00b7 valid empty range",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 117,
+            "title": "Range \u00b7 Silver Filter Rejects",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-117\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "90",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9402,
+            "title": "ID",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9402\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "parameter Count Run ID [Pipeline] 2357e5ab-2802-5b3e-a821-0bfca6e64e4a Manifest ID [Control Plane] 291251d6-9158-599d-a249-54209ae3b5d6 Provider.Entity [Version] chembl.activity [1.2.0] Contract [Schema] chembl.activity.1.0.0 [324651bc17fbcdae6688f2aed5bb1e80f70e3b4bc00eee70d1ee86af0e818f36] Execution [Type|Context|Git] incremental | isolated | git=6cf8cda81035eca612036d4278964a7120d4e8e2",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9403,
+            "title": "Processed Records",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9403\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "parameter Count percentage row_status percintage bronze [total] 90 100% 100% silver [valid] 0 0.0% 0.0% silver [filtered out] 90 100% 100% silver [quarantined] 0 0% 0% silver [skipped] 0 0% 0% silver [deduplicated] 0 0% 0%",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          }
+        ]
+      },
+      "screenshotEvidence": {
+        "file": "bioetl-dq-v2.png",
+        "bytes": 389818,
+        "sha256": "2251b1af7a2ffadbf0fad7de8cb51e8e19916b91d4b2da8977916f75ebee9fae",
+        "width": 1024,
+        "height": 4046,
+        "capturedAt": "2026-07-29T17:08:35.224Z"
+      },
+      "renderStatus": "rendered"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "title": "Incident Workspace",
+      "url": "/d/bioetl-incident-v1/incident-workspace",
+      "file": "bioetl-incident-v1.png",
+      "requiredPanels": [
+        {
+          "id": 1000,
+          "title": "Navigation",
+          "type": "text"
+        },
+        {
+          "id": 9400,
+          "title": "Provenance",
+          "type": "text"
+        },
+        {
+          "id": 9401,
+          "title": "Status",
+          "type": "stat"
+        },
+        {
+          "id": 2001,
+          "title": "Next Best Actions",
+          "type": "text"
+        },
+        {
+          "id": 2010,
+          "title": "Ranked Active Suspects",
+          "type": "table"
+        },
+        {
+          "id": 2005,
+          "title": "Evidence timeline \u00b7 Current Alerts (now)",
+          "type": "table"
+        },
+        {
+          "id": 2006,
+          "title": "Evidence timeline \u00b7 Alert State History (range)",
+          "type": "state-timeline"
+        },
+        {
+          "id": 2007,
+          "title": "Impact / confidence (honest bounds)",
+          "type": "text"
+        },
+        {
+          "id": 2002,
+          "title": "Active Suspects \u00b7 Runtime",
+          "type": "table"
+        },
+        {
+          "id": 2003,
+          "title": "Active Suspects \u00b7 Provider",
+          "type": "table"
+        },
+        {
+          "id": 2004,
+          "title": "Active Suspects \u00b7 DQ",
+          "type": "table"
+        }
+      ],
+      "requiredTerminalPanelIds": [],
+      "collapsedRowTitles": [
+        "Domain suspect detail (forensics; collapsed)"
+      ],
+      "renderedPanelCount": 11,
+      "renderedPanelSelector": "[data-testid^=\"data-testid Panel header\"]",
+      "captureHeight": 1538,
+      "requestedViewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "actualViewport": {
+        "width": 1024,
+        "height": 12000
+      },
+      "requestedTheme": "light",
+      "actualTheme": "light",
+      "browserState": {
+        "requestedZoom": 100,
+        "cssZoom": "1",
+        "visualViewportScale": 1,
+        "devicePixelRatio": 1,
+        "requestedKiosk": "off",
+        "actualKiosk": "off",
+        "kioskParam": null,
+        "visibleGrafanaChrome": false
+      },
+      "layoutGeometry": {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "documentWidth": 1024,
+        "horizontalOverflow": false,
+        "panelGeometry": {
+          "1000": {
+            "x": 16,
+            "y": 184,
+            "width": 992,
+            "height": 106
+          },
+          "2001": {
+            "x": 16,
+            "y": 412,
+            "width": 992,
+            "height": 106
+          },
+          "2002": {
+            "x": 16,
+            "y": 1248,
+            "width": 325,
+            "height": 258
+          },
+          "2003": {
+            "x": 349,
+            "y": 1248,
+            "width": 325,
+            "height": 258
+          },
+          "2004": {
+            "x": 683,
+            "y": 1248,
+            "width": 325,
+            "height": 258
+          },
+          "2005": {
+            "x": 16,
+            "y": 830,
+            "width": 492,
+            "height": 220
+          },
+          "2006": {
+            "x": 516,
+            "y": 830,
+            "width": 492,
+            "height": 220
+          },
+          "2007": {
+            "x": 16,
+            "y": 1058,
+            "width": 992,
+            "height": 144
+          },
+          "2010": {
+            "x": 16,
+            "y": 526,
+            "width": 992,
+            "height": 296
+          },
+          "9400": {
+            "x": 16,
+            "y": 298,
+            "width": 659,
+            "height": 106
+          },
+          "9401": {
+            "x": 683,
+            "y": 298,
+            "width": 325,
+            "height": 106
+          }
+        }
+      },
+      "terminalStateValidation": {
+        "status": "ok",
+        "checkedPanelCount": 11,
+        "requiredPanelCount": 11,
+        "requiredTerminalPanelIds": [],
+        "classificationCounts": {
+          "healthy": 11
+        },
+        "panelStates": [
+          {
+            "id": 1000,
+            "title": "Navigation",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-1000\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0. Trust 1. Overview 2. Pipeline Diagnostics 3. Provider Health 4. Data Quality 5. Incident Workspace (current) 6. Run Explorer",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9400,
+            "title": "Provenance",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-9400\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Incident triage \u00b7 Status \u2192 Impact/confidence \u2192 Next action \u00b7 chembl_baseline/chembl_activity/backfill, incremental/run - Read labelled Status (never bare numbers). Empty domain = No active suspects, not healthy fleet.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9401,
+            "title": "Status",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-9401\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "WARN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 2001,
+            "title": "Next Best Actions",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-2001\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Next best actions (\u22644, read-only) \u2014 1) Read labelled Status \u00b7 2) Open top Ranked Active Suspect domain \u00b7 3) Confirm Current Alerts age/severity \u00b7 4) Run Explorer for exact-run proof",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 2010,
+            "title": "Ranked Active Suspects",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-2010\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Series A Series B domain pipeline reason signal Series C None observed None observed dq chembl_activity silver_filter_rejects silver_filter_rejects 1",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 2005,
+            "title": "Evidence timeline \u00b7 Current Alerts (now)",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-2005\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Time alertname alertstate Severity 2026-07-29 17:08:42.959 BioETLDockerRuntimeProbeMissing firing 1 2026-07-29 17:08:42.959 BioETLSilverFilterRejectAccountingMismatch firing 2",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 2006,
+            "title": "Evidence timeline \u00b7 Alert State History (range)",
+            "type": "state-timeline",
+            "selector": "[data-viz-panel-key=\"panel-2006\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 2007,
+            "title": "Impact / confidence (honest bounds)",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-2007\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Impact Affected pipeline/provider scope from suspects and current alerts. Confidence High with mapped Status + suspects; low with UNKNOWN or missing telemetry. Basis Domain label + alertname; read-only evidence, not AI diagnosis.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 2002,
+            "title": "Active Suspects \u00b7 Runtime",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-2002\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "None observed",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 2003,
+            "title": "Active Suspects \u00b7 Provider",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-2003\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "None observed",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 2004,
+            "title": "Active Suspects \u00b7 DQ",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-2004\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Time pipeline reason Signal 2026-07-29 17:08:42 chembl_activity silver_filter_rejects 1",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          }
+        ]
+      },
+      "screenshotEvidence": {
+        "file": "bioetl-incident-v1.png",
+        "bytes": 190439,
+        "sha256": "c1f8a19ee437faa9fbda8fd6e1f1ce7492247416f64371ced714ebbf54157d43",
+        "width": 1024,
+        "height": 1538,
+        "capturedAt": "2026-07-29T17:09:37.987Z"
+      },
+      "renderStatus": "rendered"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "title": "1. Overview",
+      "url": "/d/bioetl-overview-v2/1-overview",
+      "file": "bioetl-overview-v2.png",
+      "requiredPanels": [
+        {
+          "id": 9601,
+          "title": "Triage Alert State",
+          "type": "table"
+        },
+        {
+          "id": 1000,
+          "title": "Navigation",
+          "type": "text"
+        },
+        {
+          "id": 99,
+          "title": "Provenance",
+          "type": "text"
+        },
+        {
+          "id": 214,
+          "title": "Status",
+          "type": "stat"
+        },
+        {
+          "id": 215,
+          "title": "First Action",
+          "type": "table"
+        },
+        {
+          "id": 9002,
+          "title": "Inputs",
+          "type": "table"
+        },
+        {
+          "id": 9018,
+          "title": "Runtime Blockers Trend",
+          "type": "state-timeline"
+        },
+        {
+          "id": 9019,
+          "title": "DQ Status Trend",
+          "type": "state-timeline"
+        },
+        {
+          "id": 9020,
+          "title": "Gold Lifecycle Trend",
+          "type": "state-timeline"
+        },
+        {
+          "id": 9010,
+          "title": "Historical Failures",
+          "type": "table"
+        },
+        {
+          "id": 9011,
+          "title": "Recent Terminal Runs",
+          "type": "table"
+        },
+        {
+          "id": 9015,
+          "title": "Silver Rejects + Rate",
+          "type": "stat"
+        },
+        {
+          "id": 9021,
+          "title": "Diagnostics Navigation",
+          "type": "text"
+        },
+        {
+          "id": 9006,
+          "title": "Control Plane",
+          "type": "table"
+        },
+        {
+          "id": 9003,
+          "title": "Runtime",
+          "type": "table"
+        },
+        {
+          "id": 9004,
+          "title": "Data Quality",
+          "type": "table"
+        },
+        {
+          "id": 9007,
+          "title": "Provider",
+          "type": "table"
+        },
+        {
+          "id": 9005,
+          "title": "Data Validation",
+          "type": "table"
+        },
+        {
+          "id": 9013,
+          "title": "Workflow",
+          "type": "table"
+        },
+        {
+          "id": 9300,
+          "title": "ID",
+          "type": "table"
+        },
+        {
+          "id": 9301,
+          "title": "Processed Records",
+          "type": "table"
+        }
+      ],
+      "requiredTerminalPanelIds": [],
+      "collapsedRowTitles": [
+        "Alert/SLO Triage",
+        "L1 Historical Trends",
+        "Range Evidence (Historical / Recent History)",
+        "Diagnostics & Docs (Logs / Traces / Raw Metrics)",
+        "Run context (thin) -> Run Explorer hub"
+      ],
+      "renderedPanelCount": 21,
+      "renderedPanelSelector": "[data-testid^=\"data-testid Panel header\"]",
+      "captureHeight": 2488,
+      "requestedViewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "actualViewport": {
+        "width": 1024,
+        "height": 12000
+      },
+      "requestedTheme": "light",
+      "actualTheme": "light",
+      "browserState": {
+        "requestedZoom": 100,
+        "cssZoom": "1",
+        "visualViewportScale": 1,
+        "devicePixelRatio": 1,
+        "requestedKiosk": "off",
+        "actualKiosk": "off",
+        "kioskParam": null,
+        "visibleGrafanaChrome": false
+      },
+      "layoutGeometry": {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "documentWidth": 1024,
+        "horizontalOverflow": false,
+        "panelGeometry": {
+          "99": {
+            "x": 16,
+            "y": 298,
+            "width": 659,
+            "height": 106
+          },
+          "214": {
+            "x": 683,
+            "y": 298,
+            "width": 325,
+            "height": 106
+          },
+          "215": {
+            "x": 16,
+            "y": 412,
+            "width": 409,
+            "height": 258
+          },
+          "1000": {
+            "x": 16,
+            "y": 184,
+            "width": 992,
+            "height": 106
+          },
+          "9002": {
+            "x": 433,
+            "y": 412,
+            "width": 575,
+            "height": 258
+          },
+          "9003": {
+            "x": 224,
+            "y": 1514,
+            "width": 159,
+            "height": 182
+          },
+          "9004": {
+            "x": 391,
+            "y": 1514,
+            "width": 200,
+            "height": 182
+          },
+          "9005": {
+            "x": 766,
+            "y": 1514,
+            "width": 242,
+            "height": 182
+          },
+          "9006": {
+            "x": 16,
+            "y": 1514,
+            "width": 200,
+            "height": 182
+          },
+          "9007": {
+            "x": 599,
+            "y": 1514,
+            "width": 159,
+            "height": 182
+          },
+          "9010": {
+            "x": 16,
+            "y": 1248,
+            "width": 325,
+            "height": 220
+          },
+          "9011": {
+            "x": 349,
+            "y": 1248,
+            "width": 325,
+            "height": 220
+          },
+          "9013": {
+            "x": 516,
+            "y": 1704,
+            "width": 492,
+            "height": 296
+          },
+          "9015": {
+            "x": 683,
+            "y": 1248,
+            "width": 325,
+            "height": 220
+          },
+          "9018": {
+            "x": 16,
+            "y": 982,
+            "width": 325,
+            "height": 220
+          },
+          "9019": {
+            "x": 349,
+            "y": 982,
+            "width": 325,
+            "height": 220
+          },
+          "9020": {
+            "x": 683,
+            "y": 982,
+            "width": 325,
+            "height": 220
+          },
+          "9021": {
+            "x": 16,
+            "y": 2008,
+            "width": 992,
+            "height": 182
+          },
+          "9300": {
+            "x": 16,
+            "y": 2236,
+            "width": 492,
+            "height": 220
+          },
+          "9301": {
+            "x": 516,
+            "y": 2236,
+            "width": 492,
+            "height": 220
+          },
+          "9601": {
+            "x": 16,
+            "y": 716,
+            "width": 992,
+            "height": 220
+          }
+        }
+      },
+      "terminalStateValidation": {
+        "status": "ok",
+        "checkedPanelCount": 21,
+        "requiredPanelCount": 21,
+        "requiredTerminalPanelIds": [],
+        "classificationCounts": {
+          "healthy": 17,
+          "incomplete": 4
+        },
+        "panelStates": [
+          {
+            "id": 9601,
+            "title": "Triage Alert State",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9601\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Alert Severity Active Alerts BioETLDockerRuntimeProbeMissing warning \u00b7 WARNING 1 BioETLSilverFilterRejectAccountingMismatch warning \u00b7 WARNING 2",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 1000,
+            "title": "Navigation",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-1000\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0. Trust 1. Overview (current) 2. Pipeline Diagnostics 3. Provider Health 4. Data Quality 5. Incident Workspace 6. Run Explorer",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 99,
+            "title": "Provenance",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-99\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "What is broken or degraded right now, and where should the operator drill down first? Status \u2192 First Action \u2192 Inputs \u00b7 chembl_baseline/chembl_activity, chembl_assay, chembl_publication, chembl_target/backfill, incremental/run - UNKNOWN = evidence incomplete. Prefer First Action over raw numbers.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 214,
+            "title": "Status",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-214\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 215,
+            "title": "First Action",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-215\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Action Why Pipeline Open Control Plane Control-plane issue chembl_assay",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9002,
+            "title": "Inputs",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9002\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Input Status Runtime OK Data Quality UNKNOWN Control Plane UNKNOWN Provider UNKNOWN Workflow UNKNOWN Data Validation OK",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9018,
+            "title": "Runtime Blockers Trend",
+            "type": "state-timeline",
+            "selector": "[data-viz-panel-key=\"panel-9018\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "< 1 1+ 2+",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9019,
+            "title": "DQ Status Trend",
+            "type": "state-timeline",
+            "selector": "[data-viz-panel-key=\"panel-9019\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "< 1 1+ 2+",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9020,
+            "title": "Gold Lifecycle Trend",
+            "type": "state-timeline",
+            "selector": "[data-viz-panel-key=\"panel-9020\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "< 1 1+ 2+",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9010,
+            "title": "Historical Failures",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9010\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No data",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 9011,
+            "title": "Recent Terminal Runs",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9011\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No data",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 9015,
+            "title": "Silver Rejects + Rate",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-9015\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Reject Count 90 Reject Rate 100%",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9021,
+            "title": "Diagnostics Navigation",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-9021\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Raw metric entrypoints bioetl_l0_status \u2014 current verdict \u00b7 bioetl_l0_next_action_route \u2014 first-action route bioetl_l0_input_status_selected \u2014 input status. Open Trust, Pipeline Diagnostics, Data Quality, or Provider Health for reasons.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9006,
+            "title": "Control Plane",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9006\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Pipeline Status chembl_assay UNKNOWN chembl_publication UNKNOWN chembl_target UNKNOWN chembl_activity OK (chembl_activity|chembl_assay|chembl_publication|chembl_target) UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9003,
+            "title": "Runtime",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9003\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Pipeline Status chembl_assay OK chembl_publication OK chembl_target OK chembl_activity OK (chembl_activity|chembl_assay|chembl_publication|chembl_target) UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9004,
+            "title": "Data Quality",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9004\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Pipeline Status chembl_assay UNKNOWN chembl_publication UNKNOWN chembl_target UNKNOWN chembl_activity WARN (chembl_activity|chembl_assay|chembl_publication|chembl_target) UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9007,
+            "title": "Provider",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9007\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No data",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 9005,
+            "title": "Data Validation",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9005\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Pipeline Status chembl_assay OK chembl_publication OK chembl_target OK chembl_activity OK (chembl_activity|chembl_assay|chembl_publication|chembl_target) UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9013,
+            "title": "Workflow",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9013\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Pipeline Status chembl_assay UNKNOWN chembl_publication UNKNOWN chembl_target UNKNOWN chembl_activity UNKNOWN (chembl_activity|chembl_assay|chembl_publication|chembl_target) UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9300,
+            "title": "ID",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9300\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "parameter Count Run ID [Pipeline] select one concrete pipeline or exact run_id Manifest ID [Control Plane] select one concrete pipeline or exact run_id Provider.Entity [Version] not available for current scope Contract [Schema] not available in selected manifest Execution [Type|Context|Git] select one concrete pipeline or exact run_id",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9301,
+            "title": "Processed Records",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9301\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "parameter Count percentage row_status percintage bronze [total] 90 100% 100% silver [valid] 0 0.0% 0.0% silver [filtered out] 90 100% 100% silver [quarantined] 0 0% 0% silver [skipped] 0 0% 0% silver [deduplicated] 0 0% 0%",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          }
+        ]
+      },
+      "screenshotEvidence": {
+        "file": "bioetl-overview-v2.png",
+        "bytes": 332938,
+        "sha256": "ac900582dddb4ee48fc7a05040befaacdc284806021279827d456a1974b80ecf",
+        "width": 1024,
+        "height": 2488,
+        "capturedAt": "2026-07-29T17:10:45.185Z"
+      },
+      "renderStatus": "rendered"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "title": "3. Provider Health",
+      "url": "/d/bioetl-provider-health-v2/3-provider-health",
+      "file": "bioetl-provider-health-v2.png",
+      "requiredPanels": [
+        {
+          "id": 1000,
+          "title": "Navigation",
+          "type": "text"
+        },
+        {
+          "id": 9400,
+          "title": "Provenance",
+          "type": "text"
+        },
+        {
+          "id": 9401,
+          "title": "Status",
+          "type": "stat"
+        },
+        {
+          "id": 9002,
+          "title": "First Action",
+          "type": "text"
+        },
+        {
+          "id": 9101,
+          "title": "Monitor GLOBAL Provider Severity Matrix",
+          "type": "table"
+        },
+        {
+          "id": 9102,
+          "title": "Inspect Critical Providers",
+          "type": "table"
+        },
+        {
+          "id": 9103,
+          "title": "Inspect Provider Top Causes",
+          "type": "table"
+        },
+        {
+          "id": 9104,
+          "title": "Monitor Provider Telemetry Freshness",
+          "type": "stat"
+        },
+        {
+          "id": 106,
+          "title": "Track Failure and Degraded Trend by Provider",
+          "type": "timeseries"
+        },
+        {
+          "id": 107,
+          "title": "Track Provider Failure Share (Selected Range)",
+          "type": "bargauge"
+        },
+        {
+          "id": 108,
+          "title": "Track Retries Exhausted by Provider/Operation",
+          "type": "table"
+        },
+        {
+          "id": 109,
+          "title": "Track Retries Exhausted Trend by Provider/Operation",
+          "type": "timeseries"
+        },
+        {
+          "id": 102,
+          "title": "Inspect Provider Health Check Latency (p95) - $provider",
+          "type": "gauge"
+        },
+        {
+          "id": 110,
+          "title": "Inspect Adapter Request Latency by Endpoint (p95)",
+          "type": "timeseries"
+        },
+        {
+          "id": 111,
+          "title": "Inspect Rate Limit Errors by Method",
+          "type": "timeseries"
+        },
+        {
+          "id": 115,
+          "title": "Inspect Network Timeout Errors by Method",
+          "type": "timeseries"
+        },
+        {
+          "id": 112,
+          "title": "Track Rate Limiter Wait by Provider (p95)",
+          "type": "timeseries"
+        },
+        {
+          "id": 113,
+          "title": "Monitor Minimum Rate Limiter Tokens Available",
+          "type": "bargauge"
+        },
+        {
+          "id": 31,
+          "title": "Monitor Cross-Scope Adapter Circuit Breaker State (max)",
+          "type": "stat"
+        },
+        {
+          "id": 32,
+          "title": "Track Cross-Scope Adapter Circuit Breaker Trips",
+          "type": "timeseries"
+        },
+        {
+          "id": 114,
+          "title": "Review Raw Provider Health Enum",
+          "type": "table"
+        },
+        {
+          "id": 1,
+          "title": "Track Health Check Latency by Provider (p95)",
+          "type": "timeseries"
+        },
+        {
+          "id": 2,
+          "title": "Monitor Healthy Checks (Selected Range)",
+          "type": "stat"
+        },
+        {
+          "id": 105,
+          "title": "Monitor Degraded Checks (Selected Range)",
+          "type": "stat"
+        },
+        {
+          "id": 104,
+          "title": "Track Provider Failure Rate (Selected Range)",
+          "type": "stat"
+        },
+        {
+          "id": 7,
+          "title": "Track Health Checks Total (Selected Range)",
+          "type": "stat"
+        },
+        {
+          "id": 9402,
+          "title": "ID",
+          "type": "table"
+        },
+        {
+          "id": 9403,
+          "title": "Processed Records",
+          "type": "table"
+        }
+      ],
+      "requiredTerminalPanelIds": [],
+      "collapsedRowTitles": [
+        "Selected Provider Detail",
+        "Range / debug evidence",
+        "Run context (thin) -> Run Explorer hub"
+      ],
+      "renderedPanelCount": 28,
+      "renderedPanelSelector": "[data-testid^=\"data-testid Panel header\"]",
+      "captureHeight": 3742,
+      "requestedViewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "actualViewport": {
+        "width": 1024,
+        "height": 12000
+      },
+      "requestedTheme": "light",
+      "actualTheme": "light",
+      "browserState": {
+        "requestedZoom": 100,
+        "cssZoom": "1",
+        "visualViewportScale": 1,
+        "devicePixelRatio": 1,
+        "requestedKiosk": "off",
+        "actualKiosk": "off",
+        "kioskParam": null,
+        "visibleGrafanaChrome": false
+      },
+      "layoutGeometry": {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "documentWidth": 1024,
+        "horizontalOverflow": false,
+        "panelGeometry": {
+          "1": {
+            "x": 516,
+            "y": 2692,
+            "width": 492,
+            "height": 220
+          },
+          "2": {
+            "x": 16,
+            "y": 2882,
+            "width": 492,
+            "height": 220
+          },
+          "7": {
+            "x": 16,
+            "y": 3300,
+            "width": 492,
+            "height": 144
+          },
+          "31": {
+            "x": 16,
+            "y": 2464,
+            "width": 492,
+            "height": 182
+          },
+          "32": {
+            "x": 516,
+            "y": 2464,
+            "width": 492,
+            "height": 182
+          },
+          "102": {
+            "x": 16,
+            "y": 1894,
+            "width": 492,
+            "height": 182
+          },
+          "104": {
+            "x": 16,
+            "y": 3110,
+            "width": 492,
+            "height": 182
+          },
+          "105": {
+            "x": 516,
+            "y": 2920,
+            "width": 492,
+            "height": 182
+          },
+          "106": {
+            "x": 16,
+            "y": 906,
+            "width": 992,
+            "height": 220
+          },
+          "107": {
+            "x": 16,
+            "y": 1134,
+            "width": 992,
+            "height": 220
+          },
+          "108": {
+            "x": 16,
+            "y": 1362,
+            "width": 992,
+            "height": 258
+          },
+          "109": {
+            "x": 16,
+            "y": 1628,
+            "width": 992,
+            "height": 258
+          },
+          "110": {
+            "x": 516,
+            "y": 1894,
+            "width": 492,
+            "height": 182
+          },
+          "111": {
+            "x": 16,
+            "y": 2084,
+            "width": 492,
+            "height": 182
+          },
+          "112": {
+            "x": 16,
+            "y": 2274,
+            "width": 492,
+            "height": 182
+          },
+          "113": {
+            "x": 516,
+            "y": 2274,
+            "width": 492,
+            "height": 182
+          },
+          "114": {
+            "x": 16,
+            "y": 2692,
+            "width": 492,
+            "height": 182
+          },
+          "115": {
+            "x": 516,
+            "y": 2084,
+            "width": 492,
+            "height": 182
+          },
+          "1000": {
+            "x": 16,
+            "y": 184,
+            "width": 992,
+            "height": 106
+          },
+          "9002": {
+            "x": 16,
+            "y": 412,
+            "width": 992,
+            "height": 68
+          },
+          "9101": {
+            "x": 16,
+            "y": 488,
+            "width": 325,
+            "height": 220
+          },
+          "9102": {
+            "x": 349,
+            "y": 488,
+            "width": 242,
+            "height": 220
+          },
+          "9103": {
+            "x": 599,
+            "y": 488,
+            "width": 409,
+            "height": 220
+          },
+          "9104": {
+            "x": 16,
+            "y": 716,
+            "width": 325,
+            "height": 144
+          },
+          "9400": {
+            "x": 16,
+            "y": 298,
+            "width": 659,
+            "height": 106
+          },
+          "9401": {
+            "x": 683,
+            "y": 298,
+            "width": 325,
+            "height": 106
+          },
+          "9402": {
+            "x": 16,
+            "y": 3490,
+            "width": 492,
+            "height": 220
+          },
+          "9403": {
+            "x": 516,
+            "y": 3490,
+            "width": 492,
+            "height": 220
+          }
+        }
+      },
+      "terminalStateValidation": {
+        "status": "ok",
+        "checkedPanelCount": 28,
+        "requiredPanelCount": 28,
+        "requiredTerminalPanelIds": [],
+        "classificationCounts": {
+          "healthy": 16,
+          "incomplete": 12
+        },
+        "panelStates": [
+          {
+            "id": 1000,
+            "title": "Navigation",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-1000\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0. Trust 1. Overview 2. Pipeline Diagnostics 3. Provider Health (current) 4. Data Quality 5. Incident Workspace 6. Run Explorer",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9400,
+            "title": "Provenance",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-9400\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Which provider is degraded, and why? Provider-global scope: GLOBAL severity + telemetry freshness \u00b7 Selected-provider Status can disagree by design Blank Provider \u2192 Selection required. UNKNOWN freshness = missing Runtime telemetry \u2014 inspect scrape target.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9401,
+            "title": "Status",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-9401\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 9002,
+            "title": "First Action",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-9002\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "**Next actions (\u22644)** 1. Confirm **Telemetry Freshness** (missing vs degraded). 2. Open worst row in **Severity Matrix**. 3. Read **Top Causes** for selected provider. 4. If selector blank \u2192 choose provider (Selection required).",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9101,
+            "title": "Monitor GLOBAL Provider Severity Matrix",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9101\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 9102,
+            "title": "Inspect Critical Providers",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9102\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No data",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 9103,
+            "title": "Inspect Provider Top Causes",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9103\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "None observed",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9104,
+            "title": "Monitor Provider Telemetry Freshness",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-9104\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 106,
+            "title": "Track Failure and Degraded Trend by Provider",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-106\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "failures Total: 0 degraded Total: 0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 107,
+            "title": "Track Provider Failure Share (Selected Range)",
+            "type": "bargauge",
+            "selector": "[data-viz-panel-key=\"panel-107\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0%",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 108,
+            "title": "Track Retries Exhausted by Provider/Operation",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-108\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Time Count 2026-07-29 17:10:54 0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 109,
+            "title": "Track Retries Exhausted Trend by Provider/Operation",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-109\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Total: 0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 102,
+            "title": "Inspect Provider Health Check Latency (p95) - $provider",
+            "type": "gauge",
+            "selector": "[data-viz-panel-key=\"panel-102\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 110,
+            "title": "Inspect Adapter Request Latency by Endpoint (p95)",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-110\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No optional adapter latency samples in range; not a provider verdict.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 111,
+            "title": "Inspect Rate Limit Errors by Method",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-111\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 115,
+            "title": "Inspect Network Timeout Errors by Method",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-115\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 112,
+            "title": "Track Rate Limiter Wait by Provider (p95)",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-112\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No optional rate-limiter wait samples in range; not a provider verdict.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 113,
+            "title": "Monitor Minimum Rate Limiter Tokens Available",
+            "type": "bargauge",
+            "selector": "[data-viz-panel-key=\"panel-113\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 31,
+            "title": "Monitor Cross-Scope Adapter Circuit Breaker State (max)",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-31\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 32,
+            "title": "Track Cross-Scope Adapter Circuit Breaker Trips",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-32\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No circuit-breaker trip samples in range. Adapter-scoped telemetry is optional and remains diagnostic.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 114,
+            "title": "Review Raw Provider Health Enum",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-114\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No data",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 1,
+            "title": "Track Health Check Latency by Provider (p95)",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-1\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No provider latency samples in range. This optional telemetry is neutral; use severity, freshness, and raw enum panels for provider verdict.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 2,
+            "title": "Monitor Healthy Checks (Selected Range)",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-2\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 105,
+            "title": "Monitor Degraded Checks (Selected Range)",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-105\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 104,
+            "title": "Track Provider Failure Rate (Selected Range)",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-104\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0%",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 7,
+            "title": "Track Health Checks Total (Selected Range)",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-7\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9402,
+            "title": "ID",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9402\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "parameter Count Run ID [Pipeline] 2357e5ab-2802-5b3e-a821-0bfca6e64e4a Manifest ID [Control Plane] 291251d6-9158-599d-a249-54209ae3b5d6 Provider.Entity [Version] chembl.activity [1.2.0] Contract [Schema] chembl.activity.1.0.0 [324651bc17fbcdae6688f2aed5bb1e80f70e3b4bc00eee70d1ee86af0e818f36] Execution [Type|Context|Git] incremental | isolated | git=6cf8cda81035eca612036d4278964a7120d4e8e2",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9403,
+            "title": "Processed Records",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9403\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "parameter Count percentage row_status percintage bronze [total] 90 100% 100% silver [valid] 0 0.0% 0.0% silver [filtered out] 90 100% 100% silver [quarantined] 0 0% 0% silver [skipped] 0 0% 0% silver [deduplicated] 0 0% 0%",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          }
+        ]
+      },
+      "screenshotEvidence": {
+        "file": "bioetl-provider-health-v2.png",
+        "bytes": 359267,
+        "sha256": "09b2902933bbb970122e86ff702182055fbcf85210e56ca7188ae882675347f7",
+        "width": 1024,
+        "height": 3742,
+        "capturedAt": "2026-07-29T17:11:52.270Z"
+      },
+      "renderStatus": "rendered"
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "title": "Run Explorer",
+      "url": "/d/bioetl-run-explorer-v1/run-explorer",
+      "file": "bioetl-run-explorer-v1.png",
+      "requiredPanels": [
+        {
+          "id": 1000,
+          "title": "Navigation",
+          "type": "text"
+        },
+        {
+          "id": 1,
+          "title": "Run Scope",
+          "type": "text"
+        },
+        {
+          "id": 3010,
+          "title": "Browse \u00b7 Recent pipeline runs (no selection)",
+          "type": "table"
+        },
+        {
+          "id": 9402,
+          "title": "ID",
+          "type": "table"
+        },
+        {
+          "id": 9403,
+          "title": "Processed Records",
+          "type": "table"
+        },
+        {
+          "id": 3011,
+          "title": "Selected run \u00b7 funnel stages",
+          "type": "table"
+        },
+        {
+          "id": 3012,
+          "title": "Selected run \u00b7 top reasons",
+          "type": "table"
+        },
+        {
+          "id": 3015,
+          "title": "Selected run \u00b7 reconciliation",
+          "type": "table"
+        },
+        {
+          "id": 3016,
+          "title": "Selected run \u00b7 layers (accounting)",
+          "type": "text"
+        },
+        {
+          "id": 3013,
+          "title": "Selected run \u00b7 artifacts",
+          "type": "table"
+        },
+        {
+          "id": 3014,
+          "title": "Selected run \u00b7 stage timings / failure (optional)",
+          "type": "text"
+        },
+        {
+          "id": 3001,
+          "title": "Next actions (\u22644)",
+          "type": "text"
+        }
+      ],
+      "requiredTerminalPanelIds": [],
+      "collapsedRowTitles": [
+        "Selected run detail (Ops HTTP; expand after selection)"
+      ],
+      "renderedPanelCount": 12,
+      "renderedPanelSelector": "[data-testid^=\"data-testid Panel header\"]",
+      "captureHeight": 2564,
+      "requestedViewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "actualViewport": {
+        "width": 1024,
+        "height": 12000
+      },
+      "requestedTheme": "light",
+      "actualTheme": "light",
+      "browserState": {
+        "requestedZoom": 100,
+        "cssZoom": "1",
+        "visualViewportScale": 1,
+        "devicePixelRatio": 1,
+        "requestedKiosk": "off",
+        "actualKiosk": "off",
+        "kioskParam": null,
+        "visibleGrafanaChrome": false
+      },
+      "layoutGeometry": {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "documentWidth": 1024,
+        "horizontalOverflow": false,
+        "panelGeometry": {
+          "1": {
+            "x": 16,
+            "y": 298,
+            "width": 992,
+            "height": 106
+          },
+          "1000": {
+            "x": 16,
+            "y": 184,
+            "width": 992,
+            "height": 106
+          },
+          "3001": {
+            "x": 16,
+            "y": 2008,
+            "width": 992,
+            "height": 296
+          },
+          "3010": {
+            "x": 16,
+            "y": 412,
+            "width": 992,
+            "height": 258
+          },
+          "3011": {
+            "x": 16,
+            "y": 944,
+            "width": 992,
+            "height": 220
+          },
+          "3012": {
+            "x": 16,
+            "y": 1172,
+            "width": 992,
+            "height": 182
+          },
+          "3013": {
+            "x": 16,
+            "y": 1666,
+            "width": 992,
+            "height": 182
+          },
+          "3014": {
+            "x": 16,
+            "y": 1856,
+            "width": 992,
+            "height": 144
+          },
+          "3015": {
+            "x": 16,
+            "y": 1362,
+            "width": 992,
+            "height": 182
+          },
+          "3016": {
+            "x": 16,
+            "y": 1552,
+            "width": 992,
+            "height": 106
+          },
+          "9402": {
+            "x": 16,
+            "y": 678,
+            "width": 492,
+            "height": 220
+          },
+          "9403": {
+            "x": 516,
+            "y": 2312,
+            "width": 492,
+            "height": 220
+          }
+        }
+      },
+      "terminalStateValidation": {
+        "status": "ok",
+        "checkedPanelCount": 12,
+        "requiredPanelCount": 12,
+        "requiredTerminalPanelIds": [],
+        "classificationCounts": {
+          "healthy": 7,
+          "incomplete": 5
+        },
+        "panelStates": [
+          {
+            "id": 1000,
+            "title": "Navigation",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-1000\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0. Trust 1. Overview 2. Pipeline Diagnostics 3. Provider Health 4. Data Quality 5. Incident Workspace 6. Run Explorer (current)",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 1,
+            "title": "Run Scope",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-1\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Run Explorer \u00b7 pick recent run \u2192 ID \u2192 accounting \u2192 actions. Exact-run forensic owner. Full paths live in report artifacts, not triage bodies.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 3010,
+            "title": "Browse \u00b7 Recent pipeline runs (no selection)",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-3010\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No pipeline-run-report artifacts for this pipeline on disk (reports/run-reports/pipeline/<name>/). Not a Prometheus gap \u2014 run the pipeline to write reports, or pick a pipeline with reports.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 9402,
+            "title": "ID",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9402\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "parameter Count Run ID [Pipeline] 2357e5ab-2802-5b3e-a821-0bfca6e64e4a Manifest ID [Control Plane] 291251d6-9158-599d-a249-54209ae3b5d6 Provider.Entity [Version] chembl.activity [1.2.0] Contract [Schema] chembl.activity.1.0.0 [324651bc17fbcdae6688f2aed5bb1e80f70e3b4bc00eee70d1ee86af0e818f36] Execution [Type|Context|Git] incremental | isolated | git=6cf8cda81035eca612036d4278964a7120d4e8e2",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9403,
+            "title": "Processed Records",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9403\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "parameter Count percentage row_status percintage bronze [total] 90 100% 100% silver [valid] 0 0.0% 0.0% silver [filtered out] 90 100% 100% silver [quarantined] 0 0% 0% silver [skipped] 0 0% 0% silver [deduplicated] 0 0% 0%",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 3011,
+            "title": "Selected run \u00b7 funnel stages",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-3011\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "NO DATA \u2014 empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 3012,
+            "title": "Selected run \u00b7 top reasons",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-3012\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "NO DATA \u2014 empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 3015,
+            "title": "Selected run \u00b7 reconciliation",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-3015\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "NO DATA \u2014 empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 3016,
+            "title": "Selected run \u00b7 layers (accounting)",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-3016\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Layer accounting: use Processed Records for the compact view and pipeline_run_report_v1.layers for exact counts. Actions: Open JSON \u00b7 Open Markdown \u00b7 inspect reconciliation before escalation.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 3013,
+            "title": "Selected run \u00b7 artifacts",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-3013\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "NO DATA \u2014 empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 3014,
+            "title": "Selected run \u00b7 stage timings / failure (optional)",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-3014\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Stage timing / failure: optional blocks appear only when the selected run report recorded them. Empty means not recorded for this run, not zero duration or successful execution. Open JSON or Markdown for exact evidence.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 3001,
+            "title": "Next actions (\u22644)",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-3001\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Next actions (\u22644) \u2014 1) Pick recent run \u00b7 2) Verify ID + Processed Records \u00b7 3) Expand funnel/reasons/artifacts \u00b7 4) Trust Primary recovery for resume/replay",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          }
+        ]
+      },
+      "screenshotEvidence": {
+        "file": "bioetl-run-explorer-v1.png",
+        "bytes": 233276,
+        "sha256": "4cd7695f88ee38fda772942adbf14274481f3e7469c68b2fd3f970c36694847c",
+        "width": 1024,
+        "height": 2564,
+        "capturedAt": "2026-07-29T17:13:03.043Z"
+      },
+      "renderStatus": "rendered"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "title": "2. Pipeline Diagnostics",
+      "url": "/d/bioetl-runtime/2-pipeline-diagnostics",
+      "file": "bioetl-runtime.png",
+      "requiredPanels": [
+        {
+          "id": 1000,
+          "title": "Navigation",
+          "type": "text"
+        },
+        {
+          "id": 9400,
+          "title": "Provenance",
+          "type": "text"
+        },
+        {
+          "id": 9401,
+          "title": "Status",
+          "type": "stat"
+        },
+        {
+          "id": 9991,
+          "title": "First Action",
+          "type": "text"
+        },
+        {
+          "id": 9101,
+          "title": "Runtime Blockers",
+          "type": "table"
+        },
+        {
+          "id": 9102,
+          "title": "Metrics Evidence",
+          "type": "stat"
+        },
+        {
+          "id": 238,
+          "title": "Track Stage Backlog Trend",
+          "type": "timeseries"
+        },
+        {
+          "id": 240,
+          "title": "Track Records by Stage / Interval",
+          "type": "timeseries"
+        },
+        {
+          "id": 242,
+          "title": "Inspect Active Runtime Blocker Detail",
+          "type": "table"
+        },
+        {
+          "id": 9105,
+          "title": "Monitor Aggregate Stage Lag",
+          "type": "timeseries"
+        },
+        {
+          "id": 243,
+          "title": "Inspect Stage Expectedness",
+          "type": "table"
+        },
+        {
+          "id": 220,
+          "title": "Runtime Error Rate",
+          "type": "stat"
+        },
+        {
+          "id": 207,
+          "title": "Track Pipeline Phase Duration p50/p95/p99",
+          "type": "timeseries"
+        },
+        {
+          "id": 239,
+          "title": "Track Pipeline Duration p50/p95/p99",
+          "type": "timeseries"
+        },
+        {
+          "id": 256,
+          "title": "Inspect Errors by Stage / Error Code / Range",
+          "type": "table"
+        },
+        {
+          "id": 241,
+          "title": "Track Records by Stage / Run Type / Range",
+          "type": "bargauge"
+        },
+        {
+          "id": 2541,
+          "title": "Review Runtime-owned escalation",
+          "type": "text"
+        },
+        {
+          "id": 230,
+          "title": "Monitor Pipeline Alert Conditions",
+          "type": "stat"
+        },
+        {
+          "id": 236,
+          "title": "Monitor No-Records Runs",
+          "type": "stat"
+        },
+        {
+          "id": 21,
+          "title": "Monitor Memory Pressure Active",
+          "type": "stat"
+        },
+        {
+          "id": 2542,
+          "title": "Review Cross-domain handoffs",
+          "type": "text"
+        },
+        {
+          "id": 4,
+          "title": "Inspect DQ Alert Conditions",
+          "type": "stat"
+        },
+        {
+          "id": 5,
+          "title": "Inspect Control-plane Alert Conditions",
+          "type": "stat"
+        },
+        {
+          "id": 6,
+          "title": "Inspect Provider Alert Conditions",
+          "type": "stat"
+        },
+        {
+          "id": 259,
+          "title": "Inspect GLOBAL Provider Alert Conditions",
+          "type": "stat"
+        },
+        {
+          "id": 7,
+          "title": "Inspect Freshness Lagged Entities >24h",
+          "type": "stat"
+        },
+        {
+          "id": 2543,
+          "title": "Review Process-level signals (GLOBAL)",
+          "type": "text"
+        },
+        {
+          "id": 209,
+          "title": "Track GLOBAL Shutdown Initiated by Reason / Interval",
+          "type": "timeseries"
+        },
+        {
+          "id": 210,
+          "title": "Track GLOBAL Shutdown Completed by Reason / Interval",
+          "type": "timeseries"
+        },
+        {
+          "id": 237,
+          "title": "Worst Stage Lag",
+          "type": "stat"
+        },
+        {
+          "id": 16,
+          "title": "Monitor Runtime Blockers",
+          "type": "stat"
+        },
+        {
+          "id": 205,
+          "title": "Failed Runs",
+          "type": "stat"
+        },
+        {
+          "id": 9402,
+          "title": "ID",
+          "type": "table"
+        },
+        {
+          "id": 9403,
+          "title": "Processed Records",
+          "type": "table"
+        },
+        {
+          "id": 9996,
+          "title": "Failed Workflow Runs / Range",
+          "type": "stat"
+        },
+        {
+          "id": 9997,
+          "title": "Failed Pipeline Steps / Range",
+          "type": "stat"
+        }
+      ],
+      "requiredTerminalPanelIds": [],
+      "collapsedRowTitles": [
+        "Detect",
+        "Localize",
+        "Escalate",
+        "Secondary KPIs (collapsed; not peer first-screen cards)",
+        "Run context (thin) -> Run Explorer hub",
+        "Workflow band (merged from bioetl-workflow-overview)"
+      ],
+      "renderedPanelCount": 36,
+      "renderedPanelSelector": "[data-testid^=\"data-testid Panel header\"]",
+      "captureHeight": 5300,
+      "requestedViewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "actualViewport": {
+        "width": 1024,
+        "height": 12000
+      },
+      "requestedTheme": "light",
+      "actualTheme": "light",
+      "browserState": {
+        "requestedZoom": 100,
+        "cssZoom": "1",
+        "visualViewportScale": 1,
+        "devicePixelRatio": 1,
+        "requestedKiosk": "off",
+        "actualKiosk": "off",
+        "kioskParam": null,
+        "visibleGrafanaChrome": false
+      },
+      "layoutGeometry": {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "documentWidth": 1024,
+        "horizontalOverflow": false,
+        "panelGeometry": {
+          "4": {
+            "x": 16,
+            "y": 3034,
+            "width": 992,
+            "height": 182
+          },
+          "5": {
+            "x": 16,
+            "y": 3224,
+            "width": 992,
+            "height": 182
+          },
+          "6": {
+            "x": 16,
+            "y": 3414,
+            "width": 992,
+            "height": 182
+          },
+          "7": {
+            "x": 16,
+            "y": 3794,
+            "width": 992,
+            "height": 182
+          },
+          "16": {
+            "x": 516,
+            "y": 4326,
+            "width": 492,
+            "height": 220
+          },
+          "21": {
+            "x": 16,
+            "y": 2768,
+            "width": 992,
+            "height": 182
+          },
+          "205": {
+            "x": 16,
+            "y": 4554,
+            "width": 159,
+            "height": 220
+          },
+          "207": {
+            "x": 16,
+            "y": 1780,
+            "width": 492,
+            "height": 220
+          },
+          "209": {
+            "x": 16,
+            "y": 4060,
+            "width": 492,
+            "height": 220
+          },
+          "210": {
+            "x": 516,
+            "y": 4060,
+            "width": 492,
+            "height": 220
+          },
+          "220": {
+            "x": 16,
+            "y": 1552,
+            "width": 992,
+            "height": 182
+          },
+          "230": {
+            "x": 16,
+            "y": 2388,
+            "width": 992,
+            "height": 182
+          },
+          "236": {
+            "x": 16,
+            "y": 2578,
+            "width": 992,
+            "height": 182
+          },
+          "237": {
+            "x": 16,
+            "y": 4326,
+            "width": 492,
+            "height": 220
+          },
+          "238": {
+            "x": 16,
+            "y": 716,
+            "width": 492,
+            "height": 220
+          },
+          "239": {
+            "x": 516,
+            "y": 1780,
+            "width": 492,
+            "height": 220
+          },
+          "240": {
+            "x": 516,
+            "y": 716,
+            "width": 492,
+            "height": 220
+          },
+          "241": {
+            "x": 516,
+            "y": 2008,
+            "width": 492,
+            "height": 220
+          },
+          "242": {
+            "x": 16,
+            "y": 944,
+            "width": 992,
+            "height": 220
+          },
+          "243": {
+            "x": 16,
+            "y": 1362,
+            "width": 992,
+            "height": 182
+          },
+          "256": {
+            "x": 16,
+            "y": 2008,
+            "width": 492,
+            "height": 220
+          },
+          "259": {
+            "x": 16,
+            "y": 3604,
+            "width": 992,
+            "height": 182
+          },
+          "1000": {
+            "x": 16,
+            "y": 184,
+            "width": 992,
+            "height": 106
+          },
+          "2541": {
+            "x": 16,
+            "y": 2274,
+            "width": 992,
+            "height": 106
+          },
+          "2542": {
+            "x": 16,
+            "y": 2958,
+            "width": 992,
+            "height": 68
+          },
+          "2543": {
+            "x": 16,
+            "y": 3984,
+            "width": 992,
+            "height": 68
+          },
+          "9101": {
+            "x": 16,
+            "y": 488,
+            "width": 659,
+            "height": 182
+          },
+          "9102": {
+            "x": 683,
+            "y": 488,
+            "width": 325,
+            "height": 144
+          },
+          "9105": {
+            "x": 16,
+            "y": 1172,
+            "width": 992,
+            "height": 182
+          },
+          "9400": {
+            "x": 16,
+            "y": 298,
+            "width": 659,
+            "height": 106
+          },
+          "9401": {
+            "x": 683,
+            "y": 298,
+            "width": 325,
+            "height": 106
+          },
+          "9402": {
+            "x": 16,
+            "y": 4820,
+            "width": 492,
+            "height": 220
+          },
+          "9403": {
+            "x": 516,
+            "y": 4820,
+            "width": 492,
+            "height": 220
+          },
+          "9991": {
+            "x": 16,
+            "y": 412,
+            "width": 992,
+            "height": 68
+          },
+          "9996": {
+            "x": 16,
+            "y": 5086,
+            "width": 492,
+            "height": 182
+          },
+          "9997": {
+            "x": 516,
+            "y": 5086,
+            "width": 492,
+            "height": 182
+          }
+        }
+      },
+      "terminalStateValidation": {
+        "status": "ok",
+        "checkedPanelCount": 36,
+        "requiredPanelCount": 36,
+        "requiredTerminalPanelIds": [],
+        "classificationCounts": {
+          "healthy": 29,
+          "incomplete": 7
+        },
+        "panelStates": [
+          {
+            "id": 1000,
+            "title": "Navigation",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-1000\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0. Trust 1. Overview 2. Pipeline Diagnostics (current) 3. Provider Health 4. Data Quality 5. Incident Workspace 6. Run Explorer",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9400,
+            "title": "Provenance",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-9400\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Pipeline diagnostics \u00b7 Status/Health \u2192 Phase \u2192 Blockers \u2192 Action \u00b7 chembl_activity/backfill, incremental/stage bronze, gold, silver/run - SCRAPING = execution evidence, not delivery OK. Silver/Gold zeros while scraping = Not started.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9401,
+            "title": "Status",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-9401\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "OK",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9991,
+            "title": "First Action",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-9991\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "First Action Read labelled Status + freshness. Open the highest-impact evidence panel. Confirm scope (pipeline/run_type/run). Hand off to Run Explorer or Incident as needed.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 9101,
+            "title": "Runtime Blockers",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9101\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "None observed",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9102,
+            "title": "Metrics Evidence",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-9102\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "SCRAPING",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 238,
+            "title": "Track Stage Backlog Trend",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-238\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No data",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 240,
+            "title": "Track Records by Stage / Interval",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-240\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 242,
+            "title": "Inspect Active Runtime Blocker Detail",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-242\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Time Count Count Count Count Count Count Count Count Count Count No blocker rows. Trust this only when Runtime Status is OK and Telemetry Gap is clean.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9105,
+            "title": "Monitor Aggregate Stage Lag",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-9105\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Name Last * Max other 0 s 0 s validation 0 s 0 s",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 243,
+            "title": "Inspect Stage Expectedness",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-243\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Time __name__ job pipeline run_type stage Count Count 2026-07-29 17:13:15.697 bioetl_pipeline_stage_expected bioetl chembl_activity incremental bronze expected 45 2026-07-29 17:13:15.697 bioetl_pipeline_stage_expected bioetl chembl_activity incremental gold expected disabled 2026-07-29 17:13:15.697 bioetl_pipeline_stage_expected bioetl chembl_activity incremental silver expected 45 2026-07-29 17:13:15.697 bioetl_pipeline_stage_expected bioetl chembl_activity backfill bronze expected 45 2026-07-2",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 220,
+            "title": "Runtime Error Rate",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-220\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 207,
+            "title": "Track Pipeline Phase Duration p50/p95/p99",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-207\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "cleanup / success p50 execution / success p50 lifecycle_clear / success p50 postrun / success p50 preflight / success p50 cleanup / success p95 execution / success p95 lifecycle_clear / success p95 postrun / success p95 preflight / success p95 cleanup / success p99 execution / success p99 lifecycle_clear / success p99 postrun / success p99 preflight / success p99",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 239,
+            "title": "Track Pipeline Duration p50/p95/p99",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-239\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "No terminal pipeline duration samples",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 256,
+            "title": "Inspect Errors by Stage / Error Code / Range",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-256\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Time {error_code=\"none\", stage=\"none\"} 2026-07-29 17:13:15 0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 241,
+            "title": "Track Records by Stage / Run Type / Range",
+            "type": "bargauge",
+            "selector": "[data-viz-panel-key=\"panel-241\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "bronze \u00b7 backfill 0 gold \u00b7 backfill 0 silver \u00b7 backfill 0 bronze \u00b7 incremental 0 gold \u00b7 incremental 0 silver \u00b7 incremental 0 none \u00b7 none 0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 2541,
+            "title": "Review Runtime-owned escalation",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-2541\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Runtime escalation: blockers \u2192 phase evidence \u2192 action. Use Incident Workspace for multi-domain impact; Run Explorer for exact-run proof.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 230,
+            "title": "Monitor Pipeline Alert Conditions",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-230\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 236,
+            "title": "Monitor No-Records Runs",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-236\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 21,
+            "title": "Monitor Memory Pressure Active",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-21\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 2542,
+            "title": "Review Cross-domain handoffs",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-2542\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Cross-domain handoffs \u2014 Provider (deps) \u00b7 DQ (rejects) \u00b7 Trust (replay) \u00b7 Incident (ranked triage). Preserve scope variables.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 4,
+            "title": "Inspect DQ Alert Conditions",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-4\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 5,
+            "title": "Inspect Control-plane Alert Conditions",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-5\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 6,
+            "title": "Inspect Provider Alert Conditions",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-6\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 259,
+            "title": "Inspect GLOBAL Provider Alert Conditions",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-259\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 7,
+            "title": "Inspect Freshness Lagged Entities >24h",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-7\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "UNKNOWN",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "incomplete",
+            "reason": "panel explicitly identifies incomplete or unresolved evidence"
+          },
+          {
+            "id": 2543,
+            "title": "Review Process-level signals (GLOBAL)",
+            "type": "text",
+            "selector": "[data-viz-panel-key=\"panel-2543\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Process-level (GLOBAL) \u2014 memory/error process signals are fleet evidence, not selected-run health. Pair with pipeline Status.",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "static operator copy reached a rendered state"
+          },
+          {
+            "id": 209,
+            "title": "Track GLOBAL Shutdown Initiated by Reason / Interval",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-209\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Value",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 210,
+            "title": "Track GLOBAL Shutdown Completed by Reason / Interval",
+            "type": "timeseries",
+            "selector": "[data-viz-panel-key=\"panel-210\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "Value",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 237,
+            "title": "Worst Stage Lag",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-237\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0 s",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 16,
+            "title": "Monitor Runtime Blockers",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-16\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 205,
+            "title": "Failed Runs",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-205\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9402,
+            "title": "ID",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9402\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "parameter Count Run ID [Pipeline] 2357e5ab-2802-5b3e-a821-0bfca6e64e4a Manifest ID [Control Plane] 291251d6-9158-599d-a249-54209ae3b5d6 Provider.Entity [Version] chembl.activity [1.2.0] Contract [Schema] chembl.activity.1.0.0 [324651bc17fbcdae6688f2aed5bb1e80f70e3b4bc00eee70d1ee86af0e818f36] Execution [Type|Context|Git] incremental | isolated | git=6cf8cda81035eca612036d4278964a7120d4e8e2",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9403,
+            "title": "Processed Records",
+            "type": "table",
+            "selector": "[data-viz-panel-key=\"panel-9403\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "parameter Count percentage row_status percintage bronze [total] 90 100% 100% silver [valid] 0 0.0% 0.0% silver [filtered out] 90 100% 100% silver [quarantined] 0 0% 0% silver [skipped] 0 0% 0% silver [deduplicated] 0 0% 0%",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": true,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9996,
+            "title": "Failed Workflow Runs / Range",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-9996\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0 \u00b7 valid empty range",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          },
+          {
+            "id": 9997,
+            "title": "Failed Pipeline Steps / Range",
+            "type": "stat",
+            "selector": "[data-viz-panel-key=\"panel-9997\"]",
+            "contentSelector": "[data-testid=\"data-testid panel content\"]",
+            "bodyText": "0 \u00b7 valid empty range",
+            "hasLoadingMarker": false,
+            "hasErrorIcon": false,
+            "hasVisualEvidence": false,
+            "classification": "healthy",
+            "reason": "panel body reached a visible terminal rendered state"
+          }
+        ]
+      },
+      "screenshotEvidence": {
+        "file": "bioetl-runtime.png",
+        "bytes": 517736,
+        "sha256": "cd8de30e0479ff03cae1b8e186a4e56f8d3f8addeaf46d45d87cfa7ce238e383",
+        "width": 1024,
+        "height": 5300,
+        "capturedAt": "2026-07-29T17:14:18.504Z"
+      },
+      "renderStatus": "rendered"
+    }
+  ]
+}

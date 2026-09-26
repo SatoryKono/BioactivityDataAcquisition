@@ -1,0 +1,12 @@
+# Portable project-scoped Codex settings for trusted repository sessions.
+# Authentication, model selection, providers, and user MCP credentials remain
+# user-scoped and MUST NOT be committed here.
+#
+# `max_threads` is the portable project default. Validated for Codex CLI 0.146.1.
+# Versioned compatibility check confirmed support for current key semantics.
+# User model, auth, provider, and MCP configuration stay user-local.
+
+# Dotted key keeps the root table open so a --profile overlay cannot
+# accidentally bind `model = "..."` under [agents] (AgentRoleToml flatten).
+agents.max_threads = 3
+

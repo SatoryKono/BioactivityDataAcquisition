@@ -1,0 +1,58 @@
+# ARCH-EPIC #7605 / #7608 — application/services ownership + cross-context policy.
+# Subdomain packages may import domain/* and application/core/* freely.
+# Cross-imports between service subdomains must stay explicit and rare.
+# Root modules are legacy; no-growth ratchet lives in application_services_root_ratchet.yaml.
+
+schema_version: 1
+linked_issues:
+  - "7605"
+  - "7608"
+  - "9618"
+  - "9623"
+path: src/bioetl/application/services
+subdomains:
+  control_plane:
+    owner: "@bioetl-platform"
+    responsibility: "Run manifests, ledgers, inspection, and replay evidence"
+  workflow:
+    owner: "@bioetl-platform"
+    responsibility: "Workflow state-transition orchestration and observability coordination"
+  lineage:
+    owner: "@bioetl-platform"
+    responsibility: "Lineage graph assembly and persistence collaborators"
+  dq:
+    owner: "@bioetl-data-model"
+    responsibility: "DQ report flows and silver statistics helpers"
+  execution:
+    owner: "@bioetl-architecture"
+    responsibility: "Pipeline runner service collaborators"
+  run_reports:
+    owner: "@bioetl-architecture"
+    responsibility: "Run-report enrichment, markdown, writer"
+  protein:
+    owner: "@bioetl-data-model"
+    responsibility: "Protein classification hierarchy resolution"
+  medallion:
+    owner: "@bioetl-architecture"
+    responsibility: "Medallion lifecycle clear/vacuum/prepare orchestration"
+  root_legacy:
+    owner: "@bioetl-architecture"
+    responsibility: "Transitional root-level services pending rehome"
+
+# Hard-forbidden cross-subdomain imports (module prefix -> forbidden target prefixes).
+# Prefixes are deliberately explicit so package moves cannot silently weaken the gate.
+forbidden_cross_subdomain_imports:
+  bioetl.application.services.dq:
+    - bioetl.application.services.control_plane
+    - bioetl.application.services.execution
+    - bioetl.application.services.run_reports
+  bioetl.application.services.protein:
+    - bioetl.application.services.control_plane
+    - bioetl.application.services.execution
+    - bioetl.application.services.run_reports
+
+# Prefer: new code in subdomains; root only for permanent entrypoints listed in README.
+policy:
+  new_services_in_subdomain: true
+  root_no_growth: true
+  root_ratchet: configs/quality/application_services_root_ratchet.yaml

@@ -1,0 +1,68 @@
+[
+  {
+    "number": 8155,
+    "severity": "major",
+    "path": "src/bioetl/domain/exceptions/_redaction.py",
+    "claim": "In @src/bioetl/domain/exceptions/_redaction.py around lines 111 - 118, Update _redact_sequence to construct a plain list for list inputs and a plain tuple for tuple inputs, rather than calling type(value) with a generator. Preserve recursive _redact processing and the existing list/tuple shape while normalizing subclasses, including NamedTuple values, so exception serialization cannot raise a constructor TypeError."
+  },
+  {
+    "number": 8156,
+    "severity": "major",
+    "path": "src/bioetl/domain/exceptions/base.py",
+    "claim": "In @src/bioetl/domain/exceptions/base.py around lines 52 - 128, Add nominal-path unit tests covering BioETLError.to_structured_context, get_domain_exception_context, PipelineShutdownError, and storage compatibility constructors, including redaction and context behavior as applicable. Add regression tests that verify legacy exceptions still work with raise, except, and isinstance, using the existing test conventions and public APIs."
+  },
+  {
+    "number": 8157,
+    "severity": "minor",
+    "path": "src/bioetl/domain/exceptions/storage/_delta.py",
+    "claim": "In @src/bioetl/domain/exceptions/storage/_delta.py around lines 85 - 86, Update the column-difference condition in _delta.py to call _format_column_diff whenever either expected_columns or actual_columns is non-empty, including one-sided schema mismatches; apply the same change in the infrastructure Delta exception implementation."
+  },
+  {
+    "number": 8158,
+    "severity": "minor",
+    "path": "src/bioetl/domain/exceptions/validation.py",
+    "claim": "In @src/bioetl/domain/exceptions/validation.py around lines 38 - 55, Update the constructors of ValidationError and SchemaViolationError to assign record_id and field unconditionally, preserving None when those arguments are omitted so both attributes are always accessible. Add regression tests covering omitted optional values for each exception."
+  },
+  {
+    "number": 8159,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/exceptions/network_rate_limit_helpers.py",
+    "claim": "In @src/bioetl/domain/exceptions/network_rate_limit_helpers.py around lines 6 - 29, Add parametrized tests for resolve_rate_limit_params covering provider fallback, an explicit message override, and an explicit service_name override, while retaining the existing all-None case. Assert each result against its exact expected (provider_name, resolved_message, resolved_service) tuple."
+  },
+  {
+    "number": 8160,
+    "severity": "minor",
+    "path": "src/bioetl/domain/exceptions/storage/__init__.py",
+    "claim": "In @src/bioetl/domain/exceptions/storage/__init__.py at line 1, Keep infrastructure/__init__.py as the compatibility facade, and remove or convert infrastructure/_base.py, infrastructure/_delta.py, and infrastructure/_storage.py to forwarding-only modules that reuse canonical storage exception symbols rather than defining duplicates. Update storage.__all__ to exclude all four underscore-prefixed helper exports while preserving the public symbols."
+  },
+  {
+    "number": 8161,
+    "severity": "major",
+    "path": "src/bioetl/domain/exceptions/storage/_storage.py",
+    "claim": "In @src/bioetl/domain/exceptions/storage/_storage.py around lines 268 - 271, Replace the exception aliases in the storage and delta modules with compatibility exception classes that preserve the documented constructors, attributes, and exception identity. Update BucketNotFoundError, UploadError, BronzeValidationError, and CachedBronzeEmptyError plus the corresponding symbols in both _storage.py and both _delta.py files, reusing the existing base exceptions and ensuring function-return behavior is not exposed as the public API."
+  },
+  {
+    "number": 8162,
+    "severity": "major",
+    "path": "src/bioetl/domain/exceptions/network/service.py",
+    "claim": "In @src/bioetl/domain/exceptions/network/service.py around lines 37 - 278, Add public contract tests covering ApiError, ServiceUnavailableError, both RateLimitError construction modes, and the DataValidationError alias. Verify each nominal constructor’s message, error_type, and applicable inherited attributes such as service_name, status_code, retry_after, provider, field, and value."
+  },
+  {
+    "number": 8163,
+    "severity": "major",
+    "path": "src/bioetl/domain/exceptions/__init__.py",
+    "claim": "In @src/bioetl/domain/exceptions/__init__.py around lines 178 - 186, Add contract tests for the module-level __getattr__ lazy facade that resolve every name listed in __all__ and verify each resolves successfully, while also asserting an unknown attribute raises AttributeError. Cover the nominal lazy-loading path and use the existing export definitions rather than duplicating the export list."
+  },
+  {
+    "number": 8164,
+    "severity": "major",
+    "path": "src/bioetl/domain/exceptions/infrastructure/_storage.py",
+    "claim": "In @src/bioetl/domain/exceptions/infrastructure/_storage.py around lines 268 - 271, Replace the function aliases for BucketNotFoundError, UploadError, BronzeValidationError, and CachedBronzeEmptyError with concrete exception classes that preserve their legacy constructors and support except/isinstance usage. Update the associated public-contract release metadata with the required version bump, ADR reference, migration notes, and rollback procedure, using the repository’s established symbols and documentation conventions."
+  },
+  {
+    "number": 8165,
+    "severity": "major",
+    "path": "src/bioetl/domain/exceptions/base_exceptions.py",
+    "claim": "In @src/bioetl/domain/exceptions/base_exceptions.py around lines 30 - 77, Update BioETLDomainError construction to defensively copy and recursively freeze the caller-provided context, preserving immutable value-object behavior even for nested mutable values. Ensure to_dict returns a fresh independent serialized dictionary, including nested context data, without exposing internal state. Add regression tests covering mutation of the source context and mutation of the dictionary returned by to_dict."
+  }
+]

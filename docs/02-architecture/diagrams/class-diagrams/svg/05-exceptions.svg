@@ -1,0 +1,495 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" class="classDiagram" style="max-width: 1691.35px; background-color: white;" viewBox="0 0 1691.3515625 1554" role="graphics-document document" aria-roledescription="class"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .cluster-label text{fill:#1e40af;}#my-svg .cluster-label span{color:#1e40af;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .cluster rect{fill:#f8fafc;stroke:#94a3b8;stroke-width:1px;}#my-svg .cluster text{fill:#1e40af;}#my-svg .cluster span{color:#1e40af;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .noteLabel .nodeLabel,#my-svg .noteLabel .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .labelBkg{background:#eff6ff;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg [id$="-compositionStart"],#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-compositionEnd"],#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-dependencyStart"],#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-dependencyEnd"],#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-extensionStart"],#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-extensionEnd"],#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-aggregationStart"],#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-aggregationEnd"],#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-lollipopStart"],#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-lollipopEnd"],#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;line-height:initial;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg .edgeLabel[data-look="neo"]{background-color:#ffffff;text-align:center;}#my-svg .edgeLabel[data-look="neo"] p{background-color:#ffffff;}#my-svg .edgeLabel[data-look="neo"] rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg .node .neo-node{stroke:#2563eb;}#my-svg [data-look="neo"].node rect,#my-svg [data-look="neo"].cluster rect,#my-svg [data-look="neo"].node polygon{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node path{stroke:url(#my-svg-gradient);stroke-width:1px;}#my-svg [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node .neo-line path{stroke:#2563eb;filter:none;}#my-svg [data-look="neo"].node circle{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node circle .state-start{fill:#000000;}#my-svg [data-look="neo"].icon-shape .icon{fill:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].icon-shape .icon-neo path{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}#my-svg .BioETLError&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .BioETLError span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .CriticalError&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .CriticalError span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .RecoverableError&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .RecoverableError span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .DataQualityError&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .DataQualityError span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .ValidationError&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .ValidationError span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .SchemaViolationError&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .SchemaViolationError span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .DataQualityThresholdError&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .DataQualityThresholdError span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .LockNotHeldError&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .LockNotHeldError span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .PipelineConfigError&gt;*{fill:rgb(254, 252, 232)!important;stroke:rgb(202, 138, 4)!important;stroke-width:2px!important;}#my-svg .PipelineConfigError span{fill:rgb(254, 252, 232)!important;stroke:rgb(202, 138, 4)!important;stroke-width:2px!important;}#my-svg .AdapterError&gt;*{fill:rgb(255, 241, 242)!important;stroke:rgb(220, 38, 38)!important;stroke-width:2px!important;}#my-svg .AdapterError span{fill:rgb(255, 241, 242)!important;stroke:rgb(220, 38, 38)!important;stroke-width:2px!important;}#my-svg .StorageError&gt;*{fill:rgb(255, 241, 242)!important;stroke:rgb(220, 38, 38)!important;stroke-width:2px!important;}#my-svg .StorageError span{fill:rgb(255, 241, 242)!important;stroke:rgb(220, 38, 38)!important;stroke-width:2px!important;}#my-svg .AtomicWriteError&gt;*{fill:rgb(255, 241, 242)!important;stroke:rgb(220, 38, 38)!important;stroke-width:2px!important;}#my-svg .AtomicWriteError span{fill:rgb(255, 241, 242)!important;stroke:rgb(220, 38, 38)!important;stroke-width:2px!important;}#my-svg .CheckpointError&gt;*{fill:rgb(255, 241, 242)!important;stroke:rgb(220, 38, 38)!important;stroke-width:2px!important;}#my-svg .CheckpointError span{fill:rgb(255, 241, 242)!important;stroke:rgb(220, 38, 38)!important;stroke-width:2px!important;}#my-svg .CircuitBreakerOpenError&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .CircuitBreakerOpenError span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .RateLimitExceededError&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .RateLimitExceededError span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .NetworkError&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .NetworkError span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .TimeoutError&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}#my-svg .TimeoutError span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:2px!important;}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><g><defs><marker id="my-svg_class-aggregationStart" class="marker aggregation class" refX="18" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-aggregationEnd" class="marker aggregation class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-aggregationStart-margin" class="marker aggregation class" refX="15" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 2;" /></marker></defs><defs><marker id="my-svg_class-aggregationEnd-margin" class="marker aggregation class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 2;" /></marker></defs><defs><marker id="my-svg_class-extensionStart" class="marker extension class" refX="18" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 1,7 L18,13 V 1 Z" /></marker></defs><defs><marker id="my-svg_class-extensionEnd" class="marker extension class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 1,1 V 13 L18,7 Z" /></marker></defs><marker id="my-svg_class-extensionStart-margin" class="marker extension class" refX="18" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 20 14"><polygon points="10,7 18,13 18,1" style="stroke-width: 2; stroke-dasharray: 0;" /></marker><defs><marker id="my-svg_class-extensionEnd-margin" class="marker extension class" refX="9" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 20 14"><polygon points="10,1 10,13 18,7" style="stroke-width: 2; stroke-dasharray: 0;" /></marker></defs><defs><marker id="my-svg_class-compositionStart" class="marker composition class" refX="18" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-compositionEnd" class="marker composition class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-compositionStart-margin" class="marker composition class" refX="15" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><path viewBox="0 0 15 15" d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-compositionEnd-margin" class="marker composition class" refX="3.5" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-dependencyStart" class="marker dependency class" refX="6" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 5,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-dependencyEnd" class="marker dependency class" refX="13" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L14,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-dependencyStart-margin" class="marker dependency class" refX="4" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><path d="M 5,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-dependencyEnd-margin" class="marker dependency class" refX="16" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L14,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-lollipopStart" class="marker lollipop class" refX="13" refY="7" markerWidth="190" markerHeight="240" orient="auto"><circle fill="transparent" cx="7" cy="7" r="6" /></marker></defs><defs><marker id="my-svg_class-lollipopEnd" class="marker lollipop class" refX="1" refY="7" markerWidth="190" markerHeight="240" orient="auto"><circle fill="transparent" cx="7" cy="7" r="6" /></marker></defs><defs><marker id="my-svg_class-lollipopStart-margin" class="marker lollipop class" refX="13" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><circle fill="transparent" cx="7" cy="7" r="6" stroke-width="2" /></marker></defs><defs><marker id="my-svg_class-lollipopEnd-margin" class="marker lollipop class" refX="1" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><circle fill="transparent" cx="7" cy="7" r="6" stroke-width="2" /></marker></defs><g class="root"><g class="clusters" /><g class="edgePaths"><path d="M228.382,684.238L282.863,684.238L282.863,504L364.635,504L364.635,504L391.926,504" id="my-svg-id_BioETLError_CriticalError_1" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_BioETLError_CriticalError_1" data-points="W3sieCI6MjE5LjQ1Nzk1NzQ3NDIyNjgyLCJ5Ijo2OTl9LHsieCI6MzM3LjM0Mzc1LCJ5Ijo1MDR9LHsieCI6MzkxLjkyNTc4MTI1LCJ5Ijo1MDR9XQ==" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M228.382,905.762L282.863,905.762L282.863,1086L348.594,1086L348.594,1086L359.844,1086" id="my-svg-id_BioETLError_RecoverableError_2" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_BioETLError_RecoverableError_2" data-points="W3sieCI6MjE5LjQ1Nzk1NzQ3NDIyNjgyLCJ5Ijo4OTF9LHsieCI6MzM3LjM0Mzc1LCJ5IjoxMDg2fSx7IngiOjM1OS44NDM3NSwieSI6MTA4Nn1d" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M189.874,682.275L263.609,682.275L263.609,98L370.213,98L370.213,98L403.082,98" id="my-svg-id_BioETLError_DataQualityError_3" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_BioETLError_DataQualityError_3" data-points="W3sieCI6MTg1LjY1MjE0NzU5Njg0MzYsInkiOjY5OX0seyJ4IjozMzcuMzQzNzUsInkiOjk4fSx7IngiOjQwMy4wODIwMzEyNSwieSI6OTh9XQ==" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M202.126,907.216L269.735,907.216L269.735,1280L356.865,1280L356.865,1280L376.387,1280" id="my-svg-id_BioETLError_PipelineConfigError_4" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_BioETLError_PipelineConfigError_4" data-points="W3sieCI6MTk2LjI0MzUyNDQ4NDUzNjA3LCJ5Ijo4OTF9LHsieCI6MzM3LjM0Mzc1LCJ5IjoxMjgwfSx7IngiOjM3Ni4zODY3MTg3NSwieSI6MTI4MH1d" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M693.473,504L712.139,504L712.139,504L745.002,504L745.002,504L759.199,504" id="my-svg-id_CriticalError_LockNotHeldError_5" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_CriticalError_LockNotHeldError_5" data-points="W3sieCI6Njc2LjIyMjY1NjI1LCJ5Ijo1MDR9LHsieCI6NzMwLjgwNDY4NzUsInkiOjUwNH0seyJ4Ijo3NTkuMTk5MjE4NzUsInkiOjUwNH1d" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M578.382,998.615L654.593,998.615L654.593,698L755.873,698L755.873,698L780.941,698" id="my-svg-id_RecoverableError_AdapterError_6" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_RecoverableError_AdapterError_6" data-points="W3sieCI6NTcwLjU4MDkwMzY3MjY4MDQsInkiOjEwMTR9LHsieCI6NzMwLjgwNDY4NzUsInkiOjY5OH0seyJ4Ijo3ODAuOTQxNDA2MjUsInkiOjY5OH1d" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M619.37,1170.112L675.087,1170.112L675.087,1280L753.92,1280L753.92,1280L777.035,1280" id="my-svg-id_RecoverableError_NetworkError_7" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_RecoverableError_NetworkError_7" data-points="W3sieCI6NjA3LjA4NzU4ODU5NTM2MDgsInkiOjExNTh9LHsieCI6NzMwLjgwNDY4NzUsInkiOjEyODB9LHsieCI6Nzc3LjAzNTE1NjI1LCJ5IjoxMjgwfV0=" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M578.382,1173.385L654.593,1173.385L654.593,1474L767.318,1474L767.318,1474L803.832,1474" id="my-svg-id_RecoverableError_TimeoutError_8" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_RecoverableError_TimeoutError_8" data-points="W3sieCI6NTcwLjU4MDkwMzY3MjY4MDQsInkiOjExNTh9LHsieCI6NzMwLjgwNDY4NzUsInkiOjE0NzR9LHsieCI6ODAzLjgzMjAzMTI1LCJ5IjoxNDc0fV0=" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M725.555,1086L728.18,1086L728.18,1086L757.135,1086L757.135,1086L783.465,1086" id="my-svg-id_RecoverableError_RateLimitExceededError_9" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_RecoverableError_RateLimitExceededError_9" data-points="W3sieCI6NzA4LjMwNDY4NzUsInkiOjEwODZ9LHsieCI6NzMwLjgwNDY4NzUsInkiOjEwODZ9LHsieCI6NzgzLjQ2NDg0Mzc1LCJ5IjoxMDg2fV0=" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M619.37,1001.888L675.087,1001.888L675.087,892L752.023,892L752.023,892L773.242,892" id="my-svg-id_RecoverableError_CircuitBreakerOpenError_10" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_RecoverableError_CircuitBreakerOpenError_10" data-points="W3sieCI6NjA3LjA4NzU4ODU5NTM2MDgsInkiOjEwMTR9LHsieCI6NzMwLjgwNDY4NzUsInkiOjg5Mn0seyJ4Ijo3NzMuMjQyMTg3NSwieSI6ODkyfV0=" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M682.308,93.479L706.557,93.479L706.557,92L742.055,92L742.055,92L753.305,92" id="my-svg-id_DataQualityError_ValidationError_11" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_DataQualityError_ValidationError_11" data-points="W3sieCI6NjY1LjA2NjQwNjI1LCJ5Ijo5NC4wMDQ5MjQyNDk5NDUzOX0seyJ4Ijo3MzAuODA0Njg3NSwieSI6OTJ9LHsieCI6NzUzLjMwNDY4NzUsInkiOjkyfV0=" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M616.994,182.298L673.899,182.298L673.899,298L760.264,298L760.264,298L789.723,298" id="my-svg-id_DataQualityError_DataQualityThresholdError_12" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_DataQualityError_DataQualityThresholdError_12" data-points="W3sieCI6NjA0Ljg5NzE4NzUsInkiOjE3MH0seyJ4Ijo3MzAuODA0Njg3NSwieSI6Mjk4fSx7IngiOjc4OS43MjI2NTYyNSwieSI6Mjk4fV0=" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M1102.523,92L1105.148,92L1105.148,92L1121.879,92L1121.879,92L1135.984,92" id="my-svg-id_ValidationError_SchemaViolationError_13" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_ValidationError_SchemaViolationError_13" data-points="W3sieCI6MTA4NS4yNzM0Mzc1LCJ5Ijo5Mn0seyJ4IjoxMTA3Ljc3MzQzNzUsInkiOjkyfSx7IngiOjExMzUuOTg0Mzc1LCJ5Ijo5Mn1d" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M1074.887,698L1091.33,698L1091.33,698L1119.023,698L1119.023,698L1130.273,698" id="my-svg-id_AdapterError_StorageError_14" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_AdapterError_StorageError_14" data-points="W3sieCI6MTA1Ny42MzY3MTg3NSwieSI6Njk4fSx7IngiOjExMDcuNzczNDM3NSwieSI6Njk4fSx7IngiOjExMzAuMjczNDM3NSwieSI6Njk4fV0=" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M1343.683,615.557L1353.252,615.557L1353.252,601L1388.227,601L1388.227,601L1413.633,601" id="my-svg-id_StorageError_AtomicWriteError_15" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_StorageError_AtomicWriteError_15" data-points="W3sieCI6MTMyOS45NTM0NDcxNjQ5NDg2LCJ5Ijo2MjZ9LHsieCI6MTM2Mi44MjAzMTI1LCJ5Ijo2MDF9LHsieCI6MTQxMy42MzI4MTI1LCJ5Ijo2MDF9XQ==" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M1343.683,780.443L1353.252,780.443L1353.252,795L1374.07,795L1374.07,795L1385.32,795" id="my-svg-id_StorageError_CheckpointError_16" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_StorageError_CheckpointError_16" data-points="W3sieCI6MTMyOS45NTM0NDcxNjQ5NDg2LCJ5Ijo3NzB9LHsieCI6MTM2Mi44MjAzMTI1LCJ5Ijo3OTV9LHsieCI6MTM4NS4zMjAzMTI1LCJ5Ijo3OTV9XQ==" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /></g><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-BioETLError-0" data-look="classic" transform="translate(161.421875, 795)"><g class="basic label-container outer-path"><path d="M-153.421875 -96 L153.421875 -96 L153.421875 96 L-153.421875 96" stroke="none" stroke-width="0" fill="#f0fdf4" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /><path d="M-153.421875 -96 C-71.92566130626284 -96, 9.570552387474322 -96, 153.421875 -96 M-153.421875 -96 C-72.71155681181969 -96, 7.998761376360619 -96, 153.421875 -96 M153.421875 -96 C153.421875 -49.44858759660785, 153.421875 -2.897175193215702, 153.421875 96 M153.421875 -96 C153.421875 -42.48529559073113, 153.421875 11.029408818537746, 153.421875 96 M153.421875 96 C72.93810359715255 96, -7.5456678056949045 96, -153.421875 96 M153.421875 96 C70.4390943626695 96, -12.543686274661013 96, -153.421875 96 M-153.421875 96 C-153.421875 20.34944953815335, -153.421875 -55.3011009236933, -153.421875 -96 M-153.421875 96 C-153.421875 24.929508369938873, -153.421875 -46.140983260122255, -153.421875 -96" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(-62.0625, -64)"><g class="label" style="" transform="translate(0,-12)"><text x="62.062" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="62.062">«Base Exception»</tspan></text></g></g><g class="label-group text" transform="translate(-45.6875, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="45.688" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="45.688">BioETLError</tspan></text></g></g><g class="members-group text" transform="translate(-137.421875, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="49.484" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="49.484">+context: dict</tspan></text></g></g><g class="methods-group text" transform="translate(-137.421875, 72)"><g class="label" style="" transform="translate(0,-12)"><text x="106.391" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="106.391">+with_context(**extra) : : Self</tspan></text></g></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-153.421875 -16 C-66.3684740696438 -15.999716294039132, 20.68492686071241 -15.999432588078262, 153.421875 -15.999 M-153.421875 -16 C-58.52670901511199 -15.999690737823453, 36.36845696977602 -15.999381475646906, 153.421875 -15.999" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-153.421875 40 C-33.960603780183504 40.000389322810776, 85.50066743963299 40.00077864562156, 153.421875 40.001 M-153.421875 40 C-34.11100371449699 40.00038883265925, 85.19986757100602 40.00077766531849, 153.421875 40.001" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-CriticalError-1" data-look="classic" transform="translate(534.07421875, 504)"><g class="basic label-container outer-path"><path d="M-142.1484375 -72 L142.1484375 -72 L142.1484375 72 L-142.1484375 72" stroke="none" stroke-width="0" fill="#f0fdf4" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /><path d="M-142.1484375 -72 C-78.97090477918852 -72, -15.793372058377017 -72, 142.1484375 -72 M-142.1484375 -72 C-46.334504885309585 -72, 49.47942772938083 -72, 142.1484375 -72 M142.1484375 -72 C142.1484375 -14.731378187847383, 142.1484375 42.53724362430523, 142.1484375 72 M142.1484375 -72 C142.1484375 -26.73898505960539, 142.1484375 18.52202988078922, 142.1484375 72 M142.1484375 72 C72.6572426715428 72, 3.1660478430856074 72, -142.1484375 72 M142.1484375 72 C60.16853456504147 72, -21.811368369917062 72, -142.1484375 72 M-142.1484375 72 C-142.1484375 23.00697026005352, -142.1484375 -25.98605947989296, -142.1484375 -72 M-142.1484375 72 C-142.1484375 42.42787886697373, -142.1484375 12.85575773394745, -142.1484375 -72" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-46.21875, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="46.219" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="46.219">CriticalError</tspan></text></g></g><g class="members-group text" transform="translate(-126.1484375, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="103.039" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="103.039">Unrecoverable system</tspan><tspan x="103.039" dy="16.8">errors</tspan></text></g></g><g class="methods-group text" transform="translate(-126.1484375, 72)" /><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-142.1484375 -16 C-56.00709207897653 -15.999697002137568, 30.134253342046946 -15.999394004275137, 142.1484375 -15.999 M-142.1484375 -16 C-30.584506852691263 -15.999607579469007, 80.97942379461747 -15.999215158938012, 142.1484375 -15.999" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-142.1484375 40 C-41.855561575690004 40.00035277516126, 58.43731434861999 40.00070555032252, 142.1484375 40.001 M-142.1484375 40 C-53.91046598412942 40.00031037263957, 34.32750553174117 40.00062074527914, 142.1484375 40.001" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-RecoverableError-2" data-look="classic" transform="translate(534.07421875, 1086)"><g class="basic label-container outer-path"><path d="M-174.23046875 -72 L174.23046875 -72 L174.23046875 72 L-174.23046875 72" stroke="none" stroke-width="0" fill="#f0fdf4" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /><path d="M-174.23046875 -72 C-83.52888002295084 -72, 7.172708704098312 -72, 174.23046875 -72 M-174.23046875 -72 C-95.8252897248023 -72, -17.420110699604606 -72, 174.23046875 -72 M174.23046875 -72 C174.23046875 -42.56512436652628, 174.23046875 -13.13024873305256, 174.23046875 72 M174.23046875 -72 C174.23046875 -18.464085499527748, 174.23046875 35.071829000944504, 174.23046875 72 M174.23046875 72 C96.6002347465512 72, 18.97000074310239 72, -174.23046875 72 M174.23046875 72 C82.77509964647149 72, -8.680269457057022 72, -174.23046875 72 M-174.23046875 72 C-174.23046875 21.590693205921454, -174.23046875 -28.818613588157092, -174.23046875 -72 M-174.23046875 72 C-174.23046875 32.529294019106345, -174.23046875 -6.94141196178731, -174.23046875 -72" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-65.7734375, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="65.773" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="65.773">RecoverableError</tspan></text></g></g><g class="members-group text" transform="translate(-158.23046875, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="125.344" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="125.344">Transient errors that can be</tspan><tspan x="125.344" dy="16.8">retried</tspan></text></g></g><g class="methods-group text" transform="translate(-158.23046875, 72)" /><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-174.23046875 -16 C-76.89281142346643 -15.999720664077802, 20.444845903067147 -15.999441328155605, 174.23046875 -15.999 M-174.23046875 -16 C-62.681794329659425 -15.999679881839208, 48.86688009068115 -15.999359763678417, 174.23046875 -15.999" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-174.23046875 40 C-69.63634005323217 40.000300160268885, 34.95778864353565 40.00060032053777, 174.23046875 40.001 M-174.23046875 40 C-63.026627428513336 40.000319128571824, 48.17721389297333 40.00063825714365, 174.23046875 40.001" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-DataQualityError-3" data-look="classic" transform="translate(534.07421875, 98)"><g class="basic label-container outer-path"><path d="M-130.9921875 -72 L130.9921875 -72 L130.9921875 72 L-130.9921875 72" stroke="none" stroke-width="0" fill="#f0fdf4" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /><path d="M-130.9921875 -72 C-63.736890531101466 -72, 3.5184064377970685 -72, 130.9921875 -72 M-130.9921875 -72 C-37.77966601661045 -72, 55.4328554667791 -72, 130.9921875 -72 M130.9921875 -72 C130.9921875 -26.353959590299738, 130.9921875 19.292080819400525, 130.9921875 72 M130.9921875 -72 C130.9921875 -15.24041647929704, 130.9921875 41.51916704140592, 130.9921875 72 M130.9921875 72 C52.22995692886609 72, -26.532273642267825 72, -130.9921875 72 M130.9921875 72 C47.57197579446509 72, -35.84823591106982 72, -130.9921875 72 M-130.9921875 72 C-130.9921875 18.834892202747014, -130.9921875 -34.33021559450597, -130.9921875 -72 M-130.9921875 72 C-130.9921875 33.232832803494716, -130.9921875 -5.5343343930105675, -130.9921875 -72" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-64.953125, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="64.953" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="64.953">DataQualityError</tspan></text></g></g><g class="members-group text" transform="translate(-114.9921875, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="82.516" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="82.516">Data validation</tspan><tspan x="82.516" dy="16.8">failures</tspan></text></g></g><g class="methods-group text" transform="translate(-114.9921875, 72)" /><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-130.9921875 -16 C-66.02314001992266 -15.99975201174696, -1.0540925398453282 -15.99950402349392, 130.9921875 -15.999 M-130.9921875 -16 C-42.71752607056867 -15.999663053716736, 45.557135358862666 -15.999326107433474, 130.9921875 -15.999" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-130.9921875 40 C-42.56480048709079 40.000337529240106, 45.862586525818415 40.000675058480205, 130.9921875 40.001 M-130.9921875 40 C-51.6976609827436 40.000302668914955, 27.5968655345128 40.00060533782992, 130.9921875 40.001" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-ValidationError-4" data-look="classic" transform="translate(919.2890625, 92)"><g class="basic label-container outer-path"><path d="M-165.984375 -72 L165.984375 -72 L165.984375 72 L-165.984375 72" stroke="none" stroke-width="0" fill="#f0fdf4" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /><path d="M-165.984375 -72 C-80.82559465527993 -72, 4.333185689440143 -72, 165.984375 -72 M-165.984375 -72 C-87.51966984228157 -72, -9.054964684563146 -72, 165.984375 -72 M165.984375 -72 C165.984375 -22.728641894594, 165.984375 26.542716210812003, 165.984375 72 M165.984375 -72 C165.984375 -18.234228674003376, 165.984375 35.53154265199325, 165.984375 72 M165.984375 72 C76.53137221301843 72, -12.921630573963142 72, -165.984375 72 M165.984375 72 C93.36298493802886 72, 20.741594876057718 72, -165.984375 72 M-165.984375 72 C-165.984375 31.928138875641935, -165.984375 -8.14372224871613, -165.984375 -72 M-165.984375 72 C-165.984375 41.87295197222448, -165.984375 11.745903944448955, -165.984375 -72" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-58, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="58" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="58">ValidationError</tspan></text></g></g><g class="members-group text" transform="translate(-149.984375, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="120.984" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="120.984">Schema or field validation</tspan><tspan x="120.984" dy="16.8">failures</tspan></text></g></g><g class="methods-group text" transform="translate(-149.984375, 72)" /><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-165.984375 -16 C-53.51336523222017 -15.99966120000823, 58.957644535559666 -15.99932240001646, 165.984375 -15.999 M-165.984375 -16 C-60.72973588422056 -15.999682938110542, 44.52490323155888 -15.999365876221086, 165.984375 -15.999" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-165.984375 40 C-48.150036198673874 40.00035495611801, 69.68430260265225 40.000709912236026, 165.984375 40.001 M-165.984375 40 C-36.2112969164383 40.000390919561205, 93.5617811671234 40.0007818391224, 165.984375 40.001" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-SchemaViolationError-5" data-look="classic" transform="translate(1235.296875, 92)"><g class="basic label-container outer-path"><path d="M-99.3125 -84 L99.3125 -84 L99.3125 84 L-99.3125 84" stroke="none" stroke-width="0" fill="#f0fdf4" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /><path d="M-99.3125 -84 C-22.753426324690565 -84, 53.80564735061887 -84, 99.3125 -84 M-99.3125 -84 C-30.29874738925278 -84, 38.71500522149444 -84, 99.3125 -84 M99.3125 -84 C99.3125 -19.009457959656757, 99.3125 45.981084080686486, 99.3125 84 M99.3125 -84 C99.3125 -25.627242381822235, 99.3125 32.74551523635553, 99.3125 84 M99.3125 84 C24.571782495390153 84, -50.168935009219695 84, -99.3125 84 M99.3125 84 C44.47649593773444 84, -10.359508124531118 84, -99.3125 84 M-99.3125 84 C-99.3125 39.92426843431397, -99.3125 -4.151463131372054, -99.3125 -84 M-99.3125 84 C-99.3125 16.908311108332015, -99.3125 -50.18337778333597, -99.3125 -84" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -52)" /><g class="label-group text" transform="translate(-83.3125, -52)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="83.312" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="83.312">SchemaViolationErr</tspan><tspan x="83.312" dy="16.8">or</tspan></text></g></g><g class="members-group text" transform="translate(-83.3125, 4)"><g class="label" style="" transform="translate(0,-12)"><text x="36.398" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="36.398">+table: str</tspan></text></g><g class="label" style="" transform="translate(0,12)"><text x="40.625" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="40.625">+errors: list</tspan></text></g></g><g class="methods-group text" transform="translate(-83.3125, 84)" /><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-99.3125 -28 C-35.69514120806756 -27.999679711220683, 27.922217583864878 -27.999359422441366, 99.3125 -27.999 M-99.3125 -28 C-33.43314363578288 -27.99966832293838, 32.44621272843423 -27.99933664587676, 99.3125 -27.999" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-99.3125 52 C-58.22793742717218 52.00020684487136, -17.14337485434436 52.00041368974271, 99.3125 52.001 M-99.3125 52 C-26.54901994210327 52.00036633596002, 46.21446011579346 52.00073267192003, 99.3125 52.001" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-DataQualityThresholdError-6" data-look="classic" transform="translate(919.2890625, 298)"><g class="basic label-container outer-path"><path d="M-129.56640625 -84 L129.56640625 -84 L129.56640625 84 L-129.56640625 84" stroke="none" stroke-width="0" fill="#f0fdf4" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /><path d="M-129.56640625 -84 C-70.53991343191217 -84, -11.513420613824351 -84, 129.56640625 -84 M-129.56640625 -84 C-49.24265014807631 -84, 31.081105953847384 -84, 129.56640625 -84 M129.56640625 -84 C129.56640625 -24.66940017302236, 129.56640625 34.66119965395528, 129.56640625 84 M129.56640625 -84 C129.56640625 -38.055791476428304, 129.56640625 7.888417047143392, 129.56640625 84 M129.56640625 84 C72.37243007011926 84, 15.17845389023853 84, -129.56640625 84 M129.56640625 84 C48.55343684275523 84, -32.459532564489535 84, -129.56640625 84 M-129.56640625 84 C-129.56640625 20.35465661831809, -129.56640625 -43.29068676336382, -129.56640625 -84 M-129.56640625 84 C-129.56640625 19.720330499881797, -129.56640625 -44.559339000236406, -129.56640625 -84" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -52)" /><g class="label-group text" transform="translate(-102.7578125, -52)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="102.758" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="102.758">DataQualityThresholdErr</tspan><tspan x="102.758" dy="16.8">or</tspan></text></g></g><g class="members-group text" transform="translate(-113.56640625, 4)"><g class="label" style="" transform="translate(0,-12)"><text x="62.188" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="62.188">+error_rate: float</tspan></text></g><g class="label" style="" transform="translate(0,12)"><text x="60.047" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="60.047">+threshold: float</tspan></text></g></g><g class="methods-group text" transform="translate(-113.56640625, 84)" /><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-129.56640625 -28 C-61.27190771294252 -27.999736449823246, 7.022590824114957 -27.99947289964649, 129.56640625 -27.999 M-129.56640625 -28 C-70.37533447846022 -27.99977158017466, -11.184262706920435 -27.999543160349315, 129.56640625 -27.999" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-129.56640625 52 C-55.43365670657667 52.0002860801333, 18.69909283684666 52.00057216026661, 129.56640625 52.001 M-129.56640625 52 C-31.31280098462325 52.00037916311839, 66.9408042807535 52.000758326236785, 129.56640625 52.001" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-LockNotHeldError-7" data-look="classic" transform="translate(919.2890625, 504)"><g class="basic label-container outer-path"><path d="M-160.08984375 -72 L160.08984375 -72 L160.08984375 72 L-160.08984375 72" stroke="none" stroke-width="0" fill="#f0fdf4" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /><path d="M-160.08984375 -72 C-43.54794330401781 -72, 72.99395714196439 -72, 160.08984375 -72 M-160.08984375 -72 C-36.78510571583777 -72, 86.51963231832445 -72, 160.08984375 -72 M160.08984375 -72 C160.08984375 -29.733626491874098, 160.08984375 12.532747016251804, 160.08984375 72 M160.08984375 -72 C160.08984375 -25.672743121405006, 160.08984375 20.65451375718999, 160.08984375 72 M160.08984375 72 C53.179539788786045 72, -53.73076417242791 72, -160.08984375 72 M160.08984375 72 C74.37327600438584 72, -11.343291741228313 72, -160.08984375 72 M-160.08984375 72 C-160.08984375 40.98342608076136, -160.08984375 9.96685216152273, -160.08984375 -72 M-160.08984375 72 C-160.08984375 26.008234125891683, -160.08984375 -19.983531748216635, -160.08984375 -72" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-68.8671875, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="68.867" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="68.867">LockNotHeldError</tspan></text></g></g><g class="members-group text" transform="translate(-144.08984375, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="109.656" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="109.656">Lock was lost during</tspan><tspan x="109.656" dy="16.8">operation</tspan></text></g></g><g class="methods-group text" transform="translate(-144.08984375, 72)" /><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-160.08984375 -16 C-72.62394477787343 -15.999726822461303, 14.841954194253134 -15.999453644922605, 160.08984375 -15.999 M-160.08984375 -16 C-69.3871208545589 -15.999716713063206, 21.315602040882197 -15.999433426126412, 160.08984375 -15.999" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-160.08984375 40 C-60.76813811041322 40.0003102061421, 38.55356752917356 40.000620412284206, 160.08984375 40.001 M-160.08984375 40 C-89.72114593924815 40.000219778769726, -19.35244812849629 40.00043955753946, 160.08984375 40.001" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-PipelineConfigError-8" data-look="classic" transform="translate(534.07421875, 1280)"><g class="basic label-container outer-path"><path d="M-157.6875 -72 L157.6875 -72 L157.6875 72 L-157.6875 72" stroke="none" stroke-width="0" fill="#fefce8" style="fill:#fefce8;stroke:#ca8a04;stroke-width:2px" /><path d="M-157.6875 -72 C-49.35440506027204 -72, 58.978689879455914 -72, 157.6875 -72 M-157.6875 -72 C-83.71388985795913 -72, -9.740279715918263 -72, 157.6875 -72 M157.6875 -72 C157.6875 -24.594410731844185, 157.6875 22.81117853631163, 157.6875 72 M157.6875 -72 C157.6875 -24.431515717056442, 157.6875 23.136968565887116, 157.6875 72 M157.6875 72 C45.40139358972198 72, -66.88471282055605 72, -157.6875 72 M157.6875 72 C69.71607143722811 72, -18.25535712554378 72, -157.6875 72 M-157.6875 72 C-157.6875 28.05915593707737, -157.6875 -15.881688125845258, -157.6875 -72 M-157.6875 72 C-157.6875 21.048744748338137, -157.6875 -29.902510503323725, -157.6875 -72" stroke="#ca8a04" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fefce8;stroke:#ca8a04;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-74.75, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="74.75" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="74.75">PipelineConfigErro</tspan><tspan x="74.75" dy="16.8">r</tspan></text></g></g><g class="members-group text" transform="translate(-141.6875, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="104.312" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="104.312">Invalid pipeline</tspan><tspan x="104.312" dy="16.8">configuration</tspan></text></g></g><g class="methods-group text" transform="translate(-141.6875, 72)" /><g class="divider" style="fill:#fefce8;stroke:#ca8a04;stroke-width:2px"><path d="M-157.6875 -16 C-48.32043670107154 -15.999653215811973, 61.046626597856914 -15.999306431623946, 157.6875 -15.999 M-157.6875 -16 C-46.550492376235226 -15.999647603622279, 64.58651524752955 -15.999295207244558, 157.6875 -15.999" stroke="#ca8a04" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fefce8;stroke:#ca8a04;stroke-width:2px" /></g><g class="divider" style="fill:#fefce8;stroke:#ca8a04;stroke-width:2px"><path d="M-157.6875 40 C-63.57028842394992 40.00029842952541, 30.546923152100163 40.000596859050816, 157.6875 40.001 M-157.6875 40 C-59.65524569621354 40.000310843453995, 38.37700860757292 40.00062168690799, 157.6875 40.001" stroke="#ca8a04" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fefce8;stroke:#ca8a04;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-AdapterError-9" data-look="classic" transform="translate(919.2890625, 698)"><g class="basic label-container outer-path"><path d="M-138.34765625 -72 L138.34765625 -72 L138.34765625 72 L-138.34765625 72" stroke="none" stroke-width="0" fill="#fff1f2" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /><path d="M-138.34765625 -72 C-49.871293957747355 -72, 38.60506833450529 -72, 138.34765625 -72 M-138.34765625 -72 C-29.477828391091037 -72, 79.39199946781793 -72, 138.34765625 -72 M138.34765625 -72 C138.34765625 -42.449275678140836, 138.34765625 -12.898551356281672, 138.34765625 72 M138.34765625 -72 C138.34765625 -18.678350767743424, 138.34765625 34.64329846451315, 138.34765625 72 M138.34765625 72 C63.48000510564209 72, -11.387646038715815 72, -138.34765625 72 M138.34765625 72 C35.07144856339755 72, -68.2047591232049 72, -138.34765625 72 M-138.34765625 72 C-138.34765625 24.35290407270776, -138.34765625 -23.294191854584483, -138.34765625 -72 M-138.34765625 72 C-138.34765625 17.699105154730916, -138.34765625 -36.60178969053817, -138.34765625 -72" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-50.0859375, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="50.086" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="50.086">AdapterError</tspan></text></g></g><g class="members-group text" transform="translate(-122.34765625, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="97.305" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="97.305">External API adapter</tspan><tspan x="97.305" dy="16.8">errors</tspan></text></g></g><g class="methods-group text" transform="translate(-122.34765625, 72)" /><g class="divider" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px"><path d="M-138.34765625 -16 C-47.289082447531555 -15.999670906698853, 43.76949135493689 -15.999341813397706, 138.34765625 -15.999 M-138.34765625 -16 C-61.84901265778606 -15.999723527504312, 14.649630934427876 -15.999447055008623, 138.34765625 -15.999" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /></g><g class="divider" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px"><path d="M-138.34765625 40 C-80.86819799682576 40.000207735569255, -23.3887397436515 40.00041547113852, 138.34765625 40.001 M-138.34765625 40 C-73.37756298527944 40.000234807350644, -8.407469720558879 40.000469614701295, 138.34765625 40.001" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-StorageError-10" data-look="classic" transform="translate(1235.296875, 698)"><g class="basic label-container outer-path"><path d="M-105.0234375 -72 L105.0234375 -72 L105.0234375 72 L-105.0234375 72" stroke="none" stroke-width="0" fill="#fff1f2" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /><path d="M-105.0234375 -72 C-51.52272532008678 -72, 1.9779868598264443 -72, 105.0234375 -72 M-105.0234375 -72 C-42.227547115963254 -72, 20.56834326807349 -72, 105.0234375 -72 M105.0234375 -72 C105.0234375 -18.749435096636454, 105.0234375 34.50112980672709, 105.0234375 72 M105.0234375 -72 C105.0234375 -35.14573359212427, 105.0234375 1.7085328157514539, 105.0234375 72 M105.0234375 72 C62.982591702656435 72, 20.94174590531287 72, -105.0234375 72 M105.0234375 72 C47.52729412202537 72, -9.968849255949266 72, -105.0234375 72 M-105.0234375 72 C-105.0234375 27.463057660305957, -105.0234375 -17.073884679388087, -105.0234375 -72 M-105.0234375 72 C-105.0234375 42.56380878756205, -105.0234375 13.127617575124098, -105.0234375 -72" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-48.953125, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="48.953" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="48.953">StorageError</tspan></text></g></g><g class="members-group text" transform="translate(-89.0234375, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="64.547" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="64.547">Storage I / O</tspan><tspan x="64.547" dy="16.8">errors</tspan></text></g></g><g class="methods-group text" transform="translate(-89.0234375, 72)" /><g class="divider" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px"><path d="M-105.0234375 -16 C-30.081450915226483 -15.999643213037162, 44.86053566954703 -15.999286426074326, 105.0234375 -15.999 M-105.0234375 -16 C-25.902049857653083 -15.999623315568764, 53.219337784693835 -15.999246631137527, 105.0234375 -15.999" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /></g><g class="divider" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px"><path d="M-105.0234375 40 C-52.76764649023418 40.000248781568445, -0.5118554804683555 40.00049756313689, 105.0234375 40.001 M-105.0234375 40 C-52.65545861639836 40.000249315677195, -0.2874797327967258 40.00049863135439, 105.0234375 40.001" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-AtomicWriteError-11" data-look="classic" transform="translate(1534.3359375, 601)"><g class="basic label-container outer-path"><path d="M-120.703125 -72 L120.703125 -72 L120.703125 72 L-120.703125 72" stroke="none" stroke-width="0" fill="#fff1f2" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /><path d="M-120.703125 -72 C-49.35450713913707 -72, 21.99411072172586 -72, 120.703125 -72 M-120.703125 -72 C-47.38183401335985 -72, 25.9394569732803 -72, 120.703125 -72 M120.703125 -72 C120.703125 -29.882473007700845, 120.703125 12.23505398459831, 120.703125 72 M120.703125 -72 C120.703125 -21.561934198931553, 120.703125 28.876131602136894, 120.703125 72 M120.703125 72 C42.04975604604142 72, -36.60361290791715 72, -120.703125 72 M120.703125 72 C29.925369299168906 72, -60.85238640166219 72, -120.703125 72 M-120.703125 72 C-120.703125 24.88563603699781, -120.703125 -22.22872792600438, -120.703125 -72 M-120.703125 72 C-120.703125 29.41727997937074, -120.703125 -13.16544004125852, -120.703125 -72" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-67.0625, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="67.062" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="67.062">AtomicWriteError</tspan></text></g></g><g class="members-group text" transform="translate(-104.703125, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="71.172" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="71.172">Atomic write</tspan><tspan x="71.172" dy="16.8">failure</tspan></text></g></g><g class="methods-group text" transform="translate(-104.703125, 72)" /><g class="divider" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px"><path d="M-120.703125 -16 C-72.10571335639162 -15.999798690333645, -23.508301712783222 -15.99959738066729, 120.703125 -15.999 M-120.703125 -16 C-51.36620176148355 -15.999712779088203, 17.970721477032896 -15.999425558176407, 120.703125 -15.999" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /></g><g class="divider" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px"><path d="M-120.703125 40 C-29.077968545601323 40.00037954757366, 62.547187908797355 40.00075909514732, 120.703125 40.001 M-120.703125 40 C-43.067466288920954 40.000321597550645, 34.56819242215809 40.0006431951013, 120.703125 40.001" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-CheckpointError-12" data-look="classic" transform="translate(1534.3359375, 795)"><g class="basic label-container outer-path"><path d="M-149.015625 -72 L149.015625 -72 L149.015625 72 L-149.015625 72" stroke="none" stroke-width="0" fill="#fff1f2" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /><path d="M-149.015625 -72 C-54.07980162416959 -72, 40.85602175166082 -72, 149.015625 -72 M-149.015625 -72 C-48.65733545903025 -72, 51.7009540819395 -72, 149.015625 -72 M149.015625 -72 C149.015625 -31.516517394777033, 149.015625 8.966965210445935, 149.015625 72 M149.015625 -72 C149.015625 -38.85261386694602, 149.015625 -5.705227733892045, 149.015625 72 M149.015625 72 C47.121329177206036 72, -54.77296664558793 72, -149.015625 72 M149.015625 72 C48.32265708506347 72, -52.37031082987306 72, -149.015625 72 M-149.015625 72 C-149.015625 16.039798957984246, -149.015625 -39.92040208403151, -149.015625 -72 M-149.015625 72 C-149.015625 34.032575167511695, -149.015625 -3.9348496649766105, -149.015625 -72" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-62.15625, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="62.156" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="62.156">CheckpointError</tspan></text></g></g><g class="members-group text" transform="translate(-133.015625, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="101.938" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="101.938">Checkpoint save / load</tspan><tspan x="101.938" dy="16.8">failure</tspan></text></g></g><g class="methods-group text" transform="translate(-133.015625, 72)" /><g class="divider" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px"><path d="M-149.015625 -16 C-73.44959690818004 -15.999746449313312, 2.116431183639918 -15.999492898626626, 149.015625 -15.999 M-149.015625 -16 C-70.58889280684461 -15.999736850641693, 7.837839386310776 -15.999473701283385, 149.015625 -15.999" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /></g><g class="divider" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px"><path d="M-149.015625 40 C-56.64014702696183 40.00030995232202, 35.735330946076346 40.00061990464405, 149.015625 40.001 M-149.015625 40 C-52.36202911135695 40.00032430691711, 44.29156677728611 40.00064861383421, 149.015625 40.001" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#fff1f2;stroke:#dc2626;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-CircuitBreakerOpenError-13" data-look="classic" transform="translate(919.2890625, 892)"><g class="basic label-container outer-path"><path d="M-146.046875 -72 L146.046875 -72 L146.046875 72 L-146.046875 72" stroke="none" stroke-width="0" fill="#f0fdf4" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /><path d="M-146.046875 -72 C-69.40397915874667 -72, 7.2389166825066695 -72, 146.046875 -72 M-146.046875 -72 C-74.10883680610672 -72, -2.1707986122134457 -72, 146.046875 -72 M146.046875 -72 C146.046875 -16.176664163651267, 146.046875 39.646671672697465, 146.046875 72 M146.046875 -72 C146.046875 -39.537179292666885, 146.046875 -7.074358585333769, 146.046875 72 M146.046875 72 C50.82486925672613 72, -44.39713648654774 72, -146.046875 72 M146.046875 72 C64.89987587924601 72, -16.24712324150798 72, -146.046875 72 M-146.046875 72 C-146.046875 14.780448186852517, -146.046875 -42.439103626294965, -146.046875 -72 M-146.046875 72 C-146.046875 34.24765556871675, -146.046875 -3.5046888625664963, -146.046875 -72" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-94.21875, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="94.219" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="94.219">CircuitBreakerOpenErr</tspan><tspan x="94.219" dy="16.8">or</tspan></text></g></g><g class="members-group text" transform="translate(-130.046875, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="82.938" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="82.938">Circuit breaker is</tspan><tspan x="82.938" dy="16.8">OPEN</tspan></text></g></g><g class="methods-group text" transform="translate(-130.046875, 72)" /><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-146.046875 -16 C-66.85230539625312 -15.99972887276909, 12.34226420749377 -15.99945774553818, 146.046875 -15.999 M-146.046875 -16 C-84.84615799240518 -15.999790475773592, -23.64544098481035 -15.999580951547182, 146.046875 -15.999" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-146.046875 40 C-58.115416629672524 40.00030103847949, 29.816041740654953 40.00060207695899, 146.046875 40.001 M-146.046875 40 C-69.93335925529375 40.00026057906321, 6.1801564894124965 40.00052115812642, 146.046875 40.001" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-RateLimitExceededError-14" data-look="classic" transform="translate(919.2890625, 1086)"><g class="basic label-container outer-path"><path d="M-135.82421875 -72 L135.82421875 -72 L135.82421875 72 L-135.82421875 72" stroke="none" stroke-width="0" fill="#f0fdf4" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /><path d="M-135.82421875 -72 C-81.2335176139878 -72, -26.6428164779756 -72, 135.82421875 -72 M-135.82421875 -72 C-58.4935665858485 -72, 18.837085578303004 -72, 135.82421875 -72 M135.82421875 -72 C135.82421875 -37.03675014493854, 135.82421875 -2.0735002898770745, 135.82421875 72 M135.82421875 -72 C135.82421875 -37.084945967259515, 135.82421875 -2.169891934519029, 135.82421875 72 M135.82421875 72 C35.503185511350225 72, -64.81784772729955 72, -135.82421875 72 M135.82421875 72 C40.45824997648806 72, -54.907718797023875 72, -135.82421875 72 M-135.82421875 72 C-135.82421875 39.68149951729875, -135.82421875 7.362999034597493, -135.82421875 -72 M-135.82421875 72 C-135.82421875 30.449292643116735, -135.82421875 -11.10141471376653, -135.82421875 -72" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-92.1953125, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="92.195" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="92.195">RateLimitExceededErr</tspan><tspan x="92.195" dy="16.8">or</tspan></text></g></g><g class="members-group text" transform="translate(-119.82421875, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="73.727" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="73.727">Rate limit</tspan><tspan x="73.727" dy="16.8">exhausted</tspan></text></g></g><g class="methods-group text" transform="translate(-119.82421875, 72)" /><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-135.82421875 -16 C-67.09239360693674 -15.999746982438863, 1.6394315361265228 -15.999493964877725, 135.82421875 -15.999 M-135.82421875 -16 C-47.01173687953744 -15.999673060950808, 41.800744990925125 -15.999346121901619, 135.82421875 -15.999" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-135.82421875 40 C-31.86361603018578 40.00038270274505, 72.09698668962844 40.0007654054901, 135.82421875 40.001 M-135.82421875 40 C-48.22141728925344 40.00032248593906, 39.381384171493124 40.00064497187812, 135.82421875 40.001" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-NetworkError-15" data-look="classic" transform="translate(919.2890625, 1280)"><g class="basic label-container outer-path"><path d="M-142.25390625 -72 L142.25390625 -72 L142.25390625 72 L-142.25390625 72" stroke="none" stroke-width="0" fill="#f0fdf4" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /><path d="M-142.25390625 -72 C-50.35815303238134 -72, 41.537600185237324 -72, 142.25390625 -72 M-142.25390625 -72 C-69.11069225291737 -72, 4.032521744165251 -72, 142.25390625 -72 M142.25390625 -72 C142.25390625 -32.49871343311954, 142.25390625 7.002573133760919, 142.25390625 72 M142.25390625 -72 C142.25390625 -39.67773640358624, 142.25390625 -7.355472807172475, 142.25390625 72 M142.25390625 72 C57.02613276395992 72, -28.201640722080157 72, -142.25390625 72 M142.25390625 72 C39.880576108395175 72, -62.49275403320965 72, -142.25390625 72 M-142.25390625 72 C-142.25390625 38.853385472729734, -142.25390625 5.706770945459468, -142.25390625 -72 M-142.25390625 72 C-142.25390625 36.43305440010854, -142.25390625 0.8661088002170771, -142.25390625 -72" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-52.2421875, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="52.242" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="52.242">NetworkError</tspan></text></g></g><g class="members-group text" transform="translate(-126.25390625, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="100.133" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="100.133">Network connectivity</tspan><tspan x="100.133" dy="16.8">errors</tspan></text></g></g><g class="methods-group text" transform="translate(-126.25390625, 72)" /><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-142.25390625 -16 C-36.86954244939976 -15.999629590615195, 68.51482135120048 -15.99925918123039, 142.25390625 -15.999 M-142.25390625 -16 C-59.41131154066957 -15.99970882137126, 23.431283168660855 -15.999417642742522, 142.25390625 -15.999" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-142.25390625 40 C-51.605630060952805 40.000318614365604, 39.04264612809439 40.00063722873121, 142.25390625 40.001 M-142.25390625 40 C-80.66702641280975 40.000216468150015, -19.080146575619494 40.00043293630003, 142.25390625 40.001" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g></g><g class="node default" id="my-svg-classId-TimeoutError-16" data-look="classic" transform="translate(919.2890625, 1474)"><g class="basic label-container outer-path"><path d="M-115.45703125 -72 L115.45703125 -72 L115.45703125 72 L-115.45703125 72" stroke="none" stroke-width="0" fill="#f0fdf4" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /><path d="M-115.45703125 -72 C-24.602398132591148 -72, 66.2522349848177 -72, 115.45703125 -72 M-115.45703125 -72 C-62.24838804783924 -72, -9.039744845678484 -72, 115.45703125 -72 M115.45703125 -72 C115.45703125 -20.228958764482392, 115.45703125 31.542082471035215, 115.45703125 72 M115.45703125 -72 C115.45703125 -29.415509940645215, 115.45703125 13.16898011870957, 115.45703125 72 M115.45703125 72 C68.50094720757255 72, 21.544863165145117 72, -115.45703125 72 M115.45703125 72 C43.09231086355808 72, -29.272409522883834 72, -115.45703125 72 M-115.45703125 72 C-115.45703125 37.224940320130436, -115.45703125 2.449880640260872, -115.45703125 -72 M-115.45703125 72 C-115.45703125 40.24469319216129, -115.45703125 8.489386384322579, -115.45703125 -72" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="annotation-group text" transform="translate(0, -40)" /><g class="label-group text" transform="translate(-51.0703125, -40)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="51.07" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="51.07">TimeoutError</tspan></text></g></g><g class="members-group text" transform="translate(-99.45703125, 16)"><g class="label" style="" transform="translate(0,-12)"><text x="73.922" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="73.922">Operation timed</tspan><tspan x="73.922" dy="16.8">out</tspan></text></g></g><g class="methods-group text" transform="translate(-99.45703125, 72)" /><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-115.45703125 -16 C-69.10925624370124 -15.999799285610827, -22.761481237402478 -15.999598571221654, 115.45703125 -15.999 M-115.45703125 -16 C-31.12064911812817 -15.999634771562985, 53.21573301374366 -15.999269543125969, 115.45703125 -15.999" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g><g class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px"><path d="M-115.45703125 40 C-46.00192367334651 40.00030078335994, 23.45318390330698 40.00060156671988, 115.45703125 40.001 M-115.45703125 40 C-56.5420913120888 40.00025513794743, 2.3728486258223995 40.00051027589485, 115.45703125 40.001" stroke="#16a34a" stroke-width="2" fill="none" stroke-dasharray="0 0" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" /></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000" /></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000" /></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#7c3aed" stop-opacity="1" /><stop offset="100%" stop-color="#dc2626" stop-opacity="1" /></linearGradient><style>/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px;
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*="Domain"] &gt; rect,
+[id*="Domain"] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*="Domain"] &gt; rect,
+.cluster[id*="Domain"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Application"] &gt; rect,
+[id*="Application"] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*="Application"] &gt; rect,
+.cluster[id*="Application"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Infrastructure"] &gt; rect,
+[id*="Infrastructure"] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*="Infrastructure"] &gt; rect,
+.cluster[id*="Infrastructure"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Composition"] &gt; rect,
+[id*="Composition"] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*="Composition"] &gt; rect,
+.cluster[id*="Composition"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Interfaces"] &gt; rect,
+[id*="Interfaces"] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*="Interfaces"] &gt; rect,
+.cluster[id*="Interfaces"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="External"] &gt; rect,
+[id*="External"] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*="External"] &gt; rect,
+.cluster[id*="External"] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*="Domain"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Application"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Infrastructure"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Composition"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Interfaces"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="External"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Bronze"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Silver"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Gold"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Quarantine"] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*="Domain"] .cluster-label text.fo-fallback,
+g.cluster[id*="Application"] .cluster-label text.fo-fallback,
+g.cluster[id*="Infrastructure"] .cluster-label text.fo-fallback,
+g.cluster[id*="Composition"] .cluster-label text.fo-fallback,
+g.cluster[id*="Interfaces"] .cluster-label text.fo-fallback,
+g.cluster[id*="External"] .cluster-label text.fo-fallback,
+g.cluster[id*="Bronze"] .cluster-label text.fo-fallback,
+g.cluster[id*="Silver"] .cluster-label text.fo-fallback,
+g.cluster[id*="Gold"] .cluster-label text.fo-fallback,
+g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*="Bronze"] &gt; rect,
+[id*="Bronze"] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*="Silver"] &gt; rect,
+[id*="Silver"] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*="Gold"] &gt; rect,
+[id*="Gold"] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*="Quarantine"] &gt; rect,
+[id*="Quarantine"] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}
+</style></svg>

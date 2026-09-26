@@ -1,0 +1,88 @@
+{
+  "findings": [
+    {
+      "id": "DOCS-SEQ-001",
+      "path": "docs/reports/generated/documentation-cleanup-inventory.json:1",
+      "observation": "The committed documentation cleanup inventory is not reproducible from the current source tree.",
+      "method": "python -m scripts.docs generate-cleanup-inventory --check",
+      "expected": "The owner command exits 0 and both generated inventory artifacts match the current documentation tree.",
+      "actual": "The owner command exits 1 and reports mismatches in documentation-cleanup-inventory.json and documentation-cleanup-inventory.md; the canonical docs verify command stops at the same check.",
+      "impact": "The canonical documentation verification gate is red and contributors cannot distinguish intended documentation changes from stale generated evidence.",
+      "confidence": "high",
+      "confidence_score": 1.0,
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "docs-pipeline",
+      "evidence": [
+        {
+          "path": "docs/reports/generated/documentation-cleanup-inventory.json",
+          "line": 1,
+          "command": "python -m scripts.docs generate-cleanup-inventory --check",
+          "observation": "MISMATCH: docs/reports/generated/documentation-cleanup-inventory.json"
+        },
+        {
+          "path": "docs/reports/generated/documentation-cleanup-inventory.md",
+          "line": 1,
+          "command": "python -m scripts.docs generate-cleanup-inventory --check",
+          "observation": "MISMATCH: docs/reports/generated/documentation-cleanup-inventory.md"
+        }
+      ],
+      "root_cause": "The generated inventory was not refreshed after documentation source changes.",
+      "remediation": "Run the canonical owner update command and commit only the reproducible generated delta.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.docs generate-cleanup-inventory --check",
+        "python -m scripts.docs verify --skip-build"
+      ],
+      "automation": "Existing generated-artifact check; keep it green in the docs CI path.",
+      "automated_fix_possible": true
+    },
+    {
+      "id": "DOCS-SEQ-002",
+      "path": "mkdocs.yml:92",
+      "observation": "The strict documentation build and the canonical relative-link check both allow links to missing Markdown anchors.",
+      "method": ".venv/bin/mkdocs build --strict; python -m scripts.docs check-links",
+      "expected": "A link to a heading that does not exist fails the canonical documentation gate.",
+      "actual": "mkdocs build --strict exits 0 while 35 missing-anchor diagnostics remain below warning severity; check-links also exits 0 because it validates target files but not generic fragments. Examples include docs/02-architecture/domain/aggregate-invariants.md:51 and docs/04-reference/providers/crossref/publication.md:114.",
+      "impact": "Published navigation can lead to the top of a page instead of the promised section while all required documentation checks remain green.",
+      "confidence": "high",
+      "confidence_score": 1.0,
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "docs-pipeline",
+      "evidence": [
+        {
+          "path": "mkdocs.yml",
+          "line": 92,
+          "command": ".venv/bin/mkdocs build --strict",
+          "observation": "validation.links.not_found is downgraded, anchors has no strict-build warning override, and the build exits 0 with 35 missing-anchor diagnostics."
+        },
+        {
+          "path": "docs/02-architecture/domain/aggregate-invariants.md",
+          "line": 51,
+          "command": ".venv/bin/mkdocs build --strict",
+          "observation": "The link targets #batch-aggregate, which is absent from docs/04-reference/domain/invariants.md."
+        },
+        {
+          "path": "docs/04-reference/providers/crossref/publication.md",
+          "line": 114,
+          "command": ".venv/bin/mkdocs build --strict",
+          "observation": "The same-page link targets #internalextended-material, but that heading is absent from the page."
+        }
+      ],
+      "root_cause": "MkDocs anchor validation remains below warning severity and the custom link checker does not parse and resolve Markdown fragments.",
+      "remediation": "Raise missing-anchor validation to warning for strict builds, repair the proven broken anchors, and lock the configuration with a regression test.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        ".venv/bin/mkdocs build --strict",
+        "python -m pytest -q tests/architecture/test_docs_build_site_router.py"
+      ],
+      "automation": "MkDocs strict anchor severity plus an architecture regression test.",
+      "automated_fix_possible": false
+    }
+  ]
+}

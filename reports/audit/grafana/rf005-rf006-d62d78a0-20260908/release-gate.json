@@ -1,0 +1,1155 @@
+{
+  "candidate_ref": "d62d78a0db36118df302f5f63e6ed992e01154dc",
+  "gates": {
+    "color_only": {
+      "denominator": 1,
+      "numerator": 1,
+      "status": "PASS"
+    },
+    "contract": {
+      "status": "PASS"
+    },
+    "findings": {
+      "denominator": 48,
+      "numerator": 48,
+      "status": "PASS"
+    },
+    "graphics_contrast": {
+      "denominator": 1,
+      "numerator": 1,
+      "status": "PASS"
+    },
+    "integrity": {
+      "denominator": 4,
+      "numerator": 4,
+      "status": "PASS"
+    },
+    "layout": {
+      "denominator": 3,
+      "numerator": 3,
+      "status": "PASS"
+    },
+    "lineage": {
+      "denominator": 1,
+      "numerator": 1,
+      "status": "PASS"
+    },
+    "new_regressions": {
+      "actual": 0,
+      "status": "PASS"
+    },
+    "operator": {
+      "acceptance_mode": "AI_SCENARIOS",
+      "agent_observations_do_not_measure_human_insight": true,
+      "denominator": 21,
+      "human_required": false,
+      "human_usability_status": "NOT_MEASURED",
+      "numerator": 21,
+      "statistics": [
+        {
+          "attempt_count": 0,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "clicks": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "context_loss": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "diagnostic_depth": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "elapsed_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "participant_count": 0,
+          "participant_type": "HUMAN",
+          "success_count": 0,
+          "task_id": "ALL"
+        },
+        {
+          "attempt_count": 0,
+          "attempt_kind": "repeat",
+          "back_navigation": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "clicks": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "context_loss": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "diagnostic_depth": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "elapsed_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "participant_count": 0,
+          "participant_type": "HUMAN",
+          "success_count": 0,
+          "task_id": "ALL"
+        },
+        {
+          "attempt_count": 21,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 2,
+            "median": 0,
+            "sample_size": 21
+          },
+          "clicks": {
+            "max": 2,
+            "median": 1,
+            "sample_size": 21
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 21
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 21
+          },
+          "elapsed_seconds": {
+            "max": 635.914,
+            "median": 42.929,
+            "sample_size": 21
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 6,
+            "median": 2,
+            "sample_size": 21
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 21,
+          "task_id": "ALL"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 27.478,
+            "median": 27.478,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-control-plane-v1:Q1"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 21.852,
+            "median": 21.852,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-control-plane-v1:Q2"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 46.69,
+            "median": 46.69,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-control-plane-v1:Q3"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 23.358,
+            "median": 23.358,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-dq-v2:Q1"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 35.721,
+            "median": 35.721,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-dq-v2:Q2"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 42.929,
+            "median": 42.929,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 3,
+            "median": 3,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-dq-v2:Q3"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 40.472,
+            "median": 40.472,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-incident-v1:Q1"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 635.914,
+            "median": 635.914,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-incident-v1:Q2"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 53.812,
+            "median": 53.812,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-incident-v1:Q3"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 84.882,
+            "median": 84.882,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-overview-v2:Q1"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 35.264,
+            "median": 35.264,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-overview-v2:Q2"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 37.248,
+            "median": 37.248,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-overview-v2:Q3"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 60.04,
+            "median": 60.04,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-provider-health-v2:Q1"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 92.308,
+            "median": 92.308,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-provider-health-v2:Q2"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 36.565,
+            "median": 36.565,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 3,
+            "median": 3,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-provider-health-v2:Q3"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 34.412,
+            "median": 34.412,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-run-explorer-v1:Q1"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 125.139,
+            "median": 125.139,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 6,
+            "median": 6,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-run-explorer-v1:Q2"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 109.222,
+            "median": 109.222,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 5,
+            "median": 5,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-run-explorer-v1:Q3"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 13.844,
+            "median": 13.844,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-runtime:Q1"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 43.125,
+            "median": 43.125,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-runtime:Q2"
+        },
+        {
+          "attempt_count": 1,
+          "attempt_kind": "first",
+          "back_navigation": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "clicks": {
+            "max": 2,
+            "median": 2,
+            "sample_size": 1
+          },
+          "context_loss": {
+            "max": 0,
+            "median": 0,
+            "sample_size": 1
+          },
+          "diagnostic_depth": {
+            "max": 1,
+            "median": 1,
+            "sample_size": 1
+          },
+          "elapsed_seconds": {
+            "max": 53.753,
+            "median": 53.753,
+            "sample_size": 1
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": 3,
+            "median": 3,
+            "sample_size": 1
+          },
+          "participant_count": 1,
+          "participant_type": "AI_AGENT",
+          "success_count": 1,
+          "task_id": "bioetl-runtime:Q3"
+        },
+        {
+          "attempt_count": 0,
+          "attempt_kind": "repeat",
+          "back_navigation": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "clicks": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "context_loss": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "diagnostic_depth": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "elapsed_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "first_correct_seconds": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "interactions": {
+            "max": null,
+            "median": null,
+            "sample_size": 0
+          },
+          "participant_count": 0,
+          "participant_type": "AI_AGENT",
+          "success_count": 0,
+          "task_id": "ALL"
+        }
+      ],
+      "status": "PASS"
+    },
+    "provenance": {
+      "denominator": 3,
+      "numerator": 3,
+      "status": "PASS"
+    },
+    "regression_search": {
+      "denominator": 4,
+      "numerator": 4,
+      "status": "PASS"
+    },
+    "semantic_parity": {
+      "denominator": 2,
+      "numerator": 2,
+      "status": "PASS"
+    },
+    "text_contrast": {
+      "denominator": 1,
+      "numerator": 1,
+      "status": "PASS"
+    },
+    "windows_full_profile": {
+      "denominator": 2,
+      "numerator": 2,
+      "status": "PASS"
+    }
+  },
+  "release_passed": true,
+  "schema_version": 1
+}

@@ -1,0 +1,13 @@
+schema_version: "1.0.0"
+workflow:
+  name: chembl_assay
+  version: "1.0.0"
+  defaults:
+    run_options:
+      run_type: backfill
+      dry_run: false
+      log_level: INFO
+  steps:
+    - kind: pipeline
+      step_id: run_chembl_assay
+      pipeline_name: chembl_assay

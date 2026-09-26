@@ -1,0 +1,25 @@
+{
+  "program": "GRA-CYCLE-3L-R2",
+  "cycle_count": 3,
+  "branch": "agent/grafana-3cycle-r2-20260805",
+  "iterations": [
+    {
+      "n": 1,
+      "issue": 7558,
+      "theme": "diagnostic-vector0-primary",
+      "panels": 22
+    },
+    {
+      "n": 2,
+      "issue": 7560,
+      "theme": "diagnostic-vector0-residual",
+      "panels": 17
+    },
+    {
+      "n": 3,
+      "issue": 7568,
+      "theme": "outdated-zero-descriptions",
+      "panels": 11
+    }
+  ]
+}

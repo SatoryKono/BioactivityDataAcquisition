@@ -1,0 +1,52 @@
+{
+  "iteration": 2,
+  "new_findings": 3,
+  "new_p0_p1": 0,
+  "open_cycle_issues": 2,
+  "findings": [
+    {
+      "finding_id": "AUD-003",
+      "severity": "P2",
+      "status": "PROVEN",
+      "requirement_id": "REQ-DEP-002",
+      "title": "Concurrency regression guard did not require a stable PR identity",
+      "paths": [
+        "tests/architecture/test_github_actions_runtime_policy.py",
+        ".github/workflows/labeler.yml"
+      ],
+      "evidence": [
+        "PR #9866 review discussion_r3892000624"
+      ],
+      "issue": 9865
+    },
+    {
+      "finding_id": "AUD-004",
+      "severity": "P2",
+      "status": "PROVEN",
+      "requirement_id": "REQ-DEP-002",
+      "title": "Full-run evidence omitted post-fix validation and final summary",
+      "paths": [
+        "reports/audit-runs/20260831T052815Z-github-actions-736d69c/domain-extras/workflow-validation.json"
+      ],
+      "evidence": [
+        "PR #9866 review discussion_r3892000632"
+      ],
+      "issue": 9865
+    },
+    {
+      "finding_id": "AUD-005",
+      "severity": "P2",
+      "status": "PROVEN",
+      "requirement_id": "REQ-DEP-002",
+      "title": "Trust matrix silently passed incomplete YAML extraction",
+      "paths": [
+        "reports/audit-runs/20260831T052815Z-github-actions-736d69c/domain-extras/trust-matrix.csv"
+      ],
+      "evidence": [
+        "PR #9866 review discussion_r3892000636",
+        "architecture.yml/import-linter.yml/validate-vendored-mermaid-assets.yml had empty trigger fields"
+      ],
+      "issue": 9865
+    }
+  ]
+}

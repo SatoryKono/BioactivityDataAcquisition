@@ -1,0 +1,49 @@
+{
+  "csv_total": 172,
+  "csv_uniq": 172,
+  "tests_covered": 40,
+  "src_covered": 19,
+  "union_covered": 49,
+  "untraced_in_tests": 132,
+  "concrete_untraced": 26,
+  "generic_untraced": 106,
+  "orphan_generic": 137,
+  "invented": {
+    "src": [
+      "REQ-ARCH-011",
+      "REQ-ARCH-012",
+      "REQ-ARCH-013",
+      "REQ-ARCH-030",
+      "REQ-AUDIT-001",
+      "REQ-AUDIT-002",
+      "REQ-CONF-001",
+      "REQ-ERR-015",
+      "REQ-OBS-010"
+    ],
+    "docs": [
+      "REQ-ARCH-030",
+      "REQ-ARCH-031",
+      "REQ-ARCH-040",
+      "REQ-ARCH-041",
+      "REQ-VAL-001",
+      "REQ-VAL-002",
+      "REQ-VAL-003",
+      "REQ-VAL-004",
+      "REQ-VAL-005",
+      "REQ-VAL-006",
+      "REQ-VAL-007",
+      "REQ-VAL-008"
+    ],
+    "tests": []
+  },
+  "modality_counts": {
+    "MUST NOT": 16,
+    "MAY": 1,
+    "MUST": 151,
+    "SHOULD": 4
+  },
+  "status_counts": {
+    "confirmed": 166,
+    "updated": 6
+  }
+}

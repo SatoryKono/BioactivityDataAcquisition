@@ -1,0 +1,697 @@
+# BioETL Prompt Library registry
+# Epic: #10081 | Schema: _schema/prompt.schema.json
+# Operator paste templates only — not runtime SSOT.
+
+version: 2.0.0
+root: docs/00-project/ai/prompts
+schema: _schema/prompt.schema.json
+note: 'Epic #10081: 16 scenarios. Operator paste only — not runtime SSOT.'
+scenarios:
+- id: session-bootstrap
+  scenario: Daily session lock for Grok/Codex
+  role: any
+  prompt: prompt.session.grok-bootstrap
+  inputs:
+  - TASK
+  - MODE
+  - SCOPE
+  - WORK_BRANCH
+  - LANGUAGE
+  outputs:
+  - session-lock
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.git-safety
+  - prompt.fragment.debt-budget-ban
+  - prompt.fragment.env-guardrail
+  - prompt.fragment.generated-artifact-ci
+- id: audit-cycle
+  scenario: One-cycle evidence audit
+  role: py-audit-bot
+  prompt: prompt.audit.cycle
+  inputs:
+  - SCOPE
+  - DOMAIN
+  - MODE
+  - AUDIT_MODE
+  - LANGUAGE
+  outputs:
+  - findings.json
+  - report.md
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.cyclic-kernel-v3
+  - prompt.fragment.evidence-contract-v3
+- id: audit-tech-debt
+  scenario: Technical-debt register
+  role: py-audit-bot
+  prompt: prompt.audit.tech-debt
+  inputs:
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  outputs:
+  - findings.json
+  - report.md
+  schema: _schema/finding-v3.schema.json
+  deps:
+  - prompt.fragment.finding-schema
+  - prompt.fragment.debt-budget-ban
+- id: plan-scoped
+  scenario: Scoped implementation plan
+  role: py-plan-bot
+  prompt: prompt.plan.scoped
+  inputs:
+  - TASK
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  outputs:
+  - plan.md
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.git-safety
+- id: agent-efficiency
+  scenario: Agent-efficiency plan (runtime, operator loop, generated CI)
+  role: py-plan-bot
+  prompt: prompt.plan.agent-efficiency
+  inputs:
+  - TASK
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  outputs:
+  - plan.md
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.git-safety
+  - prompt.fragment.debt-budget-ban
+  - prompt.fragment.generated-artifact-ci
+- id: test-cycle
+  scenario: Cyclic test run and triage
+  role: py-test-bot
+  prompt: prompt.tests.cycle
+  inputs:
+  - SCOPE
+  - LANE
+  - MODE
+  - LANGUAGE
+  outputs:
+  - pytest-report
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.git-safety
+- id: test-fix-retest
+  scenario: Plan, audit, implement, then run-fix-retest and close
+  role: py-test-bot
+  prompt: prompt.tests.fix-retest
+  inputs:
+  - SCOPE
+  - MAX_ITERATIONS
+  - LANGUAGE
+  outputs:
+  - green-or-blocked
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.git-safety
+- id: config-validate
+  scenario: Config and schema remediation
+  role: py-config-bot
+  prompt: prompt.config.validate
+  inputs:
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  outputs:
+  - findings.json
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.env-guardrail
+- id: doc-audit
+  scenario: Documentation content audit
+  role: py-doc-bot
+  prompt: prompt.docs.audit
+  inputs:
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  outputs:
+  - findings.json
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.project-requirements-audit
+- id: debug-isolate
+  scenario: Reproduce and isolate failures
+  role: py-debug-bot
+  prompt: prompt.debug.isolate
+  inputs:
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  outputs:
+  - root-cause
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.orchestrator-guards
+- id: closeout
+  scenario: Issue/PR closeout against origin/main
+  role: any
+  prompt: prompt.closeout.grok
+  inputs:
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  outputs:
+  - done-table
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.issue-state-machine-v3
+- id: github-actions
+  scenario: GitHub Actions supply-chain audit
+  role: py-audit-bot
+  prompt: prompt.audit.github-actions
+  inputs:
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  outputs:
+  - findings.json
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.audit-scale
+  - prompt.fragment.gh-powershell
+- id: agents-runtime
+  scenario: AI runtime/skills audit
+  role: py-audit-bot
+  prompt: prompt.audit.agents-runtime
+  inputs:
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  outputs:
+  - findings.json
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.peer-review-gate
+- id: architecture-cycle
+  scenario: Architecture scorecard cycle
+  role: py-audit-bot
+  prompt: prompt.architecture.cycle
+  inputs:
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  outputs:
+  - scorecard
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.cyclic-kernel-v3
+- id: dashboard-audit
+  scenario: Grafana dashboard cycle
+  role: py-audit-bot
+  prompt: prompt.observability.dashboard-audit-cycle
+  inputs:
+  - THEME
+  - ZOOM
+  - VIEWPORT
+  - SCOPE
+  - LANGUAGE
+  outputs:
+  - findings.json
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.audit-scale
+  - prompt.fragment.dashboard-requirements-audit
+- id: sequential-run
+  scenario: Sequential domain audit with issue gates
+  role: py-audit-bot
+  prompt: prompt.audit.sequential-run
+  inputs:
+  - N
+  - MODE
+  - LANGUAGE
+  outputs:
+  - run-ledger
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.issue-state-machine-v3
+  - prompt.fragment.gh-powershell
+entries:
+- id: prompt.fragment.audit-scale
+  path: fragments/audit-scale.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Unified surface quality score 0-3, optional 0-5/1-5 maps, priority P0-P3
+- id: prompt.fragment.cyclic-kernel-v3
+  path: fragments/cyclic-kernel-v3.md
+  status: active
+  class: fragment
+  tags: []
+  summary: BioETL Cyclic Audit Kernel v3.0 fail-closed — full cycle baseline->audit->normalize->plan->issue-sync->implement->validate->close->post-audit
+- id: prompt.fragment.dashboard-requirements-audit
+  path: fragments/dashboard-requirements-audit.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Per-dashboard palette, copy, data, answer panels, and shipped panel roster
+- id: prompt.fragment.debt-budget-ban
+  path: fragments/debt-budget-ban.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Technical-debt budgets must not increase
+- id: prompt.fragment.env-guardrail
+  path: fragments/env-guardrail.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Secret-bearing .env surface guardrail
+- id: prompt.fragment.evidence-contract-v3
+  path: fragments/evidence-contract-v3.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Evidence contract v3 — finding schema, fingerprint, status gate, evidence
+    binding
+- id: prompt.fragment.finding-schema
+  path: fragments/finding-schema.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Finding fields + findings.json contract including requirement_id (REQ-*/DASH-*)
+- id: prompt.fragment.generated-artifact-ci
+  path: fragments/generated-artifact-ci.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Generated-artifact CI families, hasher split, and safe origin/main fetch
+- id: prompt.fragment.gh-powershell
+  path: fragments/gh-powershell.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Deterministic gh usage from Windows PowerShell
+- id: prompt.fragment.git-safety
+  path: fragments/git-safety.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Git and worktree safety for operator sessions
+- id: prompt.fragment.issue-state-machine-v3
+  path: fragments/issue-state-machine-v3.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Issue FSM v3 — states, transitions, dedupe by fingerprint/root cause, target-branch
+    close gate
+- id: prompt.fragment.language-ru
+  path: fragments/language-ru.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Default operator response language
+- id: prompt.fragment.orchestrator-guards
+  path: fragments/orchestrator-guards.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Fail-closed guards for multi-iteration audit/implement orchestrator
+- id: prompt.fragment.peer-review-gate
+  path: fragments/peer-review-gate.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Peer agent review gate after task implementation and before issue close
+- id: prompt.fragment.project-requirements-audit
+  path: fragments/project-requirements-audit.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Bind project-domain audits to REQUIREMENTS.md — REQ-* IDs, gates, issue
+    titles
+- id: prompt.audit.generic-nine.pack
+  path: library/audit/generic-nine.pack.md
+  status: active
+  class: index
+  tags:
+  - audit
+  - index
+  - operator
+  summary: Index of the nine-domain operator-paste audit kit (not runtime SSOT)
+- id: prompt.audit.agents-runtime
+  path: library/audit/agents-runtime.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - agents
+  - runtime
+  - scripts
+  - operator
+  summary: Audit AI agent instructions, skills, and agent-related scripts
+- id: prompt.architecture.review
+  path: library/audit/architecture-review.md
+  status: active
+  class: operator-paste
+  tags:
+  - architecture
+  - review
+  - operator
+  - audit
+  summary: Read-only architecture review (hexagonal/C4/arc42) and refactor waves
+- id: prompt.architecture.cycle
+  path: library/audit/architecture.md
+  status: active
+  class: operator-paste
+  tags:
+  - architecture
+  - audit
+  - cycle
+  - scorecard
+  - hexagonal
+  - plan
+  - implement
+  - operator
+  summary: Cyclic architecture audit — 10-category scorecard, improvement plan, implement
+    waves, re-verify
+- id: prompt.audit.cycle
+  path: library/audit/cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - cycle
+  - grok
+  - operator
+  summary: One audit cycle — kernel v3 plus domain overlay; successor of grok-audit-cycle
+    and cyclic-pack
+- id: prompt.audit.cyclic-pack
+  path: library/audit/cyclic-pack.md
+  status: archived
+  class: historical
+  tags:
+  - audit
+  - cycle
+  - pack
+  - operator
+  summary: Deprecated pack — use prompt.audit.cycle + domains.yaml
+  successor: prompt.audit.cycle
+- id: prompt.observability.dashboard-audit-cycle
+  path: library/audit/dashboard.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - audit
+  - cycle
+  - density
+  - render
+  - operator
+  summary: Cyclic Grafana audit (v2.2) with per-UID palette, copy, data, and panel
+    roster; theme/zoom Tier-1 100% and Tier-2 200%
+- id: prompt.debug.isolate
+  path: library/audit/debug.md
+  status: active
+  class: operator-paste
+  tags:
+  - debug
+  - operator
+  summary: Reproduce, isolate, root-cause (py-debug-bot) — read-only
+- id: prompt.audit.diagrams
+  path: library/audit/diagrams.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - diagrams
+  - mermaid
+  - architecture
+  - operator
+  summary: Audit version-controlled diagrams and render scripts
+- id: prompt.audit.github-actions
+  path: library/audit/github-actions.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - ci
+  - github-actions
+  - security
+  - operator
+  summary: GitHub Actions supply-chain and correctness audit
+- id: prompt.observability.grafana-audit.data-integrity
+  path: library/audit/grafana-data.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - dashboard
+  - audit
+  - data
+  - lineage
+  - integrity
+  - operator
+  summary: Forensic Grafana data audit — lineage, exact queries, invariants, reconciliation
+- id: prompt.observability.grafana-audit.layout
+  path: library/audit/grafana-layout.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - dashboard
+  - audit
+  - layout
+  - navigation
+  - ia
+  - operator
+  summary: Grafana layout audit — composition, hierarchy, variables, drill-down
+- id: prompt.observability.grafana-audit.master
+  path: library/audit/grafana-master.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - dashboard
+  - audit
+  - master
+  - evidence
+  - read-only
+  - operator
+  summary: Complete Grafana master audit — evidence, visual, layout, data, scorecard
+- id: prompt.observability.grafana-audit.regression
+  path: library/audit/grafana-regression.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - dashboard
+  - audit
+  - regression
+  - acceptance
+  - release
+  - operator
+  summary: Grafana regression acceptance — baseline retest, new regressions, release
+    gate
+- id: prompt.observability.grafana-audit.visual
+  path: library/audit/grafana-visual.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - dashboard
+  - audit
+  - visual
+  - wcag
+  - typography
+  - operator
+  summary: Grafana visual audit — palette, WCAG contrast, typography, encoding
+- id: prompt.audit.grok-cycle
+  path: library/audit/grok-audit-cycle.md
+  status: archived
+  class: historical
+  tags:
+  - audit
+  - grok
+  - operator
+  summary: Archived pointer — use prompt.audit.cycle
+  successor: prompt.audit.cycle
+- id: prompt.observability.sequential-run
+  path: library/audit/observability-sequential.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - audit
+  - sequential
+  - operator
+  summary: Sequential observability folder run — unique cards, issue/close gates,
+    no full duplicates
+- id: prompt.audit.orchestrator
+  path: library/audit/orchestrator.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - orchestrator
+  - github
+  - operator
+  summary: Fail-closed N-iteration audit → issues → fix → CI → post-audit loop
+- id: prompt.audit.repo-tree
+  path: library/audit/repo-tree.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - repo
+  - hygiene
+  - root
+  - operator
+  summary: Repository tree and root hygiene audit against allowlist
+- id: prompt.audit.sequential-run
+  path: library/audit/sequential-run.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - sequential
+  - cycle
+  - github
+  - operator
+  summary: Sequential library/audit run — 10 cycle cards, REQ-* binding, issue/fix/close
+    gates
+- id: prompt.audit.tech-debt
+  path: library/audit/tech-debt.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - debt
+  - quality
+  - operator
+  summary: Evidence-based technical debt register with risk-ordered paydown
+- id: prompt.closeout.grok
+  path: library/closeout/grok-closeout.md
+  status: active
+  class: operator-paste
+  tags:
+  - closeout
+  - grok
+  - operator
+  summary: Issue/PR closeout paste with verdicts, evidence, ship-profile note
+- id: prompt.config.validate
+  path: library/config/validate.md
+  status: active
+  class: operator-paste
+  tags:
+  - config
+  - schema
+  - operator
+  summary: Config, schema, and contract validation or remediation (py-config-bot)
+- id: prompt.docs.audit
+  path: library/doc/audit.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - docs
+  - content
+  - operator
+  summary: Evidence-based audit of project documentation content and drift
+- id: prompt.audit.docs-pipeline
+  path: library/doc/pipeline.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - docs
+  - pipeline
+  - scripts
+  - operator
+  summary: Audit docs generate/validate/publish scripts and pipelines
+- id: prompt.docs.ai-audit-planning
+  path: library/doc/planning.md
+  status: active
+  class: operator-paste
+  tags:
+  - docs
+  - audit
+  - planning
+  - operator
+  summary: Plan an audit of docs/00-project/ai surfaces
+- id: prompt.plan.agent-efficiency
+  path: library/plan/agent-efficiency.md
+  status: active
+  class: operator-paste
+  tags:
+  - plan
+  - operator
+  - agents
+  - ci
+  summary: Plan agent-efficiency work (CI families, SCOPE bootstrap, hasher split)
+- id: prompt.plan.scoped
+  path: library/plan/scoped.md
+  status: active
+  class: operator-paste
+  tags:
+  - plan
+  - operator
+  summary: Scoped implementation plan (py-plan-bot) — one active step
+- id: prompt.session.grok-bootstrap
+  path: library/session/bootstrap.md
+  status: active
+  class: operator-paste
+  tags:
+  - session
+  - grok
+  - bootstrap
+  - operator
+  summary: Short daily-work bootstrap for Grok sessions on BioETL (MODE includes ci-rebind)
+- id: prompt.tests.cycle
+  path: library/test/cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - tests
+  - cycle
+  - pytest
+  - quality
+  - operator
+  summary: Cyclic testing — baseline run, triage, fix, retest, delta per cycle
+- id: prompt.tests.fix-retest
+  path: library/test/fix-retest.md
+  status: active
+  class: operator-paste
+  tags:
+  - tests
+  - debug
+  - operator
+  summary: Run → fix → retest until green or blocked
+- id: prompt.tests.speed-optimization
+  path: library/test/speed-optimization.md
+  status: active
+  class: operator-paste
+  tags:
+  - tests
+  - performance
+  - operator
+  summary: Accelerate test runs without weakening coverage
+- id: prompt.audit.tests-system
+  path: library/test/system-audit.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - tests
+  - quality
+  - operator
+  summary: Audit test system as regression detection, not coverage vanity

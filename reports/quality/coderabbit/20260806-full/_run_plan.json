@@ -1,0 +1,347 @@
+[
+  {
+    "id": "S01-domain-aggregates",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/aggregates"
+    ],
+    "files": 19,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/aggregates",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-behavior",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/behavior"
+    ],
+    "files": 52,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/behavior",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-composite",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/composite"
+    ],
+    "files": 26,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/composite",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-config",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/config"
+    ],
+    "files": 12,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/config",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-contracts",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/contracts"
+    ],
+    "files": 23,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/contracts",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-control_plane",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/control_plane"
+    ],
+    "files": 32,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/control_plane",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-entities",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/entities"
+    ],
+    "files": 27,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/entities",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-exceptions",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/exceptions"
+    ],
+    "files": 24,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/exceptions",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-filtering",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/filtering"
+    ],
+    "files": 13,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/filtering",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-lineage",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/lineage"
+    ],
+    "files": 6,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/lineage",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-mapping",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/mapping"
+    ],
+    "files": 15,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/mapping",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-models",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/models"
+    ],
+    "files": 7,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/models",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-normalization",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/normalization"
+    ],
+    "files": 88,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/normalization",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-ports",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/ports"
+    ],
+    "files": 76,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/ports",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-registry",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/registry"
+    ],
+    "files": 6,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/registry",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-residual-root",
+    "wave": "A",
+    "globs": [
+      "domain residual root"
+    ],
+    "files": 31,
+    "under_cap": true,
+    "dir": null,
+    "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S01-domain-residual-root.txt",
+    "note": "domain residual root"
+  },
+  {
+    "id": "S01-domain-run_reports",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/run_reports"
+    ],
+    "files": 10,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/run_reports",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-schemas",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/schemas"
+    ],
+    "files": 49,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/schemas",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-transformations",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/transformations"
+    ],
+    "files": 5,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/transformations",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-types",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/types"
+    ],
+    "files": 24,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/types",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-validation",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/validation"
+    ],
+    "files": 4,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/validation",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-value_objects",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/value_objects"
+    ],
+    "files": 42,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/value_objects",
+    "note": ""
+  },
+  {
+    "id": "S01-domain-workflow",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/domain/workflow"
+    ],
+    "files": 6,
+    "under_cap": true,
+    "dir": "src/bioetl/domain/workflow",
+    "note": ""
+  },
+  {
+    "id": "S02-app-core",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/application/core"
+    ],
+    "files": 192,
+    "under_cap": true,
+    "dir": "src/bioetl/application/core",
+    "note": ""
+  },
+  {
+    "id": "S03-app-control-plane",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/application/services/control_plane"
+    ],
+    "files": 140,
+    "under_cap": true,
+    "dir": "src/bioetl/application/services/control_plane",
+    "note": ""
+  },
+  {
+    "id": "S04-app-services-other",
+    "wave": "A",
+    "globs": [
+      "services excl CP"
+    ],
+    "files": 149,
+    "under_cap": true,
+    "dir": null,
+    "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S04-app-services-other.txt",
+    "note": "services excl CP"
+  },
+  {
+    "id": "S04b-app-residual",
+    "wave": "A",
+    "globs": [
+      "application residual"
+    ],
+    "files": 153,
+    "under_cap": true,
+    "dir": null,
+    "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S04b-app-residual.txt",
+    "note": "application residual"
+  },
+  {
+    "id": "S09-composition",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/composition"
+    ],
+    "files": 283,
+    "under_cap": true,
+    "dir": "src/bioetl/composition",
+    "note": ""
+  },
+  {
+    "id": "S10-interfaces-cli",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/interfaces/cli"
+    ],
+    "files": 104,
+    "under_cap": true,
+    "dir": "src/bioetl/interfaces/cli",
+    "note": ""
+  },
+  {
+    "id": "S11-interfaces-http",
+    "wave": "A",
+    "globs": [
+      "src/bioetl/interfaces/http"
+    ],
+    "files": 46,
+    "under_cap": true,
+    "dir": "src/bioetl/interfaces/http",
+    "note": ""
+  },
+  {
+    "id": "S11b-interfaces-residual",
+    "wave": "A",
+    "globs": [
+      "interfaces residual"
+    ],
+    "files": 2,
+    "under_cap": true,
+    "dir": null,
+    "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S11b-interfaces-residual.txt",
+    "note": "interfaces residual"
+  }
+]

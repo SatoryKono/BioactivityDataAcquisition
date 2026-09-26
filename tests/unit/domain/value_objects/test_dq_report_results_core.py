@@ -1,0 +1,145 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# pyright: reportUndefinedVariable=false
+# pyright: reportPossiblyUnboundVariable=false
+# pyright: reportTypedDictNotRequiredAccess=false
+# pyright: reportOptionalSubscript=false
+# pyright: reportOptionalOperand=false
+# pyright: reportOptionalCall=false
+# pyright: reportOptionalIterable=false
+# pyright: reportIncompatibleMethodOverride=false
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportReturnType=false
+# pyright: reportInvalidCast=false
+# pyright: reportAssignmentType=false
+# pyright: reportImplicitAbstractClass=false
+# pyright: reportFunctionMemberAccess=false
+# pyright: reportConstantRedefinition=false
+# pyright: reportInvalidTypeForm=false
+# PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
+"""Unit tests for DQ core result value objects."""
+
+from __future__ import annotations
+
+import pytest
+
+from bioetl.domain.value_objects.dq_report_enums import DQCheckStatus
+from bioetl.domain.value_objects.dq_report_results_core import (
+    CategoricalDistribution,
+    DriftLevel,
+    EncodingValidationResult,
+    SchemaDriftResult,
+    SchemaSnapshotResult,
+    TypeConformanceResult,
+    UniquenessResult,
+)
+
+
+@pytest.mark.unit
+class TestSchemaSnapshotResult:
+    """Tests for SchemaSnapshotResult."""
+
+    def test_schema_snapshot_result__to_tuple_conversion__b5e9325a(self) -> None:
+        """Test that list fields are converted to tuples in __post_init__."""
+        result = SchemaSnapshotResult(
+            fields_detected=5,
+            schema={"col1": "int"},
+            new_fields_since_last_run=["f1", "f2"],  # type: ignore[arg-type]
+            missing_fields_since_last_run=["f3"],  # type: ignore[arg-type]
+        )
+        assert isinstance(result.new_fields_since_last_run, tuple)
+        assert result.new_fields_since_last_run == ("f1", "f2")
+        assert isinstance(result.missing_fields_since_last_run, tuple)
+        assert result.missing_fields_since_last_run == ("f3",)
+
+
+@pytest.mark.unit
+class TestEncodingValidationResult:
+    """Tests for EncodingValidationResult."""
+
+    def test_validation_result__to_tuple_conversion__a82562fe(self) -> None:
+        """Test that list fields are converted to tuples in __post_init__."""
+        result = EncodingValidationResult(
+            encoding_errors=2,
+            invalid_utf8_records=[10, 20],  # type: ignore[arg-type]
+        )
+        assert isinstance(result.invalid_utf8_records, tuple)
+        assert result.invalid_utf8_records == (10, 20)
+
+
+@pytest.mark.unit
+class TestUniquenessResult:
+    """Tests for UniquenessResult."""
+
+    def test_instantiation(self) -> None:
+        """Test basic instantiation."""
+        result = UniquenessResult(
+            primary_key="id",
+            unique_count=100,
+            total_count=100,
+            duplicate_rate=0.0,
+            status=DQCheckStatus.PASS,
+        )
+        assert result.primary_key == "id"
+        assert result.unique_count == 100
+        assert result.total_count == 100
+        assert result.duplicate_rate == pytest.approx(0.0)
+        assert result.status == DQCheckStatus.PASS
+
+
+@pytest.mark.unit
+class TestTypeConformanceResult:
+    """Tests for TypeConformanceResult."""
+
+    def test_conformance_result__to_tuple_conversion__dd2d92b9(self) -> None:
+        """Test that list fields are converted to tuples in __post_init__."""
+        result = TypeConformanceResult(
+            schema_version="1.0",
+            pandera_passed=False,
+            errors=["err1", "err2"],  # type: ignore[arg-type]
+        )
+        assert isinstance(result.errors, tuple)
+        assert result.errors == ("err1", "err2")
+
+
+@pytest.mark.unit
+class TestCategoricalDistribution:
+    """Tests for CategoricalDistribution."""
+
+    def test_distribution__to_tuple_conversion__b20eb6d6(self) -> None:
+        """Test that list fields are converted to tuples in __post_init__."""
+        result = CategoricalDistribution(
+            top_values=[{"val": "a", "count": 10}],  # type: ignore[arg-type]
+            cardinality=1,
+        )
+        assert isinstance(result.top_values, tuple)
+        assert result.top_values == ({"val": "a", "count": 10},)
+
+
+@pytest.mark.unit
+class TestSchemaDriftResult:
+    """Tests for SchemaDriftResult."""
+
+    def test_schema_drift_result__to_tuple_conversion__5dc3e0b4(self) -> None:
+        """Test that list fields are converted to tuples in __post_init__."""
+        result = SchemaDriftResult(
+            drift_level=DriftLevel.INFO,
+            new_fields=["f1"],  # type: ignore[arg-type]
+            missing_fields=["f2"],  # type: ignore[arg-type]
+            type_changes=[{"field": "f3", "from": "int", "to": "str"}],  # type: ignore[arg-type]
+        )
+        assert isinstance(result.new_fields, tuple)
+        assert result.new_fields == ("f1",)
+        assert isinstance(result.missing_fields, tuple)
+        assert result.missing_fields == ("f2",)
+        assert isinstance(result.type_changes, tuple)
+        assert result.type_changes == ({"field": "f3", "from": "int", "to": "str"},)

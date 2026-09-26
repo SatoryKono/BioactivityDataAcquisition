@@ -1,0 +1,176 @@
+{
+  "bioetl-dq-v2": [
+    {
+      "id": 121,
+      "title": "Inspect Top Silver Reject Reasons",
+      "type": "bargauge",
+      "old_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "new_steps": [
+        {
+          "color": "transparent",
+          "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
+        }
+      ],
+      "mappings": [
+        {
+          "type": "special",
+          "options": {
+            "match": "null+nan",
+            "result": {
+              "text": "—",
+              "color": "transparent",
+              "index": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 122,
+      "title": "Inspect Top Silver Reject Fields",
+      "type": "bargauge",
+      "old_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "new_steps": [
+        {
+          "color": "transparent",
+          "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
+        }
+      ],
+      "mappings": [
+        {
+          "type": "special",
+          "options": {
+            "match": "null+nan",
+            "result": {
+              "text": "—",
+              "color": "transparent",
+              "index": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 118,
+      "title": "Inspect Silver Rejects by Pipeline",
+      "type": "bargauge",
+      "old_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "new_steps": [
+        {
+          "color": "transparent",
+          "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
+        }
+      ],
+      "mappings": [
+        {
+          "type": "special",
+          "options": {
+            "match": "null+nan",
+            "result": {
+              "text": "—",
+              "color": "transparent",
+              "index": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 156,
+      "title": "Inspect: Gold Reject Outcomes by Pipeline",
+      "type": "bargauge",
+      "old_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "new_steps": [
+        {
+          "color": "transparent",
+          "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
+        }
+      ],
+      "mappings": [
+        {
+          "type": "special",
+          "options": {
+            "match": "null+nan",
+            "result": {
+              "text": "—",
+              "color": "transparent",
+              "index": 0
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "bioetl-runtime": [
+    {
+      "id": 241,
+      "title": "Compare Records by Stage & Run Type",
+      "type": "bargauge",
+      "old_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "new_steps": [
+        {
+          "color": "transparent",
+          "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
+        }
+      ],
+      "mappings": [
+        {
+          "type": "special",
+          "options": {
+            "match": "null+nan",
+            "result": {
+              "text": "—",
+              "color": "transparent",
+              "index": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

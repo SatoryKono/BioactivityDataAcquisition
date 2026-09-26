@@ -1,0 +1,218 @@
+[
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/config_runtime.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_runtime.py around lines 45 - 61, Update LineageConfig.__post_init__ to defensively copy provider_lookup_fields and each nested provider mapping into immutable mappings, and normalize track_source_for_fields to a tuple. Preserve the existing values while ensuring both collections cannot be mutated after construction, maintaining the frozen value-object invariants.",
+    "fingerprint": "2fe05b476a53"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/__init__.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/__init__.py around lines 17 - 131, Add focused nominal-path unit tests for the newly exported API symbols: verify DataSchemaConfig.get_layer_groups(), CompositeDQConfig effective override behavior, and EnrichmentResult factory methods and rate calculations. Place the tests in the existing domain test structure, covering representative valid inputs and expected outputs without changing the production exports.",
+    "fingerprint": "056eab1d2be5"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/result_enrichment.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/result_enrichment.py around lines 158 - 190, Update the EnrichmentResult.timeout factory to validate timeout_seconds before constructing the result: reject negative or non-finite values, while preserving valid zero and positive values and the existing duration_seconds behavior. Ensure invalid input is rejected before formatting error_message, maintaining the value-object invariant and deterministic behavior.",
+    "fingerprint": "58c9de7a5f4c"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/result_enrichment.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/result_enrichment.py around lines 25 - 64, Extend ResultEnrichment.__post_init__ to reject negative records_input, records_enriched, records_not_found, and records_errored values, and reject records_enriched or records_not_found values greater than records_input. Preserve the existing rate and duration validations while ensuring enrichment_rate and not_found_rate remain within their documented 0.0\u20131.0 range.",
+    "fingerprint": "54d699f0ac90"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/config_cross_validation.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_cross_validation.py around lines 13 - 41, Update _validate_cross_validation_thresholds and _validate_cross_validation_tolerances to reject non-finite numeric inputs before applying their existing range and ordering checks. Validate all threshold and tolerance values with the appropriate finiteness check, preserving the current error behavior for finite out-of-range values and the existing value-object invariants.",
+    "fingerprint": "e90e31eae0af"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/config_dq.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_dq.py around lines 84 - 125, Update _validate to resolve each enricher override\u2019s effective soft and hard thresholds against the configured defaults, then validate that effective soft is less than effective hard while preserving the existing range checks and deterministic behavior. Ensure partial overrides such as only soft_fail_threshold still validate against the inherited default hard threshold, maintaining the value-object invariant for every enricher.",
+    "fingerprint": "c8a7e0298881"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/result_merge.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/result_merge.py around lines 25 - 42, Update MergeResult.__post_init__ to defensively copy field_coverage and lineage_summary into immutable mappings, and convert each JsonDict in quarantine_payloads to an immutable mapping before storing them. Preserve the existing tuple conversion and value contents while ensuring callers cannot mutate these fields through the frozen result.",
+    "fingerprint": "057253b2f027"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/config_schema.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_schema.py around lines 73 - 101, The layer-selection checks in get_layer_groups and should_include_group currently treat explicit empty tuples as absent. Update both conditions to test whether column_groups/include_groups is not None, so an empty selection is preserved and excludes all groups while None continues to trigger the existing fallback or unrestricted behavior.",
+    "fingerprint": "6b9e4ff4df73"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/result_composite.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/result_composite.py around lines 20 - 24, Before releasing the public CompositeResult contract, add the required release artifacts: bump the relevant version, reference an ADR, document migration notes, and provide a rollback procedure. Keep the __all__ export and CompositeResult implementation unchanged.",
+    "fingerprint": "215a53d1d089"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/config_composite_validation.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_composite_validation.py at line 1, Refresh reports/quality/module-coverage-inventory.json using _refresh_module_coverage_inventory.py after the src/bioetl change, then run the architecture hash guard when feasible and include the generated inventory update.",
+    "fingerprint": "abfae66105e4"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/result_composite.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/result_composite.py around lines 42 - 168, Add unit tests for CompositeResult covering the nominal path where the seed, required dependencies, required enrichers, and merge result succeed, asserting is_success and summary values. Add failure-path tests for missing and failed required dependency or enricher results, verifying is_success is false while preserving the existing summary behavior.",
+    "fingerprint": "257a8c0c5c02"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/config_composite_validation.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_composite_validation.py around lines 8 - 11, The public exports declared in __all__ require release-contract artifacts. Add the applicable version bump, an ADR reference, migration notes, and a rollback procedure for coerce_composite_collections and validate_composite_config before release, using the repository\u2019s established locations and conventions.",
+    "fingerprint": "b832b89aca91"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/config_composite_validation.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_composite_validation.py around lines 55 - 130, Add unit tests covering the nominal behavior of coerce_composite_collections and validate_composite_config, including valid configurations and conversion of enricher/dependency lists to tuples. Add failure cases asserting invalid enricher or dependency join keys and duplicate enricher or dependency pipeline names raise ValueError.",
+    "fingerprint": "9e6df0c5b06b"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/config_composite_validation.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_composite_validation.py around lines 121 - 122, Update the duplicate validation in the relevant validation function to sort duplicate pipeline names before interpolating them in both ValueError messages, including the branches around the visible duplicates check and the second duplicate set. Preserve the existing error wording while ensuring deterministic ordering.",
+    "fingerprint": "b093124f4c69"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/result_composite.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/result_composite.py around lines 30 - 31, Update the result composite\u2019s dependency_results and enrichment_results fields to be defensively copied into bioetl.domain.immutability.FrozenDict during construction, preserving dataclasses.asdict and serialization compatibility. Ensure mappings supplied by callers cannot mutate the composite, and exposed mappings remain immutable; add tests covering both source-dictionary and exposed-mapping mutation.",
+    "fingerprint": "8d3bd2bea040"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/field_groups_registry.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/field_groups_registry.py around lines 36 - 42, The registry should use the enclosing FieldGroupDefinition.group_id as the authoritative group when populating _field_to_group and _column_to_group, rather than fm.group. Update the registration loop around group_def and FieldMapping so both indexes consistently assign group_def.group_id and cannot silently classify mappings as TRASH.",
+    "fingerprint": "d24d26dd71d3"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/config_composite_serialization.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_composite_serialization.py around lines 50 - 55, Remove the trailing `or 600` from both the dependency timeout construction and `_build_enricher_config`, preserving explicit zero so `DependencyConfig._validate` and `EnricherConfig._validate` can reject it. Update the affected parameter typing to `int | None` as needed, and narrow the non-None result with an assertion or the existing dedicated helper rather than using a truthiness fallback.",
+    "fingerprint": "0cac72a7a070"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/config_models.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_models.py around lines 28 - 33, Rename the shared helpers _coerce_to_tuple, _require_non_empty, _validate_positive, and _validate_positive_limit in config_validators to public names without leading underscores, update __all__, and adjust imports in config_models.py and config_merge.py. Replace aggregation.py\u2019s local _require_non_empty usage with the shared public helper, preserving behavior and accommodating its narrower local signature where needed.",
+    "fingerprint": "60b2bf8870e6"
+  },
+  {
+    "severity": "trivial",
+    "path": "src/bioetl/domain/composite/result_seed_dependency.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/result_seed_dependency.py around lines 126 - 145, Update the DependencyResult.skipped factory so a successful SKIPPED result does not populate error_message with its non-error reason; leave error_message as None, or introduce and use a distinct reason field while preserving the existing reason value.",
+    "fingerprint": "8512f407c764"
+  },
+  {
+    "severity": "trivial",
+    "path": "src/bioetl/domain/composite/aggregation.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/aggregation.py around lines 15 - 33, Change AggregationFunction and EnricherCardinality to subclass the project\u2019s established StrEnum pattern, preserving their existing member values. Update affected serialization and comparison usage to rely on string semantics without unnecessary .value handling. Because this changes a public configuration contract, add the required version bump, ADR reference, migration notes, and rollback procedure.",
+    "fingerprint": "6d29db0c9430"
+  },
+  {
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/config_composite_serialization.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_composite_serialization.py around lines 134 - 234, Make composite_to_dict and composite_from_dict true lossless counterparts by serializing and reconstructing every CompositeConfig field, including seed.limit, dependency/enricher options, all MergeConfig fields, and top-level dq, execution, lineage, and cross_validation. Update _build_seed_config, _build_dependency_configs, _build_enricher_configs, and _build_merge_config to consume the added values and preserve validation-dependent data such as field_priorities, cardinality, and aggregation.",
+    "fingerprint": "f2c2cd8e2734"
+  },
+  {
+    "severity": "trivial",
+    "path": "src/bioetl/domain/composite/field_groups_models.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/field_groups_models.py around lines 97 - 100, Update FieldGroupDefinition.__post_init__ to validate that display_name is non-empty, matching the base_name guard in FieldMapping.__post_init__. Preserve the existing fields list-to-tuple conversion and deterministic value-object invariants, raising the same validation error type and style used for base_name.",
+    "fingerprint": "87da0074aca4"
+  },
+  {
+    "severity": "trivial",
+    "path": "src/bioetl/domain/composite/cross_validation.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/cross_validation.py around lines 89 - 99, In EnricherFieldPairing.__post_init__, normalize fields from list to tuple before validating enricher_pipeline and fields. Keep the existing validation rules and error messages unchanged, ensuring both checks operate on the normalized value.",
+    "fingerprint": "c8d0294fbfa0"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/state.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/state.py around lines 171 - 177, Update the to_metric_value method docstring to document the actual 0-11 metric range produced by _STATE_METRIC_VALUES, including the terminal COMPLETED and FAILED values. Leave the mapping and conversion behavior unchanged.",
+    "fingerprint": "97681acf3224"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/lineage.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/lineage.py around lines 82 - 138, Update CompositeLineageMetadata.to_dict and _parse_enrichment_status to preserve each EnrichmentStatusRecord\u2019s timestamp and error_message using the proposed nested payload shape. Make _parse_enrichment_status accept both legacy plain-string values and new mapping values, retaining backward compatibility while restoring all available provenance fields during from_dict.",
+    "fingerprint": "128346bed14e"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/result_seed_dependency.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/result_seed_dependency.py around lines 156 - 177, Update the Returns section of the timeout dependency result factory docstring to state that duration_seconds uses the supplied value when provided, otherwise defaults to timeout_seconds. Keep the implementation and Args documentation unchanged.",
+    "fingerprint": "6d69c89298b2"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/lineage.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/lineage.py around lines 146 - 165, Make _parse_timestamps and _parse_datetime tolerant of malformed ISO strings, matching the existing from_dict parser contract: catch datetime.fromisoformat parsing errors, skip invalid timestamp entries, and return None for an invalid optional datetime while preserving valid-value UTC normalization.",
+    "fingerprint": "17c35bf21ddf"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/field_groups_models.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/field_groups_models.py around lines 45 - 53, Normalize provider names case-insensitively within the providers property, deduplicating on the normalized value while returning a consistent normalized representation. Update has_provider to reuse self.providers directly rather than applying separate lowercase logic, and ensure provider_count and get_column remain consistent with this canonical provider handling.",
+    "fingerprint": "1c67ad776d72"
+  },
+  {
+    "severity": "trivial",
+    "path": "src/bioetl/domain/composite/config_merge.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_merge.py around lines 60 - 66, Update the configuration value object\u2019s __post_init__ or initialization path to compile pattern with the standard-library re module when it is provided, so invalid regex syntax raises during configuration construction. Preserve _validate\u2019s existing name and fields-or-pattern invariants and avoid recompiling the pattern at application call sites.",
+    "fingerprint": "0ea7168ae34c"
+  },
+  {
+    "severity": "trivial",
+    "path": "src/bioetl/domain/composite/field_groups_registry.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/field_groups_registry.py around lines 152 - 176, Update get_ordered_columns to reuse a precomputed FieldGroupId-to-rank map initialized once in __init__, rather than rebuilding group_order and scanning it with index for each column. Use the map when deriving group_idx in sort_key, while preserving the existing fallback rank and sorting behavior.",
+    "fingerprint": "36cd13645409"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/config_merge.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_merge.py around lines 201 - 208, Normalize sort-policy column names during configuration conversion before assigning them to self.sort_by_silver and self.sort_by_gold. Update _validate_sort_policy to validate the already-normalized columns directly, ensuring stored values contain no surrounding whitespace and duplicate detection uses those canonical names.",
+    "fingerprint": "260c386d5c33"
+  },
+  {
+    "severity": "trivial",
+    "path": "src/bioetl/domain/composite/config_merge.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/config_merge.py around lines 171 - 183, Update _convert_column_groups to normalize any dict elements regardless of whether column_groups is a list or tuple, while preserving existing ColumnGroupConfig instances and converting the result to the expected tuple form. Apply the same item-level normalization to _convert_exclude_fields and AggregationConfig.__post_init__, ensuring tuple inputs containing convertible dict values receive the same handling as list inputs.",
+    "fingerprint": "cfeb11863a4d"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/cross_validation.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/cross_validation.py around lines 45 - 74, Update FieldComparisonSpec so its documented threshold behavior matches implementation: either add deterministic per-method defaults of 0.8 for FUZZY and 0.10 for NUMERIC_TOLERANCE, or revise the docstring to require callers to provide thresholds. In __post_init__, reuse config_validators._validate_optional_threshold for FUZZY so thresholds remain within [0.0, 1.0], while preserving positive-threshold validation for NUMERIC_TOLERANCE and the existing value-object invariants.",
+    "fingerprint": "6945c0f3c0fc"
+  },
+  {
+    "severity": "trivial",
+    "path": "src/bioetl/domain/composite/state.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/state.py around lines 121 - 136, Cache the enum-keyed transition sets at module scope in a new _STATE_TRANSITION_SETS mapping, built from _STATE_TRANSITIONS alongside _STATE_METRIC_VALUES. Update CompositePipelineState.allowed_transitions to return the cached frozenset for self instead of rebuilding it, while preserving empty results for states without configured transitions.",
+    "fingerprint": "7e8bbdc65d58"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/field_groups_registry.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/field_groups_registry.py around lines 103 - 123, Update FieldGroupRegistry.is_gold_field() to consult the loaded FieldGroupDefinition for the column\u2019s resolved group, including custom include_in_gold overrides from field_group_loader, rather than relying only on FieldGroupId/PublicationFieldGroup metadata. Preserve system-column handling in get_gold_columns() and ensure get_trash_columns() observes the same configured result.",
+    "fingerprint": "ce83fd6a64a2"
+  },
+  {
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/aggregation.py",
+    "claim": "Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn @src/bioetl/domain/composite/aggregation.py around lines 140 - 143, Validate AggregationSpec.filter_condition during configuration loading before consumers build Polars expressions, using shared grammar validation in the aggregation configuration path. Reject or fail closed for unsupported or malformed conditions, and ensure aggregator.py and coordinator_planning.py log and ignore invalid filters consistently rather than silently treating them as valid.",
+    "fingerprint": "026e763b42c0"
+  }
+]

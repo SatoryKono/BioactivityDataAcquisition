@@ -1,0 +1,50 @@
+{
+  "request_started": "2026-09-23T08:21:56.3145158+00:00",
+  "request_finished": "2026-09-23T08:22:02.7368723+00:00",
+  "response": {
+    "status": "ok",
+    "count": 1,
+    "index_state": "ok",
+    "index_state_message": "Latest launches by started_at; manifest creation is the explicit fallback.",
+    "report_root": "/app/reports/run-reports",
+    "marker": "ok",
+    "marker_status": "healthy",
+    "source_identity": "ok",
+    "source_identity_state": "aligned",
+    "source_identity_status": "healthy",
+    "source_identity_expected": "876cef277e7904abd18fe549b99c74818573875bd4ff3e7531c76140d68339f5",
+    "source_identity_actual": "876cef277e7904abd18fe549b99c74818573875bd4ff3e7531c76140d68339f5",
+    "source_identity_resolution_source": "process_environment",
+    "items": [
+      {
+        "pipeline": "chembl_molecule",
+        "run_id": "7dfad8f0-1f7b-51c4-8bdd-785defb2fb31",
+        "workflow_id": "—",
+        "workflow_run_id": "—",
+        "run_type": "incremental",
+        "started_at": "2026-09-22T18:00:39.898464+03:00",
+        "started_at_source": "report_identity",
+        "completed_at": "2026-09-22T18:01:19.981035+03:00",
+        "status": "success",
+        "processing_status": "success",
+        "trust_status": "Inspect in 1. Trust",
+        "report_state": "AVAILABLE",
+        "selected": 1,
+        "json_path": "/app/reports/run-reports/pipeline/chembl_molecule/7dfad8f0-1f7b-51c4-8bdd-785defb2fb31/pipeline-run-report.json",
+        "markdown_path": "/app/reports/run-reports/pipeline/chembl_molecule/7dfad8f0-1f7b-51c4-8bdd-785defb2fb31/pipeline-run-report.md",
+        "last_event_at": null,
+        "report_url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=chembl_molecule&run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&format=pipeline_run_report_md",
+        "report_format": "pipeline_run_report_md",
+        "report_label": "Open report",
+        "duration_seconds": 40.082571,
+        "duration_display": "40 s",
+        "last_event_age_seconds": 62442.685023,
+        "event_age_display": "17 h 21 m",
+        "run_label": "7dfa…fb31",
+        "workflow_scope": "$__all"
+      }
+    ],
+    "catalog_state": "available",
+    "order_by": "started_at_desc"
+  }
+}

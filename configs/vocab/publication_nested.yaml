@@ -1,0 +1,60 @@
+version: 1
+description: >
+  Nested raw publication-sidecar vocabulary inventory for governance-only drift
+  checks. These surfaces remain open-world where marked, but newly observed
+  values must still be classified explicitly.
+providers:
+  openalex:
+    source_type:
+      values: ["ebook platform", "journal", "repository"]
+    raw_type:
+      values:
+        [
+          "journal-article",
+          "monograph",
+          "posted-content",
+          "proceedings-article",
+          "text",
+        ]
+    version:
+      values: ["publishedVersion", "submittedVersion"]
+    indexed_in:
+      values: ["crossref", "doaj", "pubmed"]
+    license:
+      values: ["cc-by", "cc-by-nc-nd", "cc-by-sa", "other-oa"]
+    oa_status:
+      values: ["closed", "diamond", "gold", "green", "hybrid"]
+  semanticscholar:
+    publication_types:
+      values: ["ClinicalTrial", "JournalArticle", "Review"]
+    citation_context_keys:
+      values: ["contexts", "intent", "isInfluential", "section"]
+    subject_fields:
+      values:
+        - Bioinformatics
+        - Biology
+        - Chemistry
+        - Data Engineering
+        - Data Science
+        - Genomics
+        - Knowledge Graphs
+        - Machine Learning
+        - Medicine
+        - Observability
+        - Physics
+        - Reproducibility
+        - Systems Biology
+    author_id_families:
+      values: ["CorpusId", "DBLP", "ORCID", "OpenAlex"]
+  pubmed:
+    publication_types:
+      values: ["Clinical Trial", "Journal Article", "Meta-Analysis", "Review"]
+    mesh_keys:
+      values:
+        - descriptor_name
+        - descriptor_ui
+        - is_major_topic
+        - qualifier_name
+        - qualifier_ui
+    affiliation_keys:
+      values: ["affiliations", "author", "collective_name"]

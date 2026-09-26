@@ -1,0 +1,51 @@
+{
+  "snapshot_date": "2026-06-20",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "issues": [
+    {
+      "issue": "#5343",
+      "theme": "Runtime builder removed support modules do not return",
+      "debt_types": ["Hotspot", "Maintainability debt", "Composition debt"],
+      "action": "Removed deprecated runtime builder support modules and updated hotspot family allowlist to prevent their return.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/debt_scorecard.yaml::hotspot_family_coverage_thresholds.composition_runtime_builders.allowlisted_unmeasured_paths",
+        "tests/architecture/test_tech_debt_issues_5343_5346_closeout.py::test_runtime_builder_removed_support_modules_do_not_return"
+      ]
+    },
+    {
+      "issue": "#5344",
+      "theme": "Date-only inventory burn-down bounded to reviewed surfaces",
+      "debt_types": ["Determinism risk", "Governance gap", "Config drift"],
+      "action": "Migrated remaining date-only entity inventory items to content-hash datetime policy and enforced zero remaining date-only inventory.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/determinism_identity_policy.yaml::content_hash_datetime_policy.date_only_entity_inventory",
+        "tests/architecture/test_tech_debt_issues_5343_5346_closeout.py::test_date_only_inventory_burn_down_is_bounded_to_remaining_reviewed_surfaces"
+      ]
+    },
+    {
+      "issue": "#5345",
+      "theme": "Date-only entity migration completion",
+      "debt_types": ["Determinism risk", "Migration debt", "Config debt"],
+      "action": "Completed migration of crossref, openalex, semanticscholar, and uniprot publication entities from date-only to content-hash datetime policy.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/determinism_identity_policy.yaml::content_hash_datetime_policy.date_only_entity_inventory",
+        "tests/architecture/test_tech_debt_issues_5343_5346_closeout.py::test_date_only_inventory_burn_down_is_bounded_to_remaining_reviewed_surfaces"
+      ]
+    },
+    {
+      "issue": "#5346",
+      "theme": "Determinism identity policy governance",
+      "debt_types": ["Governance gap", "Determinism risk", "Policy debt"],
+      "action": "Established governance for determinism identity policy with explicit date-only inventory tracking and migration targets.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/determinism_identity_policy.yaml",
+        "tests/architecture/test_tech_debt_issues_5343_5346_closeout.py::test_date_only_inventory_burn_down_is_bounded_to_remaining_reviewed_surfaces"
+      ]
+    }
+  ]
+}

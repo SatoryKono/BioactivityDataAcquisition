@@ -1,0 +1,369 @@
+{
+  "summary": {
+    "scanned_modules": 2491,
+    "total_internal_imports": 7857,
+    "layer_edges": 13,
+    "cross_layer_group_edges": 55,
+    "cross_layer_group_edges_total": 331,
+    "violations": 0,
+    "source_fingerprint": "2538c87d8e3fd6174e3a89c1ee5bc68a66ad382f73b4ca8a60294565b00fe2b9"
+  },
+  "layer_edges": [
+    {
+      "source": "application",
+      "target": "application",
+      "imports": 1565,
+      "allowed": true
+    },
+    {
+      "source": "application",
+      "target": "domain",
+      "imports": 1046,
+      "allowed": true
+    },
+    {
+      "source": "composition",
+      "target": "application",
+      "imports": 207,
+      "allowed": true
+    },
+    {
+      "source": "composition",
+      "target": "composition",
+      "imports": 631,
+      "allowed": true
+    },
+    {
+      "source": "composition",
+      "target": "domain",
+      "imports": 288,
+      "allowed": true
+    },
+    {
+      "source": "composition",
+      "target": "infrastructure",
+      "imports": 258,
+      "allowed": true
+    },
+    {
+      "source": "domain",
+      "target": "domain",
+      "imports": 1257,
+      "allowed": true
+    },
+    {
+      "source": "infrastructure",
+      "target": "domain",
+      "imports": 764,
+      "allowed": true
+    },
+    {
+      "source": "infrastructure",
+      "target": "infrastructure",
+      "imports": 1222,
+      "allowed": true
+    },
+    {
+      "source": "interfaces",
+      "target": "application",
+      "imports": 62,
+      "allowed": true
+    },
+    {
+      "source": "interfaces",
+      "target": "composition",
+      "imports": 59,
+      "allowed": true
+    },
+    {
+      "source": "interfaces",
+      "target": "domain",
+      "imports": 75,
+      "allowed": true
+    },
+    {
+      "source": "interfaces",
+      "target": "interfaces",
+      "imports": 423,
+      "allowed": true
+    }
+  ],
+  "cross_layer_group_edges": [
+    {
+      "source": "application.services",
+      "target": "domain.control_plane",
+      "imports": 133
+    },
+    {
+      "source": "infrastructure.adapters",
+      "target": "domain.types",
+      "imports": 120
+    },
+    {
+      "source": "application.composite",
+      "target": "domain.composite",
+      "imports": 113
+    },
+    {
+      "source": "application.core",
+      "target": "domain.types",
+      "imports": 90
+    },
+    {
+      "source": "application.services",
+      "target": "domain.types",
+      "imports": 83
+    },
+    {
+      "source": "infrastructure.storage",
+      "target": "domain.types",
+      "imports": 72
+    },
+    {
+      "source": "infrastructure.storage",
+      "target": "domain.ports",
+      "imports": 63
+    },
+    {
+      "source": "application.pipelines",
+      "target": "domain.types",
+      "imports": 57
+    },
+    {
+      "source": "application.composite",
+      "target": "domain.ports",
+      "imports": 56
+    },
+    {
+      "source": "application.services",
+      "target": "domain.ports",
+      "imports": 51
+    },
+    {
+      "source": "composition.factories",
+      "target": "application.core",
+      "imports": 47
+    },
+    {
+      "source": "infrastructure.storage",
+      "target": "domain.value_objects",
+      "imports": 43
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "application.services",
+      "imports": 39
+    },
+    {
+      "source": "composition.factories",
+      "target": "domain.ports",
+      "imports": 35
+    },
+    {
+      "source": "application.composite",
+      "target": "domain.exceptions",
+      "imports": 34
+    },
+    {
+      "source": "infrastructure.storage",
+      "target": "domain.models",
+      "imports": 34
+    },
+    {
+      "source": "application.core",
+      "target": "domain.ports",
+      "imports": 31
+    },
+    {
+      "source": "infrastructure.storage",
+      "target": "domain.medallion",
+      "imports": 31
+    },
+    {
+      "source": "interfaces.cli",
+      "target": "application.services",
+      "imports": 30
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "domain.ports",
+      "imports": 28
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "domain.control_plane",
+      "imports": 28
+    },
+    {
+      "source": "infrastructure.control_plane",
+      "target": "domain.control_plane",
+      "imports": 28
+    },
+    {
+      "source": "composition.factories",
+      "target": "infrastructure.adapters",
+      "imports": 26
+    },
+    {
+      "source": "application.services",
+      "target": "domain.value_objects",
+      "imports": 25
+    },
+    {
+      "source": "infrastructure.config",
+      "target": "domain.types",
+      "imports": 25
+    },
+    {
+      "source": "composition.factories",
+      "target": "infrastructure.config",
+      "imports": 24
+    },
+    {
+      "source": "infrastructure.adapters",
+      "target": "domain.ports",
+      "imports": 23
+    },
+    {
+      "source": "application.pipelines",
+      "target": "domain.entities",
+      "imports": 22
+    },
+    {
+      "source": "composition.factories",
+      "target": "domain.schemas",
+      "imports": 22
+    },
+    {
+      "source": "infrastructure.adapters",
+      "target": "domain.exceptions",
+      "imports": 22
+    },
+    {
+      "source": "interfaces.http",
+      "target": "domain.control_plane",
+      "imports": 22
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "application.composite",
+      "imports": 21
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.control_plane",
+      "imports": 21
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.config",
+      "imports": 21
+    },
+    {
+      "source": "interfaces.cli",
+      "target": "composition.control_plane_service_access",
+      "imports": 21
+    },
+    {
+      "source": "application.core",
+      "target": "domain.normalization",
+      "imports": 20
+    },
+    {
+      "source": "application.services",
+      "target": "domain.normalization",
+      "imports": 20
+    },
+    {
+      "source": "application.services",
+      "target": "domain.exceptions",
+      "imports": 19
+    },
+    {
+      "source": "composition.factories",
+      "target": "application.services",
+      "imports": 18
+    },
+    {
+      "source": "composition.factories",
+      "target": "domain.types",
+      "imports": 18
+    },
+    {
+      "source": "application.observability",
+      "target": "domain.control_plane",
+      "imports": 17
+    },
+    {
+      "source": "application.pipelines",
+      "target": "domain.value_objects",
+      "imports": 17
+    },
+    {
+      "source": "application.services",
+      "target": "domain.lineage",
+      "imports": 17
+    },
+    {
+      "source": "infrastructure.schemas",
+      "target": "domain.config",
+      "imports": 17
+    },
+    {
+      "source": "application.services",
+      "target": "domain.run_reports",
+      "imports": 15
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.config",
+      "imports": 15
+    },
+    {
+      "source": "composition.factories",
+      "target": "application.ports",
+      "imports": 15
+    },
+    {
+      "source": "composition.factories",
+      "target": "infrastructure.storage",
+      "imports": 15
+    },
+    {
+      "source": "infrastructure.control_plane",
+      "target": "domain.types",
+      "imports": 15
+    },
+    {
+      "source": "infrastructure.quality",
+      "target": "domain.types",
+      "imports": 15
+    },
+    {
+      "source": "infrastructure.storage",
+      "target": "domain.exceptions",
+      "imports": 15
+    },
+    {
+      "source": "application.core",
+      "target": "domain.exceptions",
+      "imports": 14
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.observability",
+      "imports": 14
+    },
+    {
+      "source": "infrastructure.observability",
+      "target": "domain.ports",
+      "imports": 14
+    },
+    {
+      "source": "application.services",
+      "target": "domain.behavior",
+      "imports": 13
+    }
+  ],
+  "violations": []
+}
