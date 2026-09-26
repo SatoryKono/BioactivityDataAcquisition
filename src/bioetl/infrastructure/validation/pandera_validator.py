@@ -32,6 +32,22 @@ if TYPE_CHECKING:
     import pandera.pandas as pa
 
 
+
+def _materialize_pandera_schema(schema: object | None) -> object | None:
+    """Resolve DataFrameModel classes to ``DataFrameSchema`` via ``to_schema``.
+
+    Pandera DataFrameModel metaclasses expose validation through the class but
+    do not provide ``.columns``. Materializing unlocks nullable dtype helpers
+    and column reordering on Gold/Silver validators (#11212).
+    """
+    if schema is None:
+        return None
+    to_schema = getattr(schema, "to_schema", None)
+    if callable(to_schema):
+        return to_schema()
+    return schema
+
+
 class BasePanderaValidator:
     """Base Pandera validator with common validation logic.
 
@@ -63,7 +79,7 @@ class BasePanderaValidator:
                 required).
 
         """
-        self._schema = schema
+        self._schema = _materialize_pandera_schema(schema)
         self._strict = strict
 
     def rebind_schema(self, schema: pa.DataFrameSchema | None) -> BasePanderaValidator:
@@ -175,8 +191,11 @@ class BasePanderaValidator:
             if not getattr(column, "nullable", False):
                 continue
 
+            # Only coerce object → pandas BooleanDtype when the schema already
+            # declares ``boolean``. Casting against plain ``bool`` yields
+            # ``expected bool, got boolean`` (see #11212 / #11213).
             dtype_name = str(getattr(column, "dtype", "")).lower()
-            if "bool" not in dtype_name and "boolean" not in dtype_name:
+            if "boolean" not in dtype_name:
                 continue
 
             series = normalized[name]
