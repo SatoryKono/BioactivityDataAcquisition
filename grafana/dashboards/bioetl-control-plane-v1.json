@@ -2065,7 +2065,7 @@
           "id": 9423,
           "type": "table",
           "title": "Review Exact Replay Checks",
-          "description": "SELECTED RUN · Individual checks behind Replay Readiness. Fail blocks replay; unknown means the check could not be confirmed. Evidence references point into the saved report.",
+          "description": "SELECTED RUN · Individual checks behind Replay Readiness. Fail blocks replay; unknown means the check could not be confirmed. Evidence references point into the saved report. VALID EMPTY is an empty successful query. Backend down is QUERY ERROR.",
           "datasource": "BioETL Ops HTTP",
           "targets": [
             {
@@ -6660,7 +6660,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Search persisted runs and choose one Run ID. This table does not score the Run ID already selected on this dashboard.",
+          "description": "SELECTED RUN · Search persisted runs and choose one Run ID. This table does not score the Run ID already selected on this dashboard. VALID EMPTY is an empty successful query. Backend down is QUERY ERROR.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm"
@@ -6864,7 +6864,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. VALID EMPTY is an empty successful query. Backend down is QUERY ERROR.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
