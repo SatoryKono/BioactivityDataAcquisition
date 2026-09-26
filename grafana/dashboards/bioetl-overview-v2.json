@@ -391,7 +391,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "SELECTED RUN · This table is the saved status verdict for the Run ID. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
+      "description": "SELECTED RUN · This table is the saved status verdict for the Run ID. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. OPERATOR: INCOMPLETE=проверка отсутствует, UNKNOWN=сохранённое доказательство отсутствует, VALID EMPTY=пустой успешный запрос. Детали — в canonical_registry.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",

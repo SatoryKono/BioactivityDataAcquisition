@@ -1,41 +1,277 @@
 {
-  "annotations": {"list": []},
-  "description": "Prometheus-only fallback for an unvalidated BioETL Ops HTTP datasource. This is an infrastructure notice, not a retention, replay, identity, or run verdict.",
-  "editable": false,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Run Explorer: latest 10 launches across all pipelines by start time, from reports and the control-plane catalog. Defaults Workflow/Pipeline/Run Type=All, Run ID=-. Details use exact Ops HTTP evidence; run_id never a Prometheus label.",
+  "editable": true,
+  "graphTooltip": 1,
   "id": null,
   "links": [],
-  "panels": [
-    {
-      "description": "Static fail-closed notice used when Grafana bootstrap cannot provision BioETL Ops HTTP. UNKNOWN means the HTTP identity backend is absent, not that retention or replay failed.",
-      "gridPos": {
-        "h": 14,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "id": 1,
-      "options": {
-        "bioetlDisplayTitle": "Review Ops HTTP Availability",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Review Ops HTTP Availability\" style=\"font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px\">Review Ops HTTP Availability</div><p style=\"font-size:16px;line-height:1.45;margin:8px 6px\">Ops HTTP not provisioned. Dashboard <strong>0. Run Explorer</strong> is serving the Prometheus-only notice profile because <code style=\"font-size:16px\">BioETL Ops HTTP</code> was not validated. Status: UNKNOWN.</p><p style=\"font-size:16px;line-height:1.45;margin:8px 6px\">No retention, replay, identity, or run verdict can be inferred from this notice. A missing datasource query is not a policy result.</p><p style=\"font-size:16px;line-height:1.45;margin:8px 6px\">Next action: start the monitoring stack through <code style=\"font-size:16px\">runtime_manager.py</code> so <code style=\"font-size:16px\">BIOETL_RUNTIME_SOURCE_ID</code> matches <code style=\"font-size:16px\">/ops/control-plane/ready</code>, then confirm <code style=\"font-size:16px\">ops_http=ready</code>, <code style=\"font-size:16px\">reason=identity_matched</code>, and <code style=\"font-size:16px\">dashboard_profile=full</code>.</p>",
-        "mode": "html"
-      },
-      "pluginVersion": "12.0.0",
-      "title": "Review Ops HTTP Availability",
-      "type": "text"
-    }
-  ],
-  "refresh": "",
-  "schemaVersion": 41,
-  "style": "dark",
+  "refresh": "60s",
+  "schemaVersion": 39,
   "tags": [
     "bioetl",
-    "prometheus-only",
-    "ops-http-unavailable"
+    "run-explorer",
+    "dashboard-2.0"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_workflow_universe, workflow)",
+        "description": "Optional workflow evidence context and workflow-dashboard handoff selector. Overview remains pipeline-summary-first: workflow does not yet drive exact intersection filtering for the current-status PromQL surfaces.",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Workflow",
+        "multi": false,
+        "name": "workflow",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_universe, workflow)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "BioETL Ops HTTP",
+        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Pipeline",
+        "multi": false,
+        "name": "pipeline",
+        "options": [],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false,
+        "description": "Browse scope from the local control-plane catalog. Default All includes every pipeline. Explicit URL selections take precedence. Select a table row to inspect its exact pipeline and Run ID."
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "BioETL Ops HTTP",
+        "definition": "/ops/control-plane/filter-options?dimension=run_type&response_shape=options&workflow=${workflow}&pipeline=${pipeline}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Run Type",
+        "multi": true,
+        "name": "run_type",
+        "options": [],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=run_type&response_shape=options&workflow=${workflow}&pipeline=${pipeline}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false,
+        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence. Select a table row to inspect its exact pipeline and Run ID."
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "-",
+          "value": "-"
+        },
+        "datasource": "BioETL Ops HTTP",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}",
+        "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Selected Run",
+        "multi": false,
+        "name": "run_id",
+        "options": [
+          {
+            "selected": true,
+            "text": "-",
+            "value": "-"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "name": "lookup_run_id",
+        "label": "Find exact Run ID",
+        "type": "textbox",
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "options": [],
+        "query": "",
+        "hide": 0,
+        "skipUrlSync": false,
+        "description": "Exact UUID lookup within Workflow/Pipeline/Run Type, including launches older than the latest ten. Clear to browse recent launches."
+      },
+      {
+        "name": "provider_for_pipeline",
+        "label": "Provider for pipeline",
+        "type": "query",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "refresh": 1,
+        "sort": 1,
+        "regex": "",
+        "skipUrlSync": true,
+        "options": [],
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
+        "query": {
+          "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
+          "refId": "StandardVariableQuery"
+        }
+      }
+    ]
   },
   "time": {
     "from": "now-12h",
@@ -45,5 +281,1029 @@
   "timezone": "browser",
   "title": "0. Run Explorer",
   "uid": "bioetl-run-explorer-v1",
-  "version": 1
+  "version": 2,
+  "style": "dark",
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "bioetlDisplayTitle": "Understand Run Scope",
+        "mode": "html",
+        "content": "<div style=\"padding:0px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;width:100%;max-width:100%;box-sizing:border-box;overflow:visible\"><strong>Last 10 launches · newest first · independent of the time range</strong><br>Select a Run ID to view details. <a href=\"/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a></div>"
+      },
+      "description": "Browse the latest 10 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
+      "links": [
+        {
+          "title": "Run-manifest inspection runbook",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md",
+          "targetBlank": true,
+          "includeVars": false
+        }
+      ]
+    },
+    {
+      "id": 3010,
+      "type": "table",
+      "title": "Inspect Recent Runs (last 10)",
+      "description": "BROWSE — Last 10 launches by started_at across the selected pipeline scope, after Workflow and Run Type filters. The dashboard time picker does not filter this table. Start time comes from ledger/report identity, with explicitly recorded manifest-created fallback; never file mtime. One row is one launch. Running is the last recorded lifecycle state, not live-process proof. REPORT MISSING distinguishes launches without a persisted report. Click a Run cell to select and mark that run, binding Workflow, Pipeline, Run Type and Run ID from that row. Pipeline and Workflow belong to each row. Older runs: use the Run ID catalog. limit=10 shows all ten rows together without pagination. VALID EMPTY means no matching launches; TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY means a report bind failure. Backend failures are QUERY ERROR, not empty data. Run python scripts/ops/runtime/docker/verify_report_bind.py to diagnose the report bind. The matching SELECTED RUN row is marked; browse is not an exact-run snapshot. Report opens the row file in a new tab: Markdown when present, otherwise JSON. REPORT MISSING opens an explicit not-found response; it does not imply a persisted file. Find Run ID searches exact UUID before the ten-row limit. Duration needs valid start/end. Event age is the last ledger event for unfinished runs, not a heartbeat. Inspect a Run cell to copy its full UUID. DUAL-STATUS · Column Processing is run-report execution state (processing_status). Trust/evidence verdict is a separate axis — open Replay readiness for the selected Run ID; do not treat Processing success as trust OK.",
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "datasource": "BioETL Ops HTTP",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "inspect": true,
+            "minWidth": 50,
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "wrapText": false
+          },
+          "noValue": "UNKNOWN — response unavailable; inspect panel status for QUERY ERROR.",
+          "links": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(started_at|Started)$"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(completed_at|Completed)$"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "wrapText": false,
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "TREE_MISSING": {
+                        "text": "TREE_MISSING",
+                        "color": "red"
+                      },
+                      "LAYOUT_UNHEALTHY": {
+                        "text": "LAYOUT_UNHEALTHY",
+                        "color": "orange"
+                      },
+                      "IDENTITY_UNHEALTHY": {
+                        "text": "IDENTITY_UNHEALTHY",
+                        "color": "orange"
+                      },
+                      "success": {
+                        "text": "success",
+                        "color": "#166534"
+                      },
+                      "failed": {
+                        "text": "failed",
+                        "color": "red"
+                      },
+                      "partial": {
+                        "text": "partial",
+                        "color": "orange"
+                      },
+                      "shutdown": {
+                        "text": "shutdown",
+                        "color": "orange"
+                      },
+                      "dry_run": {
+                        "text": "dry_run",
+                        "color": "blue"
+                      },
+                      "fail": {
+                        "text": "fail",
+                        "color": "red"
+                      },
+                      "running": {
+                        "text": "running",
+                        "color": "blue"
+                      },
+                      "unknown": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Run"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Select ${__data.fields.Run}",
+                    "url": "/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline}&var-run_type=${__data.fields.run_type}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_type"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(workflow_run_id|Workflow run)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Workflow run"
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "noValue",
+                "value": "—"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "selected"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": " "
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "wrapText": false,
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "",
+                        "color": "transparent"
+                      },
+                      "1": {
+                        "text": "●",
+                        "color": "blue"
+                      },
+                      "true": {
+                        "text": "●",
+                        "color": "blue"
+                      },
+                      "false": {
+                        "text": "",
+                        "color": "transparent"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 28
+              },
+              {
+                "id": "custom.minWidth",
+                "value": 28
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "message"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(workflow_id|Workflow)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Workflow"
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "noValue",
+                "value": "— (no workflow data)"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "—": {
+                        "text": "— (no workflow data)"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Started"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "noValue",
+                "value": "—"
+              },
+              {
+                "id": "custom.width",
+                "value": 60
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Completed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "noValue",
+                "value": "—"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "workflow_scope"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "report_url"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Report"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "${__data.fields.Report}",
+                    "url": "${__data.fields.report_url:raw}",
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "custom.inspect",
+                "value": false
+              },
+              {
+                "id": "displayName",
+                "value": "Report"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "REPORT MISSING": {
+                        "text": "Missing"
+                      },
+                      "Open report": {
+                        "text": "Open"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 40
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "completed_at"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "last_event_at"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              },
+              {
+                "id": "custom.width",
+                "value": 45
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "last_event_age_seconds"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Event age"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Action"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Why"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Stage"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "action_dashboard_uid"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Workflow"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "— (no workflow data)": {
+                        "text": "No workflow"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Replay readiness"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Open"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Inspect in 1. Trust": {
+                        "text": "Open"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open 1. Trust",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
+                    "includeVars": false
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 50
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Run Overview"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open Run Overview",
+                    "url": "/d/bioetl-overview-v2/2-overview?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
+                    "includeVars": false
+                  }
+                ]
+              },
+              {
+                "id": "noValue",
+                "value": "Open"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline Diagnostics"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open Pipeline Diagnostics",
+                    "url": "/d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
+                    "includeVars": false
+                  }
+                ]
+              },
+              {
+                "id": "noValue",
+                "value": "Open"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Provider Health"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open Provider Health",
+                    "url": "/d/bioetl-provider-health-v2/4-provider-health?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&var-provider=$__all&var-pipeline_context=${__data.fields.Pipeline:percentencode}&${__url_time_range}",
+                    "includeVars": false
+                  }
+                ]
+              },
+              {
+                "id": "noValue",
+                "value": "Open"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Data Quality"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open Data Quality",
+                    "url": "/d/bioetl-dq-v2/5-data-quality?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
+                    "includeVars": false
+                  }
+                ]
+              },
+              {
+                "id": "noValue",
+                "value": "Open"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Processing"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "wrapText": false,
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "TREE_MISSING": {
+                        "text": "TREE_MISSING",
+                        "color": "red"
+                      },
+                      "LAYOUT_UNHEALTHY": {
+                        "text": "LAYOUT_UNHEALTHY",
+                        "color": "orange"
+                      },
+                      "IDENTITY_UNHEALTHY": {
+                        "text": "IDENTITY_UNHEALTHY",
+                        "color": "orange"
+                      },
+                      "success": {
+                        "text": "success",
+                        "color": "#166534"
+                      },
+                      "failed": {
+                        "text": "failed",
+                        "color": "red"
+                      },
+                      "partial": {
+                        "text": "partial",
+                        "color": "orange"
+                      },
+                      "shutdown": {
+                        "text": "shutdown",
+                        "color": "orange"
+                      },
+                      "dry_run": {
+                        "text": "dry_run",
+                        "color": "blue"
+                      },
+                      "fail": {
+                        "text": "fail",
+                        "color": "red"
+                      },
+                      "running": {
+                        "text": "running",
+                        "color": "blue"
+                      },
+                      "unknown": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      },
+                      "unfinished": {
+                        "text": "unfinished",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 50
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trust"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Open"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Inspect in 1. Trust": {
+                        "text": "Open"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false,
+          "enablePagination": false,
+          "countRows": false
+        },
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "completed_at",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "started_at",
+                "destinationType": "time"
+              },
+              {
+                "targetField": "completed_at",
+                "destinationType": "time"
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "selected",
+                "started_at",
+                "pipeline",
+                "workflow_id",
+                "run_id",
+                "duration_display",
+                "event_age_display",
+                "status",
+                "trust_status",
+                "overview_handoff",
+                "diagnostics_handoff",
+                "provider_handoff",
+                "quality_handoff",
+                "report_label",
+                "report_url",
+                "workflow_scope",
+                "run_type",
+                "completed_at"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "selected": 0,
+              "started_at": 6,
+              "pipeline": 7,
+              "workflow_id": 8,
+              "run_id": 4,
+              "duration_display": 10,
+              "event_age_display": 11,
+              "status": 12,
+              "trust_status": 4,
+              "report_label": 13,
+              "report_url": 14,
+              "workflow_scope": 15,
+              "run_type": 16,
+              "completed_at": 17,
+              "overview_handoff": 1,
+              "diagnostics_handoff": 2,
+              "provider_handoff": 5,
+              "quality_handoff": 3
+            },
+            "renameByName": {
+              "selected": "",
+              "started_at": "Started",
+              "pipeline": "Pipeline",
+              "workflow_id": "Workflow",
+              "duration_display": "Duration",
+              "status": "Processing",
+              "report_label": "Report",
+              "event_age_display": "Event age",
+              "trust_status": "Replay readiness",
+              "run_id": "Run",
+              "overview_handoff": "Run Overview",
+              "diagnostics_handoff": "Pipeline Diagnostics",
+              "provider_handoff": "Provider Health",
+              "quality_handoff": "Data Quality"
+            },
+            "excludeByName": {
+              "Value": true,
+              "json_path": true,
+              "markdown_path": true,
+              "row_kind": true,
+              "report_url": false,
+              "workflow_scope": false,
+              "run_type": false,
+              "action_dashboard_uid": false,
+              "__name__": true,
+              "job": true
+            }
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 10
+          }
+        }
+      ],
+      "links": [
+        {
+          "title": "Browse all pipelines",
+          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Run-manifest inspection runbook",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md",
+          "targetBlank": true,
+          "includeVars": false
+        }
+      ]
+    }
+  ]
 }

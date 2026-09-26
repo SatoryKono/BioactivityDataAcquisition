@@ -720,7 +720,8 @@
             ]
           },
           "links": [],
-          "mappings": []
+          "mappings": [],
+          "decimals": 0
         },
         "overrides": [
           {
