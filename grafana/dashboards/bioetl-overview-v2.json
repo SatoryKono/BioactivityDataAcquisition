@@ -667,7 +667,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed.",
+      "description": "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed. States: OK/WARN/CRIT/UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "color": {
