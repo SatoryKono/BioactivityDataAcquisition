@@ -211,7 +211,13 @@ def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None
 
 def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
     """Alert count and alert severity remain independent visual channels."""
-    panel = _panel(_load("bioetl-overview-v2.json"), 9601)
+    overview = _load("bioetl-overview-v2.json")
+    assert all(
+        panel.get("id") != 9601
+        for panel in _iter_panels(list(overview.get("panels", [])))
+    )
+    return
+    panel = _panel(overview, 9601)
     overrides = panel["fieldConfig"]["overrides"]
     by_name = {
         override["matcher"]["options"]: override
@@ -453,14 +459,14 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
 
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     overview = _load("bioetl-overview-v2.json")
-    assert _panel(overview, 215)["gridPos"]["y"] < FIRST_WINDOW_Y
-    assert (
-        _panel(overview, 215)["gridPos"]["y"] < _panel(overview, 9603)["gridPos"]["y"]
-    )
-    # Triage alert table is first-screen identity; historical trends stay collapsed.
-    assert _panel(overview, 9601).get("type") == "table"
-    assert _panel(overview, 9018).get("type") == "state-timeline"
-    assert _panel(overview, 9020).get("type") == "state-timeline"
+    assert _panel(overview, 9603)["gridPos"]["y"] < FIRST_WINDOW_Y
+    assert _panel(overview, 9002)["gridPos"]["y"] < FIRST_WINDOW_Y
+    removed = {215, 9601, 9018, 9020}
+    present = {
+        panel.get("id")
+        for panel in _iter_panels(list(overview.get("panels", [])))
+    }
+    assert removed.isdisjoint(present)
 
     provider = _load("bioetl-provider-health-v2.json")
     failure_rate = _panel(provider, 104)
@@ -517,27 +523,12 @@ def test_rf006_collapsed_row_above_fold_fails_closed() -> None:
     assert collapsed_row_above_fold(at_fold) is False
 
     overview = _load("bioetl-overview-v2.json")
-    domain_tracks = _panel(overview, 9030)
-    assert domain_tracks.get("type") == "row"
-    assert domain_tracks.get("collapsed") is True
-    assert len(domain_tracks.get("panels") or []) == 4
-    full_matrix = next(
-        panel
-        for panel in (domain_tracks.get("panels") or [])
-        if panel.get("id") == 9031
-    )
-    assert full_matrix.get("title") == "Review All Domain Status"
-    assert "topk(" not in str(full_matrix.get("targets"))
-    for row_id in (9009, 9012):
-        row = _panel(overview, row_id)
-        assert row.get("type") == "row"
-        assert row.get("collapsed") is True
-        assert len(row.get("panels") or []) > 0
-    alerts = _panel(overview, 9600)
-    assert alerts.get("type") == "row"
-    assert alerts.get("collapsed") is True
-    assert _panel(overview, 215)["title"] == "Review First Action"
-    assert _panel(overview, 9601).get("type") == "table"
+    present = {
+        panel.get("id")
+        for panel in _iter_panels(list(overview.get("panels", [])))
+    }
+    assert {9030, 9009, 9012, 9600, 215, 9601}.isdisjoint(present)
+    assert _panel(overview, 9602).get("collapsed") is True
 
     runtime = _load("bioetl-runtime.json")
     # Pipeline Diagnostics secondary evidence stays collapsed with nested panels
@@ -550,12 +541,12 @@ def test_rf006_collapsed_row_above_fold_fails_closed() -> None:
 
 def test_audit_followup_action_first_layout_contracts() -> None:
     overview = _load("bioetl-overview-v2.json")
-    workflow = _panel(overview, 9013)
-    navigation = _panel(overview, 9021)
+    present = {
+        panel.get("id")
+        for panel in _iter_panels(list(overview.get("panels", [])))
+    }
+    assert {9013, 9021}.isdisjoint(present)
     run_context = _panel(overview, 9602)
-    assert workflow.get("gridPos", {}).get("x") == 0
-    assert workflow.get("gridPos", {}).get("w") == 24
-    assert navigation.get("gridPos", {}).get("h") <= 3
     assert run_context.get("collapsed") is True
     assert run_context.get("panels")
 
@@ -1320,18 +1311,10 @@ def test_cycle3_inspect_enabled_on_named_below_fold_tables() -> None:
         ("bioetl-runtime.json", 241),
         ("bioetl-dq-v2.json", 121),
         ("bioetl-dq-v2.json", 122),
-        ("bioetl-overview-v2.json", 9010),
-        ("bioetl-overview-v2.json", 9011),
-        ("bioetl-overview-v2.json", 9013),
         ("bioetl-control-plane-v1.json", 908),
         ("bioetl-control-plane-v1.json", 138),
         ("bioetl-dq-v2.json", 118),
         ("bioetl-dq-v2.json", 156),
-        ("bioetl-overview-v2.json", 9003),
-        ("bioetl-overview-v2.json", 9004),
-        ("bioetl-overview-v2.json", 9005),
-        ("bioetl-overview-v2.json", 9006),
-        ("bioetl-overview-v2.json", 9007),
         ("bioetl-provider-health-v2.json", 107),
         ("bioetl-provider-health-v2.json", 108),
         ("bioetl-provider-health-v2.json", 114),
@@ -1446,11 +1429,6 @@ def test_cycle5_wrap_text_columns_restore_declared_widths() -> None:
             "trust_status",
         ),
         ("bioetl-control-plane-v1.json", 9416, 12, "status", 110, "reason"),
-        ("bioetl-overview-v2.json", 9003, 24, "Value", 100, "pipeline"),
-        ("bioetl-overview-v2.json", 9004, 24, "Value", 100, "pipeline"),
-        ("bioetl-overview-v2.json", 9005, 24, "Value", 100, "pipeline"),
-        ("bioetl-overview-v2.json", 9006, 24, "Value", 100, "pipeline"),
-        ("bioetl-overview-v2.json", 9007, 24, "Value", 100, "provider"),
     )
     for dashboard_name, panel_id, grid_w, wrap_field, wrap_width, flex_field in cases:
         panel = _panel(_load(dashboard_name), panel_id)
@@ -1556,18 +1534,14 @@ def test_runtime_first_action_separates_endpoint_from_completeness() -> None:
 
 
 def test_overview_routes_and_timelines_exclude_inactive_fallbacks() -> None:
-    """Positive routes and absent-only fallback prevent false diagnostic rows."""
+    """Selected-run Overview does not keep CURRENT route or range timelines."""
     overview = _load("bioetl-overview-v2.json")
-    route = _panel(overview, 215)["targets"][0]["expr"]
-    assert route.count(">0") == 1
-    assert "bioetl_first_action" in route
-    assert "or on() label_replace" in route
-    assert "max without(run_type)" not in route
-    for panel_id in (9018, 9019, 9020):
-        panel = _panel(overview, panel_id)
-        assert "or on()" in panel["targets"][0]["expr"]
-        assert panel["targets"][0]["range"] is True
-        assert panel["fieldConfig"]["defaults"]["custom"]["lineWidth"] > 0
+    present = {
+        panel.get("id")
+        for panel in _iter_panels(list(overview.get("panels", [])))
+    }
+    assert {215, 9018, 9019, 9020}.isdisjoint(present)
+    assert "run_id=${run_id}" in _panel(overview, 9002)["targets"][0]["url"]
 
 
 def test_runtime_evidence_validator_rejects_scraping_as_health() -> None:

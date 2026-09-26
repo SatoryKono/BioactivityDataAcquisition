@@ -331,8 +331,7 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
     """Overview/Control Plane answer rows must stay on projected current-state or fixed-window evidence."""
     expectations = {
         "bioetl-overview-v2.json": {
-            "Monitor Scope Health": "bioetl_workflow_scope_priority",
-            "Review First Action": "bioetl_workflow_scope_action",
+            "Review Run Domains": "selected-run-status",
         },
         "bioetl-control-plane-v1.json": {
             "Monitor Replay": "bioetl_replay_safety_blockers_15m",
@@ -362,9 +361,9 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
                 f"{dashboard_name}:{panel_title} must stay in the answer/evidence band"
             )
             expressions = [
-                target.get("expr", "")
+                str(target.get("expr") or target.get("url") or "")
                 for target in panel.get("targets", [])
-                if isinstance(target.get("expr"), str)
+                if isinstance(target, dict)
             ]
             assert any(expected_metric in expr for expr in expressions), (
                 f"{dashboard_name}:{panel_title} must consume {expected_metric}"
@@ -693,7 +692,7 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
 def test_current_status_headlines_use_instant_queries() -> None:
     """#8746: fail-closed headlines must not lastNotNull a dashboard range."""
     expectations = {
-        "bioetl-overview-v2.json": ("Monitor Scope Health",),
+        "bioetl-overview-v2.json": ("Review Selected Run Status",),
         "bioetl-control-plane-v1.json": (
             "Monitor Readiness",
             "Track Checkpoint",
@@ -761,13 +760,9 @@ def test_run_explorer_first_screen_empty_copy_has_no_selector_dollars() -> None:
 
 
 def test_overview_alerts_row_is_collapsed() -> None:
-    """#8745: Inspect Alerts is T3, not a second first-screen question."""
+    """#11268: fleet alert row is not on Overview when Run ID is always selected."""
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-overview-v2.json")
-    row = next(
-        panel for panel in dashboard.get("panels", []) if panel.get("id") == 9600
-    )
-    assert row.get("collapsed") is True
-    assert any(child.get("id") == 9601 for child in (row.get("panels") or []))
+    assert all(panel.get("id") != 9600 for panel in dashboard.get("panels", []))
 
 
 def test_incident_domain_suspect_row_is_collapsed() -> None:

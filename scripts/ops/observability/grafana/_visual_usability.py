@@ -212,6 +212,10 @@ def _remap_mapping_texts(mapping: dict) -> None:
 
 
 def _overview(p: dict[int, dict]) -> None:
+    # Run ID is always selected. Fleet cards are removed before this pass on
+    # later renders; nothing here should recreate them.
+    if 214 not in p or 215 not in p:
+        return
     # Align the current verdict with the selected-run domains column below it.
     p[99]["gridPos"].update(x=0, w=16)
     p[214]["gridPos"].update(x=16, w=p[9002]["gridPos"]["w"])
