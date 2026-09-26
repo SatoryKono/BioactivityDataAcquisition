@@ -1,3 +1,0 @@
-Error: Failed to get file changes: Command failed with exit code 128: git --literal-pathspecs diff --no-ext-diff --no-textconv --find-renames f95abd39e869caeb7ce591a2a3fc5ef3b28c1b7f...HEAD --name-status -z --
-
-fatal: f95abd39e869caeb7ce591a2a3fc5ef3b28c1b7f...HEAD: no merge base
