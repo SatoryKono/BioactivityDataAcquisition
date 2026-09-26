@@ -1106,7 +1106,7 @@
         "h": 3
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
+      "description": "The row comes from provider_checks on the saved report. It shows one saved provider-check row. This table keeps only Check result and Evidence. SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
       "options": {
         "showHeader": true,
         "cellHeight": "sm",
