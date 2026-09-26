@@ -8,6 +8,10 @@ from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.runtime.composition_boundary_policy import (
+    resolve_health_check_mode,
+    resolve_skip_gold,
+)
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.inputs_runtime_models import (
@@ -80,16 +84,17 @@ def resolve_skip_gold_policy(
     observability: ObservabilityBundle,
 ) -> bool:
     """Resolve skip-gold policy from CLI intent plus YAML sink availability."""
-    if ctx.skip_gold:
-        return True
-    if is_gold_sink_enabled(yaml_config):
-        return False
-    observability.logger.info(
-        "gold_sink_disabled",
-        reason="sink.gold.enabled_false",
-        pipeline=getattr(yaml_config, "pipeline_name", None),
+    skip_gold = resolve_skip_gold(
+        cli_skip_gold=bool(ctx.skip_gold),
+        gold_sink_enabled=is_gold_sink_enabled(yaml_config),
     )
-    return True
+    if skip_gold and not ctx.skip_gold:
+        observability.logger.info(
+            "gold_sink_disabled",
+            reason="sink.gold.enabled_false",
+            pipeline=getattr(yaml_config, "pipeline_name", None),
+        )
+    return skip_gold
 
 
 def resolve_health_check_mode_policy(
@@ -98,12 +103,11 @@ def resolve_health_check_mode_policy(
     default_health_check_mode: Literal["strict", "probe"],
 ) -> Literal["strict", "probe"]:
     """Resolve health-check policy from settings with explicit default fallback."""
-    if settings.test_mode:
-        return "probe"
-    configured_mode = getattr(settings.pipeline, "health_check_mode", None)
-    if configured_mode in ("strict", "probe"):
-        return cast(Literal["strict", "probe"], configured_mode)
-    return default_health_check_mode
+    return resolve_health_check_mode(
+        test_mode=bool(settings.test_mode),
+        configured_mode=getattr(settings.pipeline, "health_check_mode", None),
+        default_health_check_mode=default_health_check_mode,
+    )
 
 
 def resolve_runtime_projection(

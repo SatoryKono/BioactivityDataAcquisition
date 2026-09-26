@@ -263,12 +263,19 @@ def _resolve_uniprot_mapping_databases(
     pipeline_config: PipelineYamlConfig,
 ) -> tuple[str, str]:
     """Resolve source/target database names for UniProt mapping API."""
-    from_db = "ChEMBL"
-    to_db = "UniProtKB"
+    from bioetl.domain.runtime.composition_boundary_policy import (
+        resolve_uniprot_mapping_databases,
+    )
+
+    configured_from = None
+    configured_to = None
     if pipeline_config.source.api:
-        from_db = getattr(pipeline_config.source.api, "from_db", None) or from_db
-        to_db = getattr(pipeline_config.source.api, "to_db", None) or to_db
-    return from_db, to_db
+        configured_from = getattr(pipeline_config.source.api, "from_db", None)
+        configured_to = getattr(pipeline_config.source.api, "to_db", None)
+    return resolve_uniprot_mapping_databases(
+        configured_from_db=configured_from,
+        configured_to_db=configured_to,
+    )
 
 
 def _extract_uniprot_mapping_seed_ids(

@@ -128,10 +128,11 @@ def resolve_provider_entity(
 
 def _determine_fallbacks(pipeline_name: str) -> tuple[str, str]:
     """Determine fallback provider and entity from pipeline name."""
-    if "_" in pipeline_name:
-        provider, entity = pipeline_name.split("_", 1)
-        return provider, entity
-    return pipeline_name, pipeline_name
+    from bioetl.domain.runtime.composition_boundary_policy import (
+        pipeline_name_fallbacks,
+    )
+
+    return pipeline_name_fallbacks(pipeline_name)
 
 
 def _resolve_provider(yaml_config: object, fallback: str) -> str:

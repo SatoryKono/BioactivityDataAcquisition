@@ -24,6 +24,9 @@ from bioetl.application.core.wiring.runtime import (
 from bioetl.composition.factories.services.common_service_wiring import resolve_tracer
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_batch_id
 from bioetl.domain.config import MemoryConfig
+from bioetl.domain.runtime.composition_boundary_policy import (
+    memory_adaptive_sizing_allowed,
+)
 from bioetl.domain.types import BatchID
 from bioetl.domain.ports import (
     BatchIdGeneratorPort,
@@ -50,7 +53,9 @@ def _resolve_memory_runtime_inputs(
 ) -> tuple[MemoryMonitorPort | None, MemoryConfig | None]:
     """Return memory collaborators after exact-replay policy is applied."""
     runtime = getattr(pipeline, "runtime", None)
-    if not bool(getattr(runtime, "exact_replay", False)):
+    if memory_adaptive_sizing_allowed(
+        exact_replay=bool(getattr(runtime, "exact_replay", False))
+    ):
         return memory_monitor, memory_config
 
     disabled_config = (
