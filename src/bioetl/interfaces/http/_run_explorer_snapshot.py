@@ -10,11 +10,10 @@ from __future__ import annotations
 import asyncio
 import time
 from datetime import datetime
-from typing import Protocol, cast
+from typing import Any, Protocol, cast
 
 from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.ports import RunManifestPort
-from bioetl.interfaces.http._control_plane_selector_records import RunLedgerLookup
 from bioetl.interfaces.http.recent_pipeline_runs import (
     RECENT_TIMING_FIELDS,
     _scope,
@@ -53,9 +52,7 @@ class RunExplorerSnapshotCache:
             return payload
         observed = now if now is not None else current_utc_time()
         payload["items"] = [
-            refresh_recent_timing(item, now=observed)
-            if isinstance(item, dict)
-            else item
+            refresh_recent_timing(item, now=observed) if isinstance(item, dict) else item
             for item in items
         ]
         return payload
@@ -75,10 +72,7 @@ class RunExplorerSnapshotCache:
                 lookup_run_id=None,
                 limit=DEFAULT_RECENT_LIMIT,
                 manifest_port=manifest_port,
-                ledger_port=cast(
-                    RunLedgerLookup | None,
-                    source._run_ledger_port,
-                ),
+                ledger_port=cast(Any, source._run_ledger_port),
             )
         except _REFRESH_ERRORS:
             return

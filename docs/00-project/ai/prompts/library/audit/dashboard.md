@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.dashboard-audit-cycle
-version: 2.1.0
+version: 2.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -9,27 +9,27 @@ runtimes:
 - codex
 - any
 params:
-- N = 5
-- REPO = SatoryKono/BioactivityDataAcquisition
-- BASE_BRANCH = main
-- WORK_BRANCH = fix/dashboard-audit-cycle-YYMMDD-<shortsha>
-- SCOPE = grafana/dashboards
-- MODE = full
-- DEPTH = full
-- AUDIT_MODE = full
-- CONTOURS = render,density-area,density-scalar,fill,fit,reflow,visual,layout,data,copy,safety`
-- VIEWPORT = 1920×1040
-- THEME = dark
-- ZOOM = 100%
-- USER_ROLE = operator
-- MONITORING = true
-- INCLUDE_PIPELINE = true
-- ALLOW_ISSUE_WRITE = true
-- ALLOW_PUSH = true
-- ALLOW_MERGE = true
-- ALLOW_CLOSE = true
-- MAX_ISSUES_PER_ITERATION = 10
-- LANGUAGE = ru
+- N
+- REPO
+- BASE_BRANCH
+- WORK_BRANCH
+- SCOPE
+- MODE
+- DEPTH
+- AUDIT_MODE
+- CONTOURS
+- VIEWPORT
+- THEME
+- ZOOM
+- USER_ROLE
+- MONITORING
+- INCLUDE_PIPELINE
+- ALLOW_ISSUE_WRITE
+- ALLOW_PUSH
+- ALLOW_MERGE
+- ALLOW_CLOSE
+- MAX_ISSUES_PER_ITERATION
+- LANGUAGE
 includes:
 - fragments/git-safety.md
 - fragments/debt-budget-ban.md
@@ -39,6 +39,7 @@ includes:
 - fragments/audit-scale.md
 - fragments/finding-schema.md
 - fragments/orchestrator-guards.md
+- fragments/dashboard-requirements-audit.md
 related_ssot:
 - AGENTS.md
 - docs/00-project/NORMATIVE_SOURCES.md
@@ -48,20 +49,23 @@ related_ssot:
 - docs/03-guides/dashboards/design-system.md
 - docs/03-guides/dashboards/verdict-ontology.md
 - docs/03-guides/dashboards/contracts/layout-budgets.yaml
+- docs/03-guides/dashboards/contracts/requirement-coverage.yaml
 - docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
 anti_patterns:
 - Empty cycles for form
 - Inventing panels not in shipped JSON
 - Inventing DASH-* IDs already in DASHBOARD_REQUIREMENTS.md
+- Treating the fragment roster as newer than the audited JSON
 - Data FAIL from screenshot alone
 - Treating visual-semantics PASS as no visual defects
 - Conflating FIRST_WINDOW_Y with FIRST_LOAD_Y_MAX
 - Aesthetic-only defects without task/readability/risk
 - Starting monitoring without operator approval
 - Repeating render/visual/layout/data when hosted by observability-seq
-- Raising debt budgets
+- Raising debt budgets or performance-budgets.yaml
 - One GitHub issue per cosmetic nit when same root cause
 - Full WCAG matrix dump when DEPTH=quick
+- Using a stale design-system L0 question when it disagrees with DASHBOARD_REQUIREMENTS.md §7
 tags:
 - observability
 - dashboard
@@ -71,33 +75,53 @@ tags:
 - density
 - render
 - operator
-summary: Cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — contours, gates,
-  theme/zoom
+summary: Cyclic dashboard audit with per-UID palette, copy, data, answer panels, and panel roster
 max_body_lines: 230
 ---
 # Cyclic dashboard audit (render · density · fill · acceptance)
 
-N-итерационный аудит семи shipped UID. Контракт:
-`fragments/dashboard-requirements-audit.md` +
-`docs/01-requirements/DASHBOARD_REQUIREMENTS.md`.
+Read `fragments/dashboard-requirements-audit.md` before any contour. It is the
+per-UID contract: question, answer panel, basis tokens, palette, typography,
+data plane, and the panel roster. Shipped `grafana/dashboards/*.json` at the
+audited SHA wins if the roster drifted. A missing required answer id is
+`DASH-FIT-003`.
 
-| Card | Role |
-| --- | --- |
-| `prompt.observability.dashboard-panel-audit` | per-panel render |
-| `prompt.observability.bi-dashboard-acceptance` | BI-V/L/D |
-| `prompt.observability.group-scalar-density-audit` | `density-scalar` |
-
-Skill: **observability-dashboard**. ADR-010: monitoring optional.
+Skill: **observability-dashboard**. ADR-010: monitoring optional. Do not start
+`docker-compose.monitoring.yml` unless `MONITORING=true` in this paste.
 
 Default **`N=20`**, **`MODE=full`**, **`DEPTH=full`**, **`MONITORING=false`**,
-`USER_ROLE=operator`, все **`ALLOW_*=true`**. Пустые циклы запрещены.
-Early-stop: 2 подряд итерации без новых PROVEN P0/P1 и без regression.
+`USER_ROLE=operator`, all **`ALLOW_*=true`**. Empty cycles are forbidden.
+Early-stop: 2 consecutive iterations without new PROVEN P0/P1 and without
+regression.
 
-**Host routing:** when this card is step 7 of
-`prompt.observability.sequential-run`, set
-`CONTOURS=density-area,density-scalar,fill,pipeline,fit` (do not repeat
-render/visual/layout/data). Standalone / `prompt.audit.cycle.dashboards`
-uses the full default.
+**Host routing:** step 7 of `prompt.observability.sequential-run` uses
+`CONTOURS=density-area,density-scalar,fill,pipeline,fit`. Standalone uses the
+full contour list.
+
+## Per-dashboard answers
+
+Questions are byte-equal to `DASHBOARD_REQUIREMENTS.md` §7. Ids are §7.1.
+
+| UID | Question | Answer id |
+| --- | --- | --- |
+| `bioetl-run-explorer-v1` | Which pipelines ran most recently, and where are their reports? | `3010` |
+| `bioetl-control-plane-v1` | Can the selected run be exactly replayed from saved inputs? | `9422` |
+| `bioetl-overview-v2` | What is the saved assessment of the selected Run ID? | `9603`, `9002` |
+| `bioetl-runtime` | What currently blocks runtime delivery? | `9401` |
+| `bioetl-provider-health-v2` | Which provider is degraded/failing, and why? | `9101` |
+| `bioetl-dq-v2` | What is the DQ assessment of the selected Run ID? | `9406` |
+| `bioetl-incident-v1` | What is the highest-confidence active suspect? | `2010` |
+
+Every cycle checks, for each UID, the fragment sections **Shared palette**,
+**Shared text**, **Shared data and layout**, and that UID's panel table:
+
+- state is labelled `OK` / `WARN` / `CRIT` / `UNKNOWN` (trust gates also
+  `INCOMPLETE`); null is gray, never green
+- `CURRENT` / `SELECTED RUN` / `TIME RANGE` are not peer badges
+- authored body `>=16px`, headings `>=18.6667px`, clock `YYYY-MM-DD HH:MM`
+- content titles use `Monitor|Inspect|Track|Compare|Review|Investigate`
+- datasources are Prometheus, Grafana, or `BioETL Ops HTTP` only
+- `y<18` is the visual fold; `y<28` is only the first-load query window
 
 ## Params
 
@@ -107,14 +131,14 @@ uses the full default.
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |
 | `BASE_BRANCH` | `main` |
 | `WORK_BRANCH` | `fix/dashboard-audit-cycle-<shortsha>` (never main) |
-| `SCOPE` | `grafana/dashboards` (or uid/path list) |
-| `MODE` | `full` (also: `audit` \| `audit+issues`) |
-| `DEPTH` | `full` (`quick` \| `detailed` \| `full`) |
-| `AUDIT_MODE` | `full` \| `differential` |
+| `SCOPE` | `grafana/dashboards` |
+| `MODE` | `full` |
+| `DEPTH` | `full` |
+| `AUDIT_MODE` | `full` |
 | `CONTOURS` | `render,density-area,density-scalar,fill,fit,reflow,visual,layout,data,copy,safety` |
-| `VIEWPORT` | `1366x768` (record actual if different) |
+| `VIEWPORT` | `1366x768` (record the actual viewport when it differs) |
 | `THEME` | `dark` (also record `light`) |
-| `ZOOM` | `100` (Tier-2: `200` **browser** zoom; CSS `zoom` is not evidence) |
+| `ZOOM` | `100` (Tier-2: `200` browser zoom; CSS `zoom` is not evidence) |
 | `USER_ROLE` | `operator` |
 | `MONITORING` | `false` |
 | `INCLUDE_PIPELINE` | `true` |
@@ -125,55 +149,52 @@ uses the full default.
 | `MAX_ISSUES_PER_ITERATION` | `10` |
 | `LANGUAGE` | `ru` |
 
-## BioETL anchors
-
-- Requirements + `layout-budgets.yaml` (fragment)
-- JSON: `grafana/dashboards/` · skill tooling: link only
-- Windows: `.\.venv-win\Scripts\python.exe`
+Operator paste values override this table.
 
 ## Preflight
 
-1. `git status --porcelain`; SHA; branch. Foreign dirty → worktree.
-2. Seven UIDs + answer-panel map. Empty SCOPE → STOP.
-3. Run fragment §8 static gates.
-4. `run_id = <UTC>-dash-cycle-<shortsha>`
-5. Artifacts: `reports/audit/dashboard-cycle/<run_id>/`.
+1. `git status --porcelain`; SHA; branch. Foreign dirty tree → worktree.
+2. Seven UIDs from the fragment. Empty SCOPE → STOP.
+3. Re-walk JSON into `panel-matrix.csv` and diff it against the fragment roster.
+4. Run fragment §8 static gates.
+5. `run_id = <UTC>-dash-cycle-<shortsha>`.
+6. Artifacts: `reports/audit/dashboard-cycle/<run_id>/`.
 
 ## Iteration i = 1..N
 
 | Phase | Action |
 | --- | --- |
 | **0 Scope** | `full` = SCOPE; `differential` = `origin/BASE_BRANCH` ∩ SCOPE. |
-| **A Inventory** | `uid \| panel_id \| y \| band \| type \| datasource`. |
-| **B Contours** | Names in `CONTOURS`; rules in the fragment. |
+| **A Inventory** | `uid \| panel_id \| y \| band \| type \| datasource` from JSON. |
+| **B Contours** | Apply the fragment rules for each name in `CONTOURS`. |
 | **C Normalize** | `checks.json` + `findings.json` with `requirement_id`. Dedupe. |
 | **D Issues** | Title `[<uid>][<DASH-id>][P#] …`. Cap MAX_ISSUES. |
-| **E Fix** | WORK_BRANCH; no overflow-clip; no budget raises. |
-| **F Validate** | Re-run §8 gates; PR if ALLOW_PUSH. |
-| **G Close / Post** | Close if ALLOW_CLOSE + acceptance. Delta. |
+| **E Fix** | WORK_BRANCH. No overflow-clip. No budget raises. |
+| **F Validate** | Re-run §8 gates. PR if ALLOW_PUSH. |
+| **G Close / Post** | Close only if ALLOW_CLOSE and acceptance holds. Write delta. |
 
 ### Contours
 
-See fragment. `render` statuses: `OK` \| `Expected Empty` \| `Defect` \|
-`Not Verifiable`. No UI → NV + blocker, not FAIL.
+`render`: `OK` | `Expected Empty` | `Defect` | `Not Verifiable`. No UI → NV +
+blocker, not FAIL. Do not mark data FAIL from a screenshot alone.
 
-### Theme / zoom (`reflow` + `visual`)
+`copy` / `visual`: palette, type floors, clock, HTML roles, verdict description
+tokens. `layout` / `fit` / `reflow`: fold 18 vs first-load 28, no straddle,
+Tier-1 dark+light at 100%, Tier-2 browser zoom 200% when `DEPTH=full`.
 
-Record `VIEWPORT` / `THEME` / `ZOOM` on every artifact.
-
-| Tier | When | Theme | Zoom |
-| --- | --- | --- | --- |
-| **1** | every cycle | dark + light | `100` |
-| **2** | `DEPTH=detailed\|full` or Tier-1 fold/nav defects | same | `200` browser |
+`density-area` and `density-scalar`: both metrics, or NV. `data` / `safety`:
+allowlisted datasources, no `run_id` Prometheus labels, no executable HTML.
 
 `INCLUDE_PIPELINE=true`: render scripts, scenes/parity, CI. Tag `pipeline`.
 
-## Focus checklist (each cycle)
+Record `VIEWPORT` / `THEME` / `ZOOM` on every artifact.
 
-- [ ] Answer panels still in first window
+## Focus checklist
+
+- [ ] Each §7 answer id is a root panel with `y < 18`
+- [ ] Palette, clock, and copy floors checked or NV
 - [ ] `requirement_id` on every PROVEN finding
-- [ ] Both density metrics + FIT/reflow recorded or NV
-- [ ] CURRENT / RANGE / exact-run not peer badges
+- [ ] Both density metrics and FIT/reflow recorded or NV
 - [ ] §8 gates re-run after fixes
 - [ ] Live gaps at `MONITORING=false` are NV
 
@@ -193,18 +214,18 @@ reports/audit/dashboard-cycle/<run_id>/
 | Cycle | surface_score | P0–P1 open | density/fit notes | Issues | PR/SHA | Gate |
 | --- | --- | --- | --- | --- | --- | --- |
 
-Gate: `PASS` \| `WARN` \| `BLOCK`.
+Gate: `PASS` | `WARN` | `BLOCK`.
 
 ## Stop
 
-`NO_ACTIONABLE_FINDINGS` / N / early-stop. Invented `DASH-*`. Data FAIL from
+`NO_ACTIONABLE_FINDINGS` / N / early-stop. Invented `DASH-*`. Data FAIL from a
 screenshot. Monitoring start without approval. Orchestrator hard-stop.
 
 ## Success
 
-- Contours completed with `requirement_id` evidence
+- Every in-scope UID checked against the fragment and the live JSON
 - PROVEN issues handled under ALLOW_*
-- No new P0/P1 regression in post-check
+- No new P0/P1 regression in the post-check
 - `final-summary.md` after N or early-stop
 
 ## Related
@@ -212,5 +233,5 @@ screenshot. Monitoring start without approval. Orchestrator hard-stop.
 - `prompt.observability.dashboard-panel-audit`
 - `prompt.observability.bi-dashboard-acceptance`
 - `prompt.audit.cycle.dashboards`
-- `prompt.observability.dashboard-full-cycle` — N=10 audit→issues→close with dual STOP
+- `prompt.observability.dashboard-full-cycle`
 - Closeout: `prompt.closeout.grok`

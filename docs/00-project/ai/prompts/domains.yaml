@@ -216,6 +216,7 @@ domains:
     - docs/03-guides/dashboards/design-system.md
     - docs/03-guides/dashboards/verdict-ontology.md
     - docs/03-guides/dashboards/contracts/layout-budgets.yaml
+    - docs/00-project/ai/prompts/fragments/dashboard-requirements-audit.md
     AUDIT_CONTOURS:
     - render and density area/scalar with viewport 1366x768 and theme variants
     - fill, fit, reflow, visual, layout, data, copy, and safety contours

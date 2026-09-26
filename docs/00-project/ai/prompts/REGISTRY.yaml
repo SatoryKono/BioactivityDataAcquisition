@@ -221,6 +221,7 @@ scenarios:
   schema: _schema/prompt.schema.json
   deps:
   - prompt.fragment.audit-scale
+  - prompt.fragment.dashboard-requirements-audit
 - id: sequential-run
   scenario: Sequential domain audit with issue gates
   role: py-audit-bot
@@ -248,6 +249,12 @@ entries:
   class: fragment
   tags: []
   summary: BioETL Cyclic Audit Kernel v3.0 fail-closed — full cycle baseline->audit->normalize->plan->issue-sync->implement->validate->close->post-audit
+- id: prompt.fragment.dashboard-requirements-audit
+  path: fragments/dashboard-requirements-audit.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Per-dashboard palette, copy, data, answer panels, and shipped panel roster
 - id: prompt.fragment.debt-budget-ban
   path: fragments/debt-budget-ban.md
   status: active
@@ -403,8 +410,8 @@ entries:
   - density
   - render
   - operator
-  summary: Cyclic Grafana audit (v2.1) bound to DASHBOARD_REQUIREMENTS.md — contours,
-    gates, theme/zoom (Tier-1 100% / Tier-2 200%)
+  summary: Cyclic Grafana audit (v2.2) with per-UID palette, copy, data, and panel
+    roster; theme/zoom Tier-1 100% and Tier-2 200%
 - id: prompt.debug.isolate
   path: library/audit/debug.md
   status: active
