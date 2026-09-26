@@ -10,16 +10,27 @@ REPO_WIN="/mnt/e/github/BioactivityDataAcquisition"
 if [[ ! -d "$REPO_WIN/.git" ]]; then
   REPO_WIN="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 fi
-cd "$REPO_WIN" || exit 1
 
-SRC_AUDIT="$REPO_WIN/reports/quality/coderabbit/20260925_085141"
+# Prefer Linux-local mirror to avoid /mnt/e git worktree hangs.
+MIRROR="${BIOETL_CR_MIRROR:-$HOME/bioetl-cr-restore-src}"
+if [[ ! -d "$MIRROR/.git" ]]; then
+  echo "Preparing Linux mirror at $MIRROR (one-time)..."
+  rm -rf "$MIRROR"
+  git clone --shared "$REPO_WIN" "$MIRROR" || git clone "$REPO_WIN" "$MIRROR"
+fi
+cd "$MIRROR" || exit 1
+git fetch --all --tags >/dev/null 2>&1 || true
+MAIN_SHA="$(git -C "$REPO_WIN" rev-parse HEAD)"
+git checkout -f "$MAIN_SHA" >/dev/null 2>&1 || git checkout -f "$(git rev-parse origin/main)" >/dev/null 2>&1
+REPO="$MIRROR"
+
 OUT="$REPO_WIN/reports/quality/coderabbit/20260926_restore"
+SRC_AUDIT="$REPO_WIN/reports/quality/coderabbit/20260925_085141"
 MATRIX="$SRC_AUDIT/scope_matrix.json"
 LOGS="$OUT/logs"
 mkdir -p "$LOGS" "$OUT"
 PROGRESS="$OUT/progress.json"
-WT="/tmp/bioetl-cr-restore-wt"
-MAIN_SHA="$(git -C "$REPO_WIN" rev-parse HEAD)"
+WT="${BIOETL_CR_WT:-$HOME/bioetl-cr-restore-wt}"
 CR_SLEEP="${CR_SLEEP:-12}"
 CR_TIMEOUT="${CR_TIMEOUT:-900}"
 CR_LIGHT="${CR_LIGHT:-1}"
@@ -101,11 +112,11 @@ if [[ ! -f "$PROGRESS" ]]; then
   echo '{"results":{}}' > "$PROGRESS"
 fi
 
-# Prepare orphan worktree
+# Prepare orphan worktree on Linux FS
 if [[ -d "$WT" ]]; then
-  git -C "$REPO_WIN" worktree remove --force "$WT" 2>/dev/null || rm -rf "$WT"
+  git -C "$REPO" worktree remove --force "$WT" 2>/dev/null || rm -rf "$WT"
 fi
-git -C "$REPO_WIN" worktree add --detach "$WT" "$MAIN_SHA"
+git -C "$REPO" worktree add --detach "$WT" "$MAIN_SHA"
 cd "$WT" || exit 1
 git checkout --orphan "cr-restore-empty-base" >/dev/null 2>&1 || true
 git rm -rf . >/dev/null 2>&1 || true

@@ -12,12 +12,17 @@ from bioetl.infrastructure.validation.pandera_validator import PanderaGoldValida
 
 _HASH_A = "0" * 64
 _HASH_B = "1" * 64
+_SCHEMA_COLS = list(
+    ChEMBLTargetProteinClassificationGoldSchema.to_schema().columns.keys()
+)
 
 
 def _tpc_gold_rows() -> list[dict[str, object]]:
-    """Minimal gold rows: one missing leaf (is_leaf null), one resolved leaf."""
+    """Minimal gold rows with every schema column present (production projects them)."""
+    base = {name: None for name in _SCHEMA_COLS}
     return [
         {
+            **base,
             "_dq_warn": False,
             "_dq_error": False,
             "_index": 0,
@@ -29,6 +34,7 @@ def _tpc_gold_rows() -> list[dict[str, object]]:
             "l1_counts_for_target_type": False,
         },
         {
+            **base,
             "_dq_warn": False,
             "_dq_error": False,
             "_index": 1,

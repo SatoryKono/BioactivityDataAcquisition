@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -100,7 +101,7 @@ class ChEMBLTargetProteinClassificationGoldSchema(StrictGoldContractSchema):
     path_labels: Series[str] = pa.Field(nullable=True)
     depth: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     root_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
-    is_leaf: Series[bool] = pa.Field(nullable=True)
+    is_leaf: Series[pd.BooleanDtype] = pa.Field(nullable=True, coerce=True)
     l1_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
     l1_name: Series[str] = pa.Field(nullable=True)
     l1_desc: Series[str] = pa.Field(nullable=True)
@@ -117,7 +118,9 @@ class ChEMBLTargetProteinClassificationGoldSchema(StrictGoldContractSchema):
     l5_name: Series[str] = pa.Field(nullable=True)
     l5_desc: Series[str] = pa.Field(nullable=True)
     canonical_l1: Series[str] = pa.Field(nullable=True)
-    l1_counts_for_target_type: Series[bool] = pa.Field(nullable=True)
+    l1_counts_for_target_type: Series[pd.BooleanDtype] = pa.Field(
+        nullable=True, coerce=True
+    )
     l1_mapping_version: Series[str] = pa.Field(nullable=True)
     target_type_rule_version: Series[str] = pa.Field(nullable=True)
     l1_normalization_status: Series[str] = pa.Field(
