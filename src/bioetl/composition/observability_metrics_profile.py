@@ -8,6 +8,9 @@ from urllib.parse import urlunsplit
 
 from bioetl.composition import _services
 from bioetl.composition.runtime_builders import config_access as _config_access
+from bioetl.domain.runtime.composition_boundary_policy import (
+    resolve_metrics_publication_modes,
+)
 
 _PUSHGATEWAY_FALLBACK = "localhost:9091"
 
@@ -75,13 +78,9 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
                 "",
             )
         )
-    metrics_server_mode = (
-        "auto_managed_during_pipeline_runs"
-        if metrics_enabled and metrics_server_enabled
-        else "disabled"
-    )
-    pushgateway_mode = (
-        "best_effort_on_run_completion" if metrics_enabled else "disabled"
+    metrics_server_mode, pushgateway_mode = resolve_metrics_publication_modes(
+        metrics_enabled=metrics_enabled,
+        metrics_server_enabled=metrics_server_enabled,
     )
     pushgateway_gateway = (
         getattr(settings, "pushgateway_url", None) or _PUSHGATEWAY_FALLBACK
