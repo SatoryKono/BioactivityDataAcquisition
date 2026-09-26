@@ -31,6 +31,7 @@ from bioetl.infrastructure.adapters.uniprot.feature_sequence_adapter_mixin impor
 )
 from bioetl.infrastructure.adapters.uniprot.filtering_adapter_mixin import (
     UniProtFilteringAdapterMixin,
+    extract_uniprot_accession,
 )
 from bioetl.infrastructure.adapters.uniprot.health_probe import probe_uniprot_health
 from bioetl.infrastructure.adapters.uniprot.protein_fetch_adapter_mixin import (
@@ -150,11 +151,7 @@ class UniProtAdapter(
 
     @staticmethod
     def _extract_accession_from_record(record: BronzeRecord) -> str | None:
-        accession = record.get("accession")
-        if not isinstance(accession, str):
-            return None
-        cleaned = accession.strip()
-        return cleaned if cleaned else None
+        return extract_uniprot_accession(record)
 
     @override
     async def fetch(

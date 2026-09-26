@@ -237,6 +237,7 @@ def diagnostics_contract_checks(output_json: bool) -> None:
 def diagnostics_checkpoint(
     pipeline: str,
     run_id: str | None,
+    manifest_id: str | None,
     audit_limit: int,
     output_format: str,
 ) -> None:
@@ -245,6 +246,7 @@ def diagnostics_checkpoint(
         get_observability_diagnostics_bundle(),
         pipeline=pipeline,
         run_id=run_id,
+        manifest_id=manifest_id,
         audit_limit=audit_limit,
         output_format=output_format,
     )

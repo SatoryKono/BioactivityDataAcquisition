@@ -141,6 +141,7 @@ def emit_checkpoint_diagnostics(
     *,
     pipeline: str,
     run_id: str | None,
+    manifest_id: str | None = None,
     audit_limit: int,
     output_format: str,
 ) -> None:
@@ -149,6 +150,7 @@ def emit_checkpoint_diagnostics(
         lambda: bundle.workflow_service.inspect_checkpoint_workflow(
             pipeline,
             run_id=run_id,
+            manifest_id=manifest_id,
             audit_limit=audit_limit,
         ),
         error_title="Checkpoint diagnostics failed",

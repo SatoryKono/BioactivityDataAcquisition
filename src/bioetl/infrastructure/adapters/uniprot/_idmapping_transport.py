@@ -17,6 +17,7 @@ from bioetl.infrastructure.adapters.uniprot._idmapping_url_policy import (
 
 _REDIRECT_STATUS_CODES = frozenset({301, 302, 303, 307, 308})
 _MAX_RESULT_REDIRECTS = 3
+_MAX_RESULT_PAGES = 50
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -136,8 +137,15 @@ class IDMappingTransportMixin:
         deps = self._transport_deps()
         url: str | None = trusted_idmapping_url(deps.base_url, start_url)
         redirect_count = 0
+        page_count = 0
 
         while url:
+            page_count += 1
+            if page_count > _MAX_RESULT_PAGES:
+                raise IDMappingJobError(
+                    job_id=job_id,
+                    message=f"UniProt ID mapping page limit exceeded ({_MAX_RESULT_PAGES})",
+                )
             with deps._adapter_metrics.measure_request("/idmapping/results"):
                 response = await deps.http_client.get(url, follow_redirects=False)
 
@@ -156,12 +164,18 @@ class IDMappingTransportMixin:
                     job_id=job_id,
                     status_code=response.status_code,
                 )
-                break
+                raise IDMappingJobError(
+                    job_id=job_id,
+                    message=f"UniProt ID mapping results returned HTTP {response.status_code}",
+                )
 
             redirect_count = 0
 
             if not deps._append_mapping_results(response.json(), entries_by_id):
-                break
+                raise IDMappingJobError(
+                    job_id=job_id,
+                    message="UniProt ID mapping results payload was rejected",
+                )
 
             next_url = deps._get_next_page_url(response.headers)
             url = trusted_idmapping_url(deps.base_url, next_url) if next_url else None

@@ -27,6 +27,18 @@ _FetchStrategy = Callable[..., AsyncIterator[BronzeRecord]]
 _UNIPROT_FILTER_BATCH_SIZE = 100
 
 
+def extract_uniprot_accession(record: BronzeRecord) -> str | None:
+    """Return a normalized accession from primaryAccession or accession."""
+    for key in ("primaryAccession", "accession"):
+        value = record.get(key)
+        if not isinstance(value, str):
+            continue
+        normalized = value.strip()
+        if normalized:
+            return normalized
+    return None
+
+
 class UniProtFilteringAdapterMixin:
     """Filtering and fallback orchestration extracted from UniProtAdapter."""
 
@@ -41,7 +53,8 @@ class UniProtFilteringAdapterMixin:
         for accession_id in filter_ids:
             if limit and fetched >= limit:
                 break
-            async for record in strategy(query=accession_id, limit=1):
+            remaining = None if limit is None else limit - fetched
+            async for record in strategy(query=accession_id, limit=remaining):
                 yield record
                 fetched += 1
                 if limit and fetched >= limit:
@@ -175,7 +188,7 @@ class UniProtFilteringAdapterMixin:
             filter_field=filter_field,
             limit=limit,
         ):
-            yield record, record.get("accession")
+            yield record, extract_uniprot_accession(record)
 
     def _should_do_fallback(
         self,
@@ -229,11 +242,7 @@ class UniProtFilteringAdapterMixin:
                 yield record
 
         def _extract_accession(record: BronzeRecord) -> str | None:
-            accession = record.get("accession")
-            if not isinstance(accession, str):
-                return None
-            normalized = accession.strip()
-            return normalized if normalized else None
+            return extract_uniprot_accession(record)
 
         async for record in as_mixin_host(
             self
