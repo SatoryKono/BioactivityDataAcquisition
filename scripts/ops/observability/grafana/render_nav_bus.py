@@ -41,7 +41,7 @@ CUSTOM_WIDTH = "custom.width"
 BUS: list[dict[str, str]] = [
     {
         "uid": "bioetl-run-explorer-v1",
-        "title": "0. Run Explorer",
+        "title": "Run Explorer",
         "path": "0-run-explorer",
     },
     {
@@ -56,12 +56,12 @@ BUS: list[dict[str, str]] = [
     },
     {
         "uid": "bioetl-runtime",
-        "title": "3. Pipeline Diagnostics",
+        "title": "Pipeline Diagnostics",
         "path": "3-pipeline-diagnostics",
     },
     {
         "uid": "bioetl-provider-health-v2",
-        "title": "4. Provider Health",
+        "title": "Provider Health",
         "path": "4-provider-health",
     },
     {
