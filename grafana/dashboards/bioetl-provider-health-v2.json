@@ -379,76 +379,16 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Provider Health (Provider Health)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"Provider Health (Provider Health)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "description": "Active state is underlined, not color alone. A chip handoff does not run a new provider probe. Keyboard focus can move across the chips. The row stays on one line. Data Quality sits between Provider Health and Incident Workspace. Overview sits between Trust and Pipeline Diagnostics. Trust is the chip after Run Explorer. Incident Workspace is the last chip. This row does not show the saved provider check. Use the chips to leave this page without retyping the time range. The current page chip is not a link. Provider Health is chip 4 in the 0-6 row. The chips keep the current Grafana time range. Each chip opens its dashboard in the same tab. The underlined chip is this page, Provider Health. Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
-          "title": "0. Run Explorer",
+          "title": "Run Explorer",
           "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "0. Run Explorer (Run Explorer). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "Replay Readiness",
-          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Replay Readiness (Replay Readiness). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "Run Overview",
-          "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Run Overview (Run Overview). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "3. Pipeline Diagnostics",
-          "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "tooltip": "3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, visible pipeline selection.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "Data Quality",
-          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "tooltip": "Data Quality (Data Quality). Scope reset: stage=All; preserves time range, visible pipeline selection.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "6. Incident Workspace",
-          "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
+          "tooltip": "Run Explorer (Run Explorer). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -482,9 +422,33 @@
           "tags": []
         },
         {
+          "title": "Pipeline Diagnostics",
+          "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+          "tooltip": "Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, visible pipeline selection.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
           "title": "Data Quality",
           "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
           "tooltip": "Data Quality (Data Quality). Scope reset: stage=All; preserves time range, visible pipeline selection.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "6. Incident Workspace",
+          "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -502,10 +466,10 @@
       "gridPos": {
         "x": 0,
         "y": 2,
-        "w": 24,
-        "h": 2
+        "w": 18,
+        "h": 3
       },
-      "description": "SELECTED RUN · Run ID is always set. Provider evidence is the saved check for this run. Fleet and current telemetry are not shown here.",
+      "description": "The header stays above the tables. Saved evidence is not the same as current telemetry. Start here, then read Review Provider Check. The selected run is the only run these tables describe. The chart time range does not rewrite this header. This header does not authorize replay. Provider evidence here is the stored check. The header names the scope of the tables below. A fleet chart is not on this screen. Open Review Provider Check for the stored verdict. This header is not a live health probe. Run ID on this page is already set. Current fleet telemetry is outside this page. The saved check belongs to the selected Run ID. Read this line before the tables. SELECTED RUN · Run ID is always set. Provider evidence is the saved check for this run. Fleet and current telemetry are not shown here.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Selected Run",
@@ -519,7 +483,7 @@
       "title": "Inspect Run Identity",
       "gridPos": {
         "x": 0,
-        "y": 12,
+        "y": 10,
         "w": 12,
         "h": 5
       },
@@ -776,7 +740,7 @@
       "title": "Inspect Processed Records",
       "gridPos": {
         "x": 12,
-        "y": 12,
+        "y": 10,
         "w": 12,
         "h": 5
       },
@@ -1133,34 +1097,89 @@
     },
     {
       "id": 9461,
-      "type": "table",
+      "type": "stat",
       "title": "Review Provider Check",
       "gridPos": {
-        "x": 0,
-        "y": 4,
-        "w": 24,
+        "x": 18,
+        "y": 2,
+        "w": 6,
         "h": 3
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
+      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. This is not live fleet health.",
       "options": {
-        "showHeader": true,
-        "cellHeight": "sm",
-        "footer": {
-          "show": false
-        }
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^check_result$/",
+          "values": true
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
       },
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
-          "unit": "none",
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto",
-              "wrapText": false
-            },
-            "inspect": true
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "OK": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "HEALTHY": {
+                  "text": "HEALTHY",
+                  "color": "green"
+                },
+                "WARN": {
+                  "text": "WARN",
+                  "color": "orange"
+                },
+                "DEGRADED": {
+                  "text": "DEGRADED",
+                  "color": "orange"
+                },
+                "ERROR": {
+                  "text": "ERROR",
+                  "color": "red"
+                },
+                "FAIL": {
+                  "text": "FAIL",
+                  "color": "red"
+                },
+                "FAILING": {
+                  "text": "FAILING",
+                  "color": "red"
+                },
+                "CRIT": {
+                  "text": "CRIT",
+                  "color": "red"
+                },
+                "UNKNOWN": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                },
+                "N/A": {
+                  "text": "N/A",
+                  "color": "gray"
+                },
+                "SELECT RUN": {
+                  "text": "SELECT RUN",
+                  "color": "gray"
+                },
+                "INCOMPLETE": {
+                  "text": "INCOMPLETE",
+                  "color": "orange"
+                }
+              }
+            }
+          ],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "gray"
           }
         },
         "overrides": []
@@ -1192,22 +1211,8 @@
           "options": {
             "include": {
               "names": [
-                "check_result",
-                "evidence"
+                "check_result"
               ]
-            }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "indexByName": {
-              "check_result": 0,
-              "evidence": 1
-            },
-            "renameByName": {
-              "check_result": "Check result",
-              "evidence": "Evidence"
             }
           }
         }
@@ -1220,12 +1225,12 @@
       "title": "Review Provider Evidence",
       "gridPos": {
         "x": 0,
-        "y": 7,
+        "y": 5,
         "w": 24,
         "h": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
+      "description": "The header above states that fleet telemetry is not on this page. Evidence says whether the check was stored. Compare Observed at with the completed time in Inspect Run Identity. One row is one saved provider check. This table does not query Prometheus. Check result is the stored verdict for that provider. Do not read this table as current fleet status. A missing provider name is not an OK result. The chart time range does not change these saved rows. This is the detail behind Review Provider Check. The provider name is not parsed from the pipeline name. An empty table means provider_checks was not saved. Observed at is the stored observation time. Rows come from provider_checks on the saved report. Columns are Provider, Check result, Evidence, and Observed at. SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK. TELEMETRY ABSENT=телеметрия отсутствует, не OK.",
       "options": {
         "showHeader": true,
         "cellHeight": "sm",
@@ -1247,7 +1252,20 @@
             "inspect": true
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Observed at"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -1265,6 +1283,17 @@
         }
       ],
       "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "observed_at",
+                "destinationType": "time"
+              }
+            ]
+          }
+        },
         {
           "id": "filterFieldsByName",
           "options": {

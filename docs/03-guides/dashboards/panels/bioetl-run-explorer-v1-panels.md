@@ -3,91 +3,68 @@
 **Dashboard file:** `grafana/dashboards/bioetl-run-explorer-v1.json`
 **UID:** `bioetl-run-explorer-v1`
 
-## Overview
+## Scope and layout
 
-Run Explorer is a recent-launch list with direct report access. Defaults are
-Workflow=All, Pipeline=All, Run Type=All, Run ID=-. Explicit URL selections win.
-The page contains a scope banner and Inspect Recent Runs (last 10).
-The navigation bus is not on this dashboard.
-Selected Run Details and Browse Workflow Runs, including their nested panels,
-were removed at the operator's request. Report and control-plane APIs remain
-available independently of the dashboard.
+The page contains a two-line scope banner (y=0/h=2) and Inspect Recent Runs
+(last 10), y=2/h=14. Workflow=All, Pipeline=All, Run Type=All and Run ID=-
+are the defaults. The newest ten launches are shown together without pagination,
+independently of the dashboard time range. Filters and exact Run ID lookup apply
+before the global ten-row limit. No dashboard navigation band is shown here.
 
-## Navigate Dashboards
+## Columns and links
 
-Chips on this page are non-interactive. Open Trust, Overview, Pipeline
-Diagnostics, Provider Health, and Data Quality from the matching columns in
-Inspect Recent Runs. Incoming links from other workspaces still open this list.
+| Column | Value | Destination |
+| --- | --- | --- |
+| Workflow | Workflow name; N/A when absent | Workflow passport |
+| Pipeline | Pipeline name | Pipeline passport |
+| Provider | Recorded provider; N/A when absent | Provider Health |
+| Run ID | Short UUID; full UUID in report link title | Exact persisted Report |
+| Started | YY-MM-DD:HH:mm; N/A when absent | None; descending sort |
+| Duration | Compact elapsed duration; N/A when unavailable | None |
+| Overview | Execution status | Run Overview |
+| Saved Evidence | Verified saved-evidence status | Selected-run Pipeline Diagnostics |
+| Data Quality | Saved exact-run quality verdict | Data Quality |
+| Replay Readiness | Exact replay assessment | Replay Readiness |
 
-### 1. Understand Run Scope
+Dashboard UIDs and existing URL slugs remain stable. Display names are
+Replay Readiness, Run Overview and Data Quality. Row links use the full Run ID,
+pipeline, workflow and run type from that row. Provider Health additionally
+receives the recorded provider. Passport links target generated documentation.
+Missing reports have no report URL; they must not open another run's report.
 
-The first line explains that the list shows the last ten launches by start time,
-independently of the time picker. A line break before Pipeline separates this
-explanation from Pipeline and SELECTED RUN context. Open Report inspects the
-persisted run evidence.
+## Evidence semantics
 
-### 2. Inspect Recent Runs (last 10)
+The recent-list API verifies assessments only for the bounded result page.
+Processing success never implies quality, evidence or replay OK. Nonterminal
+ledger entries remain unfinished; their age is not evidence of current liveness.
 
-- **Type:** Table, panel 3010; the only data panel on this dashboard.
-- **Data source:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
-  with `view=recent`; one request per refresh.
-- **Rows:** Last ten launches, all shown together without pagination. Compact
-  single-line cells retain full values through Inspect and full UUID links.
-- **Layout:** No navigation band. Scope banner y=0/h=3, table y=3/h=14. The table
-  uses the existing ten-row limit and small native cell height.
-- **Selection:** Clicking Run sets that row's Workflow, Pipeline, Run Type and
-  Run ID, preserving the time range and marking the matching row. It does not
-  target a detail panel. Browse all pipelines restores All scopes and Run ID=-.
-- **Reports:** Open report opens the exact row's Markdown file in a new tab,
-  falling back to JSON. Markdown is displayed as text. Report URLs use the
-  Grafana Ops HTTP proxy, independent of the selected dashboard Run ID.
-  REPORT MISSING opens an explicit bilingual not-found response. A deleted
-  file returns not found rather than another run's report.
+- OK: the relevant checks passed.
+- WARN: recorded noncritical findings.
+- ERROR: a failed assessment or corrupt/mismatched evidence.
+- INCOMPLETE: required evidence, checks or verification is missing.
+- N/A: explicitly unsupported assessment or legacy report without that evaluation.
+- IN PROGRESS: reserved for a confirmed assessment queue/running signal. The
+  current API does not infer this state from a missing report or running pipeline.
+- QUERY ERROR: source/read failure, distinct from a run's assessment failure.
 
-## Ordering and evidence
+Saved Evidence checks artifact presence and integrity. Legacy reports without a
+snapshot show N/A; missing modern evidence shows INCOMPLETE. Replay maps READY to
+OK, BLOCKED to ERROR, INSUFFICIENT to INCOMPLETE and UNSUPPORTED to N/A.
+Missing quality evidence on a modern report is INCOMPLETE; it never becomes OK.
 
-Workflow, Pipeline and Run Type filters apply before the global ten-row limit.
-Start time comes from persisted report identity or ledger start events; manifest
-creation is an explicit fallback. File modification time never ranks this view.
-Repeated pipelines remain separate rows. The time picker does not filter the
-list. Run ID selects and marks a row rather than limiting the list to one run.
+Status backgrounds: OK/success #14532D; WARN/partial/shutdown #713F12;
+ERROR/failed/QUERY ERROR #7F1D1D; INCOMPLETE/unfinished #7C2D12;
+IN PROGRESS/running #1E3A8A; N/A/unknown #374151; dry_run #4C1D95.
+Grafana selects contrasting text for native background-colored cells. Ordinary
+links use #93C5FD and ordinary values #E5E7EB on the normal row background.
 
-Final reports supply immutable start/status evidence. A recorded start without
-a terminal event displays running as its last known lifecycle state, not proof
-of a live process. Manifest-only entries remain unknown. A missing report does
-not imply zero accounting.
+## Generation and verification
 
-## Exact lookup and timing
+`python -m scripts.ops.observability.grafana._run_explorer_columns` applies only
+this presentation contract; `--check` detects drift. The full navigation generator
+also invokes this contract last, after older layout migrations.
 
-Find Run ID filters by exact UUID before the ten-row limit, within the selected
-Workflow/Pipeline/Run Type. Clearing it restores the recent list. Duration uses
-persisted start/completion timestamps and the same compact duration as Event
-age (`10 s`, `1 m 30 s`, `16 h 53 m`). Missing start or end stays UNKNOWN;
-running is not a live elapsed timer. Event age uses the last ledger event
-only for running launches. Terminal launches show `completed` for Event age.
-Missing or future timestamps stay UNKNOWN. Neither file mtime nor scrape time
-can substitute for event evidence.
-
-## Empty and failure states
-
-VALID EMPTY means no matching launches. TREE_MISSING, LAYOUT_UNHEALTHY and
-IDENTITY_UNHEALTHY indicate report bind/origin failures, not selector problems.
-Run `python scripts/ops/runtime/docker/verify_report_bind.py` from the canonical
-checkout to diagnose the report bind. Backend failures remain QUERY ERROR.
-
-## Verification
-
-Dashboard HTTP and semantic contracts cover the three remaining panels.
-Regression checks require both removed groups to stay absent, ten rows without
-pagination, a line break before Pipeline, and no links to retired detail panels.
-Run dashboard readability and first-window containment tests and verify the
-actual browser table with ten populated rows and working Report links.
-
-Inspect Saved Run Evidence is not on this page. Saved domain and identity
-evidence stays on Trust.
-
-Recent Runs keeps Pipeline, the short Run ID, Processing, Trust and Report
-readable in the 900-pixel view. Trust uses an Open link, never an inferred OK
-from processing success. Event age remains in the query frame for Inspect
-data; it is hidden from the compact table because Started already supplies
-the visible timestamp. Exact Run IDs and event-age values remain unchanged.
+Run the recent-run API tests, presentation tests, dashboard operator-readability,
+first-window no-scroll and selection-action tests. Verify ten populated rows,
+status links and passport/report targets in the browser. A source-bound API with
+matching row fields is required; an old runtime image is not acceptance.

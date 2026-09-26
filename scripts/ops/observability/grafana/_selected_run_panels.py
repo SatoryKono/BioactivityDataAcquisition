@@ -292,7 +292,35 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
                     "inspect": True,
                 },
             },
-            "overrides": [],
+            "overrides": [
+                {
+                    "matcher": {"id": "byName", "options": "duration_seconds"},
+                    "properties": [
+                        {"id": "noValue", "value": "Not recorded"},
+                        {"id": "unit", "value": "s"},
+                    ],
+                },
+                {
+                    "matcher": {"id": "byName", "options": "source"},
+                    "properties": [
+                        {
+                            "id": "mappings",
+                            "value": [{"type": "value", "options": {
+                                "report.funnel": {"text": "Open report"},
+                                "report.stage_timings": {"text": "Open report"},
+                            }}],
+                        },
+                        {
+                            "id": "links",
+                            "value": [{
+                                "title": "Open saved run report (JSON)",
+                                "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                                "targetBlank": True,
+                            }],
+                        },
+                    ],
+                },
+            ],
         },
         "targets": [
             {
@@ -311,8 +339,29 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
     }
 
 
+def _run_duration_panel(grid: dict[str, int]) -> dict[str, object]:
+    """Calculate total elapsed time from the selected run's saved timestamps."""
+    expression = (
+        "($s := summary[0]; $start := $s.started_at ? $toMillis($s.started_at) : null; "
+        "$end := $s.completed_at ? $toMillis($s.completed_at) : null; "
+        "[{'Run duration': $start != null and $end != null and $end >= $start "
+        "? ($end - $start) / 1000 : null}])"
+    )
+    return {
+        "id": 9463,
+        "type": "stat",
+        "title": "Review Total Run Duration",
+        "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing.",
+        "gridPos": grid,
+        "datasource": "BioETL Ops HTTP",
+        "fieldConfig": {"defaults": {"unit": "s", "decimals": 2, "noValue": "Not recorded"}, "overrides": []},
+        "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": False}, "colorMode": "none", "graphMode": "none", "textMode": "value"},
+        "targets": [{"refId": "A", "type": "json", "source": "url", "parser": "uql", "format": "table", "url": STATUS_URL, "url_options": {"method": "GET", "data": ""}, "uql": 'parse-json | jsonata "' + expression + '"'}],
+    }
+
+
 def _append_saved_run_evidence_row(
-    panels: list[object], *, include_identity: bool = True
+    panels: list[object], *, include_identity: bool = True, include_duration: bool = False
 ) -> None:
     panels[:] = [
         panel
@@ -326,20 +375,23 @@ def _append_saved_run_evidence_row(
         ),
         default=0,
     )
-    stages = _stage_panel({"x": 0, "y": y + 1, "w": 24, "h": 8})
+    offset = 3 if include_duration else 0
+    stages = _stage_panel({"x": 0, "y": y + 1 + offset, "w": 24, "h": 8})
     details = _panel(
         9451,
         "Inspect Selected Run Domains",
-        {"x": 0, "y": y + 9, "w": 24, "h": 10},
+        {"x": 0, "y": y + 9 + offset, "w": 24, "h": 10},
         domains=True,
     )
     _detail_fields(details, ["domain", "verdict", "reason", "action", "evidence_ref"])
     children: list[object] = [stages, details]
+    if include_duration:
+        children.insert(0, _run_duration_panel({"x": 0, "y": y + 1, "w": 24, "h": 3}))
     if include_identity:
         summary = _panel(
             9452,
             "Inspect Selected Run Identity",
-            {"x": 0, "y": y + 19, "w": 24, "h": 8},
+            {"x": 0, "y": y + 19 + offset, "w": 24, "h": 8},
             domains=False,
         )
         _detail_fields(
@@ -525,6 +577,38 @@ def _bind_provider_variable_to_run(variable: dict) -> None:
     }
 
 
+def _style_provider_check(panels: list[dict]) -> None:
+    by_id = {panel["id"]: panel for panel in panels}
+    by_id[9400]["gridPos"].update(x=0, y=2, w=18, h=3)
+    review = by_id[9461]
+    review["gridPos"].update(x=18, y=2, w=6, h=3)
+    review["type"] = "stat"
+    review["description"] = "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. This is not live fleet health."
+    review["transformations"] = [{"id": "limit", "options": {"limitField": 1}}, {"id": "filterFieldsByName", "options": {"include": {"names": ["check_result"]}}}]
+    review["options"] = {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "/^check_result$/", "values": True}, "colorMode": "background", "graphMode": "none", "textMode": "value"}
+    review["fieldConfig"] = {"defaults": {"noValue": "UNKNOWN", "mappings": [{"type": "value", "options": {
+        "OK": {"text": "OK", "color": "green"},
+        "HEALTHY": {"text": "HEALTHY", "color": "green"},
+        "WARN": {"text": "WARN", "color": "orange"},
+        "DEGRADED": {"text": "DEGRADED", "color": "orange"},
+        "ERROR": {"text": "ERROR", "color": "red"},
+        "FAIL": {"text": "FAIL", "color": "red"},
+        "FAILING": {"text": "FAILING", "color": "red"},
+        "CRIT": {"text": "CRIT", "color": "red"},
+        "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
+        "N/A": {"text": "N/A", "color": "gray"},
+        "SELECT RUN": {"text": "SELECT RUN", "color": "gray"},
+        "INCOMPLETE": {"text": "INCOMPLETE", "color": "orange"},
+    }}], "color": {"mode": "fixed", "fixedColor": "gray"}}, "overrides": []}
+    evidence = by_id[9460]
+    evidence["gridPos"].update(y=5)
+    if not any(t["id"] == "convertFieldType" for t in evidence["transformations"]):
+        evidence["transformations"].insert(0, {"id": "convertFieldType", "options": {"conversions": [{"targetField": "observed_at", "destinationType": "time"}]}})
+    evidence["fieldConfig"]["overrides"] = [{"matcher": {"id": "byName", "options": "Observed at"}, "properties": [{"id": "unit", "value": "time:YYYY-MM-DD HH:mm"}]}]
+    for panel_id in (9402, 9403):
+        by_id[panel_id]["gridPos"]["y"] = 10
+
+
 def prune_provider_health_panels(payload: dict[str, object]) -> None:
     """Drop Provider Health panels that do not assess the selected Run ID."""
     if payload.get("uid") != _PROVIDER_HEALTH_UID:
@@ -626,6 +710,7 @@ def prune_provider_health_panels(payload: dict[str, object]) -> None:
                 "enablePagination"
             ] = True
     panels.extend([review, evidence])
+    _style_provider_check(panels)
 
 
 def stamp_selected_run_panels(payload: dict[str, object]) -> None:
@@ -662,7 +747,9 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
         ]
     elif uid != "bioetl-run-explorer-v1":
         _append_saved_run_evidence_row(
-            panels, include_identity=uid != _CONTROL_PLANE_UID
+            panels,
+            include_identity=uid != _CONTROL_PLANE_UID,
+            include_duration=uid == "bioetl-runtime",
         )
 
 

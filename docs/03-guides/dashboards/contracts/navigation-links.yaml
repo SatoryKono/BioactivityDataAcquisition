@@ -48,46 +48,46 @@ selection_serialization:
       dq: [stage]
 required_top_level_links_by_uid:
   bioetl-control-plane-v1:
-  - 2. Overview
+  - Run Overview
   - 3. Pipeline Diagnostics
   - 4. Provider Health
-  - 5. Data Quality
+  - Data Quality
   - 6. Incident Workspace
   - 0. Run Explorer
   bioetl-overview-v2:
-  - 1. Trust
+  - Replay Readiness
   - 3. Pipeline Diagnostics
   - 4. Provider Health
-  - 5. Data Quality
+  - Data Quality
   - 6. Incident Workspace
   - 0. Run Explorer
   bioetl-runtime:
-  - 1. Trust
-  - 2. Overview
+  - Replay Readiness
+  - Run Overview
   - 4. Provider Health
-  - 5. Data Quality
+  - Data Quality
   - 6. Incident Workspace
   - 0. Run Explorer
   bioetl-provider-health-v2:
-  - 1. Trust
-  - 2. Overview
+  - Replay Readiness
+  - Run Overview
   - 3. Pipeline Diagnostics
-  - 5. Data Quality
+  - Data Quality
   - 6. Incident Workspace
   - 0. Run Explorer
   bioetl-dq-v2:
-  - 1. Trust
-  - 2. Overview
+  - Replay Readiness
+  - Run Overview
   - 3. Pipeline Diagnostics
   - 4. Provider Health
   - 6. Incident Workspace
   - 0. Run Explorer
   bioetl-incident-v1:
-  - 1. Trust
-  - 2. Overview
+  - Replay Readiness
+  - Run Overview
   - 3. Pipeline Diagnostics
   - 4. Provider Health
-  - 5. Data Quality
+  - Data Quality
   - 0. Run Explorer
   bioetl-run-explorer-v1: []
 top_level_link_priority_by_uid:
@@ -96,11 +96,11 @@ top_level_link_priority_by_uid:
     target_uid: bioetl-runtime
     priority: primary
     semantics: scoped_runtime_handoff
-  - title: 1. Trust
+  - title: Replay Readiness
     target_uid: bioetl-control-plane-v1
     priority: secondary
     semantics: scoped_control_plane_handoff
-  - title: 5. Data Quality
+  - title: Data Quality
     target_uid: bioetl-dq-v2
     priority: contextual
     semantics: scoped_dq_handoff
@@ -303,7 +303,7 @@ required_panel_links_by_uid:
   - panel_id: 4
     target_uid: bioetl-dq-v2
     link_titles:
-    - Open 5. Data Quality
+    - Open Data Quality
   - panel_id: 6
     target_uid: bioetl-provider-health-v2
     link_titles:
@@ -311,7 +311,7 @@ required_panel_links_by_uid:
   - panel_id: 7
     target_uid: bioetl-dq-v2
     link_titles:
-    - Open 5. Data Quality
+    - Open Data Quality
   - panel_id: 236
     target_uid: bioetl-runtime
     link_titles:
@@ -344,7 +344,7 @@ required_panel_links_by_uid:
   - panel_id: 110
     target_uid: bioetl-control-plane-v1
     link_titles:
-    - Open 1. Trust
+    - Open Replay Readiness
   bioetl-incident-v1:
   - panel_id: 2010
     target_uid: '${__data.fields.action_dashboard_uid}'
@@ -370,7 +370,7 @@ required_panel_links_by_uid:
   - panel_id: 3010
     target_uid: bioetl-control-plane-v1
     link_titles:
-    - Open 1. Trust
+    - Open Replay Readiness
 default_time_refresh_policy:
   L0:
     dashboards:
@@ -572,11 +572,11 @@ navigation_transition_contract:
       canonical_uid: bioetl-overview-v2
       mirror_panels: []
 visual_bus_titles_ordered:
-- 1. Trust
-- 2. Overview
+- Replay Readiness
+- Run Overview
 - 3. Pipeline Diagnostics
 - 4. Provider Health
-- 5. Data Quality
+- Data Quality
 - 6. Incident Workspace
 - 0. Run Explorer
 visual_bus_uids_ordered:

@@ -186,7 +186,7 @@ def test_fraction_panels_have_consistent_units():
 
 def test_global_read_latency_axis_stays_seconds_without_one_second_ceiling():
     """Panel 111 must auto-scale seconds; 0.5/1s thresholds flatten millisecond reads."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel = next(
         item for item in get_dashboard_panels(dashboard) if item.get("id") == 111
     )

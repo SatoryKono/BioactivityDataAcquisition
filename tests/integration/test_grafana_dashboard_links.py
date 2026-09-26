@@ -437,11 +437,11 @@ def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix(
 def test_dashboard_titles_match_home_dashboard_navigation_names() -> None:
     """Grafana Home > Dashboards uses dashboard.title, so titles must match the navigation map."""
     expected_titles_by_uid = {
-        "bioetl-control-plane-v1": "1. Trust",
-        "bioetl-overview-v2": "2. Overview",
+        "bioetl-control-plane-v1": "Replay Readiness",
+        "bioetl-overview-v2": "Run Overview",
         "bioetl-runtime": "3. Pipeline Diagnostics",
         "bioetl-provider-health-v2": "4. Provider Health",
-        "bioetl-dq-v2": "5. Data Quality",
+        "bioetl-dq-v2": "Data Quality",
         "bioetl-incident-v1": "6. Incident Workspace",
         "bioetl-run-explorer-v1": "0. Run Explorer",
     }
@@ -625,7 +625,7 @@ def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
     for dashboard_name in ("bioetl-overview-v2.json", "bioetl-runtime.json"):
         _assert_named_dashboard_handoff(
             dashboard_name=dashboard_name,
-            expected_title="5. Data Quality",
+            expected_title="Data Quality",
             url_prefix="/d/bioetl-dq-v2",
         )
 
@@ -635,7 +635,7 @@ def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
     for dashboard_name in ("bioetl-runtime.json", "bioetl-dq-v2.json"):
         _assert_named_dashboard_handoff(
             dashboard_name=dashboard_name,
-            expected_title="1. Trust",
+            expected_title="Replay Readiness",
             url_prefix="/d/bioetl-control-plane-v1/1-trust",
         )
 

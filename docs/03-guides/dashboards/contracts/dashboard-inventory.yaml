@@ -3,7 +3,7 @@
 
 dashboards:
   - uid: bioetl-control-plane-v1
-    title: 1. Trust
+    title: Replay Readiness
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/run-manifest-inspection.md
     family: primary
@@ -41,7 +41,7 @@ dashboards:
       - run_type
       - read_latency_quantile
   - uid: bioetl-overview-v2
-    title: 2. Overview
+    title: Run Overview
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/observability-checklist.md
     family: primary
@@ -141,7 +141,7 @@ dashboards:
       - pipeline_context
       - adapter
   - uid: bioetl-dq-v2
-    title: 5. Data Quality
+    title: Data Quality
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/pipeline-failure-dq.md
     family: primary

@@ -329,9 +329,9 @@
             "minWidth": 50,
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
-            "wrapText": true
+            "wrapText": false
           },
           "noValue": "N/A",
           "links": [],
@@ -349,7 +349,11 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 135
+                "value": 120
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
               },
               {
                 "id": "links",
@@ -375,7 +379,7 @@
                   {
                     "type": "value",
                     "options": {
-                      "—": {
+                      "â€”": {
                         "text": "N/A",
                         "color": "#9CA3AF"
                       }
@@ -394,6 +398,10 @@
               {
                 "id": "custom.width",
                 "value": 160
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
               },
               {
                 "id": "links",
@@ -426,6 +434,10 @@
                 "value": 85
               },
               {
+                "id": "custom.inspect",
+                "value": false
+              },
+              {
                 "id": "links",
                 "value": [
                   {
@@ -453,13 +465,17 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 90
+              },
+              {
+                "id": "custom.inspect",
+                "value": false
               },
               {
                 "id": "links",
                 "value": [
                   {
-                    "title": "Report · ${__data.fields.run_id}",
+                    "title": "Report Â· ${__data.fields.run_id}",
                     "url": "${__data.fields.report_url:raw}",
                     "includeVars": false,
                     "targetBlank": true
@@ -483,7 +499,11 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 130
+                "value": 115
+              },
+              {
+                "id": "custom.inspect",
+                "value": false
               },
               {
                 "id": "unit",
@@ -500,6 +520,10 @@
               {
                 "id": "custom.width",
                 "value": 75
+              },
+              {
+                "id": "custom.inspect",
+                "value": false
               }
             ]
           },
@@ -511,7 +535,11 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 85
+              },
+              {
+                "id": "custom.inspect",
+                "value": false
               },
               {
                 "id": "links",
@@ -529,7 +557,7 @@
                 "value": {
                   "type": "color-background",
                   "mode": "basic",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -628,7 +656,11 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 125
+                "value": 120
+              },
+              {
+                "id": "custom.inspect",
+                "value": false
               },
               {
                 "id": "links",
@@ -646,7 +678,7 @@
                 "value": {
                   "type": "color-background",
                   "mode": "basic",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -748,6 +780,10 @@
                 "value": 110
               },
               {
+                "id": "custom.inspect",
+                "value": false
+              },
+              {
                 "id": "links",
                 "value": [
                   {
@@ -763,7 +799,7 @@
                 "value": {
                   "type": "color-background",
                   "mode": "basic",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -865,6 +901,10 @@
                 "value": 140
               },
               {
+                "id": "custom.inspect",
+                "value": false
+              },
+              {
                 "id": "links",
                 "value": [
                   {
@@ -880,7 +920,7 @@
                 "value": {
                   "type": "color-background",
                   "mode": "basic",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {

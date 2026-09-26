@@ -63,7 +63,7 @@ def test_recent_report_column_uses_the_row_http_link() -> None:
     override = next(
         o
         for o in panel["fieldConfig"]["overrides"]
-        if o["matcher"]["options"] == "Report"
+        if o["matcher"]["options"] == "Run ID"
     )
     links = next(p["value"] for p in override["properties"] if p["id"] == "links")
     assert len(links) == 1
@@ -127,13 +127,13 @@ def test_run_explorer_styles_processing_without_obsolete_columns() -> None:
         for o in panel["fieldConfig"]["overrides"]
     }
     assert "Status" not in props and "Severity" not in props
-    assert props["Processing"]["custom.cellOptions"]["type"] == "color-background"
-    mappings = props["Processing"]["mappings"][0]["options"]
-    assert mappings["failed"]["color"] == "red"
+    assert props["Overview"]["custom.cellOptions"]["type"] == "color-background"
+    mappings = props["Overview"]["mappings"][0]["options"]
+    assert mappings["failed"]["color"] == "#7F1D1D"
     assert mappings["unfinished"]["text"] == "unfinished"
-    assert props["Replay readiness"]["noValue"] != "OK"
+    assert panel["fieldConfig"]["defaults"]["noValue"] != "OK"
 
-    assert props["Pipeline"]["custom.cellOptions"]["wrapText"] is False
+    assert panel["fieldConfig"]["defaults"]["custom"]["wrapText"] is False
     assert props["Pipeline"]["custom.inspect"] is True
     assert panel["options"]["footer"]["enablePagination"] is False
 

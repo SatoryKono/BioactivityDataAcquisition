@@ -199,7 +199,7 @@ one oversized chart from masking a prose-heavy group.
 | `DASH-PERF-002` | `maxDataPoints`, when set on a panel, MUST be a positive integer within `[1, 5000]`. |
 | `DASH-COPY-002` | Verdict severity cards MUST carry a non-empty `description` and explicit value `mappings` (state encoding; no bare numbers). |
 | `DASH-COPY-008` | Authored HTML on enrolled dashboards MUST use the five inline copy roles in design-system §9.1: numbered bold dashboard names, italic panel titles, CAPS status/scope without bold, `<code>` 16px field tokens, regular 16px body. Navigation-bus chips are exempt. |
-| `DASH-TIME-001` | Operator-facing date/time MUST render as `YYYY-MM-DD HH:MM`. Grafana custom units MUST be `time:YYYY-MM-DD HH:mm` (`mm` is minutes; `MM` is months and is forbidden). HTTP ISO timestamp strings MUST use `convertFieldType` to `time` before that unit. Compose `GF_DATE_FORMATS_*` MUST use the same pattern. |
+| `DASH-TIME-001` | Operator-facing date/time MUST render as `YYYY-MM-DD HH:MM`. Grafana custom units MUST be `time:YYYY-MM-DD HH:mm` (`mm` is minutes; `MM` is months and is forbidden). The Run Explorer recent-launch table uses the explicitly requested compact `time:YY-MM-DD:HH:mm` format for Started only. HTTP ISO timestamp strings MUST use `convertFieldType` to `time` before either unit. Compose `GF_DATE_FORMATS_*` retains the full-year pattern. |
 
 ### 6.1 Geometry & purpose regression locks (added 2026-08-14)
 

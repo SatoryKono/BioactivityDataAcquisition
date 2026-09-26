@@ -145,7 +145,7 @@ _REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
 
 _TOP_LEVEL_LINK_TITLE_RE = re.compile(
-    r"^([0-6]\. .+|Silver Reject Explorer|Explore (Logs|Traces)|Observability Checklist \(runbook\))$"
+    r"^([0-6]\. .+|Replay Readiness|Run Overview|Data Quality|Silver Reject Explorer|Explore (Logs|Traces)|Observability Checklist \(runbook\))$"
 )
 
 _CANONICAL_GITHUB_BLOB_PREFIX = (
@@ -1425,22 +1425,22 @@ def _assert_silver_explorer_html_bus_forensic_boundary(
 
 
 _EXPECTED_CURRENT_NAV_TITLE = {
-    "bioetl-control-plane-v1": "1. Trust",
-    "bioetl-overview-v2": "2. Overview",
+    "bioetl-control-plane-v1": "Replay Readiness",
+    "bioetl-overview-v2": "Run Overview",
     "bioetl-runtime": "3. Pipeline Diagnostics",
     "bioetl-provider-health-v2": "4. Provider Health",
-    "bioetl-dq-v2": "5. Data Quality",
+    "bioetl-dq-v2": "Data Quality",
     "bioetl-incident-v1": "6. Incident Workspace",
     "bioetl-run-explorer-v1": "0. Run Explorer",
 }
 
 _BASE_VISUAL_NAV_TITLES = (
     "0. Run Explorer",
-    "1. Trust",
-    "2. Overview",
+    "Replay Readiness",
+    "Run Overview",
     "3. Pipeline Diagnostics",
     "4. Provider Health",
-    "5. Data Quality",
+    "Data Quality",
     "6. Incident Workspace",
 )
 
