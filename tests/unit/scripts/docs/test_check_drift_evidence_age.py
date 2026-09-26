@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from datetime import UTC, date, datetime
 
+import pytest
+
 from scripts.docs.checks.check_drift import _utc_evidence_age_days
+
+pytestmark = pytest.mark.unit
 
 
 def test_evidence_age_uses_pinned_day() -> None:

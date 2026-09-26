@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 
 class BatchMetricsRecorderService:
-    """Record bounded batch-processing metrics; all methods are metrics-safe no-ops."""
+    """Record bounded batch-processing metrics; methods are metrics-safe no-ops."""
 
     def __init__(
         self,
@@ -45,12 +45,10 @@ class BatchMetricsRecorderService:
 
     @property
     def error_count(self) -> int:
-        """Get the run-scoped error count (not safe as a batch-rate numerator)."""
         return self._error_count
 
     @property
     def batch_error_count(self) -> int:
-        """Get the error count for the current transform batch only."""
         return self._batch_error_count
 
     def begin_batch(self) -> None:
@@ -254,6 +252,5 @@ class BatchMetricsRecorderService:
             )
 
 
-# Compatibility alias retained for legacy imports.
 BatchMetricsRecorder = BatchMetricsRecorderService
 __all__ = ["BatchMetricsRecorder", "BatchMetricsRecorderService"]

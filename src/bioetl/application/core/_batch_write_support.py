@@ -6,17 +6,19 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.core._batch_write_schema_quarantine import (
+    quarantine_schema_violation,
+)
 from bioetl.application.core.batch_operation_errors import (
     OPERATION_ERRORS as DOMAIN_EVENT_EMISSION_ERRORS,
 )
 from bioetl.application.core.quarantine_manager import (
-    DQQuarantineEntry,
     QuarantineRuntimeService,
 )
 from bioetl.domain.aggregates.events import BatchFailed, BatchWritten, DomainEvent
 from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.medallion import Layer
-from bioetl.domain.types import BatchID, ErrorType, RunID
+from bioetl.domain.types import BatchID, RunID
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_writer import BatchWriter
@@ -179,7 +181,7 @@ async def safe_write_layer(
         # Gold returns None on success; use a marker to distinguish quarantine.
         return write_result if write_result is not None else True
     except SchemaViolationError as error:
-        await _quarantine_schema_violation(
+        await quarantine_schema_violation(
             writer=writer,
             quarantine_manager=quarantine_manager,
             logger=logger,
@@ -205,48 +207,3 @@ async def safe_write_layer(
                 logger=logger,
             )
         raise
-
-
-async def _quarantine_schema_violation(
-    *,
-    writer: BatchWriter,
-    quarantine_manager: QuarantineRuntimeService,
-    logger: LoggerPort,
-    domain_event_emitter: DomainEventEmitterProtocol | None,
-    run_id: RunID | None,
-    layer: str,
-    records: list[dict[str, object]],
-    batch_id: BatchID,
-    ingestion_ts: datetime,
-    error: SchemaViolationError,
-) -> None:
-    writer.track_batch_failed(stage=layer, count=len(records))
-    emit_batch_failed(
-        emitter=domain_event_emitter,
-        run_id=run_id,
-        batch_id=batch_id,
-        layer=layer,
-        error=error,
-        occurred_at=ingestion_ts,
-        logger=logger,
-    )
-    logger.warning("schema_violation_quarantined", layer=layer, errors=error.errors)
-    reason_code = (
-        "gold_contract_schema_failure"
-        if layer == "gold"
-        else ErrorType.SCHEMA_VIOLATION.value
-    )
-    await quarantine_manager.quarantine_records(
-        [
-            DQQuarantineEntry(
-                record=record,
-                error_type=ErrorType.SCHEMA_VIOLATION,
-                error_details=f"Schema violation in {layer}: {error.errors}",
-                reason_code=reason_code,
-            )
-            for record in records
-        ],
-        batch_id,
-        ingestion_ts=ingestion_ts,
-        stage=layer,
-    )
