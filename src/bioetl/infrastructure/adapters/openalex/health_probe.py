@@ -5,6 +5,8 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
+import httpx
+
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.health_probe_policy import (
     is_slow_health_probe,
@@ -51,7 +53,10 @@ async def probe_openalex_health(
 
     start_time = time.monotonic()
     with adapter_metrics.measure_request("/health"):
-        response = await http_client.get_once(url, params=params, headers=headers)
+        try:
+            response = await http_client.get_once(url, params=params, headers=headers)
+        except httpx.HTTPStatusError as error:
+            response = error.response
     elapsed = time.monotonic() - start_time
 
     if response.status_code != 200:

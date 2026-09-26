@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from types import TracebackType
@@ -188,13 +189,11 @@ class CircuitBreakerDataSourceDecorator:
                 error=exc,
             )
 
-            async def _record_failure() -> None:
-                raise exc
+            async def _record_failure(error: BioETLError = exc) -> None:
+                raise error
 
-            try:
+            with contextlib.suppress(BioETLError):
                 await self.circuit_breaker.call(_record_failure)
-            except BioETLError:
-                pass
             raise
 
     async def health_check(self) -> HealthStatus:

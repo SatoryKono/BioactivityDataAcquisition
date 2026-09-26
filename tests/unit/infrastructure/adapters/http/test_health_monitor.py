@@ -158,12 +158,10 @@ class TestProviderHealthMonitorStateTransitions:
             state.status == HealthStatus.DEGRADED
         )  # Still degraded (window not passed)
 
-        # Simulate 5 minutes passing by setting last_success in the past
-        # This simulates that the previous success happened 5+ minutes ago
-        state.last_success = time.monotonic() - 301  # 5 min + 1 sec ago
+        # Simulate 5 minutes since the last error.
+        state.last_error = time.monotonic() - 301
 
-        # Next success should check the window BEFORE updating last_success
-        # Since last_success is 5+ min in the past, _check_clear_window returns True
+        # Next success checks the clear window from last_error before updating success.
         status = monitor.record_success("chembl")
 
         # Now should be HEALTHY since 5 min window passed

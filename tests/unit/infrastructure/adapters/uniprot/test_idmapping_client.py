@@ -469,11 +469,12 @@ class TestUniProtIDMappingClient:
             return_value=MagicMock(status_code=503, headers={})
         )
 
-        await idmapping_client._fetch_results_pages(
-            "job-1",
-            {"CHEMBL1": []},
-            "https://rest.uniprot.org/idmapping/results/job-1",
-        )
+        with pytest.raises(IDMappingJobError, match="HTTP 503"):
+            await idmapping_client._fetch_results_pages(
+                "job-1",
+                {"CHEMBL1": []},
+                "https://rest.uniprot.org/idmapping/results/job-1",
+            )
 
         mock_logger.warning.assert_called_once_with(
             "idmapping_results_error",
@@ -491,11 +492,12 @@ class TestUniProtIDMappingClient:
         response.json.return_value = []
         mock_http_client.get = AsyncMock(return_value=response)
 
-        await idmapping_client._fetch_results_pages(
-            "job-1",
-            {"CHEMBL1": []},
-            "https://rest.uniprot.org/idmapping/results/job-1",
-        )
+        with pytest.raises(IDMappingJobError, match="payload was rejected"):
+            await idmapping_client._fetch_results_pages(
+                "job-1",
+                {"CHEMBL1": []},
+                "https://rest.uniprot.org/idmapping/results/job-1",
+            )
 
         mock_http_client.get.assert_awaited_once()
 
