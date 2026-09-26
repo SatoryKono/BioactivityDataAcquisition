@@ -4615,7 +4615,7 @@
           ],
           "title": "Monitor Health Checks",
           "type": "stat",
-          "description": "TIME RANGE · Total HEALTHY, DEGRADED, and failed checks completed in the selected range. `0` means no completed checks were observed or checking has not started; it is not a health verdict. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "This completed checks stat shows completed checks in the chart range. TIME RANGE · Total HEALTHY, DEGRADED, and failed checks completed in the selected range. `0` means no completed checks were observed or checking has not started; it is not a health verdict. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         }
       ]
     },
@@ -4630,7 +4630,7 @@
         "y": 19
       },
       "id": 9405,
-      "description": "Expand for compact HTTP-backed run context; Run Explorer is the canonical exact-run workspace.",
+      "description": "This run context row shows run identity and record counts when expanded. Expand for compact HTTP-backed run context; Run Explorer is the canonical exact-run workspace.",
       "panels": [
         {
           "id": 9402,
@@ -4643,7 +4643,7 @@
             "h": 12
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero Inspect value opens full identifiers as selectable plain text.",
+          "description": "This identity table shows identifiers of the selected run. SELECTED RUN · Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero Inspect value opens full identifiers as selectable plain text.",
           "fieldConfig": {
             "defaults": {
               "custom": {
