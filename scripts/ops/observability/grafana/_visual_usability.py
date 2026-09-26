@@ -154,7 +154,23 @@ def _trust(p: dict[int, dict]) -> None:
             "Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID."
         )
     # An empty reasons list is valid; query failures remain explicit in Trust.
+<<<<<<< HEAD
     override(p[9418], "Reasons", **{"noValue": "—"})
+||||||| 2d9509c4d82f
+    override(p[9418], "Reasons", **{"noValue": "—"})
+    latency = p[111]
+    latency["fieldConfig"]["defaults"]["color"] = {"mode": "palette-classic"}
+    latency["options"]["legend"] = {
+        "displayMode": "table",
+        "placement": "right",
+        "showLegend": True,
+        "calcs": ["lastNotNull", "max"],
+        "width": 430,
+    }
+    latency["gridPos"]["h"] = 10
+=======
+    override(p[9418], "Reason count", **{"noValue": "—", "links": []})
+>>>>>>> main
     if 111 in p:
         latency = p[111]
         latency["fieldConfig"]["defaults"]["color"] = {"mode": "palette-classic"}

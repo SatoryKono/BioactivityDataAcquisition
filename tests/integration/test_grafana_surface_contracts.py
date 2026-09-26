@@ -77,13 +77,18 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
 def test_dq_dashboard_surfaces_record_flow_invariant_metrics() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     all_expressions = "\n".join(get_panel_expressions(dashboard))
-
-    required_metrics = [
+    retired = [
         "bioetl_records_processed_total",
         "bioetl_record_flow_invariants_total",
     ]
-    missing = [metric for metric in required_metrics if metric not in all_expressions]
-    assert not missing, f"DQ dashboard missing metrics: {missing}"
+    present = [metric for metric in retired if metric in all_expressions]
+    assert not present, f"DQ dashboard still ships range flow metrics: {present}"
+    titles = {
+        panel.get("title")
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    assert "Inspect Processed Records" in titles
 
 
 def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> None:
@@ -213,14 +218,7 @@ def test_dq_dashboard_contains_gold_specific_validation_surface() -> None:
         ),
         None,
     )
-    assert panel is not None
-    expressions = [
-        target.get("expr", "")
-        for target in panel.get("targets", [])
-        if isinstance(target.get("expr"), str)
-    ]
-    assert any('stage="gold"' in expr for expr in expressions)
-    assert any('severity="hard_fail"' in expr for expr in expressions)
+    assert panel is None
 
 
 def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_time_range() -> (
@@ -443,10 +441,6 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
             "bioetl-control-plane-v1.json",
             "Track Global Read Latency",
         ),
-        ("bioetl-dq-v2.json", "Monitor Quarantined Records"),
-        ("bioetl-dq-v2.json", "Monitor Silver Validation Failures"),
-        ("bioetl-dq-v2.json", "Inspect Quarantine Error Types"),
-        ("bioetl-dq-v2.json", "Monitor Silver Validation Failures"),
         ("bioetl-runtime.json", "Compare Records by Stage & Run Type"),
     ],
 )
@@ -535,8 +529,6 @@ def test_runtime_tracing_row_orders_log_hygiene_panels() -> None:
     ("dashboard_file", "panel_title"),
     [
         ("bioetl-control-plane-v1.json", "Compare Lineage Persistence Outcomes"),
-        ("bioetl-dq-v2.json", "Track DQ Check Duration p95"),
-        ("bioetl-dq-v2.json", "Track DQ Anomalies"),
         ("bioetl-runtime.json", "Track Records by Stage / Interval"),
     ],
 )

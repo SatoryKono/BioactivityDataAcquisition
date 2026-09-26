@@ -219,10 +219,15 @@ first_window_summary_tables:
     owner: "@bioetl-observability"
     bind: topk
   - dashboard: bioetl-dq-v2.json
-    id: 9102
+    id: 9402
     max_rows: 5
     owner: "@bioetl-observability"
-    bind: topk
+    bind: paginate
+  - dashboard: bioetl-dq-v2.json
+    id: 9403
+    max_rows: 5
+    owner: "@bioetl-observability"
+    bind: paginate
   - dashboard: bioetl-dq-v2.json
     id: 9406
     max_rows: 1

@@ -372,11 +372,23 @@
         "x": 0,
         "y": 2
       },
+<<<<<<< HEAD
       "description": "SELECTED RUN · This page assesses the selected Run ID from saved HTTP evidence. Prometheus current status and time-range scores are not on this page. A time-range value never proves this run.",
+||||||| 2d9509c4d82f
+      "description": "Current panels show the latest DQ verdict and reasons for the selected pipeline. Selected-run panels use HTTP-backed identity and record accounting; run ID never filters Prometheus. Selected-range panels show scores, freshness, rejects, and delivery impact. These scopes answer different questions and must not be compared as equivalent status signals. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: stage=${stage}.",
+=======
+      "description": "SELECTED RUN · This page assesses the selected Run ID from saved HTTP evidence. CURRENT pipeline status and TIME RANGE scores are not on this page. A time-range value never proves this run.",
+>>>>>>> main
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Evidence Scope",
+<<<<<<< HEAD
         "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">SELECTED RUN · Saved evidence for the selected Run ID. Current pipeline status and time-range scores are not on this page.</div></div>"
+||||||| 2d9509c4d82f
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Is data conformant, and what impact needs action? CURRENT = Status/reasons (up to 5). SELECTED RUN = accounting. TIME RANGE scopes are not peers.</div></div>"
+=======
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">SELECTED RUN · Saved evidence for the selected Run ID. CURRENT pipeline status and TIME RANGE scores are not on this page.</div></div>"
+>>>>>>> main
       },
       "links": []
     },
@@ -867,7 +879,15 @@
       "options": {
         "showHeader": true,
         "footer": {
+<<<<<<< HEAD
           "show": false
+||||||| 2d9509c4d82f
+                    "color": "green",
+                    "value": 0.95
+=======
+          "show": false,
+          "enablePagination": true
+>>>>>>> main
         },
         "cellHeight": "sm"
       },
@@ -1223,7 +1243,25 @@
           }
         ],
         "footer": {
+<<<<<<< HEAD
           "show": false
+||||||| 2d9509c4d82f
+              ],
+              "noValue": "TELEMETRY MISSING — no series for this scope; not a zero"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 79,
+            "w": 24,
+            "h": 6
+          },
+          "id": 155,
+=======
+          "show": false,
+          "enablePagination": true
+>>>>>>> main
         },
         "cellHeight": "sm"
       },

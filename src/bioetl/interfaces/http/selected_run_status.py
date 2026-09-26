@@ -8,6 +8,7 @@ import json
 from collections.abc import Mapping
 from pathlib import Path
 from typing import cast
+from uuid import UUID
 
 from bioetl.application.observability.reason_aliases import (
     display_reason,
@@ -29,6 +30,7 @@ from bioetl.domain.run_reports.selected_status import (
     provider_selector_options,
     verify_snapshot,
 )
+from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostics
 from bioetl.interfaces.http import run_report_ops
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
@@ -51,6 +53,20 @@ _CONTROL_PLANE = "Control Plane"
 _REPORT_SCHEMAS = {"pipeline_run_report_v1", "pipeline_run_report_v2"}
 
 _SELECT_RUN = "SELECT RUN"
+_SELF_REPORT_KINDS = frozenset(
+    {
+        "pipeline_run_report_json",
+        "pipeline_run_report_md",
+        "workflow_run_report_json",
+        "workflow_run_report_md",
+    }
+)
+_SELF_REPORT_FILENAMES = {
+    "pipeline_run_report_json": "pipeline-run-report.json",
+    "pipeline_run_report_md": "pipeline-run-report.md",
+    "workflow_run_report_json": "workflow-run-report.json",
+    "workflow_run_report_md": "workflow-run-report.md",
+}
 
 
 class _RevisionMissingError(LookupError):
@@ -99,6 +115,7 @@ def unavailable_status(
         "reasons_text": reason,
         "reasons_display": display_reason(reason),
         "reasons_count": None,
+        "trust_reasons_action": None,
         "evidence_observed_at": None,
     }
     return {
@@ -145,6 +162,9 @@ def unavailable_status(
                 reason=reason,
             )
         ),
+        **project_stage_diagnostics(
+            None, request_state=state, request_reason=reason
+        ),
     }
 
 
@@ -175,6 +195,31 @@ def _readiness_fields(projection: Mapping[str, object]) -> dict[str, object]:
         "replay_readiness": [row],
         "replay_checks": checks if isinstance(checks, list) else [],
     }
+
+
+def _resolve_artifact_path(
+    root: Path, relative: str, kind: str
+) -> tuple[Path | None, str]:
+    """Locate an artifact without joining a repo-relative ref onto the run directory."""
+    filename = _SELF_REPORT_FILENAMES.get(kind)
+    if filename is not None:
+        canonical = (root / filename).resolve()
+        if canonical.is_file() and canonical.is_relative_to(root):
+            return canonical, ""
+    raw = Path(relative)
+    if raw.is_absolute():
+        candidate = raw.resolve()
+        if not candidate.is_relative_to(root):
+            return None, "artifact_path_escape"
+        return candidate, ""
+    if len(raw.parts) == 1:
+        return (root / raw.name).resolve(), ""
+    if kind in _SELF_REPORT_KINDS:
+        return None, "artifact_missing"
+    candidate = (root / raw).resolve()
+    if not candidate.is_relative_to(root):
+        return None, "artifact_path_escape"
+    return candidate, ""
 
 
 def _artifact_probes(
@@ -214,29 +259,29 @@ def _artifact_probes(
                 }
             )
             continue
-        raw = Path(relative)
-        candidate = raw.resolve() if raw.is_absolute() else (root / raw).resolve()
-        if not candidate.is_relative_to(root):
+        kind = str(item.get("kind") or "")
+        candidate, resolve_error = _resolve_artifact_path(root, relative, kind or code)
+        if resolve_error or candidate is None or not candidate.is_file():
             probes.append(
                 {
                     "code": code,
                     "result": "fail",
-                    "reason": "artifact_path_escape",
-                    "evidence_ref": ref,
-                }
-            )
-            continue
-        if not candidate.is_file():
-            probes.append(
-                {
-                    "code": code,
-                    "result": "fail",
-                    "reason": "artifact_missing",
+                    "reason": resolve_error or "artifact_missing",
                     "evidence_ref": ref,
                 }
             )
             continue
         if not isinstance(digest, str) or not digest.strip():
+            if code in _SELF_REPORT_KINDS or kind in _SELF_REPORT_KINDS:
+                probes.append(
+                    {
+                        "code": code,
+                        "result": "pass",
+                        "reason": "object_available",
+                        "evidence_ref": ref,
+                    }
+                )
+                continue
             probes.append(
                 {
                     "code": code,
@@ -303,6 +348,7 @@ def _saved_trust(
     conflicts = _accounting_conflicts(report.get("reconciliation"), control["verdict"])
     if conflicts:
         reasons_text = "\n".join(filter(None, (reasons_text, *conflicts)))
+    reasons_count = sum(bool(line.strip()) for line in reasons_text.splitlines())
     return {
         "processing_status": str(summary["execution_state"]).lower(),
         "trust_status": "ERROR" if conflicts else control["verdict"],
@@ -310,7 +356,8 @@ def _saved_trust(
         "accounting_integrity": "CONFLICT" if conflicts else "NO REPORTED CONFLICT",
         "reasons_text": reasons_text,
         "reasons_display": display_reasons_text(reasons_text),
-        "reasons_count": sum(bool(line.strip()) for line in reasons_text.splitlines()),
+        "reasons_count": reasons_count,
+        "trust_reasons_action": "View trust reasons" if reasons_count > 0 else None,
         "evidence_observed_at": summary["evaluation_at"],
         "pipeline": summary["pipeline"],
         "run_id": summary["run_id"],
@@ -404,8 +451,45 @@ def _load_report_assessment(
     return report, identity, assessment, availability, revision
 
 
+def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
+    """Read manifest fields for this run. A missing port is not report identity."""
+    if port is None:
+        return None
+    try:
+        selected_id = UUID(run_id)
+    except ValueError:
+        return None
+    getter = getattr(port, "get_by_run_id", None)
+    if getter is None:
+        return None
+    manifest = getter(selected_id)
+    if manifest is None:
+        return None
+    provenance = getattr(manifest, "code_provenance", None)
+    fingerprints: list[str] = []
+    for source in getattr(manifest, "source_refs", ()) or ():
+        for snapshot in getattr(source, "input_snapshots", ()) or ():
+            content_hash = getattr(snapshot, "content_hash", None)
+            if isinstance(content_hash, str) and content_hash.strip():
+                fingerprints.append(content_hash.strip())
+    capability = getattr(manifest, "replay_capability", None)
+    capability_value = getattr(capability, "value", capability)
+    return {
+        "effective_config_hash": getattr(provenance, "effective_config_hash", None),
+        "dependency_lock_hash": getattr(provenance, "dependency_lock_hash", None),
+        "input_snapshot_fingerprint": ",".join(fingerprints) if fingerprints else None,
+        "replay_capability": capability_value,
+        "replay_of_run_id": getattr(manifest, "replay_of_run_id", None),
+        "replay_of_manifest_id": getattr(manifest, "replay_of_manifest_id", None),
+    }
+
+
 def load_selected_run_status(
-    *, pipeline: str, run_id: str, root: Path | None = None
+    *,
+    pipeline: str,
+    run_id: str,
+    root: Path | None = None,
+    manifest_port: object | None = None,
 ) -> dict[str, object]:
     """Load and revalidate the exact report, revision and bound identity each time."""
     if run_id in {"", "-", "All", "$__all"}:
@@ -453,6 +537,7 @@ def load_selected_run_status(
     probes, inventory_present = _artifact_probes(report, path.parent)
     projection = project_selected_run_replay_readiness(
         identity=identity,
+        manifest=_manifest_snapshot(manifest_port, run_id),
         artifact_probes=probes,
         inventory_present=inventory_present,
         evidence_revision=revision,
@@ -514,6 +599,7 @@ def load_selected_run_status(
         "rows": rows,
         "trust": [trust],
         **readiness_fields,
+        **project_stage_diagnostics(report),
     }
 
 
@@ -563,7 +649,11 @@ async def handle_selected_run_status(
     run_id = host._read_optional_param(query, "run_id") or "-"
 
     def load() -> dict[str, object]:
-        result = load_selected_run_status(pipeline=pipeline, run_id=run_id)
+        result = load_selected_run_status(
+            pipeline=pipeline,
+            run_id=run_id,
+            manifest_port=host._run_manifest_port,
+        )
         if result.get("reason") == "run_not_found":
             active = active_run_diagnostics(host, pipeline, run_id)
             if active is not None:
