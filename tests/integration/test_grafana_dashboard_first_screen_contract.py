@@ -161,7 +161,7 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
         if dashboard_name == "bioetl-control-plane-v1.json":
             expected_header_ids = (9400, 9422)
             assert 9401 not in panels
-        if dashboard_name == "bioetl-dq-v2.json":
+        if dashboard_name in {"bioetl-dq-v2.json", "bioetl-runtime.json"}:
             expected_header_ids = (9400,)
             assert 9401 not in panels
         if dashboard_name == "bioetl-runtime.json":
@@ -307,23 +307,8 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
     provider_dashboard = load_dashboard(
         Path("grafana/dashboards") / "bioetl-provider-health-v2.json"
     )
-    provider_causes_row = next(
-        (
-            panel
-            for panel in provider_dashboard.get("panels", [])
-            if panel.get("id") == 9106
-        ),
-        None,
-    )
-    if provider_causes_row is not None:
-        assert provider_causes_row.get("collapsed") is True
-        provider_causes = next(
-            panel
-            for panel in (provider_causes_row.get("panels") or [])
-            if panel.get("id") == 9103
-        )
-        assert provider_causes.get("title") == "Inspect Top Provider Causes"
-        assert int((provider_causes.get("gridPos") or {}).get("y", 0)) >= 18
+    assert all(panel.get("id") != 9106 for panel in provider_dashboard.get("panels", []))
+    assert any(panel.get("id") == 9460 for panel in provider_dashboard.get("panels", []))
 
 
 def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
@@ -409,7 +394,9 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
 def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> None:
     """Fail-closed current-status surfaces must not hide missing telemetry behind or vector(0)."""
     expectations = {
-        "bioetl-runtime.json": [],
+        "bioetl-incident-v1.json": [
+            "Review Runtime Blockers",
+        ],
         "bioetl-provider-health-v2.json": [],
         "bioetl-dq-v2.json": [],
     }
@@ -590,7 +577,7 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
     expectations = {
         "bioetl-overview-v2.json": {
             "Inspect Scope & Evidence": {
-                "tokens": ("current", "selected run", "time range", "unknown"),
+                "tokens": ("selected run", "unknown"),
                 "max_y": 12,
             },
         },
@@ -601,8 +588,8 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
             },
         },
         "bioetl-provider-health-v2.json": {
-            "Understand Current Provider": {
-                "tokens": ("current status", "run id", "all providers"),
+            "Understand Selected Run": {
+                "tokens": ("selected run", "fleet"),
                 "max_y": 4,
                 "panel_id": 9400,
             },

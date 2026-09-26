@@ -4154,21 +4154,6 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
-      '1000':
-        title: ''
-        role: navigation
-        tier: 3
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - navigation_context
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
       '3010':
         title: Inspect Recent Runs (last 10)
         role: forensic_table

@@ -442,7 +442,7 @@
       "type": "table",
       "title": "Review Selected-Run Trust",
       "gridPos": {
-        "h": 8,
+        "h": 10,
         "w": 12,
         "x": 0,
         "y": 7
@@ -828,7 +828,7 @@
                 "value": [
                   {
                     "title": "View trust reasons",
-                    "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9451&${__url_time_range}",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9418&${__url_time_range}",
                     "includeVars": false,
                     "targetBlank": false
                   }
@@ -1443,7 +1443,7 @@
         ]
       },
       "gridPos": {
-        "h": 8,
+        "h": 10,
         "w": 12,
         "x": 12,
         "y": 7
@@ -1568,7 +1568,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 17
       },
       "id": 9419,
       "title": "Review Lineage Validation",
@@ -1785,7 +1785,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 16
+            "y": 18
           },
           "id": 9415,
           "options": {
@@ -1831,7 +1831,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 18
       },
       "id": 902,
       "title": "Inspect Checkpoint and Replay Checks",
@@ -2021,7 +2021,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 17,
+            "y": 19,
             "w": 24,
             "h": 6
           },
@@ -2084,7 +2084,7 @@
           ],
           "gridPos": {
             "x": 0,
-            "y": 23,
+            "y": 25,
             "w": 24,
             "h": 8
           },
@@ -2120,6 +2120,7 @@
               "noValue": "—",
               "custom": {
                 "align": "left",
+                "inspect": true,
                 "wrapText": true,
                 "cellOptions": {
                   "type": "auto",
@@ -2160,7 +2161,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 19
       },
       "id": 901,
       "title": "Inspect Manifest Validation",
@@ -2350,7 +2351,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 18,
+            "y": 20,
             "w": 24,
             "h": 9
           },
@@ -5834,7 +5835,7 @@
               },
               "decimals": 0,
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer. QUERY ERROR means the status request failed.",
               "links": [
                 {
                   "title": "Check BioETL Ops HTTP health",

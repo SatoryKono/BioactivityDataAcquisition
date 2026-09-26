@@ -214,10 +214,40 @@ first_window_summary_tables:
     owner: "@bioetl-observability"
     bind: limit
   - dashboard: bioetl-runtime.json
-    id: 9101
-    max_rows: 3
+    id: 9998
+    max_rows: 1
     owner: "@bioetl-observability"
-    bind: topk
+    bind: limit
+  - dashboard: bioetl-runtime.json
+    id: 9402
+    max_rows: 5
+    owner: "@bioetl-observability"
+    bind: paginate
+  - dashboard: bioetl-runtime.json
+    id: 9403
+    max_rows: 5
+    owner: "@bioetl-observability"
+    bind: paginate
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9461
+    max_rows: 1
+    owner: "@bioetl-observability"
+    bind: limit
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9460
+    max_rows: 5
+    owner: "@bioetl-observability"
+    bind: paginate
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9402
+    max_rows: 5
+    owner: "@bioetl-observability"
+    bind: paginate
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9403
+    max_rows: 5
+    owner: "@bioetl-observability"
+    bind: paginate
   - dashboard: bioetl-dq-v2.json
     id: 9402
     max_rows: 5

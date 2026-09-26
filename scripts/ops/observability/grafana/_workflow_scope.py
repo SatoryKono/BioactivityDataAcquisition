@@ -349,14 +349,12 @@ def _retain_selected_run_overview(payload: dict) -> None:
             '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
             'font-size:16px;line-height:1.2;overflow-wrap:anywhere">'
             "SELECTED RUN · ${pipeline:text} / ${run_type:text} / ${run_id}. "
-            "This page assesses that run only.<br>"
-            "CURRENT fleet status and TIME RANGE history are not shown here. "
-            "UNKNOWN means saved evidence is missing, not a healthy fleet."
+            "This page assesses that run only. "
+            "UNKNOWN means saved evidence is missing."
             "</div>"
         )
         panel["description"] = (
             "SELECTED RUN · Saved evidence for the selected Run ID. "
-            "CURRENT fleet status and TIME RANGE history are not on this page. "
             "UNKNOWN means the saved assessment is missing, not a healthy empty run. "
             "A request failure is QUERY ERROR."
         )

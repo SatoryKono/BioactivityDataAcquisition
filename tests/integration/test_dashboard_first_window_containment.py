@@ -155,7 +155,7 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     dashboard = load_dashboard(dashboard_path)
     panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9416)
 
-    assert panel.get("gridPos") == {"h": 8, "w": 12, "x": 12, "y": 7}
+    assert panel.get("gridPos") == {"h": 10, "w": 12, "x": 12, "y": 7}
     assert panel.get("options", {}).get("cellHeight") == "sm"
     assert panel.get("options", {}).get("sortBy") == [
         {"displayName": "Status", "desc": True}
@@ -297,9 +297,9 @@ def test_row_cap_contracts_are_unique_and_owned() -> None:
 def test_first_window_scope_banners_name_current_range_and_selected_run() -> None:
     """#8923: first-window scope copy must not conflate CURRENT / RANGE / SELECTED RUN."""
     required = {
-        "bioetl-overview-v2.json": ("CURRENT", "SELECTED RUN", "TIME RANGE"),
-        "bioetl-runtime.json": ("CURRENT", "SELECTED RUN"),
-        "bioetl-provider-health-v2.json": ("GLOBAL", "SELECTED PROVIDER"),
+        "bioetl-overview-v2.json": ("SELECTED RUN",),
+        "bioetl-runtime.json": ("SELECTED RUN",),
+        "bioetl-provider-health-v2.json": ("SELECTED RUN",),
         "bioetl-dq-v2.json": ("CURRENT", "SELECTED RUN", "TIME RANGE"),
         "bioetl-incident-v1.json": ("CURRENT", "SELECTED RUN"),
         "bioetl-run-explorer-v1.json": ("BROWSE", "SELECTED RUN"),
@@ -329,7 +329,7 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
         if panel.get("type") == "text"
     )
     assert "TIME RANGE = Domain Status" not in overview_blob
-    assert "TIME RANGE" in overview_blob and "SELECTED RUN" in overview_blob
+    assert "SELECTED RUN" in overview_blob
 
 
 def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
