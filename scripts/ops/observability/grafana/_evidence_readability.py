@@ -835,6 +835,9 @@ def apply_evidence_readability(payload: dict) -> None:
 
         apply_replay_readiness_design(payload)
         _trust_full_detail_values(payload)
+        from ._replay_readiness_design import compact_replay_first_window
+
+        compact_replay_first_window(payload)
 
 
 def _trust_full_detail_values(payload: dict) -> None:

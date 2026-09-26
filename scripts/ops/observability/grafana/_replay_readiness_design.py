@@ -3,6 +3,31 @@
 from copy import deepcopy
 
 
+def compact_replay_first_window(payload: dict) -> None:
+    """Share the scope band with readiness and fit the five retention rows."""
+    panels = {p["id"]: p for p in payload["panels"]}
+    if not {9400, 9422, 9418, 9416} <= panels.keys():
+        return
+    old_bottom = max(
+        panels[pid]["gridPos"]["y"] + panels[pid]["gridPos"]["h"]
+        for pid in (9418, 9416)
+    )
+    panels[9400]["gridPos"].update(x=0, y=2, w=16, h=3)
+    panels[9422]["gridPos"].update(x=16, y=2, w=8, h=3)
+    for pid, x in ((9418, 0), (9416, 12)):
+        panels[pid]["gridPos"].update(x=x, y=5, w=12, h=7)
+    shift = 12 - old_bottom
+
+    def move(panel: dict) -> None:
+        panel["gridPos"]["y"] += shift
+        for child in panel.get("panels", []):
+            move(child)
+
+    for panel in panels.values():
+        if panel["gridPos"]["y"] >= old_bottom:
+            move(panel)
+
+
 def apply_replay_readiness_design(payload: dict) -> None:
     if payload.get("uid") != "bioetl-control-plane-v1":
         return
