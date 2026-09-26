@@ -79,3 +79,42 @@ def test_measurements_keep_stage_and_do_not_claim_event_freshness():
     assert "max_over_time(bioetl_stage_lag_seconds[15m])" in panel["targets"][0]["expr"]
     assert ">= 300" in panel["targets"][0]["expr"]
     assert "> 0" in panel["targets"][0]["expr"]
+
+
+def test_triage_points_at_the_fleet_row_on_this_page() -> None:
+    panels = _panels()
+    content = panels[2001]["options"]["content"]
+    assert "Rule triggered; cause not confirmed" in content
+    assert "Pipeline fleet and range on this page" in content
+    assert "Open Pipeline Diagnostics" not in content
+    assert "Fleet blockers" in panels[2001]["description"]
+    for panel_id in (2020, 32010, 32005, 9700):
+        assert panels[panel_id]["description"]
+
+
+def test_fleet_children_do_not_overlap() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-incident-v1.json").read_text(encoding="utf-8")
+    )
+    row = next(panel for panel in dashboard["panels"] if panel.get("id") == 8808)
+    boxes = []
+    for child in row["panels"]:
+        grid = child["gridPos"]
+        boxes.append(
+            (
+                child.get("id"),
+                grid["x"],
+                grid["y"],
+                grid["x"] + grid["w"],
+                grid["y"] + grid["h"],
+            )
+        )
+    for index, left in enumerate(boxes):
+        for right in boxes[index + 1 :]:
+            overlaps = not (
+                left[3] <= right[1]
+                or right[3] <= left[1]
+                or left[4] <= right[2]
+                or right[4] <= left[2]
+            )
+            assert not overlaps, f"{left[0]} overlaps {right[0]}"

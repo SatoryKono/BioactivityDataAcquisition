@@ -75,8 +75,9 @@ def test_overview_dashboard_identity_and_primary_question() -> None:
 
     assert dashboard.get("title") in {"2. Overview", "2. Overview (Fleet)"}
     assert dashboard.get("uid") == "bioetl-overview-v2"
-    assert "Hybrid L0 overview" in description
     assert "Run ID is always selected" in description
+    assert "not on Overview" in description
+    assert "First Action" in description
     assert "selected run" in content.lower()
     assert "unknown" in content.lower()
 
