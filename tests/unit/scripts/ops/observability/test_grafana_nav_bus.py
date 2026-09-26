@@ -208,7 +208,8 @@ def test_trust_layout_preserves_scalar_area_and_detail_rows() -> None:
     assert trust["gridPos"]["h"] == retention["gridPos"]["h"] == 7
     assert trust["targets"][0]["url"].count("error_as_row=1") == 1
     assert "run_id=${run_id}" in trust["targets"][0]["url"]
-    assert "panel error" in trust["fieldConfig"]["defaults"]["noValue"]
+    assert "SELECT RUN" in trust["fieldConfig"]["defaults"]["noValue"]
+    assert "QUERY ERROR" in trust["fieldConfig"]["defaults"]["noValue"]
     assert all(kpi["gridPos"]["y"] == 13 for kpi in kpis)
     assert all(kpi["gridPos"]["h"] == 4 for kpi in kpis)
     assert recovery["gridPos"] == {"x": 0, "y": 16, "w": 24, "h": 3}

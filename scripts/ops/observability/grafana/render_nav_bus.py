@@ -1299,7 +1299,7 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
     footer["enablePagination"] = True
     field_config = panel.setdefault("fieldConfig", {})
     field_config.setdefault("defaults", {})["noValue"] = (
-        "Trust response unavailable. Check the panel error and run selection."
+        "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
     )
     display_names = {
         "processing_status": "Processing result",
@@ -1588,7 +1588,7 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
                 "targetBlank": False,
             }
         ]
-    for panel_id in (9405, 9406, 9407, 9408, 9409, 9413, 9414, 9415, 9417):
+    for panel_id in (9405, 9406, 9407, 9408, 9409, 9413, 9414, 9415, 9416, 9417):
         panel = by_id.get(panel_id)
         if not isinstance(panel, dict):
             continue
@@ -1596,7 +1596,22 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
         description = description.replace("SELECTED RUN · TIME RANGE · ", "SELECTED RUN · ")
         description = description.replace("TIME RANGE · SELECTED RUN ", "SELECTED RUN · ")
         description = description.replace("TIME RANGE · ", "")
+        description = description.replace(" SELECT RUN / VALID EMPTY is not OK.", "")
+        description = description.replace(
+            "Compares current runtime anchors",
+            "Compares this run's runtime anchors",
+        )
         panel["description"] = description
+    retention = by_id.get(9416)
+    if isinstance(retention, dict):
+        retention["description"] = (
+            "SELECTED RUN · Five retention rows for this Run ID: policy, evidence floor, "
+            "required evidence, snapshot evidence, and archive. UNKNOWN is not a healthy zero. "
+            "No rows can be a valid empty result. A failed request is not OK. "
+            "Archive N/A means a referenced policy does not require archiving; "
+            "it is not proof of an archive. Archive verified means local copies "
+            "and restore evidence passed current hash and identity checks."
+        )
     trust = by_id.get(9418)
     if isinstance(trust, dict):
         trust["description"] = (
