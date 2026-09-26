@@ -300,6 +300,27 @@ def _event_age_display(
     return "UNKNOWN"
 
 
+RECENT_TIMING_FIELDS = (
+    "duration_seconds",
+    "duration_display",
+    "last_event_age_seconds",
+    "event_age_display",
+)
+
+
+def refresh_recent_timing(
+    row: dict[str, object],
+    *,
+    now: datetime,
+) -> dict[str, object]:
+    """Return one recent row with ages measured at ``now``."""
+    refreshed = dict(row)
+    for key in RECENT_TIMING_FIELDS:
+        refreshed.pop(key, None)
+    refreshed.update(_timing_fields(refreshed, now))
+    return refreshed
+
+
 def _timing_fields(row: dict[str, object], now: datetime) -> dict[str, object]:
     """Use event timestamps, never file mtime or scrape time, for elapsed values."""
     minimum = datetime.min.replace(tzinfo=UTC)

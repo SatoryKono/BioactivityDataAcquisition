@@ -732,8 +732,13 @@ def _organize_trust_reasons(trust: dict) -> None:
             options = transform["options"]
             options.setdefault("excludeByName", {})["reasons_display"] = True
             options["renameByName"].pop("reasons_display", None)
-            options["renameByName"]["reasons_count"] = "Reasons"
+            options["renameByName"]["reasons_count"] = "Reason count"
+            options["renameByName"]["processing_status"] = "Processing result"
+            options["renameByName"]["trust_status"] = "Saved trust verdict"
+            options["renameByName"]["evidence_observed_at"] = "Assessed at"
+            options["renameByName"]["trust_reasons_action"] = "Action"
             options["indexByName"]["reasons_count"] = 2
+            options["indexByName"]["trust_reasons_action"] = 4
 
 
 def _organize_trust_details(details: dict) -> None:
@@ -768,23 +773,43 @@ def _correct_control_plane_trust(uid: object, panels: dict[int, dict]) -> None:
         "wrapText": False,
     }
     _organize_trust_reasons(trust)
-    for field, width in (("Result", 80), ("Trust", 115), ("Reasons", 65)):
+    for field, width in (
+        ("Processing result", 150),
+        ("Saved trust verdict", 160),
+        ("Reason count", 120),
+    ):
         _override(trust, field, _WIDTH, width)
     for item in trust["fieldConfig"]["overrides"]:
-        if item["matcher"].get("options") == "Observed":
+        if item["matcher"].get("options") in {"Observed", "Assessed at"}:
             item["properties"] = [p for p in item["properties"] if p["id"] != _WIDTH]
-    _override(trust, "Reasons", _CELL, {"type": "auto"})
-    _override(trust, "Reasons", _HIDDEN, False)
-    _override(trust, "Reasons", "noValue", "Inspect")
-    reason_links = [
-        {
-            **link,
-            "title": "Inspect saved Trust reasons",
-            "url": link["url"].replace("viewPanel=9414", "viewPanel=9451"),
-        }
-        for link in trust["links"]
-    ]
-    _override(trust, "Reasons", "links", reason_links)
+    _override(trust, "Reason count", _CELL, {"type": "auto"})
+    _override(trust, "Reason count", _HIDDEN, False)
+    _override(trust, "Reason count", "noValue", "—")
+    _override(trust, "Reason count", "links", [])
+    _override(
+        trust,
+        "Reason count",
+        "mappings",
+        [{"type": "value", "options": {"0": {"text": "no"}}}],
+    )
+    _override(trust, "Action", "noValue", "")
+    _override(
+        trust,
+        "Action",
+        "links",
+        [
+            {
+                "title": "View trust reasons",
+                "url": (
+                    "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}"
+                    "&${pipeline:queryparam}&${run_type:queryparam}"
+                    "&${run_id:queryparam}&viewPanel=9451&${__url_time_range}"
+                ),
+                "includeVars": False,
+                "targetBlank": False,
+            }
+        ],
+    )
     details = panels[9451]
     _organize_trust_details(details)
     _override(details, "Reason", _CELL, {"type": "auto", "wrapText": True})

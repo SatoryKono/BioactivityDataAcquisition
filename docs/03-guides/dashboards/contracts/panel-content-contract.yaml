@@ -40,6 +40,12 @@ allowed_states:
 - VALID_EMPTY
 - TELEMETRY_ABSENT
 - N/A
+- READY
+- BLOCKED
+- INSUFFICIENT
+- UNSUPPORTED
+- SELECT RUN
+- QUERY ERROR
 allowed_empty_state_classes:
 - event_empty
 - telemetry_missing
@@ -468,30 +474,6 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
-      '9422':
-        title: Review Exact Replay Readiness
-        role: evidence_table
-        tier: 1
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - READY
-        - BLOCKED
-        - INSUFFICIENT
-        - UNSUPPORTED
-        - SELECT RUN
-        - QUERY ERROR
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
       '9418':
         title: Review Selected-Run Trust
         role: evidence_table
@@ -567,6 +549,30 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id002
+      '9422':
+        title: Review Exact Replay Readiness
+        role: evidence_table
+        tier: 1
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - READY
+        - BLOCKED
+        - INSUFFICIENT
+        - UNSUPPORTED
+        - SELECT RUN
+        - QUERY ERROR
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id001
       '9450':
         title: Inspect Saved Run Evidence
         role: row_group
@@ -722,7 +728,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: &id005
+        render_profiles: &id004
         - full_dark
         - full_light
         - zoom_200
@@ -1008,7 +1014,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id005
+        render_profiles: *id004
       '2101':
         title: Review Selected Run Status
         role: evidence_table
@@ -1029,7 +1035,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id005
+        render_profiles: *id004
       '9400':
         title: ''
         role: guidance
@@ -1130,6 +1136,45 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id003
+      '9700':
+        title: Inspect Current Workflow Evidence
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: &id005
+        - full_dark
+        - full_light
+        - zoom_200
+      '9701':
+        title: Review Current Workflow Evidence
+        role: evidence_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id005
       '22005':
         title: Monitor Global Alerts (Full)
         role: forensic_table
@@ -1423,7 +1468,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id005
+        render_profiles: *id004
   bioetl-provider-health-v2:
     panels:
       '1':
@@ -2076,7 +2121,7 @@ dashboards:
         - populated
         - telemetry_absent
         - backend_error
-        render_profiles: *id005
+        render_profiles: *id004
       '9111':
         title: Inspect Full Fleet Severity
         role: forensic_table
@@ -4036,173 +4081,6 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
-      '2460':
-        title: Review Stage Progress
-        role: evidence_table
-        tier: 3
-        scope: time_range
-        scope_class: time_range
-        evidence_source: prometheus
-        empty_state_class: telemetry_missing
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles:
-        - full_dark
-        - full_light
-        - zoom_200
-      '2461':
-        title: Inspect Current Missing Stage Signals
-        role: forensic_table
-        tier: 3
-        scope: current
-        scope_class: current
-        evidence_source: prometheus
-        empty_state_class: telemetry_missing
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles:
-        - full_dark
-        - full_light
-        - zoom_200
-      '2541':
-        title: Review Runtime Escalation
-        role: guidance
-        tier: 4
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
-      '2542':
-        title: Review Cross-Domain Handoffs
-        role: guidance
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
-      '2543':
-        title: Review Global Process Signals
-        role: guidance
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
-      '9101':
-        title: Review Runtime Blockers
-        role: evidence_table
-        tier: 3
-        scope: current
-        scope_class: current
-        evidence_source: prometheus
-        empty_state_class: telemetry_missing
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
-      '9102':
-        title: Monitor Coverage
-        role: confidence
-        tier: 2
-        scope: current
-        scope_class: current
-        evidence_source: prometheus
-        empty_state_class: telemetry_missing
-        state_model:
-        - OK
-        - WARN
-        - CRIT
-        - UNKNOWN
-        - INCOMPLETE
-        - ERROR
-        required_copy:
-        - state_mapping
-        - evidence_scope
-        - no_data
-        - next_action
-        fixture_cases:
-        - ok
-        - warn
-        - crit
-        - telemetry_absent
-        - backend_error
-        render_profiles:
-        - first_window_dark
-        - first_window_light
-      '9105':
-        title: Track Stage Lag
-        role: trend
-        tier: 3
-        scope: time_range
-        scope_class: time_range
-        evidence_source: prometheus
-        empty_state_class: telemetry_missing
-        state_model:
-        - OK
-        - WARN
-        - CRIT
-        - UNKNOWN
-        - ERROR
-        - VALID_EMPTY
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
       '9400':
         title: ''
         role: guidance
@@ -4218,36 +4096,6 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
-      '9401':
-        title: Monitor Pipeline Status
-        role: verdict
-        tier: 1
-        scope: current
-        scope_class: current
-        evidence_source: prometheus
-        empty_state_class: telemetry_missing
-        state_model:
-        - OK
-        - WARN
-        - CRIT
-        - UNKNOWN
-        - INCOMPLETE
-        - ERROR
-        required_copy:
-        - state_mapping
-        - evidence_scope
-        - no_data
-        - next_action
-        fixture_cases:
-        - ok
-        - warn
-        - crit
-        - telemetry_absent
-        - backend_error
-        render_profiles:
-        - first_window_dark
-        - first_window_light
-        - zoom_200
       '9402':
         title: Inspect Pipeline Identity
         role: forensic_table
@@ -4347,36 +4195,27 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id003
-      '9991':
-        title: ''
-        role: guidance
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
-      '9992':
-        title: Inspect Secondary Runtime Indicators
-        role: row_group
-        tier: 4
+      '9460':
+        title: Inspect Selected Run Stages
+        role: forensic_table
+        tier: 3
         scope: selected_run
         scope_class: selected_run
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
+        evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
-        - N/A
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
         required_copy:
-        - operator_guidance
+        - evidence_scope
+        - no_data
         fixture_cases:
-        - not_applicable
-        render_profiles: *id001
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id005
       '9993':
         title: Inspect Run Context
         role: row_group
@@ -4391,77 +4230,6 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id001
-      '9994':
-        title: Inspect Workflow Evidence
-        role: row_group
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
-      '9996':
-        title: Track Failed Workflow Runs
-        role: indicator
-        tier: 3
-        scope: time_range
-        scope_class: time_range
-        evidence_source: prometheus
-        empty_state_class: telemetry_missing
-        state_model:
-        - OK
-        - WARN
-        - CRIT
-        - UNKNOWN
-        - INCOMPLETE
-        - ERROR
-        - VALID_EMPTY
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        - next_action
-        fixture_cases:
-        - ok
-        - warn
-        - crit
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
-      '9997':
-        title: Track Failed Workflow Steps
-        role: indicator
-        tier: 3
-        scope: time_range
-        scope_class: time_range
-        evidence_source: prometheus
-        empty_state_class: telemetry_missing
-        state_model:
-        - OK
-        - WARN
-        - CRIT
-        - UNKNOWN
-        - INCOMPLETE
-        - ERROR
-        - VALID_EMPTY
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        - next_action
-        fixture_cases:
-        - ok
-        - warn
-        - crit
-        - telemetry_absent
-        - backend_error
         render_profiles: *id001
       '9998':
         title: Review Selected Run Status
@@ -4484,40 +4252,4 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id005
-      '22460':
-        title: Inspect Full Stage Progress
-        role: forensic_table
-        tier: 3
-        scope: current
-        scope_class: current
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id006
-      '32460':
-        title: Inspect Full Stage Progress
-        role: row_group
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id007
+        render_profiles: *id004

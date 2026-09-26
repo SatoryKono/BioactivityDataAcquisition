@@ -1058,11 +1058,10 @@ def test_monitoring_readme_dashboard_inventory_matches_shipped_json() -> None:
 
 
 def test_dq_dashboard_contains_core_dq_metrics():
-    """Ensure DQ dashboard visualizes key DQ metrics."""
+    """5. Data Quality assesses the selected Run ID, not CURRENT PromQL."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     all_expressions = "\n".join(get_panel_expressions(dashboard))
-
-    required_metrics = [
+    retired_metrics = [
         "bioetl_dq_validation_score",
         "bioetl_dq_validation_record_count",
         "bioetl_dq_records_quarantined_total",
@@ -1072,8 +1071,16 @@ def test_dq_dashboard_contains_core_dq_metrics():
         "bioetl_data_freshness_seconds",
         "bioetl_silver_validation_failures_total",
     ]
-    missing = [metric for metric in required_metrics if metric not in all_expressions]
-    assert not missing, f"DQ dashboard missing metrics: {missing}"
+    present = [metric for metric in retired_metrics if metric in all_expressions]
+    assert not present, f"DQ dashboard still ships CURRENT metrics: {present}"
+    urls = "\n".join(
+        str(target.get("url", ""))
+        for panel in get_dashboard_panels(dashboard)
+        for target in panel.get("targets", [])
+        if isinstance(target, dict)
+    )
+    assert "selected-run-status" in urls
+    assert "run_id=${run_id}" in urls
 
 
 def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
@@ -1087,21 +1094,7 @@ def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
         ),
         None,
     )
-    assert panel is not None, "Freshness lag panel not found in bioetl-dq-v2.json"
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any(
-        "max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds" in expr
-        and "/ 3600" in expr
-        for expr in expressions
-    ), "Freshness panel must derive worst age in hours from range timestamp evidence"
-    assert all("[$__range]" in expr for expr in expressions)
-    assert all(
-        target.get("instant") is True and target.get("range") is False
-        for target in panel["targets"]
-    ), "A stat must evaluate age at range end, not reuse an earlier non-null age"
-    assert all(
-        "time() - max(bioetl_data_freshness_seconds" not in expr for expr in expressions
-    ), "Freshness lag must not collapse scope to the freshest entity"
+    assert panel is None, "Freshness lag panel must not ship on bioetl-dq-v2.json"
 
 
 def test_freshness_panels_do_not_compute_age_from_counter_suffix_metrics() -> None:
@@ -1125,31 +1118,15 @@ def test_freshness_panels_do_not_compute_age_from_counter_suffix_metrics() -> No
     assert not violations, "\n".join(violations)
 
 
-@pytest.mark.parametrize(
-    ("dashboard_file", "panel_title"),
-    [
-        ("bioetl-dq-v2.json", "Inspect Latest Successful Data"),
-    ],
-)
-def test_latest_timestamp_panels_are_explicitly_success_timestamp_panels(
-    dashboard_file: str, panel_title: str
-) -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == panel_title
-        ),
-        None,
-    )
-    assert panel is not None, f"Panel {panel_title!r} not found in {dashboard_file}"
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any(
-        "max(max_over_time(bioetl_data_freshness_seconds" in expr
-        for expr in expressions
-    )
-    assert any("* 1000" in expr for expr in expressions)
+def test_latest_timestamp_panels_are_explicitly_success_timestamp_panels() -> None:
+    """Latest-success timestamps are TIME RANGE and are not on 5. Data Quality."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    titles = {
+        panel.get("title")
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    assert "Inspect Latest Successful Data" not in titles
 
 
 def test_control_plane_dashboard_has_primary_question() -> None:
@@ -1446,20 +1423,8 @@ def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
         ),
         None,
     )
-    assert panel is not None, (
-        "DQ dashboard missing 'Monitor Silver Validation Failures' panel"
-    )
-
-    expressions = [
-        target.get("expr", "")
-        for target in panel.get("targets", [])
-        if isinstance(target.get("expr"), str)
-    ]
-    assert any('{pipeline=~"$pipeline"}' in expr for expr in expressions), (
-        "Monitor Silver Validation Failures must filter on the explicit pipeline label"
-    )
-    assert all('{table=~"$pipeline"}' not in expr for expr in expressions), (
-        "Monitor Silver Validation Failures must not rely on the table-to-pipeline naming convention"
+    assert panel is None, (
+        "Monitor Silver Validation Failures is TIME RANGE and is not on this page"
     )
 
 

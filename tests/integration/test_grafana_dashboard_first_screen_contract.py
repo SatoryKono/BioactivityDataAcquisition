@@ -266,6 +266,19 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
                 f"{dashboard_name}:{panel_title} must not use selected range for current status"
             )
 
+    runtime_dashboard = load_dashboard(Path("grafana/dashboards") / "bioetl-runtime.json")
+    runtime_panels = {
+        panel.get("id"): panel
+        for panel in get_dashboard_panels(runtime_dashboard)
+        if isinstance(panel.get("id"), int)
+    }
+    runtime_status = runtime_panels[9998]
+    assert runtime_status.get("title") == "Review Selected Run Status"
+    assert int((runtime_status.get("gridPos") or {}).get("y", 0)) >= 18
+    assert "run_id=${run_id}" in str(runtime_status.get("targets"))
+    assert runtime_panels[9401].get("title") == "Monitor Pipeline Status"
+    assert runtime_panels[9101].get("title") == "Review Runtime Blockers"
+
     dq_dashboard = load_dashboard(Path("grafana/dashboards") / "bioetl-dq-v2.json")
     dq_panels = {
         panel.get("id"): panel
@@ -283,16 +296,19 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
     provider_dashboard = load_dashboard(
         Path("grafana/dashboards") / "bioetl-provider-health-v2.json"
     )
-    assert all(panel.get("id") != 9106 for panel in provider_dashboard.get("panels", []))
-    provider_check_row = next(
+    provider_causes_row = next(
         panel
         for panel in provider_dashboard.get("panels", [])
-        if panel.get("id") == 9462
+        if panel.get("id") == 9106
     )
-    assert provider_check_row.get("collapsed") is True
-    assert any(
-        panel.get("id") == 9460 for panel in provider_check_row.get("panels") or []
+    assert provider_causes_row.get("collapsed") is True
+    provider_causes = next(
+        panel
+        for panel in (provider_causes_row.get("panels") or [])
+        if panel.get("id") == 9103
     )
+    assert provider_causes.get("title") == "Inspect Top Provider Causes"
+    assert int((provider_causes.get("gridPos") or {}).get("y", 0)) >= 18
 
 
 def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
@@ -374,7 +390,10 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
             "Monitor Pipeline Status",
             "Review Runtime Blockers",
         ],
-        "bioetl-provider-health-v2.json": [],
+        "bioetl-provider-health-v2.json": [
+            "Inspect Top Provider Causes",
+            "Monitor Telemetry Presence",
+        ],
         "bioetl-dq-v2.json": [],
     }
 
@@ -404,15 +423,11 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
 
 
 def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
-    """Datasource trust surfaces are targeted: Runtime/Control Plane need explicit first-screen markers."""
+    """Runtime coverage must say missing telemetry is not proof of delivery."""
     expectations = {
         "bioetl-runtime.json": (
             "Monitor Coverage",
-            ("evidence confidence", "inconclusive"),
-        ),
-        "bioetl-control-plane-v1.json": (
-            "Monitor Telemetry",
-            ("do not trust zero blocker cards", "prometheus scrape/rules"),
+            ("missing telemetry", "not proof"),
         ),
     }
 
@@ -479,6 +494,9 @@ def test_dashboard_top_level_grid_positions_do_not_leave_root_gaps() -> None:
         # before collapsed row at y18; incident keeps bottom17 with y13 h4.
         # Allow the documented single-row gap for dq-v2.
         if dashboard_path.name == "bioetl-dq-v2.json" and gaps == [(17, 17)]:
+            continue
+        # Trust tables 9416/9418 end at row 12; collapsed lineage row 9419 starts at y=17.
+        if dashboard_path.name == "bioetl-control-plane-v1.json" and gaps == [(13, 16)]:
             continue
         assert not gaps, (
             f"{dashboard_path.name} has unexplained empty root row gaps: {gaps}"
@@ -674,11 +692,9 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
 def test_current_status_headlines_use_instant_queries() -> None:
     """#8746: fail-closed headlines must not lastNotNull a dashboard range."""
     expectations = {
-        "bioetl-overview-v2.json": ("Review Selected Run Status",),
-        "bioetl-control-plane-v1.json": (
-            "Monitor Readiness",
-            "Track Checkpoint",
-        ),
+        # 9603 mirrors panel 9002 via the dashboard datasource and has no PromQL expr.
+        "bioetl-overview-v2.json": (),
+        "bioetl-control-plane-v1.json": (),
         "bioetl-runtime.json": (
             "Monitor Pipeline Status",
             "Monitor Coverage",

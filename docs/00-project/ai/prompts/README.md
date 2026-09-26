@@ -31,7 +31,7 @@ docs/00-project/ai/prompts/
   domains.yaml           # 24 ADR-060 overlays (consolidated)
   CATALOG.md             # optional, from python -m scripts.ai.prompts catalog
   _schema/*.json         # 6 schemas
-  fragments/             # 13 reusable blocks
+  fragments/             # 14 reusable blocks
   library/{audit,plan,test,config,doc,closeout,session}/
   profiles/*.yaml        # audit-readonly | differential | full-write
 ```
@@ -66,7 +66,7 @@ Deprecated: `prompt.audit.grok-cycle`, `prompt.audit.cyclic-pack` → `prompt.au
 
 ## Fragments
 
-Thirteen blocks under `fragments/`. Cards declare them in `includes:`.
+Fourteen blocks under `fragments/`. Cards declare them in `includes:`.
 Renderer also expands `{{> fragment-name}}` (example: `{{> debt-budget-ban}}`).
 
 ## Compile (ADR-060)

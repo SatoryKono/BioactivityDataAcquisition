@@ -79,24 +79,28 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 89
+    panel_count: 10
     key_panels:
-      - id: 9401
-        title: Monitor Pipeline Status
-        type: stat
-        description: Trust-gated current runtime health status
-      - id: 205
-        title: Monitor Failed Runs
-        type: stat
-        description: Failed runs in the selected range
-      - id: 237
-        title: Monitor Worst Stage Lag
-        type: stat
-        description: Worst observed stage lag in the selected range
-      - id: 9102
-        title: Monitor Coverage
-        type: stat
-        description: Telemetry confidence chip / scrape-rule trust gate; a gap forces the headline to INCOMPLETE
+      - id: 9998
+        title: Review Selected Run Status
+        type: table
+        description: Saved execution assessment for the always-selected Run ID
+      - id: 9402
+        title: Inspect Pipeline Identity
+        type: table
+        description: Saved identity for the selected Run ID
+      - id: 9403
+        title: Inspect Processed Records
+        type: table
+        description: Saved record counts for the selected Run ID
+      - id: 9451
+        title: Inspect Selected Run Domains
+        type: table
+        description: Saved domain verdicts for the selected Run ID
+      - id: 9452
+        title: Inspect Selected Run Identity
+        type: table
+        description: Saved identity summary for the selected Run ID
     selector_variables:
       - workflow
       - pipeline

@@ -136,11 +136,11 @@ def test_trust_9418_keeps_verdict_and_reason_count_visible() -> None:
     }
     assert props["reasons_text"]["custom.hidden"] is True
     assert props["reasons_text"]["custom.inspect"] is True
-    assert props["reasons_count"]["custom.hidden"] is True
     assert props["evidence_observed_at"]["custom.hidden"] is False
     assert props["evidence_observed_at"]["unit"].startswith("time:")
-    assert props["processing_status"]["displayName"] == "Result"
-    assert props["trust_status"]["displayName"] == "Trust"
+    assert props["processing_status"]["displayName"] == "Processing result"
+    assert props["trust_status"]["displayName"] == "Saved trust verdict"
+    assert props["reasons_count"]["custom.hidden"] is False
     assert panel_declared_row_cap(panel) == 1
     assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
 

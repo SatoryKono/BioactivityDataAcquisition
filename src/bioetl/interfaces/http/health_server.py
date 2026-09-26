@@ -35,6 +35,11 @@ from bioetl.interfaces.http._health_server_control_plane_metrics_refresh import 
     run_periodic_control_plane_metrics_refresh,
     stop_control_plane_metrics_refresh,
 )
+from bioetl.interfaces.http._run_explorer_snapshot import (
+    RunExplorerSnapshotCache,
+    run_periodic_run_explorer_snapshot,
+    stop_run_explorer_snapshot,
+)
 from bioetl.interfaces.http._selector_catalog import (
     SELECTOR_ENDPOINT_CONCURRENCY,
     SelectorCatalog,
@@ -223,6 +228,8 @@ class HealthServer(
             SELECTOR_ENDPOINT_CONCURRENCY
         )
         self._selector_catalog = SelectorCatalog()
+        self._run_explorer_snapshot = RunExplorerSnapshotCache()
+        self._run_explorer_refresh_task: asyncio.Task[None] | None = None
         self._start_time: float | None = None
         self._request_error_allowlist = (
             UnicodeDecodeError,
@@ -267,6 +274,14 @@ class HealthServer(
                     reason_code="HEALTH_SERVER_BIND_FAILED",
                 )
             raise
+        if self._run_manifest_port is not None:
+            self._run_explorer_refresh_task = asyncio.create_task(
+                run_periodic_run_explorer_snapshot(
+                    self._run_explorer_snapshot,
+                    self,
+                ),
+                name="bioetl-run-explorer-snapshot",
+            )
         if self._control_plane_integrity_refresher is not None:
             try:
                 await refresh_control_plane_metrics(
@@ -289,6 +304,8 @@ class HealthServer(
 
     async def stop(self) -> None:
         """Stop the health server gracefully."""
+        await stop_run_explorer_snapshot(self._run_explorer_refresh_task)
+        self._run_explorer_refresh_task = None
         await stop_control_plane_metrics_refresh(
             self._control_plane_integrity_refresh_task
         )

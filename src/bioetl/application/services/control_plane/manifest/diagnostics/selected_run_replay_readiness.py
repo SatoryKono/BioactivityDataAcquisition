@@ -54,12 +54,82 @@ def _present(value: object) -> bool:
     return True
 
 
-def _capability(identity: Mapping[str, object]) -> tuple[ReplayCapability, bool]:
-    token = str(identity.get("replay_capability") or "").strip().lower()
+def _capability(source: Mapping[str, object]) -> tuple[ReplayCapability, bool]:
+    token = str(source.get("replay_capability") or "").strip().lower()
     try:
         return ReplayCapability(token), True
     except ValueError:
         return ReplayCapability.REBUILD_ONLY, False
+
+
+def _recorded_object_check(
+    manifest: Mapping[str, object],
+    code: str,
+) -> dict[str, str]:
+    """A recorded hash is not a pass until its object is verified."""
+    objects = manifest.get("objects")
+    verified = objects.get(code) if isinstance(objects, Mapping) else None
+    if not _present(manifest.get(code)):
+        return _check(code, "unknown", "not_recorded", f"#/manifest/{code}")
+    if verified is True:
+        return _check(code, "pass", "object_verified", f"#/manifest/{code}")
+    if verified is False:
+        return _check(code, "fail", "hash_without_object", f"#/manifest/{code}")
+    return _check(code, "unknown", "object_not_verified", f"#/manifest/{code}")
+
+
+def _manifest_checks(
+    manifest: Mapping[str, object] | None,
+) -> list[dict[str, str]]:
+    if manifest is None:
+        return [
+            _check(
+                "manifest_not_recorded",
+                "unknown",
+                "manifest_not_recorded",
+                "#/manifest",
+            )
+        ]
+    checks = [
+        _recorded_object_check(manifest, code)
+        for code in (
+            "effective_config_hash",
+            "dependency_lock_hash",
+            "input_snapshot_fingerprint",
+        )
+    ]
+    supported = manifest.get("exact_replay_supported")
+    capability, capability_known = _capability(manifest)
+    if supported is False or (
+        capability_known and capability.value in _EXPLICIT_UNSUPPORTED
+    ):
+        checks.append(
+            _check(
+                "exact_replay_family",
+                "fail",
+                "family_outside_supported_exact_replay_boundary",
+                "#/manifest/replay_capability",
+            )
+        )
+    elif capability_known and capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
+        checks.append(
+            _check(
+                "exact_replay_family",
+                "pass",
+                capability.value,
+                "#/manifest/replay_capability",
+            )
+        )
+    else:
+        checks.append(
+            _check(
+                "exact_replay_family",
+                "unknown",
+                "replay_capability_not_recorded",
+                "#/manifest/replay_capability",
+            )
+        )
+    return checks
 
 
 def _identity_checks(identity: Mapping[str, object]) -> list[dict[str, str]]:
@@ -109,48 +179,6 @@ def _identity_checks(identity: Mapping[str, object]) -> list[dict[str, str]]:
                 "n/a",
                 "source_run_not_a_replay",
                 "#/identity/replay_of_run_id",
-            )
-        )
-    for code in (
-        "effective_config_hash",
-        "dependency_lock_hash",
-        "input_snapshot_fingerprint",
-    ):
-        if _present(identity.get(code)):
-            checks.append(
-                _check(code, "pass", "recorded_in_saved_report", f"#/identity/{code}")
-            )
-        else:
-            checks.append(_check(code, "unknown", "not_recorded", f"#/identity/{code}"))
-    supported = identity.get("exact_replay_supported")
-    capability, capability_known = _capability(identity)
-    if supported is False or (
-        capability_known and capability.value in _EXPLICIT_UNSUPPORTED
-    ):
-        checks.append(
-            _check(
-                "exact_replay_family",
-                "fail",
-                "family_outside_supported_exact_replay_boundary",
-                "#/identity/replay_capability",
-            )
-        )
-    elif capability_known and capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
-        checks.append(
-            _check(
-                "exact_replay_family",
-                "pass",
-                capability.value,
-                "#/identity/replay_capability",
-            )
-        )
-    else:
-        checks.append(
-            _check(
-                "exact_replay_family",
-                "unknown",
-                "replay_capability_not_recorded",
-                "#/identity/replay_capability",
             )
         )
     return checks
@@ -224,6 +252,7 @@ def _operator_verdict(
 def project_selected_run_replay_readiness(
     *,
     identity: Mapping[str, object],
+    manifest: Mapping[str, object] | None = None,
     artifact_probes: tuple[Mapping[str, object], ...] | list[Mapping[str, object]] = (),
     inventory_present: bool = False,
     evidence_revision: str = "",
@@ -232,9 +261,10 @@ def project_selected_run_replay_readiness(
     """Project operator readiness. Capability alone never yields READY."""
     checks = [
         *_identity_checks(identity),
+        *_manifest_checks(manifest),
         *_artifact_checks(artifact_probes, inventory_present=inventory_present),
     ]
-    capability, _known = _capability(identity)
+    capability, _known = _capability(manifest or {})
     blocking = tuple(
         item["code"] for item in checks if item["result"] in {"fail", "unknown"}
     )

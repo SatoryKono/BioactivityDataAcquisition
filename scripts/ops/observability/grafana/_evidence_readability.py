@@ -217,7 +217,10 @@ def _stamp_result_mapping_prop(prop: dict) -> None:
 def _trust_select_run_mappings(p: dict[int, dict]) -> None:
     # An unselected run is not a successful processing result.
     for override in p[9418]["fieldConfig"]["overrides"]:
-        if override.get("matcher", {}).get("options") != "Result":
+        if override.get("matcher", {}).get("options") not in {
+            "Result",
+            "Processing result",
+        }:
             continue
         for prop in override["properties"]:
             _stamp_result_mapping_prop(prop)
@@ -243,7 +246,14 @@ def _trust_layout(p: dict[int, dict]) -> None:
 
 def _trust(p: dict[int, dict]) -> None:
     _trust_select_run_mappings(p)
-    _table(p[9418], {"Result": 110, "Trust": 105, "Reasons": 90, "Observed": 165})
+    _table(
+        p[9418],
+        {
+            "Processing result": 150,
+            "Saved trust verdict": 160,
+            "Reason count": 120,
+        },
+    )
     _trust_anchors(p)
     for pid in (9408, 9409, 9406):
         _table(p[pid], {"Result": 125, "Status": 115, "Action": 160})
@@ -264,6 +274,8 @@ def _trust(p: dict[int, dict]) -> None:
 
 def _compact_trust_monitors(p: dict[int, dict]) -> None:
     """Match the monitoring band to the readiness card and reclaim its space."""
+    if 9401 not in p or any(pid not in p for pid in (891, 892, 893, 907)):
+        return
     height = p[9401]["gridPos"]["h"]
     cards = [p[pid] for pid in (891, 892, 893, 907)]
     old_bottom = max(card["gridPos"]["y"] + card["gridPos"]["h"] for card in cards)
@@ -276,6 +288,8 @@ def _compact_trust_monitors(p: dict[int, dict]) -> None:
 
 
 def _runtime(p: dict[int, dict]) -> None:
+    if 9102 not in p:
+        return
     p[9102]["title"] = "Monitor Coverage"
     for pid, title in {
         230: "Monitor Pipeline Alerts",
@@ -806,6 +820,9 @@ def apply_evidence_readability(payload: dict) -> None:
     _apply_run_summary_wrap(p)
     if payload.get("uid") == "bioetl-control-plane-v1":
         _rename_trust_monitor_titles(p)
+        from ._replay_readiness_design import apply_replay_readiness_design
+
+        apply_replay_readiness_design(payload)
 
 
 def _run_links(run: dict):
@@ -914,7 +931,11 @@ def _run_explorer(p: dict[int, dict]) -> None:
 def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
     widths = {
         "bioetl-control-plane-v1": {
-            9418: {"Result": 100, "Trust": 105, "reasons_count": 80}
+            9418: {
+                "Processing result": 150,
+                "Saved trust verdict": 160,
+                "Reason count": 120,
+            }
         },
         "bioetl-overview-v2": {215: {"Priority": 90, "Action": 155}},
         "bioetl-dq-v2": {9102: {"severity": 70, "Action": 125}},

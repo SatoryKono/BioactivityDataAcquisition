@@ -1293,31 +1293,43 @@ def test_cycle4_below_fold_declared_widths_fit_200pct_css_budget() -> None:
 
 def test_selected_trust_reasons_link_preserves_multiple_run_types() -> None:
     panel = _panel(_load("bioetl-control-plane-v1.json"), 9418)
-    reasons = next(
+    action = next(
         item
         for item in panel["fieldConfig"]["overrides"]
-        if item["matcher"]["options"] == "reasons_count"
+        if item["matcher"]["options"] == "Action"
     )
     links = next(
-        item["value"] for item in reasons["properties"] if item["id"] == "links"
+        item["value"] for item in action["properties"] if item["id"] == "links"
     )
     assert "${run_type:queryparam}" in links[0]["url"]
+    assert "${run_id:queryparam}" in links[0]["url"]
     assert "var-run_type=${run_type:csv}" not in links[0]["url"]
+    count = next(
+        item
+        for item in panel["fieldConfig"]["overrides"]
+        if item["matcher"]["options"] == "Reason count"
+    )
+    count_links = next(
+        (item["value"] for item in count["properties"] if item["id"] == "links"),
+        [],
+    )
+    assert count_links == []
 
 
 def test_visible_trust_reason_count_opens_frozen_reason_details() -> None:
     dashboard = _load("bioetl-control-plane-v1.json")
     trust = _panel(dashboard, 9418)
-    reasons = next(
+    action = next(
         item
         for item in trust["fieldConfig"]["overrides"]
-        if item["matcher"]["options"] == "Reasons"
+        if item["matcher"]["options"] == "Action"
     )
     links = next(
-        item["value"] for item in reasons["properties"] if item["id"] == "links"
+        item["value"] for item in action["properties"] if item["id"] == "links"
     )
+    assert links[0]["title"] == "View trust reasons"
     assert "viewPanel=9451" in links[0]["url"]
-    assert "${run_type:queryparam}" in links[0]["url"]
+    assert "${run_id:queryparam}" in links[0]["url"]
     details = _panel(dashboard, 9451)
     names = next(
         item["options"]["include"]["names"]

@@ -23,6 +23,9 @@ from bioetl.interfaces.http._pipeline_run_report_table import (
     _table_shape_workflow_run_report,
     _unresolved_pipeline_run_report_shell,
 )
+from bioetl.interfaces.http._run_explorer_snapshot import (
+    take_default_recent_snapshot,
+)
 from bioetl.interfaces.http.processed_records_table import (
     build_processed_records_table_payload_from_ledger,
     build_processed_records_table_payload_from_prometheus,
@@ -272,13 +275,29 @@ async def handle_pipeline_run_reports_list(
     except ValueError as exc:
         raise ValueError("limit must be an integer") from exc
     if query.get("view") == "recent":
+        workflow = host._read_optional_param(query, "workflow")
+        run_type = host._read_optional_param(query, "run_type")
+        lookup_run_id = host._read_optional_param(query, "lookup_run_id")
+        cached = take_default_recent_snapshot(
+            getattr(host, "_run_explorer_snapshot", None),
+            view=query.get("view"),
+            limit=limit,
+            pipeline=pipeline,
+            workflow=workflow,
+            run_type=run_type,
+            run_id=selected_run_id,
+            lookup_run_id=lookup_run_id,
+        )
+        if cached is not None:
+            await host._send_payload_response(writer, 200, cached)
+            return
         payload = await asyncio.to_thread(
             list_recent_pipeline_runs,
             pipeline=pipeline,
-            workflow=host._read_optional_param(query, "workflow"),
-            run_type=host._read_optional_param(query, "run_type"),
+            workflow=workflow,
+            run_type=run_type,
             selected_run_id=selected_run_id,
-            lookup_run_id=host._read_optional_param(query, "lookup_run_id"),
+            lookup_run_id=lookup_run_id,
             limit=limit,
             manifest_port=host._run_manifest_port,
             ledger_port=host._run_ledger_port,

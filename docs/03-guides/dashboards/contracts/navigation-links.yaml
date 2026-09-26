@@ -297,18 +297,10 @@ required_panel_links_by_uid:
     link_titles:
     - Open Run Explorer
   bioetl-dq-v2:
-  - panel_id: 116
-    target_uid: bioetl-control-plane-v1
-    link_titles:
-    - Open Control Plane lineage diagnostics
   - panel_id: 9406
     target_uid: bioetl-run-explorer-v1
     link_titles:
     - Open Run Explorer
-  - panel_id: 9102
-    target_uid: bioetl-dq-v2
-    link_titles:
-    - Open Data Quality evidence
   bioetl-runtime:
   - panel_id: 230
     target_uid: bioetl-runtime
