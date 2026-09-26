@@ -235,6 +235,7 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             "Monitor Pipeline Status": "bioetl_runtime_current_status_trusted",
             "Review Runtime Blockers": "bioetl_runtime_current_blocker_reason",
         },
+<<<<<<< HEAD
         "bioetl-provider-health-v2.json": {
             "Monitor Fleet Status": "bioetl_provider_current_status",
             "Inspect Health Evidence": "bioetl_provider_current_status_info",
@@ -248,6 +249,14 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             "Inspect Health Evidence": "bioetl_provider_current_status_info",
         },
 >>>>>>> main
+||||||| 4c57c33fa896
+        "bioetl-provider-health-v2.json": {
+            "Monitor Fleet Status": "bioetl_provider_current_status",
+            "Inspect Health Evidence": "bioetl_provider_current_status_info",
+        },
+=======
+        "bioetl-provider-health-v2.json": {},
+>>>>>>> fix/provider-run-11264
     }
 
     for dashboard_name, panel_expectations in expectations.items():
@@ -407,6 +416,7 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
             "Review Runtime Blockers",
         ],
 <<<<<<< HEAD
+<<<<<<< HEAD
         "bioetl-provider-health-v2.json": [],
 ||||||| 2d9509c4d82f
         "bioetl-provider-health-v2.json": [
@@ -425,6 +435,15 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
             "Monitor Telemetry Presence",
         ],
 >>>>>>> main
+||||||| 4c57c33fa896
+        "bioetl-provider-health-v2.json": [
+            "Monitor Fleet Status",
+            "Inspect Top Provider Causes",
+            "Monitor Telemetry Presence",
+        ],
+=======
+        "bioetl-provider-health-v2.json": [],
+>>>>>>> fix/provider-run-11264
         "bioetl-dq-v2.json": [],
     }
 
