@@ -300,6 +300,8 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         "6. Incident Workspace",
     )
     for path in sorted(DASHBOARD_DIR.glob("bioetl-*.json")):
+        if path.name == "bioetl-run-explorer-v1.json":
+            continue
         dashboard = json.loads(path.read_text(encoding="utf-8"))
         content = unescape(
             str(_panel(dashboard, 1000).get("options", {}).get("content", ""))
@@ -1217,7 +1219,7 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     assert "run_type" in hidden
     assert "message" in hidden
     grid = recent.get("gridPos") or {}
-    assert int(grid.get("h") or 0) == 12
+    assert int(grid.get("h") or 0) == 14
     assert int(grid.get("y") or 0) + int(grid.get("h") or 0) == 17
     assert recent.get("options", {}).get("cellHeight") == "sm"
     assert (

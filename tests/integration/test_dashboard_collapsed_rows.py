@@ -75,7 +75,7 @@ def test_every_dashboard_has_at_least_one_row() -> None:
         ]
         if dashboard_path.name == "bioetl-run-explorer-v1.json":
             assert rows == []
-            assert len(get_dashboard_panels(dashboard)) == 3
+            assert len(get_dashboard_panels(dashboard)) == 2
         else:
             assert rows, f"{dashboard_path.name} must declare at least one row group"
         observed += len(rows)

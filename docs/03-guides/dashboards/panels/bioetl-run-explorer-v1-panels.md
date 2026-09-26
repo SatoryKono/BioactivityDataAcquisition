@@ -7,7 +7,8 @@
 
 Run Explorer is a recent-launch list with direct report access. Defaults are
 Workflow=All, Pipeline=All, Run Type=All, Run ID=-. Explicit URL selections win.
-The page contains navigation, a scope banner, and Inspect Recent Runs (last 10).
+The page contains a scope banner and Inspect Recent Runs (last 10).
+The navigation bus is not on this dashboard.
 Selected Run Details and Browse Workflow Runs, including their nested panels,
 were removed at the operator's request. Report and control-plane APIs remain
 available independently of the dashboard.
@@ -32,7 +33,7 @@ persisted run evidence.
   with `view=recent`; one request per refresh.
 - **Rows:** Last ten launches, all shown together without pagination. Compact
   single-line cells retain full values through Inspect and full UUID links.
-- **Layout:** Link-only navigation h=2, scope banner y=2/h=3, table y=5/h=12. The table
+- **Layout:** No navigation band. Scope banner y=0/h=3, table y=3/h=14. The table
   uses the existing ten-row limit and small native cell height.
 - **Selection:** Clicking Run sets that row's Workflow, Pipeline, Run Type and
   Run ID, preserving the time range and marking the matching row. It does not

@@ -283,8 +283,8 @@ def test_promql_targets_do_not_select_run_id_label() -> None:
 def test_run_explorer_selects_rows_without_removed_detail_groups() -> None:
     dashboard = _load(DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
     roots = _root_panels(dashboard)
-    assert len(roots) == 3
-    assert len([p for p in roots if p.get("type") != "row"]) == 3
+    assert len(roots) == 2
+    assert len([p for p in roots if p.get("type") != "row"]) == 2
     assert all(p.get("id") != 9450 for p in roots)
     browse = next(p for p in roots if p["id"] == 3010)
     override = next(
