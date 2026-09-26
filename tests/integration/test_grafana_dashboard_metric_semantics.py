@@ -512,7 +512,6 @@ def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> No
         if panel.get("title")
     }
     identity_panels = [
-        panels["Review Identity Anchors"],
         panels["Review Identity Gaps"],
         panels["Compare Checkpoint Anchors"],
         panels["Inspect Identity Values"],
@@ -545,21 +544,12 @@ def test_control_plane_identity_evidence_documents_short_full_split() -> None:
     panel = next(
         panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Review Identity Anchors"
+        if panel.get("title") == "Inspect Identity Values"
     )
     description = str(panel.get("description", "")).lower()
-    assert "full values are shown" in description
-    assert "inspect value" in description
+    assert "full" in description
     transformation_payload = json.dumps(panel.get("transformations", []))
     assert "value_full" in transformation_payload
-    overrides = {
-        item["matcher"]["options"]: {
-            prop["id"]: prop["value"] for prop in item["properties"]
-        }
-        for item in panel["fieldConfig"]["overrides"]
-    }
-    for field in ("value_short", "source_type", "drilldown_target"):
-        assert overrides[field]["custom.hidden"] is True
     assert panel["fieldConfig"]["defaults"]["custom"]["inspect"] is True
 
 

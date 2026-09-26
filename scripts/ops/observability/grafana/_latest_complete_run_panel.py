@@ -136,6 +136,10 @@ def stamp_latest_complete_run_panel(panels: list[object]) -> None:
             "type": "row",
             "title": "Inspect Complete Run Discovery",
             "collapsed": True,
+            "description": (
+                "Expand to search persisted runs and choose a Run ID. "
+                "This row does not score the run already selected."
+            ),
             "gridPos": {"x": 0, "y": y, "w": 24, "h": 1},
             "panels": [panel],
         }

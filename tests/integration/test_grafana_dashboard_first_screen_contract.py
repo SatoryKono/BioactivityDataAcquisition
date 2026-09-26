@@ -179,6 +179,14 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
             assert grid_pos.get("h", 99) <= 4, (
                 f"{dashboard_name}:id={panel_id} context band height must stay compact"
             )
+            if dashboard_name == "bioetl-control-plane-v1.json" and panel_id == 9422:
+                assert grid_pos.get("w") == 24
+                assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == "—"
+                assert all(
+                    "viewPanel=9422" not in str(link.get("url", ""))
+                    for link in panel.get("links") or []
+                    if isinstance(link, dict)
+                )
         # ID + Processed Records remain available under collapsed Run context.
         for panel_id in lazy_shell_ids:
             panel = panels.get(panel_id)

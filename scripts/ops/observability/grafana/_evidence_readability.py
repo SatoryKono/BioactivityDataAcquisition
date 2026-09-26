@@ -146,30 +146,37 @@ def _saved_run(p: dict[int, dict]) -> None:
         ],
     )
     panel["links"] = []
-    for field in ("Pipeline", "Run ID"):
-        _override(
-            p[9452],
-            field,
-            "mappings",
-            [
-                {
-                    "type": "value",
-                    "options": {
-                        ".*": {"text": "No run selected"},
-                        "-": {"text": "No run selected"},
-                    },
-                }
-            ],
-        )
-    _table(p[9452])
-    # Identity is a single evidence row: retain the full UUID and revision,
-    # including on narrow screens, rather than truncating provenance.
-    identity_custom = p[9452]["fieldConfig"]["defaults"]["custom"]
-    identity_custom["wrapText"] = True
-    identity_custom["cellOptions"]["wrapText"] = True
+    if 9452 in p:
+        for field in ("Pipeline", "Run ID"):
+            _override(
+                p[9452],
+                field,
+                "mappings",
+                [
+                    {
+                        "type": "value",
+                        "options": {
+                            ".*": {"text": "No run selected"},
+                            "-": {"text": "No run selected"},
+                        },
+                    }
+                ],
+            )
+        _table(p[9452])
+        # Identity is a single evidence row: retain the full UUID and revision,
+        # including on narrow screens, rather than truncating provenance.
+        identity_custom = p[9452]["fieldConfig"]["defaults"]["custom"]
+        identity_custom["wrapText"] = True
+        identity_custom["cellOptions"]["wrapText"] = True
+        p[9452]["options"]["footer"]["enablePagination"] = True
     p[9451]["options"]["footer"]["enablePagination"] = False
-    p[9452]["options"]["footer"]["enablePagination"] = True
-    _stack(p[9450], {9451: 12, 9452: 8})
+    heights: dict[int, int] = {}
+    if 9460 in p:
+        heights[9460] = 8
+    heights[9451] = 12
+    if 9452 in p:
+        heights[9452] = 8
+    _stack(p[9450], heights)
 
 
 def _overview(p: dict[int, dict]) -> None:
@@ -227,6 +234,8 @@ def _trust_select_run_mappings(p: dict[int, dict]) -> None:
 
 
 def _trust_anchors(p: dict[int, dict]) -> None:
+    if 9404 not in p:
+        return
     anchors = p[9404]
     _table(anchors)
     anchors["options"]["cellHeight"] = "lg"
@@ -249,9 +258,9 @@ def _trust(p: dict[int, dict]) -> None:
     _table(
         p[9418],
         {
-            "Processing result": 150,
-            "Saved trust verdict": 160,
-            "Reason count": 120,
+            "Processing result": 110,
+            "Saved trust verdict": 110,
+            "Reason count": 70,
         },
     )
     _trust_anchors(p)
@@ -932,9 +941,9 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
     widths = {
         "bioetl-control-plane-v1": {
             9418: {
-                "Processing result": 150,
-                "Saved trust verdict": 160,
-                "Reason count": 120,
+                "Processing result": 110,
+                "Saved trust verdict": 110,
+                "Reason count": 70,
             }
         },
         "bioetl-overview-v2": {215: {"Priority": 90, "Action": 155}},

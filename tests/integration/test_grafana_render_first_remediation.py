@@ -420,8 +420,8 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
 
 
 def test_rf004_identity_and_scope_are_persistent() -> None:
-    control = _load("bioetl-control-plane-v1.json")
-    latency = _panel(control, 111)
+    runtime = _load("bioetl-runtime.json")
+    latency = _panel(runtime, 111)
     assert latency["options"]["legend"]["showLegend"] is True
     assert len(latency["targets"]) == 1
     latency_target = latency["targets"][0]
@@ -432,16 +432,21 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
     assert legend["displayMode"] == "table"
     assert "lastNotNull" in legend["calcs"]
     assert "max" in legend["calcs"]
+    control = _load("bioetl-control-plane-v1.json")
     variable_names = {
         item.get("name")
         for item in control.get("templating", {}).get("list", [])
         if isinstance(item, dict)
     }
     assert "read_latency_quantile" in variable_names
-    # Expanded detail groups place identity panels under their section headers.
-    assert _panel(control, 9404)["gridPos"]["y"] >= 0
+    present = {
+        panel.get("id")
+        for panel in _iter_panels(list(control.get("panels", [])))
+    }
+    assert 9404 not in present
+    assert 9452 not in present
     copy_panel = _panel(control, 9407)
-    assert copy_panel["gridPos"]["y"] >= _panel(control, 9404)["gridPos"]["y"]
+    assert copy_panel["gridPos"]["y"] >= 0
 
     for name in (
         "bioetl-control-plane-v1.json",
@@ -796,28 +801,18 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
 def test_cycle4_named_text_columns_wrap_below_fold() -> None:
     """#9570 #9568 #9571 #9569 #9567: wrap long text without table-default wrap."""
     cases = (
-        ("bioetl-control-plane-v1.json", 9404, "value_full"),
         ("bioetl-overview-v2.json", 9301, "parameter"),
         ("bioetl-dq-v2.json", 9403, "parameter"),
         ("bioetl-provider-health-v2.json", 9403, "parameter"),
         ("bioetl-runtime.json", 9403, "parameter"),
         ("bioetl-control-plane-v1.json", 9403, "parameter"),
         ("bioetl-control-plane-v1.json", 9417, "reason"),
-        ("bioetl-control-plane-v1.json", 9404, "value_full"),
     )
     for dashboard_name, panel_id, field in cases:
         panel = _panel(_load(dashboard_name), panel_id)
         custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
         assert custom.get("cellOptions", {}).get("wrapText") in (True, False, None)
         wrapped = _wrapped_field_names(panel)
-        if dashboard_name == "bioetl-control-plane-v1.json" and panel_id == 9404:
-            # #10571: full fingerprints and identity-gap reasons need wrapping
-            # at 900px; large rows reserve space before the pagination footer.
-            assert panel["options"]["cellHeight"] == "lg"
-            assert panel["options"]["footer"]["enablePagination"] is True
-            assert field in wrapped
-            assert panel["gridPos"]["h"] >= 12
-            continue
         if dashboard_name in {
             "bioetl-control-plane-v1.json",
             "bioetl-provider-health-v2.json",

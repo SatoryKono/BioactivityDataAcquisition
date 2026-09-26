@@ -168,13 +168,12 @@ def _trust(p: dict[int, dict]) -> None:
             "width": 430,
         }
         latency["gridPos"]["h"] = 10
-    for panel_id in (9404, 9405, 9406, 9407, 9408, 9409, 9402, 9403, 9417):
+    for panel_id in (9405, 9406, 9407, 9408, 9409, 9402, 9403, 9417):
         if panel_id in p:
             _compact_trust_evidence_table(p, panel_id)
     _bands(
         p[905],
         [
-            [(9404, 0, 24, 12)],
             [(9407, 0, 24, 8)],
             [(9410, 0, 12, 5), (9411, 12, 12, 5)],
             [(9405, 0, 24, 7)],
@@ -564,10 +563,14 @@ def apply_visual_usability(payload: dict) -> None:
     if payload["uid"] == "bioetl-incident-v1":
         p[2001]["gridPos"].update(y=5, h=3)
     # Keep useful evidence tables compact with explicit pagination, not huge repeated placeholders.
-    p[9452]["gridPos"].update(y=p[9451]["gridPos"]["y"] + 12, h=7)
-    p[9451]["gridPos"]["h"] = 12
-    for panel_id in (9451, 9452):
-        _table(p[panel_id], compact=False)
+    if 9451 in p and 9452 in p:
+        p[9452]["gridPos"].update(y=p[9451]["gridPos"]["y"] + 12, h=7)
+        p[9451]["gridPos"]["h"] = 12
+        for panel_id in (9451, 9452):
+            _table(p[panel_id], compact=False)
+    elif 9451 in p:
+        p[9451]["gridPos"]["h"] = 12
+        _table(p[9451], compact=False)
     if payload["uid"] == "bioetl-run-explorer-v1":
         _table(p[3010])
         _flex(p[3010], {"Run", "run_id"})
