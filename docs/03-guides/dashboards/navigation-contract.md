@@ -68,11 +68,11 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 
 ## Required inbound paths (discoverable first-screen CTA)
 
-L1-target dashboards MUST be discoverable from first-screen status/KPI area on `bioetl-overview-v2` via panel `Review First Action` (id `215`), located on the frozen Overview v3 first-screen layout after the provenance header panel matched by regex `^Inspect Scope & Evidence$`.
+L1-target dashboards MUST be discoverable from the selected-run answer on `bioetl-overview-v2` via panel `Review Run Domains` (id `9002`), after the provenance header matched by regex `^Inspect Scope & Evidence$`. Run ID is always selected on Overview.
 
 | Target UID | Source UID | Source panel id | Source panel title | First-screen row matcher |
 | --- | --- | ---: | --- | --- |
-| `bioetl-runtime` | `bioetl-overview-v2` | `215` | `Review First Action` | `^Inspect Scope & Evidence$` |
-| `bioetl-control-plane-v1` | `bioetl-overview-v2` | `215` | `Review First Action` | `^Inspect Scope & Evidence$` |
-| `bioetl-provider-health-v2` | `bioetl-overview-v2` | `215` | `Review First Action` | `^Inspect Scope & Evidence$` |
-| `bioetl-dq-v2` | `bioetl-overview-v2` | `215` | `Review First Action` | `^Inspect Scope & Evidence$` |
+| `bioetl-runtime` | `bioetl-overview-v2` | `9002` | `Review Run Domains` | `^Inspect Scope & Evidence$` |
+| `bioetl-control-plane-v1` | `bioetl-overview-v2` | `9002` | `Review Run Domains` | `^Inspect Scope & Evidence$` |
+| `bioetl-provider-health-v2` | `bioetl-overview-v2` | `9002` | `Review Run Domains` | `^Inspect Scope & Evidence$` |
+| `bioetl-dq-v2` | `bioetl-overview-v2` | `9002` | `Review Run Domains` | `^Inspect Scope & Evidence$` |

@@ -551,6 +551,8 @@ def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
         "Review Global Provider Status",
         "Review Workflow Status",
     ):
+        assert panel_title not in panels
+        continue
         panel = panels.get(panel_title)
         assert panel is not None
         expr = "\n".join(

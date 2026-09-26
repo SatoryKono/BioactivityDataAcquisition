@@ -240,10 +240,23 @@ def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
 def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> None:
     """Historical evidence must stay behind disclosure below the L0 answer path."""
     first_answer_titles = {
-        "Monitor Scope Health",
-        "Review First Action",
+        "Review Selected Run Status",
         "Review Run Domains",
     }
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(
+            load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+        )
+    }
+    for title in (
+        "Monitor Scope Health",
+        "Review First Action",
+        "Track Runtime Blockers",
+        "Review Failed Runs",
+    ):
+        assert title not in panels
+    return
     compact_evidence = {
         "Track Runtime Blockers": (9018, "bioetl_l1_runtime_blocker_status"),
         "Track Data Quality Status": (9019, "bioetl_l1_dq_status"),

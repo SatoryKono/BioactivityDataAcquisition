@@ -173,6 +173,8 @@ def _saved_run(p: dict[int, dict]) -> None:
 
 
 def _overview(p: dict[int, dict]) -> None:
+    if 9030 not in p:
+        return
     _stack(p[9030], {9031: 9, 9018: 12, 9019: 12, 9020: 12})
     for pid in (9018, 9019, 9020):
         p[pid]["options"].pop("pageSize", None)
@@ -666,9 +668,11 @@ def _overview_selected_run_layout(p: dict[int, dict], summary: dict) -> None:
     _table(p[9002], {"Domain": 120, "Status": 115})
     # Three evidence columns need half the first-screen width at narrow viewports.
     p[9002]["gridPos"].update(x=12, w=12)
-    p[214]["gridPos"].update(x=16, w=8)
-    p[215]["gridPos"]["w"] = 12
-    p[215]["options"]["cellHeight"] = "sm"
+    if 214 in p:
+        p[214]["gridPos"].update(x=16, w=8)
+    if 215 in p:
+        p[215]["gridPos"]["w"] = 12
+        p[215]["options"]["cellHeight"] = "sm"
     summary["gridPos"]["w"] = 12
     for rule in summary["fieldConfig"]["overrides"]:
         if rule["matcher"].get("options") in {

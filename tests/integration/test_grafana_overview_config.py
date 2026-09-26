@@ -76,8 +76,9 @@ def test_overview_dashboard_identity_and_primary_question() -> None:
     assert dashboard.get("title") in {"2. Overview", "2. Overview (Fleet)"}
     assert dashboard.get("uid") == "bioetl-overview-v2"
     assert "Hybrid L0 overview" in description
-    assert "current" in content.lower() and "verify" in content.lower()
-    assert "first action" in content.lower()
+    assert "Run ID is always selected" in description
+    assert "selected run" in content.lower()
+    assert "unknown" in content.lower()
 
 
 def test_overview_uses_frozen_v3_selector_set() -> None:
@@ -153,18 +154,13 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     panels = _panels_by_title()
     # Compact navigation gives the first screen one extra grid row.
     assert panels["Inspect Scope & Evidence"].get("id") == 99
-    assert panels["Monitor Scope Health"].get("id") == 214
-    assert panels["Review First Action"].get("id") == 215
+    assert "Monitor Scope Health" not in panels
+    assert "Review First Action" not in panels
     assert panels["Review Run Domains"].get("id") == 9002
     assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 2
     assert panels["Review Selected Run Status"].get("id") == 9603
-    assert panels["Review Selected Run Status"].get("gridPos", {}).get("y") == 11
-    assert panels["Monitor Scope Health"].get("gridPos", {}).get("y") == 2
-    assert panels["Review First Action"].get("gridPos", {}).get("y") == 5
-    assert panels["Review Run Domains"].get("gridPos", {}).get("y") == panels[
-        "Review First Action"
-    ].get("gridPos", {}).get("y")
-    assert panels["Review First Action"].get("gridPos", {}).get("w", 0) >= 8
+    assert panels["Review Selected Run Status"].get("gridPos", {}).get("y") == 5
+    assert panels["Review Run Domains"].get("gridPos", {}).get("y") == 5
     assert panels["Review Run Domains"].get("gridPos", {}).get("w", 0) >= 8
     lazy = {"Review Run Identity": 9300, "Review Processed Records": 9301}
     for title, panel_id in lazy.items():
@@ -182,6 +178,9 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
 
 def test_status_and_next_action_preserve_current_status_semantics() -> None:
     panels = _panels_by_title()
+    assert "Monitor Scope Health" not in panels
+    assert "Review First Action" not in panels
+    return
     status = panels["Monitor Scope Health"]
     next_action = panels["Review First Action"]
 
@@ -220,10 +219,7 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
     """Selected-run domains use saved evidence; CURRENT detail stays below the fold."""
     panels = _panels_by_title()
     summary = panels["Review Run Domains"]
-    full_matrix = panels["Review All Domain Status"]
-    next_action = panels["Review First Action"]
     summary_expr = _panel_expr(summary)
-    full_expr = _panel_expr(full_matrix)
 
     assert summary.get("id") == 9002
     assert not summary_expr
@@ -233,145 +229,13 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
     assert "from=" not in target["url"] and "to=" not in target["url"]
     assert "15-minute" in summary["description"]
 
-    assert full_matrix.get("id") == 9031
-    assert "topk(" not in full_expr
-    assert "max by (input)" in full_expr
-    assert "bioetl_l0_input_status_selected" in full_expr
     content = str(
         panels["Inspect Scope & Evidence"].get("options", {}).get("content", "")
     )
     assert "set a concrete" not in content
-    assert "VERIFY" in content
-
-    # #10170: theme text keeps Priority and Action readable without colored fills.
-    overrides = next_action.get("fieldConfig", {}).get("overrides", [])
-    value_override = next(
-        (
-            item
-            for item in overrides
-            if item.get("matcher", {}).get("options") in {"Value", "Priority"}
-        ),
-        None,
-    )
-    assert value_override is not None
-    value_props = {
-        prop.get("id"): prop.get("value")
-        for prop in value_override.get("properties", [])
-    }
-    priority_cell = value_props.get("custom.cellOptions", {})
-    assert priority_cell.get("type") == "auto"
-    assert priority_cell.get("applyToRow") is not True, (
-        "Priority badge must not paint the whole row (verdict-ontology anti-pattern)"
-    )
-
-    # Short Priority badges (RUNTIME/CP/DQ/…) live on field defaults mappings.
-    priority_maps = {}
-    for mapping in (
-        next_action.get("fieldConfig", {}).get("defaults", {}).get("mappings") or []
-    ):
-        if mapping.get("type") == "value":
-            priority_maps.update(mapping.get("options") or {})
-    for score, badge in {
-        "1": "—",
-        "10": "REVIEW",
-        "15": "VERIFY",
-        "20": "HIGH",
-        "30": "HIGH",
-        "35": "URGENT",
-        "40": "URGENT",
-        "50": "URGENT",
-    }.items():
-        assert score in priority_maps, f"missing Priority map for score {score}"
-        assert priority_maps[score].get("text") == badge
-        assert len(str(priority_maps[score].get("text") or "")) <= 8
-
-    action_override = next(
-        (
-            item
-            for item in overrides
-            if item.get("matcher", {}).get("options") == "action_target"
-        ),
-        None,
-    )
-    assert action_override is not None
-    action_props = {
-        prop.get("id"): prop.get("value")
-        for prop in action_override.get("properties", [])
-    }
-    assert action_props.get("custom.cellOptions", {}).get("type") == "auto"
-    # Workflow and reason wrap to multiple lines at the narrow viewport.
-    assert next_action.get("options", {}).get("cellHeight") == "lg"
-    action_widths = [
-        prop["value"]
-        for item in overrides
-        if item.get("matcher", {}).get("options") in {"action_target", "Action"}
-        for prop in item.get("properties", [])
-        if prop["id"] == "custom.width"
-    ]
-    assert action_widths and min(action_widths) >= 90, (
-        "Action column keeps a named width that still fits DASH-REFLOW-001 200%"
-    )
-    # Short operator labels (panel dataLinks keep full Open* CTA titles).
-    action_maps = {}
-    for mapping in action_props.get("mappings") or []:
-        if mapping.get("type") == "value":
-            action_maps.update(mapping.get("options") or {})
-    for key, text in {
-        "runtime": "Diagnose",
-        "control_plane": "Trust",
-        "dq": "Data Quality",
-        "provider": "Provider Health",
-        "none": "—",
-        "inspect_evidence": "Inspect evidence",
-        "workflow": "Diagnose",
-    }.items():
-        assert key in action_maps, f"missing Action map for {key}"
-        assert action_maps[key].get("text") == text
-        assert action_maps[key].get("color") == "text"
-        assert len(str(action_maps[key].get("text") or "")) <= 20
-    links = action_props.get("links") or []
-    assert links, "Action column must expose row-aware board links"
-    assert any(
-        link.get("url") == "${__data.fields.action_href:raw}" for link in links
-    ), "Action links must use the row href, empty when no action is required"
-    assert "var-provider=$$__all&var-pipeline_context=$1" in Path(
-        "grafana/prometheus-rules/bioetl_observability.yml"
-    ).read_text(encoding="utf-8")
-
-    organize = next(
-        (
-            transform
-            for transform in next_action.get("transformations", [])
-            if transform.get("id") == "organize"
-        ),
-        None,
-    )
-    assert organize is not None
-    exclude = organize.get("options", {}).get("excludeByName", {})
-    # Keep action_dashboard_uid for field links; hide via field override instead.
-    assert exclude.get("action_dashboard_uid") is not True
-    hidden_route_override = next(
-        (
-            item
-            for item in overrides
-            if item.get("matcher", {}).get("options") == "action_dashboard_uid"
-        ),
-        None,
-    )
-    assert hidden_route_override is not None
-    hidden_route_properties = {
-        property_.get("id"): property_.get("value")
-        for property_ in hidden_route_override.get("properties", [])
-    }
-    assert hidden_route_properties.get("custom.hidden") is True
-    assert exclude.get("Value") is not True
-    assert exclude.get("pipeline") is False
-    # Urgency and explicit row object precede the reason and action.
-    index_by_name = organize.get("options", {}).get("indexByName", {})
-    assert index_by_name.get("action_target") == 4
-    assert index_by_name.get("Value") == 0
-    assert index_by_name.get("action_reason") == 3
-    assert index_by_name["pipeline"] == 1
+    assert "unknown" in content.lower()
+    assert "Review All Domain Status" not in panels
+    assert "Review First Action" not in panels
 
 
 def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> None:
@@ -404,7 +268,9 @@ def test_current_domain_detail_uses_same_qualified_verdict_as_summary(
     title: str,
     domain: str,
 ) -> None:
-    panel = _panels_by_title()[title]
+    assert title not in _panels_by_title()
+    assert domain
+    return
     expr = _panel_expr(panel)
     assert "bioetl_l0_input_status_selected" in expr
     assert f'input="{domain}"' in expr
@@ -416,6 +282,10 @@ def test_current_domain_detail_uses_same_qualified_verdict_as_summary(
 
 
 def test_l1_cards_have_operator_mappings_and_targeted_links() -> None:
+    titles = _panels_by_title()
+    for title in _L1_CARD_TITLES:
+        assert title not in titles
+    return
     expected_links = {
         "Review Runtime Status": {"Open Runtime"},
         "Review Data Quality Status": {"Open Data Quality"},
@@ -437,6 +307,10 @@ def test_l1_cards_have_operator_mappings_and_targeted_links() -> None:
 
 def test_selected_scope_cards_normalize_workflow_pipeline_aliases() -> None:
     """Epic #6574: first-screen cards use thin pipeline selectors (no mega-expr glue)."""
+    titles = _panels_by_title()
+    assert "Monitor Scope Health" not in titles
+    assert "Review First Action" not in titles
+    return
     for title in (
         "Monitor Scope Health",
         "Review First Action",
@@ -450,7 +324,11 @@ def test_selected_scope_cards_normalize_workflow_pipeline_aliases() -> None:
 
 
 def test_provider_and_workflow_scope_are_explicit() -> None:
-    provider = _panels_by_title()["Review Global Provider Status"]
+    titles = _panels_by_title()
+    assert "Review Global Provider Status" not in titles
+    assert "Review Workflow Status" not in titles
+    return
+    provider = titles["Review Global Provider Status"]
     workflow = _panels_by_title()["Review Workflow Status"]
 
     assert _panel_expr(provider).strip() == "bioetl_l1_provider_global_status"
@@ -481,6 +359,16 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
 
 def test_range_evidence_and_trend_rows_are_retained() -> None:
     panels = _panels_by_title()
+    for title in (
+        "Track Runtime Blockers",
+        "Track Data Quality Status",
+        "Track Gold Lifecycle",
+        "Review Failed Runs",
+        "Review Recent Non-success Terminal Runs",
+        "Track Silver Rejects",
+    ):
+        assert title not in panels
+    return
     current_verdict_titles = {
         "Monitor Scope Health",
         "Review First Action",
@@ -557,6 +445,11 @@ def test_range_evidence_and_trend_rows_are_retained() -> None:
 
 def test_diagnostics_row_is_not_empty() -> None:
     dashboard = _dashboard()
+    assert all(
+        panel.get("title") != "Inspect Domain Diagnostics"
+        for panel in dashboard.get("panels", [])
+    )
+    return
     diagnostics_row = next(
         panel
         for panel in dashboard.get("panels", [])
@@ -572,15 +465,17 @@ def test_diagnostics_row_is_not_empty() -> None:
 
 
 def test_overview_queries_are_backed_by_expected_records_and_metrics() -> None:
-    all_expressions = "\n".join(get_panel_expressions(_dashboard()))
+    all_expressions = "\n".join(
+        str(target.get("url") or target.get("expr") or "")
+        for panel in get_dashboard_panels(_dashboard())
+        for target in (panel.get("targets") or [])
+        if isinstance(target, dict)
+    )
 
     for required_token in (
-        "bioetl_workflow_scope_priority",
-        "bioetl_first_action",
-        "bioetl_l0_input_status_selected",
-        "bioetl_l1_gold_lifecycle_status",
-        "bioetl_pipeline_runs_total",
-        "bioetl_records_processed_total",
+        "selected-run-status?pipeline=${pipeline}&run_id=${run_id}",
+        "identity-table?pipeline=${pipeline}",
+        "processed-records?pipeline=${pipeline}",
     ):
         assert required_token in all_expressions
 
@@ -588,6 +483,9 @@ def test_overview_queries_are_backed_by_expected_records_and_metrics() -> None:
 def test_overview_timelines_use_all_labels_and_hide_clipped_in_band_text() -> None:
     """#10249: All instead of .* on empty fallback; no clipped in-band state text."""
     panels = {panel.get("id"): panel for panel in get_dashboard_panels(_dashboard())}
+    for panel_id in (9018, 9019, 9020):
+        assert panel_id not in panels
+    return
     for panel_id in (9018, 9019, 9020):
         panel = panels[panel_id]
         assert panel.get("type") == "state-timeline"
@@ -600,3 +498,17 @@ def test_overview_timelines_use_all_labels_and_hide_clipped_in_band_text() -> No
         assert "${pipeline:text}" in expr
         assert "${run_type:text}" in expr
         assert 'pipeline=~"$pipeline"' in expr
+
+
+def test_overview_keeps_only_panels_that_assess_the_selected_run() -> None:
+    """#11268: Run ID is always set, so fleet and range panels are not on Overview."""
+    panels = {panel.get("id"): panel for panel in get_dashboard_panels(_dashboard())}
+    removed = {214, 215, 9601, 9031, 9010, 9011, 9003, 9007, 20215, 9701}
+    kept = {99, 9603, 9002, 9300, 9301, 9451, 9452}
+    for panel_id in removed:
+        assert panel_id not in panels
+    for panel_id in kept:
+        assert panel_id in panels
+    assert "Run ID is always selected" in str(_dashboard().get("description"))
+    assert panels[9603]["gridPos"]["y"] == panels[9002]["gridPos"]["y"]
+    assert panels[9603]["gridPos"]["y"] < 12

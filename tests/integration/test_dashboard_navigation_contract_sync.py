@@ -63,8 +63,8 @@ def test_required_inbound_paths_match_overview_first_action_mirror() -> None:
     )
     route = {
         "source_uid": "bioetl-overview-v2",
-        "source_panel_id": 215,
-        "source_panel_title": "Review First Action",
+        "source_panel_id": 9002,
+        "source_panel_title": "Review Run Domains",
         "source_status_row_panel_title_matcher": "^Inspect Scope & Evidence$",
     }
     assert contract["required_discoverable_inbound_paths"] == {
@@ -74,18 +74,18 @@ def test_required_inbound_paths_match_overview_first_action_mirror() -> None:
     narrative = _NAV_DOC_PATH.read_text(encoding="utf-8")
     for target_uid in target_uids:
         expected_row = (
-            f"| `{target_uid}` | `bioetl-overview-v2` | `215` | "
-            "`Review First Action` | `^Inspect Scope & Evidence$` |"
+            f"| `{target_uid}` | `bioetl-overview-v2` | `9002` | "
+            "`Review Run Domains` | `^Inspect Scope & Evidence$` |"
         )
         assert expected_row in narrative
 
     overview = json.loads(
         (_DASHBOARDS_DIR / "bioetl-overview-v2.json").read_text(encoding="utf-8")
     )
-    first_action = next(panel for panel in overview["panels"] if panel.get("id") == 215)
+    first_action = next(panel for panel in overview["panels"] if panel.get("id") == 9002)
     urls = {
         str(link.get("url", ""))
-        for link in first_action.get("options", {}).get("dataLinks", [])
+        for link in (first_action.get("links") or [])
     }
     for target_uid in target_uids:
         assert any(url.startswith(f"/d/{target_uid}/") for url in urls)

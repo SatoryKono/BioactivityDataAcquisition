@@ -32,32 +32,23 @@ def test_overview_v2_semantics_contract():
     )
     panels = _panels(d)
     titles = [p.get("title") for p in panels]
-    assert titles.count("Monitor Scope Health") == 1
-    system = next(p for p in panels if p.get("title") == "Monitor Scope Health")
-    expr = "\n".join(t.get("expr", "") for t in system.get("targets", []))
-    assert "bioetl_workflow_scope_priority" in expr
-    assert "$__range" not in expr
-    mapping = json.dumps(
-        system.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])
-    )
-    for token in ["UNKNOWN", "OK", "WARN", "CRIT"]:
-        assert token in mapping
-
-    assert titles.count("Review First Action") == 1
+    assert titles.count("Monitor Scope Health") == 0
+    assert titles.count("Review First Action") == 0
+    assert titles.count("Review Run Domains") == 1
     row_labels = " ".join(
         p.get("title", "") for p in d.get("panels", []) if p.get("type") == "row"
     )
-    assert "Range Evidence" in row_labels
-    assert any(
-        label in row_labels
-        for label in ("Inspect Domain Diagnostics", "Domain status matrix")
-    )
+    assert "Range Evidence" not in row_labels
+    assert "Inspect Run Context" in row_labels
+    assert "Inspect Saved Run Evidence" in row_labels
 
     nav_links = list(d.get("links", []))
+    links_blob = ""
     for panel in panels:
         if panel.get("id") == 1000:
             nav_links.extend(panel.get("links", []))
-    links = " ".join(link.get("title", "") for link in nav_links)
+            links_blob = str(panel.get("options", {}).get("content", ""))
+    links = " ".join(link.get("title", "") for link in nav_links) + links_blob
     # Full portfolio bus 0–6, with Run Explorer first.
     for token in [
         "Trust",
@@ -78,6 +69,8 @@ def test_overview_v2_semantics_contract():
         "Review Data Validation Status",
         "Review Workflow Status",
     ]:
+        assert current_title not in titles
+        continue
         p = next(x for x in panels if x.get("title") == current_title)
         expr = "\n".join(t.get("expr", "") for t in p.get("targets", []))
         assert "$__range" not in expr
