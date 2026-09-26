@@ -375,7 +375,7 @@
       "id": 9401,
       "type": "stat",
       "title": "Monitor Scope Status",
-      "description": "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed.",
+      "description": "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed. States: OK/WARN/CRIT/UNKNOWN.",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -514,7 +514,7 @@
       "id": 2010,
       "type": "table",
       "title": "Inspect Ranked Suspects",
-      "description": "GLOBAL / TIME RANGE · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Open Pipeline Diagnostics via Action to verify the source evidence. Summary shows up to two rows; open all rows for complete evidence.",
+      "description": "GLOBAL / TIME RANGE · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Open Pipeline Diagnostics via Action to verify the source evidence. Summary shows up to two rows; open all rows for complete evidence. VALID_EMPTY means no ranked suspects in this scope, not a healthy fleet.",
       "gridPos": {
         "h": 5,
         "w": 24,
