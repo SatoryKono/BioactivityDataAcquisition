@@ -1,57 +1,66 @@
-# Аудит диаграмм (prompt.audit.diagrams)
+# Аудит домена diagrams
 
-HEAD `32d77a51e556de60d6dc0daf871a442becc709c5`. Режим audit, full. Каталог требований не содержит `REQ-*` на диаграммы: `requirement_id=GAP`. Статус `PROVEN` только при файле или команде на этом SHA.
-
-**surface_score: 2.** Текст диаграмм в git, SVG-соседи на месте, Mermaid CLI закреплён на 10.6.1, lint без ошибок. Срез `90-pkg-*` не совпадает с AST, а nightly-проверка этого среза выключена `if: false`. Это не score 3 («модель совпадает с системой») и не score 1: канонический корпус не бинарный и не разъезжается целиком.
-
-Предыдущий closeout (328 `.mmd`, score 3, 0 PROVEN) на этом SHA не копировался. Счёт 328 подтверждён заново. Score 3 не подтверждён.
-
-## Census (2026-09-25)
-
-| Семейство | .mmd | .mermaid | sibling svg |
-| --- | ---: | ---: | ---: |
-| architecture | 89 | 0 | 89 |
-| class-diagrams | 145 | 0 | 145 |
-| foundation | 55 | 0 | 55 |
-| providers | 28 | 0 | 28 |
-| sequence | 5 | 0 | 5 |
-| state-machines | 5 | 0 | 5 |
-| `_template.mmd` | 1 | 0 | 0 |
-| views | 0 | 165 | 165 |
-| **итого** | **328** | **165** | **492** |
-
-`git ls-files` видит `_template.mmd`. PNG под `diagrams/` в индексе: 0. Пропусков sibling SVG у источников: 0. PlantUML/Graphviz/drawio под `docs/` не найдены. Встроенные fences ` ```mermaid ` вне дерева diagrams: 53 файла, 82 блока (синтаксис fences отдельно не гонялся). Секретов по шаблону key/password/token в `.mmd`/`.mermaid` нет.
-
-Типы по `%% @type`: flowchart 144, classDiagram 162, sequenceDiagram 25, stateDiagram 14, плюс короткие `sequence`/`state` у sequence/state-machines.
-
-## Команды
-
-| Команда | Результат |
+| Поле | Значение |
 | --- | --- |
-| `lint_diagrams.py docs/02-architecture/diagrams` с `PYTHONPATH` | exit 0; 492 файла; 0 errors; 174 warnings (SIZE-002 99, STALE-002 24, LINK-001 22, LABEL-001 20, GRAPH-001 4, SIZE-003 3, CLASS-003 2) |
-| тот же lint без пакета `scripts` на path | exit 0; GRAPH-001 отсутствует (DIAG-005) |
-| `lint-budget --lint-report` (max errors 0) | exit 0, `lint.errors=0` |
-| `check-artifacts` | exit 0, 6 SVG |
-| `generate_package_family_class_diagrams.py --check` | exit 1, changed 26, stale 1 (DIAG-001) |
-| `python -m scripts.diagrams.render.generate_pipeline_dataflows --check --pipeline chembl_activity` | exit 0, artifacts current |
-| `prune_orphan_nodes.py --check --json` | exit 1, total_orphans 6 (DIAG-003, DIAG-004) |
-| `apply-elk --dry-run` | exit 0, Modified 17, already ELK 0 (DIAG-002) |
+| `domain_id` | `diagrams` |
+| `prompt_id` | `prompt.audit.diagrams` |
+| `run_id` | `20260926T084327Z-e1c184857e46-nine` |
+| Baseline | `origin/main` @ `e1c184857e46` |
+| Worktree | `.worktrees/nine-domain-audit-9f71c6444175` |
+| MODE | read-only audit |
+| Дата | 2026-09-26 |
 
-Предупреждения SIZE-002 / STALE-002 (90–136 дней, порог ERROR 150) / LINK-001 / LABEL-001 укладываются в бюджет warnings (`max-lint-warnings` по умолчанию выключен). Отдельными дефектами не открыты.
+## surface_score: **2** / 3
 
-## Канонический источник
+**Легенда:** 3 — текстовый источник в VCS, детерминированный render, CI, модель совпадает с системой; 2 — актуальные диаграммы, часть регрессии/регенерации вручную; 1 — drift или неясный источник; 0 — опасная ошибка deploy/security.
 
-SSOT: `docs/02-architecture/diagrams/**/*.mmd` и `views/**/*.mermaid` (ADR-040 D2, DOC-GOV-02). Рендер: `.github/actions/setup-mermaid` pin `@mermaid-js/mermaid-cli` 10.6.1, `scripts/diagrams/mmdc_wrapper.sh` требует ту же версию. `npx -y` в scripts/diagrams и diagram workflows не найден. PNG не в git.
+### Краткий вывод
 
-## Пропуски
+Корпус диаграмм инженерно зрелый: **329** `.mmd`, **165** `.mermaid`, **493** tracked SVG, канон в `docs/02-architecture/diagrams/`, рендер через `render.sh` + `mmdc_wrapper.sh` с pin **10.6.1** и lockfile-backed `setup-mermaid`. На PR работают syntax validation, incremental lint, drift gate для изменённых источников и точечный render dataflow ChEMBL.
 
-Полный рендер SVG/PNG не запускался. Embedded-fence pytest и `check-quality-gates` не запускались. Dataflow `--check` выполнен только для `chembl_activity`.
+Главный разрыв — **автоматизация Phase 2**: job `render-diagrams` в `docs.yml` и `diagram-nightly.yml` отключены (`if: false`, #11196), поэтому DIAG-T013/T018–T023/T026 и extended visual smoke **не выполняются в CI**, хотя regression plan и README tooling описывают их как PR/nightly hard gates. Regression pool покрывает **6** SVG (`visual-smoke.txt`) при ~**494** lint-файлах.
 
-## Findings
+Локальный lint (`python -m scripts.diagrams lint docs/02-architecture/diagrams`): **493** файлов, **0** ERROR, **24** STALE-002 (>90d), **27** LINK-001, **100** SIZE-002 (warnings).
 
-1. **DIAG-001 P2.** `90-pkg-*` расходится с генератором; nightly `--check` выключен.
-2. **DIAG-002 P2.** Детектор ELK однострочный: lint не видит multiline init, dry-run хочет переписать 17 файлов.
-3. **DIAG-003 P2.** `-. label .->` не считается ребром; EXEC/MAINT ложные orphan.
-4. **DIAG-004 P3.** Участники `Profiles` и `PR` без сообщений.
-5. **DIAG-005 P3.** `ImportError` в lint гасит GRAPH-001.
-6. **DIAG-006 P3.** У local-deployment Silver/Quarantine стоят чужие hex из палитры ADR-040.
+`blocked`: **false** (нет PROVEN P0/P1).
+
+## Инвентарь (SCOPE)
+
+| Метрика | Значение |
+| --- | --- |
+| `.mmd` | 329 |
+| `.mermaid` | 165 |
+| `.svg` (tracked) | 493 |
+| `.png` (tracked) | 0 (DOC-GOV-02 / gitignore) |
+| `.md` (derived/index) | 394 |
+| `scripts/diagrams/**` | 48 файлов |
+| DrawIO / binary-only | не найдено |
+
+## Сильные стороны
+
+- ADR-040 governance, manifests, pre-commit `lint-diagrams` / orphan checks.
+- Pinned Mermaid CLI; отказ от `npx -y` в `scripts/diagrams/**`.
+- PR `check-diagram-drift`: re-render изменённых `.mmd` и `git diff --exit-code` sibling SVG.
+- Architecture tests на diagram workflows и quality gate scripts.
+
+## Top remediations
+
+1. Явно пересмотреть SSOT `diagram-regression-test-plan.md` vs фактический CI (#11196): пометить DIAG-T013/T018–T026 как manual/local или восстановить budgeted job (workflow_dispatch / path-scoped).
+2. Периодически гонять `scripts/diagrams/run_diagram_checks.sh --profile pr` локально или в dispatch job; расширить `visual-smoke.txt` по приоритету архитектурных семейств.
+3. Обновить `@date` / описания для кластера architecture **24–31** (24× STALE-002) или подтвердить актуальность содержимого.
+4. Синхронизировать `scripts/diagrams/README.md` и `docs/02-architecture/diagrams/README.md` (Last verified **2026-07-28**) с текущими CI gates.
+5. Закрыть LINK-001 на observability / bootstrap / reproducible-run семействах (semantic arrow mix).
+
+## Выполненные проверки
+
+| Проверка | Результат |
+| --- | --- |
+| `python -m scripts.diagrams lint docs/02-architecture/diagrams --json` | OK, 0 errors |
+| `python -m scripts.diagrams check-artifacts` | OK, 6 entries |
+| Инспекция `docs.yml`, `diagram-nightly.yml`, `setup-mermaid`, `mmdc_wrapper.sh` | см. findings |
+| Render smoke в CI | не запускался (read-only; jobs disabled) |
+
+## Артефакты
+
+- `reports/audit/diagrams/findings.json`
+- Копия: `reports/audit-runs/20260926T084327Z-e1c184857e46-nine/diagrams/`

@@ -1,0 +1,84 @@
+rule_files:
+  - ../bioetl_workflow_scope.yml
+evaluation_interval: 30s
+tests:
+  - name: Standalone pipeline missing Trust is VERIFY and ignores a neighbor workflow
+    interval: 1m
+    input_series:
+      - series: 'bioetl_overview_pipeline_run_type_universe{pipeline="uniprot_protein",run_type="incremental"}'
+        values: '1+0x5'
+      - series: 'bioetl_workflow_pipeline_expected{workflow="chembl_baseline",pipeline="chembl_assay",run_type="incremental"}'
+        values: '1+0x5'
+      - series: 'bioetl_workflow_current_status{workflow="chembl_baseline",job="bioetl_workflow_chembl_baseline"}'
+        values: '2+0x5'
+      - series: 'push_time_seconds{job="bioetl_workflow_chembl_baseline",pipeline="",run_type=""}'
+        values: '1+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="control_plane",pipeline="uniprot_protein",run_type="incremental"}'
+        values: '3+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="runtime",pipeline="uniprot_protein",run_type="incremental"}'
+        values: '0+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="dq",pipeline="uniprot_protein",run_type="incremental"}'
+        values: '0+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="provider",pipeline="uniprot_protein",run_type="incremental"}'
+        values: '0+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="gold",pipeline="uniprot_protein",run_type="incremental"}'
+        values: '0+0x5'
+    promql_expr_test:
+      - expr: 'max by (workflow, pipeline, run_type, action_reason, action_target) (bioetl_first_action{workflow="__standalone__",pipeline="uniprot_protein",action_reason="control_plane_evidence_missing"})'
+        eval_time: 3m
+        exp_samples:
+          - labels: '{action_reason="control_plane_evidence_missing",action_target="control_plane",pipeline="uniprot_protein",run_type="incremental",workflow="__standalone__"}'
+            value: 15
+      - expr: 'count(bioetl_first_action{workflow="chembl_baseline",pipeline="uniprot_protein"}) or vector(0)'
+        eval_time: 3m
+        exp_samples:
+          - labels: '{}'
+            value: 0
+  - name: Confirmed workflow checks are no-action and a sibling CRIT stays on its workflow
+    interval: 1m
+    input_series:
+      - series: 'bioetl_workflow_pipeline_expected{workflow="chembl_baseline",pipeline="chembl_assay",run_type="incremental"}'
+        values: '1+0x5'
+      - series: 'bioetl_workflow_pipeline_expected{workflow="other",pipeline="chembl_target",run_type="incremental"}'
+        values: '1+0x5'
+      - series: 'bioetl_workflow_current_status{workflow="chembl_baseline",job="bioetl_workflow_chembl_baseline"}'
+        values: '0+0x5'
+      - series: 'bioetl_workflow_current_status{workflow="other",job="bioetl_workflow_other"}'
+        values: '2+0x5'
+      - series: 'push_time_seconds{job="bioetl_workflow_chembl_baseline",pipeline="",run_type=""}'
+        values: '1+0x5'
+      - series: 'push_time_seconds{job="bioetl_workflow_other",pipeline="",run_type=""}'
+        values: '1+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="runtime",pipeline="chembl_assay",run_type="incremental"}'
+        values: '0+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="control_plane",pipeline="chembl_assay",run_type="incremental"}'
+        values: '0+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="dq",pipeline="chembl_assay",run_type="incremental"}'
+        values: '0+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="provider",pipeline="chembl_assay",run_type="incremental"}'
+        values: '0+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="gold",pipeline="chembl_assay",run_type="incremental"}'
+        values: '0+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="runtime",pipeline="chembl_target",run_type="incremental"}'
+        values: '2+0x5'
+    promql_expr_test:
+      - expr: 'max by (workflow, pipeline, run_type, action_reason, action_target) (bioetl_first_action{workflow="chembl_baseline",pipeline="chembl_assay",action_reason="no_action_required"})'
+        eval_time: 3m
+        exp_samples:
+          - labels: '{action_reason="no_action_required",action_target="none",pipeline="chembl_assay",run_type="incremental",workflow="chembl_baseline"}'
+            value: 1
+      - expr: 'count(bioetl_first_action{workflow="chembl_baseline",action_reason="runtime_blockers_active"} > 0) or vector(0)'
+        eval_time: 3m
+        exp_samples:
+          - labels: '{}'
+            value: 0
+      - expr: 'max(bioetl_first_action{workflow="other",pipeline="chembl_target",action_reason="runtime_blockers_active"})'
+        eval_time: 3m
+        exp_samples:
+          - labels: '{}'
+            value: 50
+      - expr: 'max by (action_reason, action_target) (bioetl_fa_gap)'
+        eval_time: 3m
+        exp_samples:
+          - labels: '{action_reason="selected_scope_not_present",action_target="inspect_evidence"}'
+            value: 15

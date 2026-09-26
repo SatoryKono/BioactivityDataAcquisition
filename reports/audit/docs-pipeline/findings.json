@@ -1,165 +1,334 @@
 {
   "domain_id": "docs-pipeline",
   "prompt_id": "prompt.audit.docs-pipeline",
-  "surface_score": 2,
-  "head": "32d77a51e556de60d6dc0daf871a442becc709c5",
+  "surface_score": 1,
+  "head": "e1c184857e460461bbb3e20829e60ab8bb262e2f",
+  "blocked": false,
+  "proven_count": 9,
+  "p0_p1_count": 0,
+  "summary": "На origin/main e1c184857e46 каноническая цепочка `python -m scripts.docs verify` не проходит чистый checkout: падают check-links (инвентарь workflow-триггеров), check-drift (freshness RULES), generate-cleanup-inventory и generate-pipeline-normalization-matrix --check. `mkdocs build --strict` собирается (~56s). Pin toolchain через uv.lock сохранён. GitHub Pages не публикуется (site_url отсутствует).",
+  "top_remediations": [
+    "Синхронизировать колонку Triggers в docs/04-reference/github-actions-workflows.md с фактическими `on:` в labeler/pr-hygiene/quality-debt-weekly/stale после #11234.",
+    "Обновить documentation-cleanup-inventory (--update) после коммита tracked coderabbit reports или убрать их из дерева.",
+    "Поднять ссылку на версию RULES в docs/00-project/ai/rules/README.md до 6.1.13 и перегенерировать tracked pipeline_normalization_field_matrix.",
+    "Добавить диагностический вывод в check_artifacts при --check; не полагаться на exit 1 без сообщения."
+  ],
   "findings": [
     {
       "id": "DOCS-PIPE-001",
       "requirement_id": "REQ-DOC-001",
-      "path": ".github/workflows/tests.yml:647-654",
-      "observation": "Канонический workbook матрицы отсутствует в checkout и gitignored, а CI-шаг sync --check при отсутствии файла завершается с exit 0.",
-      "method": "git check-ignore -v и Test-Path @ 2026-09-25T08:43Z; inspection tests.yml:647-654, .gitignore:577, scripts/docs/README.md:99-108, scripts/docs/matrix/sync_structural_policy.py:58-61",
-      "expected": "Выделенная generated-doc проверка workbook sync либо выполняется на чистом checkout и падает при drift, либо workbook не описан как единственный канонический артефакт.",
-      "actual": "git check-ignore: .gitignore:577 игнорирует docs/reports/chembl_pipeline_silver_matrices_v12.xlsx. Test-Path=False, git ls-files пуст, glob 0. tests.yml:650-653 печатает skip и exit 0, если файла нет. README.md:99-101 называет этот xlsx единственным каноническим workbook.",
-      "impact": "На чистом checkout свежесть workbook относительно structural contract не проверяется, хотя шаг помечен blocking. Оператор не может повторить documented matrix workflow из git.",
+      "path": "docs/04-reference/github-actions-workflows.md:113-116",
+      "observation": "Опубликованный workflow inventory описывает schedule/pull_request_target триггеры, которых уже нет в исполняемых YAML после #11234.",
+      "method": "python -m scripts.docs check-links --workflow-inventory @ worktree e1c184857e46 (2026-09-26)",
+      "expected": "Таблица Triggers в github-actions-workflows.md совпадает с множеством ключей `on:` каждого .github/workflows/*.yml (check_links.py:1076-1119).",
+      "actual": "4 mismatch: labeler.yml (doc pull_request_target vs YAML workflow_dispatch), pr-hygiene.yml и quality-debt-weekly.yml (doc schedule+workflow_dispatch vs YAML workflow_dispatch), stale.yml (doc schedule vs YAML workflow_dispatch). Exit 1, Total violations: 4.",
+      "impact": "Первый шаг verify/check-links падает на main; docs.yml validate-mkdocs не может пройти полную цепочку без правки inventory.",
       "confidence": "high",
-      "confidence_score": 0.93,
+      "confidence_score": 0.97,
       "status": "PROVEN",
       "priority": "P2",
       "severity": "Medium",
-      "remediation": "Либо добавить workbook в gitignore allowlist и убрать skip-exit-0, либо убрать его из канонического README и оставить SoT на export-matrix-structural-contract --check.",
-      "effort": "M",
-      "automation": "CI: fail closed, если commit_policy требует workbook, а файла нет",
-      "automated_fix_possible": false,
-      "fingerprint": "3b5d52f49210480d80454b14f6f73a857942e96ca095e0a8d871628ce937ad11",
-      "evidence_class": "FACT",
-      "claim": "CI matrix workbook sync exits 0 when the documented canonical xlsx is absent.",
-      "broken_invariant": "REQ-DOC-001 generated-doc checks must actually run in CI",
-      "root_cause": "canonical workbook gitignored and absent so CI sync check exits 0",
-      "affected_paths": [
-        ".github/workflows/tests.yml",
-        ".gitignore",
-        "scripts/docs/README.md"
+      "category": "workflow-inventory-parity",
+      "remediation": "Обновить строки таблицы для четырёх workflow под фактические `on:` (как в .github/workflows/*.yml:11-14) и прогнать check-links.",
+      "effort": "S",
+      "automation": "CI: docs.yml validate-mkdocs → check-links (уже wired)",
+      "automated_fix_possible": true,
+      "root_cause": "Документ inventory не обновлён после удаления schedule/pull_request_target (#11234).",
+      "validation": [
+        "python -m scripts.docs check-links --workflow-inventory"
       ],
       "evidence": [
         {
-          "path": ".github/workflows/tests.yml",
-          "line": 650,
-          "command": "inspection",
-          "observation": "if [ ! -f \"$workbook\" ]; then echo Skipping...; exit 0; fi"
+          "path": "docs/04-reference/github-actions-workflows.md",
+          "line": 116,
+          "command": "python -m scripts.docs check-links --workflow-inventory",
+          "observation": "stale.yml documented trigger `schedule` only"
         },
         {
-          "path": ".gitignore",
-          "line": 577,
-          "command": "git check-ignore -v -- docs/reports/chembl_pipeline_silver_matrices_v12.xlsx",
-          "observation": ".gitignore:577:/docs/reports/* matches; Test-Path False"
+          "path": ".github/workflows/stale.yml",
+          "line": 12,
+          "command": "inspection",
+          "observation": "on: workflow_dispatch only; schedule removed (#11234)"
         }
       ]
     },
     {
       "id": "DOCS-PIPE-002",
       "requirement_id": "REQ-DOC-001",
-      "path": "scripts/docs/matrix/build_matrix_dicts.py:285-290",
-      "observation": "Маршрут matrix-dictionaries объявлен tracked curated, но каталог gitignored и пуст, генератор пишет wall-clock и абсолютный путь и не входит в verify.",
-      "method": "git check-ignore -v @ 2026-09-25T08:43Z; inspection generated_artifact_routing.yaml:180-186, build_matrix_dicts.py:33-36,285-290,452-457,505-510; rg build-matrix-dicts в .github/workflows и verify.py — нет совпадений",
-      "expected": "tracked_curated_generated_doc имеет repo-relative детерминированный вывод, --check и вызов из verify либо docs CI.",
-      "actual": "commit_policy tracked_curated_generated_doc на docs/reports/dictionaries/. git check-ignore: .gitignore:577. Test-Path dictionaries=False. generated_at_utc=datetime.now(UTC) (строка 510). source_workbook=str(workbook.resolve()) (строки 507 и 288). _write_yaml использует path.write_text. verify.py этот генератор не вызывает.",
-      "impact": "Заявленный curated dictionary нельзя воспроизвести из checkout и нельзя поймать drift в docs CI. Повторный запуск вшил бы абсолютный путь машины и текущее время.",
+      "path": "docs/reports/generated/documentation-cleanup-inventory.json",
+      "observation": "Tracked documentation-cleanup-inventory отстаёт от дерева: новые tracked coderabbit reports помечены generated-only.",
+      "method": "python -m scripts.docs generate-cleanup-inventory --check @ e1c184857e46",
+      "expected": "Committed inventory JSON/MD отражает все tracked markdown/json под docs/ и reports/ согласно routing.",
+      "actual": "Exit 1; drift на documentation-cleanup-inventory.json/.md; 12 файлов под reports/quality/coderabbit/20260925_085141 и 20260926_restore отсутствуют в inventory (generated-only).",
+      "impact": "Шаг verify generate-cleanup-inventory --check падает; architecture-fast inventory gate блокируется на этом HEAD.",
       "confidence": "high",
-      "confidence_score": 0.91,
+      "confidence_score": 0.95,
       "status": "PROVEN",
       "priority": "P2",
       "severity": "Medium",
-      "remediation": "Согласовать routing и gitignore. Убрать generated_at_utc и absolute source_workbook, писать через temp+os.replace, добавить --check в verify, либо сменить commit_policy на ignored_local_output.",
-      "effort": "M",
-      "automation": "python -m scripts.docs build-matrix-dicts --check в verify, после детерминизации",
-      "automated_fix_possible": false,
-      "fingerprint": "c40bb14cdcfe6bba5311cb0466b73b6d0f076827eaeec6399831b3cea70d5299",
-      "evidence_class": "FACT",
-      "claim": "Dictionary artifacts declared tracked are gitignored, nondeterministic, and outside the verify chain.",
-      "broken_invariant": "REQ-DOC-001 generated docs must pass a real CI check",
-      "root_cause": "dictionary route claims tracked curated output but generator is nondeterministic and gitignored without --check",
-      "affected_paths": [
-        ".gitignore",
-        "configs/quality/generated_artifact_routing.yaml",
-        "scripts/docs/checks/verify.py",
-        "scripts/docs/matrix/build_matrix_dicts.py"
+      "category": "generated-inventory-drift",
+      "remediation": "python -m scripts.docs generate-cleanup-inventory --update и закоммитить JSON/MD вместе с reports или исключить ephemeral coderabbit paths из tracked set.",
+      "effort": "S",
+      "automation": "verify → generate-cleanup-inventory --check",
+      "automated_fix_possible": true,
+      "root_cause": "Tracked coderabbit restore artifacts добавлены без refresh inventory.",
+      "validation": [
+        "python -m scripts.docs generate-cleanup-inventory --check"
       ],
       "evidence": [
         {
-          "path": "configs/quality/generated_artifact_routing.yaml",
-          "line": 180,
-          "observation": "id matrix-dictionaries-curated-docs commit_policy tracked_curated_generated_doc"
+          "path": "reports/quality/coderabbit/20260926_restore/gh-issues/M.md",
+          "line": 1,
+          "command": "git ls-files",
+          "observation": "file tracked in git at HEAD"
         },
         {
-          "path": "scripts/docs/matrix/build_matrix_dicts.py",
-          "line": 510,
-          "observation": "generated_at = datetime.now(UTC).isoformat(); workbook = args.workbook.resolve()"
+          "path": "scripts/docs/checks/verify.py",
+          "line": 110,
+          "command": "inspection",
+          "observation": "verify invokes generate-cleanup-inventory --check"
         }
       ]
     },
     {
       "id": "DOCS-PIPE-003",
-      "requirement_id": "GAP",
-      "path": "scripts/docs/checks/verify.py:74-88",
-      "observation": "verify не передаёт --ai-surfaces, хотя README относит AI-surface regression к этому CI-гейту.",
-      "method": "inspection verify.py:74-88 и scripts/docs/README.md:77; rg ai-surfaces в .github — нет флага; docs.yml:123 вызывает tests/architecture/test_ai_runtime_governance_links.py, который зовёт check_ai_surfaces",
-      "expected": "Либо verify передаёт --ai-surfaces, либо README не приписывает эту проверку команде verify.",
-      "actual": "Флаги verify: --ports --classes --runtime-mirrors --freshness --modules. --ai-surfaces нет, поэтому run_all=false и check_ai_surfaces в verify не выполняется. Тот же чекер вызывается pytest-ом в path-scoped job docs-governance.",
-      "impact": "Локальный python -m scripts.docs verify не покрывает AI-surface. В CI покрытие есть только когда docs-governance required. Отдельного REQ, что флаг обязан быть внутри verify, нет.",
+      "requirement_id": "REQ-DOC-001",
+      "path": "docs/00-project/ai/rules/README.md:31",
+      "observation": "check-drift --freshness фиксирует устаревшую версию RULES в AI rules README.",
+      "method": "python -m scripts.docs check-drift --ports --classes --runtime-mirrors --freshness --modules @ e1c184857e46",
+      "expected": "Freshness markers ссылаются на текущий Version: header RULES.md (6.1.13).",
+      "actual": "README.md строка 31: «RULES.md (v6.1.11)»; docs/00-project/RULES.md Version: 6.1.13. check-drift: 1 ERROR [FRESHNESS], exit 1.",
+      "impact": "verify останавливается на check-drift; оператор видит рассинхрон governance version markers.",
       "confidence": "high",
-      "confidence_score": 0.84,
-      "status": "NOT_PROVEN",
-      "priority": "P3",
-      "severity": "Low",
-      "remediation": "Добавить --ai-surfaces в verify или поправить README: гейт — architecture test, не флаги verify.",
+      "confidence_score": 0.94,
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "freshness-drift",
+      "remediation": "Обновить версию в docs/00-project/ai/rules/README.md до 6.1.13 (или убрать захардкоженную minor и оставить только отсылку к Version: header).",
       "effort": "S",
-      "automation": "тест, что argv verify содержит --ai-surfaces, если README остаётся источником",
+      "automation": "verify → check-drift --freshness",
       "automated_fix_possible": true,
-      "fingerprint": "93d9b10c34b04abe673709dc5b37c80cf135fc46b64c979ef7119b8629cfabf6",
-      "evidence_class": "GAP",
-      "claim": "README attributes AI-surface checks to verify, but verify omits --ai-surfaces.",
-      "broken_invariant": "unspecified; no REQ-* requires this flag inside verify",
-      "root_cause": "verify drift flags omit ai-surfaces while README attributes that regression check to the verify CI gate",
-      "affected_paths": [
-        "scripts/docs/README.md",
-        "scripts/docs/checks/verify.py"
+      "root_cause": "RULES bump без sync AI rules mirror README.",
+      "validation": [
+        "python -m scripts.docs check-drift --freshness"
       ],
       "evidence": [
         {
-          "path": "scripts/docs/checks/verify.py",
-          "line": 81,
-          "observation": "check-drift argv has no --ai-surfaces"
+          "path": "docs/00-project/RULES.md",
+          "line": 3,
+          "command": "inspection",
+          "observation": "Version: 6.1.13"
         },
         {
-          "path": ".github/workflows/docs.yml",
-          "line": 123,
-          "observation": "pytest tests/architecture/test_ai_runtime_governance_links.py calls check_ai_surfaces"
+          "path": "docs/00-project/ai/rules/README.md",
+          "line": 31,
+          "command": "inspection",
+          "observation": "references v6.1.11"
         }
       ]
     },
     {
       "id": "DOCS-PIPE-004",
-      "requirement_id": "GAP",
-      "path": "scripts/docs/checks/documentation_cleanup_inventory.py:1573-1582",
-      "observation": "Без --check и без --update generate-cleanup-inventory пишет tracked inventory.",
-      "method": "inspection documentation_cleanup_inventory.py:1356-1362 и 1562-1582. Этот аудит вызывал только --check (exit 0, inventory is synchronized, 2026-09-25T08:43:14Z–08:43:16Z).",
-      "expected": "Команда без явного режима не перезаписывает tracked JSON/MD.",
-      "actual": "if args.check: _run_check_mode; иначе _run_update_mode. Группа флагов не обязательна. CI и этот прогон передают --check.",
-      "impact": "Голый вызов может изменить docs/reports/generated/documentation-cleanup-inventory.{json,md}. Отдельного REQ на default=check нет.",
+      "requirement_id": "REQ-DOC-001",
+      "path": "docs/reports/generated/pipeline_normalization_field_matrix/",
+      "observation": "Tracked curated normalization field-matrix не проходит generate-pipeline-normalization-matrix --check на чистом checkout.",
+      "method": "python -m scripts.docs generate-pipeline-normalization-matrix --check @ e1c184857e46",
+      "expected": "Committed CSV/MD в docs/reports/generated/pipeline_normalization_field_matrix/ бит-в-бит совпадают с детерминированной генерацией (routing commit_policy tracked_curated_generated_doc).",
+      "actual": "Exit 1 без stdout; git ls-files показывает три tracked артефакта; check_artifacts возвращает 1 (normalization_matrix_report.py:206-216).",
+      "impact": "verify падает на шаге normalization matrix; drift публикуемой governance-матрицы не виден оператору из лога.",
       "confidence": "high",
       "confidence_score": 0.88,
-      "status": "NOT_PROVEN",
-      "priority": "P3",
-      "severity": "Low",
-      "remediation": "Сделать режим обязательным: без --check/--update выходить с ошибкой.",
-      "effort": "S",
-      "automation": "unit test: argv [] не пишет default JSON/MD",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "generated-artifact-drift",
+      "remediation": "Перегенерировать matrix (--update flow), закоммитить артефакты; улучшить --check вывод (см. DOCS-PIPE-005).",
+      "effort": "M",
+      "automation": "verify; provider-contract-drift.yml (optional lane)",
       "automated_fix_possible": true,
-      "fingerprint": "0bd6ea80c24c7b28d7ccffb2b5a94643d176e1550dbbba5f78af485dbed72d25",
-      "evidence_class": "GAP",
-      "claim": "Bare generate-cleanup-inventory takes the update path.",
-      "broken_invariant": "unspecified; no REQ-* forbids the write default",
-      "root_cause": "generate-cleanup-inventory writes inventories when neither --check nor --update is passed",
-      "affected_paths": [
-        "scripts/docs/checks/documentation_cleanup_inventory.py"
+      "root_cause": "Tracked generated docs отстают от generator output на HEAD.",
+      "validation": [
+        "python -m scripts.docs generate-pipeline-normalization-matrix --check"
       ],
       "evidence": [
         {
-          "path": "scripts/docs/checks/documentation_cleanup_inventory.py",
-          "line": 1573,
-          "observation": "only args.check selects _run_check_mode; else _run_update_mode"
+          "path": "configs/quality/generated_artifact_routing.yaml",
+          "line": 114,
+          "command": "inspection",
+          "observation": "pipeline-normalization-generated-docs commit_policy tracked_curated_generated_doc"
+        },
+        {
+          "path": "scripts/docs/matrix/normalization_matrix_report.py",
+          "line": 212,
+          "command": "python -m scripts.docs generate-pipeline-normalization-matrix --check",
+          "observation": "returns 1 on content mismatch without printing diff"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-PIPE-005",
+      "requirement_id": "REQ-DOC-001",
+      "path": "scripts/docs/matrix/normalization_matrix_report.py:206-216",
+      "observation": "Режим --check normalization matrix завершается exit 1 без диагностического сообщения.",
+      "method": "inspection + python -m scripts.docs generate-pipeline-normalization-matrix --check",
+      "expected": "Drift check печатает имя файла/краткий diff или hint (как generate-cleanup-inventory --check).",
+      "actual": "check_artifacts сравнивает payload и возвращает 1 при любом расхождении; main() не логирует причину (строки 206-216, 226-227).",
+      "impact": "Оператор и CI получают silent failure; нарушен anti-pattern «exit 0 ≠ semantic correctness» для диагностики.",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "priority": "P3",
+      "severity": "Low",
+      "category": "failure-semantics",
+      "remediation": "При mismatch печатать path и первую строку расхождения; опционально --verbose.",
+      "effort": "S",
+      "automation": "unit test on check_artifacts failure message",
+      "automated_fix_possible": true,
+      "root_cause": "check_artifacts реализован fail-fast без observability.",
+      "validation": [
+        "python -m scripts.docs generate-pipeline-normalization-matrix --check; expect non-empty stderr on drift"
+      ],
+      "evidence": [
+        {
+          "path": "scripts/docs/matrix/normalization_matrix_report.py",
+          "line": 215,
+          "command": "inspection",
+          "observation": "return 1 with no print"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-PIPE-006",
+      "requirement_id": "GAP",
+      "path": ".github/workflows/tests.yml:1972",
+      "observation": "Proof-or-Stop evidence producer вызывает verify с --skip-build, исключая strict MkDocs gate.",
+      "method": "inspection tests.yml + scripts/docs/checks/verify.py:133-152",
+      "expected": "Runtime parity receipt для docs либо включает strict build, либо явно документирует ослабление.",
+      "actual": "uv run python -m scripts.docs verify --skip-build; skip-build обходит _require_docs_extra и mkdocs build --strict.",
+      "impact": "Closeout bundle может быть green при сломанной strict-сборке сайта; semantic gap между docs.yml и proof-or-stop.",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "ci-evidence-gap",
+      "remediation": "Отдельный receipt для mkdocs strict или убрать --skip-build в proof-or-stop при установленном extra docs.",
+      "effort": "M",
+      "automation": "proof-or-stop receipt matrix",
+      "automated_fix_possible": false,
+      "root_cause": "Runtime budget optimization отрезал strict build от evidence job.",
+      "validation": [
+        "grep verify --skip-build in tests.yml proof-or-stop step"
+      ],
+      "evidence": [
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 1972,
+          "command": "inspection",
+          "observation": "verify --skip-build"
+        },
+        {
+          "path": "scripts/docs/checks/verify.py",
+          "line": 133,
+          "command": "inspection",
+          "observation": "skip_build bypasses strict mkdocs build"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-PIPE-007",
+      "requirement_id": "GAP",
+      "path": "scripts/docs/checks/verify.py:60-126",
+      "observation": "Команда verify не включает passports check, хотя README описывает единую canonical chain.",
+      "method": "rg passports verify.py (no matches); inspection docs.yml:87-88",
+      "expected": "verify покрывает все blocking docs generators из docs-governance либо README явно перечисляет исключения.",
+      "actual": "passports check только в docs.yml job docs-governance; verify steps: check-links, check-drift (без --ai-surfaces), docstrings, cleanup inventory, normalization matrix, mkdocs strict.",
+      "impact": "Локальный verify exit 0 не гарантирует passport drift parity; двойная mental model для оператора.",
+      "confidence": "high",
+      "confidence_score": 0.91,
+      "status": "PROVEN",
+      "priority": "P3",
+      "severity": "Low",
+      "category": "chain-completeness",
+      "remediation": "Добавить passports check в verify или сузить формулировку README verify.",
+      "effort": "S",
+      "automation": "verify step list test",
+      "automated_fix_possible": true,
+      "root_cause": "passports добавлен в CI отдельным шагом до refactor verify.",
+      "validation": [
+        "python -m scripts.docs verify --help; compare with docs.yml"
+      ],
+      "evidence": [
+        {
+          "path": ".github/workflows/docs.yml",
+          "line": 88,
+          "command": "inspection",
+          "observation": "passports check in docs-governance only"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-PIPE-008",
+      "requirement_id": "GAP",
+      "path": "scripts/docs/checks/verify.py:74-88",
+      "observation": "verify вызывает check-drift с фиксированным набором флагов без --ai-surfaces.",
+      "method": "inspection verify.py + check_drift.py _run_checks (1928-1935)",
+      "expected": "AI surface policy links проверяются в той же команде, которую оператор считает полной verify.",
+      "actual": "verify передаёт --ports --classes --runtime-mirrors --freshness --modules; run_all=false → check_ai_surfaces не вызывается. Частичное покрытие: test_ai_runtime_governance_links.py в docs-governance.",
+      "impact": "Локальный verify может пропустить ai-surfaces drift, пойманный только pytest в CI.",
+      "confidence": "high",
+      "confidence_score": 0.89,
+      "status": "PROVEN",
+      "priority": "P3",
+      "severity": "Low",
+      "category": "chain-completeness",
+      "remediation": "Добавить --ai-surfaces в verify drift argv или документировать reliance на architecture tests.",
+      "effort": "S",
+      "automation": "docs-governance pytest + optional verify flag",
+      "automated_fix_possible": true,
+      "root_cause": "Partial flag mode in check_drift excludes ai-surfaces unless explicitly passed.",
+      "validation": [
+        "python -m scripts.docs check-drift --ai-surfaces"
+      ],
+      "evidence": [
+        {
+          "path": "scripts/docs/checks/check_drift.py",
+          "line": 1882,
+          "command": "inspection",
+          "observation": "check_ai_surfaces gated by args.ai_surfaces"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-PIPE-009",
+      "requirement_id": "GAP",
+      "path": ".github/workflows/docs.yml:384-389",
+      "observation": "Job render-diagrams в docs pipeline permanently disabled (`if: false`).",
+      "method": "inspection docs.yml",
+      "expected": "Либо publish/render path documented as intentionally off, либо targeted jobs покрывают все manifest gates.",
+      "actual": "render-diagrams: if: ${{ false }}; комментарий: full-corpus rendering intentionally disabled; validate-mermaid и targeted ChEMBL render остаются условными.",
+      "impact": "Полный corpus SVG/PNG visual-smoke и quality-gates из render-diagrams не выполняются в CI; оператор должен знать про manual render.sh.",
+      "confidence": "high",
+      "confidence_score": 0.86,
+      "status": "PROVEN",
+      "priority": "P3",
+      "severity": "Low",
+      "category": "publish-path",
+      "remediation": "Оставить как есть при осознанном billing решении; синхронизировать operator runbook с фактическим CI surface.",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "root_cause": "Actions billing policy (#11196) отключил full-corpus render job.",
+      "validation": [
+        "inspect docs.yml render-diagrams if condition"
+      ],
+      "evidence": [
+        {
+          "path": ".github/workflows/docs.yml",
+          "line": 389,
+          "command": "inspection",
+          "observation": "if: ${{ false }}"
         }
       ]
     }

@@ -46,6 +46,8 @@ metric_coverage_classes:
   bioetl_dq_validation_record_count: required_current
   bioetl_dq_validation_score: required_current
   bioetl_errors_total: event_optional
+  bioetl_fa_gap: required_when_active
+  bioetl_first_action: required_when_active
   bioetl_health_check_degraded_total: event_optional
   bioetl_health_check_failures_total: event_optional
   bioetl_health_check_latency_seconds_bucket: event_optional

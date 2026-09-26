@@ -2,157 +2,157 @@
   "domain_id": "docs-content",
   "prompt_id": "prompt.docs.audit",
   "surface_score": 2,
+  "blocked": false,
+  "proven_count": 5,
+  "p0_p1_count": 0,
+  "head": "e1c184857e460461bbb3e20829e60ab8bb262e2f",
+  "scope": "README.md docs/",
+  "audit_mode": "full",
   "findings": [
     {
       "id": "DOCS-001",
       "finding_id": "DOCS-001",
-      "fingerprint": "2a3af9831e29d3f63cceda72831fbdee1f78e47a3b6fa7647235d81c235d51f1",
+      "fingerprint": "2d6db1586203fd1276fe017063d9e52598be25086059c4b70451fb51a1783f7b",
       "requirement_id": "REQ-GOV-006",
-      "path": "docs/00-project/RULES.md:3",
-      "observation": "Шапка RULES.md фиксирует Version 6.1.11 и Last verified 2026-08-25, тогда как changelog того же файла уже содержит записи 6.1.12 и 6.1.13.",
-      "claim": "Поле Version в RULES.md не равно голове changelog.",
-      "method": "Чтение docs/00-project/RULES.md:3-4 и :2164-2172; сверка зеркал docs/01-requirements/REQUIREMENTS.md:3, docs/00-project/00-map.md:16, docs/00-project/rules-summary.md:16; тест test_docs_version_sync.py извлекает версию только из шапки.",
-      "expected": "Version, Last verified и голова changelog описывают одну и ту же актуальную ревизию RULES.md; зеркала ссылаются на неё.",
-      "actual": "Version: 6.1.11 (2026-08-25). Changelog: 6.1.12 (2026-08-31, ADR-060) и 6.1.13 (2026-09-16, ADR-061). Зеркала повторяют 6.1.11.",
-      "impact": "Нормативная версия, на которую опираются requirements и навигатор, отстаёт на два пункта от записанных изменений индекса ADR.",
+      "path": "docs/01-requirements/REQUIREMENTS.md:86",
+      "observation": "Раздел ADR coverage утверждает потолок through ADR-052, хотя ниже перечислен ADR-057, а индекс decisions/README.md и RULES приложение F уже содержат Accepted ADR-060 и ADR-061.",
+      "claim": "REQUIREMENTS.md публикует устаревший потолок ADR-052.",
+      "method": "Чтение REQUIREMENTS.md:84-99; decisions/README.md и RULES.md приложение F (:2160-2163).",
+      "expected": "Фраза потолка ADR совпадает с последним Accepted ADR в каноническом индексе или явно помечена как выборочная.",
+      "actual": "Строка 86: through ADR-052; bullet ADR-057 присутствует; ADR-058…061 в списке отсутствуют.",
+      "impact": "Читатель каталога требований недооценивает покрытие ADR-058…061.",
       "confidence": "high",
-      "confidence_score": 0.95,
+      "confidence_score": 0.94,
       "status": "PROVEN",
       "evidence_class": "FACT",
       "priority": "P2",
       "severity": "Medium",
-      "category": "version-stamp",
-      "root_cause": "Version frontmatter was not advanced when changelog entries 6.1.12 and 6.1.13 were added",
-      "broken_invariant": "REQ-GOV-006: changelog и version в одном changeset должны совпадать.",
-      "affected_paths": [
-        "docs/00-project/RULES.md"
-      ],
-      "evidence": [
-        {
-          "path": "docs/00-project/RULES.md",
-          "line": 3,
-          "observation": "Version: 6.1.11; Last verified: 2026-08-25"
-        },
-        {
-          "path": "docs/00-project/RULES.md",
-          "line": 2166,
-          "observation": "Changelog entries 6.1.13 and 6.1.12 are present below the 6.1.11 entry"
-        }
-      ],
-      "remediation": "Либо поднять Version и Last verified до 6.1.13 и синхронизировать зеркала, либо убрать из changelog пункты, которых нет в шапке. Один changeset.",
-      "acceptance": "Шапка RULES.md и первая запись changelog имеют один номер; exact-mirror документы ссылаются только на него.",
-      "validation": [
-        "pytest tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_normative_mirrors_match_exact_rules_patch_version"
-      ],
-      "effort": "S",
-      "automation": "Сейчас test_docs_version_sync.py сравнивает зеркала с шапкой и не сравнивает шапку с первой записью changelog.",
-      "automated_fix_possible": false,
-      "dependencies": [],
-      "rollback": "Вернуть прежние строки Version и changelog.",
-      "owner_surface": "docs"
-    },
-    {
-      "id": "DOCS-002",
-      "finding_id": "DOCS-002",
-      "fingerprint": "8869c65947706f51beab2cf845f91d67425e87e781bc0b7cee71156cb33c8bbd",
-      "requirement_id": "REQ-GOV-006",
-      "path": "docs/00-project/RULES.md:2166-2167",
-      "observation": "Запись changelog 6.1.13 называет ADR-061 Proposed, хотя ADR-061 и приложение F помечают его Accepted.",
-      "claim": "Changelog RULES.md приписывает ADR-061 статус Proposed.",
-      "method": "Чтение RULES.md:2162 и :2166-2167 рядом с ADR-061-persisted-selected-run-assessment.md:14.",
-      "expected": "Статус ADR-061 в changelog совпадает со статусом в ADR и в приложении F.",
-      "actual": "Changelog: Proposed. ADR-061:14 Status Accepted (implemented by PR #10490). Приложение F:2162 Accepted, дата 2026-09-16.",
-      "impact": "Читатель истории версий может счесть ADR-061 ещё не принятым.",
-      "confidence": "high",
-      "confidence_score": 0.93,
-      "status": "PROVEN",
-      "evidence_class": "CONTRADICTION",
-      "priority": "P3",
-      "severity": "Low",
-      "category": "changelog",
-      "root_cause": "Changelog 6.1.13 still labels ADR-061 Proposed after the ADR and appendix mark it Accepted",
-      "broken_invariant": "REQ-GOV-006: changelog не должен противоречить статусу принятого ADR в том же документе.",
-      "affected_paths": [
-        "docs/00-project/RULES.md",
-        "docs/02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md"
-      ],
-      "evidence": [
-        {
-          "path": "docs/00-project/RULES.md",
-          "line": 2167,
-          "observation": "Parenthetical status Proposed"
-        },
-        {
-          "path": "docs/02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md",
-          "line": 14,
-          "observation": "Status Accepted"
-        }
-      ],
-      "remediation": "Заменить Proposed в записи 6.1.13 на Accepted, сохранив ссылку на дату 2026-09-16.",
-      "acceptance": "В changelog нет слова Proposed для ADR-061.",
-      "validation": [
-        "rg -n \"Proposed\" docs/00-project/RULES.md"
-      ],
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": false,
-      "dependencies": [],
-      "rollback": "Вернуть скобку Proposed в записи 6.1.13.",
-      "owner_surface": "docs"
-    },
-    {
-      "id": "DOCS-003",
-      "finding_id": "DOCS-003",
-      "fingerprint": "2e53a29a4b17f9f30217d4cfd8830d46a6d7af11a3883e6b81a2235d336d66c3",
-      "requirement_id": "GAP",
-      "path": "docs/01-requirements/REQUIREMENTS.md:86",
-      "observation": "Активные обзоры ограничивают покрытие ADR номерами 052 или 059, хотя decisions/README.md и RULES приложение F включают Accepted ADR-060 и ADR-061.",
-      "claim": "REQUIREMENTS.md, 00-overview.md и rules-summary.md публикуют потолок ADR ниже канонического индекса.",
-      "method": "Чтение REQUIREMENTS.md:86-99, 00-overview.md:73, rules-summary.md:16, decisions/README.md:81-82, RULES.md:2159-2162. Тест test_adr_registry_governance_sync.py не читает эти три абзаца.",
-      "expected": "Если абзац утверждает потолок принятых ADR, он совпадает с decisions/README.md и приложением F.",
-      "actual": "REQUIREMENTS.md:86 — through ADR-052, при этом список в том же разделе доходит до ADR-057 и не упоминает ADR-058…061. 00-overview.md:73 — through ADR-059. rules-summary.md:16 — ADR-053–059.",
-      "impact": "Навигатор требований и архитектурный обзор не показывают два последних принятых ADR.",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "NOT_PROVEN",
-      "evidence_class": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
       "category": "adr-index",
-      "root_cause": "Narrative ADR ceilings were left behind ADR-060 and ADR-061",
-      "broken_invariant": "Нет REQ-* с проверкой потолка ADR в REQUIREMENTS.md и 00-overview.md.",
+      "root_cause": "REQUIREMENTS ADR coverage paragraph still caps at ADR-052 while appendix lists through ADR-061",
+      "broken_invariant": "REQ-GOV-006: документация и changelog/version должны оставаться согласованными с каноническим индексом решений.",
       "affected_paths": [
-        "docs/00-project/rules-summary.md",
-        "docs/01-requirements/REQUIREMENTS.md",
-        "docs/02-architecture/00-overview.md"
+        "docs/01-requirements/REQUIREMENTS.md"
       ],
       "evidence": [
         {
           "path": "docs/01-requirements/REQUIREMENTS.md",
           "line": 86,
-          "observation": "through ADR-052 while later bullets name ADR-057"
+          "observation": "The catalog explicitly covers the current architecture through ADR-052"
         },
         {
-          "path": "docs/02-architecture/00-overview.md",
-          "line": 73,
-          "observation": "through ADR-059"
-        },
-        {
-          "path": "docs/02-architecture/decisions/README.md",
-          "line": 81,
-          "observation": "ADR-060 and ADR-061 listed Accepted"
+          "path": "docs/00-project/RULES.md",
+          "line": 2162,
+          "observation": "Appendix F lists ADR-060 and ADR-061 as Accepted"
         }
       ],
-      "remediation": "Обновить три потолка до ADR-061 либо явно назвать страницы выборочными и сослаться на decisions/README.md как на полный индекс.",
-      "acceptance": "Ни один активный абзац не называет потолок ниже последнего Accepted ADR без пометки, что список выборочный.",
+      "remediation": "Поднять формулировку потолка до ADR-061 или заменить на ссылку на decisions/README.md как полный индекс.",
+      "acceptance": "Строка 86 не называет ADR-052 потолком без пометки «выборочно».",
       "validation": [
-        "pytest tests/architecture/test_adr_registry_governance_sync.py::test_rules_and_requirements_do_not_publish_stale_adr_ceiling"
+        "rg -n \"through ADR-052\" docs/01-requirements/REQUIREMENTS.md"
       ],
       "effort": "S",
-      "automation": "Тест имени requirements не сканирует REQUIREMENTS.md и 00-overview.md.",
+      "automation": "test_adr_registry_governance_sync не сканирует этот абзац REQUIREMENTS.md",
       "automated_fix_possible": false,
       "dependencies": [],
-      "rollback": "Вернуть прежние фразы потолка.",
+      "rollback": "Вернуть прежнюю фразу through ADR-052.",
+      "owner_surface": "docs"
+    },
+    {
+      "id": "DOCS-002",
+      "finding_id": "DOCS-002",
+      "fingerprint": "5fe68127eb32467df7b155cc67057d2df31e122dfcfaf7da0bd15c4b82f1e32c",
+      "requirement_id": "REQ-GOV-006",
+      "path": "docs/00-project/rules-summary.md:16",
+      "observation": "Выжимка заявляет синхронизацию с RULES v6.1.13, но в скобках перечисляет только ADR-053–059, без ADR-060 и ADR-061.",
+      "claim": "rules-summary публикует устаревший диапазон ADR относительно RULES 6.1.13.",
+      "method": "Чтение rules-summary.md:16 и RULES.md:2160-2168.",
+      "expected": "Диапазон ADR в выжимке включает последние Accepted ADR из RULES.",
+      "actual": "Строка 16: ADR-053–059; RULES changelog 6.1.12–6.1.13 добавляет ADR-060 и ADR-061.",
+      "impact": "Краткий навигатор по правилам не отражает два последних принятых ADR.",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "evidence_class": "FACT",
+      "priority": "P3",
+      "severity": "Low",
+      "category": "mirror-drift",
+      "root_cause": "rules-summary ADR range stamp lists 053-059 while RULES appendix includes ADR-060 and ADR-061",
+      "broken_invariant": "REQ-GOV-006: зеркала normative docs должны отражать актуальный индекс RULES.",
+      "affected_paths": [
+        "docs/00-project/rules-summary.md"
+      ],
+      "evidence": [
+        {
+          "path": "docs/00-project/rules-summary.md",
+          "line": 16,
+          "observation": "ADR-053–059 + architecture stamps"
+        },
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 2167,
+          "observation": "Changelog 6.1.13 documents ADR-061 Accepted"
+        }
+      ],
+      "remediation": "Расширить скобки до ADR-061 или убрать диапазон и сослаться на приложение F RULES.md.",
+      "acceptance": "Строка 16 упоминает ADR-060/061 или не перечисляет диапазон.",
+      "validation": [
+        "rg -n \"ADR-053\" docs/00-project/rules-summary.md"
+      ],
+      "effort": "S",
+      "automation": "test_docs_version_sync проверяет номер RULES, но не диапазон ADR в скобках",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "rollback": "Вернуть прежнюю строку 16.",
+      "owner_surface": "docs"
+    },
+    {
+      "id": "DOCS-003",
+      "finding_id": "DOCS-003",
+      "fingerprint": "0e8443e1f145ecae78fb8752bd06a8964e38c3c1c94949869ce4912ed83d31ec",
+      "requirement_id": "REQ-GOV-006",
+      "path": "docs/00-project/rules-summary.md:10",
+      "observation": "Frontmatter Last verified: 2026-08-14, тогда как строка 16 ссылается на RULES v6.1.13 от 2026-09-16.",
+      "claim": "Дата Last verified в rules-summary не соответствует заявленной синхронизации с RULES 6.1.13.",
+      "method": "Чтение rules-summary.md:10 и :16.",
+      "expected": "Last verified не старше даты синхронизации с RULES, указанной в теле документа.",
+      "actual": "Last verified 2026-08-14; тело: v6.1.13 (2026-09-16).",
+      "impact": "Оператор может считать выжимку не пересматривавшейся после ADR-060/061.",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "evidence_class": "CONTRADICTION",
+      "priority": "P3",
+      "severity": "Low",
+      "category": "freshness-stamp",
+      "root_cause": "rules-summary Last verified frontmatter predates declared RULES v6.1.13 sync date",
+      "broken_invariant": "REQ-GOV-006: согласованность метаданных документации при change-set.",
+      "affected_paths": [
+        "docs/00-project/rules-summary.md"
+      ],
+      "evidence": [
+        {
+          "path": "docs/00-project/rules-summary.md",
+          "line": 10,
+          "observation": "Last verified: '2026-08-14'"
+        },
+        {
+          "path": "docs/00-project/rules-summary.md",
+          "line": 16,
+          "observation": "RULES.md v6.1.13 (2026-09-16)"
+        }
+      ],
+      "remediation": "Обновить Last verified до даты ревью выжимки (≥2026-09-16) в том же changeset, что и правка ADR-диапазона.",
+      "acceptance": "Last verified ≥ даты в строке синхронизации с RULES.",
+      "validation": [
+        "rg -n \"Last verified\" docs/00-project/rules-summary.md"
+      ],
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "dependencies": [
+        "DOCS-002"
+      ],
+      "rollback": "Вернуть Last verified 2026-08-14.",
       "owner_surface": "docs"
     },
     {
@@ -161,12 +161,12 @@
       "fingerprint": "9b780dbcc7c273215ed7c65385cac87112f5b3009f907e6f49fd99f1c4e8ca41",
       "requirement_id": "GAP",
       "path": "README.md:288",
-      "observation": "README задаёт BIOETL_LOG_FORMAT как переключатель json/text, но исходники эту переменную не читают.",
+      "observation": "README описывает BIOETL_LOG_FORMAT (json/text), но в src/ переменная не читается; bootstrap всегда включает json_format=True.",
       "claim": "BIOETL_LOG_FORMAT из README не подключён к configure_logging.",
-      "method": "Чтение README.md:288. Поиск BIOETL_LOG_FORMAT по src/ — нет совпадений. Чтение bootstrap_logger.py:63 и logging_config.py:220-228.",
-      "expected": "Документированная переменная читается при старте логирования, либо строка удалена из таблицы README.",
-      "actual": "bootstrap_logger.py:63 всегда передаёт json_format=True. BIOETL_LOG_FILE читается; BIOETL_LOG_FORMAT — нет.",
-      "impact": "Значение text не переключает консольный рендерер. Оператор считает формат настраиваемым.",
+      "method": "rg BIOETL_LOG_FORMAT по src/ — нет совпадений; чтение bootstrap_logger.py:63.",
+      "expected": "Документированная переменная читается при старте логирования или удалена из таблицы.",
+      "actual": "configure_logging(json_format=True, log_level=\"INFO\") без чтения env.",
+      "impact": "Оператор считает формат логов настраиваемым через env.",
       "confidence": "high",
       "confidence_score": 0.92,
       "status": "NOT_PROVEN",
@@ -192,8 +192,8 @@
           "observation": "configure_logging(json_format=True, log_level=INFO)"
         }
       ],
-      "remediation": "Убрать BIOETL_LOG_FORMAT из README или читать её в bootstrap и передавать в configure_logging. Не смешивать с правкой продукта в этом аудите.",
-      "acceptance": "Либо rg по src находит чтение BIOETL_LOG_FORMAT, либо строки нет в README.",
+      "remediation": "Удалить строку из README или подключить переменную в bootstrap (отдельный change-set продукта).",
+      "acceptance": "rg по src находит чтение BIOETL_LOG_FORMAT либо строки нет в README.",
       "validation": [
         "rg -n BIOETL_LOG_FORMAT README.md src"
       ],
@@ -207,15 +207,15 @@
     {
       "id": "DOCS-005",
       "finding_id": "DOCS-005",
-      "fingerprint": "3173c6c3c7fd72421fbe57765eb790a2cdba99a20bb94126ee29f823eaeb8ce5",
+      "fingerprint": "b6d970cfef4923ab98e134a0707a5ca190d527fd9af014bb5d02c070e4487760",
       "requirement_id": "GAP",
       "path": "docs/04-reference/environment-variables.md:36",
-      "observation": "Документы говорят, что пустой BIOETL_PUBMED_EMAIL даёт None без фиктивного адреса. Код не читает эту переменную и при пустом pipeline email возвращает placeholder из Settings.default_email.",
-      "claim": "Контракт unset PubMed email в environment-variables.md не совпадает с _resolve_biblio_contact_email.",
-      "method": "Чтение environment-variables.md:36 и endpoint-validation-checklist.md:450. Поиск BIOETL_PUBMED_EMAIL в src/ — нет совпадений. Чтение _base.py:161-164 и _registration_biblio_profiles.py:48-55. Поиск email: в configs/**/*.yaml — нет совпадений. .env.example:74 публикует пустой BIOETL_PUBMED_EMAIL.",
-      "expected": "Незаданный контакт PubMed не подставляет фиктивный адрес, а документированная переменная реально читается.",
-      "actual": "default_email имеет placeholder-default. Резолвер возвращает pipeline email или settings.default_email. BIOETL_PUBMED_EMAIL в src не читается. В YAML нет source email.",
-      "impact": "Оператор задаёт BIOETL_PUBMED_EMAIL и считает идентификацию NCBI настроенной. Unset-путь использует placeholder из Settings, вопреки тексту справочника.",
+      "observation": "Справочник и endpoint-validation-checklist утверждают, что пустой BIOETL_PUBMED_EMAIL даёт None без фиктивного адреса; src не читает переменную, а резолвер возвращает settings.default_email с placeholder-default.",
+      "claim": "Контракт unset PubMed email в docs не совпадает с _resolve_biblio_contact_email.",
+      "method": "rg BIOETL_PUBMED_EMAIL src — нет; чтение _base.py:161-164 и _registration_biblio_profiles.py:48-55; endpoint-validation-checklist.md:450.",
+      "expected": "Unset email не подставляет placeholder, документированная переменная читается.",
+      "actual": "default_email Field с placeholder-default; резолвер: configured_email or settings.default_email.",
+      "impact": "Оператор задаёт BIOETL_PUBMED_EMAIL и считает идентификацию NCBI настроенной; unset-путь использует placeholder.",
       "confidence": "high",
       "confidence_score": 0.88,
       "status": "NOT_PROVEN",
@@ -224,39 +224,144 @@
       "severity": "Medium",
       "category": "env-docs",
       "root_cause": "Documented PubMed email unset path claims None while Settings falls back to a placeholder address",
-      "broken_invariant": "Нет REQ-* на отказ от placeholder email и на чтение BIOETL_PUBMED_EMAIL.",
+      "broken_invariant": "Нет REQ-* на отказ от placeholder email и чтение BIOETL_PUBMED_EMAIL.",
       "affected_paths": [
         "docs/04-reference/environment-variables.md",
-        "src/bioetl/composition/providers/_registration_biblio_profiles.py",
-        "src/bioetl/infrastructure/config/_base.py"
+        "docs/05-operations/verification/endpoint-validation-checklist.md",
+        "src/bioetl/infrastructure/config/_base.py",
+        "src/bioetl/composition/providers/_registration_biblio_profiles.py"
       ],
       "evidence": [
         {
           "path": "docs/04-reference/environment-variables.md",
           "line": 36,
-          "observation": "Unset BIOETL_PUBMED_EMAIL documented as None and no fake identity"
+          "observation": "empty / unset — adapter returns None; no fake identity"
+        },
+        {
+          "path": "docs/05-operations/verification/endpoint-validation-checklist.md",
+          "line": 450,
+          "observation": "same None / no fake identity claim for BIOETL_PUBMED_EMAIL"
         },
         {
           "path": "src/bioetl/infrastructure/config/_base.py",
           "line": 161,
-          "observation": "default_email Field has a placeholder default"
+          "observation": "default_email Field with placeholder default"
         },
         {
           "path": "src/bioetl/composition/providers/_registration_biblio_profiles.py",
-          "line": 55,
-          "observation": "returns configured_email or settings.default_email"
+          "line": 54,
+          "observation": "return configured_email or settings.default_email"
         }
       ],
-      "remediation": "Согласовать справочник, .env.example и резолвер: либо читать BIOETL_PUBMED_EMAIL и при пустом значении возвращать None, либо документировать фактический fallback. Значение placeholder в отчёт не дублировать сверх имени поля.",
-      "acceptance": "Текст environment-variables.md описывает ту же ветку, которую выполняет _resolve_biblio_contact_email при пустом source.email.",
+      "remediation": "Согласовать справочник, checklist и резолвер; не дублировать значение placeholder в отчётах.",
+      "acceptance": "Текст environment-variables.md описывает фактическую ветку резолвера.",
       "validation": [
-        "rg -n BIOETL_PUBMED_EMAIL src docs/04-reference/environment-variables.md .env.example"
+        "rg -n BIOETL_PUBMED_EMAIL src docs/04-reference/environment-variables.md"
       ],
       "effort": "M",
       "automation": "n/a",
       "automated_fix_possible": false,
       "dependencies": [],
-      "rollback": "Вернуть прежний текст справочника и прежний default поля.",
+      "rollback": "Вернуть прежний текст справочника.",
+      "owner_surface": "docs"
+    },
+    {
+      "id": "DOCS-006",
+      "finding_id": "DOCS-006",
+      "fingerprint": "503571013b86bcb8008304b2ce193630c323ce2469624d849a2e32352fc1194b",
+      "requirement_id": "REQ-DOC-001",
+      "path": "docs/04-reference/github-actions-workflows.md:125",
+      "observation": "Колонка Triggers в инвентаре GHA не совпадает с исполняемым on: в YAML для четырёх keep-disabled workflow (labeler, pr-hygiene, quality-debt-weekly, stale): в docs указаны pull_request_target/schedule, в файлах только workflow_dispatch после #11234.",
+      "claim": "github-actions-workflows.md публикует триггеры, которые check-links считает mismatch относительно .github/workflows/*.yml.",
+      "method": "uv run python -m scripts.docs check-links --workflow-inventory @ 2026-09-26T08:43:27Z exit 1; чтение labeler.yml:10-12 и stale.yml:10-12.",
+      "expected": "REQ-DOC-001: инвентарь проходит check-links --workflow-inventory без trigger/count mismatches.",
+      "actual": "4 trigger mismatches; labeler.yml on: только workflow_dispatch, комментарий что pull_request_target снят.",
+      "impact": "Оператор ожидает schedule/PR-триггеры у disabled workflow, которых в YAML нет.",
+      "confidence": "high",
+      "confidence_score": 0.96,
+      "status": "PROVEN",
+      "evidence_class": "FACT",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "workflow-inventory",
+      "root_cause": "Published workflow trigger column does not match executable on blocks in YAML for keep-disabled workflows",
+      "broken_invariant": "REQ-DOC-001: check-links --workflow-inventory должен проходить для опубликованного инвентаря.",
+      "affected_paths": [
+        "docs/04-reference/github-actions-workflows.md",
+        ".github/workflows/labeler.yml",
+        ".github/workflows/stale.yml"
+      ],
+      "evidence": [
+        {
+          "path": "docs/04-reference/github-actions-workflows.md",
+          "line": 125,
+          "command": "python -m scripts.docs check-links --workflow-inventory",
+          "observation": "labeler.yml inventory triggers ['pull_request_target'] != executable ['workflow_dispatch']"
+        },
+        {
+          "path": ".github/workflows/labeler.yml",
+          "line": 12,
+          "observation": "on: workflow_dispatch only; pull_request_target removed (#11234)"
+        }
+      ],
+      "remediation": "Разделить «design trigger при re-enable» и «current executable on» в таблице или синхронизировать колонку с YAML; прогнать check-links до exit 0.",
+      "acceptance": "check-links --workflow-inventory без GITHUB ACTIONS WORKFLOW INVENTORY MISMATCH.",
+      "validation": [
+        "python -m scripts.docs check-links --links --specs --configs --workflow-inventory --provider-overview"
+      ],
+      "effort": "M",
+      "automation": "check-links уже ловит mismatch; CI docs gate должен блокировать регресс",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "rollback": "Вернуть прежние строки таблицы Triggers.",
+      "owner_surface": "docs"
+    },
+    {
+      "id": "DOCS-007",
+      "finding_id": "DOCS-007",
+      "fingerprint": "2576f0322aba2be68ad8bfb7ae465b13f6a1a921fbee3144ccde425cece6e9fe",
+      "requirement_id": "REQ-GOV-006",
+      "path": "docs/00-project/00-map.md:10",
+      "observation": "Frontmatter Last verified: 2026-08-14, тогда как тело навигатора заявляет Synced with RULES.md v6.1.13 | Last updated: 2026-09-25.",
+      "claim": "00-map Last verified отстаёт от body sync stamp на 11+ дней.",
+      "method": "Чтение 00-map.md:10 и :16.",
+      "expected": "Last verified согласован с Last updated / версией RULES в теле.",
+      "actual": "Frontmatter 2026-08-14; body 2026-09-25 и RULES v6.1.13.",
+      "impact": "Навигатор выглядит непересмотренным после синхронизации RULES 6.1.13.",
+      "confidence": "high",
+      "confidence_score": 0.89,
+      "status": "PROVEN",
+      "evidence_class": "CONTRADICTION",
+      "priority": "P3",
+      "severity": "Low",
+      "category": "freshness-stamp",
+      "root_cause": "00-map Last verified frontmatter predates body sync stamp for RULES v6.1.13",
+      "broken_invariant": "REQ-GOV-006: метаданные published docs согласованы с телом.",
+      "affected_paths": [
+        "docs/00-project/00-map.md"
+      ],
+      "evidence": [
+        {
+          "path": "docs/00-project/00-map.md",
+          "line": 10,
+          "observation": "Last verified: '2026-08-14'"
+        },
+        {
+          "path": "docs/00-project/00-map.md",
+          "line": 16,
+          "observation": "Synced with RULES.md v6.1.13 | Last updated: 2026-09-25"
+        }
+      ],
+      "remediation": "Поднять Last verified до ≥2026-09-25 при следующем docs change-set (с generate-cleanup-inventory --update при смене header).",
+      "acceptance": "Last verified ≥ Last updated в теле.",
+      "validation": [
+        "rg -n \"Last verified|Last updated\" docs/00-project/00-map.md"
+      ],
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "rollback": "Вернуть Last verified 2026-08-14.",
       "owner_surface": "docs"
     }
   ]

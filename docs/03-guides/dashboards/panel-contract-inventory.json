@@ -16,7 +16,7 @@
   "target_counts": {
     "http": 42,
     "loki": 0,
-    "promql": 182,
+    "promql": 187,
     "tempo": 0,
     "unknown": 0
   },
@@ -1890,6 +1890,175 @@
     },
     {
       "coverage_class": "event_optional",
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "valid_empty",
+      "formula": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "kind": "promql",
+      "panel_id": 9491,
+      "panel_title": "Inspect Telemetry Coverage",
+      "query": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "query_tokens": [
+        "bioetl_control_plane_manifest_writes_total",
+        "bioetl_control_plane_run_type_universe"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "event_optional",
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "valid_empty",
+      "formula": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "kind": "promql",
+      "panel_id": 9491,
+      "panel_title": "Inspect Telemetry Coverage",
+      "query": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "query_tokens": [
+        "bioetl_control_plane_ledger_appends_total",
+        "bioetl_control_plane_run_type_universe"
+      ],
+      "ref_id": "B",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~\"duplicate|overwrite\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "kind": "promql",
+      "panel_id": 9491,
+      "panel_title": "Inspect Telemetry Coverage",
+      "query": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~\"duplicate|overwrite\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "query_tokens": [
+        "bioetl_control_plane_run_type_universe",
+        "bioetl_replay_duplicate_overwrite_risk_total"
+      ],
+      "ref_id": "C",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~\"consistent|inconsistent\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "kind": "promql",
+      "panel_id": 9491,
+      "panel_title": "Inspect Telemetry Coverage",
+      "query": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~\"consistent|inconsistent\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "query_tokens": [
+        "bioetl_control_plane_run_type_universe",
+        "bioetl_manifest_ledger_integrity_ratio"
+      ],
+      "ref_id": "D",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} > 0 and push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} <= time())) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "kind": "promql",
+      "panel_id": 9491,
+      "panel_title": "Inspect Telemetry Coverage",
+      "query": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} > 0 and push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} <= time())) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "query_tokens": [
+        "bioetl_control_plane_run_type_universe"
+      ],
+      "ref_id": "E",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "event_optional",
       "dashboard_uid": "bioetl-dq-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
@@ -3064,7 +3233,7 @@
       "dashboard_uid": "bioetl-incident-v1",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": false,
+      "documents_valid_empty": true,
       "empty_state": "coverage_gap",
       "formula": "label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\")",
       "kind": "promql",
@@ -3304,17 +3473,17 @@
       "coverage_class": "required_when_active",
       "dashboard_uid": "bioetl-overview-v2",
       "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_backend_down": true,
+      "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "max without(run_type)(bioetl_workflow_scope_action{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0) or on() bioetl_l0_next_action_no_route",
+      "formula": "bioetl_first_action{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0 or on() label_replace(label_replace(bioetl_fa_gap,\"pipeline\",\"$pipeline\",\"\",\"\"),\"workflow\",\"$workflow\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 215,
       "panel_title": "Review First Action",
-      "query": "max without(run_type)(bioetl_workflow_scope_action{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0) or on() bioetl_l0_next_action_no_route",
+      "query": "bioetl_first_action{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0 or on() label_replace(label_replace(bioetl_fa_gap,\"pipeline\",\"$pipeline\",\"\",\"\"),\"workflow\",\"$workflow\",\"\",\"\")",
       "query_tokens": [
-        "bioetl_l0_next_action_no_route",
-        "bioetl_workflow_scope_action"
+        "bioetl_fa_gap",
+        "bioetl_first_action"
       ],
       "ref_id": "A",
       "runbook_urls": [],
