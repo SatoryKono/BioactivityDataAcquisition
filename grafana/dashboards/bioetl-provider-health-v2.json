@@ -3767,7 +3767,7 @@
           ],
           "title": "Monitor Available Rate-Limit Tokens",
           "type": "bargauge",
-          "description": "TIME RANGE · Compact optional selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK Numeric token count is primary; sequential color is secondary. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "This token gauge shows the minimum remaining rate-limit tokens in the chart range. TIME RANGE · Compact optional selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK Numeric token count is primary; sequential color is secondary. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -3865,7 +3865,7 @@
           ],
           "title": "Monitor Global Circuit-Breaker State",
           "type": "stat",
-          "description": "TIME RANGE · Compact cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL ADAPTER evidence: covers all adapters, independent of Provider and Pipeline."
+          "description": "This circuit-breaker stat shows adapter circuit-breaker state over the chart range. TIME RANGE · Compact cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL ADAPTER evidence: covers all adapters, independent of Provider and Pipeline."
         },
         {
           "datasource": {
@@ -3942,7 +3942,7 @@
           ],
           "title": "Track Global Circuit-Breaker Trips",
           "type": "timeseries",
-          "description": "TIME RANGE · Compact cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL ADAPTER evidence: covers all adapters, independent of Provider and Pipeline. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
+          "description": "This circuit-breaker trend shows circuit-breaker trips over the chart range. TIME RANGE · Compact cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL ADAPTER evidence: covers all adapters, independent of Provider and Pipeline. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
           "maxDataPoints": 400,
           "interval": "1m"
         }
