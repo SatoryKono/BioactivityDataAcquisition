@@ -386,10 +386,7 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
             "Inspect Top Provider Causes",
             "Monitor Telemetry Presence",
         ],
-        "bioetl-dq-v2.json": [
-            "Monitor Current DQ Status",
-            "Inspect Current DQ Reasons",
-        ],
+        "bioetl-dq-v2.json": [],
     }
 
     for dashboard_name, panel_titles in expectations.items():

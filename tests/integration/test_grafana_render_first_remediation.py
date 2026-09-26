@@ -187,26 +187,15 @@ def test_rf002_terminal_states_are_explicit() -> None:
 
 
 def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None:
-    """DQ keeps one Silver validation fact and closes the removed half-row gap."""
+    """Data Quality keeps selected-run HTTP panels and drops range validation."""
     dashboard = _load("bioetl-dq-v2.json")
     panels = {int(panel["id"]): panel for panel in _iter_panels(dashboard["panels"])}
 
-    assert 7 not in panels
-    canonical = panels[12]
-    assert canonical["title"] == "Monitor Silver Validation Failures"
-    assert "or vector(0)" not in canonical["targets"][0]["expr"]
-
-    # Detail evidence uses full-width rows so categories remain readable at 1000 px.
-    ordered_ids = (1, 4, 3, 101, 9, 12, 151)
-    previous_end = None
-    for panel_id in ordered_ids:
-        geometry = panels[panel_id]["gridPos"]
-        assert geometry["x"] == 0
-        assert geometry["w"] == 24
-        assert geometry["h"] == (10 if panel_id == 1 else 7 if panel_id == 9 else 3)
-        if previous_end is not None:
-            assert geometry["y"] == previous_end
-        previous_end = geometry["y"] + geometry["h"]
+    assert 12 not in panels
+    assert 1 not in panels
+    for panel_id in (9406, 9402, 9403, 9451, 9452):
+        targets = panels[panel_id].get("targets") or []
+        assert any("run_id=" in str(target.get("url") or "") for target in targets)
 
 
 def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
@@ -260,13 +249,7 @@ def test_iteration_2_runtime_valid_empty_frames_are_semantic_tables() -> None:
 
 def test_iteration_2_empty_distributions_use_no_data_capable_tables() -> None:
     """Empty categorical vectors remain visibly unknown without synthetic data."""
-    scoped_panels = (
-        ("bioetl-dq-v2.json", 118),
-        ("bioetl-dq-v2.json", 121),
-        ("bioetl-dq-v2.json", 122),
-        ("bioetl-dq-v2.json", 156),
-        ("bioetl-provider-health-v2.json", 107),
-    )
+    scoped_panels = (("bioetl-provider-health-v2.json", 107),)
     expected_exprs = {
         (
             "bioetl-dq-v2.json",
@@ -590,21 +573,11 @@ def test_audit_followup_action_first_layout_contracts() -> None:
 
     dq = _load("bioetl-dq-v2.json")
     dq_rows = [panel for panel in dq.get("panels", []) if panel.get("type") == "row"]
-    assert [panel.get("title") for panel in dq_rows] == [
-        "Selected Run · Identity & Accounting",
-        "Selected Range · Impact & Freshness",
-        "Selected Range · Reject Evidence",
-        "Selected Range · Validation Diagnostics",
-        "Inspect Saved Run Evidence",
-    ]
-    assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
-        18,
-        19,
-        20,
-        21,
-        22,
-    ]
-    assert all(panel.get("collapsed") is True for panel in dq_rows)
+    assert [panel.get("title") for panel in dq_rows] == ["Inspect Saved Run Evidence"]
+    assert dq_rows[0].get("collapsed") is True
+    assert {9402, 9403, 9406} <= {
+        panel.get("id") for panel in dq.get("panels", [])
+    }
 
 
 def test_collapsed_rows_never_ship_empty_nested_panels() -> None:
@@ -654,53 +627,26 @@ def test_rf007_counts_and_dense_legends_are_bounded() -> None:
     )
 
     dq = _load("bioetl-dq-v2.json")
-    for panel_id in (1, 10, 11, 153, 155):
-        legend = _panel(dq, panel_id).get("options", {}).get("legend")
-        if isinstance(legend, dict):
-            assert legend.get("showLegend") is (panel_id in (1, 153))
-        desc = str(_panel(dq, panel_id).get("description", ""))
-        assert "full identifiers remain available" in desc or "TIME RANGE" in desc
+    dq_ids = {panel.get("id") for panel in _iter_panels(dq.get("panels") or [])}
+    assert {1, 10, 11, 153, 155}.isdisjoint(dq_ids)
 
 
 def test_dq_threshold_counter_fixtures_exercise_shipped_query() -> None:
-    """Promtool reset/partial fixtures must test the actual dashboard expression."""
-    panel = _panel(_load("bioetl-dq-v2.json"), 155)
-    expression = panel["targets"][0]["expr"].replace("$pipeline", ".*")
-    fixtures = yaml.safe_load(
-        Path("grafana/prometheus-rules/tests/gr_db_counter_windows.test.yml").read_text(
-            encoding="utf-8"
-        )
-    )
-    cases = [
-        case for case in fixtures["tests"] if not case["name"].startswith("duration-")
-    ]
-    assert len(cases) == 9
-    for case in cases:
-        for check in case["promql_expr_test"]:
-            assert check["expr"] in {
-                expression.replace("$__rate_interval", window)
-                for window in ("2m", "5m")
-            }, case["name"]
+    """Threshold counters are not a selected-run assessment on Data Quality."""
+    dq_ids = {
+        panel.get("id")
+        for panel in _iter_panels(_load("bioetl-dq-v2.json").get("panels") or [])
+    }
+    assert 155 not in dq_ids
 
 
 def test_duration_fixtures_exercise_shipped_nan_filter() -> None:
-    """Zero and positive latency survive; NaN-only observations cannot draw an empty frame."""
-    panel = _panel(_load("bioetl-dq-v2.json"), 11)
-    expression = (
-        panel["targets"][0]["expr"]
-        .replace("${pipeline:regex}", "example")
-        .replace("$__rate_interval", "2m")
-    )
-    fixtures = yaml.safe_load(
-        Path("grafana/prometheus-rules/tests/gr_db_counter_windows.test.yml").read_text(
-            encoding="utf-8"
-        )
-    )
-    cases = [case for case in fixtures["tests"] if case["name"].startswith("duration-")]
-    assert len(cases) == 6
-    for case in cases:
-        assert case["promql_expr_test"][0]["expr"] == expression
-    assert panel["fieldConfig"]["defaults"]["noValue"].startswith("NO OBSERVATIONS")
+    """Duration charts are not a selected-run assessment on Data Quality."""
+    dq_ids = {
+        panel.get("id")
+        for panel in _iter_panels(_load("bioetl-dq-v2.json").get("panels") or [])
+    }
+    assert 11 not in dq_ids
 
 
 def _limit_field(panel: dict[str, object]) -> int | None:
@@ -756,7 +702,7 @@ def _override_width(panel: dict[str, object], field_name: str) -> int | None:
 
 def test_operator_critical_tables_expose_full_values() -> None:
     expected_panels = {
-        "bioetl-dq-v2.json": (9102,),
+        "bioetl-dq-v2.json": (9406, 9402, 9403),
         "bioetl-incident-v1.json": (2010, 2002, 2003, 2004, 2005),
         "bioetl-run-explorer-v1.json": (3010,),
     }
@@ -845,8 +791,6 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
 def test_cycle4_named_text_columns_wrap_below_fold() -> None:
     """#9570 #9568 #9571 #9569 #9567: wrap long text without table-default wrap."""
     cases = (
-        ("bioetl-dq-v2.json", 121, "Reject Reason"),
-        ("bioetl-dq-v2.json", 122, "Reject Field"),
         ("bioetl-control-plane-v1.json", 9404, "value_full"),
         ("bioetl-overview-v2.json", 9301, "parameter"),
         ("bioetl-dq-v2.json", 9403, "parameter"),
@@ -854,9 +798,7 @@ def test_cycle4_named_text_columns_wrap_below_fold() -> None:
         ("bioetl-runtime.json", 9403, "parameter"),
         ("bioetl-control-plane-v1.json", 9403, "parameter"),
         ("bioetl-control-plane-v1.json", 9417, "reason"),
-        ("bioetl-dq-v2.json", 118, "Pipeline"),
         ("bioetl-control-plane-v1.json", 9404, "value_full"),
-        ("bioetl-dq-v2.json", 156, "Pipeline"),
     )
     for dashboard_name, panel_id, field in cases:
         panel = _panel(_load(dashboard_name), panel_id)
@@ -1318,15 +1260,11 @@ def test_cycle3_inspect_enabled_on_named_below_fold_tables() -> None:
         ("bioetl-provider-health-v2.json", 9103),
         ("bioetl-runtime.json", 256),
         ("bioetl-runtime.json", 241),
-        ("bioetl-dq-v2.json", 121),
-        ("bioetl-dq-v2.json", 122),
         ("bioetl-overview-v2.json", 9010),
         ("bioetl-overview-v2.json", 9011),
         ("bioetl-overview-v2.json", 9013),
         ("bioetl-control-plane-v1.json", 908),
         ("bioetl-control-plane-v1.json", 138),
-        ("bioetl-dq-v2.json", 118),
-        ("bioetl-dq-v2.json", 156),
         ("bioetl-overview-v2.json", 9003),
         ("bioetl-overview-v2.json", 9004),
         ("bioetl-overview-v2.json", 9005),
