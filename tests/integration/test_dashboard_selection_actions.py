@@ -131,7 +131,7 @@ def test_run_explorer_styles_processing_without_obsolete_columns() -> None:
     mappings = props["Processing"]["mappings"][0]["options"]
     assert mappings["failed"]["color"] == "red"
     assert mappings["unfinished"]["text"] == "unfinished"
-    assert props["1. Trust"]["noValue"] != "OK"
+    assert props["Replay readiness"]["noValue"] != "OK"
 
     assert props["Pipeline"]["custom.cellOptions"]["wrapText"] is False
     assert props["Pipeline"]["custom.inspect"] is True

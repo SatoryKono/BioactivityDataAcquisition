@@ -22,15 +22,17 @@ def _require_dashboard(name: str) -> Path:
 
 
 def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None:
-    dashboard = load_dashboard(_require_dashboard("bioetl-runtime.json"))
+    runtime = load_dashboard(_require_dashboard("bioetl-runtime.json"))
 
-    description = str(dashboard.get("description", "")).lower()
-    assert "pipeline flow dual layout" in description
-    assert "blockers + taxonomy first" in description
-    assert "empty blockers are valid empty" in description
-    assert "telemetry confidence" in description
+    description = str(runtime.get("description", "")).lower()
+    assert "selected run" in description
+    assert "incident workspace" in description
+    assert "pipeline flow dual layout" not in description
+    assert "blockers" not in description
+    assert "taxonomy" not in description
 
-    panels = index_panels_by_base_title(get_dashboard_panels(dashboard))
+    incident = load_dashboard(_require_dashboard("bioetl-incident-v1.json"))
+    panels = index_panels_by_base_title(get_dashboard_panels(incident))
     expected_tokens = {
         "Track Failed Workflow Runs": ("selected range", "not current workflow"),
         "Track Failed Workflow Steps": ("selected range", "not stage success"),

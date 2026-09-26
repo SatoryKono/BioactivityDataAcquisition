@@ -338,14 +338,14 @@ def _provider(p: dict[int, dict]) -> None:
         if target["expr"].startswith("topk(3, ") and target["expr"].endswith(")"):
             target["expr"] = target["expr"][8:-1]
         p[pid]["title"] = (
-            "Monitor Fleet Status"
+            "All providers · status"
             if pid == 9101
-            else "Inspect Fleet Evidence"
+            else "All providers · evidence"
         )
         p[pid]["description"] = (
-            "CURRENT · Все провайдеры. Этот раздел не фильтруется выбранным Provider. "
-            "Выбранный Run ID — только контекст навигации и не доказывает историческую "
-            "работоспособность. UNKNOWN означает отсутствие или недостоверность наблюдения."
+            "CURRENT · All providers. This section is not filtered by the selected Provider. "
+            "The selected Run ID is navigation context only and does not prove historical "
+            "health. UNKNOWN means the observation is missing or unreliable."
         )
     _override(p[9101], "Severity", "displayName", "Status")
     _override(p[9101], "Provider", "custom.wrapText", True)
@@ -953,13 +953,13 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
         "bioetl-run-explorer-v1": {
             3010: {
                 "selected": 28,
-                "2. Overview": 90,
-                "3. Pipeline Diagnostics": 90,
-                "4. Provider Health": 90,
-                "5. Data Quality": 90,
-                "Started": 70,
+                "Run Overview": 80,
+                "Pipeline Diagnostics": 80,
+                "Data Quality": 80,
+                "Replay readiness": 50,
+                "Provider Health": 80,
+                "Started": 60,
                 "Duration": 45,
-                "Trust": 50,
                 "Processing": 50,
                 "Report": 40,
             }

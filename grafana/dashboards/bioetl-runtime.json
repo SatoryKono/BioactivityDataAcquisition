@@ -429,7 +429,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Pipeline Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">SELECTED RUN. Saved pipeline evidence for this Run ID. Fleet and time-range charts are on Incident Workspace.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">SELECTED RUN · Saved evidence for the selected Run ID. Fleet and time-range charts are on Incident Workspace, not this verdict.</div></div>"
       },
       "links": []
     },
@@ -463,6 +463,16 @@
               "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
+            },
+            {
+              "title": "Open Trust replay readiness",
+              "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9422",
+              "targetBlank": false
+            },
+            {
+              "title": "Open fleet signals on Incident",
+              "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}",
+              "targetBlank": false
             }
           ]
         },

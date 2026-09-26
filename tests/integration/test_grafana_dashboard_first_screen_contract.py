@@ -651,6 +651,7 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
     )
 
     for dashboard_path in get_dashboard_files():
+        # Run Explorer is a browse surface: it has no dashboard-bus panel.
         if dashboard_path.name == "bioetl-run-explorer-v1.json":
             continue
         dashboard = load_dashboard(dashboard_path)
