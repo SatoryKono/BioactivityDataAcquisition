@@ -1155,6 +1155,9 @@ def _stamp_retention_override(
         properties = override.setdefault("properties", [])
         properties[:] = [p for p in properties if p.get("id") != CUSTOM_WIDTH]
         properties.append({"id": CUSTOM_WIDTH, "value": widths[field]})
+    if field in {"reason", "Reason", "check", "Check", "status", "Status"}:
+        _set_override_value(override, "links", [])
+        _set_override_value(override, "custom.inspect", False)
     if field in {"reason", "Reason"}:
         override["properties"] = [
             p for p in override.get("properties", []) if p.get("id") != CUSTOM_WIDTH
@@ -1167,13 +1170,25 @@ def _stamp_retention_override(
         )
 
 
+def _without_self_table_links(links: object) -> list[object]:
+    if not isinstance(links, list):
+        return []
+    return [
+        link
+        for link in links
+        if isinstance(link, dict) and "viewPanel=9416" not in str(link.get("url", ""))
+    ]
+
+
 def _stamp_retention_readability(by_id: dict[object, dict[str, object]]) -> None:
     """Reserve compact status space and let the retention reason use the remainder."""
     panel = by_id.get(9416)
     if not isinstance(panel, dict):
         return
+    panel["links"] = _without_self_table_links(panel.get("links"))
     field_config = panel.setdefault("fieldConfig", {})
     defaults = field_config.setdefault("defaults", {})
+    defaults["links"] = _without_self_table_links(defaults.get("links"))
     custom = defaults.setdefault("custom", {})
     if isinstance(custom, dict):
         custom["inspect"] = True
@@ -1207,21 +1222,42 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
                 and "error_as_row=" not in target["url"]
             ):
                 target["url"] += "&error_as_row=1"
+    panel["links"] = [
+        link
+        for link in panel.get("links", [])
+        if isinstance(link, dict) and "viewPanel=" not in str(link.get("url", ""))
+    ]
     panel["description"] = (
-        "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention "
-        "evidence for this run. ERROR wins; missing evidence is INCOMPLETE. "
-        "processing_status success does not imply trust_status OK. Inspect each "
-        "validation table for details. No selected run is a valid empty state "
-        "(UNKNOWN). Backend unavailable means QUERY ERROR; deadline_exceeded "
-        "means the backend timed out, not that the run selection is missing. "
-        "Result is the ETL processing outcome; Observed is the manifest "
-        "creation time and is unavailable when the query fails."
+        "SELECTED RUN · Processing result is the saved ETL outcome. "
+        "Saved trust verdict is the historical Trust assessment and does not "
+        "authorize replay. Reason count is the number of saved remarks: 0 is no, "
+        "and missing data stays —. Assessed at is when that assessment was recorded, "
+        "not manifest creation time, and is unavailable when the query fails. "
+        "View trust reasons opens the full remark list for this Run ID only when "
+        "the count is positive. CURRENT telemetry does not change these values. "
+        "SELECT RUN means no run is selected. QUERY ERROR means the request failed."
     )
     for transform in panel.get("transformations", []):
-        if transform.get("id") == "organize":
-            transform.setdefault("options", {}).setdefault("renameByName", {}).update(
-                {"processing_status": "Result", "evidence_observed_at": "Observed"}
+        if transform.get("id") == "filterFieldsByName":
+            names = transform.setdefault("options", {}).setdefault("include", {}).setdefault(
+                "names", []
             )
+            if "trust_reasons_action" not in names:
+                names.append("trust_reasons_action")
+        if transform.get("id") == "organize":
+            options = transform.setdefault("options", {})
+            rename = options.setdefault("renameByName", {})
+            index = options.setdefault("indexByName", {})
+            rename.update(
+                {
+                    "processing_status": "Processing result",
+                    "trust_status": "Saved trust verdict",
+                    "reasons_count": "Reason count",
+                    "evidence_observed_at": "Assessed at",
+                    "trust_reasons_action": "Action",
+                }
+            )
+            index["trust_reasons_action"] = 4
     options = panel.setdefault("options", {})
     footer = options.setdefault("footer", {})
     footer["enablePagination"] = True
@@ -1229,8 +1265,22 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
     field_config.setdefault("defaults", {})["noValue"] = (
         "Trust response unavailable. Check the panel error and run selection."
     )
+    display_names = {
+        "processing_status": "Processing result",
+        "trust_status": "Saved trust verdict",
+        "evidence_observed_at": "Assessed at",
+        "reasons_count": "Reason count",
+    }
     for override in field_config.setdefault("overrides", []):
         _stamp_trust_override(override)
+        matcher = override.get("matcher", {})
+        field = matcher.get("options") if isinstance(matcher, dict) else None
+        if field in display_names:
+            _set_override_value(override, "displayName", display_names[field])
+        if field == "reasons_count":
+            _set_override_value(override, "custom.hidden", False)
+            _set_override_value(override, "links", [])
+            _set_override_value(override, "noValue", "—")
 
 
 def _set_override_value(
@@ -1245,18 +1295,55 @@ def _set_override_value(
 def _stamp_trust_override(override: dict[str, object]) -> None:
     matcher = override.get("matcher", {})
     field = matcher.get("options") if isinstance(matcher, dict) else None
-    field = {"Processing": "Result", "Observed at": "Observed"}.get(field, field)
+    field = {
+        "Processing": "Processing result",
+        "Result": "Processing result",
+        "Trust": "Saved trust verdict",
+        "Observed at": "Assessed at",
+        "Observed": "Assessed at",
+        "Reasons": "Reason count",
+    }.get(field, field)
     if isinstance(matcher, dict):
         matcher["options"] = field
-    if field == "processing_status":
-        _set_override_value(override, "displayName", "Result")
-    width = {"Result": 90, "Trust": 110}.get(field)
+    if field in {"processing_status", "Processing result"}:
+        _set_override_value(override, "displayName", "Processing result")
+    width = {
+        "Processing result": 150,
+        "Saved trust verdict": 160,
+        "Reason count": 120,
+    }.get(field)
     if width is not None:
         _set_override_value(override, CUSTOM_WIDTH, width)
-    if field == "Observed":
+    if field == "Assessed at":
         override["properties"] = [
             p for p in override.get("properties", []) if p.get("id") != CUSTOM_WIDTH
         ]
+    if field == "Reason count":
+        _set_override_value(override, "links", [])
+        _set_override_value(override, "noValue", "—")
+        _set_override_value(
+            override,
+            "mappings",
+            [{"type": "value", "options": {"0": {"text": "no"}}}],
+        )
+    if field == "Action":
+        _set_override_value(override, "noValue", "")
+        _set_override_value(
+            override,
+            "links",
+            [
+                {
+                    "title": "View trust reasons",
+                    "url": (
+                        "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}"
+                        "&${pipeline:queryparam}&${run_type:queryparam}"
+                        "&${run_id:queryparam}&viewPanel=9451&${__url_time_range}"
+                    ),
+                    "includeVars": False,
+                    "targetBlank": False,
+                }
+            ],
+        )
     if field == "reasons_text":
         _set_override_value(override, "noValue", "—")
         _set_override_value(

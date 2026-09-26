@@ -151,7 +151,7 @@ def _stamp_control_plane_copy(panel: dict[str, object], uid: object) -> None:
             target["root_selector"] = "trust"
         panel["description"] = (
             DESCRIPTION
-            + " Observed is the saved completion-time assessment. processing_status success does not imply trust_status OK."
+            + " Processing result is the saved ETL outcome. Saved trust verdict is the historical Trust assessment. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded."
         )
     if panel.get("id") == 9403:
         description = str(panel.get("description") or "")

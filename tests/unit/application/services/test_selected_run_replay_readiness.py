@@ -15,11 +15,18 @@ _PASSING_IDENTITY = {
     "run_id": "run-a",
     "status": "success",
     "run_type": "full",
+}
+_PASSING_MANIFEST = {
     "replay_capability": "exact_replay_supported",
     "exact_replay_supported": True,
     "effective_config_hash": "abc",
     "dependency_lock_hash": "def",
     "input_snapshot_fingerprint": "ghi",
+    "objects": {
+        "effective_config_hash": True,
+        "dependency_lock_hash": True,
+        "input_snapshot_fingerprint": True,
+    },
 }
 
 
@@ -33,15 +40,30 @@ def _pass_probe() -> dict[str, str]:
 
 
 def test_capability_without_artifact_inventory_is_not_ready() -> None:
-    projection = project_selected_run_replay_readiness(identity=_PASSING_IDENTITY)
+    projection = project_selected_run_replay_readiness(
+        identity=_PASSING_IDENTITY,
+        manifest=_PASSING_MANIFEST,
+    )
     assert projection["verdict"] == INSUFFICIENT
-    assert "artifact_inventory" in projection["unknown_checks"]
+    assert projection["unknown_checks"] == ["artifact_inventory"]
+
+
+def test_report_without_manifest_is_insufficient() -> None:
+    projection = project_selected_run_replay_readiness(
+        identity=_PASSING_IDENTITY,
+        inventory_present=True,
+        artifact_probes=(_pass_probe(),),
+    )
+    assert projection["verdict"] == INSUFFICIENT
+    assert projection["unknown_checks"] == ["manifest_not_recorded"]
+    assert "effective_config_hash" not in projection["unknown_checks"]
 
 
 def test_missing_artifact_blocks_even_when_capability_is_exact() -> None:
     projection = project_selected_run_replay_readiness(
         identity=_PASSING_IDENTITY,
         inventory_present=True,
+        manifest=_PASSING_MANIFEST,
         artifact_probes=(
             {
                 "code": "input_snapshot",
@@ -59,14 +81,11 @@ def test_hash_without_object_is_not_ready() -> None:
     projection = project_selected_run_replay_readiness(
         identity=_PASSING_IDENTITY,
         inventory_present=True,
-        artifact_probes=(
-            {
-                "code": "input_snapshot",
-                "result": "fail",
-                "reason": "hash_without_object",
-                "evidence_ref": "#/artifacts/0",
-            },
-        ),
+        manifest={
+            **_PASSING_MANIFEST,
+            "objects": {"effective_config_hash": False},
+        },
+        artifact_probes=(_pass_probe(),),
     )
     assert projection["verdict"] == BLOCKED
 
@@ -74,6 +93,7 @@ def test_hash_without_object_is_not_ready() -> None:
 def test_source_run_without_replay_of_run_id_can_be_ready() -> None:
     projection = project_selected_run_replay_readiness(
         identity=_PASSING_IDENTITY,
+        manifest=_PASSING_MANIFEST,
         inventory_present=True,
         artifact_probes=(_pass_probe(),),
         evidence_revision="rev-1",
@@ -90,6 +110,7 @@ def test_replay_run_without_replay_of_run_id_is_blocked() -> None:
     projection = project_selected_run_replay_readiness(
         identity=identity,
         inventory_present=True,
+        manifest=_PASSING_MANIFEST,
         artifact_probes=(_pass_probe(),),
     )
     assert projection["verdict"] == BLOCKED
@@ -97,9 +118,9 @@ def test_replay_run_without_replay_of_run_id_is_blocked() -> None:
 
 
 def test_unsupported_family_is_not_ready() -> None:
-    identity = {**_PASSING_IDENTITY, "replay_capability": "rebuild_only"}
     projection = project_selected_run_replay_readiness(
-        identity=identity,
+        identity=_PASSING_IDENTITY,
+        manifest={**_PASSING_MANIFEST, "replay_capability": "rebuild_only"},
         inventory_present=True,
         artifact_probes=(_pass_probe(),),
     )
@@ -110,6 +131,7 @@ def test_unfinished_run_is_not_ready() -> None:
     identity = {**_PASSING_IDENTITY, "status": "running"}
     projection = project_selected_run_replay_readiness(
         identity=identity,
+        manifest=_PASSING_MANIFEST,
         inventory_present=True,
         artifact_probes=(_pass_probe(),),
     )
