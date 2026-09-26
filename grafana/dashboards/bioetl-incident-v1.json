@@ -384,7 +384,7 @@
       "id": 9400,
       "type": "text",
       "title": "",
-      "description": "Explains the incident-triage question and the evidence scopes used on this read-only dashboard. CURRENT ranks suspects from current fleet telemetry in GLOBAL scope; Pipeline and Run ID do not filter suspects. SELECTED RUN uses HTTP-backed evidence for one exact run; run_id never filters Prometheus. No suspects means none were found in the current scope and does not prove the fleet is healthy Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider}.",
+      "description": "Explains the incident-triage question and the evidence scopes used on this read-only dashboard. CURRENT ranks suspects from current fleet telemetry in GLOBAL scope; Pipeline and Run ID do not filter suspects. SELECTED RUN uses HTTP-backed evidence for one exact run; run_id never filters Prometheus. No suspects means none were found in the current scope and does not prove the fleet is healthy Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider}. VALID_EMPTY is an empty suspect list, not a healthy fleet.",
       "gridPos": {
         "h": 3,
         "w": 16,
@@ -394,7 +394,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Incident Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">CURRENT: ${workflow:text} / ${pipeline:text} / ${run_type:text}; Run ID does not filter this card.<br>GLOBAL tables below cover all pipelines; suspects are not verified causes.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">CURRENT: ${workflow:text} / ${pipeline:text} / ${run_type:text}; Run ID does not filter this card.<br>GLOBAL tables below cover all pipelines; suspects are not verified causes. VALID_EMPTY is an empty suspect list, not a healthy fleet.</div>"
       },
       "links": []
     },
@@ -1661,7 +1661,7 @@
           "id": 2002,
           "type": "table",
           "title": "Inspect Runtime Suspects",
-          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · SELECTED RUN · Selected pipeline may differ from row pipeline (blast radius). Runtime blockers (current topk by domain). VALID EMPTY when none. Handoff: Pipeline Diagnostics. Not cross-domain ranking ",
+          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). Runtime blockers (current topk by domain). VALID EMPTY when none. Handoff: Pipeline Diagnostics. Not cross-domain ranking ",
           "gridPos": {
             "h": 7,
             "w": 24,
@@ -5091,7 +5091,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · SELECTED RUN · Lists current runtime blocker rules for Pipeline and applicable Run Type labels. An empty table is valid only when Pipeline Health is OK and Metrics Coverage is complete; otherwise inspect telemetry or selector scope TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Pipeline and Run Type, not a single Run ID. Lists current runtime blocker rules for Pipeline and applicable Run Type labels. An empty table is valid only when Pipeline Health is OK and Metrics Coverage is complete; otherwise inspect telemetry or selector scope TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -5795,7 +5795,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · SELECTED RUN · Shows the current 30-minute Runtime Error Rate for Pipeline; Run Type does not affect this panel. Below 5%=OK, >=5%=WARN, >=20%=CRIT when the Bronze denominator is at least 20; insufficient or missing input is UNKNOWN. Review errors by Stage and code next",
+          "description": "TIME RANGE · Pipeline only, not a single Run ID. Shows the current 30-minute Runtime Error Rate for Pipeline; Run Type does not affect this panel. Below 5%=OK, >=5%=WARN, >=20%=CRIT when the Bronze denominator is at least 20; insufficient or missing input is UNKNOWN. Review errors by Stage and code next",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -6528,7 +6528,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · SELECTED RUN · Shows no-records runs from the last 30 minutes for Pipeline and Run Type. Zero is valid only when runs and telemetry exist; UNKNOWN, no matching scope, or a run not started is inconclusive. Inspect checkpoint/resume and stage expectedness next",
+          "description": "TIME RANGE · Pipeline and Run Type, not a single Run ID. Shows no-records runs from the last 30 minutes for Pipeline and Run Type. Zero is valid only when runs and telemetry exist; UNKNOWN, no matching scope, or a run not started is inconclusive. Inspect checkpoint/resume and stage expectedness next",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -7722,7 +7722,7 @@
           ],
           "title": "Track Failed Workflow Runs",
           "type": "stat",
-          "description": "TIME RANGE · SELECTED RUN · Counts failed Workflow runs in the selected range for Workflow and Pipeline. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not current Workflow or Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "TIME RANGE · Workflow only, not a single Run ID. Counts failed Workflow runs in the selected range for Workflow and Pipeline. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not current Workflow or Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -9698,7 +9698,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · SELECTED RUN · Counts failed manifest writes during the selected range. Any non-zero value requires checking manifest persistence before replay or resume. Role: selected-range failure count ($__range); the 30m fail-rate gate on this row is Monitor Manifest Failures (132).",
+          "description": "TIME RANGE · Pipeline and Run Type, not a single Run ID. Counts failed manifest writes during the selected range. Any non-zero value requires checking manifest persistence before replay or resume. Role: selected-range failure count ($__range); the 30m fail-rate gate on this row is Monitor Manifest Failures (132).",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -9794,7 +9794,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · SELECTED RUN · Shows manifest-write failure severity over the last 30 minutes. Status mapping: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. Confirm telemetry coverage before trusting OK. Role: 30m fail-rate gate (ratio), not the selected-range count in Track Manifest Write Failures (1).",
+          "description": "TIME RANGE · Pipeline and Run Type, not a single Run ID. Shows manifest-write failure severity over the last 30 minutes. Status mapping: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. Confirm telemetry coverage before trusting OK. Role: 30m fail-rate gate (ratio), not the selected-range count in Track Manifest Write Failures (1).",
           "fieldConfig": {
             "defaults": {
               "color": {

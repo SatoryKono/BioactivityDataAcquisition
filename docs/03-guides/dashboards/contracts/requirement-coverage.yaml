@@ -43,11 +43,11 @@ dashboards:
   bioetl-provider-health-v2:
     question: Which provider is degraded/failing, and why?
     answer_panel_ids:
-      - 9400
+      - 9401
     next_action_tokens:
-      - saved check
+      - Review severity matrix
     basis_tokens:
-      - SELECTED RUN
+      - CURRENT
   bioetl-dq-v2:
     question: What is the DQ assessment of the selected Run ID?
     answer_panel_ids:

@@ -726,9 +726,9 @@ def test_current_status_headlines_use_instant_queries() -> None:
 def test_run_explorer_shows_ten_rows_and_only_the_browse_surface() -> None:
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
-    assert len(panels) == 6
+    assert len(panels) == 7
     assert panels[9450]["collapsed"] is True
-    assert {p["id"] for p in panels[9450]["panels"]} == {9451, 9452}
+    assert {p["id"] for p in panels[9450]["panels"]} == {9451, 9452, 9460}
     assert not ({3098, 3099, 3011, 3012, 3013, 3014, 3020, 3022, 3023} & panels.keys())
     browse = panels[3010]
     grid = browse["gridPos"]

@@ -445,7 +445,7 @@ def _correct_provider(uid: object, panels: dict[int, dict]) -> None:
         },
     ]
     panels[9401]["fieldConfig"]["defaults"]["mappings"] = []
-    panels[9401]["title"] = "Текущий статус (${provider})"
+    panels[9401]["title"] = "Monitor Provider Status"
     panels[9401]["fieldConfig"]["defaults"]["noValue"] = "TELEMETRY MISSING"
     panels[9401]["description"] = (
         "CURRENT · выбранный провайдер, не история Run ID. "
