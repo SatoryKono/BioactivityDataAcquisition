@@ -415,6 +415,8 @@ def _provider(p: dict[int, dict]) -> None:
 
 
 def _dq(p: dict[int, dict]) -> None:
+    if 2 not in p:
+        return
     for panel_id in (2, 5):
         p[panel_id]["options"]["textMode"] = "value_and_name"
         p[panel_id]["fieldConfig"]["defaults"]["displayName"] = (
@@ -547,7 +549,7 @@ def apply_visual_usability(payload: dict) -> None:
     }
     if handler := handlers.get(payload["uid"]):
         handler(p)
-    if payload["uid"] == "bioetl-dq-v2":
+    if payload["uid"] == "bioetl-dq-v2" and 9103 in p:
         p[9103]["gridPos"]["h"] = 2
     if payload["uid"] == "bioetl-incident-v1":
         p[2001]["gridPos"].update(y=5, h=3)

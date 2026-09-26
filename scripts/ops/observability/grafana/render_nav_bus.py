@@ -111,7 +111,7 @@ FIRST_WINDOW_PANEL_BOTTOM = 17
 _MINIMUM_FIRST_WINDOW_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-run-explorer-v1": {1: 3, 3010: 12},
     "bioetl-incident-v1": {2005: 4, 2010: 4},
-    "bioetl-dq-v2": {9102: 4, 9406: 4},
+    "bioetl-dq-v2": {9406: 5},
     "bioetl-control-plane-v1": {9418: 7, 9416: 7},
 }
 # Donors used when the provenance text rail is already at h=3. Values are the
@@ -181,10 +181,24 @@ _INCIDENT_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     2010: (0, 8, 24, 5),
     2005: (0, 13, 24, 4),
 }
+_DQ_SELECTED_RUN_IDS = (1000, 9400, 9406, 9402, 9403)
+_DQ_SCOPE_DESCRIPTION = (
+    "SELECTED RUN · This page assesses the selected Run ID from saved HTTP "
+    "evidence. Prometheus current status and time-range scores are not on "
+    "this page. A time-range value never proves this run."
+)
+_DQ_SCOPE_HTML = (
+    '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;'
+    'line-height:1.2;white-space:normal;overflow-wrap:anywhere"><div style="max-width:96ch">'
+    "SELECTED RUN · Saved evidence for the selected Run ID. "
+    "Current pipeline status and time-range scores are not on this page."
+    "</div></div>"
+)
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9101: (0, 7, 8, 4),
-    9102: (8, 7, 16, 4),
-    9406: (0, 11, 24, 5),
+    9400: (0, 2, 24, 2),
+    9406: (0, 4, 24, 5),
+    9402: (0, 9, 12, 5),
+    9403: (12, 9, 12, 5),
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
@@ -1481,12 +1495,6 @@ def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
         return
     if current_uid == "bioetl-dq-v2":
         _apply_first_window_geometry(panels, _DQ_FIRST_WINDOW_GEOMETRY, uid=current_uid)
-        _pin_collapsed_rows_from(
-            panels,
-            target_y=17,
-            protected_ids=set(_DQ_FIRST_WINDOW_GEOMETRY),
-            uid=current_uid,
-        )
 
 
 def _reclaim_first_window_overflow(
@@ -1659,6 +1667,48 @@ def _attach_trust_range_panels(payload: dict[str, object]) -> None:
     _MOVED_TRUST_RANGE_PANELS.clear()
 
 
+def _retain_dq_selected_run_panels(payload: dict[str, object]) -> None:
+    """Keep only panels that assess the selected Run ID.
+
+    Run ID is always set on 5. Data Quality. Prometheus CURRENT and TIME RANGE
+    panels do not read that id, so they are not part of this dashboard.
+    """
+    panels = payload.get("panels")
+    if not isinstance(panels, list):
+        return
+    found: dict[int, dict[str, object]] = {}
+
+    def _collect(items: list[object]) -> None:
+        for panel in items:
+            if not isinstance(panel, dict):
+                continue
+            panel_id = panel.get("id")
+            if panel_id in _DQ_SELECTED_RUN_IDS and panel_id not in found:
+                found[int(panel_id)] = panel
+            children = panel.get("panels")
+            if isinstance(children, list):
+                _collect(children)
+
+    _collect(panels)
+    missing = set(_DQ_SELECTED_RUN_IDS) - set(found)
+    if missing:
+        raise SystemExit(
+            "bioetl-dq-v2: missing selected-run panels " + str(sorted(missing))
+        )
+    for panel in found.values():
+        panel.pop("panels", None)
+    payload["panels"] = [found[panel_id] for panel_id in _DQ_SELECTED_RUN_IDS]
+    scope = found[9400]
+    scope["title"] = ""
+    scope["description"] = _DQ_SCOPE_DESCRIPTION
+    options = scope.setdefault("options", {})
+    if not isinstance(options, dict):
+        raise SystemExit("bioetl-dq-v2: panel 9400 options must be an object")
+    options["mode"] = "html"
+    options["bioetlDisplayTitle"] = "Understand Evidence Scope"
+    options["content"] = _DQ_SCOPE_HTML
+
+
 def apply_to_dashboard(
     path: Path, *, current_uid: str, check: bool = False, state_followup: bool = False
 ) -> bool:
@@ -1672,6 +1722,8 @@ def apply_to_dashboard(
         _stash_trust_range_panels(payload)
     elif current_uid == "bioetl-runtime":
         _attach_trust_range_panels(payload)
+    elif current_uid == "bioetl-dq-v2":
+        _retain_dq_selected_run_panels(payload)
     # Remove generated details before earlier layout passes measure bottom rows.
     payload["panels"] = [
         panel for panel in payload.get("panels", []) if panel.get("id") != 9450

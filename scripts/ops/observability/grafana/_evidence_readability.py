@@ -381,6 +381,8 @@ def _provider(p: dict[int, dict]) -> None:
 
 
 def _dq(p: dict[int, dict]) -> None:
+    if 9102 not in p:
+        return
     p[2]["title"] = "Monitor Weighted DQ"
     p[8]["targets"][0].update(
         expr='(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~"$pipeline"}[$__range]), 0))) / 3600',
@@ -728,6 +730,8 @@ def _apply_enum_verdict_copy(uid: object, p: dict[int, dict]) -> None:
         "bioetl-overview-v2": (9031, 9007),
     }
     for pid in enum_panels.get(uid, ()):
+        if pid not in p:
+            continue
         p[pid]["description"] = (
             p[pid]["description"]
             .replace(">=2=CRIT", "2=CRIT")
@@ -916,6 +920,8 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
         },
     }
     for pid, fields in widths.get(payload.get("uid"), {}).items():
+        if pid not in p:
+            continue
         for item in p[pid]["fieldConfig"].get("overrides", []):
             item["properties"] = [
                 prop for prop in item["properties"] if prop["id"] != _WIDTH
