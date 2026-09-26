@@ -105,18 +105,6 @@ entries:
     owner: "@bioetl-observability"
     freshness_slo: 60s
     reason: Full-fleet severity below fold duplicates 9101.
-  - dashboard: bioetl-dq-v2.json
-    id: 9401
-    disposition: keep
-    owner: "@bioetl-observability"
-    freshness_slo: 60s
-    reason: DQ-owned CURRENT status; Overview 9002 is the L0 rollup.
-  - dashboard: bioetl-dq-v2.json
-    id: 9101
-    disposition: keep
-    owner: "@bioetl-observability"
-    freshness_slo: 60s
-    reason: CURRENT DQ threshold state for the selected pipeline.
   - dashboard: bioetl-control-plane-v1.json
     id: 9401
     disposition: keep

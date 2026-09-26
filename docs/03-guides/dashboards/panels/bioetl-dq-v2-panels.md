@@ -4,15 +4,13 @@
 
 ## Overview
 
-Dashboard `5. Data Quality` monitors DQ current status, validation score, freshness, quarantine, Silver structural rejects, and Gold contract-semantic reject outcomes. Shipped dashboard JSON is the source of truth.
+Dashboard `5. Data Quality` assesses the selected Run ID from saved HTTP evidence. Run ID is always set on this page. Prometheus CURRENT status and TIME RANGE scores are not panels on this dashboard. Shipped dashboard JSON is the source of truth.
 
 Counter panels that use `max_over_time()` show the maximum Pushgateway final
 snapshot observed in the selected window. They are bounded range evidence, not
 an exact total across multiple runs; use RunLedger for exact multi-run totals.
 
-Visible scope vocabulary is strict: headline cards are `CURRENT`, HTTP identity
-is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
-`TIME RANGE`. A TIME RANGE value never proves an exact run result.
+The page answer is `SELECTED RUN`. A TIME RANGE value is not shown here and never proves this run.
 
 Silver/Gold validation, quarantine, and filter-reject diagnostic panels preserve
 empty Prometheus results as `No data`/`UNKNOWN`. They do not turn missing series

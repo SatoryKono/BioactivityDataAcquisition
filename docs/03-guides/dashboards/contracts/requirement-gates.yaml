@@ -79,10 +79,10 @@ first_window_inspect_tables:
     rationale: DASH-FIT-003 browse index showing all ten launches with report links.
     retire_when: browse index moves behind a collapsed row
   - dashboard: bioetl-dq-v2.json
-    id: 9102
+    id: 9406
     owner: "@bioetl-observability"
-    rationale: NOW-lane current DQ reasons belong on the first window, not the RANGE row; the Inspect title reflects the active reason list, not a forensics dump.
-    retire_when: 9102 is no longer a first-window table or is retitled without Inspect
+    rationale: Selected-run status is the Data Quality answer. Run ID is always set on this page.
+    retire_when: 9406 leaves the first window
 
 # DASH-FIRST-001: one operator question via answer panel + next-action + basis copy.
 operator_question:
@@ -107,10 +107,10 @@ operator_question:
     basis_tokens: [CURRENT]
     next_action_tokens: [Start Provider Triage]
   bioetl-dq-v2.json:
-    answer_ids: [9401]
-    next_action_id: 9103
-    basis_tokens: [CURRENT]
-    next_action_tokens: [Start DQ Triage]
+    answer_ids: [9406]
+    next_action_id: 9406
+    basis_tokens: [SELECTED RUN]
+    next_action_tokens: [Open Run Explorer]
   bioetl-incident-v1.json:
     answer_ids: [2010]
     next_action_id: 2001

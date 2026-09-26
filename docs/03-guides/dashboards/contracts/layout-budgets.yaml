@@ -100,13 +100,6 @@ first_screen_shell_panels:
       Native title omitted so h=2 Start Provider Triage fits DASH-FIT-004.
       Growing h=3 would push Monitor Telemetry Presence (9104) past VIEWPORT_ROWS.
     retire_when: the CTA can use h=3 without folding 9104 past row 18
-  - dashboard: bioetl-dq-v2.json
-    id: 9103
-    owner: "@bioetl-observability"
-    rationale: >-
-      Native title omitted so h=2 Start DQ Triage body fits DASH-FIT-004.
-      Display title stays in bioetlDisplayTitle.
-    retire_when: the CTA can keep a native title without overflowing at 200%
   - dashboard: bioetl-incident-v1.json
     id: 2001
     owner: "@bioetl-observability"
@@ -306,8 +299,8 @@ answer_panels:
     - id: 9101
       title: Monitor Fleet Status
   bioetl-dq-v2.json:
-    - id: 9401
-      title: Monitor Current DQ Status
+    - id: 9406
+      title: Review Selected Run Status
   bioetl-incident-v1.json:
     - id: 2010
       title: Inspect Ranked Suspects
@@ -354,27 +347,6 @@ allowlists:
         Monitor Current Alerts h=4 at y=13 ends on the measured 1366x768 kiosk
         fold after Ranked Suspects kept h=4; h=5 would end at 18.
       retire_when: Current Alerts can keep h=5 without outside at 1366x768
-    - dashboard: bioetl-dq-v2.json
-      id: 153
-      owner: "@bioetl-observability"
-      rationale: >-
-        Track Volume-Weighted DQ Score is an intentional ultra-compact
-        timeseries (h=4) with the legend hidden.
-      retire_when: DQ score trend moves out of the compact evidence strip
-    - dashboard: bioetl-dq-v2.json
-      id: 9102
-      owner: "@bioetl-observability"
-      rationale: >-
-        Inspect Current DQ Reasons h=4 at y=9 leaves four rows for Selected
-        Run Summary at y=13; h=5 would overlap or push 9406 past y+h=17.
-      retire_when: Current DQ Reasons can keep h=5 without overflow at 1366x768
-    - dashboard: bioetl-dq-v2.json
-      id: 9406
-      owner: "@bioetl-observability"
-      rationale: >-
-        Review Selected Run Summary h=4 at y=13 ends on the measured 1366x768
-        kiosk fold; h=5 at y=14 exceeds y+h=17 after nav grew to h=4.
-      retire_when: Selected Run Summary can keep h=5 without outside at 1366x768
     - dashboard: bioetl-control-plane-v1.json
       id: 9418
       owner: "@bioetl-observability"
@@ -406,22 +378,6 @@ allowlists:
         Collapsed Range & Debug Evidence row (h=1) is below-fold forensic
         evidence, not a first-screen scalar group.
       retire_when: range/debug evidence is represented by first-window scalar cards
-    - dashboard: bioetl-dq-v2.json
-      id: 9404
-      owner: "@bioetl-observability"
-      rationale: >-
-        Collapsed Selected Range · Impact & Freshness row (h=1, y=19) is
-        below-fold range evidence after #10253 moved selected-run accounting
-        onto the first screen. Density cannot exceed the first-screen floor
-        without adding first-window scalar cards.
-      retire_when: selected-range impact/freshness is represented by first-window scalar cards
-    - dashboard: bioetl-dq-v2.json
-      id: 220
-      owner: "@bioetl-observability"
-      rationale: >-
-        Collapsed Selected Range · Reject Evidence row (h=1, y=20) is
-        below-fold range evidence, not a first-screen scalar group.
-      retire_when: selected-range reject evidence is represented by first-window scalar cards
     - dashboard: bioetl-control-plane-v1.json
       id: 903
       owner: "@bioetl-observability"
@@ -431,14 +387,6 @@ allowlists:
         trust verdict. Density cannot exceed the first-screen floor without
         adding first-window scalar cards.
       retire_when: store-reliability diagnostics move into first-window scalar cards
-    - dashboard: bioetl-dq-v2.json
-      id: 221
-      owner: "@bioetl-observability"
-      rationale: >-
-        Collapsed Selected Range · Validation Diagnostics row (h=1, y=21) is
-        below-fold range evidence after current/impact lanes. Density cannot
-        exceed the first-screen floor without adding first-window scalar cards.
-      retire_when: selected-range validation diagnostics move into first-window scalar cards
     - dashboard: bioetl-overview-v2.json
       id: 9009
       owner: "@bioetl-observability"
