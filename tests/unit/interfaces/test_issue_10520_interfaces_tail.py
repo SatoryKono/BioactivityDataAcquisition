@@ -191,6 +191,7 @@ def test_diagnostics_getters_and_compat_seams(monkeypatch: pytest.MonkeyPatch) -
     diagnostics_mod.diagnostics_checkpoint.callback(
         pipeline="chembl_activity",
         run_id=None,
+        manifest_id=None,
         audit_limit=10,
         output_format="text",
     )
@@ -455,7 +456,7 @@ def test_config_dq_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
             "bad",
         ],
     )
-    assert result.exit_code == 0
+    assert result.exit_code != 0
     result = runner.invoke(
         config_dq_mod.dq,
         ["show-effective", "chembl_activity", "--format", "yaml", "--override", "k=v"],

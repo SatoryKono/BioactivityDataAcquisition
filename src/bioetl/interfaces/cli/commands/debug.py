@@ -167,13 +167,6 @@ def debug(
     else:
         echo_info("Breakpoints: all stages enabled")
 
-    if mode != "log" or enabled_breakpoints:
-        echo_error(
-            "Unsupported debug mode or breakpoints: only mode='log' without "
-            "breakpoints is available"
-        )
-        sys.exit(ExitCode.CONFIG_ERROR)
-
     run_options_type = _load_run_options_type()
     options = run_options_type(
         run_type=run_type,
@@ -200,6 +193,9 @@ def debug(
             f"silver={result.records_silver}, "
             f"quarantined={result.records_quarantined}"
         )
+    except ValueError as exc:
+        echo_error(str(exc))
+        sys.exit(ExitCode.CONFIG_ERROR)
     except debug_abort_error:
         echo_info("Pipeline aborted by user at breakpoint")
         sys.exit(ExitCode.SIGINT)

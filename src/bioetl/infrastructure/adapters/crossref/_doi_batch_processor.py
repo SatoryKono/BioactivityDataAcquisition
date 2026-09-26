@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from httpx import Response
+from httpx import HTTPStatusError, Response
 
 from bioetl.domain.normalization import normalize_doi
 from bioetl.domain.types import BronzeRecord
@@ -88,6 +88,15 @@ class DoiBatchProcessor:
 
         except CrossRefApiError:
             raise
+        except HTTPStatusError as error:
+            status_code = error.response.status_code
+            if status_code == 404:
+                self._logger.debug("crossref_doi_not_found", doi=normalized_doi)
+                return None
+            raise CrossRefApiError(
+                f"CrossRef API error for DOI {normalized_doi}",
+                status_code=status_code,
+            ) from error
         except CROSSREF_RUNTIME_ERRORS as error:
             self._logger.error(
                 "crossref_fetch_failed",
