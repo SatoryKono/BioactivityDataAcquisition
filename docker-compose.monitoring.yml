@@ -68,6 +68,12 @@ services:
   pushgateway:
     image: prom/pushgateway:v1.11.3@sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48
     container_name: bioetl-pushgateway
+    # Preserve completed CLI snapshots across container recreation.
+    volumes:
+      - pushgateway-data:/pushgateway
+    command:
+      - "--persistence.file=/pushgateway/metrics.db"
+      - "--persistence.interval=30s"
     ports:
       - "127.0.0.1:9091:9091"
     networks:
@@ -262,6 +268,7 @@ services:
 volumes:
   prometheus-data:
   grafana-data:
+  pushgateway-data:
 
 networks:
   # Shared fixed name across main + monitoring projects.

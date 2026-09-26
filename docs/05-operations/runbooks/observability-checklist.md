@@ -33,6 +33,30 @@ ______________________________________________________________________
 
 ## Procedure
 
+### CURRENT telemetry missing after a monitoring restart
+
+Trust readiness, Replay, Ledger and Telemetry cards evaluate current pipeline/run
+type telemetry independently of the selected Run ID. Selected-run Trust can remain
+OK from persisted evidence while these cards report INCOMPLETE, UNKNOWN or CRIT.
+Open Inspect Telemetry Coverage on Trust to identify the missing evidence.
+
+Check Pushgateway `/api/v1/metrics` and Prometheus `push_time_seconds` first. An
+empty gateway has no retained CLI snapshots. Required coverage includes manifest
+writes, ledger appends, both replay-risk types and both integrity-ratio types.
+Scrape `up=1` alone does not establish coverage. Missing coverage deliberately
+suppresses zero-valued Replay and Ledger cards.
+
+The optional monitoring stack persists snapshots in `pushgateway-data` at
+`/pushgateway/metrics.db`, with a 30-second persistence interval. Preserve this
+volume during recreation; do not use `down -v` for routine recovery. Abrupt failure
+can lose writes since the last flush. Restarting must retain the original
+`push_time_seconds`, not make an old observation look newly published.
+
+Enabling persistence cannot recover snapshots already lost. Wait for a genuine
+pipeline publication or restore a verified gateway backup. Do not seed zero
+counters in a fresh process to claim historical success or replay a pipeline
+solely to change dashboard colours. Keep missing evidence visible until recovered.
+
 ### Validation Scope
 
 This checklist validates that operators can:

@@ -380,7 +380,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">CURRENT · Pipeline / Run Type readiness is shown at right.<br>SELECTED RUN · Do not replay while Trust is INCOMPLETE or UNKNOWN. Check retention below.</div>",
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">CURRENT · Missing telemetry blocks readiness. See <em>Inspect Telemetry Coverage</em> below.<br>SELECTED RUN · Do not replay while Trust is INCOMPLETE or UNKNOWN. Check retention below.</div>",
         "dataLinks": [
           {
             "title": "Open Replay Safety Diagnostics",
@@ -424,7 +424,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter this panel. Palette: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. UNKNOWN means evidence incomplete. This CURRENT verdict is not exact-run processing_status or trust_status. OK here does not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN still blocks replay.",
+      "description": "CURRENT · Pipeline/run type readiness, independent of Run ID. INCOMPLETE means required telemetry or checkpoint evidence is missing. Inspect Telemetry Coverage below. Selected-run Trust uses persisted exact-run evidence and can remain OK. No status here authorizes replay on its own.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1644,7 +1644,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · CURRENT · Shows current replay/resume blockers from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero when telemetry coverage is missing. Missing required telemetry suppresses a misleading OK; UNKNOWN requires evidence inspection. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
+      "description": "CURRENT · Replay uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1857,7 +1857,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · SELECTED RUN · Shows manifest-write and ledger-append failures from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Use run evidence to verify integrity for an exact run. Missing required telemetry suppresses a misleading OK; UNKNOWN requires evidence inspection. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
+      "description": "CURRENT · Ledger uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1963,7 +1963,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · Shows whether required manifest and ledger telemetry is available. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero blocker cards when this panel is not OK; validate Prometheus scrape/rules. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
+      "description": "CURRENT · Required telemetry coverage over 5 minutes, independent of Run ID. CRIT means at least two required groups are missing; it does not count failed runs. Inspect Telemetry Coverage below for manifest, ledger, replay-risk, integrity and publication evidence. An empty Pushgateway after restart requires a genuine new publication or verified backup, never synthetic zero counters.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -10862,6 +10862,129 @@
             }
           ],
           "links": []
+        }
+      ]
+    },
+    {
+      "id": 9490,
+      "type": "row",
+      "title": "Inspect Telemetry Coverage",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 27,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "CURRENT · Worst coverage in selected pipeline/run type scope. PRESENT means series observed, not successful processing. Publication requires an original positive timestamp no later than now; age alone is informational. Run ID and dashboard time range do not change these fixed-window checks.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "PRESENT",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "MISSING",
+                      "color": "red"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "short",
+              "noValue": "UNKNOWN"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 28,
+            "w": 24,
+            "h": 8
+          },
+          "id": 9491,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
+          },
+          "pluginVersion": "9.5.0",
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+              "instant": true,
+              "legendFormat": "Manifest writes (5m)"
+            },
+            {
+              "refId": "B",
+              "expr": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+              "instant": true,
+              "legendFormat": "Ledger appends (5m)"
+            },
+            {
+              "refId": "C",
+              "expr": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~\"duplicate|overwrite\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+              "instant": true,
+              "legendFormat": "Replay risk pair (5m)"
+            },
+            {
+              "refId": "D",
+              "expr": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~\"consistent|inconsistent\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+              "instant": true,
+              "legendFormat": "Integrity pair (5m)"
+            },
+            {
+              "refId": "E",
+              "expr": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} > 0 and push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} <= time())) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+              "instant": true,
+              "legendFormat": "Publication timestamp"
+            }
+          ],
+          "title": "Inspect Telemetry Coverage",
+          "type": "stat"
         }
       ]
     }
