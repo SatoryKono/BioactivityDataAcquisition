@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Provider Explorer (population-first). First screen answers which providers are degraded via GLOBAL severity matrix and top causes. Selected provider detail is secondary. Empty-state taxonomy: VALID EMPTY vs projection gap.",
+  "description": "Текущий статус выбранного провайдера. Run ID этот статус не меняет. Общий список — в разделе «Все провайдеры» ниже.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -448,11 +448,11 @@
         "x": 0,
         "y": 2
       },
-      "description": "CURRENT · статус выбранного провайдера. Run ID — контекст навигации, не история проверки. Раздел «Все провайдеры» ниже не фильтруется выбранным Provider.",
+      "description": "Текущий статус ${provider}. Run ID ${run_id} этот статус не меняет. Общий список — в разделе «Все провайдеры» ниже.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Current Provider",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2\">Текущее состояние провайдера ${provider}. Run ID не меняет этот статус. All — общий обзор.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2\">Текущий статус ${provider}. Запуск ${run_id} — контекст навигации, не здоровье провайдера сейчас. Общий список ниже.</div>"
       },
       "links": []
     },
@@ -470,7 +470,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · выбранный провайдер. UNKNOWN: нет или недостоверно наблюдение. TELEMETRY MISSING: нет серии. QUERY ERROR: сбой запроса. All — общий статус; одна серия не означает полноту набора.",
+      "description": "CURRENT. UNKNOWN: нет или недостоверно наблюдение. TELEMETRY MISSING: нет серии. QUERY ERROR: сбой запроса. All показывает число провайдеров в каждом статусе, не одну цифру.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -478,49 +478,7 @@
           },
           "decimals": 0,
           "displayName": "Monitor Selected Provider",
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "#555555"
-                }
-              }
-            },
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "#555555"
-                }
-              }
-            },
-            {
-              "type": "special",
-              "options": {
-                "match": "nan",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "#555555"
-                }
-              }
-            }
-          ],
+          "mappings": [],
           "noValue": "TELEMETRY MISSING",
           "thresholds": {
             "mode": "absolute",
@@ -543,7 +501,7 @@
               }
             ]
           },
-          "unit": "none"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -551,26 +509,14 @@
         "colorMode": "background",
         "dataLinks": [
           {
-            "title": "Inspect Provider Telemetry Presence",
-            "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9104&${__url_time_range}",
+            "title": "Все провайдеры · статус",
+            "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${provider:queryparam}&viewPanel=9101&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           },
           {
-            "title": "Review Raw Provider Health Enum",
-            "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=114&${__url_time_range}",
-            "targetBlank": false,
-            "includeVars": false
-          },
-          {
-            "title": "Inspect Severity Matrix",
-            "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9101&${__url_time_range}",
-            "targetBlank": false,
-            "includeVars": false
-          },
-          {
-            "title": "Inspect provider top causes",
-            "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9103&${__url_time_range}",
+            "title": "Все провайдеры · evidence",
+            "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${provider:queryparam}&viewPanel=9107&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           }
@@ -593,9 +539,28 @@
       },
       "targets": [
         {
-          "expr": "max(bioetl_pstatus{provider=~\"$provider\"} == 2) or max(bioetl_pstatus{provider=~\"$provider\"} == 1) or max(bioetl_pstatus{provider=~\"$provider\"} == 3) or max(bioetl_pstatus{provider=~\"$provider\"} == 0)",
-          "refId": "A",
-          "instant": true
+          "expr": "count(bioetl_pstatus{provider=~\"$provider\"} == 0)",
+          "legendFormat": "OK",
+          "instant": true,
+          "refId": "A"
+        },
+        {
+          "expr": "count(bioetl_pstatus{provider=~\"$provider\"} == 1)",
+          "legendFormat": "WARN",
+          "instant": true,
+          "refId": "B"
+        },
+        {
+          "expr": "count(bioetl_pstatus{provider=~\"$provider\"} == 2)",
+          "legendFormat": "CRIT",
+          "instant": true,
+          "refId": "C"
+        },
+        {
+          "expr": "count(bioetl_pstatus{provider=~\"$provider\"} == 3)",
+          "legendFormat": "UNKNOWN",
+          "instant": true,
+          "refId": "D"
         }
       ]
     },
@@ -855,7 +820,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 7
+        "y": 20
       },
       "id": 9101,
       "options": {
@@ -1292,7 +1257,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 7
+        "y": 20
       },
       "id": 9107,
       "options": {
@@ -1420,7 +1385,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 28
       },
       "id": 9104,
       "options": {
@@ -1459,7 +1424,7 @@
     {
       "type": "row",
       "id": 9106,
-      "title": "Inspect Fleet Non-OK and Causes",
+      "title": "Все провайдеры",
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -5309,7 +5274,7 @@
             "h": 12
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
+          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Run ID is navigation context and does not change current provider health. Missing checks are INCOMPLETE; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -5534,7 +5499,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
+          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Run ID is navigation context and does not change current provider health. Missing checks are INCOMPLETE; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
