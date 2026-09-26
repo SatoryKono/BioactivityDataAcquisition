@@ -745,7 +745,7 @@
         "h": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "This table is stage accounting for the selected run. Percentage is the share of the prior stage in this same table. The count column is the record count stored in the value field. SELECTED RUN · TIME RANGE · Do not put full UUIDs into Prometheus labels. Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
+      "description": "Record counts do not set the provider check result. This table is stage accounting for the selected run. Percentage is the share of the prior stage in this same table. The count column is the record count stored in the value field. SELECTED RUN · TIME RANGE · Do not put full UUIDs into Prometheus labels. Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1106,7 +1106,7 @@
         "h": 3
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "PRESENT means the check was stored, not that it passed. It shows one saved provider-check row. This table keeps only Check result and Evidence. SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
+      "description": "The row comes from provider_checks on the saved report. PRESENT means the check was stored, not that it passed. It shows one saved provider-check row. This table keeps only Check result and Evidence. SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
       "options": {
         "showHeader": true,
         "cellHeight": "sm",
@@ -1189,7 +1189,7 @@
         "h": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "Observed at is the stored observation time. Rows come from provider_checks on the saved report. Columns are Provider, Check result, Evidence, and Observed at. SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
+      "description": "An empty table means provider_checks was not saved. Observed at is the stored observation time. Rows come from provider_checks on the saved report. Columns are Provider, Check result, Evidence, and Observed at. SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
       "options": {
         "showHeader": true,
         "cellHeight": "sm",
