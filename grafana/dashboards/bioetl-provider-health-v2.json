@@ -1810,7 +1810,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · CURRENT · Top current causes of provider degradation, bounded to the worst three rows, such as raw health, failures, retry exhaustion, latency, HTTP errors, or rate limiting. Scope: fleet; not filtered by run ID. This table renders exactly one state: active-cause rows, or a single FLEET verdict row. VALID EMPTY needs proven coverage — recorded status for every provider, no provider above OK, present health telemetry, present cause series, and no active cause. Unproven coverage stays UNKNOWN and means restore provider telemetry; it is never a healthy empty. Datasource or query failure is QUERY ERROR, never an empty table. Complete cause evidence remains in Inspect Full Fleet Evidence. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
+          "description": "This top causes table shows the three strongest current degradation causes. TIME RANGE · CURRENT · Top current causes of provider degradation, bounded to the worst three rows, such as raw health, failures, retry exhaustion, latency, HTTP errors, or rate limiting. Scope: fleet; not filtered by run ID. This table renders exactly one state: active-cause rows, or a single FLEET verdict row. VALID EMPTY needs proven coverage — recorded status for every provider, no provider above OK, present health telemetry, present cause series, and no active cause. Unproven coverage stays UNKNOWN and means restore provider telemetry; it is never a healthy empty. Datasource or query failure is QUERY ERROR, never an empty table. Complete cause evidence remains in Inspect Full Fleet Evidence. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2173,7 +2173,7 @@
     },
     {
       "collapsed": true,
-      "description": "Detailed list of the same providers, not a second current status. Complete fleet, non-OK-provider, and cause evidence. First-screen tables stay bounded to four rows; this lane is the unbounded forensic copy. Empty domains are not a healthy-fleet verdict.",
+      "description": "This fleet details row shows the full fleet tables when expanded. Detailed list of the same providers, not a second current status. Complete fleet, non-OK-provider, and cause evidence. First-screen tables stay bounded to four rows; this lane is the unbounded forensic copy. Empty domains are not a healthy-fleet verdict.",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -2189,7 +2189,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · TIME RANGE · Complete GLOBAL provider severity matrix. First-screen Monitor Fleet Severity is the four-row summary. TELEMETRY MISSING is a blind spot, not a healthy fleet. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
+          "description": "This full severity table shows the complete current severity matrix. CURRENT · TIME RANGE · Complete GLOBAL provider severity matrix. First-screen Monitor Fleet Severity is the four-row summary. TELEMETRY MISSING is a blind spot, not a healthy fleet. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "gridPos": {
             "x": 0,
             "y": 20,
