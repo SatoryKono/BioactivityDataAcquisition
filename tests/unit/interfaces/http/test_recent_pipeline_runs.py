@@ -148,6 +148,10 @@ def test_manifest_fallback_does_not_claim_running_or_duplicate_report(tmp_path):
     assert rows[1]["status"] == "success"
     assert rows[1]["processing_status"] == "success"
     assert rows[1]["trust_status"] == "Inspect in 1. Trust"
+    assert rows[0]["overview_handoff"] == "Open"
+    assert rows[1]["diagnostics_handoff"] == "Open"
+    assert rows[1]["provider_handoff"] == "Open"
+    assert rows[1]["quality_handoff"] == "Open"
     assert rows[1]["report_state"] == "AVAILABLE"
     assert rows[1]["started_at_source"] == "manifest_created_at_fallback"
 

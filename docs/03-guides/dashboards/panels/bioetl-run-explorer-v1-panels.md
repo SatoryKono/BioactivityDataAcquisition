@@ -14,8 +14,9 @@ available independently of the dashboard.
 
 ## Navigate Dashboards
 
-The navigation bus preserves scope and time range. Incoming links from other
-workspaces open the Run Explorer list without targeting a removed panel.
+Chips on this page are non-interactive. Open Trust, Overview, Pipeline
+Diagnostics, Provider Health, and Data Quality from the matching columns in
+Inspect Recent Runs. Incoming links from other workspaces still open this list.
 
 ### 1. Understand Run Scope
 
