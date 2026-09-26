@@ -1647,6 +1647,33 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "and read Review Processed Records for this Run ID. An empty identity "
             "table is not zero records."
         )
+    request_empty = (
+        "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
+    )
+    for panel_id in (9413, 9414, 9415, 9417):
+        panel = by_id.get(panel_id)
+        if isinstance(panel, dict):
+            _set_panel_no_value(panel, request_empty)
+    retention_empty = by_id.get(9416)
+    if isinstance(retention_empty, dict):
+        _set_panel_no_value(
+            retention_empty,
+            request_empty + " HTTP 504 is a query error, not an empty result.",
+        )
+    missing_identity = by_id.get(9410)
+    if isinstance(missing_identity, dict):
+        missing_identity["description"] = (
+            "Shown when Inspect Identity Values has no rows for this Run ID. "
+            "SELECT RUN means no run is selected. QUERY ERROR means the request failed. "
+            "An empty table is not a failed identity check."
+        )
+    uncovered = by_id.get(139)
+    if isinstance(uncovered, dict):
+        uncovered["description"] = (
+            "This note is not a verdict for the selected Run ID. "
+            "It lists replay signals that stay outside saved-run evidence."
+        )
+        _set_panel_no_value(uncovered, "—")
     trust = by_id.get(9418)
     if isinstance(trust, dict):
         trust["description"] = (
