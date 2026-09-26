@@ -257,6 +257,20 @@ def _trust(p: dict[int, dict]) -> None:
         _override(p[pid], "check", "displayName", "Check")
         _override(p[pid], "status", "displayName", "Status")
     _trust_layout(p)
+    _compact_trust_monitors(p)
+
+
+def _compact_trust_monitors(p: dict[int, dict]) -> None:
+    """Match the monitoring band to the readiness card and reclaim its space."""
+    height = p[9401]["gridPos"]["h"]
+    cards = [p[pid] for pid in (891, 892, 893, 907)]
+    old_bottom = max(card["gridPos"]["y"] + card["gridPos"]["h"] for card in cards)
+    new_bottom = max(card["gridPos"]["y"] + height for card in cards)
+    for card in cards:
+        card["gridPos"]["h"] = height
+    for panel in p.values():
+        if panel["gridPos"]["y"] >= old_bottom:
+            panel["gridPos"]["y"] -= old_bottom - new_bottom
 
 
 def _runtime(p: dict[int, dict]) -> None:
