@@ -416,7 +416,7 @@ def _correct_provider(uid: object, panels: dict[int, dict]) -> None:
     _override(panels[9107], "Provider", _WIDTH, 95)
     _override(panels[9107], "Source state", _WIDTH, 105)
     _override(panels[9107], "Status", _WIDTH, 100)
-    selected = 'bioetl_provider_current_status{provider=~"$provider"}'
+    selected = 'bioetl_pstatus{provider=~"$provider"}'
     # Status codes are categories, not severity order: UNKNOWN=3 must not
     # hide a confirmed CRIT=2 or WARN=1 in a multi-provider selection.
     panels[9401]["targets"][0]["expr"] = " or ".join(
@@ -793,17 +793,26 @@ def _correct_runtime(uid: object, panels: dict[int, dict]) -> None:
     if uid != "bioetl-runtime" or 2460 not in panels:
         return
     coverage = panels[9102]
-    coverage["targets"] = [t for t in coverage["targets"] if t.get("refId") != "D"] + [
+    merged = (
+        'label_replace(min(bioetl_rt_stage_ratio{pipeline=~"$pipeline",run_type=~"$run_type"}) '
+        'or on() vector(-1),"k","stages","","") or '
+        'label_replace(bioetl_runtime_trust_gap_active_10m,"k","quality","","")'
+    )
+    kept = [t for t in coverage["targets"] if t.get("refId") not in {"B", "D"}]
+    kept.append(
         {
-            "refId": "D",
-            "expr": "bioetl_runtime_trust_gap_active_10m",
+            "expr": merged,
+            "refId": "B",
             "instant": True,
-            "legendFormat": "Monitoring quality (10m)",
+            "legendFormat": "{{k}}",
         }
-    ]
+    )
+    coverage["targets"] = sorted(kept, key=lambda item: str(item.get("refId")))
+    _override(coverage, "stages", "displayName", "Expected stage signals")
+    _override(coverage, "quality", "displayName", "Monitoring quality (10m)")
     _override(
         coverage,
-        "Monitoring quality (10m)",
+        "quality",
         "mappings",
         [
             {

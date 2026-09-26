@@ -54,6 +54,7 @@ metric_coverage_classes:
   bioetl_health_check_success_total: event_optional
   bioetl_http_request_errors_total: event_optional
   bioetl_incident_alert_priority: required_current
+  bioetl_incident_global_alerts: required_current
   bioetl_incident_ranked_dq: required_current
   bioetl_incident_ranked_evidence: required_current
   bioetl_incident_ranked_provider: required_current
@@ -88,6 +89,7 @@ metric_coverage_classes:
   bioetl_provider_health_status: required_current
   bioetl_provider_health_status_fresh: required_current
   bioetl_provider_observed_universe: required_current
+  bioetl_pstatus: required_current
   bioetl_rate_limiter_tokens_available: required_current
   bioetl_rate_limiter_wait_seconds_bucket: event_optional
   bioetl_record_flow_invariants_total: event_optional
@@ -97,6 +99,7 @@ metric_coverage_classes:
   bioetl_replay_lag_seconds: required_current
   bioetl_replay_reconstructability_events_total: event_optional
   bioetl_replay_safety_blockers_15m: event_optional
+  bioetl_rt_stage_ratio: required_current
   bioetl_runtime_alert_condition_checkpoint_incompatible_30m: required_when_active
   bioetl_runtime_alert_condition_dq_critical_anomaly_30m: required_when_active
   bioetl_runtime_alert_condition_dq_hard_fail_15m: required_when_active

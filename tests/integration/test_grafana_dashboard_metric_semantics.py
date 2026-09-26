@@ -408,9 +408,7 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         assert "not exact-run evidence" in status_description
         assert "run_id remains local id-only identity context" in status_description
     elif dashboard_name == "bioetl-provider-health-v2.json":
-        assert any(
-            "bioetl_provider_current_status" in expr for expr in status_expressions
-        )
+        assert any("bioetl_pstatus" in expr for expr in status_expressions)
         # Provider headline is current-status based (no selected range glue).
         assert all("$__range" not in expr for expr in status_expressions)
         assert status_description, (

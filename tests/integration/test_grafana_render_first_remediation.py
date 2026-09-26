@@ -1544,10 +1544,17 @@ def test_runtime_first_action_separates_endpoint_from_completeness() -> None:
     assert coverage["options"]["colorMode"] == "value"
     assert {target["legendFormat"] for target in coverage["targets"]} == {
         "Endpoint",
-        "Expected stage signals",
+        "{{k}}",
         "Rule age",
     }
-    assert "UNKNOWN" in _panel(runtime, 9400)["options"]["content"]
+    stage_expr = next(
+        target["expr"] for target in coverage["targets"] if target["refId"] == "B"
+    )
+    assert "bioetl_rt_stage_ratio" in stage_expr
+    assert "bioetl_runtime_trust_gap_active_10m" in stage_expr
+    header = _panel(runtime, 9400)["options"]["content"]
+    assert "monitoring quality (10m)" in header
+    assert "SCRAPING does not prove completeness" in header
     for panel_id in (2542, 2543):
         panel = _panel(runtime, panel_id)
         assert panel["gridPos"]["h"] >= 3

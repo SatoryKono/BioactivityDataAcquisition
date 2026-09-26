@@ -642,6 +642,8 @@ groups:
         expr: (count by (pipeline, run_type) (bioetl_runtime_missing_stage_signal) > bool 0) or (count by (pipeline, run_type) (bioetl_runtime_expected_stage_scope) * 0) or (bioetl_runtime_pipeline_run_type_universe_scoped * 0 + 3)
       - record: bioetl_runtime_stage_evidence_present_ratio
         expr: 1 - ((count by (pipeline, run_type) (bioetl_runtime_missing_stage_signal) or (count by (pipeline, run_type) (bioetl_runtime_expected_stage_scope) * 0)) / (count by (pipeline, run_type) (bioetl_runtime_expected_stage_scope) * 2))
+      - record: bioetl_rt_stage_ratio
+        expr: bioetl_runtime_stage_evidence_present_ratio
 
       - record: bioetl_runtime_stage_progress
         labels:
@@ -657,6 +659,8 @@ groups:
         expr: label_replace(sum by (pipeline, run_type, stage) (rate(bioetl_records_processed_total{stage="bronze"}[5m])), "stage", "ingestion", "", "") or label_replace(sum by (pipeline, run_type, stage) (rate(bioetl_records_processed_total{stage="silver"}[5m])), "stage", "validation", "", "") or label_replace(sum by (pipeline, run_type, stage) (rate(bioetl_records_processed_total{stage="gold"}[5m])), "stage", "output", "", "")
       - record: bioetl_incident_alert_priority
         expr: (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity="critical",alertstate="firing"}) * 0 + 60) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity="critical",alertstate="pending"}) * 0 + 50) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity="warning",alertstate="firing"}) * 0 + 40) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity="warning",alertstate="pending"}) * 0 + 30) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity!~"critical|warning",alertstate="firing"}) * 0 + 20) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity!~"critical|warning",alertstate="pending"}) * 0 + 10)
+      - record: bioetl_incident_global_alerts
+        expr: label_replace(label_replace(label_replace(label_replace((label_replace(label_join((bioetl_incident_alert_priority{provider!=""} or ((bioetl_incident_alert_priority{provider=""} unless bioetl_incident_alert_priority{provider="",pipeline="",alertname="BioETLDockerRuntimeProbeMissing"}) * on(pipeline) group_left(provider) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!="",provider!="",provider!="unknown"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!="",provider!="",provider!="unknown"} > 0)) == 1))) or ((bioetl_incident_alert_priority{provider=""} unless bioetl_incident_alert_priority{provider="",pipeline="",alertname="BioETLDockerRuntimeProbeMissing"}) unless on(pipeline) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!="",provider!="",provider!="unknown"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!="",provider!="",provider!="unknown"} > 0)) == 1))) or label_replace(bioetl_incident_alert_priority{provider="",pipeline="",alertname="BioETLDockerRuntimeProbeMissing"},"provider","N/A — Infrastructure","","")),"pipeline_context",";","alertname","pipeline"),"pipeline","N/A — Docker infrastructure","pipeline_context","BioETLDockerRuntimeProbeMissing;")),"pipeline","Not provided","pipeline","^$"),"provider","Not provided","provider","^$"),"alert_runbook","incident-response","",""),"alert_runbook","docker-stability","alertname","BioETLDockerRuntimeProbeMissing")
 
       # Completeness is scoped to pipeline evidence. Historical rule-scheduling
       # gaps remain visible separately as monitoring quality, not missing stages.
@@ -790,6 +794,9 @@ groups:
           or (max by (provider) (bioetl_provider_health_status) * 0 + 3)
           or (max by (provider) (bioetl_provider_observed_universe) * 0 + 3)
           or (max by (provider) (bioetl_provider_health_check_provider_universe_15m) * 0 + 3)
+      - record: bioetl_pstatus
+        # First-screen alias of bioetl_provider_current_status (DASH-PERF-001).
+        expr: bioetl_provider_current_status
       - record: bioetl_provider_current_status_info
         labels:
           reason: missing_health_status

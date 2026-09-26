@@ -33,7 +33,7 @@ def test_provider_status_uses_filtered_vectors_in_severity_order():
     panel = next(p for p in dashboard["panels"] if p["id"] == 9401)
     branches = panel["targets"][0]["expr"].split(" or ")
     assert branches == [
-        f'max(bioetl_provider_current_status{{provider=~"$provider"}} == {code})'
+        f'max(bioetl_pstatus{{provider=~"$provider"}} == {code})'
         for code in (2, 1, 3, 0)
     ]
     # PromQL comparisons must filter, not emit bool 0/1: the latter would
