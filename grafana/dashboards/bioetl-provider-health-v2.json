@@ -2915,7 +2915,7 @@
           ],
           "title": "Track Health Failures & Degradation",
           "type": "timeseries",
-          "description": "TIME RANGE · Selected-range evidence: failure/degraded probe trend over the active Grafana interval A measured zero means no events (VALID EMPTY); absent series mean TELEMETRY MISSING. Query failures remain QUERY ERROR. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
+          "description": "This failure trend shows how failures and degradation moved over the selected time range. TIME RANGE · Selected-range evidence: failure/degraded probe trend over the active Grafana interval A measured zero means no events (VALID EMPTY); absent series mean TELEMETRY MISSING. Query failures remain QUERY ERROR. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -3020,7 +3020,7 @@
           ],
           "title": "Track Failure Share",
           "type": "table",
-          "description": "TIME RANGE · Selected-range evidence: provider share of failed probes in the active Grafana range. The full share chart is collapsed by default and should be expanded only when total failures are non-zero A measured zero means no events (VALID EMPTY); absent series mean TELEMETRY MISSING. Query failures remain QUERY ERROR."
+          "description": "This failure share table shows the share of failed checks in the selected time range. TIME RANGE · Selected-range evidence: provider share of failed probes in the active Grafana range. The full share chart is collapsed by default and should be expanded only when total failures are non-zero A measured zero means no events (VALID EMPTY); absent series mean TELEMETRY MISSING. Query failures remain QUERY ERROR."
         },
         {
           "datasource": {
@@ -3154,7 +3154,7 @@
           ],
           "title": "Inspect Exhausted Retries",
           "type": "table",
-          "description": "TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected-range evidence: retries exhausted by provider and operation in the active Grafana range. Non-zero rows identify where retry budgets were consumed, not raw provider-health enum state TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: snapshot table of exhausted retries over $__range; the interval trend is Track Exhausted Retries (109).",
+          "description": "This exhausted retries table shows retries exhausted in the chart range. TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected-range evidence: retries exhausted by provider and operation in the active Grafana range. Non-zero rows identify where retry budgets were consumed, not raw provider-health enum state TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: snapshot table of exhausted retries over $__range; the interval trend is Track Exhausted Retries (109).",
           "transformations": [
             {
               "id": "organize",
