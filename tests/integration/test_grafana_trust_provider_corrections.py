@@ -40,7 +40,7 @@ def test_provider_status_uses_filtered_vectors_in_severity_order():
     assert panel["fieldConfig"]["defaults"]["noValue"] == "TELEMETRY MISSING"
     assert "UNKNOWN" in panel["description"]
     fleet = next(item for item in dashboard["panels"] if item.get("id") == 9101)
-    assert fleet["title"].startswith("Все провайдеры")
+    assert fleet["title"].startswith("All providers")
     assert all(
         "Severity Matrix" not in link.get("title", "")
         and "Top Causes" not in link.get("title", "")

@@ -327,14 +327,14 @@ def _provider(p: dict[int, dict]) -> None:
         if target["expr"].startswith("topk(3, ") and target["expr"].endswith(")"):
             target["expr"] = target["expr"][8:-1]
         p[pid]["title"] = (
-            "Все провайдеры · статус"
+            "All providers · status"
             if pid == 9101
-            else "Все провайдеры · evidence"
+            else "All providers · evidence"
         )
         p[pid]["description"] = (
-            "CURRENT · Все провайдеры. Этот раздел не фильтруется выбранным Provider. "
-            "Выбранный Run ID — только контекст навигации и не доказывает историческую "
-            "работоспособность. UNKNOWN означает отсутствие или недостоверность наблюдения."
+            "CURRENT · All providers. This section is not filtered by the selected Provider. "
+            "The selected Run ID is navigation context only and does not prove historical "
+            "health. UNKNOWN means the observation is missing or unreliable."
         )
     _override(p[9101], "Severity", "displayName", "Status")
     _override(p[9101], "Provider", "custom.wrapText", True)
