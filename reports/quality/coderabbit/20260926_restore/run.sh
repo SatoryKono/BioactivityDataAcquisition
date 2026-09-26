@@ -14,9 +14,10 @@ LOGS="$OUT/logs"
 PROGRESS="$OUT/progress.json"
 MIRROR="${BIOETL_CR_MIRROR:-$HOME/bioetl-cr-restore-src}"
 WT="${BIOETL_CR_WT:-$HOME/bioetl-cr-restore-wt}"
-CR_SLEEP="${CR_SLEEP:-12}"
+CR_SLEEP="${CR_SLEEP:-20}"
 CR_TIMEOUT="${CR_TIMEOUT:-900}"
 CR_LIGHT="${CR_LIGHT:-1}"
+CR_RETRIES="${CR_RETRIES:-3}"
 CR_LEAVES="${CR_LEAVES:-S03-infra-adapters,S05-interfaces,S06a-tests-architecture,S06b-tests-architecture,S07-configs-quality,S08a-docs-00-project,S08b-docs-decisions}"
 
 mkdir -p "$LOGS" "$OUT"
@@ -84,11 +85,57 @@ git -C "$REPO" worktree prune >/dev/null 2>&1 || true
 rm -rf "$WT"
 git -C "$REPO" worktree add --detach -f "$WT" "$MAIN_SHA"
 cd "$WT" || exit 1
-git checkout --orphan cr-restore-empty-base >/dev/null 2>&1 || true
+# Linear empty base (child of MAIN) so CodeRabbit 0.8 three-dot diff has a merge-base.
+git checkout -B cr-restore-working "$MAIN_SHA" >/dev/null 2>&1
 git rm -rf . >/dev/null 2>&1 || true
-git -c user.email=cr-restore@local -c user.name=cr-restore commit --allow-empty -m "empty base" >/dev/null
+git -c user.email=cr-restore@local -c user.name=cr-restore commit --allow-empty -m "empty base for CR restore" >/dev/null
 EMPTY_SHA="$(git rev-parse HEAD)"
 echo "EMPTY_SHA=$EMPTY_SHA MAIN_SHA=$MAIN_SHA"
+# Sanity: EMPTY must be ancestor of a leaf commit later; prove merge-base with MAIN exists.
+git merge-base "$EMPTY_SHA" "$MAIN_SHA" >/dev/null || { echo "empty base merge-base failed"; exit 3; }
+
+count_findings() {
+  local path="$1"
+  python3 - <<'PY' "$path"
+import json, sys
+from pathlib import Path
+p = Path(sys.argv[1])
+if not p.exists():
+    print(0)
+    raise SystemExit(0)
+n = 0
+for line in p.read_text(encoding="utf-8", errors="replace").splitlines():
+    try:
+        o = json.loads(line)
+    except Exception:
+        continue
+    if o.get("type") == "finding":
+        n += 1
+print(n)
+PY
+}
+
+classify_log() {
+  local log="$1"
+  local err="$2"
+  local rc="$3"
+  local findings="$4"
+  if grep -q 'All files are ignored' "$log" "$err" 2>/dev/null; then
+    echo "ignored|all_files_ignored"
+  elif grep -qE 'Rate limit exceeded' "$log" "$err" 2>/dev/null; then
+    echo "retry|rate_limit"
+  elif grep -qE 'no merge base' "$log" "$err" 2>/dev/null; then
+    echo "error|no_merge_base"
+  elif grep -qE 'WebSocket closed|Connection failed|"errorType":"connection"' "$log" "$err" 2>/dev/null; then
+    echo "retry|connection"
+  elif grep -qE '"type":"error"' "$log" "$err" 2>/dev/null; then
+    echo "retry|coderabbit_error"
+  elif [[ "$rc" -ne 0 && "$findings" -eq 0 ]]; then
+    echo "error|rc_${rc}"
+  else
+    echo "ok|findings=${findings}"
+  fi
+}
 
 while IFS= read -r leaf_json; do
   lid=$(python3 -c "import sys,json;print(json.load(sys.stdin)['id'])" <<<"$leaf_json")
@@ -98,18 +145,27 @@ while IFS= read -r leaf_json; do
   [[ "$already" == "ok" ]] && { echo "SKIP $lid"; continue; }
 
   echo "RUN $lid files=$files_n dir=$dirp"
+  mkdir -p "$LOGS"
+  tmplog="/tmp/cr_review_${lid}.jsonl"
+  tmperr="/tmp/cr_review_${lid}.stderr.txt"
   log="$LOGS/review_${lid}.jsonl"
-  : >"$log"
+  err="$LOGS/review_${lid}.stderr.txt"
+  : >"$tmplog"
+  : >"$tmperr"
   findings=0
   status=ok
   reason=""
 
-  git checkout -f cr-restore-empty-base >/dev/null 2>&1
+  git checkout -f "$EMPTY_SHA" >/dev/null 2>&1
   git clean -fdx >/dev/null 2>&1
-  git checkout -B "cr-leaf-$lid" cr-restore-empty-base >/dev/null 2>&1
+  git checkout -B "cr-leaf-$lid" "$EMPTY_SHA" >/dev/null 2>&1
 
+  review_dir="."
   if [[ -n "$dirp" ]]; then
-    git checkout "$MAIN_SHA" -- "$dirp" || { status=error; reason=checkout_dir; }
+    if ! git checkout "$MAIN_SHA" -- "$dirp"; then
+      status=error
+      reason=checkout_dir
+    fi
     review_dir="$dirp"
   else
     python3 - <<'PY' "$OUT/_run_plan.json" "$lid" "$MAIN_SHA"
@@ -138,62 +194,76 @@ PY
   if [[ "$status" == "ok" ]]; then
     git add -A >/dev/null 2>&1 || true
     if git diff --cached --quiet; then
-      status=skipped; reason=no_files
+      status=skipped
+      reason=no_files
     else
       git -c user.email=cr-restore@local -c user.name=cr-restore commit -m "leaf $lid" >/dev/null 2>&1 || true
-      set +e
-      timeout --signal=TERM --kill-after=30 "$CR_TIMEOUT" \
-        coderabbit review --agent "${light_flag[@]}" --base-commit="$EMPTY_SHA" --dir "$review_dir" \
-        >"$log" 2>"$LOGS/review_${lid}.stderr.txt"
-      rc=$?
-      set -e
-      findings=$(python3 -c "import json,pathlib;n=0
-p=pathlib.Path('$log')
-for line in p.read_text(encoding='utf-8',errors='replace').splitlines():
-  try: o=json.loads(line)
-  except Exception: continue
-  if o.get('type')=='finding': n+=1
-print(n)")
-      if grep -qE 'Rate limit exceeded|"type":"error"|All files are ignored' "$log" "$LOGS/review_${lid}.stderr.txt" 2>/dev/null; then
-        if grep -q 'All files are ignored' "$log" "$LOGS/review_${lid}.stderr.txt" 2>/dev/null; then
-          status=ignored; reason=all_files_ignored
-        else
-          status=error; reason=coderabbit_error
+      attempt=1
+      while [[ $attempt -le $CR_RETRIES ]]; do
+        echo "  attempt $attempt/$CR_RETRIES"
+        : >"$tmplog"
+        : >"$tmperr"
+        set +e
+        timeout --signal=TERM --kill-after=30 "$CR_TIMEOUT" \
+          coderabbit review --agent "${light_flag[@]}" --base-commit="$EMPTY_SHA" --dir "$review_dir" \
+          >"$tmplog" 2>"$tmperr"
+        rc=$?
+        set +e
+        findings="$(count_findings "$tmplog")"
+        class="$(classify_log "$tmplog" "$tmperr" "$rc" "$findings")"
+        status="${class%%|*}"
+        reason="${class#*|}"
+        echo "  class=$status reason=$reason findings=$findings rc=$rc"
+        if [[ "$status" != "retry" ]]; then
+          break
         fi
-      elif [[ $rc -ne 0 && $findings -eq 0 ]]; then
-        status=error; reason="rc_$rc"
-      else
-        status=ok; reason="findings=$findings"
+        sleep $((CR_SLEEP * attempt))
+        attempt=$((attempt + 1))
+      done
+      if [[ "$status" == "retry" ]]; then
+        status=error
       fi
-      cp -f "$log" "$SRC_AUDIT/review_${lid}.jsonl" 2>/dev/null || true
-      cp -f "$LOGS/review_${lid}.stderr.txt" "$SRC_AUDIT/review_${lid}.stderr.txt" 2>/dev/null || true
+      mkdir -p "$LOGS"
+      cp -f "$tmplog" "$log"
+      cp -f "$tmperr" "$err"
+      cp -f "$tmplog" "$SRC_AUDIT/review_${lid}.jsonl" 2>/dev/null || true
+      cp -f "$tmperr" "$SRC_AUDIT/review_${lid}.stderr.txt" 2>/dev/null || true
     fi
   fi
 
   python3 - <<'PY' "$PROGRESS" "$lid" "$status" "$reason" "$files_n" "$findings"
-import json,datetime,sys
+import json, datetime, sys
 from pathlib import Path
-p=Path(sys.argv[1]); lid,status,reason,files_n,findings=sys.argv[2:7]
-data=json.loads(p.read_text(encoding="utf-8"))
-data.setdefault("results",{})[lid]={"status":status,"reason":reason,"files":int(files_n),"findings":findings,"at":datetime.datetime.utcnow().isoformat()+"Z"}
-p.write_text(json.dumps(data,indent=2),encoding="utf-8")
+p = Path(sys.argv[1])
+lid, status, reason, files_n, findings = sys.argv[2:7]
+data = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {"results": {}}
+data.setdefault("results", {})[lid] = {
+    "status": status,
+    "reason": reason,
+    "files": int(files_n),
+    "findings": findings,
+    "at": datetime.datetime.utcnow().isoformat() + "Z",
+}
+p.write_text(json.dumps(data, indent=2), encoding="utf-8")
 print(f"RESULT {lid} status={status} reason={reason}")
 PY
 
   if [[ "$status" == "ok" ]]; then
     python3 - <<'PY' "$SRC_AUDIT/state.json" "$lid"
-import json,sys
+import json, sys
 from pathlib import Path
-p=Path(sys.argv[1]); lid=sys.argv[2]
-data=json.loads(p.read_text(encoding="utf-8")) if p.exists() else {"ok":[]}
-ok=list(data.get("ok") or [])
-if lid not in ok: ok.append(lid)
-data["ok"]=ok
-p.write_text(json.dumps(data),encoding="utf-8")
+p = Path(sys.argv[1])
+lid = sys.argv[2]
+data = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {"ok": []}
+ok = list(data.get("ok") or [])
+if lid not in ok:
+    ok.append(lid)
+data["ok"] = ok
+p.write_text(json.dumps(data), encoding="utf-8")
 PY
   fi
   sleep "$CR_SLEEP"
 done < <(python3 -c "import json; [print(json.dumps(x)) for x in json.load(open('$OUT/_run_plan.json'))]")
 
 echo "=== restore finished ==="
-python3 -c "import json;print(json.dumps(json.load(open('$PROGRESS')),indent=2))"
+python3 -c "import json; print(json.dumps(json.load(open('$PROGRESS')), indent=2))"
