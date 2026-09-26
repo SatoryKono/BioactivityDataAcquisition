@@ -63,12 +63,12 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
 from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     requires_artifact_publication_closure,
 )
-from bioetl.composition.runtime_builders._runner_control_plane_policy_support import (
+from bioetl.domain.control_plane.artifact_lineage_layers import (
     _has_lineage_sidecar_persistence,
     _is_sink_layer_enabled,
     _resolve_sink_layer_config,
 )
-from bioetl.composition.services.effective_config_serializer import (
+from bioetl.domain.config.effective_config_serializer import (
     _dataclass_to_dict,
     _to_jsonable,
 )
