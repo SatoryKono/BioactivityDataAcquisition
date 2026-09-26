@@ -3,3 +3,5 @@
 - Theme: Overview — навигационная шина читаемость
 - Proposal: Выровнять font-size 16px
 - Status: planned
+
+- Status: CLOSED

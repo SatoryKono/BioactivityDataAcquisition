@@ -3,3 +3,5 @@
 - Theme: Overview — навигационная шина читаемость
 - Proposal: Проверить что nav не использует overflow scroll
 - Status: planned
+
+- Status: CLOSED

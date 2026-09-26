@@ -3,3 +3,5 @@
 - Theme: Overview — навигационная шина читаемость
 - Proposal: Увеличить gap между nav chips с 8px до 10px для 1366px
 - Status: planned
+
+- Status: CLOSED

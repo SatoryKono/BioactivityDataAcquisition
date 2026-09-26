@@ -3,3 +3,5 @@
 - Theme: Overview — навигационная шина читаемость
 - Proposal: Добавить aria-current подсветку для текущего дашборда
 - Status: planned
+
+- Status: CLOSED
