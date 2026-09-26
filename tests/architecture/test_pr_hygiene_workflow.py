@@ -33,12 +33,13 @@ def test_pr_hygiene_policy_documents_issue_first_governance() -> None:
     assert "21" in content
 
 
-def test_pr_hygiene_workflow_is_manual_and_scheduled() -> None:
+def test_pr_hygiene_workflow_is_dispatch_only_and_keep_disabled() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
+    assert "KEEP-DISABLED (#10263)" in workflow
     assert "workflow_dispatch:" in workflow
-    assert "schedule:" in workflow
-    assert 'cron: "30 6 * * 1"' in workflow
+    assert "cron:" not in workflow
+    assert "if: ${{ false }}" in workflow
 
 
 def test_pr_hygiene_workflow_closes_only_stale_report_noise_drafts() -> None:

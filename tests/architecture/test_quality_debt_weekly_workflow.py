@@ -20,14 +20,15 @@ from pathlib import Path
 pytestmark = pytest.mark.architecture
 
 
-def test_quality_debt_weekly_workflow_exists_and_is_scheduled() -> None:
+def test_quality_debt_weekly_workflow_exists_and_stays_keep_disabled() -> None:
     workflow_path = Path(".github/workflows/quality-debt-weekly.yml")
     assert workflow_path.exists(), "quality-debt-weekly workflow file must exist"
 
     workflow = workflow_path.read_text(encoding="utf-8")
-    assert "schedule:" in workflow
-    assert 'cron: "45 4 * * 1"' in workflow
+    assert "KEEP-DISABLED (#10263)" in workflow
+    assert "cron:" not in workflow
     assert "workflow_dispatch:" in workflow
+    assert "if: ${{ false }}" in workflow
 
 
 def test_quality_debt_weekly_workflow_runs_report_script() -> None:

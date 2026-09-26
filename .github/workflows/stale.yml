@@ -8,8 +8,8 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  schedule:
-    - cron: "0 6 * * 1"  # every Monday at 06:00 UTC
+  # schedule removed (#11234). Cron must not spend minutes while billing is off.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,6 +20,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    if: ${{ false }}
     steps:
       - uses: actions/stale@5bef64f19d7facfb25b37b414482c7164d639639 # v9
         with:
