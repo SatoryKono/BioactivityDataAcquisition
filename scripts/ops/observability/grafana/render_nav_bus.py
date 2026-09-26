@@ -122,14 +122,14 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-provider-health-v2": {9101: 4, 9107: 4},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 3, 18, 3),
-    9422: (18, 3, 6, 3),
-    9418: (0, 6, 12, 7),
-    9416: (12, 6, 12, 7),
+    9400: (0, 3, 24, 2),
+    9422: (0, 5, 24, 3),
+    9418: (0, 8, 12, 7),
+    9416: (12, 8, 12, 7),
 }
-_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
+_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 15
 # Runtime already owns current readiness as 9401 Monitor Pipeline Status.
-_TRUST_DROP_PANEL_IDS = frozenset({9401})
+_TRUST_DROP_PANEL_IDS = frozenset({9401, 9404, 9452})
 _TRUST_MOVE_PANEL_IDS = frozenset(
     {
         891,
@@ -214,9 +214,8 @@ _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
     'font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch">'
-    "SELECTED RUN · Exact replay readiness is the answer on the right.<br>"
-    "Saved evidence decides. CURRENT telemetry does not change this verdict. "
-    "Do not replay while Trust is INCOMPLETE or UNKNOWN.</div>"
+    "SELECTED RUN · Read exact replay readiness first, then the saved Trust verdict, "
+    "then retention.</div>"
 )
 _RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (
@@ -1085,17 +1084,26 @@ def _stamp_control_plane_counts(by_id: dict[object, dict[str, object]]) -> None:
             count_panel["description"] = description + count_note
 
 
+_SELECT_RUN_EMPTY = (
+    "SELECT RUN — no exact Run ID selected. Choose a run first. "
+    "VALID EMPTY if the selected run has no rows for this table."
+)
+_RUN_EXPLORER_URL = (
+    "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?"
+    "${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}"
+    "&${run_id:queryparam}&${__url_time_range}"
+)
+
+
 def _stamp_recovery_copy(by_id: dict[object, dict[str, object]]) -> None:
     if 9400 not in by_id:
         return
     options = by_id[9400].setdefault("options", {})
     options["content"] = _RECOVERY_ACTION_HTML
     by_id[9400]["description"] = (
-        "CURRENT readiness is pipeline/run_type telemetry. SELECTED RUN Trust "
-        "and retention tables are exact-run persisted evidence. An incomplete "
-        "selected run cannot be replayed even when current readiness is OK. "
-        "Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when "
-        "OUT OF RANGE. Effective refresh: 60s · timezone: browser."
+        "SELECTED RUN · Read exact replay readiness first, then the saved Trust "
+        "verdict, then retention. Those three answers use the selected Run ID. "
+        "They do not use current Prometheus telemetry."
     )
 
 
@@ -1182,7 +1190,10 @@ def _stamp_retention_override(
         properties.append({"id": CUSTOM_WIDTH, "value": widths[field]})
     if field in {"reason", "Reason", "check", "Check", "status", "Status"}:
         _set_override_value(override, "links", [])
+    if field in {"check", "Check", "status", "Status"}:
         _set_override_value(override, "custom.inspect", False)
+    if field in {"reason", "Reason"}:
+        _set_override_value(override, "custom.inspect", True)
     if field in {"reason", "Reason"}:
         override["properties"] = [
             p for p in override.get("properties", []) if p.get("id") != CUSTOM_WIDTH
@@ -1333,9 +1344,9 @@ def _stamp_trust_override(override: dict[str, object]) -> None:
     if field in {"processing_status", "Processing result"}:
         _set_override_value(override, "displayName", "Processing result")
     width = {
-        "Processing result": 150,
-        "Saved trust verdict": 160,
-        "Reason count": 120,
+        "Processing result": 110,
+        "Saved trust verdict": 110,
+        "Reason count": 70,
     }.get(field)
     if width is not None:
         _set_override_value(override, CUSTOM_WIDTH, width)
@@ -1419,7 +1430,7 @@ def _ensure_exact_replay_readiness_panel(panels: list[object]) -> None:
                 "INSUFFICIENT means a required check could not be completed. UNSUPPORTED "
                 "means this family cannot exact-replay. SELECT RUN and QUERY ERROR are "
                 "request states. N/A is not zero. CURRENT Prometheus does not change this "
-                "verdict. Inspect Replay Safety State remains diagnostic, not this answer."
+                "verdict."
             ),
             "options": {
                 "showHeader": True,
@@ -1428,7 +1439,7 @@ def _ensure_exact_replay_readiness_panel(panels: list[object]) -> None:
             },
             "fieldConfig": {
                 "defaults": {
-                    "noValue": "QUERY ERROR",
+                    "noValue": "—",
                     "unit": "none",
                     "custom": {"align": "left", "inspect": True},
                 },
@@ -1471,24 +1482,106 @@ def _ensure_exact_replay_readiness_panel(panels: list[object]) -> None:
                     },
                 },
             ],
-            "links": [
-                {
-                    "title": "Inspect Replay Safety State",
-                    "url": (
-                        "/d/bioetl-control-plane-v1/1-trust?"
-                        "${workflow:queryparam}&${pipeline:queryparam}&"
-                        "${run_type:queryparam}&${run_id:queryparam}&viewPanel=9422"
-                    ),
-                    "targetBlank": False,
-                }
-            ],
+            "links": [],
         }
     )
+
+
+def _set_panel_no_value(panel: dict[str, object], text: str) -> None:
+    field_config = panel.setdefault("fieldConfig", {})
+    if not isinstance(field_config, dict):
+        return
+    defaults = field_config.setdefault("defaults", {})
+    if isinstance(defaults, dict):
+        defaults["noValue"] = text
+
+
+def _stamp_exact_replay_panel(panels: list[object]) -> None:
+    """Keep the readiness answer full-width and free of a self-link."""
+    for panel in _walk_panels(panels):
+        if not isinstance(panel, dict) or panel.get("id") != 9422:
+            continue
+        panel["links"] = []
+        panel["description"] = (
+            "SELECTED RUN · Exact replay readiness of the selected Run ID from saved "
+            "inputs. READY means required checks passed, not that a replay already ran "
+            "and not permission to write current tables. BLOCKED is a proven gap. "
+            "INSUFFICIENT means a required check could not be completed. UNSUPPORTED "
+            "means this family cannot exact-replay. SELECT RUN and QUERY ERROR are "
+            "request states. N/A is not zero. CURRENT Prometheus does not change this "
+            "verdict."
+        )
+        _set_panel_no_value(panel, "—")
+        transforms = panel.setdefault("transformations", [])
+        if isinstance(transforms, list) and not any(
+            isinstance(item, dict) and item.get("id") == "limit" for item in transforms
+        ):
+            transforms.append({"id": "limit", "options": {"limitField": 1}})
+
+
+def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
+    """Align Trust copy with panels that still assess the selected Run ID."""
+    by_id = {
+        panel.get("id"): panel
+        for panel in _walk_panels(panels)
+        if isinstance(panel, dict)
+    }
+    row_copy = {
+        902: (
+            "Inspect Checkpoint and Replay Checks",
+            "Expand to review checkpoint validation and exact-replay checks for the selected Run ID.",
+        ),
+        901: (
+            "Inspect Manifest Validation",
+            "Expand to review manifest validation for the selected Run ID.",
+        ),
+    }
+    for panel_id, (title, description) in row_copy.items():
+        row = by_id.get(panel_id)
+        if isinstance(row, dict):
+            row["title"] = title
+            row["description"] = description
+    empty_copy = {
+        9406: (
+            "SELECT RUN — no exact Run ID selected. Choose a run first. "
+            "VALID EMPTY if this run has no checkpoint comparison."
+        ),
+        9408: (
+            "SELECT RUN — no exact Run ID selected. Choose a run first. "
+            "VALID EMPTY if this run has no replay anchors."
+        ),
+        9411: _SELECT_RUN_EMPTY,
+        139: _SELECT_RUN_EMPTY,
+        9403: (
+            "SELECT RUN — no exact Run ID selected. "
+            "Choose this run in Run Explorer."
+        ),
+    }
+    for panel_id, text in empty_copy.items():
+        panel = by_id.get(panel_id)
+        if isinstance(panel, dict):
+            _set_panel_no_value(panel, text)
+    processed = by_id.get(9403)
+    if isinstance(processed, dict):
+        description = str(processed.get("description") or "")
+        description = description.replace("Inspect Recent Runs", "Run Explorer")
+        note = " Open Run Explorer for this same Run ID."
+        if note.strip() not in description:
+            description += note
+        processed["description"] = description
+        processed["links"] = [
+            {
+                "title": "Open Run Explorer",
+                "url": _RUN_EXPLORER_URL,
+                "targetBlank": False,
+            }
+        ]
 
 
 def _layout_control_plane_first_window(panels: list[object]) -> None:
     """Keep Trust density/readability while fitting the canonical h=4 nav."""
     _ensure_exact_replay_readiness_panel(panels)
+    _stamp_exact_replay_panel(panels)
     root = _root_panels(panels)
     rows = [panel for panel in root if panel.get("type") == "row"]
     row_geometries = [
@@ -1508,6 +1601,7 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
     _stamp_retention_copy(by_id)
     _stamp_retention_readability(by_id)
     _stamp_aggregate_trust(by_id)
+    _stamp_trust_operator_surfaces(panels)
     if 906 in by_id:
         _stamp_control_plane_recovery_cta(by_id[906])
 
@@ -2036,6 +2130,12 @@ def apply_to_dashboard(
         safe_path.read_text(encoding="utf-8")  # NOSONAR - confined under DASH_DIR
     )
     if current_uid == "bioetl-control-plane-v1":
+        payload["description"] = (
+            "Answers whether the selected Run ID can be exact-replayed from saved "
+            "evidence. The first screen shows exact replay readiness, the saved Trust "
+            "verdict, and retention. Collapsed rows hold checkpoint validation, "
+            "manifest validation, identity, run details, discovery, and saved domain reasons."
+        )
         _stash_trust_range_panels(payload)
     elif current_uid == "bioetl-runtime":
         _attach_trust_range_panels(payload)

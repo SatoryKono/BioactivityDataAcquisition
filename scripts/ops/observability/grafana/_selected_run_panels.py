@@ -155,10 +155,13 @@ def _stamp_control_plane_copy(panel: dict[str, object], uid: object) -> None:
         )
     if panel.get("id") == 9403:
         description = str(panel.get("description") or "")
-        panel["description"] = description.replace("SELECTED RUN · CURRENT · ", "SELECTED RUN · ")
+        panel["description"] = description.replace(
+            "SELECTED RUN · CURRENT · ", "SELECTED RUN · "
+        ).replace("Inspect Recent Runs", "Run Explorer")
     if panel.get("id") == 9421:
         panel["description"] = (
-            DESCRIPTION + " SELECTED RUN search: find an exact persisted identity."
+            "SELECTED RUN · Search persisted runs and choose one Run ID. "
+            "This table does not score the run already selected above."
         )
 
 
@@ -310,7 +313,9 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
     }
 
 
-def _append_saved_run_evidence_row(panels: list[object]) -> None:
+def _append_saved_run_evidence_row(
+    panels: list[object], *, include_identity: bool = True
+) -> None:
     panels[:] = [
         panel
         for panel in panels
@@ -331,23 +336,31 @@ def _append_saved_run_evidence_row(panels: list[object]) -> None:
         domains=True,
     )
     _detail_fields(details, ["domain", "verdict", "reason", "action", "evidence_ref"])
-    summary = _panel(
-        9452,
-        "Inspect Selected Run Identity",
-        {"x": 0, "y": y + 19, "w": 24, "h": 8},
-        domains=False,
-    )
-    _detail_fields(
-        summary,
-        [
-            "pipeline",
-            "run_id",
-            "completed_at",
-            "rules_version",
-            "revision",
-            "evidence_completeness",
-        ],
-    )
+    children: list[object] = [stages, details]
+    if include_identity:
+        summary = _panel(
+            9452,
+            "Inspect Selected Run Identity",
+            {"x": 0, "y": y + 19, "w": 24, "h": 8},
+            domains=False,
+        )
+        _detail_fields(
+            summary,
+            [
+                "pipeline",
+                "run_id",
+                "completed_at",
+                "rules_version",
+                "revision",
+                "evidence_completeness",
+            ],
+        )
+        children.append(deepcopy(summary))
+    else:
+        details["description"] = (
+            "SELECTED RUN · Domain trust reasons for this Run ID. "
+            "Open this table from View trust reasons when the reason count is greater than zero."
+        )
     panels.append(
         {
             "id": 9450,
@@ -355,7 +368,7 @@ def _append_saved_run_evidence_row(panels: list[object]) -> None:
             "title": "Inspect Saved Run Evidence",
             "collapsed": True,
             "gridPos": {"x": 0, "y": y, "w": 24, "h": 1},
-            "panels": [stages, details, deepcopy(summary)],
+            "panels": children,
         }
     )
 
@@ -594,7 +607,9 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
         _stamp_overview_derived_panels(panel, uid)
     prune_provider_health_panels(payload)
     panels = payload.get("panels", [])
-    _append_saved_run_evidence_row(panels)
+    _append_saved_run_evidence_row(
+        panels, include_identity=uid != _CONTROL_PLANE_UID
+    )
 
 
 SELECTOR_ROWS = (

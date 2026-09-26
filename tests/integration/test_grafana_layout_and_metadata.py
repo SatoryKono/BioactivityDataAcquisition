@@ -275,8 +275,8 @@ def test_control_plane_row_sequence_matches_operator_flow() -> None:
     ]
     expected_prefix = [
         (9419, "Review Lineage Validation"),
-        (902, "Inspect Replay & Checkpoint Evidence"),
-        (901, "Inspect Manifest & Ledger Evidence"),
+        (902, "Inspect Checkpoint and Replay Checks"),
+        (901, "Inspect Manifest Validation"),
         (905, "Inspect Run Identity Evidence"),
     ]
     assert row_pairs[: len(expected_prefix)] == expected_prefix, (
@@ -307,7 +307,7 @@ def test_control_plane_named_review_surfaces_are_findable() -> None:
     assert lineage_row.get("collapsed") is True
     assert trust.get("gridPos", {}).get("y", 99) < 18
     assert retention.get("gridPos", {}).get("y", 99) < 18
-    assert lineage_row.get("gridPos", {}).get("y") == 17
+    assert lineage_row.get("gridPos", {}).get("y") == 15
     child_ids = [child.get("id") for child in lineage_row.get("panels") or []]
     assert 9415 in child_ids
     lineage = next(
@@ -347,7 +347,7 @@ def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:
     }
     panel = panels.get("Track Replay Blockers")
     assert panel is not None
-    row_panel = panels["Inspect Replay & Checkpoint Evidence"]
+    row_panel = panels["Inspect Checkpoint and Replay Checks"]
     grid_pos = panel.get("gridPos", {})
     assert grid_pos.get("y") > row_panel.get("gridPos", {}).get("y", 0)
     assert grid_pos.get("w", 0) == 8
@@ -431,10 +431,10 @@ def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
     row = next(
         panel
         for panel in dashboard.get("panels", [])
-        if panel.get("title") == "Inspect Manifest & Ledger Evidence"
+        if panel.get("title") == "Inspect Manifest Validation"
     )
     assert row.get("collapsed") is True
-    child_panels = get_row_child_panels(dashboard, "Inspect Manifest & Ledger Evidence")
+    child_panels = get_row_child_panels(dashboard, "Inspect Manifest Validation")
     panels = {panel.get("title"): panel for panel in child_panels if panel.get("title")}
     terminal = panels["Review Observed Terminal Counters"]
     terminal_grid = terminal.get("gridPos", {})
@@ -470,11 +470,11 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
         panel
         for panel in dashboard.get("panels", [])
         if panel.get("type") == "row"
-        and panel.get("title") == "Inspect Replay & Checkpoint Evidence"
+        and panel.get("title") == "Inspect Checkpoint and Replay Checks"
     )
     assert row_panel.get("collapsed") is True
     child_panels = get_row_child_panels(
-        dashboard, "Inspect Replay & Checkpoint Evidence"
+        dashboard, "Inspect Checkpoint and Replay Checks"
     )
     panels = {panel.get("id"): panel for panel in child_panels}
 

@@ -12,7 +12,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 31
+    panel_count: 30
     key_panels:
       - id: 9422
         title: Review Exact Replay Readiness

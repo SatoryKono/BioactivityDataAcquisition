@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Answers whether manifest, ledger, checkpoint, replay, and lineage state are trustworthy enough to allow replay/resume for the selected pipeline/run_type/time range. Primary question: Can we trust manifest/ledger/checkpoint/lineage state and safely replay/resume? GLOBAL read-path panels are not pipeline-scoped and must not use $pipeline or $run_type filtering. First screen shows Monitor Current Readiness plus Review Selected-Run Trust and Review Retention Compliance. Review Lineage Validation is the first collapsed row.",
+  "description": "Answers whether the selected Run ID can be exact-replayed from saved evidence. The first screen shows exact replay readiness, the saved Trust verdict, and retention. Collapsed rows hold checkpoint validation, manifest validation, identity, run details, discovery, and saved domain reasons.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -398,16 +398,16 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
-        "w": 18,
+        "h": 2,
+        "w": 24,
         "x": 0,
         "y": 2
       },
-      "description": "CURRENT readiness is pipeline/run_type telemetry. SELECTED RUN Trust and retention tables are exact-run persisted evidence. An incomplete selected run cannot be replayed even when current readiness is OK. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser.",
+      "description": "SELECTED RUN · Read exact replay readiness first, then the saved Trust verdict, then retention. Those three answers use the selected Run ID. They do not use current Prometheus telemetry.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">SELECTED RUN · Exact replay readiness is the answer on the right.<br>Saved evidence decides. CURRENT telemetry does not change this verdict. Do not replay while Trust is INCOMPLETE or UNKNOWN.</div>",
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">SELECTED RUN · Read exact replay readiness first, then the saved Trust verdict, then retention.</div>",
         "dataLinks": [
           {
             "title": "Open Replay Safety Diagnostics",
@@ -445,7 +445,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 5
+        "y": 7
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence. Processing result is the saved ETL outcome. Saved trust verdict is the historical Trust assessment. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded.",
@@ -687,7 +687,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 150
+                "value": 110
               }
             ]
           },
@@ -755,7 +755,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 160
+                "value": 110
               }
             ]
           },
@@ -809,7 +809,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 120
+                "value": 70
               }
             ]
           },
@@ -1057,7 +1057,7 @@
             "properties": [
               {
                 "id": "custom.inspect",
-                "value": false
+                "value": true
               },
               {
                 "id": "displayName",
@@ -1446,7 +1446,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 5
+        "y": 7
       },
       "id": 9416,
       "options": {
@@ -1568,7 +1568,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 15
       },
       "id": 9419,
       "title": "Review Lineage Validation",
@@ -1785,7 +1785,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 18
+            "y": 16
           },
           "id": 9415,
           "options": {
@@ -1831,12 +1831,12 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 16
       },
       "id": 902,
-      "title": "Inspect Replay & Checkpoint Evidence",
+      "title": "Inspect Checkpoint and Replay Checks",
       "type": "row",
-      "description": "Expand only when replay or checkpoint readiness needs forensic evidence.",
+      "description": "Expand to review checkpoint validation and exact-replay checks for the selected Run ID.",
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
@@ -2021,7 +2021,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 19,
+            "y": 17,
             "w": 24,
             "h": 6
           },
@@ -2084,9 +2084,9 @@
           ],
           "gridPos": {
             "x": 0,
-            "y": 25,
+            "y": 23,
             "w": 24,
-            "h": 12
+            "h": 8
           },
           "options": {
             "showHeader": true,
@@ -2095,20 +2095,6 @@
               "show": false,
               "enablePagination": true
             }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "—",
-              "custom": {
-                "align": "left",
-                "wrapText": true,
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              }
-            },
-            "overrides": []
           },
           "transformations": [
             {
@@ -2128,7 +2114,43 @@
                 }
               }
             }
-          ]
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "—",
+              "custom": {
+                "align": "left",
+                "wrapText": true,
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Check"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "manifest_not_recorded": {
+                            "text": "manifest этого запуска не найден"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
         }
       ]
     },
@@ -2138,12 +2160,12 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 17
       },
       "id": 901,
-      "title": "Inspect Manifest & Ledger Evidence",
+      "title": "Inspect Manifest Validation",
       "type": "row",
-      "description": "Expand only when the current trust verdict requires manifest or ledger localization.",
+      "description": "Expand to review manifest validation for the selected Run ID.",
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
@@ -2328,7 +2350,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 20,
+            "y": 18,
             "w": 24,
             "h": 9
           },
@@ -2376,532 +2398,13 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 20
       },
       "id": 905,
       "title": "Inspect Run Identity Evidence",
       "type": "row",
       "description": "Expand for exact run identity after selecting a concrete Run ID.",
       "panels": [
-        {
-          "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Summarizes the selected run’s identity and replay anchors. Full values are shown in the table and remain available for copying through Inspect value. Source metadata remains in table inspection. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Inspect value opens full identifiers as selectable plain text.",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
-                },
-                "inspect": true,
-                "minWidth": 50,
-                "wrapText": true
-              },
-              "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "priority"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "name"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "source"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "source_type"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "source_quality"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "format"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "why"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "rendering"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "value_short"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "copy"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "copy_mode"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "copy_value"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "drilldown"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "drilldown_type"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "drilldown_target"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "drilldown_label"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "missing_severity"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "identity_gap"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "present"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "status"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "ERROR": {
-                            "text": "ERROR",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "label"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Anchor"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 180
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "value_full"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Value"
-                  },
-                  {
-                    "id": "custom.inspect",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.wrapText",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "ui_status"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "State"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 160
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Current"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Parameter"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Action"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "reason"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "deadline_exceeded": {
-                            "text": "QUERY ERROR — deadline exceeded",
-                            "color": "red"
-                          },
-                          "capacity_exhausted": {
-                            "text": "QUERY ERROR — capacity exhausted",
-                            "color": "red"
-                          },
-                          "catalog_unavailable": {
-                            "text": "QUERY ERROR — catalog unavailable",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Reason"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "deadline_exceeded": {
-                            "text": "QUERY ERROR — deadline exceeded",
-                            "color": "red"
-                          },
-                          "capacity_exhausted": {
-                            "text": "QUERY ERROR — capacity exhausted",
-                            "color": "red"
-                          },
-                          "catalog_unavailable": {
-                            "text": "QUERY ERROR — catalog unavailable",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Status"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "ERROR": {
-                            "text": "ERROR",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 23,
-            "w": 24,
-            "h": 12
-          },
-          "id": 9404,
-          "options": {
-            "footer": {
-              "show": false,
-              "enablePagination": true,
-              "countRows": true
-            },
-            "showHeader": true,
-            "cellHeight": "lg"
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "rows",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=overview",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              }
-            }
-          ],
-          "title": "Review Identity Anchors",
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true
-                },
-                "indexByName": {
-                  "label": 0,
-                  "value_full": 1,
-                  "ui_status": 2
-                },
-                "renameByName": {}
-              }
-            }
-          ],
-          "type": "table"
-        },
         {
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · TIME RANGE · Provides full run IDs, hashes, artifact references, lineage references, snapshots, and checkpoint values for copying. These values come from BioETL Ops HTTP and are never Prometheus labels. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Inspect value opens full identifiers as selectable plain text.",
@@ -3401,7 +2904,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 35,
+            "y": 21,
             "w": 24,
             "h": 8
           },
@@ -3490,7 +2993,7 @@
           "description": "Shown when no identity rows are returned. This can mean no matching run, unresolved scope, or an unavailable backend; it is not a critical verdict by itself.",
           "gridPos": {
             "x": 0,
-            "y": 43,
+            "y": 29,
             "w": 12,
             "h": 5
           },
@@ -3510,7 +3013,9 @@
         {
           "datasource": null,
           "fieldConfig": {
-            "defaults": {},
+            "defaults": {
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no rows for this table."
+            },
             "overrides": []
           },
           "pluginVersion": "12.0.2",
@@ -3519,7 +3024,7 @@
           "description": "Shown when no processed-record rows are returned. This can mean no activity, a run that has not started, unresolved scope, or an unavailable backend.",
           "gridPos": {
             "x": 12,
-            "y": 43,
+            "y": 29,
             "w": 12,
             "h": 5
           },
@@ -4035,7 +3540,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 48,
+            "y": 34,
             "w": 24,
             "h": 7
           },
@@ -4126,7 +3631,7 @@
                 "wrapText": false
               },
               "unit": "none",
-              "noValue": "No P1 replay/evidence anchors for this forensic view. Use the replay/resume summary above, then verify backend health and selected run scope before treating this as expected empty."
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if this run has no replay anchors."
             },
             "overrides": [
               {
@@ -4642,7 +4147,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 55,
+            "y": 41,
             "w": 24,
             "h": 12
           },
@@ -4733,7 +4238,7 @@
                 "wrapText": false
               },
               "unit": "none",
-              "noValue": "No checkpoint anchor comparison rows. Use checkpoint freshness above, then verify backend health and selected run scope before treating this as expected empty.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if this run has no checkpoint comparison.",
               "links": []
             },
             "overrides": [
@@ -5254,7 +4759,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 67,
+            "y": 53,
             "w": 24,
             "h": 12
           },
@@ -5862,7 +5367,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 79,
+            "y": 65,
             "w": 24,
             "h": 12
           },
@@ -5940,7 +5445,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 91,
+            "y": 77,
             "w": 24,
             "h": 4
           },
@@ -5951,7 +5456,12 @@
           },
           "title": "Review Uncovered Replay Signals",
           "type": "text",
-          "description": "Lists the residual semantic-drift evidence that is intentionally kept out of bounded Prometheus labels; duplicate/overwrite write risk is now instrumented."
+          "description": "Lists the residual semantic-drift evidence that is intentionally kept out of bounded Prometheus labels; duplicate/overwrite write risk is now instrumented.",
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no rows for this table."
+            }
+          }
         }
       ]
     },
@@ -5963,7 +5473,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 21
       },
       "id": 9412,
       "description": "Expand for HTTP-backed run details. Run Explorer remains the canonical exact-run workspace.",
@@ -5974,7 +5484,7 @@
           "title": "Review Run Summary",
           "gridPos": {
             "x": 0,
-            "y": 24,
+            "y": 22,
             "w": 24,
             "h": 12
           },
@@ -6306,12 +5816,12 @@
           "title": "Review Processed Records",
           "gridPos": {
             "x": 0,
-            "y": 36,
+            "y": 34,
             "w": 24,
             "h": 12
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Shows Bronze, Silver, and Gold record counts and outcomes for the selected scope. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Use Run Explorer for full run details. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
+          "description": "SELECTED RUN · Shows Bronze, Silver, and Gold record counts and outcomes for the selected scope. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Use Run Explorer for full run details. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares). Open Run Explorer for this same Run ID.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -6324,7 +5834,7 @@
               },
               "decimals": 0,
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs. UNKNOWN/QUERY ERROR if a selected run has no accounting.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer.",
               "links": [
                 {
                   "title": "Check BioETL Ops HTTP health",
@@ -6718,6 +6228,14 @@
                 }
               }
             }
+          ],
+          "links": [
+            {
+              "title": "Open Run Explorer",
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            }
           ]
         },
         {
@@ -6959,7 +6477,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 48,
+            "y": 46,
             "w": 24,
             "h": 7
           },
@@ -7009,12 +6527,12 @@
       "title": "Review Exact Replay Readiness",
       "gridPos": {
         "h": 3,
-        "w": 6,
-        "x": 18,
-        "y": 2
+        "w": 24,
+        "x": 0,
+        "y": 4
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Exact replay readiness of the selected Run ID from saved inputs. READY means required checks passed, not that a replay already ran and not permission to write current tables. BLOCKED is a proven gap. INSUFFICIENT means a required check could not be completed. UNSUPPORTED means this family cannot exact-replay. SELECT RUN and QUERY ERROR are request states. N/A is not zero. CURRENT Prometheus does not change this verdict. Inspect Replay Safety State remains diagnostic, not this answer.",
+      "description": "SELECTED RUN · Exact replay readiness of the selected Run ID from saved inputs. READY means required checks passed, not that a replay already ran and not permission to write current tables. BLOCKED is a proven gap. INSUFFICIENT means a required check could not be completed. UNSUPPORTED means this family cannot exact-replay. SELECT RUN and QUERY ERROR are request states. N/A is not zero. CURRENT Prometheus does not change this verdict.",
       "options": {
         "reduceOptions": {
           "values": false,
@@ -7035,7 +6553,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "none",
-          "noValue": "QUERY ERROR",
+          "noValue": "—",
           "mappings": [
             {
               "type": "value",
@@ -7125,7 +6643,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 24,
+        "y": 22,
         "w": 24,
         "h": 1
       },
@@ -7136,12 +6654,12 @@
           "title": "Inspect Latest Complete Run",
           "gridPos": {
             "x": 0,
-            "y": 25,
+            "y": 23,
             "w": 24,
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence. SELECTED RUN search: find an exact persisted identity.",
+          "description": "SELECTED RUN · Search persisted runs and choose one Run ID. This table does not score the run already selected above.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm"
@@ -7328,7 +6846,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 25,
+        "y": 23,
         "w": 24,
         "h": 1
       },
@@ -7339,12 +6857,12 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 26,
+            "y": 24,
             "w": 24,
             "h": 12
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
+          "description": "SELECTED RUN · Domain trust reasons for this Run ID. Open this table from View trust reasons when the reason count is greater than zero.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -7563,23 +7081,22 @@
           "links": []
         },
         {
-          "id": 9452,
+          "id": 9460,
           "type": "table",
-          "title": "Inspect Selected Run Identity",
+          "title": "Inspect Selected Run Stages",
           "gridPos": {
             "x": 0,
-            "y": 38,
+            "y": 36,
             "w": 24,
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
             "footer": {
-              "show": false,
-              "enablePagination": true
+              "show": false
             }
           },
           "fieldConfig": {
@@ -7590,79 +7107,12 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
-                "inspect": true,
-                "minWidth": 50,
-                "wrapText": true
+                "inspect": true
               }
             },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Completed"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "time:YYYY-MM-DD HH:mm"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 175
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Pipeline"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          ".*": {
-                            "text": "No run selected"
-                          },
-                          "-": {
-                            "text": "No run selected"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Run ID"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          ".*": {
-                            "text": "No run selected"
-                          },
-                          "-": {
-                            "text": "No run selected"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
+            "overrides": []
           },
           "targets": [
             {
@@ -7671,7 +7121,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "presentation_summary",
+              "root_selector": "stage_diagnostics",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",
@@ -7681,62 +7131,9 @@
           ],
           "transformations": [
             {
-              "id": "convertFieldType",
-              "options": {
-                "conversions": [
-                  {
-                    "targetField": "completed_at",
-                    "destinationType": "time"
-                  }
-                ]
-              }
-            },
-            {
               "id": "limit",
               "options": {
-                "limitField": 1
-              }
-            },
-            {
-              "id": "filterFieldsByName",
-              "options": {
-                "include": {
-                  "names": [
-                    "pipeline",
-                    "run_id",
-                    "completed_at",
-                    "rules_version",
-                    "revision",
-                    "evidence_completeness"
-                  ]
-                }
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "indexByName": {
-                  "pipeline": 0,
-                  "run_id": 1,
-                  "completed_at": 2,
-                  "rules_version": 3,
-                  "revision": 4,
-                  "evidence_completeness": 5
-                },
-                "renameByName": {
-                  "domain": "Domain",
-                  "verdict": "Status",
-                  "execution_state": "Result",
-                  "evidence_completeness": "Evidence",
-                  "rules_version": "Rules",
-                  "reason": "Reason",
-                  "action": "Action",
-                  "evidence_ref": "Evidence reference",
-                  "pipeline": "Pipeline",
-                  "run_id": "Run ID",
-                  "completed_at": "Completed",
-                  "revision": "Revision"
-                }
+                "limitField": 12
               }
             }
           ],

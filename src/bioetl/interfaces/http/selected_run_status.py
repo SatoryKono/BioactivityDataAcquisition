@@ -176,13 +176,22 @@ def _readiness_state(state: str) -> str:
     return INSUFFICIENT
 
 
+_UNKNOWN_CHECK_LABELS = {
+    "manifest_not_recorded": "manifest этого запуска не найден",
+}
+
+
 def _readiness_fields(projection: Mapping[str, object]) -> dict[str, object]:
     blockers = projection.get("blockers")
     unknown = projection.get("unknown_checks")
     blocker_text = (
         ", ".join(blockers) if isinstance(blockers, list) and blockers else "—"
     )
-    unknown_text = ", ".join(unknown) if isinstance(unknown, list) and unknown else "—"
+    unknown_text = (
+        ", ".join(_UNKNOWN_CHECK_LABELS.get(str(code), str(code)) for code in unknown)
+        if isinstance(unknown, list) and unknown
+        else "—"
+    )
     row = {
         key: value
         for key, value in projection.items()

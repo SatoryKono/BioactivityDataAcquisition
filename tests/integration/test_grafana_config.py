@@ -1300,7 +1300,6 @@ def test_control_plane_identity_evidence_panels_exist() -> None:
         if panel.get("title")
     }
     for title, view in {
-        "Review Identity Anchors": "view=overview",
         "Review Identity Gaps": "view=gaps",
         "Compare Checkpoint Anchors": "view=checkpoint_compare",
         "Inspect Identity Values": "view=copy_values",
