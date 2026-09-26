@@ -614,9 +614,10 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
         _stamp_overview_derived_panels(panel, uid)
     prune_provider_health_panels(payload)
     panels = payload.get("panels", [])
-    _append_saved_run_evidence_row(
-        panels, include_identity=uid != _CONTROL_PLANE_UID
-    )
+    if uid != "bioetl-run-explorer-v1":
+        _append_saved_run_evidence_row(
+            panels, include_identity=uid != _CONTROL_PLANE_UID
+        )
 
 
 SELECTOR_ROWS = (
