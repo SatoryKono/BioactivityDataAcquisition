@@ -256,58 +256,26 @@ required_discoverable_inbound_paths:
   L1:
     bioetl-runtime:
     - source_uid: bioetl-overview-v2
-      source_panel_id: 215
-      source_panel_title: Review First Action
+      source_panel_id: 9002
+      source_panel_title: Review Run Domains
       source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
     bioetl-control-plane-v1:
     - source_uid: bioetl-overview-v2
-      source_panel_id: 215
-      source_panel_title: Review First Action
+      source_panel_id: 9002
+      source_panel_title: Review Run Domains
       source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
     bioetl-provider-health-v2:
     - source_uid: bioetl-overview-v2
-      source_panel_id: 215
-      source_panel_title: Review First Action
+      source_panel_id: 9002
+      source_panel_title: Review Run Domains
       source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
     bioetl-dq-v2:
     - source_uid: bioetl-overview-v2
-      source_panel_id: 215
-      source_panel_title: Review First Action
+      source_panel_id: 9002
+      source_panel_title: Review Run Domains
       source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
 required_panel_links_by_uid:
   bioetl-overview-v2:
-  - panel_id: 214
-    target_uid: bioetl-runtime
-    link_titles:
-    - Open Runtime
-  - panel_id: 214
-    target_uid: bioetl-control-plane-v1
-    link_titles:
-    - Open Control Plane
-  - panel_id: 214
-    target_uid: bioetl-dq-v2
-    link_titles:
-    - Open Data Quality
-  - panel_id: 214
-    target_uid: bioetl-provider-health-v2
-    link_titles:
-    - Open Provider Health
-  - panel_id: 215
-    target_uid: bioetl-runtime
-    link_titles:
-    - Open Runtime
-  - panel_id: 215
-    target_uid: bioetl-control-plane-v1
-    link_titles:
-    - Open Control Plane
-  - panel_id: 215
-    target_uid: bioetl-dq-v2
-    link_titles:
-    - Open Data Quality
-  - panel_id: 215
-    target_uid: bioetl-provider-health-v2
-    link_titles:
-    - Open Provider Health
   - panel_id: 9002
     target_uid: bioetl-runtime
     link_titles:
@@ -321,26 +289,6 @@ required_panel_links_by_uid:
     link_titles:
     - Open Data Quality
   - panel_id: 9002
-    target_uid: bioetl-provider-health-v2
-    link_titles:
-    - Open Provider Health
-  - panel_id: 9003
-    target_uid: bioetl-runtime
-    link_titles:
-    - Open Runtime
-  - panel_id: 9004
-    target_uid: bioetl-dq-v2
-    link_titles:
-    - Open Data Quality
-  - panel_id: 9005
-    target_uid: bioetl-runtime
-    link_titles:
-    - Open Runtime
-  - panel_id: 9006
-    target_uid: bioetl-control-plane-v1
-    link_titles:
-    - Open Control Plane
-  - panel_id: 9007
     target_uid: bioetl-provider-health-v2
     link_titles:
     - Open Provider Health
@@ -540,8 +488,8 @@ navigation_transition_contract:
     - bioetl-dq-v2
   first_action_contract:
     bioetl-overview-v2:
-      panel_id: 215
-      panel_title: Review First Action
+      panel_id: 9002
+      panel_title: Review Run Domains
       min_cta: 4
       max_cta: 4
       ctas:

@@ -173,6 +173,8 @@ def _saved_run(p: dict[int, dict]) -> None:
 
 
 def _overview(p: dict[int, dict]) -> None:
+    if 9030 not in p:
+        return
     _stack(p[9030], {9031: 9, 9018: 12, 9019: 12, 9020: 12})
     for pid in (9018, 9019, 9020):
         p[pid]["options"].pop("pageSize", None)
@@ -393,6 +395,8 @@ def _provider(p: dict[int, dict]) -> None:
 
 
 def _dq(p: dict[int, dict]) -> None:
+    if 9102 not in p:
+        return
     p[2]["title"] = "Monitor Weighted DQ"
     p[8]["targets"][0].update(
         expr='(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~"$pipeline"}[$__range]), 0))) / 3600',
@@ -676,9 +680,11 @@ def _overview_selected_run_layout(p: dict[int, dict], summary: dict) -> None:
     _table(p[9002], {"Domain": 120, "Status": 115})
     # Three evidence columns need half the first-screen width at narrow viewports.
     p[9002]["gridPos"].update(x=12, w=12)
-    p[214]["gridPos"].update(x=16, w=8)
-    p[215]["gridPos"]["w"] = 12
-    p[215]["options"]["cellHeight"] = "sm"
+    if 214 in p:
+        p[214]["gridPos"].update(x=16, w=8)
+    if 215 in p:
+        p[215]["gridPos"]["w"] = 12
+        p[215]["options"]["cellHeight"] = "sm"
     summary["gridPos"]["w"] = 12
     for rule in summary["fieldConfig"]["overrides"]:
         if rule["matcher"].get("options") in {
@@ -740,6 +746,8 @@ def _apply_enum_verdict_copy(uid: object, p: dict[int, dict]) -> None:
         "bioetl-overview-v2": (9031, 9007),
     }
     for pid in enum_panels.get(uid, ()):
+        if pid not in p:
+            continue
         p[pid]["description"] = (
             p[pid]["description"]
             .replace(">=2=CRIT", "2=CRIT")
@@ -932,6 +940,8 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
         },
     }
     for pid, fields in widths.get(payload.get("uid"), {}).items():
+        if pid not in p:
+            continue
         for item in p[pid]["fieldConfig"].get("overrides", []):
             item["properties"] = [
                 prop for prop in item["properties"] if prop["id"] != _WIDTH

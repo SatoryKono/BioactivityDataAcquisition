@@ -335,19 +335,13 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
 def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panels = {p["id"]: p for p in dashboard["panels"]}
-    assert panels[214]["title"] == "Monitor Scope Health"
-    assert (
-        panels[214]["gridPos"]["y"]
-        < panels[215]["gridPos"]["y"]
-        < panels[9603]["gridPos"]["y"]
-    )
-    assert panels[9002]["gridPos"]["y"] == panels[215]["gridPos"]["y"]
-    for pid, cap in ((215, 2), (9002, 6)):
-        panel = panels[pid]
-        assert panel_declared_row_cap(panel) == cap
-        assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
-        assert panel["options"]["cellHeight"] == ("lg" if pid == 215 else "sm")
-    assert "bioetl_workflow_scope_action" in panels[215]["targets"][0]["expr"]
+    assert 214 not in panels
+    assert 215 not in panels
+    assert panels[9002]["gridPos"]["y"] == panels[9603]["gridPos"]["y"]
+    panel = panels[9002]
+    assert panel_declared_row_cap(panel) == 6
+    assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
+    assert panel["options"]["cellHeight"] == "sm"
     assert "presentation_domains" in panels[9002]["targets"][0]["root_selector"]
     assert "/selected-run-status?" in panels[9002]["targets"][0]["url"]
     assert panels[9603]["targets"] == [

@@ -50,20 +50,20 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 35
+    panel_count: 10
     key_panels:
-      - id: 214
-        title: Monitor Scope Health
-        type: stat
-        description: Current system status summary
-      - id: 215
-        title: Review First Action
+      - id: 9603
+        title: Review Selected Run Status
         type: table
-        description: Recommended first action for current state
-      - id: 1000
-        title: Navigate Dashboards
-        type: text
-        description: Theme-safe wrapping navigation bus (0-6 shipped surface)
+        description: Saved assessment of the selected Run ID
+      - id: 9002
+        title: Review Run Domains
+        type: table
+        description: Saved domain status for the selected Run ID
+      - id: 9300
+        title: Review Run Identity
+        type: table
+        description: HTTP identity for the selected Run ID
     selector_variables:
       - workflow
       - pipeline
@@ -144,24 +144,24 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 42
+    panel_count: 8
     key_panels:
-      - id: 9401
-        title: Monitor Current DQ Status
-        type: stat
-        description: Current DQ status summary
-      - id: 9101
-        title: Monitor DQ Threshold State
-        type: stat
-        description: DQ threshold violation state (NOW lane)
-      - id: 9102
-        title: Inspect Current DQ Reasons
+      - id: 9406
+        title: Review Selected Run Status
         type: table
-        description: Current DQ violation reasons breakdown (NOW lane)
-      - id: 8
-        title: Monitor Worst Freshness Age
-        type: stat
-        description: TIME RANGE freshness age in hours with WARN 24h and CRIT 72h
+        description: Saved HTTP evidence for the selected Run ID
+      - id: 9402
+        title: Inspect Run Identity
+        type: table
+        description: HTTP identity for the selected Run ID
+      - id: 9403
+        title: Inspect Processed Records
+        type: table
+        description: Processed-record accounting for the selected Run ID
+      - id: 9451
+        title: Inspect Selected Run Domains
+        type: table
+        description: Saved domain evidence for the selected Run ID
     selector_variables:
       - workflow
       - pipeline

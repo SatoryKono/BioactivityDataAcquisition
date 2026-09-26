@@ -23,6 +23,11 @@ def test_scope_is_idempotent_and_does_not_rewrite_saved_run(uid):
     apply_workflow_scope(payload)
     assert payload == first
     assert next(p for p in payload["panels"] if p["id"] == 9450) == saved
+    if uid == "bioetl-overview-v2":
+        titles = {panel.get("title") for panel in payload["panels"]}
+        assert "Monitor Scope Health" not in titles
+        assert "Review First Action" not in titles
+        return
     card = next(
         p
         for p in payload["panels"]
@@ -41,20 +46,8 @@ def test_scope_is_idempotent_and_does_not_rewrite_saved_run(uid):
     )
 
 
-def test_action_navigation_uses_responsible_workflow_even_when_selector_is_all():
+def test_overview_does_not_keep_current_first_action():
     payload = json.loads(
         (_DASHBOARDS / "bioetl-overview-v2.json").read_text(encoding="utf-8")
     )
-    panel = next(p for p in payload["panels"] if p["id"] == 215)
-    links = [
-        link
-        for override in panel["fieldConfig"]["overrides"]
-        for prop in override["properties"]
-        if prop["id"] == "links"
-        for link in prop["value"]
-        if "${__data.fields.action_href" in link.get("url", "")
-    ]
-    assert links
-    assert all(link["url"] == "${__data.fields.action_href:raw}" for link in links)
-    assert "bioetl_first_action" in panel["targets"][0]["expr"]
-    assert len(panel["targets"][0]["expr"]) <= 200
+    assert all(panel.get("id") != 215 for panel in payload["panels"])
