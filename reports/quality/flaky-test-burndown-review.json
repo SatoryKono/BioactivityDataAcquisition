@@ -26,6 +26,7 @@
   },
   "review_notes": [
     "The curated residual flaky-test inventory is empty at this review point.",
+    "tests.yml flaky-telemetry N=3 (seeds 17, 73, 113) covers only tests/contract/test_semanticscholar_contract.py and tests/architecture/test_determinism_identity_policy.py (#11187). An empty reviewed_flaky_tests list is not proof that no other test flakes. Do not widen this shard to spend Actions minutes.",
     "SWARM-001 flakiness-database.json reports total_flaky=0 with empty flaky_tests.",
     "Current suite size and source identity are derived from test-governance-current.json.",
     "Repeated-run CI telemetry remains the authority for discovering intermittent outcomes.",
@@ -39,8 +40,8 @@
     "reports/quality/test-governance-current.json"
   ],
   "source_fingerprints": {
-    "curated_inventory_sha256": "fcc0223fda92af30984526c1ed95253c46c20b031234f0240a698b6484e3b651",
-    "test_governance_source_tree_sha256": "8bc5f87f3a398916a41ed4e552d7d45061609fe2d0814b628947fe3ff823a378"
+    "curated_inventory_sha256": "0d698b73cd22ee00bb4afbb96cb166c3f7c7a6da809fe5e05931b3f3dc3dad04",
+    "test_governance_source_tree_sha256": "fdd9905b62ef3a879dd3e4905a944e3bfbf1b2ac080a40df6b805d1bd7acba33"
   },
   "summary": {
     "by_alert_level": {
@@ -74,9 +75,9 @@
       "quarantined": 0
     },
     "test_governance_budget_violation_count": 0,
-    "test_governance_source_tree_sha256": "8bc5f87f3a398916a41ed4e552d7d45061609fe2d0814b628947fe3ff823a378",
+    "test_governance_source_tree_sha256": "fdd9905b62ef3a879dd3e4905a944e3bfbf1b2ac080a40df6b805d1bd7acba33",
     "total_flaky": 0,
-    "total_test_files": 2915,
-    "total_tests_analyzed": 28721
+    "total_test_files": 2928,
+    "total_tests_analyzed": 28806
   }
 }

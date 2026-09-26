@@ -261,6 +261,7 @@ class TestDQMetricsInput:
         assert input_data.validation_errors == validation_errors
 
 
+@pytest.mark.unit
 def test_batch_dq_metrics_rejects_negative_counts() -> None:
     from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 

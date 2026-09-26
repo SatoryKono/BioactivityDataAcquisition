@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 import yaml
 
 from bioetl.composition.factories.storage.bundle import StorageBundle
+
+pytestmark = pytest.mark.unit
 
 _CONFIG = (
     Path(__file__).resolve().parents[4]

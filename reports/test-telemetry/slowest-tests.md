@@ -1,9 +1,9 @@
 # Slowest Tests
 
-Source commit: `pending`
-Source run id: `pending`
+Source commit: `9f71c644417551222e489ec08c6b358e7c0b64b2`
+Source run id: `36202183545`
 Source event: `push`
-Source run URL: `pending`
+Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/36202183545`
 Refresh status: `captured`
 Collected test cases: `49975`
 Freshness guard: `<=45 days`
