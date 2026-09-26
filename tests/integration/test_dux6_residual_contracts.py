@@ -160,7 +160,11 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     assert "$exists(items)" in selector
     assert "$count(items) = 0" in selector
     assert '"pipeline": "VALID EMPTY"' in selector
-    assert selector.endswith(": items")
+    assert selector.endswith(
+        ': items.($merge([$, {"overview_handoff": "Open", '
+        '"diagnostics_handoff": "Open", "provider_handoff": "Open", '
+        '"quality_handoff": "Open"}]))'
+    )
     assert target.get("url") == (
         "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10"
         "&run_id=${run_id}&view=recent&workflow=${workflow}"

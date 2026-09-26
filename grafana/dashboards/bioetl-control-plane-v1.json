@@ -7006,7 +7006,7 @@
     {
       "id": 9422,
       "type": "stat",
-      "title": "Replay Readiness",
+      "title": "Review Exact Replay Readiness",
       "gridPos": {
         "h": 3,
         "w": 6,

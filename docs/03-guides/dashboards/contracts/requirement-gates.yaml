@@ -97,10 +97,10 @@ operator_question:
     basis_tokens: [SELECTED RUN]
     next_action_tokens: [Open Run Explorer]
   bioetl-provider-health-v2.json:
-    answer_ids: [9101]
-    next_action_id: 9002
-    basis_tokens: [CURRENT]
-    next_action_tokens: [Start Provider Triage]
+    answer_ids: [9400]
+    next_action_id: 9400
+    basis_tokens: [SELECTED RUN]
+    next_action_tokens: [saved check]
   bioetl-dq-v2.json:
     answer_ids: [9406]
     next_action_id: 9406
