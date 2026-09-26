@@ -916,10 +916,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 50
-              },
-              {
                 "id": "noValue",
                 "value": "Open"
               },
@@ -940,11 +936,15 @@
                 "id": "links",
                 "value": [
                   {
-                    "title": "Open Replay readiness",
+                    "title": "Open 1. Trust",
                     "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
                     "includeVars": false
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 50
               }
             ]
           },
@@ -1152,10 +1152,6 @@
                     }
                   }
                 ]
-              },
-              {
-                "id": "custom.width",
-                "value": 50
               }
             ]
           }
@@ -1236,7 +1232,7 @@
               "started_at": 6,
               "pipeline": 7,
               "workflow_id": 8,
-              "run_id": 9,
+              "run_id": 4,
               "duration_display": 10,
               "event_age_display": 11,
               "status": 12,

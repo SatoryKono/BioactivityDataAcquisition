@@ -2267,6 +2267,75 @@ def _strip_fleet_id_collisions(panels: list[object]) -> None:
     ]
 
 
+def _stamp_incident_row_help(payload: dict[str, object]) -> None:
+    """Collapsed Incident rows must say what the operator will see."""
+    help_text = {
+        2020: (
+            "Expand for alert state history and the impact note. "
+            "These rows do not replace the ranked suspect."
+        ),
+        32010: (
+            "Expand for the full global suspect table. "
+            "The first screen already shows the ranked subset."
+        ),
+        32005: (
+            "Expand for the full global alert table. "
+            "The first screen already shows Monitor Global Alerts."
+        ),
+        9700: (
+            "Expand for current workflow evidence. "
+            "This table is not the selected Run ID verdict."
+        ),
+    }
+
+    def walk(panels: object) -> None:
+        if not isinstance(panels, list):
+            return
+        for panel in panels:
+            if not isinstance(panel, dict):
+                continue
+            text = help_text.get(panel.get("id"))
+            if text:
+                panel["description"] = text
+            walk(panel.get("panels"))
+
+    walk(payload.get("panels"))
+
+
+def _pack_fleet_children(row: dict[str, object]) -> None:
+    """Place fleet children on a shelf so expanded rows do not hide charts."""
+    children = [
+        child
+        for child in row.get("panels") or []
+        if isinstance(child, dict) and isinstance(child.get("gridPos"), dict)
+    ]
+    children.sort(
+        key=lambda panel: (
+            int(panel["gridPos"].get("y") or 0),
+            int(panel["gridPos"].get("x") or 0),
+            int(panel.get("id") or 0),
+        )
+    )
+    y = int((row.get("gridPos") or {}).get("y") or 0) + 1
+    x = 0
+    row_height = 0
+    for child in children:
+        grid = child["gridPos"]
+        width = min(24, max(1, int(grid.get("w") or 24)))
+        height = max(1, int(grid.get("h") or 4))
+        if x and x + width > 24:
+            y += row_height
+            x = 0
+            row_height = 0
+        grid["x"] = x
+        grid["y"] = y
+        grid["w"] = width
+        grid["h"] = height
+        x += width
+        row_height = max(row_height, height)
+    row["panels"] = children
+
+
 def _attach_runtime_fleet_row(payload: dict[str, object]) -> None:
     panels = payload.get("panels")
     if not isinstance(panels, list):
@@ -2285,6 +2354,7 @@ def _attach_runtime_fleet_row(payload: dict[str, object]) -> None:
             for child in existing.get("panels") or []:
                 if isinstance(child, dict):
                     _stamp_runtime_fleet_panel(child)
+            _pack_fleet_children(existing)
         return
     incoming: list[dict[str, object]] = []
     seen: set[object] = set()
@@ -2337,6 +2407,8 @@ def _attach_runtime_fleet_row(payload: dict[str, object]) -> None:
     for child in children:
         if isinstance(child, dict):
             _stamp_runtime_fleet_panel(child)
+    if isinstance(row, dict):
+        _pack_fleet_children(row)
 
 
 def apply_to_dashboard(
@@ -2348,7 +2420,32 @@ def apply_to_dashboard(
     payload = json.loads(
         safe_path.read_text(encoding="utf-8")  # NOSONAR - confined under DASH_DIR
     )
-    if current_uid == "bioetl-control-plane-v1":
+    if current_uid == "bioetl-overview-v2":
+        payload["description"] = (
+            "SELECTED RUN. Run ID is always selected. The first screen shows the "
+            "saved status and the domain verdicts for that run. Inspect Run Context "
+            "holds identity and processed records. CURRENT fleet panels, First Action, "
+            "and TIME RANGE history are not on Overview. run_id is HTTP context only "
+            "and is never a Prometheus label."
+        )
+    elif current_uid == "bioetl-runtime":
+        payload["description"] = (
+            "SELECTED RUN. Run ID is always selected. The first screen shows the "
+            "saved pipeline status, identity, and processed records for that run. "
+            "Fleet blockers, coverage, and time-range charts are on Incident "
+            "Workspace. They do not assess this Run ID."
+        )
+        _attach_trust_range_panels(payload)
+        _retain_runtime_selected_run(payload)
+    elif current_uid == "bioetl-dq-v2":
+        payload["description"] = (
+            "SELECTED RUN. Run ID is always selected. The first screen shows the "
+            "saved data-quality status, identity, and processed records for that "
+            "run. CURRENT pipeline status and TIME RANGE scores are not on this "
+            "page. A time-range value never proves this run."
+        )
+        _retain_dq_selected_run_panels(payload)
+    elif current_uid == "bioetl-control-plane-v1":
         payload["description"] = (
             "Answers whether the selected Run ID can be exact-replayed from saved "
             "evidence. The first screen shows exact replay readiness, the saved Trust "
@@ -2356,13 +2453,8 @@ def apply_to_dashboard(
             "manifest validation, identity, run details, discovery, and saved domain reasons."
         )
         _stash_trust_range_panels(payload)
-    elif current_uid == "bioetl-runtime":
-        _attach_trust_range_panels(payload)
-        _retain_runtime_selected_run(payload)
     elif current_uid == "bioetl-incident-v1":
         _attach_runtime_fleet_row(payload)
-    elif current_uid == "bioetl-dq-v2":
-        _retain_dq_selected_run_panels(payload)
     # Remove generated details before earlier layout passes measure bottom rows.
     payload["panels"] = [
         panel for panel in payload.get("panels", []) if panel.get("id") != 9450
@@ -2427,6 +2519,8 @@ def apply_to_dashboard(
     from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope
 
     apply_workflow_scope(payload)
+    if current_uid == "bioetl-incident-v1":
+        _stamp_incident_row_help(payload)
     finalize_dashboard_links(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")

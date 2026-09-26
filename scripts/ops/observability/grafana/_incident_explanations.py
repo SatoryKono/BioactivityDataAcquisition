@@ -27,12 +27,43 @@ def explain_incident(panels: dict[int, dict], override) -> None:
         '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">GLOBAL · All pipelines · '
         "independent of selected Pipeline, Provider and Run ID. Suspects are not verified causes. Telemetry gaps are UNKNOWN.</div>"
     )
+    panels[2001]["description"] = (
+        "The ranked suspect is the first answer. Cause is not confirmed. "
+        "Fleet blockers and time-range charts are in Pipeline fleet and range "
+        "on this page, not on Pipeline Diagnostics."
+    )
     panels[2001]["options"]["content"] = (
         '<div style="font-size:16px;line-height:1.2">Rule triggered; cause not confirmed. '
-        "Open Pipeline Diagnostics via Action to verify. PENDING has not fired. "
+        "Read the ranked suspect first. Fleet blockers and time-range charts are "
+        "in Pipeline fleet and range on this page. PENDING has not fired. "
         '<a href="/d/bioetl-incident-v1/6-incident-workspace?viewPanel=22011&from=${__from}&to=${__to}">'
         "Stage lag/backlog measurements</a>.</div>"
     )
+    for panel_id, description in (
+        (
+            2020,
+            "Expand for alert state history and the impact note. "
+            "These rows do not replace the ranked suspect.",
+        ),
+        (
+            32010,
+            "Expand for the full global suspect table. "
+            "The first screen already shows the ranked subset.",
+        ),
+        (
+            32005,
+            "Expand for the full global alert table. "
+            "The first screen already shows Monitor Global Alerts.",
+        ),
+        (
+            9700,
+            "Expand for current workflow evidence. "
+            "This table is not the selected Run ID verdict.",
+        ),
+    ):
+        row = panels.get(panel_id)
+        if isinstance(row, dict):
+            row["description"] = description
     panels[32010]["title"] = "Browse Global Suspects"
     panels[32005]["title"] = "Browse Global Alerts"
     _explain_ranked_suspects(panels, override)
@@ -60,7 +91,8 @@ def _explain_ranked_suspects(panels: dict[int, dict], override) -> None:
             "GLOBAL / TIME RANGE · All pipelines; independent of selected Pipeline, Provider and Run ID. "
             "Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. "
             "Recording sample time is not event time. Missing telemetry remains UNKNOWN. "
-            "Open Pipeline Diagnostics via Action to verify the source evidence."
+            "Action opens the domain page named on the row. "
+            "Fleet charts for pipeline signals stay on this page."
             + (
                 " Summary shows up to two rows; open all rows for complete evidence."
                 if pid == 2010
