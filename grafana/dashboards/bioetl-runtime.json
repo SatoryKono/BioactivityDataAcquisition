@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "SELECTED RUN. This page assesses the selected Run ID from saved HTTP evidence. Fleet status and time-range charts are on Incident Workspace. An empty Prometheus series is not this run verdict.",
+  "description": "SELECTED RUN. Run ID is always selected. The first screen shows the saved pipeline status, identity, and processed records for that run. Fleet blockers, coverage, and time-range charts are on Incident Workspace. They do not assess this Run ID.",
   "editable": true,
   "graphTooltip": 1,
   "id": null,
@@ -429,7 +429,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Pipeline Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">SELECTED RUN · Saved evidence for the selected Run ID. Fleet and time-range charts are on Incident Workspace, not this verdict.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">SELECTED RUN. Saved pipeline evidence for this Run ID. Fleet and time-range charts are on Incident Workspace.</div>"
       },
       "links": []
     },
@@ -463,16 +463,6 @@
               "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
-            },
-            {
-              "title": "Open Trust replay readiness",
-              "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9422",
-              "targetBlank": false
-            },
-            {
-              "title": "Open fleet signals on Incident",
-              "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}",
-              "targetBlank": false
             }
           ]
         },
@@ -1236,7 +1226,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. VALID EMPTY is an empty successful query. Backend down is QUERY ERROR.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
