@@ -1543,6 +1543,10 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "Inspect Saved Run Evidence",
             "Expand for saved stage rows, then domain trust reasons, for the selected Run ID.",
         ),
+        9419: (
+            "Review Lineage Validation",
+            "Expand to review lineage closure for the selected Run ID.",
+        ),
     }
     for panel_id, (title, description) in row_copy.items():
         row = by_id.get(panel_id)
@@ -1611,6 +1615,20 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
             "Archive N/A means a referenced policy does not require archiving; "
             "it is not proof of an archive. Archive verified means local copies "
             "and restore evidence passed current hash and identity checks."
+        )
+    lineage = by_id.get(9415)
+    if isinstance(lineage, dict):
+        lineage["description"] = (
+            "SELECTED RUN · Lineage closure, identity consistency, cycle freedom, "
+            "and persistence profile for this Run ID. UNKNOWN is not a healthy zero. "
+            "No rows can be a valid empty result. A failed request is not OK."
+        )
+    missing_counts = by_id.get(9411)
+    if isinstance(missing_counts, dict):
+        missing_counts["description"] = (
+            "Record counts are not in this identity row. Open Inspect Run Details "
+            "and read Review Processed Records for this Run ID. An empty identity "
+            "table is not zero records."
         )
     trust = by_id.get(9418)
     if isinstance(trust, dict):

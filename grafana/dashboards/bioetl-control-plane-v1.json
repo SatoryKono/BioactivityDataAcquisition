@@ -1573,11 +1573,11 @@
       "id": 9419,
       "title": "Review Lineage Validation",
       "type": "row",
-      "description": "Expand for the Review Lineage Validation table (9415). This row is named after that table; it is not Inspect Audit & Lineage Evidence.",
+      "description": "Expand to review lineage closure for the selected Run ID.",
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · lineage closure, identity consistency, cycle freedom, and persistence profile. Lives in the collapsed row titled Review Lineage Validation (not Inspect Audit & Lineage Evidence). UNKNOWN is not a healthy zero. No matching rows are a valid empty result; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · Lineage closure, identity consistency, cycle freedom, and persistence profile for this Run ID. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3021,7 +3021,7 @@
           "pluginVersion": "12.0.2",
           "targets": [],
           "type": "text",
-          "description": "Shown when no processed-record rows are returned. This can mean no activity, a run that has not started, unresolved scope, or an unavailable backend.",
+          "description": "Record counts are not in this identity row. Open Inspect Run Details and read Review Processed Records for this Run ID. An empty identity table is not zero records.",
           "gridPos": {
             "x": 12,
             "y": 29,
@@ -6553,7 +6553,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "none",
-          "noValue": "—",
+          "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
           "mappings": [
             {
               "type": "value",
@@ -6874,7 +6874,7 @@
           },
           "fieldConfig": {
             "defaults": {
-              "noValue": "UNKNOWN",
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
               "unit": "none",
               "custom": {
                 "align": "left",
@@ -6934,7 +6934,7 @@
           },
           "fieldConfig": {
             "defaults": {
-              "noValue": "UNKNOWN",
+              "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
               "unit": "none",
               "custom": {
                 "align": "left",

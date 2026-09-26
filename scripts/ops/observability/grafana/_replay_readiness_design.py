@@ -39,7 +39,10 @@ def apply_replay_readiness_design(payload: dict) -> None:
     card["fieldConfig"] = {
         "defaults": {
             "unit": "none",
-            "noValue": "—",
+            "noValue": (
+                "SELECT RUN if no Run ID is selected. "
+                "QUERY ERROR if the request failed."
+            ),
             "mappings": [
                 {
                     "type": "value",
