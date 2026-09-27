@@ -1,6 +1,6 @@
 ---
 id: prompt.architecture.cycle
-version: 1.1.0
+version: 1.1.1
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -80,11 +80,13 @@ N-итерационный цикл: **оценить архитектуру п�
 | Scorecard SSOT | `reports/quality/architecture-quality-scorecard.json` (10 categories) |
 | Loop shell | `prompt.audit.orchestrator` |
 
-Default **`N=10`**, **`MODE=full`**, **`INCLUDE_PIPELINE=true`**,
-**`LAYERS=all`**, **`SCORE_SOURCE=live+committed`**, все **`ALLOW_*=true`**.
+Default **`N=1`**, **`MODE=audit`**, **`INCLUDE_PIPELINE=true`**,
+**`LAYERS=all`**, **`SCORE_SOURCE=live+committed`**, all **`ALLOW_*=false`**
+(fail-closed).
 
-Operator **full-run** paste must set `ALLOW_ISSUE_WRITE/PUSH/MERGE/CLOSE=true`
-explicitly before Phases G–I mutate GitHub/git. Without flags → plan/payloads only.
+Operator **full-run** must pass `--profile full-write` (or set
+`ALLOW_ISSUE_WRITE/PUSH/MERGE/CLOSE=true` explicitly) before Phases G–I
+mutate GitHub/git. Without flags → plan/payloads only.
 
 Пустые циклы запрещены. Early-stop: 2 подряд итерации без новых actionable
 PROVEN P0/P1, без regression и без падения `integral_score` / category scores.
@@ -93,18 +95,18 @@ PROVEN P0/P1, без regression и без падения `integral_score` / cate
 
 | Param | Default |
 | --- | --- |
-| `N` | `10` |
+| `N` | `1` |
 | `SCOPE` | `src/bioetl/` (+ `tests/architecture`, configs, compose as needed) |
-| `MODE` | `full` (`audit` \| `audit+plan` \| `audit+issues` \| `full`) |
+| `MODE` | `audit` (`audit` \| `audit+plan` \| `audit+issues` \| `full`) |
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
 | `INCLUDE_PIPELINE` | `true` (arch CI, import-linter, architecture tests) |
 | `LAYERS` | `all` or CSV of hexagonal layers |
 | `SCORE_SOURCE` | `live+committed` \| `committed` \| `live` |
-| `ALLOW_ISSUE_WRITE` | `true` (operator full-run: `true`) |
-| `ALLOW_PUSH` | `true` (operator full-run: `true`) |
-| `ALLOW_MERGE` | `true` (operator full-run: `true`) |
-| `ALLOW_CLOSE` | `true` (operator full-run: `true`) |
+| `ALLOW_ISSUE_WRITE` | `false` (fail-closed; `true` only via `--profile full-write`) |
+| `ALLOW_PUSH` | `false` (fail-closed; `true` only via `--profile full-write`) |
+| `ALLOW_MERGE` | `false` (fail-closed; `true` only via `--profile full-write`) |
+| `ALLOW_CLOSE` | `false` (fail-closed; `true` only via `--profile full-write`) |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `MAX_WAVES_PER_ITERATION` | `30` |
 | `BASE_BRANCH` | `main` |

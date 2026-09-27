@@ -23,6 +23,7 @@ from pathlib import Path
 
 from scripts.ai.prompts.check import (
     check_hygiene,
+    check_readme_scenarios,
     check_registry,
     format_report,
     write_quality_artifact,
@@ -195,9 +196,12 @@ def cmd_check_registry(args: argparse.Namespace) -> int:
 def cmd_check(args: argparse.Namespace) -> int:
     reg = check_registry()
     hyg = check_hygiene()
+    readme = check_readme_scenarios()
     # merge
     reg.errors.extend(hyg.errors)
     reg.warnings.extend(hyg.warnings)
+    reg.errors.extend(readme.errors)
+    reg.warnings.extend(readme.warnings)
     project_full_drift = find_project_full_link_drift()
     for path in project_full_drift:
         reg.add_error(
@@ -208,6 +212,7 @@ def cmd_check(args: argparse.Namespace) -> int:
     reg.stats = {
         "registry": reg.stats,
         "hygiene": hyg.stats,
+        "readme_scenarios": readme.stats,
         "project_full_link_drift": len(project_full_drift),
         "errors": len(reg.errors),
         "warnings": len(reg.warnings),

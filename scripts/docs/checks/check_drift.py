@@ -346,6 +346,11 @@ AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         NORMATIVE_SOURCES_DOC_TOKEN,
         RULES_DOC_TOKEN,
     ),
+    Path("docs/00-project/ai/agents/guides/KIMI.md"): (
+        *RUNTIME_DOC_TOKENS_WITH_MEMORY,
+        NORMATIVE_SOURCES_DOC_TOKEN,
+        RULES_DOC_TOKEN,
+    ),
     Path("docs/00-project/ai/agents/guides/AGENT.md"): (
         MEMORY_USAGE_TOKEN,
         POST_CHANGE_DOC_TOKEN,

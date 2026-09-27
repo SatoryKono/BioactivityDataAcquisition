@@ -9,20 +9,24 @@ from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 from uuid import UUID
 
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
 
+
+@runtime_checkable
 class _ModelDumpHost(Protocol):
     def model_dump(
         self, *, mode: str = "python", exclude_none: bool = False
     ) -> dict[str, object]: ...
 
 
+@runtime_checkable
 class _DictHost(Protocol):
     def dict(self, *, exclude_none: bool = False) -> dict[str, object]: ...
+
 
 __all__ = ["normalize_snapshot", "to_serializable_mapping"]
 

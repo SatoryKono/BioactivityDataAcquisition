@@ -22,12 +22,19 @@ When a prompt conflicts with active sources, **active sources win**:
 2. `AGENTS.md` → `docs/00-project/NORMATIVE_SOURCES.md` → `RULES.md` / ADRs
 3. This library
 
+## Versioning
+
+`Version:` in this file tracks the doc surface; `REGISTRY.yaml version:`
+tracks the registry format; `domains.yaml version:` tracks the overlay pack.
+The three are independent — never require them equal. `check` enforces
+scenario-table content parity (`check_readme_scenarios`), not version equality.
+
 ## Layout
 
 ```text
 docs/00-project/ai/prompts/
   README.md
-  REGISTRY.yaml          # 16 scenarios + entries
+  REGISTRY.yaml          # 17 scenarios + entries
   domains.yaml           # 24 ADR-060 overlays (consolidated)
   CATALOG.md             # optional, from python -m scripts.ai.prompts catalog
   _schema/*.json         # 6 schemas
@@ -38,9 +45,10 @@ docs/00-project/ai/prompts/
 
 Historical copies: `docs/99-archive/prompts-2026-09/`.
 
-## 16 scenarios
+## 17 scenarios
 
-See `REGISTRY.yaml` `scenarios:`. Primary cards:
+See `REGISTRY.yaml` `scenarios:`. Primary cards (this table must mirror
+`scenarios:` id + prompt id both ways — enforced by `check`):
 
 | Scenario | Prompt id | Card |
 | --- | --- | --- |
@@ -57,7 +65,7 @@ See `REGISTRY.yaml` `scenarios:`. Primary cards:
 | closeout | `prompt.closeout.grok` | [library/closeout/grok-closeout.md](library/closeout/grok-closeout.md) |
 | github-actions | `prompt.audit.github-actions` | [library/audit/github-actions.md](library/audit/github-actions.md) |
 | agents-runtime | `prompt.audit.agents-runtime` | [library/audit/agents-runtime.md](library/audit/agents-runtime.md) |
-| generic-nine pack | `prompt.audit.generic-nine.pack` | [library/audit/generic-nine.pack.md](library/audit/generic-nine.pack.md) |
+| test-loop | `prompt.tests.loop` | [library/test/loop.md](library/test/loop.md) |
 | architecture-cycle | `prompt.architecture.cycle` | [library/audit/architecture.md](library/audit/architecture.md) |
 | dashboard-audit | `prompt.observability.dashboard-audit-cycle` | [library/audit/dashboard.md](library/audit/dashboard.md) |
 | sequential-run | `prompt.audit.sequential-run` | [library/audit/sequential-run.md](library/audit/sequential-run.md) |
@@ -66,8 +74,15 @@ Deprecated: `prompt.audit.grok-cycle`, `prompt.audit.cyclic-pack` → `prompt.au
 
 ## Fragments
 
-Fourteen blocks under `fragments/`. Cards declare them in `includes:`.
-Renderer also expands `{{> fragment-name}}` (example: `{{> debt-budget-ban}}`).
+Fourteen blocks under `fragments/`. Cards declare them in `includes:` — the
+single SSOT prepend mechanism (`render` inlines them before the body).
+
+Do **not** use inline `{{> fragment-name}}` tokens in operator-paste bodies:
+`check` errors when a token duplicates an `includes:` entry
+(`fragment_double_include`) and warns on any other inline token
+(`fragment_inline_include`). Rendered paste budget (body + fragments) is
+enforced separately from `max_body_lines` — see `DEFAULT_RENDERED_MAX_LINES`
+in `scripts/ai/prompts/check.py` (per-card override `max_rendered_lines`).
 
 ## Compile (ADR-060)
 

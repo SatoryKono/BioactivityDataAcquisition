@@ -24,6 +24,8 @@ This policy applies to:
 - `.devin/config.json`
 - `.devin/mcp_config.json`
 - `.devin/mcp_config.local.json`
+- `.kimi-code/mcp.json`
+- `.kimi-code/local.toml`
 
 ## Current Classification
 
@@ -38,6 +40,10 @@ This policy applies to:
 | `.gemini/settings.json` | no | local-only/generated runtime config | may exist in local checkouts; not a tracked runtime source on `main`; may contain machine-local absolute paths |
 | `.codex/config-headless.toml` | no | local-only/untracked runtime config | headless variant; not currently tracked on `main` |
 | `.gemini/config.toml` | no | local-only/untracked runtime config | may exist in local checkouts; not a tracked runtime source on `main` |
+| `~/.kimi-code/mcp.json` | no | user-owned/generated Kimi runtime config | user-level MCP servers for Kimi Code CLI; project-level `.kimi-code/mcp.json` may override entries per project; may contain machine-local paths; secret values only via env var names, never inline |
+| `.kimi-code/mcp.json` | no | local-only/generated runtime config | may exist in local checkouts; not a tracked runtime source on `main`; shared-plane entries use `http://127.0.0.1:<port>/mcp` like `.codex/settings.json` |
+| `.kimi-code/local.toml` | no | local-only/untracked Kimi project overlay | written automatically by Kimi (`/add-dir`); holds `[workspace]` `additional_dir` absolute paths; gitignored |
+| `~/.kimi-code/config.toml` | no | user-owned/generated Kimi runtime config | model/provider preference, `default_permission_mode`, `[[permission.rules]]`, hooks; API keys via `api_key_env` names only |
 | `.devin/config.json` | yes | tracked Devin project settings | contains only current project-level settings (`permissions`, `read_config_from`, optional hooks, and CLI metadata); MCP servers do not live here in Devin CLI `v3000.3+` |
 | `.devin/mcp_config.json` | yes | tracked active Devin MCP projection | full sanctioned inventory; local servers use shared localhost HTTP and remote servers use Devin `${env:VAR}` header expansion |
 | `.devin/mcp_config.local.json` | no | generated machine-local Devin MCP overlay | gitignored daily override; marks optional servers disabled without changing the tracked inventory |

@@ -358,6 +358,11 @@ reports/quality/coderabbit/**/auth.*
 .devin/mcp_config.local.json
 .gemini/
 .jules/
+# Kimi Code CLI runtime surface (mirror-level runtime like Muse): machine-local
+# config/MCP/skills only; no tracked `.kimi-code/**` behavior tree on `main`
+# (see docs/00-project/ai/agents/guides/KIMI.md and
+# docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md).
+.kimi-code/
 # .junie/ â€” JetBrains Junie runtime surface. Tracked as equal-peer runtime to
 # `.codex/**` (see AGENTS.md, .junie/guidelines.md). Selective un-ignore below
 # keeps machine-local state (history/state/cache) out of git while allowing

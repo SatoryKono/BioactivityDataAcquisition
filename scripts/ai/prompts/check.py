@@ -22,12 +22,40 @@ from scripts.ai.prompts.registry import (
     PromptCard,
     RegistryEntry,
     body_line_count,
+    fragment_body,
     load_card,
     load_registry,
+    load_scenarios,
     resolve_include,
+)
+from scripts.ai.prompts.render import (
+    FRAGMENT_INCLUDE_RE,
+    extract_defaults_from_body,
 )
 
 _SUMMARY_VERSION_TOKEN = re.compile(r"\bv(\d+\.\d+(?:\.\d+)?)\b", re.I)
+
+# Fail-closed mutation flags: an operator-paste/campaign card must never ship
+# `ALLOW_*=true` as a paste default (#11690). Mutations are enabled only via
+# the named `full-write` profile or an explicit CLI `--param` override.
+FAIL_CLOSED_ALLOW_KEYS = frozenset(
+    {
+        "ALLOW_ISSUE_WRITE",
+        "ALLOW_PUSH",
+        "ALLOW_MERGE",
+        "ALLOW_CLOSE",
+    }
+)
+
+_TRUE_FALSE_RE = re.compile(r"\b(true|false)\b", re.I)
+_FRONTMATTER_PARAM_RE = re.compile(r"^\s*([A-Z][A-Z0-9_]*)\s*(?:[=:]\s*(.*?))?\s*$")
+
+# Rendered paste budget (card body + prepended `includes:` fragments),
+# separate from `max_body_lines` which constrains the body alone (#11695).
+# Largest current card (dashboard roster) renders ~1000 lines; 1500 leaves
+# headroom while still catching runaway pastes. Per-card override via
+# frontmatter `max_rendered_lines`.
+DEFAULT_RENDERED_MAX_LINES = 1500
 
 RULES_DUMP_PATTERNS = (
     re.compile(r"(?i)full\s+rules\s+dump"),
@@ -294,6 +322,103 @@ def _check_card_rules_dump(
         )
 
 
+def _first_bool_token(raw: str) -> str | None:
+    """First `true`/`false` word of a default cell, if any."""
+    match = _TRUE_FALSE_RE.search(raw or "")
+    return match.group(1).lower() if match else None
+
+
+def fail_closed_violations(card: PromptCard) -> list[str]:
+    """Fail-closed default violations (#11690): `ALLOW_*=true` in frontmatter
+    `params:` entries or body Params-table defaults. Bare param names without
+    a value carry no default and are clean."""
+    violations: list[str] = []
+    raw_params = card.raw_frontmatter.get("params") or []
+    if isinstance(raw_params, list):
+        for item in raw_params:
+            match = _FRONTMATTER_PARAM_RE.match(str(item))
+            if match is None:
+                continue
+            key, value = match.group(1), match.group(2) or ""
+            if key in FAIL_CLOSED_ALLOW_KEYS and _first_bool_token(value) == "true":
+                violations.append(f"frontmatter param default {key}=true")
+    for key, raw in extract_defaults_from_body(card.body).items():
+        if key in FAIL_CLOSED_ALLOW_KEYS and _first_bool_token(raw) == "true":
+            violations.append(f"Params table default {key}=true")
+    return violations
+
+
+def _check_card_fail_closed(
+    report: CheckReport,
+    entry: RegistryEntry,
+    card: PromptCard,
+) -> None:
+    for violation in fail_closed_violations(card):
+        report.add_error(
+            "fail_closed_default",
+            f"{card.id}: {violation} — fail-closed required, "
+            "mutations only via --profile full-write",
+            entry.path,
+        )
+
+
+def _check_card_fragment_includes(
+    report: CheckReport,
+    entry: RegistryEntry,
+    card: PromptCard,
+) -> None:
+    """`includes:` is the SSOT prepend mechanism (#11695). An inline
+    `{{> name}}` token duplicating an `includes:` entry is an error;
+    any other inline token is a warning pointing at `includes:`."""
+    included_stems = {Path(rel).stem for rel in card.includes}
+    for name in FRAGMENT_INCLUDE_RE.findall(card.body):
+        if name in included_stems:
+            report.add_error(
+                "fragment_double_include",
+                f"{card.id}: inline {{{{> {name}}}}} duplicates includes: entry",
+                entry.path,
+            )
+        else:
+            report.add_warning(
+                "fragment_inline_include",
+                f"{card.id}: inline {{{{> {name}}}}} — prefer includes: entry",
+                entry.path,
+            )
+
+
+def _rendered_line_count(card: PromptCard) -> int:
+    """Body lines plus prepended `includes:` fragment bodies."""
+    total = body_line_count(card.body)
+    for rel in card.includes:
+        try:
+            frag_path = resolve_include(rel)
+        except FileNotFoundError:
+            continue  # reported separately as include_missing
+        try:
+            total += body_line_count(fragment_body(frag_path))
+        except OSError:
+            continue
+    return total
+
+
+def _check_card_rendered_size(
+    report: CheckReport,
+    entry: RegistryEntry,
+    card: PromptCard,
+) -> None:
+    max_lines = card.max_rendered_lines
+    if max_lines is None:
+        max_lines = DEFAULT_RENDERED_MAX_LINES
+    rendered = _rendered_line_count(card)
+    if rendered > max_lines:
+        report.add_error(
+            "rendered_size",
+            f"{card.id}: rendered paste has {rendered} lines (max {max_lines}); "
+            "split the card or set max_rendered_lines with reason",
+            entry.path,
+        )
+
+
 def _check_card_lifecycle(
     report: CheckReport,
     entry: RegistryEntry,
@@ -337,7 +462,10 @@ def check_hygiene(*, registry_path: Path | None = None) -> CheckReport:
             continue
         checked += 1
         _check_card_size(report, entry, card)
+        _check_card_rendered_size(report, entry, card)
         _check_card_guardrails(report, entry, card)
+        _check_card_fail_closed(report, entry, card)
+        _check_card_fragment_includes(report, entry, card)
         _check_card_ssot(report, entry, card)
         _check_card_rules_dump(report, entry, card)
         _check_card_lifecycle(report, entry, card)
@@ -348,6 +476,84 @@ def check_hygiene(*, registry_path: Path | None = None) -> CheckReport:
 
     report.stats = {
         "cards_checked": checked,
+        "errors": len(report.errors),
+        "warnings": len(report.warnings),
+    }
+    return report
+
+
+def _readme_scenario_table(readme_text: str) -> dict[str, str]:
+    """Map scenario id -> prompt id from the README scenario table (#11692).
+
+    Only data rows qualify: the header (`Scenario`) and separator (`---`)
+    rows and cells whose prompt is not backticked are skipped.
+    """
+    rows: dict[str, str] = {}
+    for line in readme_text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if len(cells) < 2:
+            continue
+        scenario, prompt = cells[0], cells[1].strip("`").strip()
+        if scenario.lower() == "scenario" or set(scenario) <= {"-", " "}:
+            continue
+        if not prompt.startswith("prompt."):
+            continue
+        rows[scenario] = prompt
+    return rows
+
+
+def check_readme_scenarios(
+    *,
+    registry_path: Path | None = None,
+    readme_path: Path | None = None,
+) -> CheckReport:
+    """README scenario table must mirror REGISTRY scenarios (#11692).
+
+    Version fields stay independent: README `Version:`, REGISTRY `version:`
+    and `domains.yaml version:` track different artifacts and are never
+    required to be equal.
+    """
+    report = CheckReport()
+    try:
+        scenarios = {
+            item["id"]: item["prompt"] for item in load_scenarios(registry_path)
+        }
+    except Exception as exc:
+        report.add_error("registry_parse", str(exc))
+        return report
+    readme = readme_path or PROMPTS_ROOT / "README.md"
+    try:
+        table = _readme_scenario_table(readme.read_text(encoding="utf-8"))
+    except OSError as exc:
+        report.add_error("readme_missing", str(exc), readme.as_posix())
+        return report
+    for scenario_id, prompt in sorted(scenarios.items()):
+        if scenario_id not in table:
+            report.add_error(
+                "readme_scenario_missing",
+                f"REGISTRY scenario {scenario_id!r} missing from README table",
+                readme.as_posix(),
+            )
+        elif table[scenario_id] != prompt:
+            report.add_error(
+                "readme_prompt_drift",
+                f"README maps {scenario_id!r} to {table[scenario_id]!r}, "
+                f"REGISTRY says {prompt!r}",
+                readme.as_posix(),
+            )
+    for scenario_id in sorted(table):
+        if scenario_id not in scenarios:
+            report.add_error(
+                "registry_scenario_missing",
+                f"README lists {scenario_id!r} which has no REGISTRY scenario",
+                readme.as_posix(),
+            )
+    report.stats = {
+        "scenarios": len(scenarios),
+        "rows": len(table),
         "errors": len(report.errors),
         "warnings": len(report.warnings),
     }

@@ -236,6 +236,22 @@ scenarios:
   deps:
   - prompt.fragment.issue-state-machine-v3
   - prompt.fragment.gh-powershell
+- id: test-loop
+  scenario: Loop run report fix retest until green
+  role: py-test-bot
+  prompt: prompt.tests.loop
+  inputs:
+  - SCOPE
+  - MAX_ITERATIONS
+  - LANGUAGE
+  outputs:
+  - green-or-blocked
+  - per-run-report
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.git-safety
+  - prompt.fragment.debt-budget-ban
+  - prompt.fragment.env-guardrail
 entries:
 - id: prompt.fragment.audit-scale
   path: fragments/audit-scale.md
@@ -685,6 +701,16 @@ entries:
   - performance
   - operator
   summary: Accelerate test runs without weakening coverage
+- id: prompt.tests.loop
+  path: library/test/loop.md
+  status: active
+  class: operator-paste
+  tags:
+  - tests
+  - loop
+  - fix-retest
+  - operator
+  summary: Loop run report fix retest until green with mandatory per-run report
 - id: prompt.audit.tests-system
   path: library/test/system-audit.md
   status: active

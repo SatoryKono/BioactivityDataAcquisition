@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.dashboard-audit-cycle
-version: 2.2.0
+version: 2.2.1
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -89,8 +89,9 @@ audited SHA wins if the roster drifted. A missing required answer id is
 Skill: **observability-dashboard**. ADR-010: monitoring optional. Do not start
 `docker-compose.monitoring.yml` unless `MONITORING=true` in this paste.
 
-Default **`N=20`**, **`MODE=full`**, **`DEPTH=full`**, **`MONITORING=false`**,
-`USER_ROLE=operator`, all **`ALLOW_*=true`**. Empty cycles are forbidden.
+Default **`N=1`**, **`MODE=audit`**, **`DEPTH=full`**, **`MONITORING=false`**,
+`USER_ROLE=operator`, all **`ALLOW_*=false`** (fail-closed; mutations only via
+`--profile full-write`). Empty cycles are forbidden.
 Early-stop: 2 consecutive iterations without new PROVEN P0/P1 and without
 regression.
 
@@ -127,12 +128,12 @@ Every cycle checks, for each UID, the fragment sections **Shared palette**,
 
 | Param | Default |
 | --- | --- |
-| `N` | `20` |
+| `N` | `1` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |
 | `BASE_BRANCH` | `main` |
 | `WORK_BRANCH` | `fix/dashboard-audit-cycle-<shortsha>` (never main) |
 | `SCOPE` | `grafana/dashboards` |
-| `MODE` | `full` |
+| `MODE` | `audit` |
 | `DEPTH` | `full` |
 | `AUDIT_MODE` | `full` |
 | `CONTOURS` | `render,density-area,density-scalar,fill,fit,reflow,visual,layout,data,copy,safety` |
@@ -142,10 +143,10 @@ Every cycle checks, for each UID, the fragment sections **Shared palette**,
 | `USER_ROLE` | `operator` |
 | `MONITORING` | `false` |
 | `INCLUDE_PIPELINE` | `true` |
-| `ALLOW_ISSUE_WRITE` | `true` |
-| `ALLOW_PUSH` | `true` |
-| `ALLOW_MERGE` | `true` |
-| `ALLOW_CLOSE` | `true` |
+| `ALLOW_ISSUE_WRITE` | `false` (fail-closed; `true` only via `--profile full-write`) |
+| `ALLOW_PUSH` | `false` (fail-closed; `true` only via `--profile full-write`) |
+| `ALLOW_MERGE` | `false` (fail-closed; `true` only via `--profile full-write`) |
+| `ALLOW_CLOSE` | `false` (fail-closed; `true` only via `--profile full-write`) |
 | `MAX_ISSUES_PER_ITERATION` | `10` |
 | `LANGUAGE` | `ru` |
 

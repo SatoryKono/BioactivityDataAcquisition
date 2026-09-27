@@ -60,6 +60,8 @@ Live runtime set is exactly the six `py-*` profiles in `.codex/agents/` (Junie/D
 - [AGENT.md](guides/AGENT.md) — Core Engineering Guide
 - [CLAUDE.md](guides/CLAUDE.md) — Claude CLI specific guide
 - [GEMINI.md](guides/GEMINI.md) — Gemini CLI specific guide
+- [MUSE.md](guides/MUSE.md) — Muse Code mirror-level runtime guide
+- [KIMI.md](guides/KIMI.md) — Kimi Code CLI mirror-level runtime guide
 - [AI Runtime Mirror Ownership](policy/AI_RUNTIME_MIRROR_OWNERSHIP.md) —
   source-of-truth, sync direction, allowed divergence
 

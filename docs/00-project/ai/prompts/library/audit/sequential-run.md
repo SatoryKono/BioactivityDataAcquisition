@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.sequential-run
-version: 1.1.1
+version: 1.1.2
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -78,15 +78,15 @@ Precedence: активные runtime maps (`.codex/agents/CODEX-RUNTIME.md`,
 | `BASE_BRANCH` | `main` |
 | `WORK_BRANCH` | `fix/audit-seq-<shortsha>` |
 | `LANGUAGE` | `ru` |
-| `N` | `10` |
-| `MODE` | `full` |
+| `N` | `1` |
+| `MODE` | `audit` |
 | `DEPTH` | `full` |
 | `INCLUDE_PIPELINE` | `true` |
 | `MONITORING` | `true` |
-| `ALLOW_ISSUE_WRITE` | `true` |
-| `ALLOW_PUSH` | `true` |
+| `ALLOW_ISSUE_WRITE` | `false` (fail-closed; `true` only via `--profile full-write`) |
+| `ALLOW_PUSH` | `false` (fail-closed; `true` only via `--profile full-write`) |
 | `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `true` |
+| `ALLOW_CLOSE` | `false` (fail-closed; `true` only via `--profile full-write`) |
 | `MAX_ISSUES_PER_STEP` | `8` |
 | `REQUIRE_GH_TRACKING` | `true` |
 | `CODERABBIT` | `required-then-agent` |
@@ -100,8 +100,9 @@ Precedence: активные runtime maps (`.codex/agents/CODEX-RUNTIME.md`,
 TASK: исполнить уникальные audit-карточки по порядку ниже. После **каждой**
 карточки — ISSUE GATE → IMPLEMENT → CLOSEOUT GATE. К следующей карточке не
 переходить, пока issues шага не `closed` или `BLOCKED` с точной причиной.
-MODE: implement. Не commit/push/merge в `{{BASE_BRANCH}}`. Чужой dirty WIP —
-worktree.
+MODE: audit (default; `implement` только с явным `--profile full-write` и
+`ALLOW_*=true` для авторизованного mutation-прогона). Не commit/push/merge в
+`{{BASE_BRANCH}}`. Чужой dirty WIP — worktree.
 
 ## Жёсткие запреты
 

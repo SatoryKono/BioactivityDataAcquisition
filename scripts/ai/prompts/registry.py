@@ -68,6 +68,7 @@ class PromptCard:
     successor: str | None = None
     waive_guardrails: str | None = None
     max_body_lines: int | None = None
+    max_rendered_lines: int | None = None
     raw_frontmatter: dict[str, Any] = field(default_factory=dict)
 
 
@@ -151,6 +152,7 @@ def load_card(path: Path) -> PromptCard:
         successor=_optional_text(meta, "successor"),
         waive_guardrails=_optional_text(meta, "waive_guardrails"),
         max_body_lines=_optional_int(meta, "max_body_lines"),
+        max_rendered_lines=_optional_int(meta, "max_rendered_lines"),
         raw_frontmatter=meta,
     )
 

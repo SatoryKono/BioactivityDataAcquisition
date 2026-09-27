@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.sequential-run
-version: 1.2.0
+version: 1.2.1
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -71,10 +71,10 @@ max_body_lines: 280
 | `SCOPE` | `grafana/dashboards` |
 | `LANGUAGE` | `ru` |
 | `MONITORING` | `false` |
-| `ALLOW_ISSUE_WRITE` | `true` |
-| `ALLOW_PUSH` | `true` |
+| `ALLOW_ISSUE_WRITE` | `false` (fail-closed; `true` only via `--profile full-write`) |
+| `ALLOW_PUSH` | `false` (fail-closed; `true` only via `--profile full-write`) |
 | `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `true` |
+| `ALLOW_CLOSE` | `false` (fail-closed; `true` only via `--profile full-write`) |
 | `MAX_ISSUES_PER_STEP` | `8` |
 | `REQUIRE_GH_TRACKING` | `true` |
 
@@ -82,7 +82,9 @@ max_body_lines: 280
 
 TASK: исполнить уникальные карточки папки по порядку; после карточки без
 нативного create/close — ISSUE GATE + CLOSEOUT GATE; в конце sweep.
-MODE: implement. Не commit/push в `main`. Чужой dirty WIP — worktree.
+MODE: audit (default; `implement` только с явным `--profile full-write` и
+`ALLOW_*=true` для авторизованного mutation-прогона). Не commit/push в `main`.
+Чужой dirty WIP — worktree.
 
 ## Жёсткие запреты
 

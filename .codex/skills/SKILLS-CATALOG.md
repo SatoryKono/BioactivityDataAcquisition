@@ -35,7 +35,7 @@ emits a machine-readable drift/sync report for owner review.
 | `py-doc-bot` | focused docs, broad docs audit, mirror sync |
 | `py-plan-bot` | implementation, refactor, release planning |
 | `py-test-bot` | focused tests, broad campaign, flake triage |
-| `research-workflow` | single-stream, multi-stream research and evidence |
+| `research-workflow` | single router, phases via --phase: initialize, evidence, synthesis, decisions, specs, complete |
 | `new-pipeline` | provider/entity scaffolding |
 | `observability-dashboard` | dashboard edit, render, query debug |
 | `observability-prometheus` | rule edit, rule test, query debug |

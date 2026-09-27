@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3738 |
-| Tracked doc-like files | 3738 |
+| Doc-like files | 3409 |
+| Tracked doc-like files | 3409 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3738 |
+| tracked | 3409 |
 
 ## Lifecycle Counts
 
@@ -26,14 +26,14 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 278 |
-| active_quality_baseline | 72 |
-| closeout_evidence | 101 |
+| active_quality_baseline | 39 |
+| closeout_evidence | 54 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 26 |
 | docs_reports_generated_or_route_owned | 7 |
-| docs_reports_retention_sensitive_evidence | 21 |
+| docs_reports_retention_sensitive_evidence | 20 |
 | generated_skill_reference_mirror | 19 |
-| generated_test_run_evidence | 4 |
+| generated_test_run_evidence | 3 |
 | guide | 4 |
 | index | 4 |
 | issue_pack | 60 |
@@ -41,7 +41,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 1022 |
+| working_report | 793 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -57,30 +57,30 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 750 |
-| Archived | 295 |
+| Active | 749 |
+| Archived | 276 |
 | Canonical | 74 |
-| Generated | 1049 |
-| Working | 1570 |
+| Generated | 1047 |
+| Working | 1263 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 750 |
-| archive | 295 |
+| active | 749 |
+| archive | 276 |
 | canonical | 74 |
-| generated | 1049 |
-| working | 1570 |
+| generated | 1047 |
+| working | 1263 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 338 |
-| archive-after-migration | 1051 |
-| generate-automatically | 1049 |
-| keep | 1292 |
+| archive-after-migration | 824 |
+| generate-automatically | 1047 |
+| keep | 1192 |
 | reconcile-with-github-state | 8 |
 
 ## Cleanup Candidates
@@ -126,47 +126,47 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/runtime-receipt.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
-| `reports/ai/agent-tools/RF005-CLOSEOUT-2026-08-09.md` | Working | 0 | archive-after-migration |
-| `reports/ai/agent-tools/compatibility/rf005-platform-matrix-2026-08-09.json` | Working | 0 | archive-after-migration |
-| `reports/ai/agent-tools/evaluation/rf005-utility-pilot-2026-08-09.json` | Working | 0 | archive-after-migration |
-| `reports/ai/issue-7340-specialized-subsystem-analysis-20260731.md` | Working | 0 | archive-after-migration |
-| `reports/ai/issue-7348-comprehensive-skills-analysis-20260731.md` | Working | 0 | archive-after-migration |
-| `reports/ai/memory-audit-20260804/FINAL-REPORT.md` | Working | 0 | archive-after-migration |
-| `reports/ai/memory-audit-20260804/execution-ledger.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/crosswalk-delta.csv` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/orphan-req.csv` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/requirement-graph.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/untraced-tests.csv` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/final-summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/delta.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/plan.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/validation.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/delta.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/plan.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/validation.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/run.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/source-of-truth-map.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/run.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/docs-kpi.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/docs-kpi.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/link-report.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/plan.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/preflight.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/blocked-evidence.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-budget.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-budget.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-lint.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-01/issue-01-1.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-01/issue-01-2.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-01/issue-01-3.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-01/issue-01-4.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-02/issue-02-1.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-02/issue-02-2.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-02/issue-02-3.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-02/issue-02-4.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-03/issue-03-1.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-03/issue-03-2.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-03/issue-03-3.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-03/issue-03-4.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-04/issue-04-1.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-04/issue-04-2.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-04/issue-04-3.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-04/issue-04-4.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-05/issue-05-1.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-05/issue-05-2.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-05/issue-05-3.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-05/issue-05-4.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-06/issue-06-1.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-06/issue-06-2.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-06/issue-06-3.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-06/issue-06-4.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-07/issue-07-1.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-07/issue-07-2.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-07/issue-07-3.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-07/issue-07-4.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-08/issue-08-1.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-08/issue-08-2.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-08/issue-08-3.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-08/issue-08-4.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-09/issue-09-1.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-09/issue-09-2.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-09/issue-09-3.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-09/issue-09-4.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-10/issue-10-1.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-10/issue-10-2.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-10/issue-10-3.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-10/issue-10-4.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-11/issue-11-1.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -213,6 +213,7 @@
 | `docs/00-project/ai/prompts/domains.yaml` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/audit-scale.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/cyclic-kernel-v3.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/dashboard-requirements-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/debt-budget-ban.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/env-guardrail.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/evidence-contract-v3.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
@@ -251,7 +252,6 @@
 | `docs/00-project/ai/prompts/library/doc/audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/doc/pipeline.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/doc/planning.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/library/plan/agent-efficiency.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 

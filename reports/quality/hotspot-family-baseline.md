@@ -8,18 +8,20 @@
 
 | Family | Files | Total LOC | Files >=250 LOC | Helper ratio | Duplication | Max fan-in | Max fan-in module | Budgets | Budget warnings | Budget review notes |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |
-| `application_core` | 196 | 24218 | 0 | 0.384 | 0 | 6 | `bioetl.application.core.quarantine_manager` | `files_ge_250_loc=0, max_internal_fan_in=7` | `-` | `near_budget:max_internal_fan_in=6/7` |
+| `application_core` | 197 | 24373 | 1 | 0.384 | 0 | 7 | `bioetl.application.core.quarantine_manager` | `files_ge_250_loc=0, max_internal_fan_in=7` | `over_budget:files_ge_250_loc=1/0` | `at_budget:max_internal_fan_in=7/7` |
 | `composition_bootstrap_runtime` | 50 | 6160 | 0 | 0.323 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 | `composition_factories_pipeline` | 32 | 3870 | 0 | 0.358 | 0 | 2 | `bioetl.composition.factories.pipeline.runner_constructor` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
-| `application_services_control_plane` | 124 | 14703 | 0 | 0.378 | 0 | 1 | `bioetl.application.services.control_plane.workflow.manifest_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `-` |
-| `composition_runtime_builders` | 56 | 7398 | 0 | 0.386 | 0 | 2 | `bioetl.composition.runtime_builders.runner_inputs` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
+| `application_services_control_plane` | 126 | 15141 | 1 | 0.384 | 0 | 1 | `bioetl.application.services.control_plane.workflow.manifest_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `over_budget:files_ge_250_loc=1/0` | `-` |
+| `composition_runtime_builders` | 56 | 6651 | 0 | 0.339 | 0 | 2 | `bioetl.composition.runtime_builders.runner_inputs` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 
 ## `application_core` internal fan-in
 
-- distribution: `0:19, 1:103, 2:40, 3:17, 4:5, 5:11, 6:1`
-- at_budget_module_count: `0` (cap `7`)
+- distribution: `0:19, 1:104, 2:39, 3:18, 4:5, 5:11, 7:1`
+- at_budget_module_count: `1` (cap `7`)
 
-No modules currently sit at the fan-in cap.
+| Module | Fan-in | Runtime importers |
+| --- | ---: | --- |
+| `bioetl.application.core.quarantine_manager` | 7 | `bioetl.application.core._batch_write_schema_quarantine`, `bioetl.application.core._batch_write_support`, `bioetl.application.core._quarantine_metrics_support`, `bioetl.application.core.batch_transformer_attempt_failures`, `bioetl.application.core.batch_transformer_quarantine`, `bioetl.application.core.batch_transformer_state`, `bioetl.application.core.wiring.runtime` |
 
 ## `composition_bootstrap_runtime` internal fan-in
 
@@ -37,7 +39,7 @@ No modules currently sit at the fan-in cap.
 
 ## `application_services_control_plane` internal fan-in
 
-- distribution: `0:20, 1:104`
+- distribution: `0:22, 1:104`
 - at_budget_module_count: `0` (cap `2`)
 
 No modules currently sit at the fan-in cap.

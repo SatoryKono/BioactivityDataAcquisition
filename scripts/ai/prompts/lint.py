@@ -8,6 +8,8 @@ Checks:
   - no_controller_duplication (regex scan for controller phrases like
       "Scope freeze|Iteration i|Issue-sync|Validate|Post-audit" in overlay)
   - full_profile_explicit  (ALLOW_*=true only in full-write profile)
+  - fail_closed_default  (#11690/#11695: operator-paste cards must not ship
+      ALLOW_*=true paste defaults; shared predicate lives in check.py)
 
 CLI:
   python -m scripts.ai.prompts.lint           # all overlays + profiles
@@ -375,6 +377,55 @@ def check_profiles(report: LintReport) -> None:
         _lint_profile_file(report, path, schema, has_js)
 
 
+def check_library_cards(report: LintReport) -> int:
+    """Fail-closed defaults on operator-paste/campaign cards (#11690/#11695).
+
+    Reuses the shared :func:`check.fail_closed_violations` predicate so lint
+    and check can never disagree. Returns the number of cards scanned.
+    """
+    try:
+        from scripts.ai.prompts.check import fail_closed_violations
+        from scripts.ai.prompts.registry import (
+            load_card as _load_card,
+            load_registry as _load_registry,
+        )
+    except Exception as exc:
+        report.add_warning(
+            "library_cards_unavailable", f"card lint skipped: {exc}"
+        )
+        return 0
+    scanned = 0
+    try:
+        entries = _load_registry()
+    except Exception as exc:
+        report.add_error("library_registry_parse", str(exc))
+        return 0
+    for entry in entries:
+        if entry.status != "active" or entry.class_ not in {
+            "operator-paste",
+            "campaign",
+        }:
+            continue
+        if not entry.absolute_path.is_file():
+            continue
+        try:
+            card = _load_card(entry.absolute_path)
+        except Exception as exc:
+            report.add_error(
+                "library_card_parse", f"{entry.id}: {exc}", entry.path
+            )
+            continue
+        scanned += 1
+        for violation in fail_closed_violations(card):
+            report.add_error(
+                "fail_closed_default",
+                f"{card.id}: {violation} — fail-closed required, "
+                "mutations only via --profile full-write",
+                entry.path,
+            )
+    return scanned
+
+
 def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict handled by caller
     report = LintReport()
     check_kernel_schema(report)
@@ -409,6 +460,7 @@ def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict 
             check_overlay(report, Path(label), data, raw)
 
     check_profiles(report)
+    card_count = check_library_cards(report)
 
     report.stats = {
         "errors": len(report.errors),
@@ -417,6 +469,7 @@ def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict 
         "profiles": len(list(PROFILES_DIR.glob(_YAML_GLOB)))
         if PROFILES_DIR.is_dir()
         else 0,
+        "cards": card_count,
     }
     return report
 

@@ -1,21 +1,21 @@
 ---
 id: prompt.audit.orchestrator
-version: 1.0.0
+version: 1.0.1
 status: active
 class: operator-paste
 owner: BioETL Team
 runtimes:
 - any
 params:
-- N = 10
+- N = 1
 - SCOPE =
 - AUDIT_PROMPT_SOURCE =
-- MODE = full
+- MODE = audit
 - LANGUAGE = ru
-- ALLOW_ISSUE_WRITE = true
-- ALLOW_PUSH = true
-- ALLOW_MERGE = true
-- ALLOW_CLOSE = true
+- ALLOW_ISSUE_WRITE = false
+- ALLOW_PUSH = false
+- ALLOW_MERGE = false
+- ALLOW_CLOSE = false
 - MAX_ISSUES_PER_ITERATION
 - BASE_BRANCH = main
 - REPO = SatoryKono/BioactivityDataAcquisition
@@ -66,10 +66,10 @@ use this card when chaining findings into issues/PRs under explicit ALLOW flags.
 | `AUDIT_PROMPT_SOURCE` | library id or `file:<path>` (render via CLI) |
 | `MODE` | `plan` \| `audit` \| `audit+issues` \| `full` (mutations need ALLOW_*) |
 | `LANGUAGE` | `ru` |
-| `ALLOW_ISSUE_WRITE` | `true` |
-| `ALLOW_PUSH` | `true` |
-| `ALLOW_MERGE` | `true` |
-| `ALLOW_CLOSE` | `true` |
+| `ALLOW_ISSUE_WRITE` | `false` (fail-closed; `true` only via `--profile full-write`) |
+| `ALLOW_PUSH` | `false` (fail-closed; `true` only via `--profile full-write`) |
+| `ALLOW_MERGE` | `false` (fail-closed; `true` only via `--profile full-write`) |
+| `ALLOW_CLOSE` | `false` (fail-closed; `true` only via `--profile full-write`) |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |

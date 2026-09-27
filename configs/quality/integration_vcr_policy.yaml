@@ -193,9 +193,12 @@ tracked_suite_inventory:
     - tests/integration/test_incident_explanations.py
     - tests/integration/test_json_hash_stability.py
     - tests/integration/test_organism_classification_csv_coverage.py
+    - tests/integration/test_pipeline_diagnostics_evidence_actions.py
+    - tests/integration/test_run_explorer_columns.py
     - tests/integration/test_run_explorer_http_catalog.py
     - tests/integration/test_run_explorer_request_fixtures.py
     - tests/integration/test_runtime_metric_emission_consistency.py
+    - tests/integration/test_trust_telemetry_coverage.py
     - tests/integration/test_uniprot_idmapping_pipeline.py
     - tests/integration/workflow/test_workflow_foreign_key_reconciliation.py
     - tests/integration/workflow/test_workflow_runner_service.py

@@ -125,7 +125,11 @@ After this kernel, execute the overlay for the selected audit object. Overlay de
 
 ## Explicit full-run profile
 
-Library kernel remains fail-closed by default. For an authorized full run materialize:
+Library kernel remains fail-closed by default. For an authorized full run
+materialize the `full-write` profile
+(`docs/00-project/ai/prompts/profiles/full-write.yaml`, i.e.
+`python -m scripts.ai.prompts compile --profile full-write`) or the explicit
+operator overrides below:
 
 ```
 MODE=full
