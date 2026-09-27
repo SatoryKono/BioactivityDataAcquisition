@@ -14,7 +14,6 @@ if TYPE_CHECKING:
         RunLedgerService,
     )
     from bioetl.domain.control_plane import RunManifest
-    from bioetl.domain.ports import RunManifestPort
 
 
 def canonical_lineage_fragment_id(raw: object) -> str | None:
