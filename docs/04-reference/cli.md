@@ -169,6 +169,13 @@ bioetl workflow run chembl_activity --dry-run
 bioetl workflow run chembl_activity --limit 1000
 bioetl workflow run chembl_activity --input-csv data/filter-ids.csv --filter-column molecule_id --filter-field molecule_chembl_id
 bioetl workflow run chembl_activity --use-cached-bronze --exact-replay --replay-of-run-id parent-run-1 --replay-of-manifest-id manifest-parent-1
+# Trust panel 9422 / Run Explorer Replay: READY only with snapshot-backed
+# inputs. Live extract with degraded_observable is INSUFFICIENT/N/A until
+# Bronze snapshots are on source_refs (or replay from cached Bronze):
+# python -m bioetl run --pipeline chembl_tissue --use-cached-bronze \
+#   --cached-bronze-date YYYY-MM-DD --exact-replay --replay-of-run-id <id> \
+#   --required-persistence-profile replay_ready --no-health-server \
+#   --no-ensure-observability-backend
 bioetl workflow run chembl_baseline --log-level DEBUG --debug-export --debug-export-format csv --debug-export-format xlsx
 bioetl workflow run chembl_target --incremental --use-cached-bronze --cached-bronze-date 2026-06-29
 bioetl workflow status chembl_activity

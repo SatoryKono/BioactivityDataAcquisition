@@ -299,7 +299,8 @@ def test_manifest_without_input_snapshot_is_not_ready(tmp_path):
     assert result["replay_readiness_now"] != "READY"
     checks = {item["code"]: item["result"] for item in result["replay_checks"]}
     assert checks["input_snapshot_fingerprint"] == "unknown"
-    assert checks["effective_config_hash"] == "unknown"
+    assert checks["effective_config_hash"] == "pass"
+    assert checks["dependency_lock_hash"] == "unknown"
 
 
 @pytest.mark.parametrize(

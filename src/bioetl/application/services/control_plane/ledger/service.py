@@ -25,7 +25,7 @@ from bioetl.domain.control_plane.run_ledger import (
     STAGE_STARTED_EVENT,
     canonicalize_run_ledger_stage_name,
 )
-from bioetl.domain.ports import RunLedgerPort
+from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
 from bioetl.domain.types.dq_contracts import DQDisposition
 
@@ -62,6 +62,7 @@ class RunLedgerService(RunLedgerRichEventRecordingMixin):
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
     composite_run_id: str | None = None
+    manifest_port: RunManifestPort | None = None
     _entry_id_factory: Callable[[], str] = field(
         default_factory=lambda: _missing_entry_id_factory
     )

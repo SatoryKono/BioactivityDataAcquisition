@@ -117,14 +117,39 @@ def test_replay_run_without_replay_of_run_id_is_blocked() -> None:
     assert "replay_of_run_id" in projection["blockers"]
 
 
-def test_unsupported_family_is_not_ready() -> None:
+def test_rebuild_only_inside_family_boundary_is_insufficient() -> None:
     projection = project_selected_run_replay_readiness(
         identity=_PASSING_IDENTITY,
         manifest={**_PASSING_MANIFEST, "replay_capability": "rebuild_only"},
         inventory_present=True,
         artifact_probes=(_pass_probe(),),
     )
+    assert projection["verdict"] == INSUFFICIENT
+    family = next(
+        item for item in projection["checks"] if item["code"] == "exact_replay_family"
+    )
+    assert family["result"] == "unknown"
+    assert family["reason"] == "run_missing_input_snapshots"
+    assert "family_outside_supported_exact_replay_boundary" not in family["reason"]
+
+
+def test_unsupported_family_is_not_ready() -> None:
+    projection = project_selected_run_replay_readiness(
+        identity=_PASSING_IDENTITY,
+        manifest={
+            **_PASSING_MANIFEST,
+            "replay_capability": "rebuild_only",
+            "exact_replay_supported": False,
+        },
+        inventory_present=True,
+        artifact_probes=(_pass_probe(),),
+    )
     assert projection["verdict"] == UNSUPPORTED
+    family = next(
+        item for item in projection["checks"] if item["code"] == "exact_replay_family"
+    )
+    assert family["result"] == "fail"
+    assert family["reason"] == "family_outside_supported_exact_replay_boundary"
 
 
 def test_unfinished_run_is_not_ready() -> None:

@@ -162,9 +162,7 @@ def unavailable_status(
                 reason=reason,
             )
         ),
-        **project_stage_diagnostics(
-            None, request_state=state, request_reason=reason
-        ),
+        **project_stage_diagnostics(None, request_state=state, request_reason=reason),
     }
 
 
@@ -483,11 +481,25 @@ def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
                 fingerprints.append(content_hash.strip())
     capability = getattr(manifest, "replay_capability", None)
     capability_value = getattr(capability, "value", capability)
+    launch_context = getattr(manifest, "launch_context", None)
+    family_supported = None
+    if isinstance(launch_context, Mapping):
+        family_supported = launch_context.get("strict_exact_replay_supported")
+    config_hash = getattr(provenance, "effective_config_hash", None)
+    lock_hash = getattr(provenance, "dependency_lock_hash", None)
+    fingerprint = ",".join(fingerprints) if fingerprints else None
     return {
-        "effective_config_hash": getattr(provenance, "effective_config_hash", None),
-        "dependency_lock_hash": getattr(provenance, "dependency_lock_hash", None),
-        "input_snapshot_fingerprint": ",".join(fingerprints) if fingerprints else None,
+        "effective_config_hash": config_hash,
+        "dependency_lock_hash": lock_hash,
+        "input_snapshot_fingerprint": fingerprint,
         "replay_capability": capability_value,
+        "exact_replay_supported": family_supported,
+        "strict_exact_replay_supported": family_supported,
+        "objects": {
+            "effective_config_hash": bool(config_hash),
+            "dependency_lock_hash": bool(lock_hash),
+            "input_snapshot_fingerprint": bool(fingerprint),
+        },
         "replay_of_run_id": getattr(manifest, "replay_of_run_id", None),
         "replay_of_manifest_id": getattr(manifest, "replay_of_manifest_id", None),
     }

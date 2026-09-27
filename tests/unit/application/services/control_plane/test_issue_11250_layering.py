@@ -21,6 +21,59 @@ def test_lineage_fragment_id_rejects_layer_alias() -> None:
     assert canonical_lineage_fragment_id("frag-1") == "frag-1"
 
 
+def test_bronze_snapshots_update_manifest_capability() -> None:
+    from uuid import UUID
+
+    from bioetl.domain.control_plane import ReplayCapability, RunManifest, RunSourceRef
+    from bioetl.domain.types import RunID, RunType
+
+    manifest = RunManifest(
+        manifest_id="m1",
+        execution_fingerprint="legacy-fingerprint",
+        run_id=RunID(UUID(int=1)),
+        run_type=RunType.BACKFILL,
+        pipeline_name="chembl_tissue",
+        provider="chembl",
+        entity="tissue",
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="tissue",
+                pipeline_name="chembl_tissue",
+            ),
+        ),
+        replay_capability=ReplayCapability.REBUILD_ONLY,
+    )
+    port = MagicMock()
+    port.get.return_value = manifest
+    service = MagicMock()
+    service.manifest_port = port
+    service.manifest_id = "m1"
+    record_input_snapshots_from_artifact(
+        service,
+        layer="bronze",
+        artifact_path="bronze/batch",
+        details={
+            "provider": "chembl",
+            "entity": "tissue",
+            "pipeline_name": "chembl_tissue",
+            "input_snapshots": [
+                {
+                    "snapshot_id": "snap-1",
+                    "content_hash": "abc",
+                    "immutable_uri": "bronze://chembl/tissue/2026-09-27",
+                }
+            ],
+        },
+    )
+    service.record_input_snapshot_published.assert_called_once()
+    port.save.assert_called_once()
+    saved = port.save.call_args[0][0]
+    assert saved.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+    assert saved.source_refs[0].input_snapshots[0].snapshot_id == "snap-1"
+    assert saved.source_refs[0].input_snapshots[0].content_hash == "abc"
+
+
 def test_input_snapshot_requires_snapshot_id() -> None:
     service = MagicMock()
     with pytest.raises(ValueError, match="snapshot_id"):

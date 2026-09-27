@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P1
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-09-25'
+  Last verified: '2026-09-27'
 
 ______________________________________________________________________
 
@@ -49,6 +49,19 @@ read the catalog, and slow or unavailable storage remains an explicit API error.
 ### 0. Triage order
 
 Do not treat terminal processing success or historical Trust=OK as exact-replay readiness. `Review Exact Replay Readiness` on `1. Trust` is READY only after saved artifact checks pass. READY is not a replay that already ran and not permission to write current tables. A missing or unreadable required artifact is BLOCKED. CURRENT Prometheus does not change that verdict. Range counters for replay, ledger, lineage and telemetry are on Pipeline Diagnostics. Trust keeps the selected run's manifest, checkpoint and lineage checks.
+
+Read `replay_capability` and check `exact_replay_family` before blaming the workflow YAML:
+
+```bash
+python -m bioetl run-manifest show <run_id> --format json
+```
+
+| Signal | Meaning |
+| --- | --- |
+| `replay_capability=rebuild_only` and `strict_exact_replay_supported=true` | This run has no input snapshots yet. Panel 9422 is INSUFFICIENT (`run_missing_input_snapshots`), not “family cannot exact-replay”. |
+| `exact_replay_family` reason `family_outside_supported_exact_replay_boundary` | The executable family is outside the published exact-replay boundary. 9422 is UNSUPPORTED; Run Explorer Replay is N/A. |
+| `source_refs[].input_snapshots` empty at create, Bronze later published | Capability is recomputed after Bronze `immutable_input_snapshot` is attached to the manifest. |
+| `replay_capability=exact_replay_supported` plus verified hashes | 9422 can be READY when artifact checks pass. |
 
 1. Run outcome (`processing_status`) — data-processing result.
 2. Trust readiness (`trust_status` on `/ops/control-plane/*-validation`) — fail-closed exact-run evidence.

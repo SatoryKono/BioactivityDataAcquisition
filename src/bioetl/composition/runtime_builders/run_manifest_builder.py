@@ -144,6 +144,8 @@ def _publish_manifest_and_refs(
         inputs=inputs,
         ctx=ctx,
     )
+    if ledger_service is not None:
+        ledger_service.manifest_port = manifest_store
     emit_replay_reconstructability_metric(
         request=manifest_create_request,
         strict_exact_replay_supported=(

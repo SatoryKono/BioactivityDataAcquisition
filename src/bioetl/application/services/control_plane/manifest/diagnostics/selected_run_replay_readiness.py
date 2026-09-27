@@ -22,12 +22,14 @@ QUERY_ERROR = "QUERY ERROR"
 CheckResult = Literal["pass", "fail", "unknown", "n/a"]
 _TERMINAL_STATUSES = frozenset({"success", "failed", "shutdown", "cancelled"})
 _UNFINISHED_STATUSES = frozenset({"running", "started", "unfinished"})
-_EXPLICIT_UNSUPPORTED = frozenset(
+_RUN_SCOPED_CAPABILITIES = frozenset(
     {
         ReplayCapability.RESUME_ONLY.value,
         ReplayCapability.REBUILD_ONLY.value,
     }
 )
+_MISSING_SNAPSHOTS_REASON = "run_missing_input_snapshots"
+_FAMILY_OUTSIDE_REASON = "family_outside_supported_exact_replay_boundary"
 
 
 def _check(
@@ -98,38 +100,58 @@ def _manifest_checks(
             "input_snapshot_fingerprint",
         )
     ]
-    supported = manifest.get("exact_replay_supported")
-    capability, capability_known = _capability(manifest)
-    if supported is False or (
-        capability_known and capability.value in _EXPLICIT_UNSUPPORTED
-    ):
-        checks.append(
-            _check(
-                "exact_replay_family",
-                "fail",
-                "family_outside_supported_exact_replay_boundary",
-                "#/manifest/replay_capability",
-            )
-        )
-    elif capability_known and capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
-        checks.append(
-            _check(
-                "exact_replay_family",
-                "pass",
-                capability.value,
-                "#/manifest/replay_capability",
-            )
-        )
-    else:
-        checks.append(
-            _check(
-                "exact_replay_family",
-                "unknown",
-                "replay_capability_not_recorded",
-                "#/manifest/replay_capability",
-            )
-        )
+    checks.append(_exact_replay_family_check(manifest))
     return checks
+
+
+def _family_supported(manifest: Mapping[str, object]) -> bool | None:
+    """Return explicit family support; None means the flag was not recorded."""
+    supported = manifest.get("exact_replay_supported")
+    if supported is None:
+        supported = manifest.get("strict_exact_replay_supported")
+    if supported is None:
+        return None
+    if isinstance(supported, bool):
+        return supported
+    token = str(supported).strip().lower()
+    if token in {"true", "1", "yes"}:
+        return True
+    if token in {"false", "0", "no"}:
+        return False
+    return None
+
+
+def _exact_replay_family_check(manifest: Mapping[str, object]) -> dict[str, str]:
+    """Classify family support separately from this run's snapshot envelope."""
+    capability, capability_known = _capability(manifest)
+    family_supported = _family_supported(manifest)
+    if family_supported is False:
+        return _check(
+            "exact_replay_family",
+            "fail",
+            _FAMILY_OUTSIDE_REASON,
+            "#/manifest/replay_capability",
+        )
+    if capability_known and capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
+        return _check(
+            "exact_replay_family",
+            "pass",
+            capability.value,
+            "#/manifest/replay_capability",
+        )
+    if capability_known and capability.value in _RUN_SCOPED_CAPABILITIES:
+        return _check(
+            "exact_replay_family",
+            "unknown",
+            _MISSING_SNAPSHOTS_REASON,
+            "#/manifest/replay_capability",
+        )
+    return _check(
+        "exact_replay_family",
+        "unknown",
+        "replay_capability_not_recorded",
+        "#/manifest/replay_capability",
+    )
 
 
 def _identity_checks(identity: Mapping[str, object]) -> list[dict[str, str]]:

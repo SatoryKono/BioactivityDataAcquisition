@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-09-24'
+  Last verified: '2026-09-27'
 
 ______________________________________________________________________
 
@@ -105,6 +105,17 @@ Why these flags:
   settings stay `replay_ready`, and composite execution is outside the
   strict exact-replay boundary (`replay_ready` / `forensic_grade` fail-close).
   Do **not** combine with `--exact-replay`.
+
+Expected Run Explorer / Trust (panel 9422) columns for this smoke:
+
+| Launch | 9422 Review Exact Replay Readiness | Explorer Replay |
+| --- | --- | --- |
+| live extract, `degraded_observable`, empty `source_refs.input_snapshots` | INSUFFICIENT (`run_missing_input_snapshots`) | INCOMPLETE |
+| same run after Bronze snapshots are attached to the manifest | READY | OK |
+| `--use-cached-bronze --exact-replay --replay-of-run-id` + `replay_ready` | READY | OK |
+| family outside the exact-replay boundary (`exact_replay_supported=false`) | UNSUPPORTED | N/A |
+
+INCOMPLETE / N/A on Replay during `degraded_observable` smoke is expected. Do not treat it as a failed workflow. See [Run Manifest Inspection](run-manifest-inspection.md) for `replay_capability` and check `exact_replay_family`.
 - `--no-health-server` — sequential smokes must not fight over `:8000`.
 - `--no-ensure-observability-backend` — keep the default-off Ops HTTP backend
   off unless Grafana ID panels are in scope.
