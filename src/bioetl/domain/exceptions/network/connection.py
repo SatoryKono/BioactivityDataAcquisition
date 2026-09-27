@@ -8,13 +8,46 @@ retry with exponential backoff is appropriate (per RULES.md §3.1.3).
 
 from __future__ import annotations
 
+import socket
+
 from bioetl.domain.exceptions.base import RecoverableError
 from bioetl.domain.types import ErrorType
 
 __all__ = [
     "NetworkError",
     "RetryExhaustedError",
+    "is_dns_resolution_failure",
 ]
+
+_DNS_MESSAGE_MARKERS = (
+    "getaddrinfo failed",
+    "name or service not known",
+    "nodename nor servname provided",
+    "[errno 11001]",
+    "[errno -2]",
+    "[errno -3]",
+    "temporary failure in name resolution",
+)
+
+
+def is_dns_resolution_failure(
+    exc: BaseException | None = None,
+    message: str | None = None,
+) -> bool:
+    """Return True when the failure is DNS resolution, not a transient TCP drop."""
+    texts: list[str] = []
+    if message:
+        texts.append(message)
+    current: BaseException | None = exc
+    depth = 0
+    while current is not None and depth < 8:
+        if isinstance(current, socket.gaierror):
+            return True
+        texts.append(str(current))
+        current = current.__cause__ or current.__context__
+        depth += 1
+    blob = " ".join(texts).lower()
+    return any(marker in blob for marker in _DNS_MESSAGE_MARKERS)
 
 
 class NetworkError(RecoverableError):

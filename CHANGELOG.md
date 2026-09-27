@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Provider DNS fail-closed:** `getaddrinfo` / errno 11001 on data-source health
+  raises `NetworkError` (CLI 86) instead of `InfrastructureError`, and HTTP
+  retries no longer burn five attempts on NXDOMAIN. Unauthenticated Semantic
+  Scholar clients cap `max_retries` at 2 so a 429 does not exhaust a 5×30s loop.
+
 - **Empty TypeError in run reports (#11696):** `TypeError()` without args
   serializes as `TypeError()` instead of a null `error_message`. `--ensure-observability-backend` waits for `docker info` when the Docker CLI is present.
 

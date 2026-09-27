@@ -465,6 +465,14 @@ def test_is_retryable_error_returns_true_for_httpx_transport_errors(
     assert client._is_retryable_error(exc) is True
 
 
+def test_is_retryable_error_returns_false_for_dns_connect_error(
+    client: _ConcreteRetryClient,
+) -> None:
+    """DNS NXDOMAIN is not a transient TCP failure and must not burn retries."""
+    exc = httpx.ConnectError("[Errno 11001] getaddrinfo failed")
+    assert client._is_retryable_error(exc) is False
+
+
 def test_is_retryable_error_returns_true_for_recoverable_error(
     client: _ConcreteRetryClient,
 ) -> None:

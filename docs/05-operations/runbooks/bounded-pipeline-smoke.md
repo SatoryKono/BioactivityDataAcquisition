@@ -39,7 +39,11 @@ ______________________________________________________________________
   dashboard work. If Docker Desktop is part of this session (Grafana / Ops HTTP
   / `--ensure-observability-backend`), wait until `docker info` prints a
   Server Version before any `bioetl run` or `workflow run`. A stale pipeline
-  lock still fails with exit `84`.
+  lock still fails with exit `84`. If `api.crossref.org` / `api.semanticscholar.org`
+  / `eutils.ncbi.nlm.nih.gov` fail `getaddrinfo`, do not retry the provider pack:
+  that is DNS (exit 86), not a pipeline contract failure. Semantic Scholar without
+  `BIOETL_SEMANTICSCHOLAR_API_KEY` uses at most two HTTP attempts; prefer
+  `--enrich-only crossref,openalex,pubmed` for smoke.
 - Mixed Windows + WSL checkout: use
   `.\.venv-win\Scripts\python.exe` on Windows, or
   `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"` on WSL.
