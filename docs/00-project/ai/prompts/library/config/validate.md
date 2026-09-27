@@ -7,9 +7,9 @@ owner: BioETL Team
 runtimes:
 - any
 params:
-- SCOPE = `configs/` and related schemas 
-- MODE = remediate
-- LANGUAGE = ru
+- SCOPE
+- MODE
+- LANGUAGE
 includes:
 - fragments/git-safety.md
 - fragments/debt-budget-ban.md
