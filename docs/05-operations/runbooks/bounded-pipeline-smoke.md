@@ -36,7 +36,10 @@ ______________________________________________________________________
 
 - Runtime profile: Local-Only single-instance (ADR-010). Do **not** start
   `docker-compose.monitoring.yml` unless an operator explicitly requested
-  dashboard work.
+  dashboard work. If Docker Desktop is part of this session (Grafana / Ops HTTP
+  / `--ensure-observability-backend`), wait until `docker info` prints a
+  Server Version before any `bioetl run` or `workflow run`. A stale pipeline
+  lock still fails with exit `84`.
 - Mixed Windows + WSL checkout: use
   `.\.venv-win\Scripts\python.exe` on Windows, or
   `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"` on WSL.
@@ -245,6 +248,11 @@ $common = @(
 & $py -m bioetl run --pipeline chembl_publication_term @common
 & $py -m bioetl run --pipeline chembl_subcellular_fraction @common
 & $py -m bioetl run --pipeline chembl_target_protein_classification @common
+
+# chembl_reference_pack derived steps (subcellular_fraction, publication_term):
+# smoke with --limit 100 only. --limit 1000 can hang one ChEMBL page past 180s.
+& $py -m bioetl workflow run chembl_reference_pack @common `
+  --only-steps run_chembl_subcellular_fraction,run_chembl_publication_term
 
 # Wave D
 & $py -m bioetl run --pipeline pubmed_publication @common

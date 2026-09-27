@@ -399,3 +399,28 @@ def test_run_composite_disables_transient_server_when_backend_owns_port(
     assert startup.call_args.kwargs["health_server"] is False
     assert runner.call_args.kwargs["health_server"] is False
     exit_result.assert_called_once_with(True, None)
+
+
+def test_docker_engine_not_ready_message_skips_when_cli_missing(monkeypatch) -> None:
+    from bioetl.interfaces.cli.commands.domains.health import (
+        observability_backend_runtime as runtime,
+    )
+
+    monkeypatch.setattr(runtime.shutil, "which", lambda _name: None)
+    assert runtime.docker_engine_not_ready_message() is None
+
+
+def test_docker_engine_not_ready_message_when_info_fails(monkeypatch) -> None:
+    from bioetl.interfaces.cli.commands.domains.health import (
+        observability_backend_runtime as runtime,
+    )
+
+    monkeypatch.setattr(runtime.shutil, "which", lambda _name: "/usr/bin/docker")
+
+    def fake_run(*_args, **_kwargs):
+        return SimpleNamespace(returncode=1)
+
+    monkeypatch.setattr(runtime.subprocess, "run", fake_run)
+    message = runtime.docker_engine_not_ready_message()
+    assert message is not None
+    assert "docker info" in message

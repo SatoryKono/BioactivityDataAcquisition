@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Empty TypeError in run reports (#11696):** `TypeError()` without args
+  serializes as `TypeError()` instead of a null `error_message`. `--ensure-observability-backend` waits for `docker info` when the Docker CLI is present.
+
+- **Derived-scan hang retry (#11699):** one in-flight `anext` may use a second
+  hang window without being cancelled, so a slow ChEMBL page can finish.
+  A second hang on the same wait still fails closed. `max_records` is unchanged.
+
+- **`chembl_reference_pack` smoke `--limit` (#11698):** documented pack and
+  derived-step launches use `--limit 100`, not 1000.
+
 - **GitHub Actions billing stay-off:** ruleset `13643213` stays disabled, scheduled Release/VACUUM/contract-tests/diagram-nightly triggers are removed, `pr-gate` checks out the base ref, and checkout steps set `persist-credentials: false`.
 
 - **`chembl_reference_pack` limited subcellular scan:** a `--limit` whose

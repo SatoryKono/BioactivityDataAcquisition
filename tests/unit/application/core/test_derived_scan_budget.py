@@ -99,6 +99,27 @@ async def test_iter_derived_source_stops_for_limited_output_and_fails_when_unlim
 
 
 @pytest.mark.asyncio
+async def test_one_hang_retry_then_progresses():
+    closed = []
+
+    async def source():
+        try:
+            await asyncio.sleep(0.08)
+            yield 7
+        finally:
+            closed.append(True)
+
+    rows = [
+        row
+        async for row in bounded_source_records(
+            source(), max_records=10, timeout_seconds=0.05
+        )
+    ]
+    assert rows == [7]
+    assert closed == [True]
+
+
+@pytest.mark.asyncio
 async def test_deadline_closes_blocked_source():
     closed = []
 

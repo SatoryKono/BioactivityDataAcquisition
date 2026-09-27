@@ -7,6 +7,9 @@ from dataclasses import dataclass, replace
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.execution.pipeline_run_execution_service import (
+    format_run_error_message,
+)
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowStepExecutionResult,
 )
@@ -130,7 +133,7 @@ async def execute_pipeline_step(
             step_kind=_STEP_KIND_PIPELINE,
             status="failed",
             error_type=type(exc).__name__,
-            error_message=str(exc),
+            error_message=format_run_error_message(exc),
             child_run_id=optional_identity(exc, "run_id"),
             child_manifest_id=optional_identity(exc, "manifest_id"),
         )

@@ -313,6 +313,15 @@ def test_publication_primary_id_field_delegates_to_provider_hook() -> None:
     assert BasePublicationTransformer.get_primary_id_field(host) == "publication_id"
 
 
+def test_format_run_error_message_keeps_empty_typeerror() -> None:
+    from bioetl.application.services.execution.pipeline_run_execution_service import (
+        format_run_error_message,
+    )
+
+    assert format_run_error_message(TypeError()) == "TypeError()"
+    assert format_run_error_message(TypeError("boom")) == "boom"
+
+
 @pytest.mark.asyncio
 async def test_pipeline_execution_derives_monotonic_anchor_from_started_at() -> None:
     clock = MagicMock()
