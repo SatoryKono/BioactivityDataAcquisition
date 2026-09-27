@@ -303,6 +303,40 @@ def test_manifest_without_input_snapshot_is_not_ready(tmp_path):
     assert checks["dependency_lock_hash"] == "unknown"
 
 
+def test_rebuild_only_inside_family_boundary_is_insufficient(tmp_path):
+    from types import SimpleNamespace
+    from uuid import uuid4
+
+    run_id = str(uuid4())
+    persist(tmp_path, report(run_id=run_id))
+    port = MagicMock()
+    port.get_by_run_id.return_value = SimpleNamespace(
+        code_provenance=SimpleNamespace(
+            effective_config_hash="abc",
+            dependency_lock_hash="def",
+        ),
+        source_refs=(),
+        replay_capability=SimpleNamespace(value="rebuild_only"),
+        replay_of_run_id=None,
+        replay_of_manifest_id=None,
+        launch_context={"strict_exact_replay_supported": True},
+    )
+    result = load_selected_run_status(
+        pipeline="chembl_activity",
+        run_id=run_id,
+        root=tmp_path,
+        manifest_port=port,
+    )
+    family = next(
+        item
+        for item in result["replay_checks"]
+        if item["code"] == "exact_replay_family"
+    )
+    assert family["reason"] == "run_missing_input_snapshots"
+    assert family["result"] == "unknown"
+    assert result["replay_readiness_now"] == "INSUFFICIENT"
+
+
 @pytest.mark.parametrize(
     "status,expected",
     [
