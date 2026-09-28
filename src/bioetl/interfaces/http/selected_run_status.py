@@ -34,6 +34,8 @@ from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostic
 from bioetl.interfaces.http import run_report_ops
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
+    _deadline_exceeded_error,
+    request_deadline_exceeded,
     run_bounded_forensic_operation,
 )
 from bioetl.interfaces.http._health_server_observability_protocols import (
@@ -229,6 +231,20 @@ def _resolve_artifact_path(
     return candidate, ""
 
 
+_HASH_READ_CHUNK_SIZE = 256 * 1024
+
+
+def _hash_artifact_chunked(candidate: Path) -> str:
+    """Hash one artifact in blocks, stopping new work after the deadline."""
+    digest = hashlib.sha256()
+    with candidate.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(_HASH_READ_CHUNK_SIZE), b""):
+            if request_deadline_exceeded():
+                raise _deadline_exceeded_error()
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def _artifact_probes(
     report: Mapping[str, object], run_root: Path
 ) -> tuple[list[dict[str, str]], bool]:
@@ -298,7 +314,7 @@ def _artifact_probes(
                 }
             )
             continue
-        actual = hashlib.sha256(candidate.read_bytes()).hexdigest()
+        actual = _hash_artifact_chunked(candidate)
         if actual != digest.strip().lower():
             probes.append(
                 {

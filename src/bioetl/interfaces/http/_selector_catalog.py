@@ -6,6 +6,9 @@ import asyncio
 from collections.abc import Callable
 from time import monotonic
 
+from bioetl.application.observability.control_plane_evidence.timing import (
+    evidence_stage,
+)
 from bioetl.application.services.run_reports.query import ReportIndexEntry
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
 from bioetl.domain.ports import RunManifestPort, WorkflowManifestPort
@@ -52,7 +55,9 @@ class SelectorCatalog:
             return snapshot[1]
         if key not in self._report_tasks:
             self._report_snapshot = None
-            task = asyncio.create_task(asyncio.to_thread(loader, {"pipeline": key}))
+            task = asyncio.create_task(
+                asyncio.to_thread(_read_report_catalog, loader, {"pipeline": key})
+            )
             self._report_tasks[key] = task
             task.add_done_callback(lambda result: self._complete_reports(key, result))
         return await asyncio.shield(self._report_tasks[key])
@@ -92,11 +97,36 @@ class SelectorCatalog:
     ) -> SelectorCatalogSnapshot:
         # Drain both reads on failure before permitting a retry; a thread-backed
         # read cannot be cancelled when its sibling fails.
-        manifest_task = asyncio.create_task(asyncio.to_thread(manifests.list_all))
+        manifest_task = asyncio.create_task(
+            asyncio.to_thread(_read_manifest_catalog, manifests)
+        )
         workflow_task = asyncio.create_task(
-            asyncio.to_thread(workflows.list_all)
+            asyncio.to_thread(_read_workflow_catalog, workflows)
             if workflows is not None
             else asyncio.sleep(0, result=())
         )
         await asyncio.gather(manifest_task, workflow_task, return_exceptions=True)
         return manifest_task.result(), workflow_task.result()
+
+
+def _read_manifest_catalog(manifests: RunManifestPort) -> tuple[RunManifest, ...]:
+    """Read the run manifest catalog under the request-bound stage observer."""
+    with evidence_stage("selector_manifest_catalog"):
+        return manifests.list_all()
+
+
+def _read_workflow_catalog(
+    workflows: WorkflowManifestPort,
+) -> tuple[WorkflowManifest, ...]:
+    """Read the workflow manifest catalog under the request-bound stage observer."""
+    with evidence_stage("selector_workflow_catalog"):
+        return workflows.list_all()
+
+
+def _read_report_catalog(
+    loader: Callable[[dict[str, tuple[str, ...]]], list[ReportIndexEntry]],
+    scopes: dict[str, tuple[str, ...]],
+) -> list[ReportIndexEntry]:
+    """Read the report index under the request-bound stage observer."""
+    with evidence_stage("selector_report_catalog"):
+        return loader(scopes)

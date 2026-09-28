@@ -923,7 +923,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs.",
+          "noValue": "UNKNOWN — no rows for this Run ID. A failed request is QUERY ERROR, not an empty selection: the Run ID stays selected. 503 means the backend is busy (capacity_exhausted); 504 means the request exceeded its deadline (deadline_exceeded). Retry the query.",
           "links": [
             {
               "title": "Open saved run report",

@@ -16,6 +16,10 @@ from bioetl.domain.control_plane.run_ledger import (
     RUN_STARTED_EVENT,
 )
 from bioetl.domain.types import RunID
+from bioetl.interfaces.http._forensic_request_budget import (
+    _deadline_exceeded_error,
+    request_deadline_exceeded,
+)
 from bioetl.interfaces.http._processed_records_value_support import (
     _is_all_scope as _is_all_scope_token,
 )
@@ -70,6 +74,10 @@ def _read_selector_records(
     workflow_aliases: WorkflowAliasMap | None,
 ) -> tuple[SelectorRecord, ...]:
     """Bound ledger I/O and preserve catalog order without caching evidence."""
+    if request_deadline_exceeded():
+        # The catalog read already consumed the request budget; starting
+        # ledger reads now would only extend orphaned background I/O.
+        raise _deadline_exceeded_error()
     remaining = iter(enumerate(manifests))
     records: dict[int, SelectorRecord] = {}
     executor = ThreadPoolExecutor(max_workers=4)
@@ -87,6 +95,10 @@ def _read_selector_records(
             records.update(loaded)
             for future in completed:
                 del pending[future]
+            if request_deadline_exceeded():
+                # The caller already received 504; refilling the ledger queue
+                # would start new reads that nobody waits for.
+                raise _deadline_exceeded_error()
             pending.update(
                 (
                     executor.submit(

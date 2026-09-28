@@ -1097,6 +1097,13 @@ _SELECT_RUN_EMPTY = (
     "SELECT RUN — no exact Run ID selected. Choose a run first. "
     "VALID EMPTY if the selected run has no rows for this table."
 )
+_RUNTIME_9403_EMPTY = (
+    "UNKNOWN — no rows for this Run ID. A failed request is QUERY ERROR, "
+    "not an empty selection: the Run ID stays selected. "
+    "503 means the backend is busy (capacity_exhausted); "
+    "504 means the request exceeded its deadline (deadline_exceeded). "
+    "Retry the query."
+)
 _RUN_EXPLORER_URL = (
     "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?"
     "${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}"
@@ -2241,6 +2248,9 @@ def _retain_runtime_selected_run(payload: dict[str, object]) -> None:
         footer = found[panel_id].setdefault("options", {}).setdefault("footer", {})
         if isinstance(footer, dict):
             footer["enablePagination"] = True
+    # Processed Records must not claim "nothing selected" on 503/504: the Run
+    # ID stays selected and the failure surfaces as QUERY ERROR panel content.
+    _set_panel_no_value(found[9403], _RUNTIME_9403_EMPTY)
 
 
 _FLEET_ID_COLLISIONS = frozenset({9401, 9450, 9451, 9452, 1000, 9400, 9402, 9403})

@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Callable, Coroutine, Mapping
+from contextvars import ContextVar
 from functools import partial
 from secrets import token_hex
 from time import perf_counter
@@ -19,6 +20,26 @@ FORENSIC_ENDPOINT_QUEUE_TIMEOUT_SECONDS = 0.25
 FORENSIC_ENDPOINT_TIMEOUT_SECONDS = 12.0
 FORENSIC_ENDPOINT_ERROR_CONTRACT = "forensic_endpoint_error_v1"
 _LOGGER = logging.getLogger(__name__)
+
+_request_deadline: ContextVar[float | None] = ContextVar(
+    "forensic_request_deadline", default=None
+)
+
+
+def request_deadline_exceeded() -> bool:
+    """Return whether the current request outlived its forensic deadline.
+
+    The deadline is request-local: worker threads spawned by
+    ``asyncio.to_thread`` inherit a copy, while concurrent requests keep
+    their own value. Outside a bounded operation the result is always False.
+    """
+    deadline = _request_deadline.get()
+    return deadline is not None and perf_counter() >= deadline
+
+
+def _deadline_exceeded_error() -> ForensicEndpointUnavailable:
+    """Build the typed error for work that must stop after the deadline."""
+    return ForensicEndpointUnavailable(reason="deadline_exceeded", status_code=504)
 
 
 def _log_stage(request_id: str, endpoint: str, stage: str, elapsed: float) -> None:
@@ -147,10 +168,15 @@ async def run_bounded_forensic_operation[ResultT](
     started_at = perf_counter()
     queue_seconds = started_at - queued_at
 
+    # The operation task inherits a copy of this deadline through to_thread,
+    # so orphaned worker threads stop scheduling new reads after a timeout
+    # while concurrent requests keep their own value.
+    deadline_token = _request_deadline.set(started_at + timeout_seconds)
     try:
         with observe_evidence_stages(partial(_log_stage, request_id, endpoint)):
             operation_task = asyncio.create_task(operation_factory())
     except BaseException:
+        _request_deadline.reset(deadline_token)
         limiter.release()
         raise
     release_deferred = False
@@ -196,6 +222,7 @@ async def run_bounded_forensic_operation[ResultT](
             release_deferred = True
         raise
     finally:
+        _request_deadline.reset(deadline_token)
         if not release_deferred:
             limiter.release()
 
@@ -208,6 +235,7 @@ __all__ = [
     "ForensicEndpointUnavailable",
     "forensic_unavailable_payload",
     "forensic_unavailable_table_payload",
+    "request_deadline_exceeded",
     "run_bounded_forensic_operation",
     "table_error_as_http_ok",
 ]

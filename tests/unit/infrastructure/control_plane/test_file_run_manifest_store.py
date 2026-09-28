@@ -31,7 +31,9 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
+from pathlib import Path
 from unittest.mock import MagicMock
+from uuid import UUID
 
 import pytest
 
@@ -668,3 +670,33 @@ def test_file_store_list_all_reports_empty_and_non_object_catalog_entries(
 
     with pytest.raises(ValueError, match="must be a JSON object"):
         store.list_all()
+
+
+def test_read_path_needs_no_existence_precheck(tmp_path, monkeypatch) -> None:
+    """Read-path loads resolve missing files via FileNotFoundError, not exists()."""
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    manifest = make_run_manifest(manifest_id="manifest-no-precheck")
+    store.save(manifest)
+    absent_run_id = RunID(UUID("00000000-0000-0000-0000-000000000000"))
+
+    def _forbid_precheck(self) -> bool:
+        raise AssertionError("read-path must not probe file existence")
+
+    monkeypatch.setattr(Path, "exists", _forbid_precheck)
+    assert store._load_manifest(manifest.manifest_id) == manifest
+    assert store._load_manifest("manifest-absent") is None
+    assert (
+        store._load_manifest_id_for_run_id(manifest.run_id) == manifest.manifest_id
+    )
+    assert store._load_manifest_id_for_run_id(absent_run_id) is None
+
+
+def test_read_path_raises_on_corrupt_manifest_payload(tmp_path) -> None:
+    """Corrupt manifest JSON stays an error, never a silent catalog skip."""
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    manifest = make_run_manifest(manifest_id="manifest-corrupt")
+    store.save(manifest)
+    (store.base_path / "manifest-corrupt.json").write_text("{not json", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="property name"):
+        store._load_manifest("manifest-corrupt")
