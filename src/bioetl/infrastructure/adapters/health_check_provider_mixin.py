@@ -14,9 +14,25 @@ from bioetl.infrastructure.adapters._health_check_policy import (
     get_consecutive_health_failures,
     resolve_failure_health_status,
 )
-from bioetl.infrastructure.adapters.decorators._retry_support import (
-    _redact_transport_error_message,
-)
+
+
+def _redact_transport_error_message(message: str) -> str:
+    """Best-effort redact of secret-like tokens from transport error text."""
+    import re
+
+    redacted = re.sub(
+        r"(?i)\bBearer\s+\S+",
+        "Bearer <redacted>",
+        message,
+    )
+    redacted = re.sub(
+        r"(?i)(api[_-]?key|token|secret|password|authorization)\s*[:=]\s*\S+",
+        r"\1=<redacted>",
+        redacted,
+    )
+    if len(redacted) > 500:
+        return redacted[:500] + "..."
+    return redacted
 from bioetl.infrastructure.adapters.health_check_contract import (
     HEALTH_CHECK_ERRORS,
     HealthCheckContext,
