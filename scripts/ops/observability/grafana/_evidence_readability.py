@@ -79,10 +79,21 @@ def _selected_run_selectors(p: dict[int, dict]) -> None:
                     target["root_selector"] = "presentation_" + selector
 
 
-def _saved_run(p: dict[int, dict]) -> None:
+def _saved_run(p: dict[int, dict], *, uid: object = None) -> None:
     _selected_run_selectors(p)
     if 9451 not in p or 9450 not in p:
         return
+    # #11686: the DQ operator subset applies to bioetl-dq-v2 only; other
+    # dashboards keep the selection-only mapping byte-identical.
+    reason_options = (
+        dict(_DQ_REASON_MAPPINGS)
+        if uid == "bioetl-dq-v2"
+        else {
+            "selection_required": {
+                "text": "Choose a run to inspect saved evidence"
+            }
+        }
+    )
     panel = p[9451]
     panel["targets"][0]["root_selector"] = "presentation_domains"
     for transform in panel["transformations"]:
@@ -108,16 +119,7 @@ def _saved_run(p: dict[int, dict]) -> None:
         panel,
         "Reason",
         "mappings",
-        [
-            {
-                "type": "value",
-                "options": {
-                    "selection_required": {
-                        "text": "Choose a run to inspect saved evidence"
-                    }
-                },
-            }
-        ],
+        [{"type": "value", "options": reason_options}],
     )
     _override(panel, "Evidence reference", _HIDDEN, True)
     _override(
@@ -583,6 +585,28 @@ _REASON_MAPPINGS = {
     "archive_evidence_not_recorded": {"text": "No verified archive"},
 }
 
+# #11686: operator subset for the saved domain/status tables. Unknown codes
+# stay visible; verdicts and N/A are never rewritten by these mappings.
+_DQ_REASON_CODES = (
+    "execution_success",
+    "run_dq_threshold_evaluation",
+    "run_preflight_provider_observation",
+    "run_gold_schema_validation",
+    "run_observation_missing",
+)
+_DQ_EXTRA_REASON_LABELS = {
+    # Observed domain codes from the saved-run envelope that predate
+    # _REASON_MAPPINGS: workflow_{status} in workflow_observations.py and
+    # run_completion_trust_assessment in control_plane_snapshot.py.
+    "workflow_success": {"text": "Workflow completed"},
+    "run_completion_trust_assessment": {"text": "Trust assessment"},
+}
+_DQ_REASON_MAPPINGS = {
+    "selection_required": {"text": "Choose a run to inspect saved evidence"},
+    **{code: _REASON_MAPPINGS[code] for code in _DQ_REASON_CODES},
+    **_DQ_EXTRA_REASON_LABELS,
+}
+
 
 def _bind_selected_run_envelope(summary: dict, source: dict) -> None:
     # The previous Dashboard datasource reused domain rows. Query the envelope
@@ -796,7 +820,7 @@ def apply_evidence_readability(payload: dict) -> None:
     """Preserve queries while improving evidence readability at narrow widths."""
     p = {panel["id"]: panel for panel in _panels(payload["panels"])}
     _apply_stat_value_sizes(p)
-    _saved_run(p)
+    _saved_run(p, uid=payload.get("uid"))
     handlers = {
         "bioetl-overview-v2": _overview,
         "bioetl-control-plane-v1": _trust,

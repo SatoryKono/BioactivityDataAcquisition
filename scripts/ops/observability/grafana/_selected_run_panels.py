@@ -275,6 +275,18 @@ _STAGE_FIELDS = [
     "duration_seconds",
     "source",
 ]
+
+# #11685: readable ordered stage columns for bioetl-dq-v2. Other dashboards
+# keep _STAGE_FIELDS/_STAGE_RENAMES byte-identical.
+_DQ_STAGE_FIELDS = [
+    "stage_id",
+    "state",
+    "records_in",
+    "records_out",
+    "duration_seconds",
+    "reason",
+    "source",
+]
 _STAGE_RENAMES = {
     "stage_id": "Stage",
     "state": "Status",
@@ -284,10 +296,52 @@ _STAGE_RENAMES = {
     "duration_seconds": "Duration",
     "source": "Source",
 }
+_DQ_STAGE_RENAMES = {
+    "stage_id": "Stage",
+    "state": "Status",
+    "records_in": "Records in",
+    "records_out": "Records out",
+    "duration_seconds": "Duration",
+    "reason": "Reason",
+    "source": "Source",
+}
 
 
-def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
+def _stage_panel(grid: dict[str, int], *, dq_columns: bool = False) -> dict[str, object]:
     """Saved stage rows for the selected Run ID. They precede domain evidence."""
+    from scripts.ops.observability.grafana._evidence_readability import (
+        _DQ_REASON_MAPPINGS,
+    )
+
+    fields = _DQ_STAGE_FIELDS if dq_columns else _STAGE_FIELDS
+    renames = _DQ_STAGE_RENAMES if dq_columns else _STAGE_RENAMES
+    count_in = "Records in" if dq_columns else "In"
+    count_out = "Records out" if dq_columns else "Out"
+    reason_properties: list[dict[str, object]] = [
+        {"id": "custom.wrapText", "value": True},
+        {
+            "id": "custom.cellOptions",
+            "value": {"type": "auto", "wrapText": True},
+        },
+    ]
+    if dq_columns:
+        # #11685/#11686: same operator strings as the domain table; an
+        # unknown stage code stays visible instead of becoming a zero.
+        reason_properties.append(
+            {
+                "id": "mappings",
+                "value": [
+                    {
+                        "type": "value",
+                        "options": {
+                            code: label
+                            for code, label in _DQ_REASON_MAPPINGS.items()
+                            if code != "selection_required"
+                        },
+                    }
+                ],
+            }
+        )
     return {
         "id": 9460,
         "type": "table",
@@ -320,13 +374,7 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
             "overrides": [
                 {
                     "matcher": {"id": "byName", "options": "Reason"},
-                    "properties": [
-                        {"id": "custom.wrapText", "value": True},
-                        {
-                            "id": "custom.cellOptions",
-                            "value": {"type": "auto", "wrapText": True},
-                        },
-                    ],
+                    "properties": reason_properties,
                 },
                 {
                     "matcher": {"id": "byName", "options": "Duration"},
@@ -336,11 +384,11 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
                     ],
                 },
                 {
-                    "matcher": {"id": "byName", "options": "In"},
+                    "matcher": {"id": "byName", "options": count_in},
                     "properties": [{"id": "noValue", "value": ""}],
                 },
                 {
-                    "matcher": {"id": "byName", "options": "Out"},
+                    "matcher": {"id": "byName", "options": count_out},
                     "properties": [{"id": "noValue", "value": ""}],
                 },
                 {
@@ -388,15 +436,15 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
             {"id": "limit", "options": {"limitField": 12}},
             {
                 "id": "filterFieldsByName",
-                "options": {"include": {"names": _STAGE_FIELDS}},
+                "options": {"include": {"names": list(fields)}},
             },
             {
                 "id": "organize",
                 "options": {
                     "indexByName": {
-                        name: index for index, name in enumerate(_STAGE_FIELDS)
+                        name: index for index, name in enumerate(fields)
                     },
-                    "renameByName": dict(_STAGE_RENAMES),
+                    "renameByName": dict(renames),
                 },
             },
         ],
@@ -449,6 +497,7 @@ def _append_saved_run_evidence_row(
     *,
     include_identity: bool = True,
     include_duration: bool = False,
+    uid: object = None,
 ) -> None:
     panels[:] = [
         panel
@@ -463,7 +512,11 @@ def _append_saved_run_evidence_row(
         default=0,
     )
     offset = 3 if include_duration else 0
-    stages = _stage_panel({"x": 0, "y": y + 1 + offset, "w": 24, "h": 8})
+    # #11685: readable ordered stage columns apply to bioetl-dq-v2 only.
+    stages = _stage_panel(
+        {"x": 0, "y": y + 1 + offset, "w": 24, "h": 8},
+        dq_columns=uid == "bioetl-dq-v2",
+    )
     details = _panel(
         9451,
         "Inspect Selected Run Domains",
@@ -503,16 +556,25 @@ def _append_saved_run_evidence_row(
         )
         details["fieldConfig"]["defaults"]["noValue"] = empty
         stages["fieldConfig"]["defaults"]["noValue"] = empty
+    if uid == "bioetl-dq-v2":
+        # #11572: name all three tables of the row, including full identity.
+        row_description = (
+            "Expand for saved stage rows (Inspect Selected Run Stages), "
+            "domain verdicts (Inspect Selected Run Domains), and full "
+            "identity (Inspect Selected Run Identity) for the selected Run ID."
+        )
+    else:
+        row_description = (
+            "Expand for saved stage rows, then domain trust reasons, "
+            "for the selected Run ID."
+        )
     panels.append(
         {
             "id": 9450,
             "type": "row",
             "title": "Inspect Saved Run Evidence",
             "collapsed": True,
-            "description": (
-                "Expand for saved stage rows, then domain trust reasons, "
-                "for the selected Run ID."
-            ),
+            "description": row_description,
             "gridPos": {"x": 0, "y": y, "w": 24, "h": 1},
             "panels": children,
         }
@@ -883,6 +945,7 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
             panels,
             include_identity=uid != _CONTROL_PLANE_UID,
             include_duration=uid == "bioetl-runtime",
+            uid=uid,
         )
 
 

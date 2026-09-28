@@ -841,8 +841,9 @@ def _dq_processed_records(panel: dict) -> None:
     for field in ("value", "value A", "count", "count out"):
         _override(panel, field, _WIDTH, 100)
     _override(panel, "percentage", _WIDTH, 100)
-    _override(panel, "percentage", "displayName", "percentage")
-    _override(panel, "percentage A", "displayName", "percentage")
+    # #11684: Gold/Silver percentages are shares of the Bronze count.
+    _override(panel, "percentage", "displayName", "percentage of Bronze")
+    _override(panel, "percentage A", "displayName", "percentage of Bronze")
     for field in (
         "value",
         "value A",
@@ -871,7 +872,12 @@ def _dq_processed_records(panel: dict) -> None:
     panel["options"]["cellHeight"] = "sm"
     panel["gridPos"]["h"] = 13
     panel["description"] = (
-        "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden."
+        "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Gold and Silver percentages are of the Bronze count and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden."
+    )
+    # #11569: one SELECT RUN state pointing at Run Explorer, not Inspect
+    # Recent Runs (that table lives on the Run Explorer dashboard).
+    panel["fieldConfig"]["defaults"]["noValue"] = (
+        "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer."
     )
 
 
@@ -897,6 +903,39 @@ def _correct_dq(uid: object, panels: dict[int, dict]) -> None:
         for field in ("Result", "Status", "Trust", "Reason"):
             _override(summary, field, "custom.wrapText", False)
             _override(summary, field, _CELL, {"type": "auto", "wrapText": False})
+        # #11570: name the answer column before the glossary. Geometry,
+        # queries, renames, and links stay untouched.
+        lead = (
+            "SELECTED RUN · Overall verdict is the data-quality assessment of "
+            "this Run ID; Processing is the saved ETL outcome; Trust is the "
+            "saved trust and does not authorize replay. "
+        )
+        description = str(summary.get("description") or "")
+        if "Overall verdict is the data-quality assessment" not in description:
+            if description.startswith("SELECTED RUN · "):
+                description = lead + description.removeprefix("SELECTED RUN · ")
+            else:
+                description = lead + description
+            summary["description"] = description
+        # #11571: 9451 and 9452 must not clone the 9406 glossary.
+        domains = panels.get(9451)
+        if isinstance(domains, dict):
+            domains["description"] = (
+                "SELECTED RUN · Domain verdicts of this Run ID; this table is "
+                "not the page status. Missing checks are INCOMPLETE; missing "
+                "selection is SELECT RUN; request failure is QUERY ERROR. N/A "
+                "means explicitly inapplicable. VALID EMPTY is an empty "
+                "successful query."
+            )
+        identity = panels.get(9452)
+        if isinstance(identity, dict):
+            identity["description"] = (
+                "SELECTED RUN · Full identifiers of this Run ID; the short "
+                "table is Inspect Run Identity on the first screen. Missing "
+                "checks are INCOMPLETE; missing selection is SELECT RUN; "
+                "request failure is QUERY ERROR. N/A means explicitly "
+                "inapplicable. VALID EMPTY is an empty successful query."
+            )
     if uid != "bioetl-dq-v2" or 155 not in panels:
         return
     panels[10]["fieldConfig"]["defaults"]["noValue"] = (

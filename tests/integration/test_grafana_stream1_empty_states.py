@@ -219,7 +219,10 @@ def test_dq_10253_selected_run_summary_is_first_window() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     root = {panel.get("id"): panel for panel in dashboard.get("panels") or []}
     summary = root[9406]
-    assert summary.get("gridPos") == {"h": 4, "w": 24, "x": 0, "y": 18}
+    # Canonical first-window geometry from _DQ_FIRST_WINDOW_GEOMETRY (#11570
+    # pins y=5 h=5: the y=18 h=4 in the issue audit is stale, geometry is
+    # not moved by this change).
+    assert summary.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 5}
     organize = next(
         item
         for item in summary.get("transformations") or []
@@ -229,9 +232,7 @@ def test_dq_10253_selected_run_summary_is_first_window() -> None:
         "execution_state": 0,
         "verdict": 1,
         "saved_trust": 2,
-        "evidence_completeness": 3,
-        "reason_display": 4,
-        "rules_version": 5,
+        "reason_display": 3,
     }
     assert "presentation_summary[0]" in summary["targets"][0]["root_selector"]
     assert "/selected-run-status?" in summary["targets"][0]["url"]
@@ -243,7 +244,7 @@ def test_dq_10253_selected_run_summary_is_first_window() -> None:
 
 
 def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
-    """#10253 §7.3: DQ HTTP empty copy names one state."""
+    """#10253 §7.3: DQ HTTP empty copy names one state (#11569: Run Explorer)."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panels = {
         panel["id"]: panel
@@ -254,7 +255,7 @@ def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
         9402: "SELECT RUN — no exact Run ID selected. Choose a run first.",
         9403: (
             "SELECT RUN — no exact Run ID selected. "
-            "Choose a run in Inspect Recent Runs."
+            "Choose this run in Run Explorer."
         ),
         9406: "UNKNOWN",
     }

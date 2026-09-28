@@ -415,7 +415,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Evidence Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">SELECTED RUN · Saved evidence for the selected Run ID. CURRENT pipeline status and TIME RANGE scores are not on this page.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">SELECTED RUN · Saved evidence for the selected Run ID. CURRENT pipeline status and TIME RANGE scores are not on this page. A time-range value never proves this run.</div></div>"
       },
       "links": []
     },
@@ -430,7 +430,7 @@
         "y": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Columns are Result, Status, Evidence, and Rules. Status is the verdict. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
+      "description": "SELECTED RUN · Overall verdict is the data-quality assessment of this Run ID; Processing is the saved ETL outcome; Trust is the saved trust and does not authorize replay. Columns are Result, Status, Evidence, and Rules. Status is the verdict. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -1002,7 +1002,7 @@
         "h": 13
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden.",
+      "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Gold and Silver percentages are of the Bronze count and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1014,7 +1014,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs.",
+          "noValue": "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer.",
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
@@ -1188,7 +1188,7 @@
               },
               {
                 "id": "displayName",
-                "value": "percentage"
+                "value": "percentage of Bronze"
               },
               {
                 "id": "noValue",
@@ -1456,7 +1456,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "percentage"
+                "value": "percentage of Bronze"
               },
               {
                 "id": "noValue",
@@ -1565,7 +1565,7 @@
       "type": "row",
       "title": "Inspect Saved Run Evidence",
       "collapsed": true,
-      "description": "Expand for saved stage rows, then domain trust reasons, for the selected Run ID.",
+      "description": "Expand for saved stage rows (Inspect Selected Run Stages), domain verdicts (Inspect Selected Run Domains), and full identity (Inspect Selected Run Identity) for the selected Run ID.",
       "gridPos": {
         "x": 0,
         "y": 17,
@@ -1622,6 +1622,37 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "execution_success": {
+                            "text": "Processing completed"
+                          },
+                          "run_dq_threshold_evaluation": {
+                            "text": "Data quality checks"
+                          },
+                          "run_preflight_provider_observation": {
+                            "text": "Provider preflight check"
+                          },
+                          "run_gold_schema_validation": {
+                            "text": "Gold schema validation"
+                          },
+                          "run_observation_missing": {
+                            "text": "Result not recorded"
+                          },
+                          "workflow_success": {
+                            "text": "Workflow completed"
+                          },
+                          "run_completion_trust_assessment": {
+                            "text": "Trust assessment"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -1644,7 +1675,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "In"
+                  "options": "Records in"
                 },
                 "properties": [
                   {
@@ -1656,7 +1687,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Out"
+                  "options": "Records out"
                 },
                 "properties": [
                   {
@@ -1730,10 +1761,10 @@
                   "names": [
                     "stage_id",
                     "state",
-                    "reason",
                     "records_in",
                     "records_out",
                     "duration_seconds",
+                    "reason",
                     "source"
                   ]
                 }
@@ -1745,19 +1776,19 @@
                 "indexByName": {
                   "stage_id": 0,
                   "state": 1,
-                  "reason": 2,
-                  "records_in": 3,
-                  "records_out": 4,
-                  "duration_seconds": 5,
+                  "records_in": 2,
+                  "records_out": 3,
+                  "duration_seconds": 4,
+                  "reason": 5,
                   "source": 6
                 },
                 "renameByName": {
                   "stage_id": "Stage",
                   "state": "Status",
-                  "reason": "Reason",
-                  "records_in": "In",
-                  "records_out": "Out",
+                  "records_in": "Records in",
+                  "records_out": "Records out",
                   "duration_seconds": "Duration",
+                  "reason": "Reason",
                   "source": "Source"
                 }
               }
@@ -1776,7 +1807,7 @@
             "h": 12
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · Domain verdicts of this Run ID; this table is not the page status. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -1903,6 +1934,27 @@
                         "options": {
                           "selection_required": {
                             "text": "Choose a run to inspect saved evidence"
+                          },
+                          "execution_success": {
+                            "text": "Processing completed"
+                          },
+                          "run_dq_threshold_evaluation": {
+                            "text": "Data quality checks"
+                          },
+                          "run_preflight_provider_observation": {
+                            "text": "Provider preflight check"
+                          },
+                          "run_gold_schema_validation": {
+                            "text": "Gold schema validation"
+                          },
+                          "run_observation_missing": {
+                            "text": "Result not recorded"
+                          },
+                          "workflow_success": {
+                            "text": "Workflow completed"
+                          },
+                          "run_completion_trust_assessment": {
+                            "text": "Trust assessment"
                           }
                         }
                       }
@@ -2001,7 +2053,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · Full identifiers of this Run ID; the short table is Inspect Run Identity on the first screen. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
