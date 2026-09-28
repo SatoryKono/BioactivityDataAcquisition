@@ -205,3 +205,43 @@ async def test_selector_timeout_retains_slot_until_operation_finishes(monkeypatc
         release.set()
     await asyncio.wait_for(host._selector_endpoint_limiter.acquire(), 1)
     host._selector_endpoint_limiter.release()
+
+
+@pytest.mark.asyncio
+async def test_catalog_reads_emit_request_bound_stages():
+    """Manifest, workflow, and report catalog reads report request-bound stages."""
+    from bioetl.application.observability.control_plane_evidence.timing import (
+        observe_evidence_stages,
+    )
+
+    stages: list[str] = []
+    manifests = MagicMock()
+    manifests.list_all.return_value = ()
+    workflows = MagicMock()
+    workflows.list_all.return_value = ()
+    catalog = SelectorCatalog()
+    with observe_evidence_stages(lambda name, _elapsed: stages.append(name)):
+        await catalog.read(manifests, workflows)
+        await catalog.read_reports({"pipeline": ()}, lambda scopes: [])
+    assert "selector_manifest_catalog" in stages
+    assert "selector_workflow_catalog" in stages
+    assert "selector_report_catalog" in stages
+
+
+@pytest.mark.asyncio
+async def test_catalog_stage_observed_on_read_failure():
+    """A failing catalog read still closes its request-bound stage."""
+    from bioetl.application.observability.control_plane_evidence.timing import (
+        observe_evidence_stages,
+    )
+
+    stages: list[str] = []
+    manifests = MagicMock()
+    manifests.list_all.side_effect = OSError("disk gone")
+    catalog = SelectorCatalog()
+    with observe_evidence_stages(lambda name, _elapsed: stages.append(name)):
+        with pytest.raises(OSError, match="disk gone"):
+            await catalog.read(manifests, None)
+    assert "selector_manifest_catalog" in stages
+    assert "selector_workflow_catalog" not in stages
+    assert "selector_report_catalog" not in stages

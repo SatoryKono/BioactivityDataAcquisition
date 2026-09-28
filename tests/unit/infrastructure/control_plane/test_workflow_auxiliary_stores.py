@@ -576,3 +576,38 @@ def test_workflow_manifest_error_does_not_queue_entire_catalog(
     with pytest.raises(ValueError):
         FileWorkflowManifestStore(base_path=tmp_path).list_all()
     assert len(submitted) == 4
+
+
+def test_workflow_manifest_read_path_needs_no_existence_precheck(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Workflow read-path resolves missing files via FileNotFoundError, not exists()."""
+    workflow_run_id = _run_id("00000000-0000-0000-0000-000000000201")
+    store = FileWorkflowManifestStore(base_path=tmp_path / "workflow_manifest")
+    manifest = _manifest(manifest_id="wf-no-precheck", workflow_run_id=workflow_run_id)
+    store.save(manifest)
+    absent_run_id = _run_id("00000000-0000-0000-0000-000000000000")
+
+    def _forbid_precheck(self) -> bool:
+        raise AssertionError("read-path must not probe file existence")
+
+    monkeypatch.setattr(Path, "exists", _forbid_precheck)
+    assert store._load_manifest(manifest.manifest_id) == manifest
+    assert store._load_manifest("wf-absent") is None
+    assert store._load_manifest_id_for_run_id(workflow_run_id) == manifest.manifest_id
+    assert store._load_manifest_id_for_run_id(absent_run_id) is None
+
+
+def test_workflow_manifest_read_path_raises_on_corrupt_payload(
+    tmp_path: Path,
+) -> None:
+    """Corrupt workflow JSON stays an error, never a silent catalog skip."""
+    workflow_run_id = _run_id("00000000-0000-0000-0000-000000000202")
+    store = FileWorkflowManifestStore(base_path=tmp_path / "workflow_manifest")
+    manifest = _manifest(manifest_id="wf-corrupt", workflow_run_id=workflow_run_id)
+    store.save(manifest)
+    (store.base_path / "wf-corrupt.json").write_text("{not json", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="property name"):
+        store._load_manifest("wf-corrupt")

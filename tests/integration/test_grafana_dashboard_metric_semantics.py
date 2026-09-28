@@ -1567,7 +1567,15 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     processed_no_value = str(
         processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
     )
-    if dashboard_name in {"bioetl-runtime.json", "bioetl-dq-v2.json"}:
+    if dashboard_name == "bioetl-runtime.json":
+        # #11678: Processed Records must not masquerade a 503/504 request
+        # failure as "nothing selected" once a Run ID is in the selector.
+        assert identity_no_value.startswith("SELECT RUN")
+        assert "valid empty" not in identity_no_value.lower()
+        assert "no exact Run ID selected" not in processed_no_value
+        assert "query error" in processed_no_value.lower()
+        assert "503" in processed_no_value and "504" in processed_no_value
+    elif dashboard_name == "bioetl-dq-v2.json":
         assert identity_no_value.startswith("SELECT RUN")
         assert processed_no_value.startswith("SELECT RUN")
         assert "valid empty" not in identity_no_value.lower()

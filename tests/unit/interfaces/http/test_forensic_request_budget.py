@@ -293,3 +293,47 @@ def test_trust_query_failure_has_displayable_row_without_claiming_run_evidence(
 
 def test_forensic_deadline_remains_twelve_seconds() -> None:
     assert FORENSIC_ENDPOINT_TIMEOUT_SECONDS == 12.0
+
+
+def test_request_deadline_exceeded_stays_false_outside_bounded_operation() -> None:
+    from bioetl.interfaces.http._forensic_request_budget import (
+        request_deadline_exceeded,
+    )
+
+    assert request_deadline_exceeded() is False
+
+
+@pytest.mark.asyncio
+async def test_request_deadline_does_not_leak_into_concurrent_requests() -> None:
+    """A live deadline is visible only inside its own request, never a neighbor."""
+    from bioetl.interfaces.http._forensic_request_budget import (
+        request_deadline_exceeded,
+    )
+
+    limiter = asyncio.Semaphore(2)
+    observed: dict[str, bool] = {}
+
+    async def bounded_operation() -> str:
+        observed["inside_bounded_operation"] = request_deadline_exceeded()
+        await asyncio.sleep(0.2)
+        return "bounded"
+
+    async def neighbor_probe() -> None:
+        await asyncio.sleep(0.05)
+        observed["neighbor_during_bounded_operation"] = request_deadline_exceeded()
+
+    result = await asyncio.gather(
+        run_bounded_forensic_operation(
+            limiter=limiter,
+            operation_factory=bounded_operation,
+            timeout_seconds=60.0,
+            endpoint="deadline-isolation",
+        ),
+        neighbor_probe(),
+    )
+    assert result[0] == "bounded"
+    assert observed == {
+        "inside_bounded_operation": False,
+        "neighbor_during_bounded_operation": False,
+    }
+    assert request_deadline_exceeded() is False

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+import time
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from typing import cast
@@ -759,3 +761,71 @@ def test_ledger_read_failure_stops_refill_and_waits_for_running_reads(monkeypatc
         with pytest.raises(OSError, match="ledger read failed"):
             result.result(timeout=5)
     assert len(calls) == 4
+
+
+def test_expired_deadline_stops_ledger_reads_before_start(monkeypatch) -> None:
+    """An already-exceeded deadline raises instead of starting ledger I/O."""
+    from bioetl.interfaces.http._forensic_request_budget import (
+        ForensicEndpointUnavailable,
+    )
+
+    manifests = tuple(_manifest(index) for index in range(1, 4))
+    ledger = _Ledger({})
+    monkeypatch.setattr(subject, "request_deadline_exceeded", lambda: True)
+    with pytest.raises(ForensicEndpointUnavailable, match="deadline_exceeded"):
+        subject.build_selector_records(manifests, ledger, None)
+    assert ledger.lookups == []
+
+
+def test_expired_deadline_stops_ledger_refill_mid_flight(monkeypatch) -> None:
+    """No new ledger portion starts once the request deadline has passed."""
+    from bioetl.interfaces.http._forensic_request_budget import (
+        ForensicEndpointUnavailable,
+    )
+
+    manifests = tuple(_manifest(index) for index in range(1, 7))
+    ledger = _Ledger({})
+    checks = {"count": 0}
+
+    def _deadline() -> bool:
+        checks["count"] += 1
+        return checks["count"] > 1
+
+    monkeypatch.setattr(subject, "request_deadline_exceeded", _deadline)
+    with pytest.raises(ForensicEndpointUnavailable, match="deadline_exceeded"):
+        subject.build_selector_records(manifests, ledger, None)
+    assert len(ledger.lookups) == 4
+
+
+@pytest.mark.asyncio
+async def test_timed_out_selector_stops_ledger_refill_and_releases_slot() -> None:
+    """After 504 the orphaned selector stops refilling ledger and frees capacity."""
+    from bioetl.interfaces.http._forensic_request_budget import (
+        ForensicEndpointUnavailable,
+        run_bounded_forensic_operation,
+    )
+
+    limiter = asyncio.Semaphore(1)
+    manifests = tuple(_manifest(index) for index in range(1, 7))
+
+    class _SlowLedger(_Ledger):
+        def list_entries_by_run_id(self, run_id):
+            time.sleep(0.2)
+            return super().list_entries_by_run_id(run_id)
+
+    slow_ledger = _SlowLedger({})
+    with pytest.raises(ForensicEndpointUnavailable) as exc_info:
+        await run_bounded_forensic_operation(
+            limiter=limiter,
+            operation_factory=lambda: asyncio.to_thread(
+                subject.build_selector_records, manifests, slow_ledger, None
+            ),
+            timeout_seconds=0.05,
+            endpoint="deadline-refill",
+        )
+    assert exc_info.value.status_code == 504
+    assert exc_info.value.reason == "deadline_exceeded"
+    assert limiter.locked()
+    await asyncio.wait_for(limiter.acquire(), 5)
+    limiter.release()
+    assert len(slow_ledger.lookups) == 4

@@ -1610,3 +1610,29 @@ def test_selection_presentation_retains_summary_mirror_fields():
     assert row["run_verdict"] == "SELECT RUN"
     assert row["evidence_completeness"] == "SELECT RUN"
     assert row["rules_version"]
+
+
+def test_chunked_artifact_hash_matches_single_read(tmp_path):
+    import hashlib
+
+    from bioetl.interfaces.http.selected_run_status import _hash_artifact_chunked
+
+    candidate = tmp_path / "artifact.bin"
+    candidate.write_bytes(bytes(range(256)) * 3000)
+    assert candidate.stat().st_size > 256 * 1024
+    assert _hash_artifact_chunked(candidate) == hashlib.sha256(
+        candidate.read_bytes()
+    ).hexdigest()
+
+
+def test_chunked_artifact_hash_stops_after_deadline(tmp_path, monkeypatch):
+    from bioetl.interfaces.http import selected_run_status
+    from bioetl.interfaces.http._forensic_request_budget import (
+        ForensicEndpointUnavailable,
+    )
+
+    candidate = tmp_path / "artifact.bin"
+    candidate.write_bytes(b"0123456789" * 100)
+    monkeypatch.setattr(selected_run_status, "request_deadline_exceeded", lambda: True)
+    with pytest.raises(ForensicEndpointUnavailable, match="deadline_exceeded"):
+        selected_run_status._hash_artifact_chunked(candidate)
