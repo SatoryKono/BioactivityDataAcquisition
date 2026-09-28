@@ -4,6 +4,10 @@ from __future__ import annotations
 
 import re
 
+from scripts.ops.observability.grafana.action_target_routes import (
+    OPEN_PIPELINE_DIAGNOSTICS_TITLE,
+)
+
 _HIDDEN = "custom.hidden"
 _INSPECT = "custom.inspect"
 _WIDTH = "custom.width"
@@ -406,20 +410,22 @@ def _correct_provider(uid: object, panels: dict[int, dict]) -> None:
         return
     answer = panels.get(9461)
     if isinstance(answer, dict):
-        data_links = answer.setdefault("options", {}).setdefault("dataLinks", [])
-        if not any(
-            str(link.get("url", "")).startswith("/d/bioetl-runtime/")
-            for link in data_links
-            if isinstance(link, dict)
+        runtime_link = {
+            "title": OPEN_PIPELINE_DIAGNOSTICS_TITLE,
+            "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+            "targetBlank": False,
+            "includeVars": False,
+        }
+        for links in (
+            answer.setdefault("links", []),
+            answer.setdefault("options", {}).setdefault("dataLinks", []),
         ):
-            data_links.append(
-                {
-                    "title": OPEN_PIPELINE_DIAGNOSTICS_TITLE,
-                    "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-                    "targetBlank": False,
-                    "includeVars": False,
-                }
-            )
+            if not any(
+                str(link.get("url", "")).startswith("/d/bioetl-runtime/")
+                for link in links
+                if isinstance(link, dict)
+            ):
+                links.append(dict(runtime_link))
     if 9401 not in panels or 9101 not in panels or 9107 not in panels:
         return
     # Sparse real counter observations (including a single zero) need a
