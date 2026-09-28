@@ -28,6 +28,14 @@ def _passport(kind: str, name: object) -> str:
 
 
 def _evidence_status(assessment: dict[str, object]) -> str:
+    """Map verified saved evidence to the Saved Evidence column.
+
+    ``N/A`` only marks legacy runs whose report never carried a
+    ``selected_run_snapshot`` (``legacy_no_snapshot``): there is nothing
+    verified to score. A run with a published snapshot is never ``N/A`` —
+    failing artifact probes or incomplete evidence stay ``INCOMPLETE`` and
+    only a fully passing, complete assessment becomes ``OK``.
+    """
     availability = assessment.get("evidence_availability")
     if availability == "legacy_no_snapshot":
         return "N/A"
