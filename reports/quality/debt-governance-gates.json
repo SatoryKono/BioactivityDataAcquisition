@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "197d833a48f6fd18fd17ce8336f21860826aad12304c1d0c43ba006ec053e1a1",
-      "limit": "197d833a48f6fd18fd17ce8336f21860826aad12304c1d0c43ba006ec053e1a1",
+      "current": "d013f3e059ae21dd0bc3edc79c326492f9c089408670e1058110282c2db12458",
+      "limit": "d013f3e059ae21dd0bc3edc79c326492f9c089408670e1058110282c2db12458",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2491,
-        "source_tree_sha256": "197d833a48f6fd18fd17ce8336f21860826aad12304c1d0c43ba006ec053e1a1",
+        "source_tree_sha256": "d013f3e059ae21dd0bc3edc79c326492f9c089408670e1058110282c2db12458",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2491,
-        "source_tree_sha256": "197d833a48f6fd18fd17ce8336f21860826aad12304c1d0c43ba006ec053e1a1",
+        "source_tree_sha256": "d013f3e059ae21dd0bc3edc79c326492f9c089408670e1058110282c2db12458",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "fac2bb95860fbdd1a0c96789e45c34050bd21b3d0d0f3392e155a4eab8787764",
+      "current": "da16a353c109f51869998f2d929f17b6d86500ec72d45906f9ee959ed65222a2",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -425,17 +425,15 @@
     },
     {
       "current": {
-        "artifacts": [
-          "adr_enforcement_matrix"
-        ],
-        "count": 1
+        "artifacts": [],
+        "count": 0
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: adr_enforcement_matrix",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -460,7 +458,7 @@
   ],
   "schema_version": 1,
   "stale_artifacts": {
-    "adr_enforcement_matrix": true,
+    "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
@@ -469,24 +467,23 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 6,
-    "pass": 40,
+    "fail": 5,
+    "pass": 41,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.74,
     "architecture_quality_scorecard_interpretation": "excellent",
-    "fail_count": 6,
+    "fail_count": 5,
     "failing_gates": [
       "hotspot_family_baseline_budget_warnings",
       "supporting_scripts_zero_reference_count",
       "supporting_scripts_untriaged_zero_reference_count",
       "test_governance_budget_violations",
-      "test_governance_uuid4_call_sites",
-      "generated_artifact_drift"
+      "test_governance_uuid4_call_sites"
     ],
     "gate_count": 46,
-    "pass_count": 40,
+    "pass_count": 41,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
