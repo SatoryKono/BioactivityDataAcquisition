@@ -71,7 +71,21 @@ def _evidence_status(assessment: dict[str, object]) -> str:
 def recent_run_presentation(
     row: dict[str, object], *, root: Path | None, manifest_port: object | None
 ) -> dict[str, object]:
-    """Reuse verified report/revision/artifact checks only for the bounded page."""
+    """Reuse verified report/revision/artifact checks only for the bounded page.
+
+    Column semantics (``N/A`` vs ``INCOMPLETE``):
+
+    - ``saved_evidence_status`` — ``N/A`` only for legacy reports without a
+      snapshot; snapshot-backed runs score ``OK``/``INCOMPLETE``/``ERROR``
+      from verified artifact probes and evidence completeness.
+    - ``replay_readiness_status`` — ``N/A`` for legacy runs and for
+      ``UNSUPPORTED`` (outside the exact-replay family boundary), so a
+      ``degraded_observable`` smoke is never misread as an error;
+      ``INSUFFICIENT`` evidence stays ``INCOMPLETE``; ``ERROR`` requires a
+      failed verdict with unavailable evidence or a blocked readiness.
+    - ``data_quality_status`` — ``N/A`` only for legacy runs whose saved
+      quality is unknown; scored runs keep the recorded verdict.
+    """
     assessment = load_selected_run_status(
         pipeline=str(row["pipeline"]),
         run_id=str(row["run_id"]),
