@@ -1255,7 +1255,91 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Reason"
+                  "options": "stage_id"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Stage"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "state"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "records_in"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Records in"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "records_out"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Records out"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "duration_seconds"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Duration"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Source"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
                 },
                 "properties": [
                   {
@@ -1274,7 +1358,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Duration"
+                  "options": "duration_seconds"
                 },
                 "properties": [
                   {
@@ -1290,7 +1374,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "In"
+                  "options": "records_in"
                 },
                 "properties": [
                   {
@@ -1302,7 +1386,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Out"
+                  "options": "records_out"
                 },
                 "properties": [
                   {
@@ -1314,7 +1398,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Source"
+                  "options": "source"
                 },
                 "properties": [
                   {
@@ -1396,15 +1480,6 @@
                   "records_out": 4,
                   "duration_seconds": 5,
                   "source": 6
-                },
-                "renameByName": {
-                  "stage_id": "Stage",
-                  "state": "Status",
-                  "reason": "Reason",
-                  "records_in": "In",
-                  "records_out": "Out",
-                  "duration_seconds": "Duration",
-                  "source": "Source"
                 }
               }
             }

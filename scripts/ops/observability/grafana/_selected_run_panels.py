@@ -280,11 +280,20 @@ _STAGE_RENAMES = {
     "stage_id": "Stage",
     "state": "Status",
     "reason": "Reason",
-    "records_in": "In",
-    "records_out": "Out",
+    "records_in": "Records in",
+    "records_out": "Records out",
     "duration_seconds": "Duration",
     "source": "Source",
 }
+_STAGE_DISPLAY_ORDER = [
+    "stage_id",
+    "state",
+    "records_in",
+    "records_out",
+    "duration_seconds",
+    "reason",
+    "source",
+]
 
 
 def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
@@ -320,8 +329,17 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
                 },
             },
             "overrides": [
+                *[
+                    {
+                        "matcher": {"id": "byName", "options": field},
+                        "properties": [
+                            {"id": "displayName", "value": _STAGE_RENAMES[field]}
+                        ],
+                    }
+                    for field in _STAGE_DISPLAY_ORDER
+                ],
                 {
-                    "matcher": {"id": "byName", "options": "Reason"},
+                    "matcher": {"id": "byName", "options": "reason"},
                     "properties": [
                         {"id": "custom.wrapText", "value": True},
                         {
@@ -331,22 +349,22 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
                     ],
                 },
                 {
-                    "matcher": {"id": "byName", "options": "Duration"},
+                    "matcher": {"id": "byName", "options": "duration_seconds"},
                     "properties": [
                         {"id": "noValue", "value": "Not recorded"},
                         {"id": "unit", "value": "s"},
                     ],
                 },
                 {
-                    "matcher": {"id": "byName", "options": "In"},
+                    "matcher": {"id": "byName", "options": "records_in"},
                     "properties": [{"id": "noValue", "value": ""}],
                 },
                 {
-                    "matcher": {"id": "byName", "options": "Out"},
+                    "matcher": {"id": "byName", "options": "records_out"},
                     "properties": [{"id": "noValue", "value": ""}],
                 },
                 {
-                    "matcher": {"id": "byName", "options": "Source"},
+                    "matcher": {"id": "byName", "options": "source"},
                     "properties": [
                         {
                             "id": "mappings",
@@ -398,7 +416,6 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
                     "indexByName": {
                         name: index for index, name in enumerate(_STAGE_FIELDS)
                     },
-                    "renameByName": dict(_STAGE_RENAMES),
                 },
             },
         ],
