@@ -809,10 +809,10 @@ def _assert_cross_dashboard_link_policy(
         )
         if row_action:
             assert _extract_link_var_values(url)["run_id"] == "-"
-            assert (
-                _extract_link_var_values(url)["pipeline"]
-                == "${__data.fields.route_pipeline:percentencode}"
-            )
+            assert _extract_link_var_values(url)["pipeline"] in {
+                "${__data.fields.route_pipeline:percentencode}",
+                "${__data.fields.pipeline:percentencode}",
+            }
         elif current_uid == "bioetl-run-explorer-v1" and str(
             link.get("title") or ""
         ).startswith("Open "):

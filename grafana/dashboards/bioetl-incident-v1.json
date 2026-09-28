@@ -345,7 +345,7 @@
         },
         {
           "title": "Pipeline Diagnostics",
-          "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+          "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "tooltip": "Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.",
           "type": "link",
           "icon": "dashboard",
@@ -516,7 +516,7 @@
       "links": [
         {
           "title": "Open Pipeline Diagnostics",
-          "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "includeVars": false,
           "targetBlank": false
         }
@@ -2554,7 +2554,7 @@
             "h": 5
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Columns are Result, Status, Evidence, and Rules. Status is the verdict. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",
@@ -2855,13 +2855,13 @@
             "dataLinks": [
               {
                 "title": "Open Runtime Blockers",
-                "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=9101&${__url_time_range}",
+                "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=9101&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false
               },
               {
                 "title": "Inspect Active Runtime Blocker Detail",
-                "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=242&${__url_time_range}",
+                "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=242&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false
               },
@@ -2955,7 +2955,7 @@
               "links": [
                 {
                   "title": "Open Runtime",
-                  "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&var-stage=$__all&${run_id:queryparam}&${__url_time_range}",
+                  "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
                   "targetBlank": false,
                   "includeVars": false
                 },
@@ -3118,8 +3118,8 @@
                     "id": "links",
                     "value": [
                       {
-                        "title": "Open blocker diagnostics",
-                        "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}&${__data.fields.action_scope:raw}&var-run_type=${__data.fields.run_type:percentencode}&${run_id:queryparam}&${__url_time_range}",
+                        "title": "Open domain diagnostics",
+                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?var-workflow=$__all&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
                         "targetBlank": false,
                         "includeVars": false
                       }
@@ -3283,7 +3283,7 @@
             "dataLinks": [
               {
                 "title": "Inspect Active Runtime Blocker Detail",
-                "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=242&${__url_time_range}",
+                "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=242&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false
               },
@@ -4522,7 +4522,7 @@
               },
               {
                 "title": "Inspect active runtime blocker",
-                "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=242&${__url_time_range}",
+                "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=242&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -4704,7 +4704,7 @@
               },
               {
                 "title": "Inspect stage expectedness",
-                "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=243&${__url_time_range}",
+                "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=243&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -4983,7 +4983,7 @@
               "links": [
                 {
                   "title": "Check Monitor Metrics Coverage",
-                  "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9102&${__url_time_range}",
+                  "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9102&${__url_time_range}",
                   "targetBlank": false,
                   "includeVars": false
                 }
@@ -5065,7 +5065,7 @@
             "dataLinks": [
               {
                 "title": "Check Monitor Metrics Coverage",
-                "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9102&${__url_time_range}",
+                "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9102&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -5150,7 +5150,7 @@
               "links": [
                 {
                   "title": "Check Monitor Metrics Coverage",
-                  "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9102&${__url_time_range}",
+                  "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9102&${__url_time_range}",
                   "targetBlank": false,
                   "includeVars": false
                 }
@@ -5206,7 +5206,7 @@
             "dataLinks": [
               {
                 "title": "Check Monitor Metrics Coverage",
-                "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9102&${__url_time_range}",
+                "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9102&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -11336,7 +11336,7 @@
       "type": "row",
       "title": "Inspect Saved Run Evidence",
       "collapsed": true,
-      "description": "Expand for saved stage rows, then domain trust reasons, for the selected Run ID.",
+      "description": "Expand for saved stage rows (Inspect Selected Run Stages), domain verdicts (Inspect Selected Run Domains), and full identity (Inspect Selected Run Identity) of the selected Run ID.",
       "gridPos": {
         "x": 0,
         "y": 50,
@@ -11547,7 +11547,7 @@
             "h": 12
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · Domain verdicts of this Run ID; this is not the page status. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -11674,6 +11674,27 @@
                         "options": {
                           "selection_required": {
                             "text": "Choose a run to inspect saved evidence"
+                          },
+                          "execution_success": {
+                            "text": "Processing completed"
+                          },
+                          "run_dq_threshold_evaluation": {
+                            "text": "Data quality checks"
+                          },
+                          "run_preflight_provider_observation": {
+                            "text": "Provider preflight check"
+                          },
+                          "run_gold_schema_validation": {
+                            "text": "Gold schema validation"
+                          },
+                          "run_observation_missing": {
+                            "text": "Result not recorded"
+                          },
+                          "workflow_success": {
+                            "text": "Workflow completed"
+                          },
+                          "run_completion_trust_assessment": {
+                            "text": "Completion trust assessment"
                           }
                         }
                       }
@@ -11772,7 +11793,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · Full identifiers of this Run ID; the short table is Inspect Run Identity on the first screen. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",

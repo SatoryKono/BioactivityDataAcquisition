@@ -991,7 +991,7 @@
         "h": 7
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden. Request failure is QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1003,7 +1003,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs.",
+          "noValue": "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer.",
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
