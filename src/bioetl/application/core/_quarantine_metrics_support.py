@@ -7,8 +7,9 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_metrics_accounting import (
     _record_silver_removal_accounting,
+    _silver_filter_rejection_labels,
 )
-from bioetl.domain.types import ErrorType
+from bioetl.domain.types import ErrorType, JsonDict
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -153,5 +154,71 @@ def record_filtered_quarantine_metrics(
         _record_silver_removal_accounting(
             outcome="filtered_out",
             reason_code=reason_code or FILTERED_OUT_SILVER,
+            count=count,
+        )
+
+
+def record_service_quarantined_records(
+    *,
+    metrics: MetricsPort | None,
+    pipeline_metrics: PipelineMetricsRecorder,
+    pipeline_label: str,
+    run_type_label: str,
+    error_type: ErrorType,
+    count: int,
+    stage: str = "silver",
+    reason_code: str | None = None,
+) -> None:
+    """Service-level quarantined-record counters and flow projections."""
+    if metrics:
+        metrics.increment_counter(
+            "bioetl_dq_records_quarantined_total",
+            count,
+            {
+                "pipeline": pipeline_label,
+                "error_type": error_type.value,
+                "run_type": run_type_label,
+            },
+        )
+        pipeline_metrics.record_quarantine_records(
+            reason=error_type.value,
+            count=count,
+        )
+        pipeline_metrics.record_record_flow(
+            run_type=run_type_label,
+            flow_stage="quarantined",
+            count=count,
+        )
+    _record_silver_removal_accounting(
+        outcome="quarantined",
+        reason_code=reason_code or getattr(error_type, "value", str(error_type)),
+        count=count,
+        stage=stage,
+    )
+
+
+def record_service_silver_filter_rejection(
+    *,
+    pipeline_metrics: PipelineMetricsRecorder,
+    run_type_label: str,
+    details: JsonDict | None = None,
+    count: int = 1,
+    account: bool = False,
+    emit_pipeline_metric: bool = True,
+) -> None:
+    """Service-level bounded reject labels for silver-filter rejections."""
+    reason_code, rule_type, field = _silver_filter_rejection_labels(details)
+    if emit_pipeline_metric:
+        pipeline_metrics.record_silver_filter_rejections(
+            run_type=run_type_label,
+            reason_code=reason_code,
+            rule_type=rule_type,
+            field=field,
+            count=count,
+        )
+    if account:
+        _record_silver_removal_accounting(
+            outcome="filtered_out",
+            reason_code=reason_code or "FILTERED_OUT_SILVER",
             count=count,
         )

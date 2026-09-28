@@ -515,7 +515,7 @@ class TestTrackSilverFilterRejection:
             accounting_calls.append(dict(kwargs))
 
         monkeypatch.setattr(
-            "bioetl.application.core.batch_metrics._record_silver_removal_accounting",
+            "bioetl.application.core._quarantine_metrics_support._record_silver_removal_accounting",
             _capture_accounting,
         )
         recorder_no_metrics.track_silver_filter_rejection(

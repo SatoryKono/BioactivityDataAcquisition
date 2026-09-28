@@ -3,7 +3,7 @@
     "snapshot_date": "2026-09-11",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 2,
+    "budget_warnings": 0,
     "budget_review_notes": 1
   },
   "families": [
@@ -18,9 +18,9 @@
       ],
       "duplication_clusters": 0,
       "files": 197,
-      "total_loc": 24404,
-      "files_ge_250_loc": 1,
-      "helper_function_ratio": 0.384,
+      "total_loc": 24451,
+      "files_ge_250_loc": 0,
+      "helper_function_ratio": 0.383,
       "max_internal_fan_in": 7,
       "max_internal_fan_in_module": "bioetl.application.core.quarantine_manager",
       "bounded_growth_budgets": {
@@ -32,8 +32,8 @@
           "0": 19,
           "1": 104,
           "2": 39,
-          "3": 18,
-          "4": 5,
+          "3": 17,
+          "4": 6,
           "5": 11,
           "7": 1
         },
@@ -154,11 +154,12 @@
           },
           {
             "module": "bioetl.application.core._quarantine_metrics_support",
-            "fan_in": 3,
+            "fan_in": 4,
             "runtime_importers": [
               "bioetl.application.core._quarantine_manager_support",
               "bioetl.application.core._quarantine_request_builders",
-              "bioetl.application.core._quarantine_support"
+              "bioetl.application.core._quarantine_support",
+              "bioetl.application.core.batch_metrics"
             ]
           },
           {
@@ -1525,9 +1526,7 @@
           "bioetl.application.core.quarantine_manager"
         ]
       },
-      "budget_warnings": [
-        "over_budget:files_ge_250_loc=1/0"
-      ],
+      "budget_warnings": [],
       "budget_review_notes": [
         "at_budget:max_internal_fan_in=7/7"
       ],
@@ -2239,9 +2238,9 @@
       ],
       "duplication_clusters": 0,
       "files": 126,
-      "total_loc": 15330,
-      "files_ge_250_loc": 2,
-      "helper_function_ratio": 0.39,
+      "total_loc": 14908,
+      "files_ge_250_loc": 0,
+      "helper_function_ratio": 0.377,
       "max_internal_fan_in": 1,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
@@ -3201,9 +3200,7 @@
           "bioetl.application.services.control_plane.workflow.manifest_models"
         ]
       },
-      "budget_warnings": [
-        "over_budget:files_ge_250_loc=2/0"
-      ],
+      "budget_warnings": [],
       "budget_review_notes": [],
       "at_budget_modules": [],
       "at_budget_module_count": 0

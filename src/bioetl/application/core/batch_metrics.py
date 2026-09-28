@@ -4,14 +4,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.core._quarantine_metrics_support import (
+    record_service_quarantined_records,
+    record_service_silver_filter_rejection,
+)
 from bioetl.application.core.batch_metrics_accounting import (
     _FLOW_ACCOUNTING_STAGES,
     _record_batch_lifecycle_event,
     _record_filtered_out_stage_metrics,
     _record_processed_stage_accounting,
-    _record_silver_removal_accounting,
     _record_stage_outcome_accounting,
-    _silver_filter_rejection_labels,
 )
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.domain.run_reports.context import get_stage_accounting
@@ -197,30 +199,15 @@ class BatchMetricsRecorderService:
         reason_code: str | None = None,
     ) -> None:
         """Record quarantined-record counters and flow projections."""
-        if self._metrics:
-            self._metrics.increment_counter(
-                "bioetl_dq_records_quarantined_total",
-                count,
-                {
-                    "pipeline": self._pipeline_label,
-                    "error_type": error_type.value,
-                    "run_type": self._run_type_label,
-                },
-            )
-            self._pipeline_metrics.record_quarantine_records(
-                reason=error_type.value,
-                count=count,
-            )
-            self._pipeline_metrics.record_record_flow(
-                run_type=self._run_type_label,
-                flow_stage="quarantined",
-                count=count,
-            )
-        _record_silver_removal_accounting(
-            outcome="quarantined",
-            reason_code=reason_code or getattr(error_type, "value", str(error_type)),
+        record_service_quarantined_records(
+            metrics=self._metrics,
+            pipeline_metrics=self._pipeline_metrics,
+            pipeline_label=self._pipeline_label,
+            run_type_label=self._run_type_label,
+            error_type=error_type,
             count=count,
             stage=stage,
+            reason_code=reason_code,
         )
 
     def track_silver_filter_rejection(
@@ -235,21 +222,14 @@ class BatchMetricsRecorderService:
         Durable quarantine persistence owns filtered-out removals. Pass
         ``account=True`` for skip/fail policies that never persist a row.
         """
-        reason_code, rule_type, field = _silver_filter_rejection_labels(details)
-        if self._metrics is not None:
-            self._pipeline_metrics.record_silver_filter_rejections(
-                run_type=self._run_type_label,
-                reason_code=reason_code,
-                rule_type=rule_type,
-                field=field,
-                count=count,
-            )
-        if account:
-            _record_silver_removal_accounting(
-                outcome="filtered_out",
-                reason_code=reason_code or "FILTERED_OUT_SILVER",
-                count=count,
-            )
+        record_service_silver_filter_rejection(
+            pipeline_metrics=self._pipeline_metrics,
+            run_type_label=self._run_type_label,
+            details=details,
+            count=count,
+            account=account,
+            emit_pipeline_metric=self._metrics is not None,
+        )
 
 
 BatchMetricsRecorder = BatchMetricsRecorderService
