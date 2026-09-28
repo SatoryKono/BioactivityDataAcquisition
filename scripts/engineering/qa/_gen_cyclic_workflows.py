@@ -589,17 +589,20 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
 
 
 def normalize_defaults(defaults: dict[str, str]) -> dict[str, str]:
-    """Operator-run defaults: MONITORING=true, ALLOW_*=true, ALLOW_MERGE=false, MODE=full."""
+    """Fail-closed operator-run defaults (#11704).
+
+    Card-requested values are clamped to the fail-closed policy: every
+    ALLOW_* key is false and MODE falls back to audit. Mutations are
+    enabled only via an explicit operator override at run time, never
+    via baked defaults. MONITORING and other keys pass through unchanged.
+    """
     out = dict(defaults)
-    out["MODE"] = "full"
-    out["MONITORING"] = "true"
-    out["ALLOW_ISSUE_WRITE"] = "true"
-    out["ALLOW_PUSH"] = "true"
-    out["ALLOW_CLOSE"] = "true"
-    out["ALLOW_MERGE"] = "false"
+    out["MODE"] = "audit"
+    for key in ("ALLOW_ISSUE_WRITE", "ALLOW_PUSH", "ALLOW_MERGE", "ALLOW_CLOSE"):
+        out[key] = "false"
     for key in out:
-        if key.startswith("ALLOW_") and key != "ALLOW_MERGE":
-            out[key] = "true"
+        if key.startswith("ALLOW_"):
+            out[key] = "false"
     return out
 
 

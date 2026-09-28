@@ -12,7 +12,7 @@ pytestmark = pytest.mark.unit
 
 EXPECTED_CARD_COUNT = 26
 EXPECTED_RENDER_DIGEST = (
-    "1505e01cbc707e48cfecc47d37127418645468c002d347443f0bcb72464684e8"
+    "2d2761ee0c7bd807e043a388d0633e29cdbc4dd4a27ca0eb18e01c438423af91"
 )
 
 
@@ -61,7 +61,7 @@ def test_card_constants_cover_only_exact_semantic_values() -> None:
 
 def test_normalize_defaults_preserves_input_and_key_order() -> None:
     defaults = {
-        "ALLOW_PUSH": "false",
+        "ALLOW_PUSH": "true",
         "ALLOW_MERGE": "true",
         "CUSTOM": "kept",
     }
@@ -71,13 +71,13 @@ def test_normalize_defaults_preserves_input_and_key_order() -> None:
 
     assert defaults == before
     assert list(normalized)[:3] == list(before)
-    assert normalized["ALLOW_PUSH"] == "true"
+    assert normalized["ALLOW_PUSH"] == "false"
     assert normalized["ALLOW_MERGE"] == "false"
     assert normalized["CUSTOM"] == "kept"
-    assert normalized["MODE"] == "full"
-    assert normalized["MONITORING"] == "true"
-    assert normalized["ALLOW_ISSUE_WRITE"] == "true"
-    assert normalized["ALLOW_CLOSE"] == "true"
+    assert normalized["MODE"] == "audit"
+    assert "MONITORING" not in normalized
+    assert normalized["ALLOW_ISSUE_WRITE"] == "false"
+    assert normalized["ALLOW_CLOSE"] == "false"
 
 
 def test_rendered_workflow_cards_remain_byte_stable() -> None:
