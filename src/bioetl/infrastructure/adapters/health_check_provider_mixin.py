@@ -14,6 +14,11 @@ from bioetl.infrastructure.adapters._health_check_policy import (
     get_consecutive_health_failures,
     resolve_failure_health_status,
 )
+from bioetl.infrastructure.adapters.health_check_contract import (
+    HEALTH_CHECK_ERRORS,
+    HealthCheckContext,
+)
+from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckMixin
 
 
 def _redact_transport_error_message(message: str) -> str:
@@ -33,11 +38,7 @@ def _redact_transport_error_message(message: str) -> str:
     if len(redacted) > 500:
         return redacted[:500] + "..."
     return redacted
-from bioetl.infrastructure.adapters.health_check_contract import (
-    HEALTH_CHECK_ERRORS,
-    HealthCheckContext,
-)
-from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckMixin
+
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import CircuitBreakerPort, HealthCheckResult

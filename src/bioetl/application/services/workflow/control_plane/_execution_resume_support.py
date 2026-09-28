@@ -138,7 +138,7 @@ def _validate_step_references(
 def _validate_lifecycle_status(latest_state: WorkflowExecutionState) -> None:
     allowed_statuses = {"created", "running", "incomplete", "failed", "success"}
     if latest_state.status not in allowed_statuses or any(
-        step.status not in {"pending", "running", "success", "failed"}
+        step.status not in {"pending", "running", "success", "failed", "skipped"}
         for step in latest_state.steps
     ):
         raise RuntimeError("Workflow resume state is damaged: unknown lifecycle status")
