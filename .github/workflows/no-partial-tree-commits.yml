@@ -1,0 +1,53 @@
+# #11709: partial-tree commits (for example reports-only bot snapshots built
+# on an empty index) break three-point diffs for every PR based on them.
+# This gate fails closed on any collapsing commit in the pushed range.
+# History is never rewritten; only new collapsing commits are refused.
+name: No partial-tree commits
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  no-partial-tree:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Reject partial-tree commits
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            BASE="origin/${BASE_REF}"
+            TIP="${HEAD_SHA}"
+          else
+            BASE="${BEFORE_SHA}"
+            if [ "${BASE}" = "0000000000000000000000000000000000000000" ]; then
+              BASE="$(git rev-list --max-parents=0 HEAD | head -1)"
+            fi
+            TIP="${HEAD_SHA}"
+          fi
+          uv run --frozen --no-build python scripts/engineering/repo/check_no_partial_tree.py \
+            --base "${BASE}" --tip "${TIP}"
