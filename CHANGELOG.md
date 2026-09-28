@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **Code scanning #1464 / #1462:** `check_no_partial_tree._git` allowlists git
+  verbs, verifies `--repo`/`--base`/`--tip` before `subprocess.run`, and
+  resolves revisions with `--end-of-options`. `check_agent_headers.update_headers`
+  writes only `*.md` confined under the agent directory.
+
 ### Documentation
 
 - **Diagram census and metadata (#10983–#10985):** ADR-040 live `.mmd` count

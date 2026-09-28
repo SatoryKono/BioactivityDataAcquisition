@@ -412,10 +412,10 @@
       "type": "table",
       "title": "Review Selected Run Status",
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 18
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
@@ -729,9 +729,9 @@
       "title": "Inspect Run Identity",
       "gridPos": {
         "x": 0,
-        "y": 10,
-        "w": 12,
-        "h": 7
+        "y": 5,
+        "w": 14,
+        "h": 13
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Selected run: Compact identity table showing Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, Replay [Capability.Mode], Checkpoint [Anchors], and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Inspect value opens full identifiers as selectable plain text.",
@@ -984,13 +984,13 @@
       "type": "table",
       "title": "Inspect Processed Records",
       "gridPos": {
-        "x": 12,
-        "y": 10,
-        "w": 12,
+        "x": 14,
+        "y": 5,
+        "w": 10,
         "h": 13
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden.",
+      "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden. Request failure is QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1556,7 +1556,7 @@
       "description": "Expand for saved stage rows (Inspect Selected Run Stages), domain verdicts (Inspect Selected Run Domains), and full identity (Inspect Selected Run Identity) of the selected Run ID.",
       "gridPos": {
         "x": 0,
-        "y": 17,
+        "y": 22,
         "w": 24,
         "h": 1
       },
@@ -1567,7 +1567,7 @@
           "title": "Inspect Selected Run Stages",
           "gridPos": {
             "x": 0,
-            "y": 18,
+            "y": 23,
             "w": 24,
             "h": 8
           },
@@ -1759,7 +1759,7 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 26,
+            "y": 31,
             "w": 24,
             "h": 12
           },
@@ -2005,7 +2005,7 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 38,
+            "y": 43,
             "w": 24,
             "h": 8
           },

@@ -159,7 +159,8 @@ def apply_run_explorer_columns(payload: dict) -> None:
             "Provider Health",
             "/d/bioetl-provider-health-v2/4-provider-health?"
             + _CONTEXT
-            + "&var-provider=${__data.fields.Provider:percentencode}",
+            + "&var-provider=${__data.fields.Provider:percentencode}"
+            + "&var-pipeline_context=${__data.fields.Pipeline:percentencode}",
         ),
         "Overview": ("Run Overview", "/d/bioetl-overview-v2/2-overview?" + _CONTEXT),
         "Saved Evidence": (

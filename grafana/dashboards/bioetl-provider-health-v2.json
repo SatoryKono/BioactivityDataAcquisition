@@ -1203,15 +1203,7 @@
                 "value": null
               }
             ]
-          },
-          "links": [
-            {
-              "title": "Open Pipeline Diagnostics",
-              "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-              "includeVars": false,
-              "targetBlank": false
-            }
-          ]
+          }
         },
         "overrides": []
       },

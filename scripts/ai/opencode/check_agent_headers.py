@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -26,6 +27,7 @@ AGENT_DIR = REPO_ROOT / ".opencode" / "agent"
 CANON_PATH = AGENT_DIR / "_shared" / "untrusted-header.md"
 CANON_REL = CANON_PATH.relative_to(REPO_ROOT).as_posix()
 _HEADING = "## Language and untrusted input"
+_AGENT_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*\.md$")
 
 
 @dataclass(slots=True)
@@ -50,28 +52,52 @@ class HeaderReport:
         self.errors.append(HeaderIssue("error", code, message, path))
 
 
+def _confine_under(root: Path, candidate: Path) -> Path:
+    """Resolve *candidate* and require it to stay under *root*."""
+    resolved_root = root.resolve()
+    resolved = candidate.resolve()
+    if not resolved.is_relative_to(resolved_root):
+        raise ValueError(f"path escapes agent directory: {candidate}")
+    return resolved
+
+
 def load_core(canon_path: Path = CANON_PATH) -> str:
     """Read the canonical core block (exactly as embedded in agents)."""
-    return canon_path.read_text(encoding="utf-8")
+    if canon_path == CANON_PATH:
+        path = CANON_PATH.resolve()
+    else:
+        parent = canon_path.parent.resolve()
+        path = _confine_under(parent, canon_path)
+        _confine_under(parent.parent, path)
+    return path.read_text(encoding="utf-8")
 
 
 def agent_files(agent_dir: Path = AGENT_DIR) -> list[Path]:
     """Agent prompt files, excluding the `_shared/` canon directory."""
-    if not agent_dir.is_dir():
+    root = agent_dir.resolve()
+    if not root.is_dir():
         return []
-    return sorted(
-        path
-        for path in agent_dir.glob("*.md")
-        if path.is_file() and path.name != "README.md"
-    )
+    confined: list[Path] = []
+    for path in root.glob("*.md"):
+        if not path.is_file() or path.name == "README.md":
+            continue
+        if not _AGENT_NAME_RE.fullmatch(path.name):
+            continue
+        try:
+            resolved = _confine_under(root, path)
+        except ValueError:
+            continue
+        if resolved.parent != root:
+            continue
+        confined.append(resolved)
+    return sorted(confined)
 
 
 def check_text(agent_name: str, text: str, core: str) -> str | None:
     """Return an error message when the verbatim core is missing, else None."""
     if core not in text:
         return (
-            f"{agent_name}: missing verbatim core from {CANON_REL} — "
-            "run with --update"
+            f"{agent_name}: missing verbatim core from {CANON_REL} — run with --update"
         )
     return None
 
@@ -107,11 +133,7 @@ def normalize_text(text: str, core: str) -> str | None:
         return "".join(lines[:body_at] + ["\n"] + core_lines + ["\n"] + rest)
     last_line = core_lines[-1].strip()
     end = next(
-        (
-            i
-            for i in range(heading, len(lines))
-            if lines[i].strip() == last_line
-        ),
+        (i for i in range(heading, len(lines)) if lines[i].strip() == last_line),
         None,
     )
     if end is None:
@@ -127,7 +149,7 @@ def check_headers(
     report = HeaderReport()
     try:
         core = load_core(canon_path)
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         report.add_error("canon_missing", str(exc), canon_path.as_posix())
         return report
     files = agent_files(agent_dir)
@@ -165,7 +187,7 @@ def update_headers(
     report = HeaderReport()
     try:
         core = load_core(canon_path)
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         report.add_error("canon_missing", str(exc), canon_path.as_posix())
         return report, []
     updated: list[str] = []
@@ -189,8 +211,20 @@ def update_headers(
             )
             continue
         if fixed != text:
-            path.write_text(fixed, encoding="utf-8")
-            updated.append(path.name)
+            try:
+                target = _confine_under(agent_dir, path)
+            except ValueError as exc:
+                report.add_error("agent_path_escape", str(exc), path.as_posix())
+                continue
+            if not _AGENT_NAME_RE.fullmatch(target.name):
+                report.add_error(
+                    "agent_name_invalid",
+                    f"refusing to write {target.name!r}",
+                    target.as_posix(),
+                )
+                continue
+            target.write_text(fixed, encoding="utf-8")
+            updated.append(target.name)
     report.stats = {
         "agents": len(files),
         "updated": len(updated),

@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from scripts.ai.opencode.check_agent_headers import (
+    _confine_under,
     agent_files,
     check_headers,
     load_core,
@@ -97,3 +98,32 @@ def test_update_headers_fixes_tmp_agent(tmp_path: Path) -> None:
     assert updated == ["demo.md"]
     fixed = (agent_dir / "demo.md").read_text(encoding="utf-8")
     assert core in fixed
+
+
+def test_confine_under_rejects_escape(tmp_path: Path) -> None:
+    root = tmp_path / "agent"
+    root.mkdir()
+    outside = tmp_path / "evil.md"
+    outside.write_text("nope", encoding="utf-8")
+    with pytest.raises(ValueError, match="escapes"):
+        _confine_under(root, outside)
+    with pytest.raises(ValueError, match="escapes"):
+        _confine_under(root, root / ".." / "evil.md")
+
+
+def test_update_headers_does_not_write_outside_agent_dir(tmp_path: Path) -> None:
+    core = load_core()
+    agent_dir = tmp_path / "agent"
+    agent_dir.mkdir()
+    outside = tmp_path / "evil.md"
+    outside.write_text("secret", encoding="utf-8")
+    shared = agent_dir / "_shared"
+    shared.mkdir()
+    (shared / "untrusted-header.md").write_text(core, encoding="utf-8")
+    report, updated = update_headers(
+        agent_dir=agent_dir,
+        canon_path=shared / "untrusted-header.md",
+    )
+    assert updated == []
+    assert outside.read_text(encoding="utf-8") == "secret"
+    assert report.ok or "agents_missing" in {item.code for item in report.errors}
