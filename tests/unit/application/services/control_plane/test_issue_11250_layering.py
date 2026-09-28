@@ -74,6 +74,108 @@ def test_bronze_snapshots_update_manifest_capability() -> None:
     assert saved.source_refs[0].input_snapshots[0].content_hash == "abc"
 
 
+def test_bronze_attach_records_verified_snapshot_object(tmp_path) -> None:
+    from uuid import UUID
+
+    from bioetl.domain.control_plane import ReplayCapability, RunManifest, RunSourceRef
+    from bioetl.domain.types import RunID, RunType
+
+    batch = tmp_path / "bronze-batch.json"
+    batch.write_text("{}", encoding="utf-8")
+    manifest = RunManifest(
+        manifest_id="m1",
+        execution_fingerprint="legacy-fingerprint",
+        run_id=RunID(UUID(int=1)),
+        run_type=RunType.BACKFILL,
+        pipeline_name="chembl_tissue",
+        provider="chembl",
+        entity="tissue",
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="tissue",
+                pipeline_name="chembl_tissue",
+            ),
+        ),
+        replay_capability=ReplayCapability.REBUILD_ONLY,
+    )
+    port = MagicMock()
+    port.get.return_value = manifest
+    service = MagicMock()
+    service.manifest_port = port
+    service.manifest_id = "m1"
+    record_input_snapshots_from_artifact(
+        service,
+        layer="bronze",
+        artifact_path=str(batch),
+        details={
+            "provider": "chembl",
+            "entity": "tissue",
+            "pipeline_name": "chembl_tissue",
+            "input_snapshots": [
+                {
+                    "snapshot_id": "snap-1",
+                    "content_hash": "abc",
+                    "immutable_uri": str(batch),
+                }
+            ],
+        },
+    )
+    port.save.assert_called_once()
+    saved = port.save.call_args[0][0]
+    assert dict(saved.objects) == {"input_snapshot_fingerprint": True}
+
+
+def test_bronze_attach_without_batch_file_leaves_objects_unset(tmp_path) -> None:
+    from uuid import UUID
+
+    from bioetl.domain.control_plane import ReplayCapability, RunManifest, RunSourceRef
+    from bioetl.domain.types import RunID, RunType
+
+    manifest = RunManifest(
+        manifest_id="m1",
+        execution_fingerprint="legacy-fingerprint",
+        run_id=RunID(UUID(int=1)),
+        run_type=RunType.BACKFILL,
+        pipeline_name="chembl_tissue",
+        provider="chembl",
+        entity="tissue",
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="tissue",
+                pipeline_name="chembl_tissue",
+            ),
+        ),
+        replay_capability=ReplayCapability.REBUILD_ONLY,
+    )
+    port = MagicMock()
+    port.get.return_value = manifest
+    service = MagicMock()
+    service.manifest_port = port
+    service.manifest_id = "m1"
+    record_input_snapshots_from_artifact(
+        service,
+        layer="bronze",
+        artifact_path=str(tmp_path / "absent-batch.json"),
+        details={
+            "provider": "chembl",
+            "entity": "tissue",
+            "pipeline_name": "chembl_tissue",
+            "input_snapshots": [
+                {
+                    "snapshot_id": "snap-1",
+                    "content_hash": "abc",
+                    "immutable_uri": str(tmp_path / "absent-batch.json"),
+                }
+            ],
+        },
+    )
+    port.save.assert_called_once()
+    saved = port.save.call_args[0][0]
+    assert dict(saved.objects) == {}
+
+
 def test_input_snapshot_requires_snapshot_id() -> None:
     service = MagicMock()
     with pytest.raises(ValueError, match="snapshot_id"):

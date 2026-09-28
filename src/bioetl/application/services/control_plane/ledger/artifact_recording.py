@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import RunInputSnapshotRef, RunSourceRef
@@ -112,7 +113,24 @@ def record_input_snapshots_from_artifact(
         provider=str(details.get("provider") or ""),
         entity=str(details.get("entity") or ""),
         pipeline_name=str(details.get("pipeline_name") or ""),
+        input_snapshot_verified=_local_batch_file_verified(artifact_path),
     )
+
+
+def _local_batch_file_verified(artifact_path: str) -> bool | None:
+    """Return True only when a local batch file demonstrably exists (#11711).
+
+    Non-local references stay unset so readers report object_not_verified
+    instead of assuming presence from a recorded hash.
+    """
+    raw = str(artifact_path or "").strip()
+    if "://" in raw:
+        if not raw.lower().startswith("file://"):
+            return None
+        raw = raw[7:]
+    if not raw:
+        return None
+    return True if Path(raw).is_file() else None
 
 
 def persist_input_snapshots_on_manifest(
@@ -122,6 +140,7 @@ def persist_input_snapshots_on_manifest(
     provider: str,
     entity: str,
     pipeline_name: str,
+    input_snapshot_verified: bool | None = None,
 ) -> RunManifest | None:
     """Copy Bronze snapshots onto the persisted manifest and recompute capability."""
     if not snapshots:
@@ -158,6 +177,10 @@ def persist_input_snapshots_on_manifest(
         source_refs=new_refs,
         replay_capability=capability,
     )
+    if input_snapshot_verified is True:
+        recorded = dict(getattr(updated, "objects", None) or {})
+        recorded["input_snapshot_fingerprint"] = True
+        updated = replace(updated, objects=recorded)
     saver(updated)
     return updated
 

@@ -458,6 +458,55 @@ def _load_report_assessment(
     return report, identity, assessment, availability, revision
 
 
+def _recorded_object_flags(manifest: object) -> dict[str, bool]:
+    """Return recorded object verifications, ignoring non-boolean noise."""
+    recorded = getattr(manifest, "objects", None)
+    if not isinstance(recorded, Mapping):
+        return {}
+    return {
+        str(code): flag for code, flag in recorded.items() if isinstance(flag, bool)
+    }
+
+
+def _snapshot_file_verified(raw_uri: object) -> bool | None:
+    """Verify one snapshot URI against local disk (#11711).
+
+    Returns True for an existing local file, False for a missing local
+    file, and None for remote or empty references.
+    """
+    if not isinstance(raw_uri, str) or not raw_uri.strip():
+        return None
+    candidate = raw_uri.strip()
+    if "://" in candidate:
+        if not candidate.lower().startswith("file://"):
+            return None
+        candidate = candidate[7:]
+    if not candidate:
+        return None
+    return Path(candidate).is_file()
+
+
+def _verify_snapshot_objects(manifest: object) -> bool | None:
+    """File-verify Bronze input snapshots referenced by the manifest.
+
+    True only when every checkable local file exists. Any missing local
+    file — or nothing checkable at all — stays unset so readers report
+    object_not_verified instead of assuming presence from a recorded hash.
+    """
+    sources = getattr(manifest, "source_refs", ()) or ()
+    results: list[bool] = []
+    for source in sources:
+        for snapshot in getattr(source, "input_snapshots", ()) or ():
+            for attr in ("immutable_uri", "bronze_batch_ref"):
+                result = _snapshot_file_verified(getattr(snapshot, attr, None))
+                if result is not None:
+                    results.append(result)
+                    break
+    if not results or not all(results):
+        return None
+    return True
+
+
 def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
     """Read manifest fields for this run. A missing port is not report identity."""
     if port is None:
@@ -488,6 +537,20 @@ def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
     config_hash = getattr(provenance, "effective_config_hash", None)
     lock_hash = getattr(provenance, "dependency_lock_hash", None)
     fingerprint = ",".join(fingerprints) if fingerprints else None
+    recorded = _recorded_object_flags(manifest)
+    snapshot_verified = _verify_snapshot_objects(manifest)
+    objects = {
+        code: flag
+        for code, flag in (
+            ("effective_config_hash", recorded.get("effective_config_hash")),
+            ("dependency_lock_hash", recorded.get("dependency_lock_hash")),
+            (
+                "input_snapshot_fingerprint",
+                recorded.get("input_snapshot_fingerprint", snapshot_verified),
+            ),
+        )
+        if isinstance(flag, bool)
+    }
     return {
         "effective_config_hash": config_hash,
         "dependency_lock_hash": lock_hash,
@@ -495,11 +558,7 @@ def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
         "replay_capability": capability_value,
         "exact_replay_supported": family_supported,
         "strict_exact_replay_supported": family_supported,
-        "objects": {
-            "effective_config_hash": bool(config_hash),
-            "dependency_lock_hash": bool(lock_hash),
-            "input_snapshot_fingerprint": bool(fingerprint),
-        },
+        "objects": objects,
         "replay_of_run_id": getattr(manifest, "replay_of_run_id", None),
         "replay_of_manifest_id": getattr(manifest, "replay_of_manifest_id", None),
     }

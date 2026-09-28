@@ -156,6 +156,37 @@ def test_run_manifest_round_trip_keeps_canonical_payload_snapshot() -> None:
     assert loaded_manifest == manifest
 
 
+def test_run_manifest_objects_round_trip_and_reject_mutation() -> None:
+    from dataclasses import replace
+
+    manifest = replace(
+        _make_manifest(),
+        objects={
+            "input_snapshot_fingerprint": True,
+            "effective_config_hash": False,
+        },
+    )
+    payload = manifest.to_dict()
+    assert payload["objects"] == {
+        "input_snapshot_fingerprint": True,
+        "effective_config_hash": False,
+    }
+    with pytest.raises(TypeError, match="immutable"):
+        manifest.objects["input_snapshot_fingerprint"] = False
+
+    noisy = dict(payload)
+    noisy["objects"] = {
+        "input_snapshot_fingerprint": True,
+        "stale": "yes",
+        "count": 3,
+    }
+    loaded = RunManifest.from_dict(noisy)
+    assert loaded.to_dict()["objects"] == {"input_snapshot_fingerprint": True}
+    assert loaded == replace(
+        _make_manifest(), objects={"input_snapshot_fingerprint": True}
+    )
+
+
 @pytest.mark.parametrize(
     ("field_name", "value"),
     [

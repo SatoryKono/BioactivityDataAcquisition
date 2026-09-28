@@ -299,8 +299,119 @@ def test_manifest_without_input_snapshot_is_not_ready(tmp_path):
     assert result["replay_readiness_now"] != "READY"
     checks = {item["code"]: item["result"] for item in result["replay_checks"]}
     assert checks["input_snapshot_fingerprint"] == "unknown"
-    assert checks["effective_config_hash"] == "pass"
+    # A recorded hash alone is not a verified object (#11711).
+    assert checks["effective_config_hash"] == "unknown"
+    reasons = {item["code"]: item["reason"] for item in result["replay_checks"]}
+    assert reasons["effective_config_hash"] == "object_not_verified"
     assert checks["dependency_lock_hash"] == "unknown"
+
+
+def test_recorded_object_verification_passes(tmp_path):
+    from types import SimpleNamespace
+    from uuid import uuid4
+
+    run_id = str(uuid4())
+    persist(tmp_path, report(run_id=run_id))
+    port = MagicMock()
+    port.get_by_run_id.return_value = SimpleNamespace(
+        code_provenance=SimpleNamespace(
+            effective_config_hash="abc",
+            dependency_lock_hash="def",
+        ),
+        source_refs=(),
+        objects={
+            "effective_config_hash": True,
+            "dependency_lock_hash": True,
+        },
+        replay_capability=SimpleNamespace(value="exact_replay_supported"),
+        replay_of_run_id=None,
+        replay_of_manifest_id=None,
+    )
+    result = load_selected_run_status(
+        pipeline="chembl_activity",
+        run_id=run_id,
+        root=tmp_path,
+        manifest_port=port,
+    )
+    checks = {item["code"]: item for item in result["replay_checks"]}
+    assert checks["effective_config_hash"]["result"] == "pass"
+    assert checks["effective_config_hash"]["reason"] == "object_verified"
+
+
+def test_snapshot_file_on_disk_verifies_bronze_fingerprint(tmp_path):
+    from types import SimpleNamespace
+    from uuid import uuid4
+
+    batch = tmp_path / "bronze-batch.json"
+    batch.write_text("{}", encoding="utf-8")
+    run_id = str(uuid4())
+    persist(tmp_path, report(run_id=run_id))
+    port = MagicMock()
+    port.get_by_run_id.return_value = SimpleNamespace(
+        code_provenance=SimpleNamespace(
+            effective_config_hash=None,
+            dependency_lock_hash=None,
+        ),
+        source_refs=(
+            SimpleNamespace(
+                input_snapshots=(
+                    SimpleNamespace(
+                        content_hash="ghi",
+                        immutable_uri=str(batch),
+                    ),
+                )
+            ),
+        ),
+        replay_capability=SimpleNamespace(value="exact_replay_supported"),
+        replay_of_run_id=None,
+        replay_of_manifest_id=None,
+    )
+    result = load_selected_run_status(
+        pipeline="chembl_activity",
+        run_id=run_id,
+        root=tmp_path,
+        manifest_port=port,
+    )
+    checks = {item["code"]: item for item in result["replay_checks"]}
+    assert checks["input_snapshot_fingerprint"]["result"] == "pass"
+    assert checks["input_snapshot_fingerprint"]["reason"] == "object_verified"
+
+
+def test_missing_snapshot_file_stays_unverified(tmp_path):
+    from types import SimpleNamespace
+    from uuid import uuid4
+
+    run_id = str(uuid4())
+    persist(tmp_path, report(run_id=run_id))
+    port = MagicMock()
+    port.get_by_run_id.return_value = SimpleNamespace(
+        code_provenance=SimpleNamespace(
+            effective_config_hash=None,
+            dependency_lock_hash=None,
+        ),
+        source_refs=(
+            SimpleNamespace(
+                input_snapshots=(
+                    SimpleNamespace(
+                        content_hash="ghi",
+                        immutable_uri=str(tmp_path / "absent-batch.json"),
+                    ),
+                )
+            ),
+        ),
+        replay_capability=SimpleNamespace(value="exact_replay_supported"),
+        replay_of_run_id=None,
+        replay_of_manifest_id=None,
+    )
+    result = load_selected_run_status(
+        pipeline="chembl_activity",
+        run_id=run_id,
+        root=tmp_path,
+        manifest_port=port,
+    )
+    checks = {item["code"]: item for item in result["replay_checks"]}
+    assert checks["input_snapshot_fingerprint"]["result"] == "unknown"
+    assert checks["input_snapshot_fingerprint"]["reason"] == "object_not_verified"
 
 
 def test_rebuild_only_inside_family_boundary_is_insufficient(tmp_path):

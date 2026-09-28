@@ -15,6 +15,7 @@ from bioetl.domain.control_plane._run_manifest_deserialization import (
     _load_optional_str,
     _load_replay_capability,
     _load_source_refs,
+    _load_verified_objects,
 )
 from bioetl.domain.control_plane._run_manifest_serialization import (
     freeze_manifest_payload,
@@ -188,6 +189,7 @@ class RunManifest:
     replay_capability: ReplayCapability = ReplayCapability.REBUILD_ONLY
     source_refs: tuple[RunSourceRef, ...] = ()
     planned_artifacts: tuple[RunArtifactRef, ...] = ()
+    objects: dict[str, bool] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Keep manifest timestamps canonical across serialize/deserialize cycles."""
@@ -203,7 +205,12 @@ class RunManifest:
         set_attr = object.__setattr__
         freeze = freeze_manifest_payload
         set_attr(self, "created_at", normalize_manifest_created_at(self.created_at))
-        for field_name in ("launch_context", "runtime_config", "resolved_config"):
+        for field_name in (
+            "launch_context",
+            "runtime_config",
+            "resolved_config",
+            "objects",
+        ):
             set_attr(self, field_name, freeze(getattr(self, field_name)))
 
     def to_dict(self) -> dict[str, object]:
@@ -254,4 +261,5 @@ class RunManifest:
                 payload.get("planned_artifacts"),
                 artifact_type=RunArtifactRef,
             ),
+            objects=_load_verified_objects(payload.get("objects")),
         )
