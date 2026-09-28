@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from scripts.ops.observability.grafana._selected_run_panels import (
+    _STAGE_DISPLAY_ORDER,
     _STAGE_FIELDS,
     _STAGE_RENAMES,
 )
@@ -501,11 +502,17 @@ def _ensure_stage_panel(by_id: dict[int, dict[str, Any]]) -> None:
                     "indexByName": {
                         name: index for index, name in enumerate(_STAGE_FIELDS)
                     },
-                    "renameByName": dict(_STAGE_RENAMES),
                 },
             },
         ],
     }
+    panel["fieldConfig"]["overrides"] = [
+        {
+            "matcher": {"id": "byName", "options": field},
+            "properties": [{"id": "displayName", "value": _STAGE_RENAMES[field]}],
+        }
+        for field in _STAGE_DISPLAY_ORDER
+    ]
     parent.setdefault("panels", []).append(panel)
     by_id[9460] = panel
 
