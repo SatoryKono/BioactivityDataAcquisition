@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   N/A-vs-INCOMPLETE contract, and end-to-end tests pin a snapshot-backed
   success run to Saved Evidence=OK.
 
+- **Control-plane ready payload:** `/ops/control-plane/ready` echoes the
+  configured `data_root` value again instead of the `"configured"` constant,
+  matching the payload contract and the sibling `runtime_source_id` field;
+  `test_routing_support_dispatches_control_plane_branches` is green.
+
 ### Fixed
 
 - **Provider DNS fail-closed:** `getaddrinfo` / errno 11001 on data-source health
