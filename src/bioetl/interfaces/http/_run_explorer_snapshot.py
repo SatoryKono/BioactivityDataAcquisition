@@ -10,10 +10,10 @@ from __future__ import annotations
 import asyncio
 import time
 from datetime import datetime
-from typing import Any, Protocol, cast
+from typing import Protocol
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.domain.ports import RunManifestPort
+from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.interfaces.http.recent_pipeline_runs import (
     RECENT_TIMING_FIELDS,
     _scope,
@@ -32,7 +32,7 @@ class _SnapshotSource(Protocol):
     def _run_manifest_port(self) -> RunManifestPort | None: ...
 
     @property
-    def _run_ledger_port(self) -> object | None: ...
+    def _run_ledger_port(self) -> RunLedgerPort | None: ...
 
 
 class RunExplorerSnapshotCache:
@@ -74,7 +74,7 @@ class RunExplorerSnapshotCache:
                 lookup_run_id=None,
                 limit=DEFAULT_RECENT_LIMIT,
                 manifest_port=manifest_port,
-                ledger_port=cast(Any, source._run_ledger_port),
+                ledger_port=source._run_ledger_port,
             )
         except _REFRESH_ERRORS:
             return

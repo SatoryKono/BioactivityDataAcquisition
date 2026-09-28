@@ -40,7 +40,7 @@ from bioetl.composition.providers._chembl_target_protein_classification_helpers 
     coerce_positive_int,
     leaf_ids_from_component_row,
 )
-from bioetl.composition.runtime_builders._effective_config_graph_support import (
+from bioetl.infrastructure.config.effective_config_graph import (
     _load_config_graph_references,
     _resolve_config_graph_reference,
 )

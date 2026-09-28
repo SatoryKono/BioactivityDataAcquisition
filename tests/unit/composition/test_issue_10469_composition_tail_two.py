@@ -22,21 +22,15 @@ from bioetl.composition.factories.pipeline_support import (
     contract_validation_helpers,
 )
 from bioetl.composition.factories.services import _record_processor_policy_support
-from bioetl.composition.providers import (
-    _chembl_target_protein_classification_helpers as protein_helpers,
-)
+from bioetl.domain.chembl import target_protein_classification as protein_helpers
+from bioetl.domain.control_plane import run_manifest_sink_policy as sink_policy
 from bioetl.composition.providers import _store
-from bioetl.composition.runtime_builders import (
-    _effective_config_graph_support as graph_support,
-)
+from bioetl.infrastructure.config import effective_config_graph as graph_support
 from bioetl.composition.runtime_builders import (
     _effective_config_secret_support as secret_support,
 )
 from bioetl.composition.runtime_builders import (
     _effective_config_source_refs_support as source_ref_support,
-)
-from bioetl.composition.runtime_builders import (
-    _run_manifest_sink_policy as sink_policy,
 )
 from bioetl.domain.ports.noop import NoOpPiiHasher
 

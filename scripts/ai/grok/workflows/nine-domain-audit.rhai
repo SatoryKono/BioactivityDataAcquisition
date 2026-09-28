@@ -11,7 +11,7 @@
 
 let meta = #{
     name: "nine-domain-audit",
-    description: "Parallel BioETL domain audits (docs, tests, debt, root, GHA, agents, diagrams, docs-pipeline, architecture)",
+    description: "Parallel BioETL domain audits (docs, tests, debt, root, Grafana, agents, diagrams, docs-pipeline, architecture)",
     when_to_use: "Run the nine library audit cards in parallel and synthesize a rollup under reports/audit-runs/",
     phases: [
         #{ title: "Preflight", detail: "run_id, git safety, domain selection" },
@@ -172,11 +172,11 @@ let ALL_DOMAINS = [
         card_path: "docs/00-project/ai/prompts/library/audit/repo-tree.md",
     },
     #{
-        id: "github-actions",
-        prompt_id: "prompt.audit.github-actions",
-        report_dir: "reports/audit/gha",
-        scope: ".github/workflows/ .github/actions/",
-        card_path: "docs/00-project/ai/prompts/library/audit/github-actions.md",
+        id: "grafana-dashboard",
+        prompt_id: "prompt.observability.grafana-audit.master",
+        report_dir: "reports/audit/grafana",
+        scope: "grafana/dashboards/ docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
+        card_path: "docs/00-project/ai/prompts/library/audit/grafana-master.md",
     },
     #{
         id: "agents-runtime",
@@ -250,8 +250,13 @@ for d in selected {
     let prompt = "";
     prompt += "You are a BioETL domain auditor (read-only). ";
     prompt += "Execute the audit card at " + d.card_path + " (prompt id " + d.prompt_id + "). ";
-    prompt += "Params: SCOPE=" + d.scope + "; MODE=" + mode + "; LANGUAGE=" + language + "; AUDIT_MODE=" + audit_mode + "; REQUIRE_GH_TRACKING=false. ";
-    prompt += "Read AGENTS.md precedence, docs/00-project/NORMATIVE_SOURCES.md, and the card includes (evidence-contract, finding-schema, debt-budget-ban, env-guardrail). ";
+    if d.id == "grafana-dashboard" {
+        prompt += "Params: SCOPE=" + d.scope + "; GRAFANA_VERSION=detect; DASHBOARD_PURPOSE=derive-from-contracts; CRITICAL_PANELS=derive-from-contracts; REFERENCE_SPEC=docs/01-requirements/DASHBOARD_REQUIREMENTS.md; VIEWPORTS=1366x768,1440x900,1920x1080; THEMES=light,dark; USER_ROLES=derive-from-contracts; TIME_RANGE=last-24h; VARIABLES=all; MONITORING=false; OUTPUT_DIR=" + d.report_dir + "; LANGUAGE=" + language + ". ";
+        prompt += "Read AGENTS.md precedence, docs/00-project/NORMATIVE_SOURCES.md, DASHBOARD_REQUIREMENTS.md, and the card includes. Do not start monitoring unless explicitly enabled by the card parameters. ";
+    } else {
+        prompt += "Params: SCOPE=" + d.scope + "; MODE=" + mode + "; LANGUAGE=" + language + "; AUDIT_MODE=" + audit_mode + "; REQUIRE_GH_TRACKING=false. ";
+        prompt += "Read AGENTS.md precedence, docs/00-project/NORMATIVE_SOURCES.md, and the card includes (evidence-contract, finding-schema, debt-budget-ban, env-guardrail). ";
+    }
     prompt += "Use tools (read_file, grep, list_dir, run_terminal_command for read-only diagnostics only). Do not edit product code. ";
     prompt += "Do NOT raise tech-debt budgets. Do NOT touch .env. Do NOT invent findings without path-level evidence (mark NOT_PROVEN). ";
     prompt += "Do not write the product tree. Return structured findings only. ";
