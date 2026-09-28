@@ -304,6 +304,19 @@ def _clear_wrap_overrides(panel: dict[str, Any]) -> None:
 
 
 def _stamp_trust_table(panel: dict[str, Any]) -> None:
+    overrides = panel["fieldConfig"].setdefault("overrides", [])
+    stale_names = {"Processing", "Trust", "Observed at", "Reasons"}
+    seen: set[object] = set()
+    kept: list[dict[str, Any]] = []
+    for item in overrides:
+        matcher = item.get("matcher") or {}
+        options = matcher.get("options")
+        if matcher.get("id") == "byName":
+            if options in stale_names or options in seen:
+                continue
+            seen.add(options)
+        kept.append(item)
+    overrides[:] = kept
     panel["options"]["cellHeight"] = "sm"
     panel["options"].pop("maxRowHeight", None)
     # Grafana 12 can measure only one wrapped field per row. Let its
@@ -313,9 +326,13 @@ def _stamp_trust_table(panel: dict[str, Any]) -> None:
         "wrapText": True,
     }
     _clear_wrap_overrides(panel)
-    for name, width in (("Processing", 85), ("Trust", 100), ("Observed at", 115)):
+    for name, width in (
+        ("Processing result", 85),
+        ("Saved trust verdict", 100),
+        ("Assessed at", 115),
+    ):
         override(panel, name, **{CUSTOM_WIDTH: width})
-    override(panel, "Reasons", **{"custom.inspect": True, "links": []})
+    override(panel, "Reason count", **{"custom.inspect": True, "links": []})
     panel["description"] = panel["description"].replace(
         "Select Reasons to inspect", "Use the panel link to inspect"
     )

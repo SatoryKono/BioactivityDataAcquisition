@@ -300,16 +300,16 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Provider Health (Provider Health). Preserves selected scope and time range. Preserves pipeline context.\" href=\"/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${provider:queryparam}&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Data Quality</a><a class=\"bioetl-nav-current\" href=\"#bioetl-incident-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"6. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">6. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Provider Health (Provider Health). Preserves selected scope and time range. Preserves pipeline context.\" href=\"/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${provider:queryparam}&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Data Quality</a><a class=\"bioetl-nav-current\" href=\"#bioetl-incident-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"6. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">6. Incident Workspace</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
-          "title": "Run Explorer",
+          "title": "0. Run Explorer",
           "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Run Explorer (Run Explorer). Preserves selected scope and time range.",
+          "tooltip": "0. Run Explorer (Run Explorer). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -321,7 +321,7 @@
         {
           "title": "Replay Readiness",
           "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Replay Readiness (Trust). Preserves selected scope and time range.",
+          "tooltip": "Replay Readiness (Replay Readiness). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -333,7 +333,7 @@
         {
           "title": "Run Overview",
           "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Run Overview (Overview). Preserves selected scope and time range.",
+          "tooltip": "Run Overview (Run Overview). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -370,6 +370,18 @@
           "title": "Data Quality",
           "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
           "tooltip": "Data Quality (Data Quality). Scope reset: stage=All; preserves time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "Run Explorer",
+          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "Run Explorer (Run Explorer). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -510,7 +522,15 @@
           "valueSize": 20,
           "titleSize": 12
         }
-      }
+      },
+      "links": [
+        {
+          "title": "Open Pipeline Diagnostics",
+          "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "includeVars": false,
+          "targetBlank": false
+        }
+      ]
     },
     {
       "id": 2001,
@@ -1525,7 +1545,7 @@
         {
           "includeVars": false,
           "title": "Show all rows and total (summary: up to 2)",
-          "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22005&${__url_time_range}",
+          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22005&${__url_time_range}",
           "targetBlank": false
         }
       ]
@@ -2537,7 +2557,7 @@
             "h": 5
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · Columns are Result, Status, Evidence, and Rules. Status is the verdict. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",
@@ -2737,1037 +2757,13 @@
       ]
     },
     {
-      "id": 32010,
-      "type": "row",
-      "title": "Browse Global Suspects",
-      "collapsed": true,
-      "gridPos": {
-        "x": 0,
-        "y": 20,
-        "w": 24,
-        "h": 1
-      },
-      "panels": [
-        {
-          "id": 22010,
-          "type": "table",
-          "title": "Inspect Global Suspects (Full)",
-          "description": "GLOBAL / TIME RANGE · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page.",
-          "gridPos": {
-            "x": 0,
-            "y": 21,
-            "w": 24,
-            "h": 12
-          },
-          "datasource": {
-            "type": "datasource",
-            "uid": "-- Dashboard --"
-          },
-          "targets": [
-            {
-              "panelId": 2010,
-              "refId": "A",
-              "withTransforms": false
-            }
-          ],
-          "transformations": [
-            {
-              "id": "filterByValue",
-              "options": {
-                "filters": [
-                  {
-                    "fieldName": "Value",
-                    "config": {
-                      "id": "greater",
-                      "options": {
-                        "value": 0
-                      }
-                    }
-                  },
-                  {
-                    "fieldName": "signal",
-                    "config": {
-                      "id": "equal",
-                      "options": {
-                        "value": "telemetry_gap"
-                      }
-                    }
-                  }
-                ],
-                "type": "include",
-                "match": "any"
-              }
-            },
-            {
-              "id": "sortBy",
-              "options": {
-                "fields": {},
-                "sort": [
-                  {
-                    "field": "Value",
-                    "desc": true
-                  }
-                ]
-              }
-            },
-            {
-              "id": "calculateField",
-              "options": {
-                "mode": "index",
-                "alias": "row_index"
-              }
-            },
-            {
-              "id": "calculateField",
-              "options": {
-                "mode": "binary",
-                "binary": {
-                  "left": "row_index",
-                  "operator": "+",
-                  "right": "1"
-                },
-                "alias": "Rank"
-              }
-            },
-            {
-              "id": "extractFields",
-              "options": {
-                "source": "signal",
-                "format": "regexp",
-                "regExp": "/(?<action_detail>.*)/",
-                "replace": false
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "Time 1": true,
-                  "Time 2": true,
-                  "reason": true,
-                  "cause": true,
-                  "run_type": true,
-                  "severity": true,
-                  "action_target": true,
-                  "__name__": true,
-                  "row_index": true,
-                  "confidence": false,
-                  "object": false,
-                  "action_dashboard_uid": false,
-                  "job": true
-                },
-                "indexByName": {
-                  "Rank": 0,
-                  "Value": 1,
-                  "confidence": 2,
-                  "pipeline": 3,
-                  "provider": 4,
-                  "signal": 5,
-                  "action": 6,
-                  "domain": 8,
-                  "object": 3,
-                  "action_detail": 7
-                },
-                "renameByName": {
-                  "domain": "Domain",
-                  "signal": "Signal",
-                  "Value": "Severity",
-                  "action": "Action",
-                  "confidence": "Confidence",
-                  "object": "Object",
-                  "pipeline": "Pipeline",
-                  "provider": "Provider",
-                  "action_detail": "Details"
-                }
-              }
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "UNKNOWN",
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": false
-                },
-                "inspect": true,
-                "hidden": true,
-                "minWidth": 50,
-                "wrapText": false
-              },
-              "color": {
-                "mode": "fixed",
-                "fixedColor": "text"
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "links": [],
-              "mappings": []
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Rank"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": []
-                  },
-                  {
-                    "id": "unit",
-                    "value": "none"
-                  },
-                  {
-                    "id": "custom.hidden",
-                    "value": false
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 50
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Severity"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "0": {
-                            "text": "UNKNOWN",
-                            "color": "text"
-                          },
-                          "1": {
-                            "text": "WARN",
-                            "color": "orange"
-                          },
-                          "2": {
-                            "text": "CRIT",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
-                  },
-                  {
-                    "id": "custom.hidden",
-                    "value": false
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Severity"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 85
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Confidence"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": false
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Cause verification"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 155
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "Not verified"
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "UNVERIFIED": {
-                            "text": "Not verified"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Pipeline"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 140
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Provider"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Signal"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "telemetry_gap": {
-                            "text": "Telemetry missing"
-                          },
-                          "runtime_failed": {
-                            "text": "Run failed"
-                          },
-                          "dq_failure": {
-                            "text": "DQ failure"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.hidden",
-                    "value": false
-                  },
-                  {
-                    "id": "custom.wrapText",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  },
-                  {
-                    "id": "links",
-                    "value": []
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Domain"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "provider": {
-                            "text": "Provider"
-                          },
-                          "runtime": {
-                            "text": "Runtime"
-                          },
-                          "dq": {
-                            "text": "DQ"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
-                  },
-                  {
-                    "id": "custom.hidden",
-                    "value": false
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 100
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Object"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": "GLOBAL"
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "unknown / unknown": {
-                            "text": "UNKNOWN"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.hidden",
-                    "value": false
-                  },
-                  {
-                    "id": "links",
-                    "value": []
-                  },
-                  {
-                    "id": "custom.wrapText",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "action_dashboard_uid"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "action_scope"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Action"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "Inspect"
-                  },
-                  {
-                    "id": "custom.hidden",
-                    "value": false
-                  },
-                  {
-                    "id": "custom.inspect",
-                    "value": false
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 90
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "provider": {
-                            "text": "Provider"
-                          },
-                          "runtime": {
-                            "text": "Runtime"
-                          },
-                          "dq": {
-                            "text": "DQ"
-                          },
-                          "UNKNOWN": {
-                            "text": "Inspect"
-                          },
-                          "unknown": {
-                            "text": "Inspect"
-                          },
-                          "data_quality": {
-                            "text": "DQ"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Open domain diagnostics",
-                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
-                        "targetBlank": false,
-                        "includeVars": false
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "route_pipeline"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Details"
-                },
-                "properties": [
-                  {
-                    "id": "custom.inspect",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.hidden",
-                    "value": false
-                  },
-                  {
-                    "id": "links",
-                    "value": []
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "telemetry_gap": {
-                            "text": "Check telemetry"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.wrapText",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Started"
-                },
-                "properties": []
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Why"
-                },
-                "properties": []
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Reason"
-                },
-                "properties": []
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Stage"
-                },
-                "properties": []
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Status"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 90
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "showHeader": true,
-            "cellHeight": "sm",
-            "footer": {
-              "show": false,
-              "enablePagination": false,
-              "countRows": false
-            },
-            "sortBy": [
-              {
-                "displayName": "Rank",
-                "desc": false
-              }
-            ]
-          },
-          "links": []
-        }
-      ],
-      "description": "Expand for the full global suspect table. The first screen already shows the ranked subset."
-    },
-    {
-      "id": 32005,
-      "type": "row",
-      "title": "Browse Global Alerts",
-      "collapsed": true,
-      "gridPos": {
-        "x": 0,
-        "y": 21,
-        "w": 24,
-        "h": 1
-      },
-      "panels": [
-        {
-          "id": 22005,
-          "type": "table",
-          "title": "Monitor Global Alerts (Full)",
-          "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
-          "gridPos": {
-            "x": 0,
-            "y": 22,
-            "w": 24,
-            "h": 6
-          },
-          "datasource": {
-            "type": "datasource",
-            "uid": "-- Dashboard --"
-          },
-          "targets": [
-            {
-              "panelId": 2005,
-              "refId": "A",
-              "withTransforms": false
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "UNKNOWN",
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": false
-                },
-                "inspect": true,
-                "minWidth": 50,
-                "wrapText": false
-              },
-              "color": {
-                "mode": "fixed",
-                "fixedColor": "text"
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "#9a3412",
-                    "value": 1
-                  },
-                  {
-                    "color": "#9f1239",
-                    "value": 2
-                  }
-                ]
-              },
-              "links": [
-                {
-                  "title": "Open incident response runbook",
-                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md",
-                  "targetBlank": true,
-                  "includeVars": false
-                }
-              ]
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value)$"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 120
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Active Alerts"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "alertname"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Alert"
-                  },
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Open alert runbook",
-                        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/${__data.fields.alert_runbook}.md",
-                        "targetBlank": true
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "alertstate"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "firing": {
-                            "text": "FIRING",
-                            "color": "#ff7383"
-                          },
-                          "pending": {
-                            "text": "PENDING",
-                            "color": "#ffb357"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 100
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "State"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "instance"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": "NOT PROVIDED"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 145
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "job"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": "NOT PROVIDED"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 185
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "severity"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 90
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Severity"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "provider"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": "Not provided"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 190
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Provider"
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "chembl": {
-                            "text": "ChEMBL"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "pipeline"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Pipeline"
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "Not provided"
-                  },
-                  {
-                    "id": "links",
-                    "value": []
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "alert_runbook"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "pipeline_context"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false,
-              "enablePagination": true,
-              "countRows": true
-            },
-            "cellHeight": "sm"
-          },
-          "transformations": [
-            {
-              "id": "sortBy",
-              "options": {
-                "fields": {},
-                "sort": [
-                  {
-                    "field": "Value",
-                    "desc": true
-                  }
-                ]
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "Value": true,
-                  "__name__": true
-                },
-                "indexByName": {
-                  "severity": 0,
-                  "alertname": 1,
-                  "pipeline": 2,
-                  "provider": 3,
-                  "alertstate": 4
-                }
-              }
-            }
-          ],
-          "links": []
-        }
-      ],
-      "description": "Expand for the full global alert table. The first screen already shows Monitor Global Alerts."
-    },
-    {
       "id": 8808,
       "type": "row",
       "title": "Pipeline fleet and range, not this Run ID",
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 24,
+        "y": 47,
         "w": 24,
         "h": 1
       },
@@ -3781,7 +2777,7 @@
             "h": 3,
             "w": 8,
             "x": 0,
-            "y": 25
+            "y": 48
           },
           "datasource": {
             "type": "prometheus",
@@ -4273,7 +3269,7 @@
             "h": 7,
             "w": 16,
             "x": 8,
-            "y": 25
+            "y": 48
           },
           "id": 9101,
           "options": {
@@ -4532,7 +3528,7 @@
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 32
+            "y": 55
           },
           "id": 9102,
           "options": {
@@ -4763,7 +3759,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 39,
+            "y": 62,
             "w": 24,
             "h": 5
           },
@@ -4809,6 +3805,58 @@
               "title": "Show all rows and total (summary: up to 3)",
               "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22460&${__url_time_range}",
               "targetBlank": false
+            }
+          ]
+        },
+        {
+          "id": 9463,
+          "type": "stat",
+          "title": "Review Total Run Duration",
+          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing.",
+          "gridPos": {
+            "x": 0,
+            "y": 67,
+            "w": 24,
+            "h": 3
+          },
+          "datasource": "BioETL Ops HTTP",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 2,
+              "noValue": "Not recorded"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "none",
+            "graphMode": "none",
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "type": "json",
+              "source": "url",
+              "parser": "uql",
+              "format": "table",
+              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              },
+              "uql": "parse-json | jsonata \"($s := summary[0]; $start := $s.started_at ? $toMillis($s.started_at) : null; $end := $s.completed_at ? $toMillis($s.completed_at) : null; [{'Run duration': $start != null and $end != null and $end >= $start ? ($end - $start) / 1000 : null}])\""
             }
           ]
         },
@@ -4919,7 +3967,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 44,
+            "y": 70,
             "w": 24,
             "h": 10
           },
@@ -4996,7 +4044,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 54,
+            "y": 80,
             "w": 12,
             "h": 6
           },
@@ -5080,7 +4128,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 54,
+            "y": 80,
             "w": 12,
             "h": 6
           },
@@ -5125,7 +4173,7 @@
           "title": "Review Runtime Escalation",
           "gridPos": {
             "x": 0,
-            "y": 60,
+            "y": 86,
             "w": 24,
             "h": 3
           },
@@ -5184,7 +4232,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 63,
+            "y": 89,
             "w": 8,
             "h": 4
           },
@@ -5273,7 +4321,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 63,
+            "y": 89,
             "w": 8,
             "h": 4
           },
@@ -5359,7 +4407,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 63,
+            "y": 89,
             "w": 8,
             "h": 4
           },
@@ -5447,7 +4495,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 67,
+            "y": 93,
             "w": 8,
             "h": 4
           },
@@ -5548,7 +4596,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 67,
+            "y": 93,
             "w": 12,
             "h": 4
           },
@@ -5629,7 +4677,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 71,
+            "y": 97,
             "w": 8,
             "h": 4
           },
@@ -5730,7 +4778,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 71,
+            "y": 97,
             "w": 12,
             "h": 4
           },
@@ -5827,7 +4875,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 75,
+            "y": 101,
             "w": 8,
             "h": 4
           },
@@ -5987,7 +5035,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 75,
+            "y": 101,
             "w": 12,
             "h": 6
           },
@@ -6142,7 +5190,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 81,
+            "y": 107,
             "w": 12,
             "h": 6
           },
@@ -6262,7 +5310,7 @@
             "h": 4,
             "w": 5,
             "x": 12,
-            "y": 81
+            "y": 107
           },
           "id": 891,
           "options": {
@@ -6351,7 +5399,7 @@
             "h": 4,
             "w": 5,
             "x": 17,
-            "y": 81
+            "y": 107
           },
           "id": 892,
           "options": {
@@ -6475,7 +5523,7 @@
             "h": 4,
             "w": 5,
             "x": 0,
-            "y": 87
+            "y": 113
           },
           "id": 893,
           "options": {
@@ -6581,7 +5629,7 @@
             "h": 4,
             "w": 4,
             "x": 5,
-            "y": 87
+            "y": 113
           },
           "id": 907,
           "options": {
@@ -6626,7 +5674,7 @@
           "title": "Review Cross-Domain Handoffs",
           "gridPos": {
             "x": 0,
-            "y": 91,
+            "y": 117,
             "w": 24,
             "h": 3
           },
@@ -6744,7 +5792,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 94,
+            "y": 120,
             "w": 24,
             "h": 10
           },
@@ -6824,7 +5872,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 104,
+            "y": 130,
             "w": 8,
             "h": 4
           },
@@ -6916,7 +5964,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 104,
+            "y": 130,
             "w": 8,
             "h": 4
           },
@@ -7002,7 +6050,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 104,
+            "y": 130,
             "w": 8,
             "h": 4
           },
@@ -7056,7 +6104,7 @@
             "h": 2,
             "w": 24,
             "x": 0,
-            "y": 108
+            "y": 134
           },
           "options": {
             "mode": "html",
@@ -7095,7 +6143,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 110,
+            "y": 136,
             "w": 24,
             "h": 5
           },
@@ -7167,7 +6215,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 115,
+            "y": 141,
             "w": 12,
             "h": 4
           },
@@ -7242,7 +6290,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 119,
+            "y": 145,
             "w": 24,
             "h": 4
           },
@@ -7342,7 +6390,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 123,
+            "y": 149,
             "w": 12,
             "h": 4
           },
@@ -7443,7 +6491,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 123,
+            "y": 149,
             "w": 12,
             "h": 3
           },
@@ -7539,7 +6587,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 127,
+            "y": 153,
             "w": 12,
             "h": 3
           },
@@ -7636,7 +6684,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 127,
+            "y": 153,
             "w": 8,
             "h": 3
           },
@@ -7732,7 +6780,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 130,
+            "y": 156,
             "w": 8,
             "h": 3
           },
@@ -7828,7 +6876,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 130,
+            "y": 156,
             "w": 8,
             "h": 3
           },
@@ -7917,7 +6965,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 130,
+            "y": 156,
             "w": 8,
             "h": 3
           },
@@ -8025,7 +7073,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 133,
+            "y": 159,
             "w": 24,
             "h": 9
           },
@@ -8184,7 +7232,7 @@
           "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
           "gridPos": {
             "x": 0,
-            "y": 142,
+            "y": 168,
             "w": 24,
             "h": 14
           },
@@ -8310,7 +7358,7 @@
           "title": "Review Global Process Signals",
           "gridPos": {
             "x": 0,
-            "y": 156,
+            "y": 182,
             "w": 24,
             "h": 3
           },
@@ -8381,7 +7429,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 159,
+            "y": 185,
             "w": 24,
             "h": 6
           },
@@ -8468,7 +7516,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 165,
+            "y": 191,
             "w": 8,
             "h": 3
           },
@@ -8565,7 +7613,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 165,
+            "y": 191,
             "w": 8,
             "h": 3
           },
@@ -8661,7 +7709,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 165,
+            "y": 191,
             "w": 8,
             "h": 3
           },
@@ -8813,7 +7861,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 168,
+            "y": 194,
             "w": 24,
             "h": 6
           },
@@ -8914,7 +7962,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 174,
+            "y": 200,
             "w": 8,
             "h": 3
           },
@@ -9010,7 +8058,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 174,
+            "y": 200,
             "w": 8,
             "h": 3
           },
@@ -9096,7 +8144,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 177,
+            "y": 203,
             "w": 12,
             "h": 6
           },
@@ -9186,7 +8234,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 177,
+            "y": 203,
             "w": 8,
             "h": 3
           },
@@ -9282,7 +8330,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 183,
+            "y": 209,
             "w": 8,
             "h": 3
           },
@@ -9368,7 +8416,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 183,
+            "y": 209,
             "w": 12,
             "h": 6
           },
@@ -9458,7 +8506,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 189,
+            "y": 215,
             "w": 8,
             "h": 3
           },
@@ -9549,7 +8597,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 192,
+            "y": 218,
             "w": 24,
             "h": 8
           },
@@ -9663,7 +8711,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 200,
+            "y": 226,
             "w": 8,
             "h": 3
           },
@@ -9744,7 +8792,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 203,
+            "y": 229,
             "w": 24,
             "h": 10
           },
@@ -9809,7 +8857,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 213,
+            "y": 239,
             "w": 24,
             "h": 9
           },
@@ -9895,7 +8943,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 222,
+            "y": 248,
             "w": 8,
             "h": 3
           },
@@ -9962,7 +9010,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 225,
+            "y": 251,
             "w": 24,
             "h": 7
           },
@@ -10029,7 +9077,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 232,
+            "y": 258,
             "w": 12,
             "h": 6
           },
@@ -10064,7 +9112,7 @@
           "description": "TIME RANGE · Shows selected-range stage lag in seconds for Pipeline, Run Type, and Stage. No data means no emitted lag samples or unavailable telemetry, never zero lag. Use Worst Stage Lag and current blockers for severity",
           "gridPos": {
             "x": 0,
-            "y": 238,
+            "y": 264,
             "w": 24,
             "h": 10
           },
@@ -10231,7 +9279,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 248,
+            "y": 274,
             "w": 12,
             "h": 6
           },
@@ -10285,7 +9333,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 254,
+            "y": 280,
             "w": 24,
             "h": 7
           },
@@ -10356,7 +9404,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 261,
+            "y": 287,
             "w": 24,
             "h": 6
           },
@@ -10410,7 +9458,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 267,
+            "y": 293,
             "w": 24,
             "h": 12
           },
@@ -10712,7 +9760,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 279,
+            "y": 305,
             "w": 24,
             "h": 9
           },
@@ -10824,7 +9872,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 288,
+            "y": 314,
             "w": 24,
             "h": 7
           },
@@ -10909,7 +9957,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 295,
+            "y": 321,
             "w": 24,
             "h": 7
           },
@@ -10993,7 +10041,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 302,
+            "y": 328,
             "w": 24,
             "h": 7
           },
@@ -11078,7 +10126,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 309,
+            "y": 335,
             "w": 24,
             "h": 7
           },
@@ -11166,7 +10214,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 316,
+            "y": 342,
             "w": 24,
             "h": 3
           },
@@ -11224,7 +10272,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 319,
+            "y": 345,
             "w": 24,
             "h": 6
           },
@@ -11255,6 +10303,1031 @@
       ]
     },
     {
+      "id": 32010,
+      "type": "row",
+      "title": "Browse Global Suspects",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 48,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 22010,
+          "type": "table",
+          "title": "Inspect Global Suspects (Full)",
+          "description": "GLOBAL / TIME RANGE · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page.",
+          "gridPos": {
+            "x": 0,
+            "y": 49,
+            "w": 24,
+            "h": 12
+          },
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "targets": [
+            {
+              "panelId": 2010,
+              "refId": "A",
+              "withTransforms": false
+            }
+          ],
+          "transformations": [
+            {
+              "id": "filterByValue",
+              "options": {
+                "filters": [
+                  {
+                    "fieldName": "Value",
+                    "config": {
+                      "id": "greater",
+                      "options": {
+                        "value": 0
+                      }
+                    }
+                  },
+                  {
+                    "fieldName": "signal",
+                    "config": {
+                      "id": "equal",
+                      "options": {
+                        "value": "telemetry_gap"
+                      }
+                    }
+                  }
+                ],
+                "type": "include",
+                "match": "any"
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "field": "Value",
+                    "desc": true
+                  }
+                ]
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "index",
+                "alias": "row_index"
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "binary",
+                "binary": {
+                  "left": "row_index",
+                  "operator": "+",
+                  "right": "1"
+                },
+                "alias": "Rank"
+              }
+            },
+            {
+              "id": "extractFields",
+              "options": {
+                "source": "signal",
+                "format": "regexp",
+                "regExp": "/(?<action_detail>.*)/",
+                "replace": false
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Time 1": true,
+                  "Time 2": true,
+                  "reason": true,
+                  "cause": true,
+                  "run_type": true,
+                  "severity": true,
+                  "action_target": true,
+                  "__name__": true,
+                  "row_index": true,
+                  "confidence": false,
+                  "object": false,
+                  "job": true,
+                  "action_dashboard_uid": false
+                },
+                "indexByName": {
+                  "Rank": 0,
+                  "Value": 1,
+                  "confidence": 2,
+                  "pipeline": 3,
+                  "provider": 4,
+                  "signal": 5,
+                  "action": 6,
+                  "domain": 8,
+                  "object": 3,
+                  "action_detail": 7
+                },
+                "renameByName": {
+                  "domain": "Domain",
+                  "signal": "Signal",
+                  "Value": "Severity",
+                  "action": "Action",
+                  "confidence": "Confidence",
+                  "object": "Object",
+                  "pipeline": "Pipeline",
+                  "provider": "Provider",
+                  "action_detail": "Details"
+                }
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true,
+                "hidden": true,
+                "minWidth": 50,
+                "wrapText": false
+              },
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "text"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "links": [],
+              "mappings": [],
+              "decimals": 0
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Rank"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": []
+                  },
+                  {
+                    "id": "unit",
+                    "value": "none"
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 50
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Severity"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "0": {
+                            "text": "UNKNOWN",
+                            "color": "text"
+                          },
+                          "1": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "2": {
+                            "text": "CRIT",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Severity"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 85
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Confidence"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Cause verification"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 155
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "Not verified"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "UNVERIFIED": {
+                            "text": "Not verified"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 140
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Provider"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Signal"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "telemetry_gap": {
+                            "text": "Telemetry missing"
+                          },
+                          "runtime_failed": {
+                            "text": "Run failed"
+                          },
+                          "dq_failure": {
+                            "text": "DQ failure"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  },
+                  {
+                    "id": "custom.wrapText",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "links",
+                    "value": []
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Domain"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "provider": {
+                            "text": "Provider"
+                          },
+                          "runtime": {
+                            "text": "Runtime"
+                          },
+                          "dq": {
+                            "text": "DQ"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 100
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Object"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "GLOBAL"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "unknown / unknown": {
+                            "text": "UNKNOWN"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  },
+                  {
+                    "id": "links",
+                    "value": []
+                  },
+                  {
+                    "id": "custom.wrapText",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action_dashboard_uid"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action_scope"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "Inspect"
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": false
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "provider": {
+                            "text": "Provider"
+                          },
+                          "runtime": {
+                            "text": "Runtime"
+                          },
+                          "dq": {
+                            "text": "DQ"
+                          },
+                          "UNKNOWN": {
+                            "text": "Inspect"
+                          },
+                          "unknown": {
+                            "text": "Inspect"
+                          },
+                          "data_quality": {
+                            "text": "DQ"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Open domain diagnostics",
+                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
+                        "targetBlank": false,
+                        "includeVars": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "route_pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Started"
+                },
+                "properties": []
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Why"
+                },
+                "properties": []
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": []
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Stage"
+                },
+                "properties": []
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Details"
+                },
+                "properties": [
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  },
+                  {
+                    "id": "links",
+                    "value": []
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "telemetry_gap": {
+                            "text": "Check telemetry"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.wrapText",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false,
+              "enablePagination": false,
+              "countRows": false
+            },
+            "sortBy": [
+              {
+                "displayName": "Rank",
+                "desc": false
+              }
+            ]
+          },
+          "links": []
+        }
+      ],
+      "description": "Expand for the full global suspect table. The first screen already shows the ranked subset."
+    },
+    {
+      "id": 32005,
+      "type": "row",
+      "title": "Browse Global Alerts",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 49,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 22005,
+          "type": "table",
+          "title": "Monitor Global Alerts (Full)",
+          "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
+          "gridPos": {
+            "x": 0,
+            "y": 50,
+            "w": 24,
+            "h": 6
+          },
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "targets": [
+            {
+              "panelId": 2005,
+              "refId": "A",
+              "withTransforms": false
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false
+              },
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "text"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  },
+                  {
+                    "color": "#9a3412",
+                    "value": 1
+                  },
+                  {
+                    "color": "#9f1239",
+                    "value": 2
+                  }
+                ]
+              },
+              "links": [
+                {
+                  "title": "Open incident response runbook",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md",
+                  "targetBlank": true,
+                  "includeVars": false
+                }
+              ]
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value)$"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 120
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Active Alerts"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "alertname"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Alert"
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Open alert runbook",
+                        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/${__data.fields.alert_runbook}.md",
+                        "targetBlank": true
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "alertstate"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "firing": {
+                            "text": "FIRING",
+                            "color": "#ff7383"
+                          },
+                          "pending": {
+                            "text": "PENDING",
+                            "color": "#ffb357"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 100
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "State"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "instance"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "NOT PROVIDED"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 145
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "job"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "NOT PROVIDED"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 185
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "severity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Severity"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "provider"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "Not provided"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 190
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Provider"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "chembl": {
+                            "text": "ChEMBL"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "Not provided"
+                  },
+                  {
+                    "id": "links",
+                    "value": []
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "alert_runbook"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "pipeline_context"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
+            },
+            "cellHeight": "sm"
+          },
+          "transformations": [
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "field": "Value",
+                    "desc": true
+                  }
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "severity": 0,
+                  "alertname": 1,
+                  "pipeline": 2,
+                  "provider": 3,
+                  "alertstate": 4
+                }
+              }
+            }
+          ],
+          "links": []
+        }
+      ],
+      "description": "Expand for the full global alert table. The first screen already shows Monitor Global Alerts."
+    },
+    {
       "id": 9450,
       "type": "row",
       "title": "Inspect Saved Run Evidence",
@@ -11262,7 +11335,7 @@
       "description": "Expand for saved stage rows, then domain trust reasons, for the selected Run ID.",
       "gridPos": {
         "x": 0,
-        "y": 25,
+        "y": 50,
         "w": 24,
         "h": 1
       },
@@ -11273,12 +11346,12 @@
           "title": "Inspect Selected Run Stages",
           "gridPos": {
             "x": 0,
-            "y": 26,
+            "y": 51,
             "w": 24,
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -11299,7 +11372,101 @@
                 "inspect": true
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.wrapText",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Duration"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "Not recorded"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "s"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "In"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": ""
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Out"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": ""
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Source"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "report.funnel": {
+                            "text": "Open report"
+                          },
+                          "report.stage_timings": {
+                            "text": "Open report"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Open saved run report (JSON)",
+                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                        "targetBlank": true
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -11322,6 +11489,45 @@
               "options": {
                 "limitField": 12
               }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "stage_id",
+                    "state",
+                    "reason",
+                    "records_in",
+                    "records_out",
+                    "duration_seconds",
+                    "source"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "indexByName": {
+                  "stage_id": 0,
+                  "state": 1,
+                  "reason": 2,
+                  "records_in": 3,
+                  "records_out": 4,
+                  "duration_seconds": 5,
+                  "source": 6
+                },
+                "renameByName": {
+                  "stage_id": "Stage",
+                  "state": "Status",
+                  "reason": "Reason",
+                  "records_in": "In",
+                  "records_out": "Out",
+                  "duration_seconds": "Duration",
+                  "source": "Source"
+                }
+              }
             }
           ],
           "links": []
@@ -11332,7 +11538,7 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 34,
+            "y": 59,
             "w": 24,
             "h": 12
           },
@@ -11557,7 +11763,7 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 46,
+            "y": 71,
             "w": 24,
             "h": 8
           },
@@ -11740,7 +11946,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 26,
+        "y": 51,
         "w": 24,
         "h": 1
       },
@@ -11752,7 +11958,7 @@
           "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric.",
           "gridPos": {
             "x": 0,
-            "y": 27,
+            "y": 52,
             "w": 24,
             "h": 9
           },

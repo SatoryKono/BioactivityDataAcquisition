@@ -346,8 +346,8 @@ answer_panels:
     - id: 9998
       title: Review Selected Run Status
   bioetl-provider-health-v2.json:
-    - id: 9401
-      title: Monitor Provider Status
+    - id: 9461
+      title: Review Provider Check
   bioetl-dq-v2.json:
     - id: 9406
       title: Review Selected Run Status
@@ -358,11 +358,9 @@ answer_panels:
     - id: 3010
       title: Inspect Recent Runs (last 10)
 
-trust_gate_panels:
-  - dashboard: bioetl-control-plane-v1.json
-    id: 9401
-  - dashboard: bioetl-runtime.json
-    id: 9401
+# Retired: the runtime/control-plane 9401 verdict cards were removed with the
+# selected-run redesign. No first-window verdict card currently gates trust.
+trust_gate_panels: []
 
 allowlists:
   # Retired with #8900: panel 9104 now ends at row 18 (y=15, h=3).
@@ -372,84 +370,19 @@ allowlists:
   first_window_overflow: []
   # DASH-ZERO-001 / DASH-STATE-001: first-window background stats may use
   # a documented presence-probe zero (not a healthy-zero fallback).
-  synthetic_zero:
-    - dashboard: bioetl-provider-health-v2.json
-      id: 9104
-      owner: "@bioetl-observability"
-      rationale: >-
-        Monitor Telemetry Presence multiplies health_status by 0 so a live
-        series proves scrape presence without encoding OK. Not a healthy zero.
-      retire_when: presence is carried by an explicit UNKNOWN/OK mapping without * 0
+  # Retired: provider-health 9104 (presence probe) was removed with the
+  # selected-run redesign.
+  synthetic_zero: []
   # Horizontal scrolling is allowed only for named below-fold explorers.
   horizontal_scroll: []
-  min_height:
-    - dashboard: bioetl-incident-v1.json
-      id: 2010
-      owner: "@bioetl-observability"
-      rationale: >-
-        Inspect Ranked Suspects h=4 fits first-window with nav h=4 without
-        overlapping Monitor Current Alerts; h=5 would push alerts past y+h=17.
-      retire_when: Ranked Suspects can keep h=5 without overflow at 1366x768
-    - dashboard: bioetl-incident-v1.json
-      id: 2005
-      owner: "@bioetl-observability"
-      rationale: >-
-        Monitor Current Alerts h=4 at y=13 ends on the measured 1366x768 kiosk
-        fold after Ranked Suspects kept h=4; h=5 would end at 18.
-      retire_when: Current Alerts can keep h=5 without outside at 1366x768
-    - dashboard: bioetl-control-plane-v1.json
-      id: 9418
-      owner: "@bioetl-observability"
-      rationale: >-
-        Review Selected-Run Trust h=4 at y=7 frees one native row so Review
-        Recovery Action can stay h=3 at 16px without overlapping the KPI strip.
-      retire_when: Trust/CTA/KPI can all keep default table/text floors at 1366x768 200%
-    - dashboard: bioetl-control-plane-v1.json
-      id: 9416
-      owner: "@bioetl-observability"
-      rationale: >-
-        Review Retention Compliance h=4 at y=7 matches Trust so Recovery
-        Action can occupy y=11..13 at 16px native 200% without leaving the fold.
-      retire_when: Retention can keep h=5 without pushing Recovery Action or KPIs past y+h=17
+  # Panels that previously needed a below-floor exception now meet the root
+  # floors (incident 2010/2005 h=5, control-plane 9418/9416 h=9).
+  min_height: []
   # DASH-DENSITY-002 governed exceptions keyed by (dashboard, row id).
+  # Retired allowlist entries for rows removed in the selected-run redesign
+  # (provider-health 9106/91/9404, control-plane 903, overview 9009,
+  # runtime 252/254/9994). Only the incident fleet row remains excepted.
   scalar_density:
-    - dashboard: bioetl-provider-health-v2.json
-      id: 9106
-      owner: "@bioetl-observability"
-      rationale: >-
-        Collapsed fleet-provider row is below-fold diagnostics, not a first-screen scalar group.
-      retire_when: fleet provider scalars move into first-window cards denser than the fold
-    - dashboard: bioetl-provider-health-v2.json
-      id: 91
-      owner: "@bioetl-observability"
-      rationale: >-
-        Collapsed Selected Provider Details row (h=1) is a below-fold forensic
-        expander, not a first-screen scalar group. Density cannot exceed the
-        first-screen floor without adding first-window panels.
-      retire_when: selected-provider diagnostics move into first-window scalar cards
-    - dashboard: bioetl-provider-health-v2.json
-      id: 9404
-      owner: "@bioetl-observability"
-      rationale: >-
-        Collapsed Range & Debug Evidence row (h=1) is below-fold forensic
-        evidence, not a first-screen scalar group.
-      retire_when: range/debug evidence is represented by first-window scalar cards
-    - dashboard: bioetl-control-plane-v1.json
-      id: 903
-      owner: "@bioetl-observability"
-      rationale: >-
-        Collapsed Inspect Global Store Reliability row (h=1, y=20) is
-        below-fold store-reliability diagnostics after the first-screen
-        trust verdict. Density cannot exceed the first-screen floor without
-        adding first-window scalar cards.
-      retire_when: store-reliability diagnostics move into first-window scalar cards
-    - dashboard: bioetl-overview-v2.json
-      id: 9009
-      owner: "@bioetl-observability"
-      rationale: >-
-        Collapsed Inspect Range Evidence row (h=1, y=19) is below-fold
-        selected-range run/reject evidence, not a first-screen scalar group.
-      retire_when: range evidence is represented by first-window scalar cards
     - dashboard: bioetl-incident-v1.json
       id: 8808
       owner: "@bioetl-observability"
@@ -457,24 +390,3 @@ allowlists:
         Collapsed Pipeline fleet and range row moved from Pipeline Diagnostics.
         It is below-fold fleet evidence, not a first-screen scalar group.
       retire_when: fleet signals are represented by first-window scalar cards on Incident
-    - dashboard: bioetl-runtime.json
-      id: 252
-      owner: "@bioetl-observability"
-      rationale: >-
-        Collapsed Inspect Detection Signals row holds selected-range detection
-        trends. Nested scalars are forensic expanders, not first-screen cards.
-      retire_when: detection-signal scalars move into first-window cards denser than the fold
-    - dashboard: bioetl-runtime.json
-      id: 254
-      owner: "@bioetl-observability"
-      rationale: >-
-        Collapsed Review Escalation Paths row (h=1, y=19) is a below-fold
-        handoff strip; group rho equals first-screen rho (gate is strictly >).
-      retire_when: escalation-path scalars densify above first-screen rho without leaving the fold
-    - dashboard: bioetl-runtime.json
-      id: 9994
-      owner: "@bioetl-observability"
-      rationale: >-
-        Collapsed Inspect Workflow Evidence row (h=1, y=22) is below-fold
-        workflow-failure evidence merged into Pipeline Diagnostics.
-      retire_when: workflow-failure evidence is represented by first-window scalar cards

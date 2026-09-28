@@ -118,8 +118,7 @@ _MINIMUM_FIRST_WINDOW_HEIGHTS: dict[str, dict[int, int]] = {
 # minimum height after reclaiming one native-zoom nav row.
 _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-run-explorer-v1": {3010: 10},
-    "bioetl-overview-v2": {215: 5, 9002: 5},
-    "bioetl-provider-health-v2": {9101: 4, 9107: 4},
+    "bioetl-overview-v2": {9002: 5},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 3, 24, 2),
@@ -205,11 +204,19 @@ _DQ_SCOPE_HTML = (
     "CURRENT pipeline status and TIME RANGE scores are not on this page."
     "</div></div>"
 )
+_OVERVIEW_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
+    99: (0, 2, 17, 3),
+    9604: (17, 2, 7, 3),
+    9603: (0, 5, 12, 6),
+    9002: (12, 5, 12, 6),
+    9300: (0, 18, 24, 8),
+    9301: (0, 26, 24, 8),
+}
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 2, 24, 3),
     9406: (0, 5, 24, 5),
-    9402: (0, 10, 12, 8),
-    9403: (12, 10, 12, 8),
+    9402: (0, 10, 12, 7),
+    9403: (12, 10, 12, 7),
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
@@ -958,6 +965,43 @@ def _shift_panel_tree(panel: dict[str, object], *, delta: int) -> None:
         grid = _panel_grid(descendant)
         if grid is not None and isinstance(grid.get("y"), int):
             grid["y"] = int(grid["y"]) + delta
+
+
+_INCIDENT_TAIL_ROW_ORDER = (8808, 32010, 32005, 9450, 9700)
+
+
+def _pack_incident_tail_rows(payload: dict[str, object]) -> None:
+    """Pin generated tail rows so repeated renders do not drift downward."""
+    if payload.get("uid") != "bioetl-incident-v1":
+        return
+    panels = payload.get("panels") or []
+    tail = [
+        panel
+        for panel in panels
+        if isinstance(panel, dict)
+        and panel.get("type") == "row"
+        and panel.get("id") in _INCIDENT_TAIL_ROW_ORDER
+    ]
+    tail_ids = {id(panel) for panel in tail}
+    tail.sort(key=lambda panel: _INCIDENT_TAIL_ROW_ORDER.index(panel.get("id")))
+    cursor = 0
+    for panel in panels:
+        if id(panel) in tail_ids or not isinstance(panel, dict):
+            continue
+        for descendant in _walk_panels([panel]):
+            grid = descendant.get("gridPos")
+            if (
+                isinstance(grid, dict)
+                and isinstance(grid.get("y"), int)
+                and isinstance(grid.get("h"), int)
+            ):
+                cursor = max(cursor, grid["y"] + grid["h"])
+    for row in tail:
+        grid = row.get("gridPos")
+        if not isinstance(grid, dict) or not isinstance(grid.get("y"), int):
+            continue
+        _shift_panel_tree(row, delta=cursor - int(grid["y"]))
+        cursor += int(grid.get("h") or 1)
 
 
 def _pack_control_plane_rows(root: list[dict[str, object]]) -> None:
@@ -1756,17 +1800,11 @@ def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
             panels, _RUNTIME_SELECTED_GEOMETRY, uid=current_uid
         )
         return
-    if current_uid == "bioetl-provider-health-v2":
-        for panel in _root_panels(panels):
-            if panel.get("id") == 9107:
-                panel["description"] = (
-                    "CURRENT · Remote API evidence. Cached Bronze replay does not "
-                    "exercise the API and proves neither outage nor health. "
-                    "missing_health_status = no observation; invalid_health_timestamp = "
-                    "missing, zero or future timestamp. Both are UNKNOWN. "
-                    "The latest valid observation has no age expiry. "
-                    "GLOBAL: independent of selected run."
-                )
+    if current_uid == "bioetl-overview-v2":
+        _apply_first_window_geometry(
+            panels, _OVERVIEW_FIRST_WINDOW_GEOMETRY, uid=current_uid
+        )
+        return
     if current_uid == "bioetl-control-plane-v1":
         _layout_control_plane_first_window(panels)
         return
@@ -2435,6 +2473,7 @@ def apply_to_dashboard(
     )
 
     apply_run_explorer_columns(payload)
+    _pack_incident_tail_rows(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

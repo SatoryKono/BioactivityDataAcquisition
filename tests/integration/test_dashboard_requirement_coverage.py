@@ -186,15 +186,18 @@ def test_dash_first_001_fails_closed_when_next_action_token_drifts() -> None:
         for key in ("title", "description"):
             value = panel.get(key)
             if isinstance(value, str):
-                panel[key] = value.replace(
-                    "Review First Action", "Review Something Else"
+                panel[key] = value.replace("Open Run Explorer", "Open Something Else")
+        for link in panel.get("links") or []:
+            if isinstance(link, dict) and isinstance(link.get("title"), str):
+                link["title"] = link["title"].replace(
+                    "Open Run Explorer", "Open Something Else"
                 )
         defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
         if isinstance(defaults, dict):
             for link in defaults.get("links") or []:
                 if isinstance(link, dict) and isinstance(link.get("title"), str):
                     link["title"] = link["title"].replace(
-                        "Review First Action", "Review Something Else"
+                        "Open Run Explorer", "Open Something Else"
                     )
     with pytest.raises(AssertionError, match="next_action token"):
         violations = first_screen_decision_violations(
