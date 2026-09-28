@@ -183,9 +183,7 @@ class TestCheckPressure:
 
     def test_disabled_sizing_decision_only_at_interval_boundary(self) -> None:
         manager = BatchMemoryManagerService(initial_batch_size=500)
-        manager.check_pressure(
-            current_size=500, check_interval=100, records_fetched=50
-        )
+        manager.check_pressure(current_size=500, check_interval=100, records_fetched=50)
         assert manager.decision_trace == ()
         manager.check_pressure(
             current_size=500, check_interval=100, records_fetched=100

@@ -33,9 +33,7 @@ def test_canon_core_present_in_all_seven_agents() -> None:
     names = {path.name for path in agent_files()}
     assert EXPECTED_AGENTS <= names
     report = check_headers()
-    assert report.ok, "; ".join(
-        f"{e.code}: {e.message}" for e in report.errors
-    )
+    assert report.ok, "; ".join(f"{e.code}: {e.message}" for e in report.errors)
 
 
 def test_per_agent_tails_survive_after_core() -> None:
@@ -95,9 +93,7 @@ def test_update_headers_fixes_tmp_agent(tmp_path: Path) -> None:
     canon = shared / "untrusted-header.md"
     canon.write_text(core, encoding="utf-8")
     report, updated = update_headers(agent_dir=agent_dir, canon_path=canon)
-    assert report.ok, "; ".join(
-        f"{e.code}: {e.message}" for e in report.errors
-    )
+    assert report.ok, "; ".join(f"{e.code}: {e.message}" for e in report.errors)
     assert updated == ["demo.md"]
     fixed = (agent_dir / "demo.md").read_text(encoding="utf-8")
     assert core in fixed

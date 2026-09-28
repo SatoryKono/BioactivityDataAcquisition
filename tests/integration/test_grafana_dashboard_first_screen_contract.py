@@ -181,7 +181,9 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
             )
             if dashboard_name == "bioetl-control-plane-v1.json" and panel_id == 9422:
                 assert grid_pos.get("w") == 24
-                assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
+                assert panel.get("fieldConfig", {}).get("defaults", {}).get(
+                    "noValue"
+                ) == (
                     "SELECT RUN if no Run ID is selected. "
                     "QUERY ERROR if the request failed."
                 )
@@ -277,7 +279,9 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
                 f"{dashboard_name}:{panel_title} must not use selected range for current status"
             )
 
-    runtime_dashboard = load_dashboard(Path("grafana/dashboards") / "bioetl-runtime.json")
+    runtime_dashboard = load_dashboard(
+        Path("grafana/dashboards") / "bioetl-runtime.json"
+    )
     runtime_panels = {
         panel.get("id"): panel
         for panel in get_dashboard_panels(runtime_dashboard)
@@ -307,8 +311,12 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
     provider_dashboard = load_dashboard(
         Path("grafana/dashboards") / "bioetl-provider-health-v2.json"
     )
-    assert all(panel.get("id") != 9106 for panel in provider_dashboard.get("panels", []))
-    assert any(panel.get("id") == 9460 for panel in provider_dashboard.get("panels", []))
+    assert all(
+        panel.get("id") != 9106 for panel in provider_dashboard.get("panels", [])
+    )
+    assert any(
+        panel.get("id") == 9460 for panel in provider_dashboard.get("panels", [])
+    )
 
 
 def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:

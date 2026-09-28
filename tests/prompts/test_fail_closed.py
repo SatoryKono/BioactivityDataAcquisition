@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 import yaml
-
 from scripts.ai.prompts.check import (
     check_hygiene,
     check_readme_scenarios,
@@ -46,8 +45,7 @@ def test_fail_closed_violations_catch_frontmatter_and_table_true(
     tmp_path: Path,
 ) -> None:
     body = (
-        "## Params\n\n| Param | Default |\n| --- | --- |\n"
-        "| `ALLOW_PUSH` | `true` |\n"
+        "## Params\n\n| Param | Default |\n| --- | --- |\n| `ALLOW_PUSH` | `true` |\n"
     )
     card = load_card(
         _write_card(tmp_path, "probe.md", "- SCOPE\n- ALLOW_PUSH = true", body)
@@ -65,9 +63,7 @@ def test_fail_closed_violations_clean_on_bare_names_and_false(
         "| `ALLOW_PUSH` | `false` |\n"
         "| `MODE` | `audit` |\n"
     )
-    card = load_card(
-        _write_card(tmp_path, "clean.md", "- SCOPE\n- ALLOW_PUSH", body)
-    )
+    card = load_card(_write_card(tmp_path, "clean.md", "- SCOPE\n- ALLOW_PUSH", body))
     assert fail_closed_violations(card) == []
 
 
@@ -84,9 +80,7 @@ def test_hygiene_has_no_fail_closed_or_include_errors() -> None:
 
 def test_readme_scenarios_match_registry() -> None:
     report = check_readme_scenarios()
-    assert report.ok, "; ".join(
-        f"{e.code}: {e.message}" for e in report.errors
-    )
+    assert report.ok, "; ".join(f"{e.code}: {e.message}" for e in report.errors)
 
 
 def _write_registry(tmp_path: Path, scenarios: list[dict[str, str]]) -> Path:

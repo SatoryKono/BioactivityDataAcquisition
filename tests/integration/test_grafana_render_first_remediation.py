@@ -441,8 +441,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
     }
     assert "read_latency_quantile" in variable_names
     present = {
-        panel.get("id")
-        for panel in _iter_panels(list(control.get("panels", [])))
+        panel.get("id") for panel in _iter_panels(list(control.get("panels", [])))
     }
     assert 9404 not in present
     assert 9452 not in present
@@ -548,9 +547,7 @@ def test_audit_followup_action_first_layout_contracts() -> None:
     provider_ids = {
         panel.get("id") for panel in _iter_panels(list(provider.get("panels", [])))
     }
-    assert {9106, 9105, 91, 9404, 9405, 9450, 9101, 9102, 9103}.isdisjoint(
-        provider_ids
-    )
+    assert {9106, 9105, 91, 9404, 9405, 9450, 9101, 9102, 9103}.isdisjoint(provider_ids)
 
     dq = _load("bioetl-dq-v2.json")
     dq_rows = [panel for panel in dq.get("panels", []) if panel.get("type") == "row"]
@@ -737,9 +734,7 @@ def test_operator_critical_tables_expose_full_values() -> None:
 
 def test_first_window_named_text_columns_wrap_without_table_default() -> None:
     """#8977: wrap only the named first-window text column; do not grow h."""
-    cases = (
-        ("bioetl-incident-v1.json", 9101, frozenset({"reason"})),
-    )
+    cases = (("bioetl-incident-v1.json", 9101, frozenset({"reason"})),)
     for dashboard_name, panel_id, allowed in cases:
         panel = _panel(_load(dashboard_name), panel_id)
         grid = panel["gridPos"]
@@ -956,9 +951,7 @@ def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> Non
     current_alerts = _panel(incident, 2005)
     dq_suspects = _panel(incident, 2004)
 
-    assert (
-        "bioetl_incident_alert_priority" in current_alerts["targets"][0]["expr"]
-    )
+    assert "bioetl_incident_alert_priority" in current_alerts["targets"][0]["expr"]
     transforms = current_alerts["transformations"]
     ids = [t["id"] for t in transforms]
     assert ids.index("sortBy") < ids.index("limit")

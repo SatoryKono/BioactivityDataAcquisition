@@ -37,7 +37,9 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
     assert "QUERY ERROR" in identity
     assert "Run Explorer Inspect" not in identity
     domains = str(runtime_panels["Inspect Selected Run Domains"].get("description", ""))
-    summary = str(runtime_panels["Inspect Selected Run Identity"].get("description", ""))
+    summary = str(
+        runtime_panels["Inspect Selected Run Identity"].get("description", "")
+    )
     assert "Evidence reference" in domains
     assert "domain verdict" in domains
     assert "completeness of the saved report" in summary

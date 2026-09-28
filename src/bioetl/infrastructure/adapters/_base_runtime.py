@@ -64,9 +64,7 @@ def init_inline_adapter_collaborators(
         object.__setattr__(host, "_adapter_metrics", adapter_metrics)
     if request_collector is not None:
         object.__setattr__(host, "_request_collector", request_collector)
-    if adapter_metrics is not None and request_collector is not None:
-        return True
-    return False
+    return bool(adapter_metrics is not None and request_collector is not None)
 
 
 def init_default_adapter_metrics(

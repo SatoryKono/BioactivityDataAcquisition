@@ -147,15 +147,11 @@ def resolve_metric_labels(
     forbidden = keys & FORBIDDEN_METRIC_LABEL_KEYS
     if forbidden:
         forbidden_names = ", ".join(sorted(forbidden))
-        raise ValueError(
-            f"Forbidden metric label key(s): {forbidden_names}"
-        )
+        raise ValueError(f"Forbidden metric label key(s): {forbidden_names}")
     unrecognized = keys - ALLOWED_METRIC_LABEL_KEYS
     if unrecognized:
         unrecognized_names = ", ".join(sorted(unrecognized))
-        raise ValueError(
-            f"Unrecognized metric label key(s): {unrecognized_names}"
-        )
+        raise ValueError(f"Unrecognized metric label key(s): {unrecognized_names}")
     return dict(labels)
 
 

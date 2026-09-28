@@ -54,14 +54,17 @@ def _row(domain: str, verdict: str, reason: str, source: str) -> dict[str, objec
     }
 
 
-_PROVIDER_EVIDENCE_MISSING = (
-    "Данные проверки провайдера для этого запуска не сохранены"
-)
+_PROVIDER_EVIDENCE_MISSING = "Данные проверки провайдера для этого запуска не сохранены"
 
 
-def _saved_provider_name(report: Mapping[str, object], facts: Mapping[str, object]) -> str:
+def _saved_provider_name(
+    report: Mapping[str, object], facts: Mapping[str, object]
+) -> str:
     """Prefer the probe fact, then the same report's identity. Never parse pipeline_name."""
-    for source in (facts.get("provider"), _mapping(report.get("identity")).get("provider")):
+    for source in (
+        facts.get("provider"),
+        _mapping(report.get("identity")).get("provider"),
+    ):
         if isinstance(source, str) and source.strip():
             return source.strip()
     return "—"
@@ -121,9 +124,8 @@ def provider_selector_options(report: Mapping[str, object]) -> list[dict[str, st
         names.append(identity_name.strip())
     for row in provider_check_rows(report):
         name = row.get("provider")
-        if isinstance(name, str) and name.strip() and name.strip() != "—":
-            if name.strip() not in names:
-                names.append(name.strip())
+        if isinstance(name, str) and name.strip() and name.strip() != "—" and name.strip() not in names:
+            names.append(name.strip())
     return [{"text": name, "value": name} for name in names]
 
 

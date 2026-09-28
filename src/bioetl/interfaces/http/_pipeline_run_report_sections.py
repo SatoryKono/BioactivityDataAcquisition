@@ -87,6 +87,7 @@ _UNRESOLVED_RUN_ID_SENTINELS = frozenset(
     }
 )
 
+
 def _is_unresolved_run_scope(run_id: str) -> bool:
     """Return True when run_id is a dashboard no-selection sentinel."""
     token = run_id.strip()

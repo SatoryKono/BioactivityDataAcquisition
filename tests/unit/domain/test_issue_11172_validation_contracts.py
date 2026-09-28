@@ -53,7 +53,9 @@ def test_started_at_requires_zero_utc_offset_and_rejects_naive() -> None:
         RunContext(
             run_id=RunID("run-1"),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 9, 25, 12, 0, tzinfo=timezone(timedelta(hours=3))),
+            started_at=datetime(
+                2026, 9, 25, 12, 0, tzinfo=timezone(timedelta(hours=3))
+            ),
             pipeline_name="chembl_activity",
             provider="chembl",
             entity="activity",

@@ -77,9 +77,7 @@ class BatchMemoryManagerService:
     ) -> int:
         """Check memory pressure and adjust batch size if needed."""
         if check_interval <= 0:
-            raise ValueError(
-                f"check_interval must be positive, got {check_interval!r}"
-            )
+            raise ValueError(f"check_interval must be positive, got {check_interval!r}")
         if records_fetched % check_interval != 0:
             return current_size
         if not self.enabled:

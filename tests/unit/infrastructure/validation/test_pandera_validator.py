@@ -342,7 +342,7 @@ class TestPanderaGoldValidator:
         schema_cols = list(
             ChEMBLTargetProteinClassificationGoldSchema.to_schema().columns.keys()
         )
-        base = {name: None for name in schema_cols}
+        base = dict.fromkeys(schema_cols)
         records = [
             {
                 **base,
@@ -376,8 +376,6 @@ class TestPanderaGoldValidator:
         result = validator.validate(records)
         assert result.valid is True, result.errors
 
-
-
     def test_pandera_gold_validator__metamodel_exposes_columns__11212(self):
         """DataFrameModel class is materialized so ``.columns`` is available."""
         from bioetl.domain.contracts.gold._chembl_target_lookup_schemas import (
@@ -400,7 +398,7 @@ class TestPanderaGoldValidator:
         schema_cols = list(
             ChEMBLTargetProteinClassificationGoldSchema.to_schema().columns.keys()
         )
-        base = {name: None for name in schema_cols}
+        base = dict.fromkeys(schema_cols)
         records = [
             {
                 **base,

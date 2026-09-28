@@ -43,7 +43,9 @@ def test_readability_pass_is_idempotent_and_preserves_metric_evidence(path):
 
 def test_overview_paired_tables_have_fixed_rows_and_inspectable_reasons():
     dashboard = json.loads(
-        (ROOT / "grafana/dashboards/bioetl-overview-v2.json").read_text(encoding="utf-8")
+        (ROOT / "grafana/dashboards/bioetl-overview-v2.json").read_text(
+            encoding="utf-8"
+        )
     )
     panels = {p["id"]: p for p in _panels(dashboard["panels"])}
     summary, domains = panels[9603], panels[9002]
@@ -62,8 +64,14 @@ def test_overview_paired_tables_have_fixed_rows_and_inspectable_reasons():
                     assert prop["value"] is False
                 if prop["id"] == "custom.cellOptions":
                     assert prop["value"]["wrapText"] is False
-    trust = next(o for o in summary["fieldConfig"]["overrides"] if o["matcher"]["options"] == "Trust")
-    assert {p["id"]: p["value"] for p in trust["properties"]}["displayName"] == "Replay readiness"
+    trust = next(
+        o
+        for o in summary["fieldConfig"]["overrides"]
+        if o["matcher"]["options"] == "Trust"
+    )
+    assert {p["id"]: p["value"] for p in trust["properties"]}[
+        "displayName"
+    ] == "Replay readiness"
 
 
 def test_overview_paginates_tracks_without_limiting_evidence():

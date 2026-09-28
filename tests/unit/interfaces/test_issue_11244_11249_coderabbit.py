@@ -17,9 +17,14 @@ from bioetl.interfaces.http.control_plane_identity.types import (
 
 
 def test_extract_uniprot_accession_prefers_primary() -> None:
-    assert extract_uniprot_accession({"primaryAccession": " P12345 ", "accession": "Q"}) == "P12345"
+    assert (
+        extract_uniprot_accession({"primaryAccession": " P12345 ", "accession": "Q"})
+        == "P12345"
+    )
     assert extract_uniprot_accession({"accession": " Q9 "}) == "Q9"
-    assert extract_uniprot_accession({"accession": None, "primaryAccession": None}) is None
+    assert (
+        extract_uniprot_accession({"accession": None, "primaryAccession": None}) is None
+    )
 
 
 def test_dedup_key_none_primary_stays_unkeyed() -> None:
@@ -39,7 +44,9 @@ def test_identity_graph_status_uses_exact_tokens() -> None:
     assert _identity_graph_severity("manifest_id") == "FAILING"
 
 
-def test_diagnostics_checkpoint_forwards_manifest_id(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_diagnostics_checkpoint_forwards_manifest_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     from bioetl.interfaces.cli.commands import diagnostics as diagnostics_mod
 
     captured: dict[str, object] = {}
