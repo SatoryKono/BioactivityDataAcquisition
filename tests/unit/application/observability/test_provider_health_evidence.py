@@ -204,3 +204,28 @@ def test_persisting_monitor_writes_compact_evidence(tmp_path: Path) -> None:
     assert loaded is not None
     assert loaded.status == HealthStatus.HEALTHY.to_metric_value()
     assert loaded.endpoint == "/status"
+
+
+def test_probe_health_observation_persists_known_status() -> None:
+    from unittest.mock import MagicMock
+
+    from bioetl.infrastructure.control_plane.provider_health_evidence import (
+        persist_probe_health_observation,
+    )
+
+    store = MagicMock()
+    store.list_all.return_value = []
+    metrics = MagicMock()
+    checked = datetime(2026, 1, 1, tzinfo=UTC)
+    persist_probe_health_observation(
+        store=store,
+        metrics=metrics,
+        provider="chembl",
+        status_name="healthy",
+        checked_at=checked,
+        endpoint="https://example.test/health",
+        error=None,
+        now=checked,
+    )
+    store.persist.assert_called_once()
+    store.list_all.assert_called()

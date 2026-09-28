@@ -146,6 +146,11 @@ dashboard извлеки:
 - reference queries/specifications и known-event windows;
 - точные blockers для недоступных UI/query/source-of-truth evidence.
 
+Если UI, renderer, live query или datasource недоступны, зафиксируй точный
+blocker как `NOT_VERIFIABLE` и продолжай остальные проверки. Не жди появления
+сервиса, не повторяй неудачный запрос без изменения условий и не запускай
+monitoring при `MONITORING=false`.
+
 Для состояния данных подготовь по возможности четыре сценария:
 
 1. populated/normal;
@@ -240,6 +245,11 @@ panel set. Не создавай P3 без конкретного readability/ta
 - `findings.json`: только доказанные findings по общей схеме;
 - `scorecard.json`: метрики с numerator, denominator, value и blockers;
 - `evidence/manifest.json`: evidence IDs, paths/source, scope and timestamp.
+
+Если карточка запущена оркестратором с `read-only` capability, не пытайся
+создавать файлы и не повторяй попытки записи. Верни findings в требуемой
+оркестратором схеме; включи scorecard и краткий evidence manifest в summary /
+report content. Оркестратор отвечает за сохранение разрешённых артефактов.
 
 Не редактируй dashboards и не открывай issues. Recommended fixes должны быть
 минимальными и проверяемыми. Заверши verdict: `PASS`, `PASS_WITH_RESIDUALS`,

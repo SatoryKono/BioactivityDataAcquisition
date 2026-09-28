@@ -339,6 +339,54 @@ async def test_workflow_report_handles_found_and_missing_payloads(
 
 
 @pytest.mark.asyncio
+async def test_workflow_report_returns_schema_mismatch_explicitly(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from bioetl.interfaces.http.run_report_ops import InvalidRunReportError
+
+    host = _ObservabilityHost()
+    writer = _writer()
+    monkeypatch.setattr(observability_routing.asyncio, "to_thread", _inline_to_thread)
+    monkeypatch.setattr(
+        observability_routing,
+        "run_bounded_forensic_operation",
+        _run_operation_directly,
+    )
+
+    def invalid(**_kwargs: object) -> object:
+        raise InvalidRunReportError(
+            reason="schema_mismatch",
+            expected_schema="workflow_run_report_v1",
+            actual_schema="pipeline_run_report_v2",
+        )
+
+    monkeypatch.setattr(
+        observability_routing,
+        "load_workflow_run_report_payload",
+        invalid,
+    )
+
+    await observability_routing.handle_workflow_run_report(
+        host,
+        writer,
+        {"workflow_run_id": "wf1", "workflow": "demo"},
+    )
+
+    assert host.sent[-1] == (
+        "payload",
+        422,
+        {
+            "status": "invalid_report",
+            "reason": "schema_mismatch",
+            "expected_schema": "workflow_run_report_v1",
+            "actual_schema": "pipeline_run_report_v2",
+            "workflow_run_id": "wf1",
+            "workflow": "demo",
+        },
+    )
+
+
+@pytest.mark.asyncio
 async def test_report_lists_bound_limits_and_reject_invalid_values(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

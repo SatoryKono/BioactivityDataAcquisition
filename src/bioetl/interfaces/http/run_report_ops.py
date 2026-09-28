@@ -39,6 +39,22 @@ _VERIFY_BIND_HINT = (
 )
 
 
+class InvalidRunReportError(ValueError):
+    """Describe one persisted report that exists but cannot satisfy its contract."""
+
+    def __init__(
+        self,
+        *,
+        reason: str,
+        expected_schema: str,
+        actual_schema: object = None,
+    ) -> None:
+        super().__init__(reason)
+        self.reason = reason
+        self.expected_schema = expected_schema
+        self.actual_schema = actual_schema
+
+
 def _safe_segment(value: str) -> str:
     """Sanitize one path segment and reject dot-only traversal tokens."""
     text = value.strip()
@@ -90,7 +106,44 @@ def load_workflow_run_report_payload(
         return None
     base = _effective_root(root)
     path = base / "workflow" / safe_workflow / safe_run_id / "workflow-run-report.json"
-    return _load_versioned_payload(path, expected_schema="workflow_run_report_v1")
+    return _load_workflow_payload(path)
+
+
+def _load_workflow_payload(path: Path) -> JsonDict | None:
+    """Load a workflow report while distinguishing absence from invalid evidence."""
+    expected_schema = "workflow_run_report_v1"
+    if not path.is_file():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise InvalidRunReportError(
+            reason="malformed_json",
+            expected_schema=expected_schema,
+        ) from exc
+    except UnicodeDecodeError as exc:
+        raise InvalidRunReportError(
+            reason="malformed_encoding",
+            expected_schema=expected_schema,
+        ) from exc
+    except OSError as exc:
+        raise InvalidRunReportError(
+            reason="report_read_error",
+            expected_schema=expected_schema,
+        ) from exc
+    if not isinstance(payload, dict):
+        raise InvalidRunReportError(
+            reason="invalid_payload",
+            expected_schema=expected_schema,
+        )
+    actual_schema = payload.get("schema_version")
+    if actual_schema != expected_schema:
+        raise InvalidRunReportError(
+            reason="schema_mismatch",
+            expected_schema=expected_schema,
+            actual_schema=actual_schema,
+        )
+    return payload
 
 
 def load_pipeline_run_report_artifact(
@@ -213,6 +266,29 @@ def _run_index_item(
         ),
     }
     if kind == "workflow":
+        if item.schema_version != "workflow_run_report_v1":
+            reason = (
+                "schema_mismatch"
+                if item.schema_version is not None
+                else "report_invalid_or_unreadable"
+            )
+            status = "SCHEMA_MISMATCH" if item.schema_version else "REPORT_INVALID"
+            return {
+                "row_kind": "diagnostic",
+                "workflow": item.owner,
+                "workflow_run_id": item.run_id,
+                **paths,
+                "status": status,
+                "processing_status": status,
+                "trust_status": "QUERY ERROR",
+                "reason": reason,
+                "expected_schema": "workflow_run_report_v1",
+                "actual_schema": item.schema_version,
+                "message": (
+                    "Persisted workflow report does not satisfy "
+                    "workflow_run_report_v1; the original artifact was preserved."
+                ),
+            }
         return {"workflow": item.owner, "workflow_run_id": item.run_id, **paths}
     return {
         "pipeline": item.owner,

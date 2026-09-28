@@ -253,6 +253,7 @@ for d in selected {
     if d.id == "grafana-dashboard" {
         prompt += "Params: SCOPE=" + d.scope + "; GRAFANA_VERSION=detect; DASHBOARD_PURPOSE=derive-from-contracts; CRITICAL_PANELS=derive-from-contracts; REFERENCE_SPEC=docs/01-requirements/DASHBOARD_REQUIREMENTS.md; VIEWPORTS=1366x768,1440x900,1920x1080; THEMES=light,dark; USER_ROLES=derive-from-contracts; TIME_RANGE=last-24h; VARIABLES=all; MONITORING=false; OUTPUT_DIR=" + d.report_dir + "; LANGUAGE=" + language + ". ";
         prompt += "Read AGENTS.md precedence, docs/00-project/NORMATIVE_SOURCES.md, DASHBOARD_REQUIREMENTS.md, and the card includes. Do not start monitoring unless explicitly enabled by the card parameters. ";
+        prompt += "This is orchestrated with read-only capability: do not create files or retry writes. Return structured findings only; include compact scorecard and evidence-manifest summaries in summary so the parent can persist report.md and findings.json. Mark unavailable UI/live evidence NOT_VERIFIABLE and continue without waiting or retry loops. ";
     } else {
         prompt += "Params: SCOPE=" + d.scope + "; MODE=" + mode + "; LANGUAGE=" + language + "; AUDIT_MODE=" + audit_mode + "; REQUIRE_GH_TRACKING=false. ";
         prompt += "Read AGENTS.md precedence, docs/00-project/NORMATIVE_SOURCES.md, and the card includes (evidence-contract, finding-schema, debt-budget-ban, env-guardrail). ";

@@ -146,11 +146,46 @@ def test_write_workflow_run_report(tmp_path: Path) -> None:
     payload = json.loads(written.json_path.read_text(encoding="utf-8"))
     assert payload["totals"]["records_extracted_sum"] == 42
     assert payload["identity"]["completed_at"] == "2026-08-24T13:49:06+00:00"
+    assert payload["schema_version"] == "workflow_run_report_v1"
     assert "Steps" in written.markdown_path.read_text(encoding="utf-8")
-    assert isinstance(payload.get("selected_run_snapshot"), dict)
+    assert "selected_run_snapshot" not in payload
+    assert not (written.json_path.parent / "status-revisions").exists()
+
+    from bioetl.interfaces.http.run_report_ops import (
+        load_workflow_run_report_payload,
+    )
+
     assert (
-        written.json_path.parent / "status-revisions"
-    ).is_dir()
+        load_workflow_run_report_payload(
+            workflow_name="demo_wf",
+            workflow_run_id="wf1",
+            root=tmp_path,
+        )
+        == payload
+    )
+
+
+def test_publish_snapshot_rejects_workflow_report_schema(tmp_path: Path) -> None:
+    from bioetl.application.services.run_reports.snapshots import publish_snapshot
+
+    report = build_workflow_run_report(
+        identity={
+            "workflow_name": "demo_wf",
+            "workflow_run_id": "wf1",
+            "status": "success",
+        },
+        plan_steps=[],
+        execution_steps=[],
+    )
+
+    with pytest.raises(ValueError, match="pipeline_snapshot_schema_required"):
+        publish_snapshot(
+            report.to_dict(),
+            tmp_path / "workflow-run-report.json",
+            store=FileRunReportStoreAdapter(),
+        )
+
+    assert not (tmp_path / "status-revisions").exists()
 
 
 def test_latest_pointer_uses_sanitized_identity_owner_with_custom_directory(

@@ -233,6 +233,9 @@ while j < selected.len() {
     p += "Also read: docs/00-project/ai/prompts/fragments/reports-output.md\n";
     p += "SCOPE=" + scope + "\n";
     p += "ARTIFACT_DIR=" + art + "\n\n";
+    if domain_id == "grafana-dashboard" {
+        p += "This is orchestrated with read-only capability: MONITORING=false; do not start monitoring, create files, or retry writes. Return structured findings only; include compact scorecard and evidence-manifest summaries in summary so the parent can persist report.md and findings.json. Mark unavailable UI/live evidence NOT_VERIFIABLE and continue without waiting or retry loops.\n";
+    }
     p += "Method:\n";
     p += "1) Read the card and follow its Method/Checklist.\n";
     p += "2) Use grep, read_file, list_dir, and safe run_terminal_command for evidence.\n";

@@ -36,6 +36,7 @@ from bioetl.interfaces.http.recent_pipeline_runs import (
     list_recent_pipeline_runs,
 )
 from bioetl.interfaces.http.run_report_ops import (
+    InvalidRunReportError,
     list_pipeline_run_report_payloads,
     list_workflow_run_report_payloads,
     load_pipeline_run_report_artifact,
@@ -238,6 +239,20 @@ async def handle_workflow_run_report(
                 endpoint="workflow-run-report",
                 reason=exc.reason,
             ),
+        )
+        return
+    except InvalidRunReportError as exc:
+        await host._send_payload_response(
+            writer,
+            422,
+            {
+                "status": "invalid_report",
+                "reason": exc.reason,
+                "expected_schema": exc.expected_schema,
+                "actual_schema": exc.actual_schema,
+                "workflow_run_id": workflow_run_id,
+                "workflow": workflow_name,
+            },
         )
         return
     if payload is None:

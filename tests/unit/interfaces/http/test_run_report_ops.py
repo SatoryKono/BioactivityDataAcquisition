@@ -64,6 +64,7 @@ from bioetl.interfaces.http._pipeline_run_report_table import (
     _section_param_value_rows,
 )
 from bioetl.interfaces.http.run_report_ops import (
+    InvalidRunReportError,
     _normalize_list_owner,
     _safe_segment,
     list_pipeline_run_report_payloads,
@@ -617,14 +618,51 @@ def test_load_rejects_wrong_schema_version(tmp_path: Path) -> None:
         json.dumps({"schema_version": "pipeline_run_report_v1"}),
         encoding="utf-8",
     )
-    assert (
+    with pytest.raises(InvalidRunReportError) as exc_info:
         load_workflow_run_report_payload(
             workflow_run_id="wf1",
             workflow_name="demo",
             root=tmp_path,
         )
-        is None
+    assert exc_info.value.reason == "schema_mismatch"
+    assert exc_info.value.expected_schema == "workflow_run_report_v1"
+    assert exc_info.value.actual_schema == "pipeline_run_report_v1"
+
+
+def test_workflow_index_marks_schema_mismatch_without_rewriting(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "workflow" / "demo" / "wf1" / "workflow-run-report.json"
+    target.parent.mkdir(parents=True)
+    original = json.dumps(
+        {
+            "schema_version": "pipeline_run_report_v2",
+            "identity": {
+                "workflow_run_id": "wf1",
+                "workflow_name": "demo",
+                "status": "success",
+            },
+        }
     )
+    target.write_text(original, encoding="utf-8")
+
+    payload = list_workflow_run_report_payloads(
+        workflow_name="demo",
+        limit=5,
+        root=tmp_path,
+    )
+
+    assert payload["index_state"] == "ok"
+    assert payload["count"] == 1
+    item = payload["items"][0]
+    assert item["row_kind"] == "diagnostic"
+    assert item["status"] == "SCHEMA_MISMATCH"
+    assert item["processing_status"] == "SCHEMA_MISMATCH"
+    assert item["trust_status"] == "QUERY ERROR"
+    assert item["reason"] == "schema_mismatch"
+    assert item["expected_schema"] == "workflow_run_report_v1"
+    assert item["actual_schema"] == "pipeline_run_report_v2"
+    assert target.read_text(encoding="utf-8") == original
 
 
 def test_summary_rows_unresolved_and_missing_are_not_ok() -> None:

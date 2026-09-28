@@ -8,6 +8,8 @@ from pathlib import Path
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.selected_status import build_snapshot
 
+_PIPELINE_REPORT_SCHEMAS = {"pipeline_run_report_v1", "pipeline_run_report_v2"}
+
 
 def publish_snapshot(
     report: dict[str, object], path: Path, *, store: RunReportStorePort
@@ -18,6 +20,8 @@ def publish_snapshot(
     Concurrent publications can select either complete revision, never a mixed one.
     Identical finalization is a no-op; late evidence creates a different revision.
     """
+    if report.get("schema_version") not in _PIPELINE_REPORT_SCHEMAS:
+        raise ValueError("pipeline_snapshot_schema_required")
     report = {**report, "schema_version": "pipeline_run_report_v2"}
     snapshot = build_snapshot(report)
     revision_path = path.parent / "status-revisions" / f"{snapshot['revision']}.json"
