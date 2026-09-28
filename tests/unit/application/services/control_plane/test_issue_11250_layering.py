@@ -7,6 +7,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from bioetl.application.services.control_plane.ledger.artifact_recording import (
     canonical_lineage_fragment_id,
     record_input_snapshots_from_artifact,

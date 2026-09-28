@@ -11,6 +11,10 @@ DESCRIPTION = (
     "N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. "
     "This saved verdict does not authorize replay."
 )
+STATUS_DESCRIPTION = (
+    "SELECTED RUN · Columns are Result, Status, Evidence, and Rules. "
+    "Status is the verdict. " + DESCRIPTION.removeprefix("SELECTED RUN · ")
+)
 
 
 def _panel(
@@ -176,13 +180,10 @@ def _rewrite_selected_run_tables(panel: dict[str, object], uid: object) -> None:
             )
         )
     elif title == SELECTED_RUN_STATUS_TITLE:
-        panel.update(
-            _panel(panel["id"], title, panel["gridPos"], domains=False)
-        )
+        panel.update(_panel(panel["id"], title, panel["gridPos"], domains=False))
+        panel["description"] = STATUS_DESCRIPTION
     if uid == _OVERVIEW_UID and panel.get("id") == 9002:
-        panel.update(
-            _panel(9002, "Review Run Domains", panel["gridPos"], domains=True)
-        )
+        panel.update(_panel(9002, "Review Run Domains", panel["gridPos"], domains=True))
 
 
 def _preserve_existing_links(
@@ -190,9 +191,10 @@ def _preserve_existing_links(
     old_links: object,
     old_data_links: object,
 ) -> None:
-    if panel.get("id") not in {9406, 9603, 9402, 9002} and panel.get(
-        "title"
-    ) != SELECTED_RUN_STATUS_TITLE:
+    if (
+        panel.get("id") not in {9406, 9603, 9402, 9002}
+        and panel.get("title") != SELECTED_RUN_STATUS_TITLE
+    ):
         return
     panel["links"] = old_links
     panel.setdefault("fieldConfig", {}).setdefault("defaults", {})["links"] = (
@@ -264,6 +266,26 @@ def _stamp_overview_derived_panels(panel: dict[str, object], uid: object) -> Non
         ).removeprefix(_CURRENT_PREFIX)
 
 
+_STAGE_FIELDS = [
+    "stage_id",
+    "state",
+    "reason",
+    "records_in",
+    "records_out",
+    "duration_seconds",
+    "source",
+]
+_STAGE_RENAMES = {
+    "stage_id": "Stage",
+    "state": "Status",
+    "reason": "Reason",
+    "records_in": "In",
+    "records_out": "Out",
+    "duration_seconds": "Duration",
+    "source": "Source",
+}
+
+
 def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
     """Saved stage rows for the selected Run ID. They precede domain evidence."""
     return {
@@ -273,9 +295,12 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
         "gridPos": grid,
         "datasource": "BioETL Ops HTTP",
         "description": (
-            "SELECTED RUN · Stage rows for this Run ID. "
+            "SELECTED RUN · Saved stage rows for the exact Run ID; "
+            "the table shows at most 12 stages. "
             "SUCCESS with missing stage evidence stays INCOMPLETE. "
-            "A recorded zero stays 0. An unknown count is empty, not 0."
+            "A recorded zero stays 0. An unknown count is empty, not 0. "
+            "UNFINISHED means no terminal event. "
+            "Prometheus does not change this table."
         ),
         "options": {
             "showHeader": True,
@@ -294,29 +319,54 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
             },
             "overrides": [
                 {
-                    "matcher": {"id": "byName", "options": "duration_seconds"},
+                    "matcher": {"id": "byName", "options": "Reason"},
+                    "properties": [
+                        {"id": "custom.wrapText", "value": True},
+                        {
+                            "id": "custom.cellOptions",
+                            "value": {"type": "auto", "wrapText": True},
+                        },
+                    ],
+                },
+                {
+                    "matcher": {"id": "byName", "options": "Duration"},
                     "properties": [
                         {"id": "noValue", "value": "Not recorded"},
                         {"id": "unit", "value": "s"},
                     ],
                 },
                 {
-                    "matcher": {"id": "byName", "options": "source"},
+                    "matcher": {"id": "byName", "options": "In"},
+                    "properties": [{"id": "noValue", "value": ""}],
+                },
+                {
+                    "matcher": {"id": "byName", "options": "Out"},
+                    "properties": [{"id": "noValue", "value": ""}],
+                },
+                {
+                    "matcher": {"id": "byName", "options": "Source"},
                     "properties": [
                         {
                             "id": "mappings",
-                            "value": [{"type": "value", "options": {
-                                "report.funnel": {"text": "Open report"},
-                                "report.stage_timings": {"text": "Open report"},
-                            }}],
+                            "value": [
+                                {
+                                    "type": "value",
+                                    "options": {
+                                        "report.funnel": {"text": "Open report"},
+                                        "report.stage_timings": {"text": "Open report"},
+                                    },
+                                }
+                            ],
                         },
                         {
                             "id": "links",
-                            "value": [{
-                                "title": "Open saved run report (JSON)",
-                                "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
-                                "targetBlank": True,
-                            }],
+                            "value": [
+                                {
+                                    "title": "Open saved run report (JSON)",
+                                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                                    "targetBlank": True,
+                                }
+                            ],
                         },
                     ],
                 },
@@ -334,7 +384,22 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
                 "url_options": {"method": "GET", "data": ""},
             }
         ],
-        "transformations": [{"id": "limit", "options": {"limitField": 12}}],
+        "transformations": [
+            {"id": "limit", "options": {"limitField": 12}},
+            {
+                "id": "filterFieldsByName",
+                "options": {"include": {"names": _STAGE_FIELDS}},
+            },
+            {
+                "id": "organize",
+                "options": {
+                    "indexByName": {
+                        name: index for index, name in enumerate(_STAGE_FIELDS)
+                    },
+                    "renameByName": dict(_STAGE_RENAMES),
+                },
+            },
+        ],
         "links": [],
     }
 
@@ -354,14 +419,36 @@ def _run_duration_panel(grid: dict[str, int]) -> dict[str, object]:
         "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing.",
         "gridPos": grid,
         "datasource": "BioETL Ops HTTP",
-        "fieldConfig": {"defaults": {"unit": "s", "decimals": 2, "noValue": "Not recorded"}, "overrides": []},
-        "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": False}, "colorMode": "none", "graphMode": "none", "textMode": "value"},
-        "targets": [{"refId": "A", "type": "json", "source": "url", "parser": "uql", "format": "table", "url": STATUS_URL, "url_options": {"method": "GET", "data": ""}, "uql": 'parse-json | jsonata "' + expression + '"'}],
+        "fieldConfig": {
+            "defaults": {"unit": "s", "decimals": 2, "noValue": "Not recorded"},
+            "overrides": [],
+        },
+        "options": {
+            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": False},
+            "colorMode": "none",
+            "graphMode": "none",
+            "textMode": "value",
+        },
+        "targets": [
+            {
+                "refId": "A",
+                "type": "json",
+                "source": "url",
+                "parser": "uql",
+                "format": "table",
+                "url": STATUS_URL,
+                "url_options": {"method": "GET", "data": ""},
+                "uql": 'parse-json | jsonata "' + expression + '"',
+            }
+        ],
     }
 
 
 def _append_saved_run_evidence_row(
-    panels: list[object], *, include_identity: bool = True, include_duration: bool = False
+    panels: list[object],
+    *,
+    include_identity: bool = True,
+    include_duration: bool = False,
 ) -> None:
     panels[:] = [
         panel
@@ -526,9 +613,7 @@ def _provider_check_panel(
             item["options"]["indexByName"] = {
                 name: index for index, name in enumerate(fields)
             }
-            item["options"]["renameByName"] = {
-                name: labels[name] for name in fields
-            }
+            item["options"]["renameByName"] = {name: labels[name] for name in fields}
     panel["transformations"] = transforms
     return panel
 
@@ -538,7 +623,7 @@ _PROVIDER_SELECTOR_URL = (
     "&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
 )
 _PROVIDER_SELECTOR_ROOT = (
-    '$exists(provider_options) and $count(provider_options) > 0 '
+    "$exists(provider_options) and $count(provider_options) > 0 "
     '? provider_options : [{"text":"unknown","value":"unknown"}]'
 )
 
@@ -583,28 +668,72 @@ def _style_provider_check(panels: list[dict]) -> None:
     review = by_id[9461]
     review["gridPos"].update(x=18, y=2, w=6, h=3)
     review["type"] = "stat"
-    review["description"] = "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. This is not live fleet health."
-    review["transformations"] = [{"id": "limit", "options": {"limitField": 1}}, {"id": "filterFieldsByName", "options": {"include": {"names": ["check_result"]}}}]
-    review["options"] = {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "/^check_result$/", "values": True}, "colorMode": "background", "graphMode": "none", "textMode": "value"}
-    review["fieldConfig"] = {"defaults": {"noValue": "UNKNOWN", "mappings": [{"type": "value", "options": {
-        "OK": {"text": "OK", "color": "green"},
-        "HEALTHY": {"text": "HEALTHY", "color": "green"},
-        "WARN": {"text": "WARN", "color": "orange"},
-        "DEGRADED": {"text": "DEGRADED", "color": "orange"},
-        "ERROR": {"text": "ERROR", "color": "red"},
-        "FAIL": {"text": "FAIL", "color": "red"},
-        "FAILING": {"text": "FAILING", "color": "red"},
-        "CRIT": {"text": "CRIT", "color": "red"},
-        "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
-        "N/A": {"text": "N/A", "color": "gray"},
-        "SELECT RUN": {"text": "SELECT RUN", "color": "gray"},
-        "INCOMPLETE": {"text": "INCOMPLETE", "color": "orange"},
-    }}], "color": {"mode": "fixed", "fixedColor": "gray"}}, "overrides": []}
+    review["description"] = (
+        "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. This is not live fleet health."
+    )
+    review["transformations"] = [
+        {"id": "limit", "options": {"limitField": 1}},
+        {
+            "id": "filterFieldsByName",
+            "options": {"include": {"names": ["check_result"]}},
+        },
+    ]
+    review["options"] = {
+        "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "/^check_result$/",
+            "values": True,
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+    }
+    review["fieldConfig"] = {
+        "defaults": {
+            "noValue": "UNKNOWN",
+            "mappings": [
+                {
+                    "type": "value",
+                    "options": {
+                        "OK": {"text": "OK", "color": "green"},
+                        "HEALTHY": {"text": "HEALTHY", "color": "green"},
+                        "WARN": {"text": "WARN", "color": "orange"},
+                        "DEGRADED": {"text": "DEGRADED", "color": "orange"},
+                        "ERROR": {"text": "ERROR", "color": "red"},
+                        "FAIL": {"text": "FAIL", "color": "red"},
+                        "FAILING": {"text": "FAILING", "color": "red"},
+                        "CRIT": {"text": "CRIT", "color": "red"},
+                        "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
+                        "N/A": {"text": "N/A", "color": "gray"},
+                        "SELECT RUN": {"text": "SELECT RUN", "color": "gray"},
+                        "INCOMPLETE": {"text": "INCOMPLETE", "color": "orange"},
+                    },
+                }
+            ],
+            "color": {"mode": "fixed", "fixedColor": "gray"},
+        },
+        "overrides": [],
+    }
     evidence = by_id[9460]
     evidence["gridPos"].update(y=5)
     if not any(t["id"] == "convertFieldType" for t in evidence["transformations"]):
-        evidence["transformations"].insert(0, {"id": "convertFieldType", "options": {"conversions": [{"targetField": "observed_at", "destinationType": "time"}]}})
-    evidence["fieldConfig"]["overrides"] = [{"matcher": {"id": "byName", "options": "Observed at"}, "properties": [{"id": "unit", "value": "time:YYYY-MM-DD HH:mm"}]}]
+        evidence["transformations"].insert(
+            0,
+            {
+                "id": "convertFieldType",
+                "options": {
+                    "conversions": [
+                        {"targetField": "observed_at", "destinationType": "time"}
+                    ]
+                },
+            },
+        )
+    evidence["fieldConfig"]["overrides"] = [
+        {
+            "matcher": {"id": "byName", "options": "Observed at"},
+            "properties": [{"id": "unit", "value": "time:YYYY-MM-DD HH:mm"}],
+        }
+    ]
     for panel_id in (9402, 9403):
         by_id[panel_id]["gridPos"]["y"] = 10
 
@@ -685,7 +814,9 @@ def prune_provider_health_panels(payload: dict[str, object]) -> None:
         ["provider", "check_result", "evidence", "observed_at"],
         limit=None,
     )
-    evidence.setdefault("options", {}).setdefault("footer", {})["enablePagination"] = True
+    evidence.setdefault("options", {}).setdefault("footer", {})["enablePagination"] = (
+        True
+    )
     review = _provider_check_panel(
         9461,
         "Review Provider Check",
@@ -693,7 +824,9 @@ def prune_provider_health_panels(payload: dict[str, object]) -> None:
         ["check_result", "evidence"],
         limit=1,
     )
-    review.setdefault("fieldConfig", {}).setdefault("defaults", {})["noValue"] = "UNKNOWN"
+    review.setdefault("fieldConfig", {}).setdefault("defaults", {})["noValue"] = (
+        "UNKNOWN"
+    )
     for panel in panels:
         if not isinstance(panel, dict):
             continue
@@ -754,8 +887,7 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
 
 
 SELECTOR_ROWS = (
-    '$exists(items) and $count(items) = 0 ? '
-    '[{"text":"NO MATCHES","value":"-"}] : items'
+    '$exists(items) and $count(items) = 0 ? [{"text":"NO MATCHES","value":"-"}] : items'
 )
 
 

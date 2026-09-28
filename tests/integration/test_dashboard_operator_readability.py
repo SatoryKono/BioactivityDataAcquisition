@@ -422,6 +422,23 @@ def test_first_window_panels_do_not_declare_internal_scroll() -> None:
     assert not violations, "first-window scroll declarations:\n" + "\n".join(violations)
 
 
+def test_dq_9403_percentage_names_bronze_denominator() -> None:
+    """#11684: the processed-records percentage column names its denominator."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panels = {
+        panel["id"]: panel
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("id"), int)
+    }
+    names = [
+        prop.get("value")
+        for override in panels[9403].get("fieldConfig", {}).get("overrides", [])
+        for prop in override.get("properties", [])
+        if prop.get("id") == "displayName"
+    ]
+    assert "percentage of Bronze" in names
+
+
 def test_operator_readability_gate_is_wired_as_required_dashboard_check() -> None:
     """The gate must stay in CI and the pre-push hook when dashboards change."""
     tests_workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")

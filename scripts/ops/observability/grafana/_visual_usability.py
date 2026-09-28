@@ -46,42 +46,6 @@ def _bands(row: dict, bands: list[list[tuple[int, int, int, int]]]) -> None:
     row["panels"] = placed
 
 
-def _runtime(p: dict[int, dict]) -> None:
-    if 2460 not in p:
-        return
-    p[9400]["options"]["content"] = (
-        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">'
-        "CURRENT · Pipeline / Run Type. <b>INCOMPLETE / UNKNOWN:</b> expected stage evidence is unverified. "
-        "Check <b>Expected stage signals</b>, then open <b>Review Stage Progress</b> below. "
-        "SCRAPING is not an active blocker. None observed does not prove completeness or health.</div>"
-    )
-    # A filtering comparison preserves ages; bool converts each entity to 0/1.
-    p[7]["targets"][0]["expr"] = (
-        "sum(clamp_min(time() - max by (pipeline, entity) "
-        '(bioetl_data_freshness_seconds{pipeline=~"$pipeline"}), 0) > bool 86400) '
-        'or (count(bioetl_data_freshness_seconds{pipeline=~"$pipeline"}) * 0)'
-    )
-    p[7]["targets"][0].update(instant=True, range=False)
-    p[7]["fieldConfig"]["defaults"].update(unit="suffix: entities", decimals=0)
-    p[7]["description"] = (
-        "TIME RANGE · Instant snapshot at the selected range end. Count of distinct pipeline/entity pairs whose last successful ingestion "
-        "is over 24h old. Each entity contributes 0 or 1, never its age in seconds. "
-        "Missing freshness telemetry stays UNKNOWN; an observed fresh entity gives zero. "
-        "Pipeline applies; Run ID and Run Type do not. Use a range ending now for current age. Open Data Quality for diagnosis."
-    )
-    for panel in p.values():
-        if panel.get("title") == "Review Runtime Escalation":
-            panel["options"]["mode"] = "html"
-            panel["options"]["content"] = (
-                '<div style="font-size:16px;line-height:1.2"><b>INCOMPLETE / UNKNOWN:</b> verify Stage Expectedness and Telemetry first. '
-                "<b>None observed</b> means no observed blocker, not complete coverage. "
-                "Use the Stage Progress panel links for the complete evidence table.</div>"
-            )
-            panel["gridPos"]["h"] = max(3, panel["gridPos"]["h"])
-    note = " INCOMPLETE: inspect expected-stage evidence; no observed blocker is not proof of coverage."
-    p[2460]["description"] = p[2460].get("description", "").removesuffix(note) + note
-
-
 def _replace_rate_intervals(p: dict[int, dict]) -> None:
     for panel in p.values():
         for target in panel.get("targets", []):
@@ -93,7 +57,10 @@ def _replace_rate_intervals(p: dict[int, dict]) -> None:
 def _stamp_counter_no_observations(panel: dict) -> None:
     panel["fieldConfig"]["defaults"]["noValue"] = "NO OBSERVATIONS"
     for mapping in panel["fieldConfig"]["defaults"].get("mappings", []):
-        if mapping.get("type") == "special" and mapping["options"].get("match") == "null":
+        if (
+            mapping.get("type") == "special"
+            and mapping["options"].get("match") == "null"
+        ):
             mapping["options"]["result"]["text"] = "NO OBSERVATIONS"
     note = (
         " No observations means this outcome has no samples in the selected window; "
@@ -101,7 +68,9 @@ def _stamp_counter_no_observations(panel: dict) -> None:
     )
     description = panel.get("description", "")
     panel["description"] = (
-        description + note if "No observations means" not in description else description
+        description + note
+        if "No observations means" not in description
+        else description
     )
 
 
@@ -207,9 +176,7 @@ def _remap_action_label_texts(panel: dict) -> None:
 def _remap_mapping_texts(mapping: dict) -> None:
     for value in mapping.get("options", {}).values():
         if isinstance(value, dict):
-            value["text"] = _ACTION_LABELS.get(
-                value.get("text"), value.get("text", "")
-            )
+            value["text"] = _ACTION_LABELS.get(value.get("text"), value.get("text", ""))
 
 
 def _overview(p: dict[int, dict]) -> None:
@@ -549,7 +516,6 @@ def apply_visual_usability(payload: dict) -> None:
         return
     p = {panel["id"]: panel for panel in walk(payload["panels"])}
     handlers = {
-        "bioetl-runtime": _runtime,
         "bioetl-control-plane-v1": _trust,
         "bioetl-overview-v2": _overview,
         "bioetl-provider-health-v2": _provider,
@@ -578,9 +544,7 @@ def apply_visual_usability(payload: dict) -> None:
     if 1000 in p:
         p[1000]["gridPos"]["h"] = 2
         first_y = min(
-            panel["gridPos"]["y"]
-            for panel in payload["panels"]
-            if panel["id"] != 1000
+            panel["gridPos"]["y"] for panel in payload["panels"] if panel["id"] != 1000
         )
         shift = max(0, first_y - 2)
         first_window = [

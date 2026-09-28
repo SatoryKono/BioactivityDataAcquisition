@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `a387a7d66bddf56c0b91e1311dbdd72c524dc74001288e593d8917002fec323c`
+Evidence surface SHA-256: `f7b3d3473c8666c5f126730076901f44526699879a7ef63c84a2830450e717d4`
 
 Evidence metadata refresh (2026-09-26): rebind after main suite-green merge. Current headline evidence:
 Debt-governance gates: **43 pass / 3 fail**;
@@ -76,15 +76,15 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "a387a7d66bddf56c0b91e1311dbdd72c524dc74001288e593d8917002fec323c",
+  "evidence_surface_sha256": "f7b3d3473c8666c5f126730076901f44526699879a7ef63c84a2830450e717d4",
   "metrics": {
-    "architecture_integral_score": 10.0,
+    "architecture_integral_score": 9.89,
     "architecture_interpretation": "excellent",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 46,
-    "debt_gate_fail_count": 3,
-    "debt_gate_pass_count": 43,
+    "debt_gate_fail_count": 0,
+    "debt_gate_pass_count": 46,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 2483,
@@ -150,3 +150,34 @@ python -m scripts.engineering.qa check-exemptions
 ## Guard
 
 - **REJECTED_POLICY:** any increase of tech-debt budgets / exemptions / hotspot caps
+
+Evidence metadata refresh (2026-09-28): wave-2 test-governance paydown (duplicate names, assertion bypass, 39 markers, deterministic run IDs, zero-ref triage). Current headline evidence:
+Debt-governance gates: **45 pass / 1 fail**;
+Architecture quality integral score: **9.74** (`excellent`);
+source_module_count: **2491**;
+fully_covered: **2483**;
+partially_covered: **7**;
+no_executable_lines: **1**;
+uncovered: **0**;
+unmeasured: **0**;
+= 2491 == source_module_count;
+Contract coverage matrix schema: **contract-coverage-matrix-v3**;
+Constructor waivers (shrink-only inventory): **1** entries;
+Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**;
+Layer violations: **0**.
+Residual fail: hotspot_family_baseline_budget_warnings (3 modules ≥250 LOC pending split).
+
+Evidence metadata refresh (2026-09-28): hotspot wave-3 splits (artifact_recording, replay_readiness, batch_metrics facades + cohesive submodules; 143+181+31 focused tests green, ruff clean). Current headline evidence:
+Debt-governance gates: **46 pass / 0 fail**;
+Architecture quality integral score: **9.89** (`excellent`);
+source_module_count: **2491**;
+fully_covered: **2483**;
+partially_covered: **7**;
+no_executable_lines: **1**;
+uncovered: **0**;
+unmeasured: **0**;
+= 2491 == source_module_count;
+Contract coverage matrix schema: **contract-coverage-matrix-v3**;
+Constructor waivers (shrink-only inventory): **1** entries;
+Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**;
+Layer violations: **0**.

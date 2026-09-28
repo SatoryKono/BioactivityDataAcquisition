@@ -403,7 +403,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Evidence Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">SELECTED RUN · Saved evidence for the selected Run ID. CURRENT pipeline status and TIME RANGE scores are not on this page.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">SELECTED RUN · Saved evidence for the selected Run ID. CURRENT pipeline status and TIME RANGE scores are not on this page. A time-range value never proves this run.</div></div>"
       },
       "links": []
     },
@@ -418,7 +418,7 @@
         "y": 18
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
+      "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -1045,7 +1045,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "UNKNOWN",
+          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs.",
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
@@ -1215,7 +1215,7 @@
               },
               {
                 "id": "displayName",
-                "value": "percentage"
+                "value": "percentage of Bronze"
               },
               {
                 "id": "noValue",
@@ -1487,7 +1487,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "percentage"
+                "value": "percentage of Bronze"
               },
               {
                 "id": "noValue",
@@ -1596,7 +1596,7 @@
       "type": "row",
       "title": "Inspect Saved Run Evidence",
       "collapsed": true,
-      "description": "Expand for saved stage rows, then domain trust reasons, for the selected Run ID.",
+      "description": "Expand for saved stage rows, then domain trust reasons, then full identity of the selected Run ID.",
       "gridPos": {
         "x": 0,
         "y": 22,
@@ -1636,7 +1636,104 @@
                 "inspect": true
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "stage_id"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Stage"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "state"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "records_in"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Records in"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "records_out"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Records out"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "duration_seconds"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Duration"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Source"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "duration_seconds"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "s"
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -1674,7 +1771,7 @@
             "h": 12
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · Domain verdicts of this Run ID; this is not the page status. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -1801,6 +1898,21 @@
                         "options": {
                           "selection_required": {
                             "text": "Choose a run to inspect saved evidence"
+                          },
+                          "execution_success": {
+                            "text": "Processing completed"
+                          },
+                          "standalone_pipeline": {
+                            "text": "Standalone pipeline; no workflow applies"
+                          },
+                          "run_dq_threshold_evaluation": {
+                            "text": "Saved data-quality threshold evaluation"
+                          },
+                          "run_preflight_provider_observation": {
+                            "text": "Saved provider preflight check"
+                          },
+                          "run_gold_schema_validation": {
+                            "text": "Saved Gold schema validation"
                           }
                         }
                       }
@@ -1899,7 +2011,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · Full identifiers of this Run ID; the short table is Inspect Run Identity on the first screen. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",

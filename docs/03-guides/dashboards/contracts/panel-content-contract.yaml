@@ -713,8 +713,8 @@ dashboards:
         title: Inspect Processed Records
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:

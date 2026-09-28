@@ -298,35 +298,6 @@ def _compact_trust_monitors(p: dict[int, dict]) -> None:
             panel["gridPos"]["y"] -= old_bottom - new_bottom
 
 
-def _runtime(p: dict[int, dict]) -> None:
-    if 9102 not in p:
-        return
-    p[9102]["title"] = "Monitor Coverage"
-    for pid, title in {
-        230: "Monitor Pipeline Alerts",
-        21: "Monitor Memory Pressure",
-        5: "Inspect Control Plane Alerts",
-        6: "Inspect Provider Alerts",
-    }.items():
-        p[pid]["title"] = title
-    for pid in (241, 256):
-        _override(p[pid], "stage", _WIDTH, 130)
-    for pid in (238, 240, 9105):
-        _legend(p[pid])
-        _stage_colors(p[pid])
-    p[9105]["fieldConfig"]["defaults"].setdefault("custom", {})["axisLabel"] = (
-        "Stage lag"
-    )
-    _stack(p[252], {238: 10, 240: 10, 242: 9, 9105: 10, 243: 9, 220: 3})
-    _stack(p[32460], {22460: 14, 2461: 14})
-    _table(p[22460], {"Backlog": 100, "Lag": 100, "Throughput": 130})
-    _table(p[2461], {"Pipeline": 240, "Run type": 130})
-    for pid in (2460, 22460, 2461, 243):
-        _override(p[pid], "Throughput", "unit", "suffix: records/s")
-        _override(p[pid], "scope_stage\\measure", "displayName", "Pipeline / Stage")
-        _override(p[pid], "scope_stage", "displayName", "Pipeline / Stage")
-
-
 def _provider(p: dict[int, dict]) -> None:
     if 9101 not in p or 9107 not in p:
         return
@@ -338,9 +309,7 @@ def _provider(p: dict[int, dict]) -> None:
         if target["expr"].startswith("topk(3, ") and target["expr"].endswith(")"):
             target["expr"] = target["expr"][8:-1]
         p[pid]["title"] = (
-            "All providers · status"
-            if pid == 9101
-            else "All providers · evidence"
+            "All providers · status" if pid == 9101 else "All providers · evidence"
         )
         p[pid]["description"] = (
             "CURRENT · All providers. This section is not filtered by the selected Provider. "
@@ -369,7 +338,9 @@ def _provider(p: dict[int, dict]) -> None:
                 "options": {
                     "observed_health_status": {"text": "Health observation available"},
                     "invalid_health_timestamp": {"text": "Invalid observation time"},
-                    "missing_health_status": {"text": "No health check result available"},
+                    "missing_health_status": {
+                        "text": "No health check result available"
+                    },
                 },
             }
         ],
@@ -383,9 +354,7 @@ def _provider(p: dict[int, dict]) -> None:
         _override(p[9107], field, _WIDTH, width)
     _override(p[9107], "Source state", "displayName", "Source")
     _override(p[9111], "Provider", _WIDTH, 200)
-    _override(
-        p[9111], "Provider", _CELL, {"type": "auto", "wrapText": False}
-    )
+    _override(p[9111], "Provider", _CELL, {"type": "auto", "wrapText": False})
     for pid in (9101, 9107):
         p[pid]["gridPos"].update(y=20, h=8)
         p[pid]["options"].setdefault("footer", {})["enablePagination"] = True
@@ -656,7 +625,10 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
     for transform in summary["transformations"]:
         if transform["id"] == "organize":
             transform["options"]["renameByName"].update(
-                run_execution="Result", run_verdict="Status", run_reason="Reason", saved_trust="Trust"
+                run_execution="Result",
+                run_verdict="Status",
+                run_reason="Reason",
+                saved_trust="Trust",
             )
     return ["run_execution", "run_verdict", "saved_trust", "run_reason"]
 
@@ -828,7 +800,6 @@ def apply_evidence_readability(payload: dict) -> None:
     handlers = {
         "bioetl-overview-v2": _overview,
         "bioetl-control-plane-v1": _trust,
-        "bioetl-runtime": _runtime,
         "bioetl-provider-health-v2": _provider,
         "bioetl-dq-v2": _dq,
         "bioetl-incident-v1": _incident,

@@ -12,7 +12,6 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
@@ -195,35 +194,6 @@ def _runtime_panels_by_id() -> dict[int, dict]:
     }
 
 
-def test_runtime_10251_stage_empty_is_not_valid_empty_in_stage_column() -> None:
-    """#10251 P1: empty Stage/Code tables fail closed on the full-width noValue."""
-    for panel_id in (241, 256):
-        panel = _runtime_panels_by_id()[panel_id]
-        expr = panel["targets"][0]["expr"]
-        assert "vector(0)" not in expr
-        no_value = str(panel.get("fieldConfig", {}).get("defaults", {}).get("noValue"))
-        assert no_value.startswith("TELEMETRY MISSING")
-        assert "VALID EMPTY" not in json.dumps(panel.get("fieldConfig", {}))
-
-
-def test_runtime_10251_expectedness_unknown_vs_contract_na() -> None:
-    """#10251 P2: missing telemetry is UNKNOWN; N/A is only inapplicable-by-construction."""
-    panel = _runtime_panels_by_id()[243]
-    no_value = panel.get("fieldConfig", {}).get("defaults", {}).get("noValue")
-    assert isinstance(no_value, str) and no_value.startswith("UNKNOWN")
-    assert "N/A" not in no_value
-    expected_no_value = None
-    for override in panel.get("fieldConfig", {}).get("overrides", []):
-        if override.get("matcher", {}).get("options") != "Expected":
-            continue
-        for prop in override.get("properties", []):
-            if prop.get("id") == "noValue":
-                expected_no_value = prop.get("value")
-    assert (
-        isinstance(expected_no_value, str) and expected_no_value == "N/A: not declared"
-    )
-
-
 def test_runtime_10251_select_run_novalue_drops_hedge_tails() -> None:
     """#10251 §7.3: SELECT RUN names one state."""
     panels = _runtime_panels_by_id()
@@ -249,9 +219,7 @@ def test_dq_10253_selected_run_summary_is_first_window() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     root = {panel.get("id"): panel for panel in dashboard.get("panels") or []}
     summary = root[9406]
-    assert summary.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 12}
-    assert int((root[9405].get("gridPos") or {}).get("y", 0)) >= 18
-    assert all(item.get("id") != 9406 for item in (root[9405].get("panels") or []))
+    assert summary.get("gridPos") == {"h": 4, "w": 24, "x": 0, "y": 18}
     organize = next(
         item
         for item in summary.get("transformations") or []

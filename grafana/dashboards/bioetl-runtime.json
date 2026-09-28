@@ -444,7 +444,7 @@
         "h": 4
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+      "description": "SELECTED RUN · Columns are Result, Status, Evidence, and Rules. Status is the verdict. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -1277,7 +1277,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -1302,7 +1302,26 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "duration_seconds"
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.wrapText",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Duration"
                 },
                 "properties": [
                   {
@@ -1342,7 +1361,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "source"
+                  "options": "Source"
                 },
                 "properties": [
                   {
@@ -1395,6 +1414,45 @@
               "id": "limit",
               "options": {
                 "limitField": 12
+              }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "stage_id",
+                    "state",
+                    "reason",
+                    "records_in",
+                    "records_out",
+                    "duration_seconds",
+                    "source"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "indexByName": {
+                  "stage_id": 0,
+                  "state": 1,
+                  "reason": 2,
+                  "records_in": 3,
+                  "records_out": 4,
+                  "duration_seconds": 5,
+                  "source": 6
+                },
+                "renameByName": {
+                  "stage_id": "Stage",
+                  "state": "Status",
+                  "reason": "Reason",
+                  "records_in": "In",
+                  "records_out": "Out",
+                  "duration_seconds": "Duration",
+                  "source": "Source"
+                }
               }
             }
           ],
