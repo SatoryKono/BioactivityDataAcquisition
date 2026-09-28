@@ -201,8 +201,10 @@ def _normalized_row(
     pipeline_report_ref: object,
     top_reasons: object = (),
     reconciliation: dict[str, object] | None = None,
-    faults: _RowFaults = _RowFaults(),
+    faults: _RowFaults | None = None,
 ) -> _NormalizedExecution:
+    if faults is None:
+        faults = _RowFaults()
     name = _optional_text(pipeline_name)
     run_id = _optional_text(pipeline_run_id)
     report_ref = _default_report_ref(
