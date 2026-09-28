@@ -130,7 +130,9 @@ def test_snapshot_backed_success_run_scores_saved_evidence_ok(tmp_path):
     )
     payload = json.loads(written.json_path.read_text(encoding="utf-8"))
     revision = payload["selected_run_snapshot"]["revision"]
-    assert (written.json_path.parent / "status-revisions" / f"{revision}.json").is_file()
+    assert (
+        written.json_path.parent / "status-revisions" / f"{revision}.json"
+    ).is_file()
 
     result = presentation.recent_run_presentation(
         {"pipeline": "chembl_assay", "run_id": "run-se-ok"},

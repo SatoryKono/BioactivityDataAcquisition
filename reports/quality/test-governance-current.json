@@ -993,13 +993,13 @@
   "assertless_total_candidates": 83,
   "budget_violations": [
     {
-      "actual": 3,
+      "actual": 1,
       "budget": "duplicate_test_names_max",
       "expected_max": 0,
       "metric": "duplicate_test_names"
     },
     {
-      "actual": 6,
+      "actual": 2,
       "budget": "duplicate_test_name_occurrences_max",
       "expected_max": 0,
       "metric": "duplicate_test_name_occurrences"
@@ -1169,32 +1169,6 @@
   "date_today_call_sites": 0,
   "duplicate_test_name_inventory": [
     {
-      "classification": "same_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/infrastructure/validation/test_pandera_validator.py:323",
-        "tests/unit/infrastructure/validation/test_pandera_validator.py:381"
-      ],
-      "name": "test_pandera_gold_validator__metamodel_exposes_columns__11212",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "same_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/infrastructure/validation/test_pandera_validator.py:336",
-        "tests/unit/infrastructure/validation/test_pandera_validator.py:394"
-      ],
-      "name": "test_pandera_gold_validator__nullable_boolean_none_true_batch__11213",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
       "classification": "cross_file",
       "count": 2,
       "lane_counts": {
@@ -1210,13 +1184,13 @@
   ],
   "duplicate_test_name_inventory_summary": {
     "cross_file_groups": 1,
-    "duplicate_occurrences": 6,
+    "duplicate_occurrences": 2,
     "mixed_groups": 0,
-    "same_file_groups": 2,
-    "total_duplicate_names": 3
+    "same_file_groups": 0,
+    "total_duplicate_names": 1
   },
-  "duplicate_test_name_occurrences": 6,
-  "duplicate_test_names": 3,
+  "duplicate_test_name_occurrences": 2,
+  "duplicate_test_names": 1,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1238,8 +1212,8 @@
   "intentional_no_exception_contract": 83,
   "markerless_examples": [
     "tests/integration/test_pipeline_diagnostics_evidence_actions.py:21",
-    "tests/integration/test_pipeline_diagnostics_evidence_actions.py:43",
-    "tests/integration/test_pipeline_diagnostics_evidence_actions.py:55",
+    "tests/integration/test_pipeline_diagnostics_evidence_actions.py:44",
+    "tests/integration/test_pipeline_diagnostics_evidence_actions.py:59",
     "tests/unit/application/core/test_issue_11221_11222_11226.py:103",
     "tests/unit/application/core/test_issue_11221_11222_11226.py:122",
     "tests/unit/application/core/test_issue_11221_11222_11226.py:131",
@@ -1259,7 +1233,7 @@
     "tests/unit/application/services/control_plane/test_issue_11250_layering.py:93",
     "tests/unit/domain/test_issue_11241_composition_layering.py:19",
     "tests/unit/domain/test_issue_11241_composition_layering.py:29",
-    "tests/unit/domain/test_issue_11241_composition_layering.py:44",
+    "tests/unit/domain/test_issue_11241_composition_layering.py:47",
     "tests/unit/domain/ports/test_resolve_metric_labels.py:14",
     "tests/unit/domain/ports/test_resolve_metric_labels.py:19",
     "tests/unit/domain/ports/test_resolve_metric_labels.py:26",
@@ -1272,10 +1246,10 @@
     "tests/unit/domain/run_reports/test_stage_diagnostics.py:59",
     "tests/unit/domain/run_reports/test_stage_diagnostics.py:77",
     "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:19",
-    "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:25",
     "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:30",
-    "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:36",
-    "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:42"
+    "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:35",
+    "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:41",
+    "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:47"
   ],
   "markerless_test_functions": 39,
   "parse_errors": [],
@@ -2096,32 +2070,6 @@
     "date_today_call_sites": 0,
     "duplicate_test_name_inventory": [
       {
-        "classification": "same_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/infrastructure/validation/test_pandera_validator.py:323",
-          "tests/unit/infrastructure/validation/test_pandera_validator.py:381"
-        ],
-        "name": "test_pandera_gold_validator__metamodel_exposes_columns__11212",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "same_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/infrastructure/validation/test_pandera_validator.py:336",
-          "tests/unit/infrastructure/validation/test_pandera_validator.py:394"
-        ],
-        "name": "test_pandera_gold_validator__nullable_boolean_none_true_batch__11213",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
         "classification": "cross_file",
         "count": 2,
         "lane_counts": {
@@ -2137,13 +2085,13 @@
     ],
     "duplicate_test_name_inventory_summary": {
       "cross_file_groups": 1,
-      "duplicate_occurrences": 6,
+      "duplicate_occurrences": 2,
       "mixed_groups": 0,
-      "same_file_groups": 2,
-      "total_duplicate_names": 3
+      "same_file_groups": 0,
+      "total_duplicate_names": 1
     },
-    "duplicate_test_name_occurrences": 6,
-    "duplicate_test_names": 3,
+    "duplicate_test_name_occurrences": 2,
+    "duplicate_test_names": 1,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2164,8 +2112,8 @@
     },
     "markerless_examples": [
       "tests/integration/test_pipeline_diagnostics_evidence_actions.py:21",
-      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:43",
-      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:55",
+      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:44",
+      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:59",
       "tests/unit/application/core/test_issue_11221_11222_11226.py:103",
       "tests/unit/application/core/test_issue_11221_11222_11226.py:122",
       "tests/unit/application/core/test_issue_11221_11222_11226.py:131",
@@ -2185,7 +2133,7 @@
       "tests/unit/application/services/control_plane/test_issue_11250_layering.py:93",
       "tests/unit/domain/test_issue_11241_composition_layering.py:19",
       "tests/unit/domain/test_issue_11241_composition_layering.py:29",
-      "tests/unit/domain/test_issue_11241_composition_layering.py:44",
+      "tests/unit/domain/test_issue_11241_composition_layering.py:47",
       "tests/unit/domain/ports/test_resolve_metric_labels.py:14",
       "tests/unit/domain/ports/test_resolve_metric_labels.py:19",
       "tests/unit/domain/ports/test_resolve_metric_labels.py:26",
@@ -2198,10 +2146,10 @@
       "tests/unit/domain/run_reports/test_stage_diagnostics.py:59",
       "tests/unit/domain/run_reports/test_stage_diagnostics.py:77",
       "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:19",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:25",
       "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:30",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:36",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:42"
+      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:35",
+      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:41",
+      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:47"
     ],
     "markerless_test_functions": 39,
     "parse_errors": [],
@@ -2221,8 +2169,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2947,
-      "test_python_file_count": 3181,
+      "test_glob_file_count": 2948,
+      "test_python_file_count": 3182,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2266,47 +2214,31 @@
       {
         "count": 2,
         "examples": [
-          "tests/unit/infrastructure/validation/test_pandera_validator.py:323",
-          "tests/unit/infrastructure/validation/test_pandera_validator.py:381"
-        ],
-        "name": "test_pandera_gold_validator__metamodel_exposes_columns__11212"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/infrastructure/validation/test_pandera_validator.py:336",
-          "tests/unit/infrastructure/validation/test_pandera_validator.py:394"
-        ],
-        "name": "test_pandera_gold_validator__nullable_boolean_none_true_batch__11213"
-      },
-      {
-        "count": 2,
-        "examples": [
           "tests/unit/application/services/test_selected_run_replay_readiness.py:120",
           "tests/unit/interfaces/http/test_selected_run_status.py:306"
         ],
         "name": "test_rebuild_only_inside_family_boundary_is_insufficient"
       }
     ],
-    "total_test_files": 2947,
-    "total_test_functions": 28926,
+    "total_test_files": 2948,
+    "total_test_functions": 28928,
     "unreviewed_assertion_bypass_count": 1,
     "uuid4_call_sites": 2
   },
   "root": ".",
-  "source_tree_sha256": "d227731e73be3996d3a57a7ee9c5f5c2fb76ac354c2c04c86fba1ef76148ea73",
+  "source_tree_sha256": "4d3eae0fa15e0a4e484d08d05457e235fd7920a3472e3f3e6a5b0c634e5dcc6c",
   "summary": {
     "assertion_branch_reachability_percent": 99.73,
     "assertless_total_candidates": 83,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 6,
-    "duplicate_test_names": 3,
+    "duplicate_test_name_occurrences": 2,
+    "duplicate_test_names": 1,
     "intentional_no_exception_contract": 83,
     "markerless_examples": [
       "tests/integration/test_pipeline_diagnostics_evidence_actions.py:21",
-      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:43",
-      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:55",
+      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:44",
+      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:59",
       "tests/unit/application/core/test_issue_11221_11222_11226.py:103",
       "tests/unit/application/core/test_issue_11221_11222_11226.py:122",
       "tests/unit/application/core/test_issue_11221_11222_11226.py:131",
@@ -2326,7 +2258,7 @@
       "tests/unit/application/services/control_plane/test_issue_11250_layering.py:93",
       "tests/unit/domain/test_issue_11241_composition_layering.py:19",
       "tests/unit/domain/test_issue_11241_composition_layering.py:29",
-      "tests/unit/domain/test_issue_11241_composition_layering.py:44",
+      "tests/unit/domain/test_issue_11241_composition_layering.py:47",
       "tests/unit/domain/ports/test_resolve_metric_labels.py:14",
       "tests/unit/domain/ports/test_resolve_metric_labels.py:19",
       "tests/unit/domain/ports/test_resolve_metric_labels.py:26",
@@ -2339,10 +2271,10 @@
       "tests/unit/domain/run_reports/test_stage_diagnostics.py:59",
       "tests/unit/domain/run_reports/test_stage_diagnostics.py:77",
       "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:19",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:25",
       "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:30",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:36",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:42"
+      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:35",
+      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:41",
+      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:47"
     ],
     "markerless_test_functions": 39,
     "refined_assertless_tests": 0,
@@ -2354,8 +2286,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2947,
-    "test_python_file_count": 3181,
+    "test_glob_file_count": 2948,
+    "test_python_file_count": 3182,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2399,30 +2331,14 @@
     {
       "count": 2,
       "examples": [
-        "tests/unit/infrastructure/validation/test_pandera_validator.py:323",
-        "tests/unit/infrastructure/validation/test_pandera_validator.py:381"
-      ],
-      "name": "test_pandera_gold_validator__metamodel_exposes_columns__11212"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/infrastructure/validation/test_pandera_validator.py:336",
-        "tests/unit/infrastructure/validation/test_pandera_validator.py:394"
-      ],
-      "name": "test_pandera_gold_validator__nullable_boolean_none_true_batch__11213"
-    },
-    {
-      "count": 2,
-      "examples": [
         "tests/unit/application/services/test_selected_run_replay_readiness.py:120",
         "tests/unit/interfaces/http/test_selected_run_status.py:306"
       ],
       "name": "test_rebuild_only_inside_family_boundary_is_insufficient"
     }
   ],
-  "total_test_files": 2947,
-  "total_test_functions": 28926,
+  "total_test_files": 2948,
+  "total_test_functions": 28928,
   "unreviewed_assertion_bypass_count": 1,
   "uuid4_call_sites": 2
 }
