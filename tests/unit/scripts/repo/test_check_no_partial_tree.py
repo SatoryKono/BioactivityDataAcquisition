@@ -83,12 +83,7 @@ def test_collapsed_tree_rule_accepts_full_restructure_and_rejects_subset() -> No
     )
     assert module.is_collapsed_tree(base, base) is False
     assert module.is_collapsed_tree(base, base | {"new_area"}) is False
-    assert (
-        module.is_collapsed_tree(
-            base, (base - {"src"}) | {"renamed_src"}
-        )
-        is False
-    )
+    assert module.is_collapsed_tree(base, (base - {"src"}) | {"renamed_src"}) is False
     assert module.is_collapsed_tree(base, frozenset({"reports"})) is True
     assert module.is_collapsed_tree(base, frozenset()) is True
     assert module.is_collapsed_tree(frozenset({"a"}), frozenset({"a"})) is False
@@ -98,6 +93,31 @@ def test_guard_flags_partial_tree_commit_in_range(repo: Path) -> None:
     healthy = _git(repo, "rev-parse", "HEAD").strip()
     bad = _commit_partial_tree(repo, "reports-only snapshot")
     assert module.find_collapsing_commits(healthy, bad, repo=repo) == [bad]
+
+
+def test_rejects_flag_injection_in_revision_tokens(repo: Path) -> None:
+    with pytest.raises(SystemExit, match="invalid git revision"):
+        module.find_collapsing_commits("--upload-pack=evil", "HEAD", repo=repo)
+    with pytest.raises(SystemExit, match="invalid git revision"):
+        module.find_collapsing_commits("HEAD", "-c", repo=repo)
+    with pytest.raises(SystemExit, match="invalid git repository path"):
+        module.validate_repo("-C")
+
+
+def test_resolve_revision_uses_end_of_options(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seen: list[list[str]] = []
+    real = module._run_git
+
+    def wrapped(cwd: Path, verb: str, *args: str) -> str:
+        seen.append([verb, *args])
+        return real(cwd, verb, *args)
+
+    monkeypatch.setattr(module, "_run_git", wrapped)
+    sha = module.resolve_revision(repo, "HEAD")
+    assert module._SHA_RE.fullmatch(sha)
+    assert any(row[0] == "rev-parse" and "--end-of-options" in row for row in seen)
 
 
 def test_guard_passes_clean_range(repo: Path) -> None:
