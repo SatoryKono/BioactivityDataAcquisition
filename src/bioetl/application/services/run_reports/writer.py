@@ -230,7 +230,8 @@ def write_workflow_run_report(
     finalize_workflow_children(
         report, root=resolve_report_root(root=root), store=writer
     )
-    write_json(json_path, report.to_dict(), store=writer)
+    payload = publish_snapshot(report.to_dict(), json_path, store=writer)
+    write_json(json_path, payload, store=writer)
     _atomic_write_text(
         md_path, render_workflow_run_report_markdown(report), store=writer
     )

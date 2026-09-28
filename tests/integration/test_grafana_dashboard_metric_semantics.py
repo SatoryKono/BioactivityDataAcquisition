@@ -1548,7 +1548,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         assert processed["gridPos"]["w"] == 12
         assert identity["options"]["footer"]["enablePagination"] is True
         assert processed["options"]["footer"]["enablePagination"] is True
-        expected_h = (8, 8) if dashboard_name == "bioetl-dq-v2.json" else (8, 8)
+        expected_h = (8, 8)
         assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == expected_h
     elif dashboard_name == "bioetl-provider-health-v2.json":
         assert identity["gridPos"]["w"] == 12

@@ -147,6 +147,10 @@ def test_write_workflow_run_report(tmp_path: Path) -> None:
     assert payload["totals"]["records_extracted_sum"] == 42
     assert payload["identity"]["completed_at"] == "2026-08-24T13:49:06+00:00"
     assert "Steps" in written.markdown_path.read_text(encoding="utf-8")
+    assert isinstance(payload.get("selected_run_snapshot"), dict)
+    assert (
+        written.json_path.parent / "status-revisions"
+    ).is_dir()
 
 
 def test_latest_pointer_uses_sanitized_identity_owner_with_custom_directory(

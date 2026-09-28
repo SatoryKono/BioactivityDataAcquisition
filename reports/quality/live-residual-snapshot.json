@@ -3,7 +3,7 @@
   "linked_issue": "#6891",
   "follow_up_issue": "#7464",
   "parent_epic": "#6890",
-  "snapshot_date": "2026-09-26",
+  "snapshot_date": "2026-09-28",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
   "policy": {
     "direction": "shrink_only",
@@ -12,11 +12,11 @@
   },
   "hotspot_families": {
     "application_core": {
-      "files_ge_250_loc": 0,
-      "max_internal_fan_in": 6,
+      "files_ge_250_loc": 1,
+      "max_internal_fan_in": 7,
       "helper_function_ratio": 0.384,
-      "files": 196,
-      "total_loc": 24218,
+      "files": 197,
+      "total_loc": 24404,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
@@ -39,20 +39,20 @@
       "budget_max_internal_fan_in": 3
     },
     "application_services_control_plane": {
-      "files_ge_250_loc": 0,
+      "files_ge_250_loc": 2,
       "max_internal_fan_in": 1,
-      "helper_function_ratio": 0.378,
-      "files": 124,
-      "total_loc": 14703,
+      "helper_function_ratio": 0.39,
+      "files": 126,
+      "total_loc": 15330,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
     "composition_runtime_builders": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.386,
+      "helper_function_ratio": 0.339,
       "files": 56,
-      "total_loc": 7398,
+      "total_loc": 6654,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }
