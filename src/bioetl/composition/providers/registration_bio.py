@@ -26,6 +26,10 @@ from bioetl.composition.factories.datasource.adapter_helpers import (
 from bioetl.composition.factories.datasource.pubchem import (
     create_pubchem_adapter,
 )
+from bioetl.domain.runtime.composition_boundary_policy import (
+    resolve_uniprot_mapping_databases,
+)
+
 from bioetl.composition.providers._config_helpers import (
     _build_provider_family_config_map,
     _get_adapter_config,
@@ -263,9 +267,6 @@ def _resolve_uniprot_mapping_databases(
     pipeline_config: PipelineYamlConfig,
 ) -> tuple[str, str]:
     """Resolve source/target database names for UniProt mapping API."""
-    from bioetl.domain.runtime.composition_boundary_policy import (
-        resolve_uniprot_mapping_databases,
-    )
 
     configured_from = None
     configured_to = None

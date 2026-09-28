@@ -13,6 +13,9 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_resolution impor
 from bioetl.composition.snapshot_serialization import (
     to_serializable_mapping as to_serializable_mapping,
 )
+from bioetl.domain.runtime.composition_boundary_policy import (
+    pipeline_name_fallbacks,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
@@ -128,9 +131,6 @@ def resolve_provider_entity(
 
 def _determine_fallbacks(pipeline_name: str) -> tuple[str, str]:
     """Determine fallback provider and entity from pipeline name."""
-    from bioetl.domain.runtime.composition_boundary_policy import (
-        pipeline_name_fallbacks,
-    )
 
     return pipeline_name_fallbacks(pipeline_name)
 

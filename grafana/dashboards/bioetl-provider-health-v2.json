@@ -500,7 +500,7 @@
         "h": 3
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. This is not live fleet health.",
+      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. VALID EMPTY means the run has no provider check. Backend down is QUERY ERROR. This is not live fleet health.",
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -519,7 +519,7 @@
       },
       "fieldConfig": {
         "defaults": {
-          "noValue": "UNKNOWN",
+          "noValue": "VALID EMPTY with no check · QUERY ERROR when backend down",
           "mappings": [
             {
               "type": "value",
@@ -628,7 +628,7 @@
         "h": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
+      "description": "SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK. VALID EMPTY means the run has no provider check. Backend down is QUERY ERROR.",
       "options": {
         "showHeader": true,
         "cellHeight": "sm",
@@ -639,7 +639,7 @@
       },
       "fieldConfig": {
         "defaults": {
-          "noValue": "UNKNOWN",
+          "noValue": "VALID EMPTY with no check · QUERY ERROR when backend down",
           "unit": "none",
           "custom": {
             "align": "left",

@@ -911,7 +911,7 @@
         "h": 8
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Shows HTTP-backed Bronze input, Silver accepted/rejected, and Gold output counts and outcomes. Zero is a recorded count. No matching rows can mean a valid empty result, unresolved scope, or backend failure (backend unavailable); verify /health/live and use Run Explorer before classifying the result. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
+      "description": "SELECTED RUN · Shows HTTP-backed Bronze input, Silver accepted/rejected, and Gold output counts and outcomes. Zero is a recorded count. No matching rows means VALID EMPTY. Backend unavailable means QUERY ERROR — verify /health/live and use Run Explorer before classifying the result. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1312,6 +1312,30 @@
                   {
                     "id": "unit",
                     "value": "s"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "In"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": ""
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Out"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": ""
                   }
                 ]
               },

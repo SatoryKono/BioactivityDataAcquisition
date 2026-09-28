@@ -45,7 +45,10 @@ class _ResolutionService(Protocol):
 
 
 class TargetProteinClassificationSnapshotDataSource:
-    """Expose relation rows from materialized local ChEMBL snapshot tables."""
+    """Expose relation rows from materialized local ChEMBL snapshot tables.
+
+    Implements FilterableDataSourcePort via fetch_filtered.
+    """
 
     provider_name = "chembl"
 
