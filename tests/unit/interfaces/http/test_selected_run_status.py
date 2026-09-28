@@ -303,7 +303,7 @@ def test_manifest_without_input_snapshot_is_not_ready(tmp_path):
     assert checks["dependency_lock_hash"] == "unknown"
 
 
-def test_rebuild_only_inside_family_boundary_is_insufficient(tmp_path):
+def test_rebuild_only_http_status_is_insufficient(tmp_path):
     from types import SimpleNamespace
     from uuid import uuid4
 

@@ -39,7 +39,7 @@
 | `full_app_duplication_total_clusters` | `pass` | `total_duplicate_clusters` | `0` | `0` | `reports/quality/full-app-duplication-baseline.json` |
 | `supporting_scripts_zero_reference_count` | `fail` | `zero_reference_supporting_script_count` | `1` | `0` | `configs/quality/scripts_inventory_manifest.json` |
 | `supporting_scripts_untriaged_zero_reference_count` | `fail` | `untriaged_zero_reference_supporting_script_count` | `1` | `0` | `configs/quality/scripts_inventory_manifest.json` |
-| `test_governance_budget_violations` | `fail` | `budget_violations` | `5` | `0` | `reports/quality/test-governance-current.json` |
+| `test_governance_budget_violations` | `fail` | `budget_violations` | `2` | `0` | `reports/quality/test-governance-current.json` |
 | `test_governance_uuid4_call_sites` | `fail` | `uuid4_call_sites` | `2` | `0` | `reports/quality/test-governance-current.json` |
 | `flaky_test_total_count` | `pass` | `total_flaky` | `0` | `0` | `reports/quality/flaky-test-burndown-review.json` |
 | `flaky_test_untriaged_count` | `pass` | `untriaged_flaky_tests` | `0` | `0` | `reports/quality/flaky-test-burndown-review.json` |
@@ -56,5 +56,5 @@
 | `observability_touched_metric_inventory_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_touched_metric_review_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_review.json` |
 | `adr_enforcement_blocking_gaps` | `pass` | `blocking_gap_count` | `0` | `0` | `reports/quality/adr-enforcement-matrix.json` |
-| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `da16a353c109f51869998f2d929f17b6d86500ec72d45906f9ee959ed65222a2` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
+| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `cbb3d286be7bcf1586759b5b252fed0deb8c92e83ce8ee6af2f2f90ea4b000d5` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
 | `generated_artifact_drift` | `pass` | `stale_artifact_count` | `{'count': 0, 'artifacts': []}` | `0` | `reports/quality/*.json` |

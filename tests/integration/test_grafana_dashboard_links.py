@@ -553,9 +553,12 @@ def test_dashboard_bus_self_links_are_omitted() -> None:
 
 def test_navigation_panel_html_links_open_in_same_window() -> None:
     """Navigation panel id=1000 should not force a new browser tab."""
-    for dashboard_path in get_dashboard_files():
-        if dashboard_path.name == "bioetl-run-explorer-v1.json":
-            continue
+    dashboard_paths = [
+        path
+        for path in get_dashboard_files()
+        if path.name != "bioetl-run-explorer-v1.json"
+    ]
+    for dashboard_path in dashboard_paths:
         dashboard = load_dashboard(dashboard_path)
         panel = next(
             (item for item in dashboard.get("panels", []) if item.get("id") == 1000),

@@ -262,7 +262,7 @@
       "status": "fail"
     },
     {
-      "current": 5,
+      "current": 2,
       "limit": 0,
       "metric": "budget_violations",
       "name": "test_governance_budget_violations",
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "da16a353c109f51869998f2d929f17b6d86500ec72d45906f9ee959ed65222a2",
+      "current": "cbb3d286be7bcf1586759b5b252fed0deb8c92e83ce8ee6af2f2f90ea4b000d5",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
