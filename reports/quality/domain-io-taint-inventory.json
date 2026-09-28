@@ -1,5 +1,5 @@
 {
-  "allowed_exception_count": 119,
+  "allowed_exception_count": 120,
   "allowed_exceptions": [
     {
       "kind": "import:pandera",
@@ -44,7 +44,7 @@
       "symbol": "<module>"
     },
     {
-      "kind": "import:pandera",
+      "kind": "import:pandas",
       "line": 6,
       "path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
@@ -53,6 +53,13 @@
     {
       "kind": "import:pandera",
       "line": 7,
+      "path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
+      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
+      "symbol": "<module>"
+    },
+    {
+      "kind": "import:pandera",
+      "line": 8,
       "path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
@@ -227,7 +234,7 @@
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 211,
+      "line": 216,
       "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "StageAccountingSnapshotsMixin._removals_for_bucket"
@@ -837,8 +844,23 @@
   ],
   "domain_root": "src/bioetl/domain",
   "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",
-  "scanned_file_count": 612,
+  "scanned_file_count": 624,
   "schema_version": 1,
-  "violation_count": 0,
-  "violations": []
+  "violation_count": 2,
+  "violations": [
+    {
+      "kind": "import:socket",
+      "line": 11,
+      "path": "src/bioetl/domain/exceptions/network/connection.py",
+      "reason": "network socket",
+      "symbol": "<module>"
+    },
+    {
+      "kind": "attribute_call:resolve",
+      "line": 19,
+      "path": "src/bioetl/domain/serialization/__init__.py",
+      "reason": "filesystem resolution",
+      "symbol": "<module>"
+    }
+  ]
 }
