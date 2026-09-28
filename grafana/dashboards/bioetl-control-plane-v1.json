@@ -313,16 +313,16 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"Replay Readiness (Trust)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Provider Health (Provider Health). Preserves selected scope and time range. Preserves pipeline context.\" href=\"/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=${provider_for_pipeline:percentencode}&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"Replay Readiness (Replay Readiness)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Provider Health (Provider Health). Preserves selected scope and time range. Preserves pipeline context.\" href=\"/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=${provider_for_pipeline:percentencode}&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
-          "title": "Run Explorer",
+          "title": "0. Run Explorer",
           "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Run Explorer (Run Explorer). Preserves selected scope and time range.",
+          "tooltip": "0. Run Explorer (Run Explorer). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -334,7 +334,7 @@
         {
           "title": "Run Overview",
           "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Run Overview (Overview). Preserves selected scope and time range.",
+          "tooltip": "Run Overview (Run Overview). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -390,6 +390,18 @@
           "includeVars": false,
           "asDropdown": false,
           "tags": []
+        },
+        {
+          "title": "Run Explorer",
+          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "Run Explorer (Run Explorer). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
         }
       ]
     },
@@ -398,8 +410,8 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
-        "w": 15,
+        "h": 2,
+        "w": 24,
         "x": 0,
         "y": 2
       },
@@ -442,10 +454,10 @@
       "type": "table",
       "title": "Review Selected-Run Trust",
       "gridPos": {
-        "h": 7,
-        "w": 15,
+        "h": 10,
+        "w": 12,
         "x": 0,
-        "y": 5
+        "y": 7
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Processing result is the saved ETL outcome. Saved trust verdict is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded.",
@@ -1443,10 +1455,10 @@
         ]
       },
       "gridPos": {
-        "h": 7,
-        "w": 9,
-        "x": 15,
-        "y": 5
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 7
       },
       "id": 9416,
       "options": {
@@ -1568,7 +1580,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 17
       },
       "id": 9419,
       "title": "Review Lineage Validation",
@@ -1584,11 +1596,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": true
+                "wrapText": false
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
@@ -1785,7 +1797,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 13
+            "y": 18
           },
           "id": 9415,
           "options": {
@@ -1832,7 +1844,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 18
       },
       "id": 902,
       "title": "Inspect Checkpoint and Replay Checks",
@@ -1848,11 +1860,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": true
+                "wrapText": false
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
@@ -2022,7 +2034,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 14,
+            "y": 19,
             "w": 24,
             "h": 6
           },
@@ -2086,16 +2098,16 @@
           ],
           "gridPos": {
             "x": 0,
-            "y": 20,
+            "y": 25,
             "w": 24,
             "h": 8
           },
           "options": {
             "showHeader": true,
-            "cellHeight": "sm",
+            "cellHeight": "lg",
             "footer": {
               "show": false,
-              "enablePagination": false
+              "enablePagination": true
             }
           },
           "transformations": [
@@ -2144,7 +2156,7 @@
                         "type": "value",
                         "options": {
                           "manifest_not_recorded": {
-                            "text": "manifest этого запуска не найден"
+                            "text": "manifest for this run was not recorded"
                           }
                         }
                       }
@@ -2163,7 +2175,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 19
       },
       "id": 901,
       "title": "Inspect Manifest Validation",
@@ -2179,11 +2191,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": true
+                "wrapText": false
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
@@ -2353,7 +2365,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 15,
+            "y": 20,
             "w": 24,
             "h": 9
           },
@@ -2402,7 +2414,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 20
       },
       "id": 905,
       "title": "Inspect Run Identity Evidence",
@@ -2418,7 +2430,7 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "wrapText": true
@@ -2697,7 +2709,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -2716,7 +2728,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -2743,7 +2755,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -2758,7 +2770,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -2777,7 +2789,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -2796,7 +2808,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -2909,7 +2921,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 16,
+            "y": 21,
             "w": 24,
             "h": 8
           },
@@ -2917,11 +2929,11 @@
           "options": {
             "footer": {
               "show": false,
-              "enablePagination": false,
+              "enablePagination": true,
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -2998,7 +3010,7 @@
           "description": "Shown when Inspect Identity Values has no rows for this Run ID. SELECT RUN means no run is selected. QUERY ERROR means the request failed. An empty table is not a failed identity check.",
           "gridPos": {
             "x": 0,
-            "y": 24,
+            "y": 29,
             "w": 12,
             "h": 3
           },
@@ -3029,7 +3041,7 @@
           "description": "Record counts are not in this identity row. Open Inspect Run Details and read Review Processed Records for this Run ID. An empty identity table is not zero records.",
           "gridPos": {
             "x": 12,
-            "y": 24,
+            "y": 29,
             "w": 12,
             "h": 3
           },
@@ -3055,7 +3067,7 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "wrapText": true
@@ -3334,7 +3346,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -3353,7 +3365,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -3380,7 +3392,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -3395,7 +3407,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -3414,7 +3426,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -3433,7 +3445,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -3546,7 +3558,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 27,
+            "y": 32,
             "w": 24,
             "h": 7
           },
@@ -3554,11 +3566,11 @@
           "options": {
             "footer": {
               "show": false,
-              "enablePagination": false,
+              "enablePagination": true,
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -3630,11 +3642,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": true
+                "wrapText": false
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
@@ -3910,7 +3922,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -3929,7 +3941,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -3956,7 +3968,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -3993,7 +4005,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -4008,7 +4020,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -4027,7 +4039,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -4042,7 +4054,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -4153,7 +4165,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 34,
+            "y": 39,
             "w": 24,
             "h": 8
           },
@@ -4161,7 +4173,7 @@
           "options": {
             "footer": {
               "show": false,
-              "enablePagination": false,
+              "enablePagination": true,
               "countRows": true
             },
             "showHeader": true,
@@ -4237,11 +4249,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": true
+                "wrapText": false
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
@@ -4518,7 +4530,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -4537,7 +4549,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -4560,7 +4572,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -4591,7 +4603,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -4620,7 +4632,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -4639,7 +4651,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -4654,7 +4666,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -4760,12 +4772,24 @@
                     "value": 125
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "checkpoint_value_short"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "UNKNOWN"
+                  }
+                ]
               }
             ]
           },
           "gridPos": {
             "x": 0,
-            "y": 42,
+            "y": 47,
             "w": 24,
             "h": 8
           },
@@ -4773,7 +4797,7 @@
           "options": {
             "footer": {
               "show": false,
-              "enablePagination": false,
+              "enablePagination": true,
               "countRows": true
             },
             "showHeader": true,
@@ -4850,11 +4874,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": true
+                "wrapText": false
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed."
@@ -5130,7 +5154,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -5149,7 +5173,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -5176,7 +5200,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -5213,7 +5237,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -5228,7 +5252,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -5247,7 +5271,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -5262,7 +5286,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -5373,7 +5397,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 50,
+            "y": 55,
             "w": 24,
             "h": 8
           },
@@ -5381,7 +5405,7 @@
           "options": {
             "footer": {
               "show": false,
-              "enablePagination": false,
+              "enablePagination": true,
               "countRows": true
             },
             "showHeader": true,
@@ -5451,7 +5475,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 58,
+            "y": 63,
             "w": 24,
             "h": 3
           },
@@ -5479,7 +5503,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 21
       },
       "id": 9412,
       "description": "Expand for the identity card, record counts, and failure categories of this Run ID.",
@@ -5490,7 +5514,7 @@
           "title": "Review Run Summary",
           "gridPos": {
             "x": 0,
-            "y": 17,
+            "y": 22,
             "w": 24,
             "h": 8
           },
@@ -5542,7 +5566,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -5593,7 +5617,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -5635,7 +5659,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -5769,10 +5793,10 @@
             "showHeader": true,
             "footer": {
               "show": false,
-              "enablePagination": false,
+              "enablePagination": true,
               "countRows": true
             },
-            "cellHeight": "sm"
+            "cellHeight": "lg"
           },
           "targets": [
             {
@@ -5822,7 +5846,7 @@
           "title": "Review Processed Records",
           "gridPos": {
             "x": 0,
-            "y": 25,
+            "y": 30,
             "w": 24,
             "h": 8
           },
@@ -5834,7 +5858,7 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "wrapText": true
@@ -5932,7 +5956,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -5958,8 +5982,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
-                      "wrapText": true
+                      "type": "color-text"
                     }
                   },
                   {
@@ -5992,8 +6015,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
-                      "wrapText": true
+                      "type": "color-text"
                     }
                   },
                   {
@@ -6027,8 +6049,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "applyToRow": true,
-                      "wrapText": true
+                      "applyToRow": true
                     }
                   },
                   {
@@ -6085,7 +6106,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -6135,7 +6156,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -6154,7 +6175,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -6173,7 +6194,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -6190,10 +6211,10 @@
             ],
             "footer": {
               "show": false,
-              "enablePagination": false,
+              "enablePagination": true,
               "countRows": true
             },
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -6257,7 +6278,7 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "wrapText": true
@@ -6322,7 +6343,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -6359,7 +6380,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -6374,7 +6395,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -6389,7 +6410,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -6408,7 +6429,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -6427,7 +6448,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -6488,7 +6509,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 33,
+            "y": 38,
             "w": 24,
             "h": 7
           },
@@ -6496,11 +6517,11 @@
           "options": {
             "footer": {
               "show": false,
-              "enablePagination": false,
+              "enablePagination": true,
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -6538,9 +6559,9 @@
       "title": "Review Exact Replay Readiness",
       "gridPos": {
         "h": 3,
-        "w": 9,
-        "x": 15,
-        "y": 2
+        "w": 24,
+        "x": 0,
+        "y": 4
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Exact replay readiness of the selected Run ID from saved inputs. READY means required checks passed, not that a replay already ran and not permission to write current tables. BLOCKED is a proven gap. INSUFFICIENT means a required check could not be completed. UNSUPPORTED means this family cannot exact-replay. SELECT RUN and QUERY ERROR are request states. N/A is not zero. CURRENT Prometheus does not change this verdict.",
@@ -6564,7 +6585,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "none",
-          "noValue": "UNKNOWN",
+          "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
           "mappings": [
             {
               "type": "value",
@@ -6655,7 +6676,7 @@
       "description": "Expand to search persisted runs and choose a Run ID. This row does not score the run already selected.",
       "gridPos": {
         "x": 0,
-        "y": 17,
+        "y": 22,
         "w": 24,
         "h": 1
       },
@@ -6666,7 +6687,7 @@
           "title": "Inspect Latest Complete Run",
           "gridPos": {
             "x": 0,
-            "y": 18,
+            "y": 23,
             "w": 24,
             "h": 6
           },
@@ -6674,10 +6695,7 @@
           "description": "SELECTED RUN · Search persisted runs and choose one Run ID. This table does not score the Run ID already selected on this dashboard.",
           "options": {
             "showHeader": true,
-            "cellHeight": "sm",
-            "footer": {
-              "enablePagination": false
-            }
+            "cellHeight": "sm"
           },
           "fieldConfig": {
             "defaults": {
@@ -6685,10 +6703,9 @@
               "custom": {
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
-                "inspect": true,
-                "wrapText": true
+                "inspect": true
               }
             },
             "overrides": [
