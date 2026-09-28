@@ -43,15 +43,19 @@ def test_recent_report_link_preserves_row_url_through_transforms() -> None:
         }
         for item in panel["fieldConfig"]["overrides"]
     }
-    link = overrides["Report"]["links"][0]
-    assert link["url"] == "${__data.fields.report_url:raw}"
-    assert link["targetBlank"] is True
+    links = overrides["Run ID"]["links"]
+    assert links[0]["title"] == "Select this run"
+    assert "var-run_id=${__data.fields.run_id:percentencode}" in links[0]["url"]
+    assert links[0]["targetBlank"] is False
+    assert links[1]["url"] == "${__data.fields.report_url:raw}"
+    assert links[1]["targetBlank"] is True
     assert overrides["report_url"]["custom.hidden"] is True
     organize = next(
         t["options"] for t in panel["transformations"] if t["id"] == "organize"
     )
-    assert organize["excludeByName"]["report_url"] is False
-    assert organize["renameByName"]["report_label"] == "Report"
+    assert "report_url" not in organize["excludeByName"]
+    assert "report_label" not in organize["renameByName"]
+    assert overrides["report_label"]["custom.hidden"] is True
 
 
 def _http_targets(panel: dict[str, object]) -> list[dict[str, object]]:
@@ -208,6 +212,47 @@ def test_recent_timing_null_does_not_inherit_empty_catalog_message() -> None:
         o["matcher"]["options"]: {v["id"]: v["value"] for v in o["properties"]}
         for o in panel["fieldConfig"]["overrides"]
     }
-    for field in ("Duration", "Event age"):
-        assert properties[field]["noValue"] == "UNKNOWN"
+    assert properties["Duration"]["noValue"] == "UNKNOWN"
     assert panel["fieldConfig"]["defaults"]["noValue"].startswith("UNKNOWN")
+
+
+def test_run_explorer_visible_selectors_use_ops_http_catalog() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
+    variables = {
+        item["name"]: item
+        for item in dashboard["templating"]["list"]
+        if isinstance(item, dict)
+    }
+    for name in ("workflow", "pipeline", "run_type", "run_id"):
+        variable = variables[name]
+        assert variable["datasource"] == "BioETL Ops HTTP"
+        query = variable["query"]["infinityQuery"]["url"]
+        assert query.startswith("/ops/control-plane/filter-options?dimension=")
+        assert "label_values(" not in query
+        assert "$__all" not in query
+    assert "dimension=workflow" in variables["workflow"]["definition"]
+    assert variables["run_type"]["multi"] is False
+    assert variables["workflow"]["allValue"] == ".*"
+    assert "var-run_id=-" in dashboard["panels"][0]["options"]["content"]
+    assert "var-workflow=.*" in dashboard["panels"][0]["options"]["content"]
+
+
+def test_run_explorer_flex_columns_omit_custom_width() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 3010)
+    assert panel["gridPos"]["w"] == 24
+    assert "custom.width" not in panel["fieldConfig"]["defaults"].get("custom", {})
+    widths: dict[str, int] = {}
+    min_widths: dict[str, int] = {}
+    for override in panel["fieldConfig"]["overrides"]:
+        field = override["matcher"]["options"]
+        props = {item["id"]: item["value"] for item in override["properties"]}
+        if "custom.width" in props:
+            widths[field] = int(props["custom.width"])
+        if "custom.minWidth" in props:
+            min_widths[field] = int(props["custom.minWidth"])
+    for field in ("Workflow", "Pipeline", "Saved Evidence", "Data Quality"):
+        assert field not in widths
+        assert min_widths[field] >= 80
+    assert widths["Replay Readiness"] == 125
+    assert widths["Run ID"] == 90

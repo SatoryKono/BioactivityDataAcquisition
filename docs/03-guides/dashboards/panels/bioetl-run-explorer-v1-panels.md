@@ -5,9 +5,11 @@
 
 ## Scope and layout
 
-The page contains a two-line scope banner (y=0/h=2) and Inspect Recent Runs
-(last 10), y=2/h=14. Workflow=All, Pipeline=All, Run Type=All and Run ID=-
-are the defaults. The newest ten launches are shown together without pagination,
+The page contains a two-line scope banner (y=0/h=3) and Inspect Recent Runs
+(last 10), y=3/h=13. Visible selectors are Ops HTTP catalog options
+(`filter-options` for Workflow, Pipeline, Run Type, Selected Run).
+Workflow=All, Pipeline=All, Run Type=All and Run ID=- are the defaults.
+The newest ten launches are shown together without pagination,
 independently of the dashboard time range. Filters and exact Run ID lookup apply
 before the global ten-row limit. No dashboard navigation band is shown here.
 
@@ -18,7 +20,7 @@ before the global ten-row limit. No dashboard navigation band is shown here.
 | Workflow | Workflow name; — when absent | Workflow passport |
 | Pipeline | Pipeline name | Pipeline passport |
 | Provider | Recorded provider; N/A when absent | Provider Health |
-| Run ID | Short UUID; full UUID in report link title | Exact persisted Report |
+| Run ID | Short UUID; Select this run writes `$run_id`; full UUID in report link title | Same dashboard Selected Run, then persisted Report |
 | Started | YY-MM-DD:HH:mm; N/A when absent | None; descending sort |
 | Duration | Compact elapsed duration, e.g. 2m 32s; N/A when unavailable | None |
 | Overview | Execution status | Run Overview |

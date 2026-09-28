@@ -38,10 +38,12 @@ description: "Edit, render, validate, or debug BioETL Grafana dashboards and the
 
 ## Debug empty Run Explorer index
 
-For **6. Run Explorer** panel `Inspect Recent Runs` (`id=3010`) or workflow
-panel `3020`, do not start with Grafana selectors. `$pipeline` / `$run_type`
-come from Prometheus and `$run_id` from the control-plane catalog; the table
-reads `GET /ops/observability/pipeline-run-reports`.
+For **0. Run Explorer** panel `Inspect Recent Runs` (`id=3010`), do not start
+with Grafana selectors. Visible `$workflow` / `$pipeline` / `$run_type` /
+`$run_id` come from the Ops HTTP catalog
+(`/ops/control-plane/filter-options`); the table reads
+`GET /ops/observability/pipeline-run-reports`. **Select this run** on the
+Run ID cell writes `$run_id` from that row.
 
 1. From the checkout you are viewing, run
    `python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`.

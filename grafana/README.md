@@ -1023,9 +1023,9 @@ default.
 
 | Variable | Primary dashboards | Source | Semantics |
 | --- | --- | --- | --- |
-| `$workflow` | `0..6` | `label_values(bioetl_workflow_universe, workflow)` on query-backed dashboards; HTTP-backed identity surfaces use the bounded Ops API. | Context/evidence unless a panel documents truthful current-status intersection. The universe includes terminal workflow outcomes and started workflows published through `bioetl_workflow_expected`. |
+| `$workflow` | `0..6` | `label_values(bioetl_workflow_universe, workflow)` on query-backed dashboards; Run Explorer uses Ops HTTP `/ops/control-plane/filter-options?dimension=workflow`. | Context/evidence unless a panel documents truthful current-status intersection. The universe includes terminal workflow outcomes and started workflows published through `bioetl_workflow_expected`. |
 | `$pipeline` | `0..6` | BioETL Ops HTTP `/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}` (catalog option list). PromQL current-state panels still match `$pipeline` against the dashboard-bounded universe metrics. | Canonical pipeline context; Overview may default to `All`, non-Overview dashboards fail-close to `unknown`. A catalog pipeline stays selectable when Prometheus has no series. |
-| `$run_type` | `0..6` | Same bounded universe as `$pipeline` for the dashboard role. | Multi-select Include All. Overview default `All`; other boards default `backfill`. Never `unknown`. |
+| `$run_type` | `0..6` | Same bounded universe as `$pipeline` for the dashboard role. | Multi-select Include All on query-backed boards; Run Explorer is single-select Include All. Overview default `All`; other boards default `backfill`. Never `unknown`. |
 | `$run_id` | `0..6` | BioETL Ops HTTP `/ops/control-plane/filter-options?dimension=run_id...&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Preserved HTTP identity context for `ID`/details panels; no Include All; default `-`; options start-time desc (`sort=0`); never a Prometheus label. |
 
 `$workflow` stays single-select with Include All across the seven shipped

@@ -45,7 +45,11 @@ def test_ten_columns_keep_full_identity_for_handoffs():
         assert "${__data.fields.run_id:percentencode}" in url
         assert "${__data.fields.Pipeline:percentencode}" in url
         assert "${__data.fields.workflow_scope:percentencode}" in url
-    assert "report_url:raw" in overrides["Run ID"]["links"][0]["url"]
+    run_id_links = overrides["Run ID"]["links"]
+    assert run_id_links[0]["title"] == "Select this run"
+    assert "var-run_id=${__data.fields.run_id:percentencode}" in run_id_links[0]["url"]
+    assert run_id_links[0]["targetBlank"] is False
+    assert "report_url:raw" in run_id_links[1]["url"]
     assert overrides["Started"]["unit"] == "time:YY-MM-DD:HH:mm"
     assert panel["options"]["sortBy"] == [{"displayName": "Started", "desc": True}]
     assert overrides["run_id"]["custom.hidden"] is True

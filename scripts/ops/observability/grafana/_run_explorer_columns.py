@@ -44,18 +44,30 @@ _COLORS = {
     "IDENTITY_UNHEALTHY": "#F2495C",
 }
 _COLUMNS = {
-    "workflow_id": ("Workflow", 120),
-    "pipeline": ("Pipeline", 160),
-    "provider": ("Provider", 85),
-    "run_label": ("Run ID", 90),
-    "started_at": ("Started", 115),
-    "duration_display": ("Duration", 75),
-    "status": ("Overview", 85),
-    "saved_evidence_status": ("Saved Evidence", 120),
-    "data_quality_status": ("Data Quality", 110),
-    "replay_readiness_status": ("Replay Readiness", 125),
+    "workflow_id": ("Workflow", None, 100),
+    "pipeline": ("Pipeline", None, 80),
+    "provider": ("Provider", 85, 50),
+    "run_label": ("Run ID", 90, 50),
+    "started_at": ("Started", 115, 50),
+    "duration_display": ("Duration", 75, 50),
+    "status": ("Overview", 85, 50),
+    "saved_evidence_status": ("Saved Evidence", None, 90),
+    "data_quality_status": ("Data Quality", None, 90),
+    "replay_readiness_status": ("Replay Readiness", 125, 90),
 }
 _CONTEXT = "var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}"
+_SELECT_RUN_URL = (
+    "/d/bioetl-run-explorer-v1/0-run-explorer?" + _CONTEXT + "&var-lookup_run_id="
+)
+_RESET_FILTERS = (
+    "/d/bioetl-run-explorer-v1/0-run-explorer"
+    "?var-workflow=.*&var-pipeline=.*&var-run_type=.*&var-run_id=-"
+    "&var-lookup_run_id=&${__url_time_range}"
+)
+_OPS_HTTP = "BioETL Ops HTTP"
+_FILTER_ROOT = (
+    '$exists(items) and $count(items) = 0 ? [{"text":"NO MATCHES","value":"-"}] : items'
+)
 
 
 def _rename_text(value: object) -> object:
@@ -78,11 +90,21 @@ def apply_run_explorer_columns(payload: dict) -> None:
     apply_overall_verdict(payload)
     if payload.get("uid") != "bioetl-run-explorer-v1":
         return
+    _apply_run_explorer_templating(payload)
     panels = {panel["id"]: panel for panel in payload["panels"]}
     panels[1]["gridPos"]["h"] = 3
-    panels[1]["options"]["content"] = panels[1]["options"]["content"].replace(
+    content = panels[1]["options"]["content"].replace(
         "Select a Run ID to view details.", "Select a status to view details."
     )
+    content = content.replace(
+        "var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=",
+        "var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=",
+    )
+    content = content.replace(
+        "var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-",
+        "var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-",
+    )
+    panels[1]["options"]["content"] = content
     panel = panels[3010]
     panel["gridPos"].update(y=3, h=13)
     panel["description"] = (
@@ -152,7 +174,7 @@ def apply_run_explorer_columns(payload: dict) -> None:
         "Workflow": ("Workflow passport", "${__data.fields.workflow_passport_url:raw}"),
         "Pipeline": ("Pipeline passport", "${__data.fields.pipeline_passport_url:raw}"),
         "Run ID": (
-            "Report Â· ${__data.fields.run_id}",
+            "Report \u00b7 ${__data.fields.run_id}",
             "${__data.fields.report_url:raw}",
         ),
         "Provider": (
@@ -174,26 +196,34 @@ def apply_run_explorer_columns(payload: dict) -> None:
         ),
     }
     overrides = []
-    for name, width in _COLUMNS.values():
+    for name, width, min_width in _COLUMNS.values():
         properties = [
-            {"id": "custom.width", "value": width},
+            {"id": "custom.minWidth", "value": min_width},
             {"id": "custom.inspect", "value": name in {"Workflow", "Pipeline"}},
         ]
+        if width is not None:
+            properties.append({"id": "custom.width", "value": width})
         if name in links:
             title, url = links[name]
-            properties.append(
+            link_items = [
                 {
-                    "id": "links",
-                    "value": [
-                        {
-                            "title": title,
-                            "url": url,
-                            "includeVars": False,
-                            "targetBlank": name in {"Workflow", "Pipeline", "Run ID"},
-                        }
-                    ],
+                    "title": title,
+                    "url": url,
+                    "includeVars": False,
+                    "targetBlank": name in {"Workflow", "Pipeline", "Run ID"},
                 }
-            )
+            ]
+            if name == "Run ID":
+                link_items.insert(
+                    0,
+                    {
+                        "title": "Select this run",
+                        "url": _SELECT_RUN_URL,
+                        "includeVars": False,
+                        "targetBlank": False,
+                    },
+                )
+            properties.append({"id": "links", "value": link_items})
         if name in {"Overview", "Saved Evidence", "Data Quality", "Replay Readiness"}:
             properties.extend(
                 [
@@ -237,11 +267,13 @@ def apply_run_explorer_columns(payload: dict) -> None:
                     "value": [
                         {
                             "type": "value",
-                            "options": {"â€”": {"text": "N/A", "color": "#9CA3AF"}},
+                            "options": {"\u2014": {"text": "N/A", "color": "#9CA3AF"}},
                         }
                     ],
                 }
             )
+        if name == "Duration":
+            properties.append({"id": "noValue", "value": "UNKNOWN"})
         overrides.append(
             {"matcher": {"id": "byName", "options": name}, "properties": properties}
         )
@@ -272,6 +304,97 @@ def apply_run_explorer_columns(payload: dict) -> None:
     )
     panel["fieldConfig"]["overrides"] = overrides
     panel["options"]["sortBy"] = [{"displayName": "Started", "desc": True}]
+    for item in panel.get("links") or []:
+        if item.get("title") == "Browse all pipelines":
+            item["url"] = _RESET_FILTERS
+
+
+def _infinity_filter_query(url: str) -> dict[str, object]:
+    return {
+        "queryType": "infinity",
+        "refId": "variable",
+        "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": _FILTER_ROOT,
+            "type": "json",
+            "source": "url",
+            "url_options": {"method": "GET", "data": ""},
+            "url": url,
+            "columns": [
+                {"selector": "text", "text": "__text", "type": "string"},
+                {"selector": "value", "text": "__value", "type": "string"},
+            ],
+        },
+    }
+
+
+def _http_filter_variable(
+    *,
+    name: str,
+    label: str,
+    url: str,
+    description: str,
+    include_all: bool = True,
+    multi: bool = False,
+    sort: int = 0,
+) -> dict[str, object]:
+    return {
+        "allValue": ".*",
+        "current": {"selected": True, "text": "All", "value": "$__all"},
+        "datasource": _OPS_HTTP,
+        "definition": url,
+        "description": description,
+        "hide": 0,
+        "includeAll": include_all,
+        "label": label,
+        "multi": multi,
+        "name": name,
+        "options": [],
+        "query": _infinity_filter_query(url),
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": False,
+        "sort": sort,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": False,
+    }
+
+
+def _apply_run_explorer_templating(payload: dict) -> None:
+    variables = {item["name"]: item for item in payload["templating"]["list"]}
+    variables["workflow"] = _http_filter_variable(
+        name="workflow",
+        label="Workflow",
+        url="/ops/control-plane/filter-options?dimension=workflow&response_shape=options",
+        description=(
+            "Browse scope from the local control-plane catalog. Default All "
+            "includes every workflow. Filters the recent-launches table."
+        ),
+        sort=1,
+    )
+    variables["pipeline"]["query"] = _infinity_filter_query(
+        str(variables["pipeline"]["definition"])
+    )
+    variables["run_type"]["multi"] = False
+    variables["run_type"]["query"] = _infinity_filter_query(
+        str(variables["run_type"]["definition"])
+    )
+    variables["lookup_run_id"]["description"] = (
+        "Exact UUID within the current Workflow/Pipeline/Run Type, including "
+        "launches older than the latest ten. Does not replace Selected Run until "
+        "a matching row is found. Clear to browse recent launches."
+    )
+    provider = variables.get("provider_for_pipeline")
+    if provider is not None:
+        provider["description"] = (
+            "Hidden selector: provider for a concrete Pipeline. Unused when "
+            "Pipeline is All ($__all / .*). Table Provider handoff uses the row field."
+        )
+    payload["templating"]["list"] = list(variables.values())
 
 
 def main() -> int:
