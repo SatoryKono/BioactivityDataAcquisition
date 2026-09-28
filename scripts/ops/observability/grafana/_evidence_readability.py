@@ -114,11 +114,13 @@ def _saved_run(p: dict[int, dict]) -> None:
                 "options": {
                     "selection_required": {
                         "text": "Choose a run to inspect saved evidence"
-                    }
+                    },
+                    **_DQ_REASON_MAPPINGS,
                 },
             }
         ],
     )
+    panel["description"] = _DQ_DOMAINS_DESCRIPTION
     _override(panel, "Evidence reference", _HIDDEN, True)
     _override(
         panel,
@@ -171,6 +173,7 @@ def _saved_run(p: dict[int, dict]) -> None:
         identity_custom["wrapText"] = True
         identity_custom["cellOptions"]["wrapText"] = True
         p[9452]["options"]["footer"]["enablePagination"] = True
+        p[9452]["description"] = _DQ_IDENTITY_DESCRIPTION
     p[9451]["options"]["footer"]["enablePagination"] = False
     heights: dict[int, int] = {}
     if 9460 in p:
@@ -569,6 +572,33 @@ def _selection_summary(panel: dict) -> None:
             }
         ],
     )
+
+
+# DQ-subset of reason codes for panel 9451 (uid bioetl-dq-v2, #11686).
+# Unknown codes stay visible: Grafana shows the raw value when no mapping
+# matches. Runtime-only wordings are deliberately not copied blindly.
+_DQ_REASON_MAPPINGS = {
+    "execution_success": {"text": "Processing completed"},
+    "run_dq_threshold_evaluation": {"text": "Data quality checks"},
+    "run_preflight_provider_observation": {"text": "Provider preflight check"},
+    "run_gold_schema_validation": {"text": "Gold schema validation"},
+    "run_observation_missing": {"text": "Result not recorded"},
+    "workflow_success": {"text": "Workflow completed"},
+    "run_completion_trust_assessment": {"text": "Completion trust assessment"},
+}
+_DQ_DOMAINS_DESCRIPTION = (
+    "SELECTED RUN · Domain verdicts of this Run ID; this is not the page status. "
+    "Missing checks are INCOMPLETE; missing selection is SELECT RUN; request "
+    "failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is "
+    "an empty successful query. This saved verdict does not authorize replay."
+)
+_DQ_IDENTITY_DESCRIPTION = (
+    "SELECTED RUN · Full identifiers of this Run ID; the short table is Inspect "
+    "Run Identity on the first screen. Missing checks are INCOMPLETE; missing "
+    "selection is SELECT RUN; request failure is QUERY ERROR. N/A means "
+    "explicitly inapplicable. VALID EMPTY is an empty successful query. This "
+    "saved verdict does not authorize replay."
+)
 
 
 _REASON_MAPPINGS = {

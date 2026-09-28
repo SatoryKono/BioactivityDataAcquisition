@@ -12,8 +12,9 @@ DESCRIPTION = (
     "This saved verdict does not authorize replay."
 )
 STATUS_DESCRIPTION = (
-    "SELECTED RUN · Columns are Result, Status, Evidence, and Rules. "
-    "Status is the verdict. " + DESCRIPTION.removeprefix("SELECTED RUN · ")
+    "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. "
+    "Processing is the ETL outcome. Trust is the saved Trust verdict and does not "
+    "authorize replay. " + DESCRIPTION.removeprefix("SELECTED RUN · ")
 )
 
 
@@ -444,6 +445,13 @@ def _run_duration_panel(grid: dict[str, int]) -> dict[str, object]:
     }
 
 
+ROW_9450_DESCRIPTION = (
+    "Expand for saved stage rows (Inspect Selected Run Stages), domain verdicts "
+    "(Inspect Selected Run Domains), and full identity (Inspect Selected Run "
+    "Identity) of the selected Run ID."
+)
+
+
 def _append_saved_run_evidence_row(
     panels: list[object],
     *,
@@ -509,10 +517,7 @@ def _append_saved_run_evidence_row(
             "type": "row",
             "title": "Inspect Saved Run Evidence",
             "collapsed": True,
-            "description": (
-                "Expand for saved stage rows, then domain trust reasons, "
-                "for the selected Run ID."
-            ),
+            "description": ROW_9450_DESCRIPTION,
             "gridPos": {"x": 0, "y": y, "w": 24, "h": 1},
             "panels": children,
         }

@@ -201,7 +201,8 @@ _DQ_SCOPE_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;'
     'line-height:1.2;white-space:normal;overflow-wrap:anywhere"><div style="max-width:96ch">'
     "SELECTED RUN · Saved evidence for the selected Run ID. "
-    "CURRENT pipeline status and TIME RANGE scores are not on this page."
+    "CURRENT pipeline status and TIME RANGE scores are not on this page. "
+    "A time-range value never proves this run."
     "</div></div>"
 )
 _OVERVIEW_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {

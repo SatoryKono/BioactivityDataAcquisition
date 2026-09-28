@@ -21,7 +21,7 @@ Selected-run accounting includes input, accepted, Silver/Gold quarantine, contra
 
 ### Review Selected Run Status
 - **Type:** Table
-- **Purpose:** Saved verdict for the exact Run ID.
+- **Purpose:** Saved verdict for the exact Run ID. Overall verdict is the data-quality assessment; Processing is the ETL outcome; Trust is the saved Trust verdict and does not authorize replay.
 - **Data sources:** `/ops/observability/selected-run-status` with `run_id`.
 - **Empty:** `QUERY ERROR` when the request fails. `SELECT RUN` is not a successful empty run.
 
@@ -32,11 +32,11 @@ Selected-run accounting includes input, accepted, Silver/Gold quarantine, contra
 
 ### Inspect Processed Records
 - **Type:** Table
-- **Purpose:** Input, accepted, quarantine, exclusions and Gold output for the selected Run ID.
+- **Purpose:** Input, accepted, quarantine, exclusions and Gold output for the selected Run ID. Counts are not TIME RANGE scores. Gold/Silver percentages use the Bronze count as the denominator.
 - **Data sources:** `/ops/observability/processed-records` with `run_id`.
 
 ### Inspect Saved Run Evidence
 - **Type:** Row
 - **Purpose:** Saved domain and identity detail for the same Run ID.
-- **Panels:** `Inspect Selected Run Domains` (domain verdicts of this Run ID; not the page status), `Inspect Selected Run Identity` (full identifiers; the short table is `Inspect Run Identity` on the first screen).
+- **Panels:** `Inspect Selected Run Stages` (saved stage rows for the exact Run ID), `Inspect Selected Run Domains` (domain verdicts of this Run ID; not the page status), `Inspect Selected Run Identity` (full identifiers; the short table is `Inspect Run Identity` on the first screen).
 - **Data sources:** `/ops/observability/selected-run-status` with `run_id`.
