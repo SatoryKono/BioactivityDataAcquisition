@@ -16,7 +16,10 @@ first_screen_y_max: 28
 budgets:
   worst_first_load_promql: 6
   overview_first_load_promql: 6
-  first_paint_ops_http_panels: 5
+  # Recalibrated after the selected-run redesign: first-screen evidence moved
+  # from Prometheus to local Ops HTTP report endpoints (saved exact-run
+  # evidence), so the first-paint HTTP panel count is intentionally higher.
+  first_paint_ops_http_panels: 17
   max_first_screen_expr_chars: 200
   first_screen_range_refs: 0
   refresh_seconds: 60
@@ -40,4 +43,8 @@ primary_uids:
   - bioetl-provider-health-v2
   - bioetl-dq-v2
 retired_uids: []
-expr_length_exceptions: []
+# bioetl-incident-v1 ships one deliberate first-window alert-union expression
+# (Monitor Global Alerts: provider enrichment + unless composition) that cannot
+# be shortened without a new recording rule.
+expr_length_exceptions:
+  - bioetl-incident-v1

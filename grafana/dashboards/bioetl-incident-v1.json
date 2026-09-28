@@ -274,7 +274,8 @@
         "query": {
           "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
           "refId": "StandardVariableQuery"
-        }
+        },
+        "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
       }
     ]
   },
@@ -377,18 +378,6 @@
           "includeVars": false,
           "asDropdown": false,
           "tags": []
-        },
-        {
-          "title": "Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Run Explorer (Run Explorer). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
         }
       ]
     },
@@ -396,7 +385,7 @@
       "id": 9400,
       "type": "text",
       "title": "",
-      "description": "Explains the incident-triage question and the evidence scopes used on this read-only dashboard. CURRENT ranks suspects from current fleet telemetry in GLOBAL scope; Pipeline and Run ID do not filter suspects. SELECTED RUN uses HTTP-backed evidence for one exact run; run_id never filters Prometheus. No suspects means none were found in the current scope and does not prove the fleet is healthy Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider}. VALID_EMPTY is an empty suspect list, not a healthy fleet.",
+      "description": "Explains the incident-triage question and the evidence scopes used on this read-only dashboard. CURRENT ranks suspects from current fleet telemetry in GLOBAL scope; Pipeline and Run ID do not filter suspects. SELECTED RUN uses HTTP-backed evidence for one exact run; run_id never filters Prometheus. No suspects means none were found in the current scope and does not prove the fleet is healthy Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider}. VALID EMPTY is an empty suspect list, not a healthy fleet.",
       "gridPos": {
         "h": 3,
         "w": 16,
@@ -406,7 +395,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Incident Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">CURRENT: ${workflow:text} / ${pipeline:text} / ${run_type:text}; Run ID does not filter this card.<br>GLOBAL tables below cover all pipelines; suspects are not verified causes. VALID_EMPTY is an empty suspect list, not a healthy fleet.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">CURRENT: ${workflow:text} / ${pipeline:text} / ${run_type:text}; Run ID does not filter this card.<br>GLOBAL tables below cover all pipelines; suspects are not verified causes. VALID EMPTY is an empty suspect list, not a healthy fleet.</div>"
       },
       "links": []
     },
@@ -501,7 +490,8 @@
               "targetBlank": false,
               "includeVars": false
             }
-          ]
+          ],
+          "unit": "none"
         },
         "overrides": []
       },
@@ -741,7 +731,8 @@
           },
           "links": [],
           "mappings": [],
-          "decimals": 0
+          "decimals": 0,
+          "unit": "none"
         },
         "overrides": [
           {
@@ -1279,7 +1270,8 @@
               "targetBlank": true,
               "includeVars": false
             }
-          ]
+          ],
+          "unit": "none"
         },
         "overrides": [
           {
@@ -1625,7 +1617,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "unit": "none"
             },
             "overrides": []
           },
@@ -1742,9 +1735,9 @@
               "links": [
                 {
                   "title": "Open domain workspace",
-                  "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-                  "targetBlank": false,
-                  "includeVars": false
+                  "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                  "includeVars": false,
+                  "targetBlank": false
                 }
               ],
               "mappings": [
@@ -1759,7 +1752,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "unit": "none"
             },
             "overrides": [
               {
@@ -1974,9 +1968,9 @@
               "links": [
                 {
                   "title": "Open domain workspace",
-                  "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-pipeline_context=${pipeline:percentencode}&var-provider=${__data.fields.provider:percentencode}&${__url_time_range}",
-                  "targetBlank": false,
-                  "includeVars": false
+                  "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${provider:queryparam}&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
+                  "includeVars": false,
+                  "targetBlank": false
                 }
               ],
               "mappings": [
@@ -1991,7 +1985,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "unit": "none"
             },
             "overrides": [
               {
@@ -2171,9 +2166,9 @@
               "links": [
                 {
                   "title": "Open domain workspace",
-                  "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-                  "targetBlank": false,
-                  "includeVars": false
+                  "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                  "includeVars": false,
+                  "targetBlank": false
                 }
               ],
               "mappings": [
@@ -2188,7 +2183,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "unit": "none"
             },
             "overrides": [
               {
@@ -2378,6 +2374,7 @@
           "fieldConfig": {
             "defaults": {
               "noValue": "Not provided",
+              "unit": "none",
               "custom": {
                 "align": "left",
                 "minWidth": 50,
@@ -3799,20 +3796,13 @@
               }
             }
           ],
-          "links": [
-            {
-              "includeVars": false,
-              "title": "Show all rows and total (summary: up to 3)",
-              "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22460&${__url_time_range}",
-              "targetBlank": false
-            }
-          ]
+          "links": []
         },
         {
           "id": 9463,
           "type": "stat",
           "title": "Review Total Run Duration",
-          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing.",
+          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN.",
           "gridPos": {
             "x": 0,
             "y": 67,
@@ -3824,7 +3814,19 @@
             "defaults": {
               "unit": "s",
               "decimals": 2,
-              "noValue": "Not recorded"
+              "noValue": "Not recorded",
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
             },
             "overrides": []
           },
@@ -3989,7 +3991,7 @@
           },
           "targets": [
             {
-              "expr": "max by(stage) (bioetl_stage_backlog_records{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"})",
+              "expr": "max by(stage) (bioetl_stage_backlog_records{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"})",
               "legendFormat": "{{stage}}",
               "refId": "A"
             }
@@ -4147,17 +4149,17 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.50, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.50, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p50",
               "refId": "A"
             },
             {
-              "expr": "(histogram_quantile(0.95, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p95",
               "refId": "B"
             },
             {
-              "expr": "(histogram_quantile(0.99, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.99, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p99",
               "refId": "C"
             }
@@ -4907,7 +4909,7 @@
           "description": "TIME RANGE · Shows current memory-pressure state by Pipeline and Stage. Mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN; Run Type does not affect this panel. Review structured report files and checkpoint/resume pressure before retrying",
           "targets": [
             {
-              "expr": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",stage=~\"$stage\"}[15m]))",
+              "expr": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[15m]))",
               "refId": "A"
             }
           ],
@@ -5071,7 +5073,7 @@
           },
           "targets": [
             {
-              "expr": "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))",
+              "expr": "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage!~\"none.*\"}[$__range]))",
               "instant": true,
               "refId": "A",
               "format": "table"
@@ -5212,7 +5214,7 @@
           },
           "targets": [
             {
-              "expr": "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))",
+              "expr": "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage!~\"none.*\"}[$__range]))",
               "instant": true,
               "refId": "A",
               "legendFormat": "{{stage}} · {{run_type}}",
@@ -5814,7 +5816,7 @@
           },
           "targets": [
             {
-              "expr": "sum by(stage) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__interval]))",
+              "expr": "sum by(stage) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__interval]))",
               "legendFormat": "{{stage}}",
               "refId": "A"
             }
@@ -6114,25 +6116,25 @@
           "links": [
             {
               "title": "Review current status",
-              "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=9401&${__url_time_range}",
+              "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9401&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             },
             {
               "title": "Review range evidence",
-              "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=205&${__url_time_range}",
+              "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=205&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             },
             {
               "title": "Inspect top blockers",
-              "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=9101&${__url_time_range}",
+              "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9101&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             },
             {
               "title": "Inspect active blocker",
-              "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${stage:queryparam}&viewPanel=242&${__url_time_range}",
+              "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=242&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             }
@@ -10490,7 +10492,8 @@
               },
               "links": [],
               "mappings": [],
-              "decimals": 0
+              "decimals": 0,
+              "unit": "none"
             },
             "overrides": [
               {
@@ -11057,7 +11060,8 @@
                   "targetBlank": true,
                   "includeVars": false
                 }
-              ]
+              ],
+              "unit": "none"
             },
             "overrides": [
               {
@@ -11351,7 +11355,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -12027,7 +12031,8 @@
                   "wrapText": true
                 }
               },
-              "noValue": "UNKNOWN"
+              "noValue": "UNKNOWN",
+              "unit": "none"
             },
             "overrides": [
               {

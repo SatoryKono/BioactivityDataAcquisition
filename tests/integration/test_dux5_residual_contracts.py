@@ -46,11 +46,11 @@ def test_nav_bus_complete_without_truncation() -> None:
         assert "DUX4-22: truncated" not in content
         assert "bioetl-nav" in content
         for chip in (
-            "1. Trust",
-            "2. Overview",
-            "3. Pipeline Diagnostics",
-            "4. Provider Health",
-            "5. Data Quality",
+            "Replay Readiness",
+            "Run Overview",
+            "Pipeline Diagnostics",
+            "Provider Health",
+            "Data Quality",
             "6. Incident Workspace",
             "0. Run Explorer",
         ):

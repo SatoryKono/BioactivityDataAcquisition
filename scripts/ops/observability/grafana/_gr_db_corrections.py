@@ -317,180 +317,118 @@ def _correct_incident(uid: object, panels: dict[int, dict]) -> None:
         )
         status["links"] = links
 
+    triage = panels.get(9991)
+    if isinstance(triage, dict):
+        # The first-action CTA targets moved to Incident Workspace together with
+        # the panel; runtime no longer hosts these viewPanel ids.
+        incident_scope = (
+            "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}"
+            "&${pipeline:queryparam}&${run_type:queryparam}"
+            "&${run_id:queryparam}"
+        )
+        target_by_title = {
+            "Review current status": 9401,
+            "Review range evidence": 205,
+            "Inspect top blockers": 9101,
+            "Inspect active blocker": 242,
+        }
+        for link in triage.get("links") or []:
+            if not isinstance(link, dict):
+                continue
+            view_panel = target_by_title.get(str(link.get("title", "")))
+            if view_panel is None:
+                continue
+            link["url"] = (
+                f"{incident_scope}&viewPanel={view_panel}&${{__url_time_range}}"
+            )
+            link["includeVars"] = False
+            link["targetBlank"] = False
 
-def _correct_provider_fleet_panel(
-    panel: dict, panel_id: int, fleet: str, empty: str
-) -> None:
-    for item in panel["fieldConfig"]["overrides"]:
-        item["properties"] = [
-            prop for prop in item["properties"] if prop["id"] != _WIDTH
+    workspace_scope = (
+        "${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}"
+        "&${run_id:queryparam}&${__url_time_range}"
+    )
+    workspace_links = {
+        2002: "/d/bioetl-runtime/3-pipeline-diagnostics?" + workspace_scope,
+        2003: "/d/bioetl-provider-health-v2/4-provider-health?"
+        + workspace_scope.replace(
+            "&${run_id:queryparam}",
+            "&${run_id:queryparam}&${provider:queryparam}"
+            "&var-pipeline_context=${pipeline:percentencode}",
+        ),
+        2004: "/d/bioetl-dq-v2/5-data-quality?" + workspace_scope,
+    }
+    for panel_id, url in workspace_links.items():
+        suspect = panels.get(panel_id)
+        if not isinstance(suspect, dict):
+            continue
+        defaults = suspect.setdefault("fieldConfig", {}).setdefault("defaults", {})
+        links = [
+            link
+            for link in defaults.get("links") or []
+            if not (
+                isinstance(link, dict) and link.get("title") == "Open domain workspace"
+            )
         ]
-    status_field = "Severity" if panel_id == 9102 else "Status"
-    _override(panel, status_field, _WIDTH, 130)
-    expr = f"{fleet} >= 1"
-    if panel_id == 9102:
-        expr = f"topk(4, {expr})"
-    expr = f'label_replace(({expr}), "provider_target", "$1", "provider", "(.*)")'
-    panel["targets"][0]["expr"] = f"({expr}) or {empty}"
-    _override(
-        panel,
-        status_field,
-        "mappings",
-        [
+        links.append(
             {
-                "type": "value",
-                "options": {
-                    "-1": {"text": "VALID EMPTY", "color": "text"},
-                    "1": {"text": "WARN", "color": "yellow"},
-                    "2": {"text": "CRIT", "color": "red"},
-                    "3": {"text": "UNKNOWN", "color": "gray"},
-                },
+                "title": "Open domain workspace",
+                "url": url,
+                "includeVars": False,
+                "targetBlank": False,
             }
-        ],
-    )
-    _override(panel, "provider_target", _HIDDEN, True)
-    _override(
-        panel,
-        "Provider",
-        "mappings",
-        [
-            {
-                "type": "value",
-                "options": {
-                    "VALID EMPTY - fleet observed, no non-OK providers": {
-                        "text": "No non-OK providers"
-                    }
-                },
-            }
-        ],
-    )
-    for link in panel["fieldConfig"].get("defaults", {}).get("links", []):
-        link["url"] = link.get("url", "").replace(
-            "${__data.fields.provider:percentencode}",
-            "${__data.fields.provider_target:percentencode}",
         )
-    panel["description"] = (
-        "GLOBAL · Current fleet, independent of the selected Provider. "
-        "VALID EMPTY requires every observed "
-        "provider to have health evidence and current status OK. Missing coverage "
-        "remains UNKNOWN; query failure is not a healthy empty fleet."
-    )
+        defaults["links"] = links
 
-
-def _correct_provider_cause_panel(panel: dict) -> None:
-    for field in ("cause", "Cause"):
-        _override(
-            panel,
-            field,
-            "mappings",
-            [
-                {
-                    "type": "value",
-                    "options": {
-                        "VALID EMPTY - FLEET coverage proven, no active provider causes": {
-                            "text": "VALID EMPTY - no active causes"
-                        },
-                        "UNKNOWN - FLEET cause coverage unproven, restore provider telemetry": {
-                            "text": "UNKNOWN - restore telemetry"
-                        },
-                    },
-                }
-            ],
-        )
-    # The synthetic verdict is a presence marker, not an event count.
-    _override(panel, "Value", _HIDDEN, True)
+    progress = panels.get(2460)
+    if isinstance(progress, dict):
+        # The expanded stage-progress clone stayed behind on runtime; drop the
+        # dead deep-link instead of pointing into a non-existent viewPanel.
+        progress["links"] = [
+            link
+            for link in progress.get("links") or []
+            if "viewPanel=22460" not in str(link.get("url", ""))
+        ]
 
 
 def _correct_provider(uid: object, panels: dict[int, dict]) -> None:
     if uid != "bioetl-provider-health-v2":
         return
-    if 9401 not in panels or 9101 not in panels or 9107 not in panels:
-        return
-    # Sparse real counter observations (including a single zero) need a
-    # marker; a line alone renders an indistinguishable empty chart.
-    panels[32]["fieldConfig"]["defaults"]["custom"]["showPoints"] = "always"
-    panels[32]["options"]["legend"].update(showLegend=True, displayMode="list")
-    _override(
-        panels[9101],
-        "provider",
-        _CELL,
-        {"type": "auto", "wrapText": False},
-    )
-    for field in ("reason", "Reason", "Source state"):
-        _override(
-            panels[9107],
-            field,
-            _CELL,
-            {"type": "auto", "wrapText": False},
+    check = panels.get(9461)
+    if isinstance(check, dict):
+        diagnostics_url = (
+            "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}"
+            "&${pipeline:queryparam}&${run_type:queryparam}"
+            "&${run_id:queryparam}&${__url_time_range}"
         )
-    _override(
-        panels[9107],
-        "reason",
-        "mappings",
-        [
+        # The critical-panel contract requires a field dataLink surface, so the
+        # CTA lives in fieldConfig.defaults.links rather than panel.links.
+        check["links"] = [
+            link
+            for link in check.get("links") or []
+            if not (
+                isinstance(link, dict)
+                and link.get("title") == "Open Pipeline Diagnostics"
+            )
+        ]
+        defaults = check.setdefault("fieldConfig", {}).setdefault("defaults", {})
+        links = [
+            link
+            for link in defaults.get("links") or []
+            if not (
+                isinstance(link, dict)
+                and link.get("title") == "Open Pipeline Diagnostics"
+            )
+        ]
+        links.append(
             {
-                "type": "value",
-                "options": {
-                    "observed_health_status": {"text": "Observed"},
-                    "invalid_health_timestamp": {"text": "Bad time"},
-                    "missing_health_status": {"text": "Missing"},
-                },
+                "title": "Open Pipeline Diagnostics",
+                "url": diagnostics_url,
+                "includeVars": False,
+                "targetBlank": False,
             }
-        ],
-    )
-    _override(panels[9107], "Provider", _WIDTH, 95)
-    _override(panels[9107], "Source state", _WIDTH, 105)
-    _override(panels[9107], "Status", _WIDTH, 100)
-    panels[9401]["targets"] = [
-        {
-            "expr": 'count(bioetl_pstatus{provider=~"$provider"} == 0)',
-            "legendFormat": "OK",
-            "instant": True,
-            "refId": "A",
-        },
-        {
-            "expr": 'count(bioetl_pstatus{provider=~"$provider"} == 1)',
-            "legendFormat": "WARN",
-            "instant": True,
-            "refId": "B",
-        },
-        {
-            "expr": 'count(bioetl_pstatus{provider=~"$provider"} == 2)',
-            "legendFormat": "CRIT",
-            "instant": True,
-            "refId": "C",
-        },
-        {
-            "expr": 'count(bioetl_pstatus{provider=~"$provider"} == 3)',
-            "legendFormat": "UNKNOWN",
-            "instant": True,
-            "refId": "D",
-        },
-    ]
-    panels[9401]["fieldConfig"]["defaults"]["mappings"] = []
-    panels[9401]["title"] = "Monitor Provider Status"
-    panels[9401]["fieldConfig"]["defaults"]["noValue"] = "TELEMETRY MISSING"
-    panels[9401]["description"] = (
-        "CURRENT · выбранный провайдер, не история Run ID. "
-        "Run ID — контекст навигации. "
-        "UNKNOWN: нет или недостоверно наблюдение (в том числе invalid_health_timestamp). "
-        "TELEMETRY MISSING: нет серии. QUERY ERROR: сбой запроса. "
-        "Если провайдер не определён — выберите его. "
-        "All — общий текущий статус; одна серия не означает полноту всего набора."
-    )
-    fleet = "max by (provider) (bioetl_provider_current_status)"
-    health = "max by (provider) (bioetl_provider_health_status)"
-    coverage = (
-        f"((count({fleet}) > 0) * 0 + 1)"
-        f" * absent({fleet} != 0)"
-        f" * absent({fleet} unless on(provider) {health})"
-    )
-    empty = f'label_replace((({coverage}) * 0 - 1), "provider", "VALID EMPTY - fleet observed, no non-OK providers", "", "")'
-    empty = f'label_replace({empty}, "provider_target", "$$__all", "", "")'
-    for panel_id in (9102, 9112):
-        _correct_provider_fleet_panel(panels[panel_id], panel_id, fleet, empty)
-    for panel_id in (9103, 9113):
-        _correct_provider_cause_panel(panels[panel_id])
+        )
+        defaults["links"] = links
 
 
 def _correct_control_plane(uid: object, panels: dict[int, dict]) -> None:
@@ -588,6 +526,30 @@ def _correct_control_plane(uid: object, panels: dict[int, dict]) -> None:
             "An absent series is TELEMETRY MISSING and remains UNKNOWN. "
             "Run Type does not affect this panel."
         )
+    processed = panels.get(9403)
+    if isinstance(processed, dict):
+        # The critical-panel contract tracks dataLinks; expose the Run
+        # Explorer handoff on the field surface, not only in panel.links.
+        defaults = processed.setdefault("fieldConfig", {}).setdefault("defaults", {})
+        links = [
+            link
+            for link in defaults.get("links") or []
+            if not (isinstance(link, dict) and link.get("title") == "Open Run Explorer")
+        ]
+        links.append(
+            {
+                "title": "Open Run Explorer",
+                "url": (
+                    "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?"
+                    "${workflow:queryparam}&${pipeline:queryparam}"
+                    "&${run_type:queryparam}&${run_id:queryparam}"
+                    "&${__url_time_range}"
+                ),
+                "includeVars": False,
+                "targetBlank": False,
+            }
+        )
+        defaults["links"] = links
 
 
 def _compact_table_base(uid: object, panel_id: int, panel: dict) -> None:
@@ -936,6 +898,7 @@ def _dq_processed_records(panel: dict) -> None:
         "$merge([$r, {'percentage': $contains($string($r.percentage), '%') ? "
         "$formatNumber($number($substringBefore($r.percentage, '%')), '0.0') & '%' : $r.percentage}])})"
     )
+    panel["targets"][0].pop("root_selector", None)
     panel["targets"][0].update(
         parser="uql", uql='parse-json | jsonata "' + outcome_expression + '"'
     )
@@ -970,7 +933,7 @@ def _dq_processed_records(panel: dict) -> None:
                     "value": "count out",
                     "value A": "count out",
                     "count in StageInput": "count in",
-                    "percentage A": "percentage",
+                    "percentage A": "percentage of Bronze",
                 },
             },
         },
@@ -987,8 +950,8 @@ def _dq_processed_records(panel: dict) -> None:
     for field in ("value", "value A", "count", "count out"):
         _override(panel, field, _WIDTH, 100)
     _override(panel, "percentage", _WIDTH, 100)
-    _override(panel, "percentage", "displayName", "percentage")
-    _override(panel, "percentage A", "displayName", "percentage")
+    _override(panel, "percentage", "displayName", "percentage of Bronze")
+    _override(panel, "percentage A", "displayName", "percentage of Bronze")
     for field in (
         "value",
         "value A",
@@ -1015,9 +978,9 @@ def _dq_processed_records(panel: dict) -> None:
         )
     panel["options"]["footer"]["enablePagination"] = False
     panel["options"]["cellHeight"] = "sm"
-    panel["gridPos"]["h"] = 13
+    panel["gridPos"]["h"] = 7
     panel["description"] = (
-        "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden."
+        "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden. Request failure is QUERY ERROR."
     )
 
 

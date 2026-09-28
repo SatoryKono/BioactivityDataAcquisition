@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -121,10 +122,10 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-overview-v2": {9002: 5},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 3, 24, 2),
-    9422: (0, 5, 24, 3),
-    9418: (0, 8, 12, 9),
-    9416: (12, 8, 12, 9),
+    9400: (0, 3, 24, 3),
+    9422: (0, 6, 24, 3),
+    9418: (0, 9, 12, 8),
+    9416: (12, 9, 12, 8),
 }
 _CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
 # Runtime already owns current readiness as 9401 Monitor Pipeline Status.
@@ -182,9 +183,9 @@ _RUNTIME_FLEET_ID_REMAP = {9401: 18940}
 _RUNTIME_FLEET_ROW_ID = 8808
 _RUNTIME_SELECTED_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 2, 14, 4),
-    9998: (14, 2, 10, 4),
-    9402: (0, 6, 12, 8),
-    9403: (12, 6, 12, 8),
+    9998: (14, 2, 10, 5),
+    9402: (0, 7, 12, 7),
+    9403: (12, 7, 12, 7),
 }
 _INCIDENT_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     2001: (0, 6, 24, 2),
@@ -207,10 +208,10 @@ _DQ_SCOPE_HTML = (
 _OVERVIEW_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     99: (0, 2, 17, 3),
     9604: (17, 2, 7, 3),
-    9603: (0, 5, 12, 6),
-    9002: (12, 5, 12, 6),
-    9300: (0, 18, 24, 8),
-    9301: (0, 26, 24, 8),
+    9603: (0, 5, 12, 7),
+    9002: (12, 5, 12, 7),
+    9300: (0, 12, 24, 7),
+    9301: (0, 18, 24, 8),
 }
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 2, 24, 3),
@@ -1894,11 +1895,16 @@ def _attach_nav_bus(nav: dict[str, object], *, current_uid: str) -> None:
         "content": render_html(current_uid=current_uid),
     }
     bus_titles = {item["title"] for item in BUS}
+    bus_uids = {item["uid"] for item in BUS}
     previous_links = nav.get("links") if isinstance(nav.get("links"), list) else []
     extra_links = [
         link
         for link in previous_links
-        if isinstance(link, dict) and link.get("title") not in bus_titles
+        if isinstance(link, dict)
+        and link.get("title") not in bus_titles
+        # Drop stale aliases of bus targets (e.g. legacy "Run Explorer" chips);
+        # the canonical bus already routes to every uid in BUS.
+        and not any(f"/d/{uid}/" in str(link.get("url", "")) for uid in bus_uids)
     ]
     nav["links"] = render_links(current_uid=current_uid) + extra_links
     if current_uid == _RUN_EXPLORER_UID:
@@ -2050,9 +2056,20 @@ def _retain_dq_selected_run_panels(payload: dict[str, object]) -> None:
         footer["enablePagination"] = True
 
 
+_FLEET_STAGE_FILTER_RE = re.compile(r',?stage=~"\$stage"')
+
+
 def _stamp_runtime_fleet_panel(panel: dict[str, object]) -> None:
     panel_id = panel.get("id")
     description = str(panel.get("description") or "")
+    # The incident workspace has no $stage variable; the moved fleet panels
+    # intentionally cover every stage, so drop the unbound selector.
+    for target in panel.get("targets") or []:
+        if not isinstance(target, dict):
+            continue
+        expr = target.get("expr")
+        if isinstance(expr, str) and 'stage=~"$stage"' in expr:
+            target["expr"] = _FLEET_STAGE_FILTER_RE.sub("", expr)
     if panel.get("id") == 18940:
         panel["title"] = "Monitor Pipeline Status"
         panel["description"] = (

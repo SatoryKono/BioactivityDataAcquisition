@@ -79,12 +79,12 @@ def apply_run_explorer_columns(payload: dict) -> None:
     if payload.get("uid") != "bioetl-run-explorer-v1":
         return
     panels = {panel["id"]: panel for panel in payload["panels"]}
-    panels[1]["gridPos"]["h"] = 2
+    panels[1]["gridPos"]["h"] = 3
     panels[1]["options"]["content"] = panels[1]["options"]["content"].replace(
         "Select a Run ID to view details.", "Select a status to view details."
     )
     panel = panels[3010]
-    panel["gridPos"].update(y=2, h=14)
+    panel["gridPos"].update(y=3, h=13)
     panel["description"] = (
         "Last 10 launches, newest Started first, independent of the time range. "
         "Workflow and Pipeline open passports. Run ID opens the persisted Report; "
@@ -93,6 +93,8 @@ def apply_run_explorer_columns(payload: dict) -> None:
         "N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. "
         "IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. "
         "QUERY ERROR is a source failure; VALID EMPTY means no matching launches. "
+        "Rows are artifact-backed: a tree_missing index means saved run artifacts are absent; "
+        "verify backing with verify_report_bind.py. "
         "Running is a recorded state, not proof of current liveness. Missing reports have no link."
     )
     hidden = [
@@ -106,7 +108,10 @@ def apply_run_explorer_columns(payload: dict) -> None:
     ]
     names = [*_COLUMNS, *hidden]
     panel["targets"][0]["root_selector"] = (
-        'index_state = "valid_empty" and $exists(items) and $count(items) = 0 ? [{"pipeline": "VALID EMPTY"}] : (items ~> | $ | {"duration_display": $replace(duration_display, /([0-9])\\s+([a-z])/, "$1$2")} |)'
+        'index_state = "valid_empty" and $exists(items) and $count(items) = 0 '
+        '? [{"pipeline": "VALID EMPTY"}] : items.($merge([$, '
+        '{"overview_handoff": "Open", "diagnostics_handoff": "Open", '
+        '"provider_handoff": "Open", "quality_handoff": "Open"}]))'
     )
     panel["transformations"] = [
         {
@@ -123,13 +128,23 @@ def apply_run_explorer_columns(payload: dict) -> None:
             "options": {
                 "indexByName": {name: i for i, name in enumerate(names)},
                 "renameByName": {name: value[0] for name, value in _COLUMNS.items()},
-                "excludeByName": {},
+                "excludeByName": {
+                    "json_path": True,
+                    "markdown_path": True,
+                    "row_kind": True,
+                },
             },
         },
         {"id": "limit", "options": {"limitField": 10}},
     ]
     defaults = panel["fieldConfig"]["defaults"]
-    defaults.update(noValue="N/A", color={"mode": "fixed", "fixedColor": "#E5E7EB"})
+    defaults.update(
+        noValue=(
+            "UNKNOWN — the launches table returned no rows for these filters. "
+            "QUERY ERROR means the backend request failed, not an empty fleet."
+        ),
+        color={"mode": "fixed", "fixedColor": "#E5E7EB"},
+    )
     defaults["custom"].update(
         minWidth=50, wrapText=False, cellOptions={"type": "auto", "wrapText": False}
     )
@@ -195,7 +210,12 @@ def apply_run_explorer_columns(payload: dict) -> None:
                             {
                                 "type": "value",
                                 "options": {
-                                    s: {"text": s if s in {"OK", "N/A", "ERROR"} else s.lower(), "color": c}
+                                    s: {
+                                        "text": s
+                                        if s in {"OK", "N/A", "ERROR"}
+                                        else s.lower(),
+                                        "color": c,
+                                    }
                                     for s, c in _COLORS.items()
                                 },
                             }
@@ -231,6 +251,24 @@ def apply_run_explorer_columns(payload: dict) -> None:
                 "properties": [{"id": "custom.hidden", "value": True}],
             }
         )
+    overrides.append(
+        {
+            "matcher": {"id": "byName", "options": "status"},
+            "properties": [
+                {
+                    "id": "mappings",
+                    "value": [
+                        {
+                            "type": "value",
+                            "options": {
+                                s: {"text": s, "color": c} for s, c in _COLORS.items()
+                            },
+                        }
+                    ],
+                }
+            ],
+        }
+    )
     panel["fieldConfig"]["overrides"] = overrides
     panel["options"]["sortBy"] = [{"displayName": "Started", "desc": True}]
 

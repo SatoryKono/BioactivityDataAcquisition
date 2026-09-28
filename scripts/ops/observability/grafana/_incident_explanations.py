@@ -304,6 +304,7 @@ def _measurements(panels: dict[int, dict]) -> None:
         "fieldConfig": {
             "defaults": {
                 "noValue": _NOT_PROVIDED,
+                "unit": "none",
                 "custom": {
                     "align": "left",
                     "minWidth": 50,

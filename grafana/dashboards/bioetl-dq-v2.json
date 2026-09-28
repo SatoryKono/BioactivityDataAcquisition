@@ -271,7 +271,8 @@
         "query": {
           "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
           "refId": "StandardVariableQuery"
-        }
+        },
+        "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
       }
     ]
   },
@@ -379,18 +380,6 @@
           "title": "6. Incident Workspace",
           "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "tooltip": "6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Run Explorer (Run Explorer). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -999,10 +988,10 @@
         "x": 12,
         "y": 10,
         "w": 12,
-        "h": 13
+        "h": 7
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden.",
+      "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden. Request failure is QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1188,7 +1177,7 @@
               },
               {
                 "id": "displayName",
-                "value": "percentage"
+                "value": "percentage of Bronze"
               },
               {
                 "id": "noValue",
@@ -1456,7 +1445,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "percentage"
+                "value": "percentage of Bronze"
               },
               {
                 "id": "noValue",
@@ -1503,7 +1492,6 @@
           "format": "table",
           "parser": "uql",
           "refId": "A",
-          "root_selector": "rows",
           "source": "url",
           "type": "json",
           "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
@@ -1554,7 +1542,7 @@
               "value": "count out",
               "value A": "count out",
               "count in StageInput": "count in",
-              "percentage A": "percentage"
+              "percentage A": "percentage of Bronze"
             }
           }
         }
@@ -1584,7 +1572,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",

@@ -297,7 +297,8 @@
         "query": {
           "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
           "refId": "StandardVariableQuery"
-        }
+        },
+        "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
       }
     ]
   },
@@ -412,18 +413,6 @@
           "includeVars": false,
           "asDropdown": false,
           "tags": []
-        },
-        {
-          "title": "Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Run Explorer (Run Explorer). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
         }
       ]
     },
@@ -453,7 +442,7 @@
         "x": 14,
         "y": 2,
         "w": 10,
-        "h": 4
+        "h": 5
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Columns are Result, Status, Evidence, and Rules. Status is the verdict. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
@@ -662,9 +651,9 @@
       "title": "Inspect Pipeline Identity",
       "gridPos": {
         "x": 0,
-        "y": 6,
+        "y": 7,
         "w": 12,
-        "h": 8
+        "h": 7
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Shows HTTP-backed identity for an exact Run ID. Aggregate Pipeline scope does not guess a run. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR. Verify /health/live and continue in Run Explorer. Inspect value opens full identifiers as selectable plain text.",
@@ -918,9 +907,9 @@
       "title": "Inspect Processed Records",
       "gridPos": {
         "x": 12,
-        "y": 6,
+        "y": 7,
         "w": 12,
-        "h": 8
+        "h": 7
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Shows HTTP-backed Bronze input, Silver accepted/rejected, and Gold output counts and outcomes. Zero is a recorded count. No matching rows means VALID EMPTY. Backend unavailable means QUERY ERROR — verify /health/live and use Run Explorer before classifying the result. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
@@ -1241,7 +1230,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -1846,7 +1835,7 @@
           "id": 9463,
           "type": "stat",
           "title": "Review Total Run Duration",
-          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing.",
+          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN.",
           "gridPos": {
             "x": 0,
             "y": 43,
@@ -1858,7 +1847,19 @@
             "defaults": {
               "unit": "s",
               "decimals": 2,
-              "noValue": "Not recorded"
+              "noValue": "Not recorded",
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
             },
             "overrides": []
           },

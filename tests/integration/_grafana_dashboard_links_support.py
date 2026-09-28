@@ -171,6 +171,10 @@ _PRIMARY_DASHBOARD_UIDS = frozenset(
     }
 )
 
+# 0. Run Explorer intentionally ships without the shared id=1000 navigation
+# bus (#11322-#11324): the dashboard is a forensic leaf, not a hub.
+_NAV_BUS_EXEMPT_UIDS = frozenset({"bioetl-run-explorer-v1"})
+
 
 def _extract_required_time_tokens(section: str) -> tuple[str, ...]:
     requirements = _NAV_LINK_CONTRACT.get("time_handoff_requirements", {})
@@ -1045,6 +1049,12 @@ def _assert_dashboard_top_level_navigation_contract(
 
     required_links = _REQUIRED_TOP_LEVEL_LINKS_BY_UID.get(uid)
     assert required_links is not None, f"Unknown dashboard uid in contract: {uid}"
+    if uid in _NAV_BUS_EXEMPT_UIDS:
+        assert not required_links, (
+            f"{dashboard_name} is nav-bus exempt but contract requires links: "
+            f"{sorted(required_links)}"
+        )
+        return
 
     navigation_links = require_dashboard_navigation_links(
         dashboard, dashboard_name=dashboard_name
@@ -1378,7 +1388,7 @@ def _assert_primary_identity_handoff_for_dashboard(
 ) -> None:
     source_uid = dashboard.get("uid")
     assert isinstance(source_uid, str), f"{dashboard_name} must declare string uid"
-    if source_uid not in _PRIMARY_DASHBOARD_UIDS:
+    if source_uid not in _PRIMARY_DASHBOARD_UIDS or source_uid in _NAV_BUS_EXEMPT_UIDS:
         return
     panel = _navigation_panel_by_id_1000(dashboard, dashboard_name=dashboard_name)
     hrefs = _html_hrefs_from_panel_content(panel, prefix="/d/")
@@ -1415,9 +1425,21 @@ def _assert_silver_explorer_html_bus_forensic_boundary(
     *, dashboard_name: str, dashboard: dict[str, object]
 ) -> None:
     """Silver Reject Explorer was removed; assert no residual handoff hrefs."""
-    panel = _navigation_panel_by_id_1000(dashboard, dashboard_name=dashboard_name)
-    hrefs = _html_hrefs_from_panel_content(panel)
-    residual = [href for href in hrefs if "silver-reject" in href]
+    panel = next(
+        (item for item in get_dashboard_panels(dashboard) if item.get("id") == 1000),
+        None,
+    )
+    if panel is None:
+        # Nav-bus-exempt dashboards (0. Run Explorer) still must not leak
+        # residual Silver Reject handoffs through any other link surface.
+        residual = [
+            str(link.get("url", ""))
+            for link in _collect_dashboard_links(dashboard)
+            if "silver-reject" in str(link.get("url", ""))
+        ]
+    else:
+        hrefs = _html_hrefs_from_panel_content(panel)
+        residual = [href for href in hrefs if "silver-reject" in href]
     assert not residual, (
         f"{dashboard_name} still links to removed Silver Reject Explorer: {residual}"
     )
@@ -1579,6 +1601,8 @@ def _assert_navigation_panel_visual_bus(
 ) -> None:
     uid = dashboard.get("uid")
     assert isinstance(uid, str), f"{dashboard_name} must declare string uid"
+    if uid in _NAV_BUS_EXEMPT_UIDS:
+        return
     panel = _navigation_panel_by_id_1000(dashboard, dashboard_name=dashboard_name)
     content = unescape(str((panel.get("options") or {}).get("content", "")))
     _assert_visual_bus_base_content(
@@ -1829,7 +1853,7 @@ def _assert_explicit_silver_explorer_policy(
     """No explicit Silver Reject Explorer handoff policy remains after removal."""
     del expected
     dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-    links = get_dashboard_navigation_links(dashboard)
+    links = _collect_dashboard_links(dashboard)
     residual = [
         link
         for link in links

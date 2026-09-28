@@ -66,7 +66,7 @@ dashboards:
       - Open Pipeline Diagnostics
     basis_tokens:
       - TIME RANGE
-      - VALID_EMPTY
+      - VALID EMPTY
   bioetl-run-explorer-v1:
     question: Which pipelines ran most recently, and where are their reports?
     answer_panel_ids:

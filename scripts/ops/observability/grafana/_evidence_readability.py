@@ -530,7 +530,7 @@ def _incident(p: dict[int, dict]) -> None:
         "UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action."
     )
     p[9400]["options"]["content"] = (
-        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">GLOBAL suspects are not verified causes. Telemetry gaps are UNKNOWN. VALID_EMPTY is an empty suspect list, not a healthy fleet.</div>'
+        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">GLOBAL suspects are not verified causes. Telemetry gaps are UNKNOWN. VALID EMPTY is an empty suspect list, not a healthy fleet.</div>'
     )
     p[2001]["options"]["content"] = (
         '<div style="font-size:16px;line-height:1.2">Open Action for evidence; PENDING has not fired. Use alert history.</div>'

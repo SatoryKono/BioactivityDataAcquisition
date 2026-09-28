@@ -300,7 +300,8 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
             "SUCCESS with missing stage evidence stays INCOMPLETE. "
             "A recorded zero stays 0. An unknown count is empty, not 0. "
             "UNFINISHED means no terminal event. "
-            "Prometheus does not change this table."
+            "Prometheus does not change this table. "
+            "Request failure is QUERY ERROR."
         ),
         "options": {
             "showHeader": True,
@@ -416,11 +417,20 @@ def _run_duration_panel(grid: dict[str, int]) -> dict[str, object]:
         "id": 9463,
         "type": "stat",
         "title": "Review Total Run Duration",
-        "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing.",
+        "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN.",
         "gridPos": grid,
         "datasource": "BioETL Ops HTTP",
         "fieldConfig": {
-            "defaults": {"unit": "s", "decimals": 2, "noValue": "Not recorded"},
+            "defaults": {
+                "unit": "s",
+                "decimals": 2,
+                "noValue": "Not recorded",
+                "color": {"mode": "thresholds"},
+                "thresholds": {
+                    "mode": "absolute",
+                    "steps": [{"color": "green", "value": None}],
+                },
+            },
             "overrides": [],
         },
         "options": {
@@ -590,7 +600,8 @@ def _provider_check_panel(
     panel["description"] = (
         "SELECTED RUN · Saved provider check for this Run ID. "
         "PRESENT means applicable saved evidence exists, not that the check passed. "
-        "Run ID is always set on this dashboard. A report without a provider id is not OK."
+        "Run ID is always set on this dashboard. A report without a provider id is not OK. "
+        "Valid-empty evidence stays VALID EMPTY. Request failure is QUERY ERROR."
     )
     panel["targets"][0]["root_selector"] = "provider_checks"
     labels = {
@@ -669,7 +680,8 @@ def _style_provider_check(panels: list[dict]) -> None:
     review["gridPos"].update(x=18, y=2, w=6, h=3)
     review["type"] = "stat"
     review["description"] = (
-        "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. This is not live fleet health."
+        "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. "
+        "OK/WARN/CRIT color the saved check verdict, not live fleet health."
     )
     review["transformations"] = [
         {"id": "limit", "options": {"limitField": 1}},
@@ -708,9 +720,20 @@ def _style_provider_check(panels: list[dict]) -> None:
                         "SELECT RUN": {"text": "SELECT RUN", "color": "gray"},
                         "INCOMPLETE": {"text": "INCOMPLETE", "color": "orange"},
                     },
-                }
+                },
+                {
+                    "type": "special",
+                    "options": {
+                        "match": "null",
+                        "result": {"text": "UNKNOWN", "color": "gray"},
+                    },
+                },
             ],
-            "color": {"mode": "fixed", "fixedColor": "gray"},
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [{"color": "green", "value": None}],
+            },
         },
         "overrides": [],
     }

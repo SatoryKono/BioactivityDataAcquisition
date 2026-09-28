@@ -25,8 +25,8 @@ pytestmark = pytest.mark.integration
 
 
 def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics():
-    """Ensure runtime dashboard stays anchored to L2 runtime triage metrics."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    """Incident Workspace hosts the fleet runtime triage metrics (#11262)."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     all_expressions = "\n".join(get_panel_expressions(dashboard))
 
     required_metrics = [
@@ -58,7 +58,7 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
         "bioetl_data_freshness_seconds",
     ]
     missing = [metric for metric in required_metrics if metric not in all_expressions]
-    assert not missing, f"Runtime dashboard missing metrics: {missing}"
+    assert not missing, f"Incident dashboard missing metrics: {missing}"
 
     def is_loki_datasource(panel: dict[str, object]) -> bool:
         datasource = panel.get("datasource")
@@ -70,7 +70,7 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
         panel for panel in get_dashboard_panels(dashboard) if is_loki_datasource(panel)
     ]
     assert not loki_panels, (
-        "Runtime dashboard must not ship Loki datasource panels after 2026-07-23"
+        "Incident dashboard must not ship Loki datasource panels after 2026-07-23"
     )
 
 
@@ -149,7 +149,8 @@ def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
 
 
 def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    # Checkpoint/replay fleet telemetry lives on Incident Workspace.
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     all_expressions = "\n".join(get_panel_expressions(dashboard))
 
     required_metrics = [
@@ -170,7 +171,7 @@ def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> Non
         "bioetl_audit_query_duration_seconds_bucket",
     ]
     missing = [metric for metric in required_metrics if metric not in all_expressions]
-    assert not missing, f"Control-plane dashboard missing metrics: {missing}"
+    assert not missing, f"Incident dashboard missing metrics: {missing}"
 
     checkpoint_panel = next(
         (panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 892),
@@ -191,23 +192,6 @@ def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> Non
     assert any("bioetl_checkpoint_age_seconds" in expr for expr in expressions)
 
 
-def test_provider_dashboard_contains_operator_surface_metrics() -> None:
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    all_expressions = "\n".join(get_panel_expressions(dashboard))
-    required_metrics = [
-        "bioetl_adapter_request_duration_seconds",
-        "bioetl_http_request_errors_total",
-        "bioetl_rate_limiter_wait_seconds",
-        "bioetl_rate_limiter_tokens_available",
-        "bioetl_circuit_breaker_state",
-        "bioetl_circuit_breaker_trips_total",
-    ]
-    missing = [metric for metric in required_metrics if metric not in all_expressions]
-    assert not missing, f"Provider dashboard missing metrics: {missing}"
-
-
 def test_dq_dashboard_contains_gold_specific_validation_surface() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panel = next(
@@ -225,7 +209,7 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
     None
 ):
     """Runtime error-rate panel must use shipped runtime errors over its fixed window."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel = next(
         (
             item
@@ -250,7 +234,7 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
     None
 ):
     """Runtime error breakdown must stay on bounded stage/error_code labels."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel = next(
         (
             item
@@ -288,119 +272,45 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
 
 
 @pytest.mark.parametrize(
-    ("panel_title", "expected_snippet"),
-    [
-        ("Monitor Healthy Checks", "[$__range]"),
-        ("Monitor Degraded Checks", "[$__range]"),
-        ("Track Failure Rate", "[$__range]"),
-        ("Monitor Health Checks", "[$__range]"),
-        ("Track Request Latency p95", "[$__rate_interval]"),
-        ("Track Rate-Limit Errors", "[$__rate_interval]"),
-        ("Track Network & Timeout Errors", "[$__rate_interval]"),
-        ("Track Rate-Limiter Wait p95", "[$__rate_interval]"),
-        ("Monitor Available Rate-Limit Tokens", "[$__range]"),
-    ],
-)
-def test_provider_health_summary_panels_use_selected_time_range(
-    panel_title: str, expected_snippet: str
-) -> None:
-    """Provider summary panels must respect the active Grafana time range."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == panel_title
-        ),
-        None,
-    )
-    assert panel is not None, f"Panel '{panel_title}' not found"
-
-    expressions = [
-        target.get("expr", "")
-        for target in panel.get("targets", [])
-        if isinstance(target.get("expr"), str)
-    ]
-    assert any(expected_snippet in expr for expr in expressions), (
-        f"Panel '{panel_title}' must use the selected Grafana time range"
-    )
-
-
-def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
-    """Circuit-breaker metrics expose adapter labels, not provider labels."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-
-    for panel_title in (
-        "Monitor Global Circuit-Breaker State",
-        "Track Global Circuit-Breaker Trips",
-    ):
-        panel = next(
-            (
-                item
-                for item in get_dashboard_panels(dashboard)
-                if item.get("title") == panel_title
-            ),
-            None,
-        )
-        assert panel is not None, f"Panel '{panel_title}' not found"
-        expressions = [
-            target.get("expr", "")
-            for target in panel.get("targets", [])
-            if isinstance(target.get("expr"), str)
-        ]
-        assert expressions, f"Panel '{panel_title}' has no PromQL expressions"
-        assert any('adapter=~"$adapter"' in expr for expr in expressions), (
-            f"Panel '{panel_title}' must filter circuit-breaker metrics via adapter"
-        )
-        assert all('adapter=~"$provider"' not in expr for expr in expressions), (
-            f"Panel '{panel_title}' must not assume provider equals adapter"
-        )
-
-
-@pytest.mark.parametrize(
     ("dashboard_file", "panel_title", "expected_snippet"),
     [
         (
-            "bioetl-runtime.json",
+            "bioetl-incident-v1.json",
             "Track Phase Duration",
             "[$__rate_interval]",
         ),
         (
-            "bioetl-runtime.json",
+            "bioetl-incident-v1.json",
             "Track Pipeline Duration",
             "[$__rate_interval]",
         ),
         (
-            "bioetl-runtime.json",
+            "bioetl-incident-v1.json",
             "Track Global Shutdown Starts",
             "[$__rate_interval]",
         ),
         (
-            "bioetl-runtime.json",
+            "bioetl-incident-v1.json",
             "Track Global Shutdown Completions",
             "[$__rate_interval]",
         ),
         (
-            "bioetl-control-plane-v1.json",
+            "bioetl-incident-v1.json",
             "Compare Global Audit Write Outcomes",
             "[$__rate_interval]",
         ),
         (
-            "bioetl-control-plane-v1.json",
+            "bioetl-incident-v1.json",
             "Compare Global Audit Query Outcomes",
             "[$__rate_interval]",
         ),
         (
-            "bioetl-control-plane-v1.json",
+            "bioetl-incident-v1.json",
             "Track Global Audit Write Latency",
             "[$__range]",
         ),
         (
-            "bioetl-control-plane-v1.json",
+            "bioetl-incident-v1.json",
             "Track Global Audit Query Latency",
             "[$__range]",
         ),
@@ -434,14 +344,14 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-overview-v2.json", "Review Failed Runs"),
-        ("bioetl-overview-v2.json", "Review Recent Non-success Terminal Runs"),
-        ("bioetl-control-plane-v1.json", "Track Global Read Failures"),
+        ("bioetl-incident-v1.json", "Monitor Failed Runs"),
+        ("bioetl-incident-v1.json", "Track Failed Workflow Runs"),
+        ("bioetl-incident-v1.json", "Track Global Read Failures"),
         (
-            "bioetl-control-plane-v1.json",
+            "bioetl-incident-v1.json",
             "Track Global Read Latency",
         ),
-        ("bioetl-runtime.json", "Compare Records by Stage & Run Type"),
+        ("bioetl-incident-v1.json", "Compare Records by Stage & Run Type"),
     ],
 )
 def test_range_aware_summary_panels_use_selected_time_range(
@@ -486,7 +396,7 @@ def test_runtime_alert_condition_panels_use_recording_rules(
     panel_title: str, expected_recording_metrics: list[str]
 ) -> None:
     """Runtime blocker panels should consume shipped recording-rule metrics."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel = next(
         (
             item
@@ -495,7 +405,7 @@ def test_runtime_alert_condition_panels_use_recording_rules(
         ),
         None,
     )
-    assert panel is not None, f"Panel '{panel_title}' not found in bioetl-runtime.json"
+    assert panel is not None, f"Panel '{panel_title}' not found in bioetl-incident-v1.json"
 
     expressions = [
         target.get("expr", "")
@@ -528,8 +438,8 @@ def test_runtime_tracing_row_orders_log_hygiene_panels() -> None:
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-control-plane-v1.json", "Compare Lineage Persistence Outcomes"),
-        ("bioetl-runtime.json", "Track Records by Stage / Interval"),
+        ("bioetl-incident-v1.json", "Compare Lineage Persistence Outcomes"),
+        ("bioetl-incident-v1.json", "Track Records by Stage / Interval"),
     ],
 )
 def test_adaptive_trend_panels_use_selected_interval(

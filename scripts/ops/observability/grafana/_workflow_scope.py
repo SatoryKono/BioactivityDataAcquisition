@@ -139,6 +139,7 @@ def _evidence_row(payload: dict, source: dict) -> None:
                 "cellOptions": {"type": "auto", "wrapText": True},
             },
             "noValue": "UNKNOWN",
+            "unit": "none",
         },
         "overrides": [
             {
@@ -207,7 +208,9 @@ def _apply_first_action_panel(panel: dict) -> None:
         if "expr" in target:
             target["expr"] = _FIRST_ACTION_EXPR
     panel["description"] = _FIRST_ACTION_DESCRIPTION
-    panel["fieldConfig"]["defaults"]["noValue"] = "Selected scope has no current evidence"
+    panel["fieldConfig"]["defaults"]["noValue"] = (
+        "Selected scope has no current evidence"
+    )
     for options in _mapping_options(panel, None):
         options.pop("0", None)
         options.pop("5", None)
@@ -233,7 +236,9 @@ def _apply_first_action_panel(panel: dict) -> None:
             ("provider", "Provider"),
             ("workflow", "Workflow"),
         ):
-            options[f"{domain}_evidence_missing"] = {"text": f"{label}: telemetry missing"}
+            options[f"{domain}_evidence_missing"] = {
+                "text": f"{label}: telemetry missing"
+            }
     for transform in panel.get("transformations", []):
         if transform.get("id") != "sortBy":
             continue
@@ -250,7 +255,9 @@ def _apply_first_action_panel(panel: dict) -> None:
             for prop in override.get("properties", [])
             if not (prop.get("id") == "custom.hidden" and prop.get("value") is True)
         ]
-    if not any(item.get("matcher", {}).get("options") == "Workflow" for item in overrides):
+    if not any(
+        item.get("matcher", {}).get("options") == "Workflow" for item in overrides
+    ):
         overrides.append(
             {"matcher": {"id": "byName", "options": "Workflow"}, "properties": []}
         )
@@ -317,7 +324,14 @@ def _place_selected_run_window(panels: list[dict]) -> None:
         if isinstance(panel, dict):
             panel["gridPos"] = {"x": x_pos, "y": y, "w": 12, "h": 6}
     y += 6
-    pinned = {1000, 99, 9603, 9002}
+    pinned = {1000, 99, 9603, 9002, 9604}
+    for panel_id, x_pos in ((9300, 0), (9301, 12)):
+        panel = by_id.get(panel_id)
+        if isinstance(panel, dict):
+            panel["gridPos"] = {"x": x_pos, "y": y, "w": 12, "h": 7}
+            pinned.add(panel_id)
+    if 9300 in pinned and 9301 in pinned:
+        y += 7
     rest = [panel for panel in panels if panel.get("id") not in pinned]
     rest.sort(key=lambda panel: (panel["gridPos"]["y"], panel["gridPos"]["x"]))
     for panel in rest:
@@ -370,9 +384,7 @@ def _retain_selected_run_overview(payload: dict) -> None:
     """Overview always has a Run ID. Drop panels that do not assess that run."""
     variables = payload.setdefault("templating", {}).setdefault("list", [])
     payload["templating"]["list"] = [
-        variable
-        for variable in variables
-        if variable.get("name") != "overview_fleet"
+        variable for variable in variables if variable.get("name") != "overview_fleet"
     ]
     payload["panels"] = _without_non_run_panels(payload.get("panels") or [])
     description = str(payload.get("description") or "")
@@ -401,9 +413,7 @@ def _retain_selected_run_overview(payload: dict) -> None:
         )
     _place_selected_run_window(payload["panels"])
     _lift_overview_identity(payload)
-    domains = next(
-        panel for panel in payload["panels"] if panel.get("id") == 9002
-    )
+    domains = next(panel for panel in payload["panels"] if panel.get("id") == 9002)
     handoff = domains.get("fieldConfig", {}).get("defaults", {}).get("links") or []
     domains["links"] = [dict(link) for link in handoff]
 
@@ -425,7 +435,7 @@ def apply_workflow_scope(payload: dict) -> None:
     for panel in panels:
         if panel.get("type") == "text" and panel.get("id") in {99, 9400}:
             suffix = (
-                "GLOBAL tables below cover all pipelines; suspects are not verified causes. VALID_EMPTY is an empty suspect list, not a healthy fleet."
+                "GLOBAL tables below cover all pipelines; suspects are not verified causes. VALID EMPTY is an empty suspect list, not a healthy fleet."
                 if payload["uid"] == "bioetl-incident-v1"
                 else (
                     "Open First Action; VERIFY means evidence is missing. "

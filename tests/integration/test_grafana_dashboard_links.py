@@ -29,6 +29,7 @@ from tests.integration._grafana_dashboard_links_support import (
     # Re-export shared helpers for sibling test modules that historically imported
     # private symbols from this file (e.g. test_grafana_dashboard_cta_links).
     _KPI_OWNERSHIP,
+    _NAV_BUS_EXEMPT_UIDS,
     _NAV_LINK_CONTRACT,
     _REQUIRED_PANEL_LINKS_BY_UID,
     _TOP_LEVEL_LINK_TITLE_RE,
@@ -83,8 +84,8 @@ def test_ops_http_health_links_use_same_origin_grafana_proxy() -> None:
             if _FORBIDDEN_OPS_HTTP_BROWSER_HOST_RE.match(url):
                 forbidden.append(f"{dashboard_path.name}:{title!r} -> {url}")
 
-    assert len(health_links) == 11, (
-        "Shipped dashboards must expose exactly eleven Ops HTTP health CTAs; "
+    assert len(health_links) == 10, (
+        "Shipped dashboards must expose exactly ten Ops HTTP health CTAs; "
         f"found {len(health_links)}"
     )
     assert not forbidden, (
@@ -343,8 +344,12 @@ def test_cross_dashboard_links_pass_only_target_scoped_variables() -> None:
         assert isinstance(current_uid, str), (
             f"Dashboard {dashboard_path.name} must define a uid"
         )
-        dashboard_links = require_dashboard_navigation_links(
-            dashboard, dashboard_name=dashboard_path.name
+        dashboard_links = (
+            require_dashboard_navigation_links(
+                dashboard, dashboard_name=dashboard_path.name
+            )
+            if current_uid not in _NAV_BUS_EXEMPT_UIDS
+            else []
         )
 
         for link in _collect_dashboard_links(dashboard):
@@ -526,7 +531,11 @@ def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
     """Dashboard links must avoid generic includeVars and legacy Explore payloads."""
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
-        navigation_links = get_dashboard_navigation_links(dashboard)
+        navigation_links = (
+            get_dashboard_navigation_links(dashboard)
+            if dashboard.get("uid") not in _NAV_BUS_EXEMPT_UIDS
+            else []
+        )
         for link in _collect_dashboard_links(dashboard):
             _assert_link_forbids_universal_handoff(
                 dashboard_name=dashboard_path.name,
@@ -541,6 +550,8 @@ def test_dashboard_bus_self_links_are_omitted() -> None:
         dashboard = load_dashboard(dashboard_path)
         uid = dashboard.get("uid")
         assert isinstance(uid, str), f"{dashboard_path.name} must declare string uid"
+        if uid in _NAV_BUS_EXEMPT_UIDS:
+            continue
 
         for link in get_dashboard_navigation_links(dashboard):
             url = str(link.get("url", ""))

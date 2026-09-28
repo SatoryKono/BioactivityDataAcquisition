@@ -269,7 +269,8 @@
         "query": {
           "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
           "refId": "StandardVariableQuery"
-        }
+        },
+        "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
       }
     ]
   },
@@ -289,7 +290,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 0
@@ -297,7 +298,7 @@
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
         "mode": "html",
-        "content": "<div style=\"padding:0px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;width:100%;max-width:100%;box-sizing:border-box;overflow:visible\"><strong>Last 10 launches · newest first · independent of the time range</strong><br>Select a status to view details. <a href=\"/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;width:100%;max-width:100%;box-sizing:border-box;overflow:visible\"><strong>Last 10 launches · newest first · independent of the time range</strong><br>Select a status to view details. <a href=\"/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a></div>"
       },
       "description": "Browse the latest 10 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
       "links": [
@@ -313,12 +314,12 @@
       "id": 3010,
       "type": "table",
       "title": "Inspect Recent Runs (last 10)",
-      "description": "Last 10 launches, newest Started first, independent of the time range. Workflow and Pipeline open passports. Run ID opens the persisted Report; inspect its full UUID in the cell. Overview is processing status, not replay readiness. Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. QUERY ERROR is a source failure; VALID EMPTY means no matching launches. Running is a recorded state, not proof of current liveness. Missing reports have no link.",
+      "description": "Last 10 launches, newest Started first, independent of the time range. Workflow and Pipeline open passports. Run ID opens the persisted Report; inspect its full UUID in the cell. Overview is processing status, not replay readiness. Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. QUERY ERROR is a source failure; VALID EMPTY means no matching launches. Rows are artifact-backed: a tree_missing index means saved run artifacts are absent; verify backing with verify_report_bind.py. Running is a recorded state, not proof of current liveness. Missing reports have no link.",
       "gridPos": {
-        "h": 14,
+        "h": 13,
         "w": 24,
         "x": 0,
-        "y": 2
+        "y": 3
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -333,7 +334,7 @@
             },
             "wrapText": false
           },
-          "noValue": "N/A",
+          "noValue": "UNKNOWN — the launches table returned no rows for these filters. QUERY ERROR means the backend request failed, not an empty fleet.",
           "links": [],
           "color": {
             "mode": "fixed",
@@ -1094,6 +1095,100 @@
                 "value": true
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "OK": {
+                        "text": "OK",
+                        "color": "#73BF69"
+                      },
+                      "WARN": {
+                        "text": "WARN",
+                        "color": "#F2CC0C"
+                      },
+                      "ERROR": {
+                        "text": "ERROR",
+                        "color": "#F2495C"
+                      },
+                      "INCOMPLETE": {
+                        "text": "INCOMPLETE",
+                        "color": "#FF9830"
+                      },
+                      "IN PROGRESS": {
+                        "text": "IN PROGRESS",
+                        "color": "#5794F2"
+                      },
+                      "N/A": {
+                        "text": "N/A",
+                        "color": "#9CA3AF"
+                      },
+                      "QUERY ERROR": {
+                        "text": "QUERY ERROR",
+                        "color": "#F2495C"
+                      },
+                      "success": {
+                        "text": "success",
+                        "color": "#73BF69"
+                      },
+                      "failed": {
+                        "text": "failed",
+                        "color": "#F2495C"
+                      },
+                      "fail": {
+                        "text": "fail",
+                        "color": "#F2495C"
+                      },
+                      "partial": {
+                        "text": "partial",
+                        "color": "#F2CC0C"
+                      },
+                      "running": {
+                        "text": "running",
+                        "color": "#5794F2"
+                      },
+                      "unfinished": {
+                        "text": "unfinished",
+                        "color": "#FF9830"
+                      },
+                      "shutdown": {
+                        "text": "shutdown",
+                        "color": "#F2CC0C"
+                      },
+                      "dry_run": {
+                        "text": "dry_run",
+                        "color": "#B877D9"
+                      },
+                      "unknown": {
+                        "text": "unknown",
+                        "color": "#9CA3AF"
+                      },
+                      "TREE_MISSING": {
+                        "text": "TREE_MISSING",
+                        "color": "#F2495C"
+                      },
+                      "LAYOUT_UNHEALTHY": {
+                        "text": "LAYOUT_UNHEALTHY",
+                        "color": "#F2495C"
+                      },
+                      "IDENTITY_UNHEALTHY": {
+                        "text": "IDENTITY_UNHEALTHY",
+                        "color": "#F2495C"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -1117,7 +1212,7 @@
           "format": "table",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : (items ~> | $ | {\"duration_display\": $replace(duration_display, /([0-9])\\s+([a-z])/, \"$1$2\")} |)",
+          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items.($merge([$, {\"overview_handoff\": \"Open\", \"diagnostics_handoff\": \"Open\", \"provider_handoff\": \"Open\", \"quality_handoff\": \"Open\"}]))",
           "source": "url",
           "type": "json",
           "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",
@@ -1199,7 +1294,11 @@
               "data_quality_status": "Data Quality",
               "replay_readiness_status": "Replay Readiness"
             },
-            "excludeByName": {}
+            "excludeByName": {
+              "json_path": true,
+              "markdown_path": true,
+              "row_kind": true
+            }
           }
         },
         {
