@@ -439,6 +439,144 @@ def test_dq_9403_percentage_names_bronze_denominator() -> None:
     assert "percentage of Bronze" in names
 
 
+def _dq_panels_by_id() -> dict[int, Any]:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    return {
+        panel["id"]: panel
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("id"), int)
+    }
+
+
+def test_dq_9403_help_names_bronze_denominator() -> None:
+    """#11684: the processed-records help names the Bronze denominator."""
+    panels = _dq_panels_by_id()
+    description = str(panels[9403].get("description") or "")
+    assert "Gold/Silver % are of Bronze count" in description
+
+
+def test_dq_9406_description_names_verdict_columns() -> None:
+    """#11570: the verdict description names Overall verdict/Processing/Trust."""
+    panels = _dq_panels_by_id()
+    description = str(panels[9406].get("description") or "")
+    assert description.startswith(
+        "SELECTED RUN · Overall verdict is the data quality assessment"
+    )
+    assert "Processing is the ETL outcome" in description
+    assert "Trust is the saved Trust verdict and does not authorize replay" in description
+
+
+def test_dq_9450_row_names_three_tables() -> None:
+    """#11571/#11572: the evidence row names its three tables."""
+    panels = _dq_panels_by_id()
+    description = str(panels[9450].get("description") or "")
+    assert "Inspect Selected Run Stages" in description
+    assert "Inspect Selected Run Domains" in description
+    assert "Inspect Selected Run Identity" in description
+
+
+def test_dq_9451_reason_uses_dq_mappings() -> None:
+    """#11686: domain reason codes use the DQ subset, unknown codes stay visible."""
+    panels = _dq_panels_by_id()
+    options: dict[str, Any] = {}
+    for override in panels[9451].get("fieldConfig", {}).get("overrides", []):
+        if override.get("matcher", {}).get("options") == "Reason":
+            for prop in override.get("properties", []):
+                if prop.get("id") == "mappings":
+                    options = prop["value"][0]["options"]
+    assert options["selection_required"] == {
+        "text": "Choose a run to inspect saved evidence"
+    }
+    assert options["execution_success"] == {"text": "Processing completed"}
+    assert options["run_dq_threshold_evaluation"] == {"text": "Data quality checks"}
+    assert options["run_preflight_provider_observation"] == {
+        "text": "Provider preflight check"
+    }
+    assert options["run_gold_schema_validation"] == {"text": "Gold schema validation"}
+    assert options["run_observation_missing"] == {"text": "Result not recorded"}
+    assert options["workflow_success"] == {"text": "Workflow completed"}
+    assert options["run_completion_trust_assessment"] == {
+        "text": "Completion trust assessment"
+    }
+    assert "standalone_pipeline" not in options
+
+
+def test_dq_9400_banner_names_time_range_limit() -> None:
+    """#11572: the banner states that a time-range value never proves this run."""
+    panels = _dq_panels_by_id()
+    content = str((panels[9400].get("options") or {}).get("content") or "")
+    assert "never proves this run" in content
+    assert "never proves this run" in str(panels[9400].get("description") or "")
+
+
+def test_dq_9460_stage_columns_stable() -> None:
+    """#11685: stage columns keep their readable names without an organize edit."""
+    panels = _dq_panels_by_id()
+    names = [
+        prop.get("value")
+        for override in panels[9460].get("fieldConfig", {}).get("overrides", [])
+        for prop in override.get("properties", [])
+        if prop.get("id") == "displayName"
+    ]
+    assert names[:7] == [
+        "Stage",
+        "Status",
+        "Records in",
+        "Records out",
+        "Duration",
+        "Reason",
+        "Source",
+    ]
+    units = [
+        prop.get("value")
+        for override in panels[9460].get("fieldConfig", {}).get("overrides", [])
+        if override.get("matcher", {}).get("options") == "duration_seconds"
+        for prop in override.get("properties", [])
+        if prop.get("id") == "unit"
+    ]
+    assert "s" in units
+
+
+def test_dq_renderer_copy_matches_shipped() -> None:
+    """Renderer constants and shipped bioetl-dq-v2.json must agree."""
+    from scripts.ops.observability.grafana._evidence_readability import (
+        _DQ_DOMAINS_DESCRIPTION,
+        _DQ_IDENTITY_DESCRIPTION,
+        _DQ_REASON_MAPPINGS,
+    )
+    from scripts.ops.observability.grafana._gr_db_corrections import (
+        _BRONZE_PERCENTAGE_DISPLAY,
+        _PROCESSED_RECORDS_DESCRIPTION,
+        _PROCESSED_RECORDS_NOVALUE,
+    )
+    from scripts.ops.observability.grafana._selected_run_panels import (
+        ROW_9450_DESCRIPTION,
+        STATUS_DESCRIPTION,
+    )
+    from scripts.ops.observability.grafana.render_nav_bus import _DQ_SCOPE_HTML
+
+    panels = _dq_panels_by_id()
+    assert panels[9400]["options"]["content"] == _DQ_SCOPE_HTML
+    assert str(panels[9406].get("description") or "").startswith(STATUS_DESCRIPTION)
+    assert panels[9403]["description"] == _PROCESSED_RECORDS_DESCRIPTION
+    assert (
+        panels[9403]["fieldConfig"]["defaults"]["noValue"]
+        == _PROCESSED_RECORDS_NOVALUE
+    )
+    assert panels[9450]["description"] == ROW_9450_DESCRIPTION
+    assert panels[9451]["description"] == _DQ_DOMAINS_DESCRIPTION
+    assert panels[9452]["description"] == _DQ_IDENTITY_DESCRIPTION
+    assert _BRONZE_PERCENTAGE_DISPLAY == "percentage of Bronze"
+    mappings: dict[str, Any] = {}
+    for override in panels[9451].get("fieldConfig", {}).get("overrides", []):
+        if override.get("matcher", {}).get("options") == "Reason":
+            for prop in override.get("properties", []):
+                if prop.get("id") == "mappings":
+                    mappings = prop["value"][0]["options"]
+    for code, label in _DQ_REASON_MAPPINGS.items():
+        assert mappings[code] == label
+
+
 def test_operator_readability_gate_is_wired_as_required_dashboard_check() -> None:
     """The gate must stay in CI and the pre-push hook when dashboards change."""
     tests_workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")

@@ -907,6 +907,15 @@ def _correct_runtime(uid: object, panels: dict[int, dict]) -> None:
         _override(panels[9998], "Status", _WIDTH, 125)
 
 
+_BRONZE_PERCENTAGE_DISPLAY = "percentage of Bronze"
+_PROCESSED_RECORDS_NOVALUE = (
+    "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer."
+)
+_PROCESSED_RECORDS_DESCRIPTION = (
+    "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden."
+)
+
+
 def _dq_processed_records(panel: dict) -> None:
     """Join saved stage inputs to the existing outcome accounting rows."""
     names = [
@@ -987,8 +996,8 @@ def _dq_processed_records(panel: dict) -> None:
     for field in ("value", "value A", "count", "count out"):
         _override(panel, field, _WIDTH, 100)
     _override(panel, "percentage", _WIDTH, 100)
-    _override(panel, "percentage", "displayName", "percentage")
-    _override(panel, "percentage A", "displayName", "percentage")
+    _override(panel, "percentage", "displayName", _BRONZE_PERCENTAGE_DISPLAY)
+    _override(panel, "percentage A", "displayName", _BRONZE_PERCENTAGE_DISPLAY)
     for field in (
         "value",
         "value A",
@@ -1016,9 +1025,8 @@ def _dq_processed_records(panel: dict) -> None:
     panel["options"]["footer"]["enablePagination"] = False
     panel["options"]["cellHeight"] = "sm"
     panel["gridPos"]["h"] = 13
-    panel["description"] = (
-        "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden."
-    )
+    panel["fieldConfig"]["defaults"]["noValue"] = _PROCESSED_RECORDS_NOVALUE
+    panel["description"] = _PROCESSED_RECORDS_DESCRIPTION
 
 
 def _correct_dq(uid: object, panels: dict[int, dict]) -> None:

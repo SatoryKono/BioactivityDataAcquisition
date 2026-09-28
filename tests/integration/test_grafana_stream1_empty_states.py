@@ -243,7 +243,7 @@ def test_dq_10253_selected_run_summary_is_first_window() -> None:
 
 
 def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
-    """#10253 §7.3: DQ HTTP empty copy names one state."""
+    """#10253 §7.3: DQ HTTP empty copy names one state (#11569: Run Explorer)."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panels = {
         panel["id"]: panel
@@ -254,7 +254,7 @@ def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
         9402: "SELECT RUN — no exact Run ID selected. Choose a run first.",
         9403: (
             "SELECT RUN — no exact Run ID selected. "
-            "Choose a run in Inspect Recent Runs."
+            "Choose this run in Run Explorer."
         ),
         9406: "UNKNOWN",
     }
