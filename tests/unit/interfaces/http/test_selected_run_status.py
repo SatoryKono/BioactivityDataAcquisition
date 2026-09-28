@@ -206,7 +206,7 @@ def test_saved_report_readiness_uses_available_report_files(tmp_path):
     assert checks["manifest_not_recorded"]["result"] == "unknown"
     assert (
         result["replay_readiness"][0]["unknown_checks"]
-        == "manifest этого запуска не найден"
+        == "manifest for this run was not recorded"
     )
     assert "effective_config_hash" not in checks
     assert checks["pipeline_run_report_json"]["result"] == "pass"
