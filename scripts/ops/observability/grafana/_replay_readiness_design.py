@@ -132,7 +132,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
                                         "type": "value",
                                         "options": {
                                             "manifest_not_recorded": {
-                                                "text": "manifest этого запуска не найден"
+                                                "text": "manifest for this run was not recorded"
                                             }
                                         },
                                     }

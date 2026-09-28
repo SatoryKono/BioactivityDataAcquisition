@@ -62,6 +62,10 @@ python -m bioetl run-manifest show <run_id> --format json
 | `exact_replay_family` reason `family_outside_supported_exact_replay_boundary` | The executable family is outside the published exact-replay boundary. 9422 is UNSUPPORTED; Run Explorer Replay is N/A. |
 | `source_refs[].input_snapshots` empty at create, Bronze later published | Capability is recomputed after Bronze `immutable_input_snapshot` is attached to the manifest. |
 | `replay_capability=exact_replay_supported` plus verified hashes | 9422 can be READY when artifact checks pass. |
+| Report artifact checks pass but replay hash checks are `unknown` (`object_not_verified`) | Hashes are recorded, but the replay objects were never file-verified. 9422 stays INSUFFICIENT even with Overview=success / Saved Evidence=OK / Data Quality=OK — expected for `degraded_observable`, closed only by persisting and file-verifying objects under `replay_ready`. |
+
+On 9422, open `unknown_checks` to list the exact `object_not_verified`
+entries before re-running anything.
 
 1. Run outcome (`processing_status`) — data-processing result.
 2. Trust readiness (`trust_status` on `/ops/control-plane/*-validation`) — fail-closed exact-run evidence.

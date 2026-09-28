@@ -63,15 +63,27 @@ def build_retention_checks(
     if archive_verifier is not None and checks[-1].reason != "archive_not_applicable":
         with evidence_stage("archive_verification"):
             verified, reason = archive_verifier.verify(manifest=manifest, plan=plan)
+        status = _archive_status(verified)
+        if verified is not True and _archive_policy_required(manifest):
+            # A required archive that is missing or broken is a hard failure,
+            # not an unknown: create runs for strict profiles and surfaces
+            # every create/verify failure through the absent pack (#11715).
+            status = "ERROR"
         archive = EvidenceCheckResult(
             "archive",
-            _archive_status(verified),
+            status,
             reason,
             "Local archive and restored copies are hash-checked against selected-run "
             "evidence on every read. This is not an off-host durability guarantee.",
         )
         checks = (*checks[:-1], archive)
     return checks, relevant
+
+
+def _archive_policy_required(manifest: RunManifest) -> bool:
+    """Return whether the recorded launch policy requires an archive pack."""
+    policy = manifest.launch_context.get("archive_policy")
+    return isinstance(policy, dict) and policy.get("required") is True
 
 
 def _archive_status(verified: bool | None) -> EvidenceStatus:

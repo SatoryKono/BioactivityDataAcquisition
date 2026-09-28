@@ -31,6 +31,21 @@ from bioetl.domain.control_plane.run_manifest import ReplayCapability, RunSource
 STRICT_PERSISTENCE_PROFILES = frozenset({"replay_ready", "forensic_grade"})
 
 
+def archive_policy_for_persistence_profile(profile: str) -> dict[str, object] | None:
+    """Return the launch-context archive policy for a persistence profile.
+
+    `degraded_observable` never requires an off-host archive; strict
+    profiles (`replay_ready`, `forensic_grade`) do. Unknown profiles yield
+    no policy so archive checks stay UNKNOWN instead of guessing (#11714).
+    """
+    normalized = str(profile or "").strip()
+    if normalized == "degraded_observable":
+        return {"required": False, "policy_ref": f"persistence-profile:{normalized}"}
+    if normalized in STRICT_PERSISTENCE_PROFILES:
+        return {"required": True, "policy_ref": f"persistence-profile:{normalized}"}
+    return None
+
+
 @dataclass(frozen=True, slots=True)
 class SnapshotEnvelopeStatus:
     """Snapshot-envelope evidence attached to one run launch."""

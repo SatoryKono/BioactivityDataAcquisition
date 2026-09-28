@@ -148,6 +148,39 @@ legacy N/A is never rewritten to OK.
   per missing DOI and can exceed the 7200s enricher timeout. Config already
   marks this enricher `required: false` (high rate limits, ok to skip).
 
+## Replay Readiness with unverified objects (#11710)
+
+A success run with Saved Evidence=OK and Data Quality=OK can still show
+Replay Readiness=INCOMPLETE. That is expected, not a pipeline bug, when the
+manifest records hashes but the replay objects were never file-verified:
+
+| Signal | Replay Readiness |
+| --- | --- |
+| `degraded_observable`, hash checks `unknown` (`object_not_verified`) | INCOMPLETE — 9422 INSUFFICIENT: hashes exist, objects not verified |
+| `replay_ready` + verified objects + snapshot envelope | OK — 9422 READY |
+| family outside the exact-replay boundary | N/A — 9422 UNSUPPORTED |
+
+How to inspect: on 9422 open `unknown_checks`; on the CLI run
+`python -m bioetl run-manifest show <run_id> --format json` and read
+`replay_capability`, `source_refs`, `code_provenance.*_hash`. See
+[Run Manifest Inspection](run-manifest-inspection.md).
+
+## Archive evidence (Saved Evidence column)
+
+Every manifest records `launch_context.archive_policy`. Control Plane check
+`retention-compliance.archive` reads it, then hash-verifies the local pack:
+
+| Profile | Archive check | Saved Evidence |
+| --- | --- | --- |
+| `degraded_observable` + `archive_not_applicable` | OK/N/A | OK — off-host archive is not required |
+| `replay_ready` / `forensic_grade` + verified `index.json` | OK (`archive_restore_verified`) | OK |
+| Pack checksum mismatch / create fail | ERROR | ERROR — never INCOMPLETE-from-UNKNOWN |
+| No policy and no pack | UNKNOWN (`archive_evidence_not_recorded`) | INCOMPLETE until the P0 policy/create fix lands on new runs |
+
+How to inspect: Trust `reasons_text=archive_evidence_not_recorded`; Control
+Plane `retention-compliance.archive`. Old runs do not recolor without
+`refresh_archived_assessment` — judge new `run_id`s, not historical ones.
+
 Equivalent bash:
 
 ```bash

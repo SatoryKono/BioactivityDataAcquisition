@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2520,
-    "total_internal_imports": 7914,
+    "total_internal_imports": 7913,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 336,
     "violations": 0,
-    "source_fingerprint": "73e7bc9688ed2bba8392a5df5563f1198c01813123731a26c1c4799c2e75d546"
+    "source_fingerprint": "a13038516bebc5736152fa97d32fedb52705bf0617687a804e46ef38bbe587d1"
   },
   "layer_edges": [
     {
@@ -30,13 +30,13 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 630,
+      "imports": 629,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 290,
+      "imports": 291,
       "allowed": true
     },
     {
@@ -60,7 +60,7 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1232,
+      "imports": 1231,
       "allowed": true
     },
     {
@@ -175,14 +175,14 @@
       "imports": 31
     },
     {
-      "source": "infrastructure.storage",
-      "target": "domain.medallion",
+      "source": "composition.runtime_builders",
+      "target": "domain.control_plane",
       "imports": 31
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "domain.control_plane",
-      "imports": 30
+      "source": "infrastructure.storage",
+      "target": "domain.medallion",
+      "imports": 31
     },
     {
       "source": "interfaces.cli",
