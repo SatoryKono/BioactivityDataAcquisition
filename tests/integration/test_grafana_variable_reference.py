@@ -141,11 +141,13 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert provider["run_id"].get("current", {}).get("value") == "-"
     assert provider["run_id"].get("sort") == 0
     assert provider["provider"].get("multi") is False
-    assert provider["provider"].get("includeAll") is True
-    assert provider["provider"].get("current", {}).get("value") == "$__all"
+    assert provider["provider"].get("includeAll") is False
+    assert provider["provider"].get("current", {}).get("value") == "unknown"
     provider_query = str(provider["provider"].get("definition") or "")
-    assert provider_query == "label_values(bioetl_provider_current_status, provider)"
-    assert "${pipeline}" not in provider_query and "${workflow}" not in provider_query
+    assert provider_query == (
+        "/ops/observability/selected-run-status?pipeline=${pipeline}"
+        "&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+    )
     assert provider["pipeline_context"].get("hide") == 2
     assert provider["pipeline_context"].get("current", {}).get("value") == "unknown"
 

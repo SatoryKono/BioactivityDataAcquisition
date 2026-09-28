@@ -413,10 +413,10 @@
       "type": "table",
       "title": "Review Selected Run Status",
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 5
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
@@ -730,9 +730,9 @@
       "title": "Inspect Run Identity",
       "gridPos": {
         "x": 0,
-        "y": 5,
+        "y": 10,
         "w": 14,
-        "h": 13
+        "h": 8
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Selected run: Compact identity table showing Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, Replay [Capability.Mode], Checkpoint [Anchors], and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Inspect value opens full identifiers as selectable plain text.",
@@ -986,9 +986,9 @@
       "title": "Inspect Processed Records",
       "gridPos": {
         "x": 14,
-        "y": 5,
+        "y": 10,
         "w": 10,
-        "h": 13
+        "h": 8
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden. Request failure is QUERY ERROR.",
@@ -1557,7 +1557,7 @@
       "description": "Expand for saved stage rows (Inspect Selected Run Stages), domain verdicts (Inspect Selected Run Domains), and full identity (Inspect Selected Run Identity) of the selected Run ID.",
       "gridPos": {
         "x": 0,
-        "y": 22,
+        "y": 18,
         "w": 24,
         "h": 1
       },
@@ -1568,7 +1568,7 @@
           "title": "Inspect Selected Run Stages",
           "gridPos": {
             "x": 0,
-            "y": 23,
+            "y": 19,
             "w": 24,
             "h": 8
           },
@@ -1598,96 +1598,93 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "stage_id"
+                  "options": "Reason"
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "Stage"
+                    "id": "custom.wrapText",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               },
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "state"
+                  "options": "Duration"
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "Status"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "records_in"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Records in"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "records_out"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Records out"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "duration_seconds"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Duration"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "reason"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Reason"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "source"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Source"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "duration_seconds"
-                },
-                "properties": [
+                    "id": "noValue",
+                    "value": "Not recorded"
+                  },
                   {
                     "id": "unit",
                     "value": "s"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "In"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": ""
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Out"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": ""
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Source"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "report.funnel": {
+                            "text": "Open report"
+                          },
+                          "report.stage_timings": {
+                            "text": "Open report"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Open saved run report (JSON)",
+                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                        "targetBlank": true
+                      }
+                    ]
                   }
                 ]
               }
@@ -1714,6 +1711,45 @@
               "options": {
                 "limitField": 12
               }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "stage_id",
+                    "state",
+                    "reason",
+                    "records_in",
+                    "records_out",
+                    "duration_seconds",
+                    "source"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "indexByName": {
+                  "stage_id": 0,
+                  "state": 1,
+                  "reason": 2,
+                  "records_in": 3,
+                  "records_out": 4,
+                  "duration_seconds": 5,
+                  "source": 6
+                },
+                "renameByName": {
+                  "stage_id": "Stage",
+                  "state": "Status",
+                  "reason": "Reason",
+                  "records_in": "In",
+                  "records_out": "Out",
+                  "duration_seconds": "Duration",
+                  "source": "Source"
+                }
+              }
             }
           ],
           "links": []
@@ -1724,7 +1760,7 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 31,
+            "y": 27,
             "w": 24,
             "h": 12
           },
@@ -1970,7 +2006,7 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 43,
+            "y": 39,
             "w": 24,
             "h": 8
           },
