@@ -26,8 +26,8 @@ endpoints:
     # Recent rows also expose report_url (Grafana Ops proxy, exact row identity),
     # report_format (md/json artifact token, null when absent), and report_label.
     # Open report prefers an existing Markdown file, falling back to JSON.
-    # REPORT MISSING links to the exact lookup with explicit 404 feedback:
-    # Grafana 12 applies native data links to the entire Report column.
+    # REPORT MISSING links to the exact lookup with explicit 404 feedback.
+    # Run ID has Select this run (same dashboard, writes $run_id) plus Report.
   identity_table:
     path: /ops/control-plane/identity-table
     required_query: [pipeline, run_type, run_id]
@@ -49,20 +49,6 @@ panels:
     title: Inspect Recent Runs (last 10)
     endpoint: pipeline_run_reports
     url: /ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}
-    root_selector: 'index_state = "valid_empty" and $exists(items) and $count(items) = 0 ? [{"pipeline": "VALID EMPTY"}] : items'
+    root_selector: 'index_state = "valid_empty" and $exists(items) and $count(items) = 0 ? [{"pipeline": "VALID EMPTY"}] : items.($merge([$, {"overview_handoff": "Open", "diagnostics_handoff": "Open", "provider_handoff": "Open", "quality_handoff": "Open"}]))'
     no_value_tokens: [UNKNOWN]
-    copy_tokens: [VALID EMPTY, TREE_MISSING, LAYOUT_UNHEALTHY]
-  - id: 9451
-    title: Inspect Selected Run Domains
-    endpoint: selected_run_status
-    url: /ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}
-    root_selector: presentation_domains
-    no_value_tokens: [UNKNOWN]
-    copy_tokens: [SELECT RUN, QUERY ERROR, VALID EMPTY, INCOMPLETE]
-  - id: 9452
-    title: Inspect Selected Run Identity
-    endpoint: selected_run_status
-    url: /ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}
-    root_selector: presentation_summary
-    no_value_tokens: [UNKNOWN]
-    copy_tokens: [SELECT RUN, QUERY ERROR, VALID EMPTY, INCOMPLETE]
+    copy_tokens: [VALID EMPTY, QUERY ERROR, tree_missing]

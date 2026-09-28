@@ -54,9 +54,9 @@ Human family guide: [selector-architecture.md](selector-architecture.md)
 
 | Variable | Dashboards | Datasource / query family | Selection | Default | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `$workflow` | all 7 shipped | Prometheus `label_values(bioetl_workflow_universe, workflow)` | Single + Include All | `All` / `$__all` | Shared shell context |
+| `$workflow` | all 7 shipped | Prometheus `label_values(bioetl_workflow_universe, workflow)` on query-backed boards; Run Explorer: Ops HTTP `filter-options?dimension=workflow` | Single + Include All | `All` / `$__all` | Shared shell context |
 | `$pipeline` | all 7 shipped | Universe per board (see `selector-contracts.yaml#pipeline_universe_contract`) | Single | Overview / Run Explorer: `All`; else `unknown` | Canonical pipeline scope |
-| `$run_type` | all 7 shipped | Same universe as `$pipeline` | Multi + Include All | Overview / Run Explorer: `All`; else `backfill` | Never hand off `run_type=unknown` |
+| `$run_type` | all 7 shipped | Same universe as `$pipeline` | Multi + Include All on query-backed boards; Run Explorer single + Include All | Overview / Run Explorer: `All`; else `backfill` | Never hand off `run_type=unknown` |
 | `$run_id` | all 7 shipped | BioETL Ops HTTP filter-options | Single, no Include All | `-` | Identity only; not PromQL |
 | `$stage` | `bioetl-runtime`, `bioetl-dq-v2` | Runtime expected-stage / DQ processed totals | Multi + Include All | `All` / `$__all` | Bounded stage filter |
 
@@ -81,7 +81,9 @@ Human family guide: [selector-architecture.md](selector-architecture.md)
 - **`bioetl-provider-health-v2`:** `$provider` is primary business selector;
   shell is secondary; hidden `$pipeline_context` + `$adapter`.
 - **`bioetl-incident-v1`:** shell + `$provider` for triage.
-- **`bioetl-run-explorer-v1`:** shell only; canonical Ops HTTP ID/Processed hub.
+- **`bioetl-run-explorer-v1`:** Ops HTTP catalog for `$workflow` / `$pipeline` /
+  `$run_type` / `$run_id`. Run ID **Select this run** writes `$run_id` from the
+  row. Canonical Ops HTTP ID/Processed hub.
 - **`bioetl-overview-v2` / `bioetl-control-plane-v1`:** shell only; aggregate
   Status does not use `$run_id` as PromQL scope.
 

@@ -66,9 +66,12 @@ def test_recent_report_column_uses_the_row_http_link() -> None:
         if o["matcher"]["options"] == "Run ID"
     )
     links = next(p["value"] for p in override["properties"] if p["id"] == "links")
-    assert len(links) == 1
-    assert links[0]["url"] == "${__data.fields.report_url:raw}"
-    assert links[0]["targetBlank"] is True
+    assert len(links) == 2
+    assert links[0]["title"] == "Select this run"
+    assert "var-run_id=${__data.fields.run_id:percentencode}" in links[0]["url"]
+    assert links[0]["targetBlank"] is False
+    assert links[1]["url"] == "${__data.fields.report_url:raw}"
+    assert links[1]["targetBlank"] is True
 
 
 def test_concrete_context_values_are_not_grafana_globs() -> None:

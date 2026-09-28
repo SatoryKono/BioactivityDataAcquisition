@@ -36,12 +36,9 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(bioetl_workflow_universe, workflow)",
-        "description": "Optional workflow evidence context and workflow-dashboard handoff selector. Overview remains pipeline-summary-first: workflow does not yet drive exact intersection filtering for the current-status PromQL surfaces.",
+        "datasource": "BioETL Ops HTTP",
+        "definition": "/ops/control-plane/filter-options?dimension=workflow&response_shape=options",
+        "description": "Browse scope from the local control-plane catalog. Default All includes every workflow. Filters the recent-launches table.",
         "hide": 0,
         "includeAll": true,
         "label": "Workflow",
@@ -49,8 +46,32 @@
         "name": "workflow",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_workflow_universe, workflow)",
-          "refId": "StandardVariableQuery"
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=workflow&response_shape=options",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
         },
         "refresh": 1,
         "regex": "",
@@ -128,7 +149,7 @@
         "hide": 0,
         "includeAll": true,
         "label": "Run Type",
-        "multi": true,
+        "multi": false,
         "name": "run_type",
         "options": [],
         "query": {
@@ -242,7 +263,7 @@
         "query": "",
         "hide": 0,
         "skipUrlSync": false,
-        "description": "Exact UUID lookup within Workflow/Pipeline/Run Type, including launches older than the latest ten. Clear to browse recent launches."
+        "description": "Exact UUID within the current Workflow/Pipeline/Run Type, including launches older than the latest ten. Does not replace Selected Run until a matching row is found. Clear to browse recent launches."
       },
       {
         "name": "provider_for_pipeline",
@@ -270,7 +291,7 @@
           "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
           "refId": "StandardVariableQuery"
         },
-        "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
+        "description": "Hidden selector: provider for a concrete Pipeline. Unused when Pipeline is All ($__all / .*). Table Provider handoff uses the row field."
       }
     ]
   },
@@ -298,7 +319,7 @@
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
         "mode": "html",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;width:100%;max-width:100%;box-sizing:border-box;overflow:visible\"><strong>Last 10 launches · newest first · independent of the time range</strong><br>Select a status to view details. <a href=\"/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;width:100%;max-width:100%;box-sizing:border-box;overflow:visible\"><strong>Last 10 launches · newest first · independent of the time range</strong><br>Select a status to view details. <a href=\"/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a></div>"
       },
       "description": "Browse the latest 10 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
       "links": [
@@ -349,8 +370,8 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 120
+                "id": "custom.minWidth",
+                "value": 100
               },
               {
                 "id": "custom.inspect",
@@ -380,7 +401,7 @@
                   {
                     "type": "value",
                     "options": {
-                      "â€”": {
+                      "—": {
                         "text": "N/A",
                         "color": "#9CA3AF"
                       }
@@ -397,8 +418,8 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 160
+                "id": "custom.minWidth",
+                "value": 80
               },
               {
                 "id": "custom.inspect",
@@ -431,12 +452,16 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 85
+                "id": "custom.minWidth",
+                "value": 50
               },
               {
                 "id": "custom.inspect",
                 "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 85
               },
               {
                 "id": "links",
@@ -465,18 +490,28 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 90
+                "id": "custom.minWidth",
+                "value": 50
               },
               {
                 "id": "custom.inspect",
                 "value": false
               },
               {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
                 "id": "links",
                 "value": [
                   {
-                    "title": "Report Â· ${__data.fields.run_id}",
+                    "title": "Select this run",
+                    "url": "/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}&var-lookup_run_id=",
+                    "includeVars": false,
+                    "targetBlank": false
+                  },
+                  {
+                    "title": "Report · ${__data.fields.run_id}",
                     "url": "${__data.fields.report_url:raw}",
                     "includeVars": false,
                     "targetBlank": true
@@ -499,12 +534,16 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 115
+                "id": "custom.minWidth",
+                "value": 50
               },
               {
                 "id": "custom.inspect",
                 "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 115
               },
               {
                 "id": "unit",
@@ -519,12 +558,20 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 75
+                "id": "custom.minWidth",
+                "value": 50
               },
               {
                 "id": "custom.inspect",
                 "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 75
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
               }
             ]
           },
@@ -535,12 +582,16 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 85
+                "id": "custom.minWidth",
+                "value": 50
               },
               {
                 "id": "custom.inspect",
                 "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 85
               },
               {
                 "id": "links",
@@ -656,8 +707,8 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 120
+                "id": "custom.minWidth",
+                "value": 90
               },
               {
                 "id": "custom.inspect",
@@ -777,8 +828,8 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 110
+                "id": "custom.minWidth",
+                "value": 90
               },
               {
                 "id": "custom.inspect",
@@ -898,12 +949,16 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 125
+                "id": "custom.minWidth",
+                "value": 90
               },
               {
                 "id": "custom.inspect",
                 "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 125
               },
               {
                 "id": "links",
@@ -1311,7 +1366,7 @@
       "links": [
         {
           "title": "Browse all pipelines",
-          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&${__url_time_range}",
+          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=.*&var-pipeline=.*&var-run_type=.*&var-run_id=-&var-lookup_run_id=&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },

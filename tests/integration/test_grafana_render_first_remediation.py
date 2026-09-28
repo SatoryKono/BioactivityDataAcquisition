@@ -1077,13 +1077,18 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
     first_links = _run_select_links(first_screen)
     assert first_links
     assert any(
-        "var-run_id=${__data.fields.Run:percentencode}" in url for url in first_links
+        "var-run_id=${__data.fields.run_id:percentencode}" in url for url in first_links
     )
-    assert any("var-pipeline=${__data.fields.Pipeline}" in url for url in first_links)
-    assert any("var-run_type=${__data.fields.run_type}" in url for url in first_links)
+    assert any(
+        "var-pipeline=${__data.fields.Pipeline:percentencode}" in url
+        for url in first_links
+    )
+    assert any(
+        "var-run_type=${__data.fields.run_type:percentencode}" in url
+        for url in first_links
+    )
     assert all("var-run_type=$run_type" not in url for url in first_links)
     assert all("viewPanel" not in url for url in first_links)
-    assert "select and mark" in str(first_screen.get("description") or "")
     hidden = {
         str((item.get("matcher") or {}).get("options"))
         for item in (first_screen.get("fieldConfig") or {}).get("overrides") or []
@@ -1098,13 +1103,6 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
     assert "run_type" in hidden
     target_url = str((first_screen.get("targets") or [{}])[0].get("url") or "")
     assert "run_id=${run_id}" in target_url
-    selected = [
-        item
-        for item in (first_screen.get("fieldConfig") or {}).get("overrides") or []
-        if isinstance(item, dict)
-        and (item.get("matcher") or {}).get("options") == "selected"
-    ]
-    assert selected, "3010 must mark the selected run_id row"
     assert all(
         panel.get("id") != 3021 for panel in _iter_panels(explorer.get("panels") or [])
     )
@@ -1146,10 +1144,10 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     banner = _panel(explorer, 1)
     content = str((banner.get("options") or {}).get("content") or "")
-    assert "not this time range" in content
+    assert "independent of the time range" in content
     recent = _panel(explorer, 3010)
     description = str(recent.get("description") or "")
-    assert "time picker does not filter this table" in description
+    assert "independent of the time range" in description
     target_url = str((recent.get("targets") or [{}])[0].get("url") or "")
     assert "$__range" not in target_url
     assert "limit=10" in target_url
@@ -1158,11 +1156,11 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
 def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
-    assert _override_width(recent, "selected") == 28
-    assert _override_width(recent, "^(workflow_id|Workflow)$") is None
+    assert _override_width(recent, "Workflow") is None
+    assert _override_width(recent, "Pipeline") is None
     assert recent["fieldConfig"]["defaults"]["custom"]["minWidth"] == 50
     assert recent["options"]["footer"]["enablePagination"] is False
-    assert (_override_width(recent, "Run") or 0) <= 340
+    assert (_override_width(recent, "Run ID") or 0) <= 340
     hidden = {
         str((item.get("matcher") or {}).get("options"))
         for item in (recent.get("fieldConfig") or {}).get("overrides") or []
@@ -1175,10 +1173,9 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     }
     assert "Pipeline" not in hidden
     assert "run_type" in hidden
-    assert "message" in hidden
     grid = recent.get("gridPos") or {}
-    assert int(grid.get("h") or 0) == 14
-    assert int(grid.get("y") or 0) + int(grid.get("h") or 0) == 17
+    assert int(grid.get("h") or 0) == 13
+    assert int(grid.get("y") or 0) + int(grid.get("h") or 0) == 16
     assert recent.get("options", {}).get("cellHeight") == "sm"
     assert (
         next(t for t in recent["transformations"] if t["id"] == "limit")
