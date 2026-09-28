@@ -326,6 +326,46 @@ def _place_selected_run_window(panels: list[dict]) -> None:
         y += height
 
 
+def _lift_overview_identity(payload: dict) -> None:
+    """Lift identity/processed-records to the overview first window (#11560).
+
+    Moves 9300/9301 out of the collapsed Inspect Run Context row to the root,
+    drops the now-empty row 9602, and compresses the status pair so identity
+    sits at y=9 h=8 (bottom <= 17) without overlapping the status row.
+    """
+    panels = payload.get("panels") or []
+    lifted: dict[int, dict] = {}
+    for panel in list(panels):
+        for child in list(panel.get("panels") or []):
+            if child.get("id") in (9300, 9301):
+                lifted[int(child["id"])] = child
+                panel["panels"].remove(child)
+    for panel in list(panels):
+        if panel.get("id") == 9602 and not panel.get("panels"):
+            panels.remove(panel)
+    if 9300 not in lifted or 9301 not in lifted:
+        return
+    by_id = {panel.get("id"): panel for panel in panels}
+    for panel_id in (9603, 9002):
+        panel = by_id.get(panel_id)
+        if isinstance(panel, dict):
+            panel["gridPos"] = {
+                "x": 0 if panel_id == 9603 else 12,
+                "y": 5,
+                "w": 12,
+                "h": 4,
+            }
+    identity = lifted[9300]
+    identity["gridPos"] = {"x": 0, "y": 9, "w": 12, "h": 8}
+    records = lifted[9301]
+    records["gridPos"] = {"x": 12, "y": 9, "w": 12, "h": 8}
+    for lifted_panel in (identity, records):
+        footer = lifted_panel.setdefault("options", {}).setdefault("footer", {})
+        footer["show"] = True
+        footer["enablePagination"] = True
+    panels.extend([identity, records])
+
+
 def _retain_selected_run_overview(payload: dict) -> None:
     """Overview always has a Run ID. Drop panels that do not assess that run."""
     variables = payload.setdefault("templating", {}).setdefault("list", [])
@@ -350,6 +390,7 @@ def _retain_selected_run_overview(payload: dict) -> None:
             'font-size:16px;line-height:1.2;overflow-wrap:anywhere">'
             "SELECTED RUN · ${pipeline:text} / ${run_type:text} / ${run_id}. "
             "This page assesses that run only. "
+            "Identity and processed records are on this screen. "
             "UNKNOWN means saved evidence is missing."
             "</div>"
         )
@@ -359,6 +400,7 @@ def _retain_selected_run_overview(payload: dict) -> None:
             "A request failure is QUERY ERROR."
         )
     _place_selected_run_window(payload["panels"])
+    _lift_overview_identity(payload)
     domains = next(
         panel for panel in payload["panels"] if panel.get("id") == 9002
     )
