@@ -10,7 +10,7 @@ The page answer is `SELECTED RUN`. A TIME RANGE value is not shown here and neve
 
 Validation score metrics that are not on this page stay on the canonical `0.0-1.0` ratio scale.
 
-Selected-run accounting includes input, accepted, Silver/Gold quarantine, contract exclusions, Gold output and the exact Report link. Excl % uses Silver accepted as the denominator; zero/missing denominator remains unknown.
+Selected-run accounting includes input, accepted, Silver/Gold quarantine, contract exclusions, Gold output and the exact Report link. Gold and Silver percentages use the Bronze count as the denominator; a missing denominator stays N/A.
 
 ## Key Panels
 
