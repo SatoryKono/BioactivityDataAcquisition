@@ -19,7 +19,7 @@ _SCHEMA_COLS = list(
 
 def _tpc_gold_rows() -> list[dict[str, object]]:
     """Minimal gold rows with every schema column present (production projects them)."""
-    base = {name: None for name in _SCHEMA_COLS}
+    base = dict.fromkeys(_SCHEMA_COLS)
     return [
         {
             **base,

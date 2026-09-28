@@ -7,15 +7,15 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import HealthStatus, JsonDict
-from bioetl.infrastructure.adapters.decorators._retry_support import (
-    _redact_transport_error_message,
-)
 from bioetl.infrastructure.adapters._health_check_policy import (
     _HealthCheckProbeOutcome,
     build_error_context,
     fallback_health_status,
     get_consecutive_health_failures,
     resolve_failure_health_status,
+)
+from bioetl.infrastructure.adapters.decorators._retry_support import (
+    _redact_transport_error_message,
 )
 from bioetl.infrastructure.adapters.health_check_contract import (
     HEALTH_CHECK_ERRORS,

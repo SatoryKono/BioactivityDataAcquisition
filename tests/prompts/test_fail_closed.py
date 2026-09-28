@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 import yaml
-
 from scripts.ai.prompts.check import (
     check_hygiene,
     check_readme_scenarios,

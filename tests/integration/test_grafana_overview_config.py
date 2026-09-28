@@ -271,15 +271,6 @@ def test_current_domain_detail_uses_same_qualified_verdict_as_summary(
 ) -> None:
     assert title not in _panels_by_title()
     assert domain
-    return
-    expr = _panel_expr(panel)
-    assert "bioetl_l0_input_status_selected" in expr
-    assert f'input="{domain}"' in expr
-    assert 'pipeline=~"$pipeline"' in expr
-    assert 'run_type=~"$run_type"' in expr
-    assert "bioetl_l1_" not in expr
-    assert "vector(3)" in expr
-    assert "evidence-qualified" in str(panel.get("description", ""))
 
 
 def test_l1_cards_have_operator_mappings_and_targeted_links() -> None:
