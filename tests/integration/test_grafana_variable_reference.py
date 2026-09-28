@@ -86,7 +86,15 @@ def test_run_explorer_defaults_browse_all_without_selecting_an_exact_run() -> No
 
 def test_variable_defaults_follow_repo_aligned_contract() -> None:
     overview = _variables("bioetl-overview-v2.json")
-    assert set(overview) == {"workflow", "pipeline", "run_type", "run_id"}
+    assert set(overview) == {
+        "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
+        # Hidden helper feeding the 9002 'Open Provider Health' handoff
+        # (var-provider=${provider_for_pipeline:percentencode}).
+        "provider_for_pipeline",
+    }
     assert overview["workflow"].get("includeAll") is True
     assert overview["workflow"].get("multi") is False
     assert overview["workflow"].get("current", {}).get("text") == "All"

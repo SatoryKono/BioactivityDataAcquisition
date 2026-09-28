@@ -275,7 +275,8 @@
         "query": {
           "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
           "refId": "StandardVariableQuery"
-        }
+        },
+        "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
       }
     ]
   },
@@ -390,18 +391,6 @@
           "includeVars": false,
           "asDropdown": false,
           "tags": []
-        },
-        {
-          "title": "Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Run Explorer (Run Explorer). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
         }
       ]
     },
@@ -410,7 +399,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 2
@@ -454,10 +443,10 @@
       "type": "table",
       "title": "Review Selected-Run Trust",
       "gridPos": {
-        "h": 10,
+        "h": 9,
         "w": 12,
         "x": 0,
-        "y": 7
+        "y": 8
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded.",
@@ -1455,10 +1444,10 @@
         ]
       },
       "gridPos": {
-        "h": 10,
+        "h": 9,
         "w": 12,
         "x": 12,
-        "y": 7
+        "y": 8
       },
       "id": 9416,
       "options": {
@@ -2079,7 +2068,7 @@
           "id": 9423,
           "type": "table",
           "title": "Review Exact Replay Checks",
-          "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass.",
+          "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass. Valid-empty check output stays VALID EMPTY. Request failure is QUERY ERROR.",
           "datasource": "BioETL Ops HTTP",
           "targets": [
             {
@@ -5876,6 +5865,12 @@
                   "title": "Open monitoring backend setup docs",
                   "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
                   "targetBlank": true
+                },
+                {
+                  "title": "Open Run Explorer",
+                  "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                  "includeVars": false,
+                  "targetBlank": false
                 }
               ],
               "mappings": [
@@ -6561,7 +6556,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 5
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Exact replay readiness of the selected Run ID from saved inputs. READY means required checks passed, not that a replay already ran and not permission to write current tables. BLOCKED is a proven gap. INSUFFICIENT means a required check could not be completed. UNSUPPORTED means this family cannot exact-replay. SELECT RUN and QUERY ERROR are request states. N/A is not zero. CURRENT Prometheus does not change this verdict.",

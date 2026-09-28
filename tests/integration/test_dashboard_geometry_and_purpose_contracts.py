@@ -474,7 +474,6 @@ def test_allowlists_carry_governance_metadata() -> None:
         for key, meta in allowlist.items():
             for field in ("owner", "rationale", "retire_when"):
                 assert meta.get(field, "").strip(), f"{name} {key} missing {field}"
-    assert MIN_HEIGHT_ALLOWLIST, "min_height still has a governed exception"
 
 
 # --- REQ-DASH-004 / DASH-DENSITY-002: scalar information density (values/area) ---

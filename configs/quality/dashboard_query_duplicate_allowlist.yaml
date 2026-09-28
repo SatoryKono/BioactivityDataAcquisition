@@ -25,7 +25,19 @@ exact_duplicates:
       linked_issue: "#11269"
       resolution: overview_selected_run_removed_shared_copy
       rationale: Overview no longer ships the shared publication clock.
-  allowed_groups: []
+  allowed_groups:
+    - id: incident-scope-status-shared-priority
+      owner: "@bioetl-observability"
+      linked_issue: "#11269"
+      normalized_expression: topk(1, bioetl_workflow_scope_priority_by_input{workflow=~"$workflow",pipeline=~"$pipeline",run_type=~"$run_type"})
+      panel_refs:
+        - "bioetl-incident-v1.json :: Monitor Pipeline Status"
+        - "bioetl-incident-v1.json :: Monitor Scope Status"
+      disposition: retain_shared_priority_signal
+      rationale: >
+        The first-window scope card and the collapsed fleet row card
+        intentionally mirror the same workflow-scope priority signal in two
+        operator contexts after the runtime fleet evidence moved to Incident.
 near_duplicates:
   max_count: 5
   owner: "@bioetl-observability"
@@ -75,7 +87,7 @@ near_duplicates:
     - id: runtime-blocker-topk-depth-variants
       disposition: retain_presentation_variants
       recording_rule_decision: rejected_topk_is_consumer_specific
-      rationale: Top-3 is the first-screen summary and top-20 is the explicit drilldown; recording either topk would make the other consumer semantically wrong.
+      rationale: Top-3 is the first-screen summary and top-20 is the explicit drilldown; recording either topk would make the other consumer semantically wrong. Both panels moved from bioetl-runtime to the incident workspace with the fleet evidence.
       panel_refs:
-        - "bioetl-runtime.json :: Inspect Active Runtime Blocker Detail"
-        - "bioetl-runtime.json :: Review Runtime Blockers"
+        - "bioetl-incident-v1.json :: Inspect Active Runtime Blocker Detail"
+        - "bioetl-incident-v1.json :: Review Runtime Blockers"

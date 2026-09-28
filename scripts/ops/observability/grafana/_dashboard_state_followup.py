@@ -467,7 +467,8 @@ def _ensure_stage_panel(by_id: dict[int, dict[str, Any]]) -> None:
             "the table shows at most 12 stages. "
             "SUCCESS with missing stage evidence stays INCOMPLETE. "
             "A recorded zero stays 0. An unknown count is empty, not 0. "
-            "UNFINISHED means no terminal event. Prometheus does not change this table."
+            "UNFINISHED means no terminal event. Prometheus does not change this table. "
+            "Request failure is QUERY ERROR."
         ),
         "gridPos": {"x": 0, "y": 16, "w": 24, "h": 8},
         "datasource": "BioETL Ops HTTP",

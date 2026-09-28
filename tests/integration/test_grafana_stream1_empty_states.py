@@ -27,23 +27,7 @@ pytestmark = pytest.mark.integration
 
 _PROVIDER_HEALTH_DASHBOARD = Path("grafana/dashboards/bioetl-provider-health-v2.json")
 _PROVIDER_HEALTH_UID = "bioetl-provider-health-v2"
-# #10246: fleet-coverage proof required before any provider-health VALID EMPTY.
-_PROVIDER_CAUSE_COVERAGE_GUARD = (
-    "(count(max by (provider) (bioetl_provider_current_status)) > bool 0)"
-    " * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0)"
-    " * absent(max by (provider) (bioetl_provider_current_status) != 0)"
-    " * absent(max by (provider) (bioetl_provider_current_status)"
-    " unless on(provider) max by (provider) (bioetl_provider_health_status))"
-    " * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0)"
-)
-_PROVIDER_CAUSE_VALID_EMPTY_LABEL = (
-    "VALID EMPTY - FLEET coverage proven, no active provider causes"
-)
-_PROVIDER_CAUSE_UNKNOWN_LABEL = (
-    "UNKNOWN - FLEET cause coverage unproven, restore provider telemetry"
-)
-_PROVIDER_CAUSE_PANEL_IDS = (9103, 9113)
-_PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS = (9102, 9103, 9107)
+_PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS = (9460, 9461)
 
 
 def _provider_health_panels_by_id() -> dict[int, dict[str, object]]:
@@ -118,71 +102,75 @@ def test_empty_state_hedge_invariant_rejects_the_10246_regression() -> None:
     )
 
 
-def test_provider_cause_tables_emit_one_fleet_verdict_row() -> None:
-    """VALID EMPTY needs the coverage proof; otherwise the fleet row stays UNKNOWN."""
+def test_provider_health_fleet_cause_tables_are_retired() -> None:
+    """Provider Health answers from selected-run HTTP evidence, not fleet PromQL."""
     panels = _provider_health_panels_by_id()
-    for panel_id in _PROVIDER_CAUSE_PANEL_IDS:
-        panel = panels.get(panel_id)
-        assert panel is not None, f"provider-health panel {panel_id} is missing"
+    retired = {
+        1,
+        2,
+        7,
+        31,
+        32,
+        91,
+        102,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        9002,
+        9101,
+        9102,
+        9103,
+        9104,
+        9105,
+        9106,
+        9107,
+        9111,
+        9112,
+        9113,
+        9401,
+        9404,
+        9405,
+        9450,
+        9451,
+        9452,
+    }
+    assert not retired & set(panels), (
+        f"retired fleet panels still ship: {sorted(retired & set(panels))}"
+    )
+    for panel_id in _PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS:
+        panel = panels[panel_id]
         expressions = [
             target["expr"]
             for target in panel.get("targets", [])
             if isinstance(target.get("expr"), str)
         ]
-        assert len(expressions) == 1, (
-            f"panel {panel_id} must answer from one instant snapshot"
+        assert not expressions, (
+            f"panel {panel_id} must not query Prometheus fleet telemetry"
         )
-        expr = expressions[0]
-
-        valid_empty_index = expr.find(_PROVIDER_CAUSE_VALID_EMPTY_LABEL)
-        unknown_index = expr.find(_PROVIDER_CAUSE_UNKNOWN_LABEL)
-        assert valid_empty_index > 0, (
-            f"panel {panel_id} must expose a proven VALID EMPTY fleet row"
-        )
-        assert unknown_index > valid_empty_index, (
-            f"panel {panel_id} must fall back to an UNKNOWN fleet row"
-        )
-        assert expr.count(_PROVIDER_CAUSE_COVERAGE_GUARD) == 2, (
-            f"panel {panel_id} must gate VALID EMPTY on the coverage proof and "
-            "exclude it from the UNKNOWN branch"
-        )
-        # The UNKNOWN branch must subtract the VALID EMPTY branch, so the two
-        # fleet verdict rows can never render together.
-        assert f"unless ({_PROVIDER_CAUSE_COVERAGE_GUARD})" in expr, (
-            f"panel {panel_id} UNKNOWN row must exclude the proven-empty case"
-        )
-        assert "or vector(0)" not in expr
-        assert "unless on (provider)" not in expr
 
 
 def test_provider_cause_contract_declares_unknown_beside_valid_empty() -> None:
-    """Contract must admit the UNKNOWN fleet row that #10246 locked in."""
+    """Contract must admit UNKNOWN beside VALID_EMPTY on selected-run panels."""
     contract = yaml.safe_load(
         Path(
             "docs/03-guides/dashboards/contracts/panel-content-contract.yaml"
         ).read_text(encoding="utf-8")
     )
     panels = contract["dashboards"][_PROVIDER_HEALTH_UID]["panels"]
-    for panel_id in _PROVIDER_CAUSE_PANEL_IDS:
+    for panel_id in _PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS:
         record = panels[str(panel_id)]
-        assert {"VALID_EMPTY", "UNKNOWN"} <= set(record["state_model"]), (
-            f"panel {panel_id} must declare both proven-empty and UNKNOWN states"
+        assert "UNKNOWN" in record["state_model"], (
+            f"panel {panel_id} must declare the UNKNOWN state"
         )
-        assert record["empty_state_class"] == "telemetry_missing"
-    for panel_id in (9107,):
-        record = panels[str(panel_id)]
-        assert "UNKNOWN" in record["state_model"]
-        assert "VALID_EMPTY" not in record["state_model"], (
-            f"panel {panel_id} cannot prove VALID EMPTY from its own query"
-        )
-    fleet = _provider_health_panels_by_id()[9102]
-    expr = fleet["targets"][0]["expr"]
-    assert "VALID_EMPTY" in panels["9102"]["state_model"]
-    assert "count(max by (provider) (bioetl_provider_current_status)) > 0" in expr
-    assert "absent(max by (provider) (bioetl_provider_current_status) != 0)" in expr
-    assert (
-        "unless on(provider) max by (provider) (bioetl_provider_health_status)" in expr
-    )
 
 
 def _runtime_panels_by_id() -> dict[int, dict]:
@@ -219,7 +207,7 @@ def test_dq_10253_selected_run_summary_is_first_window() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     root = {panel.get("id"): panel for panel in dashboard.get("panels") or []}
     summary = root[9406]
-    assert summary.get("gridPos") == {"h": 4, "w": 24, "x": 0, "y": 18}
+    assert summary.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 5}
     organize = next(
         item
         for item in summary.get("transformations") or []
@@ -229,9 +217,7 @@ def test_dq_10253_selected_run_summary_is_first_window() -> None:
         "execution_state": 0,
         "verdict": 1,
         "saved_trust": 2,
-        "evidence_completeness": 3,
-        "reason_display": 4,
-        "rules_version": 5,
+        "reason_display": 3,
     }
     assert "presentation_summary[0]" in summary["targets"][0]["root_selector"]
     assert "/selected-run-status?" in summary["targets"][0]["url"]

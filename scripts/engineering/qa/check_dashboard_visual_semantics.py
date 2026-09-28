@@ -17,18 +17,19 @@ type JsonObject = dict[str, Any]
 
 # Dashboard / panel title identities (python:S1192).
 DASHBOARD_RUNTIME = "bioetl-runtime.json"
+DASHBOARD_INCIDENT_V1 = "bioetl-incident-v1.json"
 DASHBOARD_DQ_V2 = "bioetl-dq-v2.json"
 DASHBOARD_CONTROL_PLANE_V1 = "bioetl-control-plane-v1.json"
 DASHBOARD_OVERVIEW_V2 = "bioetl-overview-v2.json"
 PANEL_MONITOR_RUNTIME_BLOCKERS = "Monitor Active Blocker Count"
 PANEL_RUNTIME_ERROR_RATE = "Monitor Runtime Error Rate"
 PANEL_WORST_STAGE_LAG = "Monitor Worst Stage Lag"
-PANEL_RUNTIME_STATUS = "Runtime Status"
 PANEL_METRICS_EVIDENCE = "Monitor Coverage"
-PANEL_MONITOR_DQ_CURRENT_STATUS = "Monitor DQ Current Status"
-PANEL_MONITOR_DQ_THRESHOLD_STATE = "Monitor DQ Threshold State"
-PANEL_MONITOR_REPLAY_SAFETY_STATE = "Monitor Replay Safety"
-PANEL_MONITOR_MANIFEST_LEDGER_INTEGRITY = "Monitor Manifest/Ledger"
+PANEL_SCOPE_STATUS = "Monitor Scope Status"
+PANEL_PIPELINE_STATUS = "Monitor Pipeline Status"
+PANEL_MONITOR_REPLAY = "Monitor Replay"
+PANEL_MONITOR_LEDGER = "Monitor Ledger"
+PANEL_MONITOR_MEMORY_PRESSURE = "Monitor Memory Pressure"
 PANEL_INSPECT_TELEMETRY_MISSING = "Monitor Telemetry"
 UNTITLED_PANEL_TITLE = "<untitled>"
 
@@ -37,17 +38,19 @@ EXPECTED_STEPS: list[JsonObject] = [
     {"color": "orange", "value": 1},
     {"color": "red", "value": 2},
 ]
+# Fleet triage stats moved from bioetl-runtime to the incident workspace's
+# collapsed fleet row; the expected steps follow the shipped panels.
 EXPECTED_STEPS_BY_PANEL: dict[tuple[str, str], list[JsonObject]] = {
-    (DASHBOARD_RUNTIME, PANEL_MONITOR_RUNTIME_BLOCKERS): [
+    (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_RUNTIME_BLOCKERS): [
         {"color": "green", "value": None},
         {"color": "red", "value": 1},
     ],
-    (DASHBOARD_RUNTIME, PANEL_RUNTIME_ERROR_RATE): [
+    (DASHBOARD_INCIDENT_V1, PANEL_RUNTIME_ERROR_RATE): [
         {"color": "green", "value": None},
         {"color": "orange", "value": 0.05},
         {"color": "red", "value": 0.2},
     ],
-    (DASHBOARD_RUNTIME, PANEL_WORST_STAGE_LAG): [
+    (DASHBOARD_INCIDENT_V1, PANEL_WORST_STAGE_LAG): [
         {"color": "green", "value": None},
         {"color": "orange", "value": 300},
         {"color": "red", "value": 900},
@@ -68,83 +71,57 @@ STANDARD_SEVERITY_TITLE_TOKENS = (
     "Threshold State",
 )
 BACKGROUND_SEVERITY_STAT_PANELS = {
-    (DASHBOARD_OVERVIEW_V2, "Status"),
-    (DASHBOARD_RUNTIME, PANEL_RUNTIME_STATUS),
-    (DASHBOARD_RUNTIME, "Failed Runs"),
-    (DASHBOARD_RUNTIME, PANEL_RUNTIME_ERROR_RATE),
-    (DASHBOARD_RUNTIME, PANEL_WORST_STAGE_LAG),
-    (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_CURRENT_STATUS),
-    (DASHBOARD_CONTROL_PLANE_V1, PANEL_MONITOR_REPLAY_SAFETY_STATE),
-    (DASHBOARD_CONTROL_PLANE_V1, PANEL_MONITOR_MANIFEST_LEDGER_INTEGRITY),
-    (DASHBOARD_CONTROL_PLANE_V1, PANEL_INSPECT_TELEMETRY_MISSING),
+    (DASHBOARD_INCIDENT_V1, PANEL_SCOPE_STATUS),
+    (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_REPLAY),
+    (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_LEDGER),
+    (DASHBOARD_INCIDENT_V1, PANEL_INSPECT_TELEMETRY_MISSING),
 }
-SCALAR_TREND_TIMESERIES_PANELS = {
-    (DASHBOARD_DQ_V2, "Track Volume-Weighted DQ Score"),
-    (DASHBOARD_DQ_V2, "Track DQ Threshold Events"),
-    (DASHBOARD_OVERVIEW_V2, "Runtime Blockers Trend"),
-    (DASHBOARD_OVERVIEW_V2, "DQ Status Trend"),
-    (DASHBOARD_OVERVIEW_V2, "Gold Lifecycle Trend"),
-}
+SCALAR_TREND_TIMESERIES_PANELS: set[tuple[str, str]] = set()
 ALLOWED_TABLE_CELL_OPTION_TYPES = {"auto", "color-background", "color-text"}
+_SEVERITY_012_VALUE_MAPPING: JsonObject = {
+    "0": {"text": "OK", "color": "green"},
+    "1": {"text": "WARN", "color": "orange"},
+    "2": {"text": "CRIT", "color": "red"},
+}
+_SCOPE_0123_VALUE_MAPPING: JsonObject = {
+    "0": {"text": "OK", "color": "green"},
+    "1": {"text": "UNKNOWN", "color": "gray"},
+    "2": {"text": "WARN", "color": "orange"},
+    "3": {"text": "CRIT", "color": "red"},
+}
 EXPLICIT_VALUE_MAPPING_STAT_PANELS: dict[tuple[str, str], JsonObject] = {
-    (DASHBOARD_OVERVIEW_V2, "Status"): {
-        "0": {"text": "OK", "color": "green"},
-        "1": {"text": "WARN", "color": "orange"},
-        "2": {"text": "CRIT", "color": "red"},
-        "3": {"text": "UNKNOWN", "color": "gray"},
-    },
-    (DASHBOARD_RUNTIME, PANEL_RUNTIME_STATUS): {
-        "0": {"text": "OK", "color": "green"},
-        "1": {"text": "WARN", "color": "orange"},
-        "2": {"text": "CRIT", "color": "red"},
-        "3": {"text": "INCOMPLETE", "color": "gray"},
-    },
-    (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_CURRENT_STATUS): {
-        "0": {"text": "OK", "color": "green"},
-        "1": {"text": "WARN", "color": "orange"},
-        "2": {"text": "CRIT", "color": "red"},
-        "3": {"text": "INCOMPLETE", "color": "gray"},
-    },
-    (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_THRESHOLD_STATE): {
-        "0": {"text": "OK", "color": "green"},
-        "1": {"text": "WARN", "color": "orange"},
-        "2": {"text": "CRIT", "color": "red"},
-    },
-    (DASHBOARD_CONTROL_PLANE_V1, PANEL_MONITOR_REPLAY_SAFETY_STATE): {
-        "0": {"text": "OK", "color": "green"},
-        "1": {"text": "WARN", "color": "orange"},
-        "2": {"text": "CRIT", "color": "red"},
-    },
-    (DASHBOARD_CONTROL_PLANE_V1, PANEL_MONITOR_MANIFEST_LEDGER_INTEGRITY): {
-        "0": {"text": "OK", "color": "green"},
-        "1": {"text": "WARN", "color": "orange"},
-        "2": {"text": "CRIT", "color": "red"},
-    },
-    (DASHBOARD_CONTROL_PLANE_V1, PANEL_INSPECT_TELEMETRY_MISSING): {
-        "0": {"text": "OK", "color": "green"},
-        "1": {"text": "WARN", "color": "orange"},
-        "2": {"text": "CRIT", "color": "red"},
+    (DASHBOARD_INCIDENT_V1, PANEL_SCOPE_STATUS): _SCOPE_0123_VALUE_MAPPING,
+    (DASHBOARD_INCIDENT_V1, PANEL_PIPELINE_STATUS): _SCOPE_0123_VALUE_MAPPING,
+    (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_MEMORY_PRESSURE): (
+        _SEVERITY_012_VALUE_MAPPING
+    ),
+    (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_REPLAY): _SEVERITY_012_VALUE_MAPPING,
+    (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_LEDGER): _SEVERITY_012_VALUE_MAPPING,
+    (DASHBOARD_INCIDENT_V1, PANEL_INSPECT_TELEMETRY_MISSING): (
+        _SEVERITY_012_VALUE_MAPPING
+    ),
+    (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_RUNTIME_BLOCKERS): {
+        "0": {"text": "0 blockers", "color": "gray"},
+        "1": {"text": "CRIT", "color": "red"},
     },
 }
 FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS = {
-    (DASHBOARD_OVERVIEW_V2, "Status"): "UNKNOWN",
-    (DASHBOARD_RUNTIME, PANEL_RUNTIME_STATUS): "UNKNOWN",
-    (DASHBOARD_RUNTIME, PANEL_METRICS_EVIDENCE): "UNKNOWN",
-    (DASHBOARD_RUNTIME, PANEL_MONITOR_RUNTIME_BLOCKERS): "UNKNOWN",
-    (DASHBOARD_RUNTIME, PANEL_RUNTIME_ERROR_RATE): "UNKNOWN",
-    (DASHBOARD_RUNTIME, PANEL_WORST_STAGE_LAG): "UNKNOWN",
-    (DASHBOARD_RUNTIME, "Monitor Memory Pressure Active"): "UNKNOWN",
-    ("bioetl-provider-health-v2.json", "Monitor GLOBAL Provider Severity Matrix"): None,
-    ("bioetl-provider-health-v2.json", "Inspect Provider Top Causes"): None,
-    (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_CURRENT_STATUS): "UNKNOWN",
-    (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_THRESHOLD_STATE): "UNKNOWN",
-    (DASHBOARD_CONTROL_PLANE_V1, PANEL_MONITOR_REPLAY_SAFETY_STATE): "UNKNOWN",
-    (DASHBOARD_CONTROL_PLANE_V1, PANEL_MONITOR_MANIFEST_LEDGER_INTEGRITY): "UNKNOWN",
-    (DASHBOARD_CONTROL_PLANE_V1, PANEL_INSPECT_TELEMETRY_MISSING): "UNKNOWN",
+    (DASHBOARD_INCIDENT_V1, PANEL_SCOPE_STATUS): "UNKNOWN",
+    (DASHBOARD_INCIDENT_V1, PANEL_PIPELINE_STATUS): "UNKNOWN",
+    (DASHBOARD_INCIDENT_V1, PANEL_METRICS_EVIDENCE): "UNKNOWN",
+    (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_RUNTIME_BLOCKERS): "UNKNOWN",
+    (DASHBOARD_INCIDENT_V1, PANEL_RUNTIME_ERROR_RATE): "UNKNOWN",
+    (DASHBOARD_INCIDENT_V1, PANEL_WORST_STAGE_LAG): "UNKNOWN",
+    (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_MEMORY_PRESSURE): "UNKNOWN",
+    (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_REPLAY): "UNKNOWN",
+    (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_LEDGER): "UNKNOWN",
+    (DASHBOARD_INCIDENT_V1, PANEL_INSPECT_TELEMETRY_MISSING): "UNKNOWN",
 }
+# Telemetry trust markers moved with the fleet evidence into the incident
+# workspace's collapsed "Pipeline fleet and range, not this Run ID" row, so
+# presence is required but the first-screen placement rule is retired.
 REQUIRED_TRUST_MARKER_PANELS = {
-    DASHBOARD_RUNTIME: {PANEL_METRICS_EVIDENCE},
-    DASHBOARD_CONTROL_PLANE_V1: {PANEL_INSPECT_TELEMETRY_MISSING},
+    DASHBOARD_INCIDENT_V1: {PANEL_METRICS_EVIDENCE, PANEL_INSPECT_TELEMETRY_MISSING},
 }
 
 # DASH-STATE-001/003 (#10246): operator copy must confirm one empty state.
@@ -509,11 +486,16 @@ def _telemetry_evidence_errors(panel: JsonObject) -> list[str]:
             errors.append(
                 f"Metrics Coverage {name} must use explicit evidence mappings"
             )
-    coverage = fields.get("Expected stage signals", {})
-    if coverage.get("unit") != "percentunit" or coverage.get("color") != {
-        "mode": "fixed",
-        "fixedColor": "text",
-    }:
+    coverage = fields.get("stages", {})
+    if (
+        coverage.get("unit") != "percentunit"
+        or coverage.get("color")
+        != {
+            "mode": "fixed",
+            "fixedColor": "text",
+        }
+        or coverage.get("displayName") != "Expected stage signals"
+    ):
         errors.append("Metrics Coverage stage presence must be a neutral percentage")
     if fields.get("Rule age", {}).get("unit") != "s":
         errors.append("Metrics Coverage must show rule evaluation age in seconds")
@@ -572,7 +554,7 @@ def _panel_errors(dashboard_path: Path, panel: JsonObject) -> list[str]:
     expected_no_value = FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS.get(panel_key)
     evidence_errors = (
         _telemetry_evidence_errors(panel)
-        if panel_key == (DASHBOARD_RUNTIME, PANEL_METRICS_EVIDENCE)
+        if panel_key == (DASHBOARD_INCIDENT_V1, PANEL_METRICS_EVIDENCE)
         else []
     )
     return (
@@ -608,15 +590,16 @@ def _trust_marker_panel_errors(
     if not required_panels:
         return []
     top_level_panels = {str(panel.get("title", "")): panel for panel in panels}
+    all_panels = {str(panel.get("title", "")): panel for panel in iter_panels(panels)}
     errors: list[str] = []
     for title in required_panels:
-        panel = top_level_panels.get(title)
+        panel = all_panels.get(title)
         if panel is None:
             errors.append(
                 f"{dashboard_path}: required trust marker panel '{title}' is missing"
             )
             continue
-        if not _trust_marker_is_above_fold(panel):
+        if title in top_level_panels and not _trust_marker_is_above_fold(panel):
             errors.append(
                 f"{dashboard_path}: trust marker panel '{title}' must stay above fold"
             )

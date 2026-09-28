@@ -466,13 +466,20 @@ def _unknown_metrics_for_query(query: str, valid_metrics: set[str]) -> list[str]
 
 
 def _infer_recording_rule_labels(expr: str) -> frozenset[str]:
-    """Infer the exported label set for simple recording-rule aggregations."""
-    match = re.search(r"\b(?:sum|max|min|avg|count)\s+by\s*\(([^)]*)\)", expr)
-    if not match:
-        return frozenset()
-    return frozenset(
-        label.strip() for label in match.group(1).split(",") if label.strip()
-    )
+    """Infer the exported label set for simple recording-rule aggregations.
+
+    Aggregation/grouping clauses (``by``/``group by``) define the output labels
+    directly, and ``on (...)`` join keys must be present on both sides, so they
+    are also exported labels.
+    """
+    labels: set[str] = set()
+    for match in re.findall(
+        r"\b(?:sum|max|min|avg|count|group)\s+by\s*\(([^)]*)\)", expr
+    ):
+        labels.update(label.strip() for label in match.split(",") if label.strip())
+    for match in re.findall(r"\bon\s*\(([^)]*)\)", expr):
+        labels.update(label.strip() for label in match.split(",") if label.strip())
+    return frozenset(labels)
 
 
 def _extract_selector_labels(selector_body: str) -> set[str]:

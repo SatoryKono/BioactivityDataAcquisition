@@ -82,7 +82,9 @@ def apply_replay_readiness_design(payload: dict) -> None:
             "title": "Review Exact Replay Checks",
             "description": (
                 "SELECTED RUN · One row per readiness check for this Run ID. "
-                "Fail blocks replay. Unknown is not a pass."
+                "Fail blocks replay. Unknown is not a pass. "
+                "Valid-empty check output stays VALID EMPTY. "
+                "Request failure is QUERY ERROR."
             ),
             "datasource": card["datasource"],
             "targets": [target],

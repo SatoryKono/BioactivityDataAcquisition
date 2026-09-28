@@ -395,7 +395,8 @@ shipped_selector_registry:
       - run_type
       - run_id
       - read_latency_quantile
-    hidden_context_selectors: []
+    hidden_context_selectors:
+      - provider_for_pipeline
     hidden_detail_selectors: []
     top_bar_order:
       - workflow
@@ -416,7 +417,8 @@ shipped_selector_registry:
       - pipeline
       - run_type
       - run_id
-    hidden_context_selectors: []
+    hidden_context_selectors:
+      - provider_for_pipeline
     hidden_detail_selectors: []
     top_bar_order:
       - workflow
@@ -437,6 +439,7 @@ shipped_selector_registry:
       - run_id
       - stage
     hidden_context_selectors:
+      - provider_for_pipeline
       - provider_hint
     hidden_detail_selectors: []
     top_bar_order:
@@ -462,6 +465,7 @@ shipped_selector_registry:
       - provider
     hidden_context_selectors:
       - pipeline_context
+      - provider_for_pipeline
     hidden_detail_selectors:
       - adapter
     top_bar_order:
@@ -486,7 +490,8 @@ shipped_selector_registry:
       - run_type
       - run_id
       - stage
-    hidden_context_selectors: []
+    hidden_context_selectors:
+      - provider_for_pipeline
     hidden_detail_selectors: []
     top_bar_order:
       - workflow
@@ -508,7 +513,8 @@ shipped_selector_registry:
       - run_type
       - run_id
       - provider
-    hidden_context_selectors: []
+    hidden_context_selectors:
+      - provider_for_pipeline
     hidden_detail_selectors: []
     top_bar_order:
       - workflow
@@ -530,7 +536,8 @@ shipped_selector_registry:
       - pipeline
       - run_type
       - run_id
-    hidden_context_selectors: []
+    hidden_context_selectors:
+      - provider_for_pipeline
     hidden_detail_selectors: []
     top_bar_order:
       - workflow
@@ -607,6 +614,7 @@ ship_now_selector_contract_by_uid:
 hidden_handoff_contract:
   allowed_shipped_vars:
     - pipeline_context
+    - provider_for_pipeline
     - provider_hint
   detail_only_shipped_vars:
     - adapter
@@ -629,7 +637,8 @@ default_selection_policy:
   decisions:
     overview_landing: fleet_all
     run_explorer_landing: fleet_all_recent_launches
-    run_explorer_native_defaults: {workflow: All, pipeline: All, run_type: All, run_id: "-"}
+    run_explorer_native_defaults:
+      { workflow: All, pipeline: All, run_type: All, run_id: "-" }
     overview_landing_detail:
       "O2: bioetl-overview-v2 keeps native defaults workflow=All, pipeline=All,
 

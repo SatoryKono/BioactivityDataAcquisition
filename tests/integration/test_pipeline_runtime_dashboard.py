@@ -8,7 +8,12 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Contracts for the shipped Pipeline Runtime Grafana dashboard."""
+"""Contracts for the shipped Incident Workspace Grafana dashboard.
+
+The Pipeline Diagnostics fleet/CURRENT panels moved to bioetl-incident-v1
+(collapsed "Pipeline fleet and range" row); the selected-run evidence stayed on
+bioetl-runtime.
+"""
 
 from __future__ import annotations
 
@@ -31,7 +36,7 @@ from tests.integration._grafana_test_support import (
 
 pytestmark = pytest.mark.integration
 
-_DASHBOARD_PATH = Path("grafana/dashboards/bioetl-runtime.json")
+_DASHBOARD_PATH = Path("grafana/dashboards/bioetl-incident-v1.json")
 _DASHBOARD_UID_RE = re.compile(r"^/d/([^\\/?]+)")
 _LINK_VAR_RE = re.compile(r"[?&]var-(\w+)=")
 _WINDOW_TOKEN_RE = re.compile(r"\[(?:\$__[^]]+|\d+[smhdw])\]")
@@ -94,11 +99,11 @@ def _runtime_data_panels() -> list[dict]:
 def test_pipeline_runtime_dashboard_json_is_valid() -> None:
     dashboard = _dashboard()
     assert isinstance(dashboard, dict)
-    assert dashboard.get("title") == "3. Pipeline Diagnostics"
+    assert dashboard.get("title") == "6. Incident Workspace"
 
 
 def test_pipeline_runtime_dashboard_uid_is_bioetl_runtime() -> None:
-    assert _dashboard().get("uid") == "bioetl-runtime"
+    assert _dashboard().get("uid") == "bioetl-incident-v1"
 
 
 def test_pipeline_runtime_has_required_variables() -> None:
@@ -112,8 +117,8 @@ def test_pipeline_runtime_has_required_variables() -> None:
         "pipeline",
         "run_type",
         "run_id",
-        "stage",
-        "provider_hint",
+        "provider",
+        "provider_for_pipeline",
     }
 
 
@@ -126,14 +131,13 @@ def test_pipeline_runtime_variables_use_runtime_universe() -> None:
 
     pipeline_query = str(variables["pipeline"].get("definition") or "")
     run_type_query = variables["run_type"].get("query", {}).get("query", "")
-    stage_query = variables["stage"].get("query", {}).get("query", "")
+    provider_query = str(variables["provider_for_pipeline"].get("definition") or "")
 
     assert "filter-options?dimension=pipeline" in pipeline_query
-    assert "bioetl_runtime_pipeline_run_type_universe" in run_type_query
+    assert "bioetl_overview_pipeline_run_type_universe" in run_type_query
     assert "bioetl_records_processed_total" not in pipeline_query
     assert "bioetl_records_processed_total" not in run_type_query
-    assert "bioetl_pipeline_stage_expected" in stage_query
-    assert variables["provider_hint"].get("current", {}).get("value") == "$__all"
+    assert "bioetl_workflow_pipeline_expected" in provider_query
 
 
 def test_pipeline_runtime_keeps_record_level_forensic_variables_out() -> None:
@@ -313,7 +317,18 @@ def test_pipeline_runtime_links_are_target_scoped() -> None:
         target_uid = _extract_dashboard_uid(url)
         assert target_uid is not None, f"Could not parse dashboard UID from {url}"
         if target_uid == "${__data.fields.action_dashboard_uid}":
-            assert "${__data.fields.action_scope:raw}" in url
+            scope_token = next(
+                (
+                    token
+                    for token in (
+                        "${__data.fields.action_scope:raw}",
+                        "${__data.fields.action_scope}",
+                    )
+                    if token in url
+                ),
+                None,
+            )
+            assert scope_token is not None, f"action link missing scope: {url}"
             for resolved_uid in (
                 "bioetl-runtime",
                 "bioetl-control-plane-v1",
@@ -322,7 +337,7 @@ def test_pipeline_runtime_links_are_target_scoped() -> None:
                 scope = "var-pipeline=chembl_assay"
                 if resolved_uid != "bioetl-control-plane-v1":
                     scope += "&var-stage=$__all"
-                resolved = url.replace("${__data.fields.action_scope:raw}", scope)
+                resolved = url.replace(scope_token, scope)
                 assert (
                     _extract_link_vars(resolved)
                     <= _ALLOWED_DASHBOARD_LINK_VARS[resolved_uid]
@@ -445,7 +460,6 @@ def test_runtime_current_panels_use_scoped_recording_rules_for_workflow_aliases(
     """Runtime current-triage panels must delegate workflow_<pipeline> selectors to rules."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
     expected_rules = {
-        "Monitor Pipeline Status": ("bioetl_runtime_current_status_trusted",),
         "Review Runtime Blockers": ("bioetl_runtime_current_blocker_reason_scoped",),
         "Monitor Active Blocker Count": (
             "bioetl_runtime_current_blocker_reason_scoped",
@@ -552,16 +566,21 @@ def test_pipeline_duration_has_explicit_no_value_message() -> None:
 
 
 def test_runtime_row_sequence_is_fixed_detect_localize_escalate() -> None:
-    """Runtime row lanes must keep canonical Detect -> Localize -> Escalate order."""
+    """Incident row lanes must keep the fixed progressive-disclosure order."""
     row_panels = [
         panel for panel in _dashboard().get("panels", []) if panel.get("type") == "row"
     ]
     row_pairs = [(panel.get("id"), panel.get("title")) for panel in row_panels]
-    assert row_pairs[:3] == [
-        (252, "Inspect Detection Signals"),
-        (253, "Localize Runtime Cause"),
-        (254, "Review Escalation Paths"),
-    ], f"Runtime row order/title drifted: {row_pairs}"
+    assert row_pairs == [
+        (2020, "Review Alert Evidence"),
+        (2099, "Domain Suspect Details · GLOBAL / CURRENT"),
+        (2100, "Inspect Selected Run Summary"),
+        (8808, "Pipeline fleet and range, not this Run ID"),
+        (32010, "Browse Global Suspects"),
+        (32005, "Browse Global Alerts"),
+        (9450, "Inspect Saved Run Evidence"),
+        (9700, "Inspect Current Workflow Evidence"),
+    ], f"Incident row order/title drifted: {row_pairs}"
 
 
 def test_runtime_first_action_cta_contract() -> None:

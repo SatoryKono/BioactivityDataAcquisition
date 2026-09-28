@@ -12,11 +12,11 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 30
+    panel_count: 27
     key_panels:
       - id: 9422
         title: Review Exact Replay Readiness
-        type: table
+        type: stat
         description: Exact-replay readiness of the selected Run ID
       - id: 9418
         title: Review Selected-Run Trust
@@ -39,6 +39,7 @@ dashboards:
       - pipeline
       - run_id
       - run_type
+      - provider_for_pipeline
       - read_latency_quantile
   - uid: bioetl-overview-v2
     title: Run Overview
@@ -50,7 +51,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 11
+    panel_count: 7
     key_panels:
       - id: 9603
         title: Review Selected Run Status
@@ -68,6 +69,7 @@ dashboards:
       - workflow
       - pipeline
       - run_id
+      - provider_for_pipeline
       - run_type
   - uid: bioetl-runtime
     title: Pipeline Diagnostics
@@ -79,7 +81,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 9
+    panel_count: 10
     key_panels:
       - id: 9998
         title: Review Selected Run Status
@@ -108,6 +110,7 @@ dashboards:
     selector_variables:
       - workflow
       - pipeline
+      - provider_for_pipeline
       - provider_hint
       - run_id
       - run_type
@@ -122,22 +125,23 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 40
+    panel_count: 6
     key_panels:
-      - id: 9101
-        title: Monitor Fleet Status
+      - id: 9461
+        title: Review Provider Check
+        type: stat
+        description: Saved provider check verdict for the selected Run ID
+      - id: 9460
+        title: Review Provider Evidence
         type: table
-        description: Provider health severity matrix
-      - id: 9103
-        title: Inspect Top Provider Causes
-        type: table
-        description: Top causes of provider failures
+        description: Saved provider evidence rows for the selected Run ID
     selector_variables:
       - workflow
       - pipeline
       - run_type
       - run_id
       - provider
+      - provider_for_pipeline
       - pipeline_context
       - adapter
   - uid: bioetl-dq-v2
@@ -174,6 +178,7 @@ dashboards:
       - workflow
       - pipeline
       - run_id
+      - provider_for_pipeline
       - run_type
       - stage
 
@@ -189,7 +194,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 99
+    panel_count: 100
     key_panels:
       - id: 2010
         title: "Inspect Ranked Suspects"
@@ -208,6 +213,7 @@ dashboards:
       - pipeline
       - run_type
       - run_id
+      - provider_for_pipeline
       - provider
   - uid: bioetl-run-explorer-v1
     title: Run Explorer
@@ -233,3 +239,4 @@ dashboards:
       - pipeline
       - run_type
       - run_id
+      - provider_for_pipeline

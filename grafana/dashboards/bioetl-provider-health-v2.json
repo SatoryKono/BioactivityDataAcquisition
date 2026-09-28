@@ -341,7 +341,8 @@
         "query": {
           "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
           "refId": "StandardVariableQuery"
-        }
+        },
+        "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
       }
     ]
   },
@@ -449,18 +450,6 @@
           "title": "6. Incident Workspace",
           "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "tooltip": "6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Run Explorer (Run Explorer). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -1118,7 +1107,7 @@
         "h": 3
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. This is not live fleet health.",
+      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health.",
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -1191,12 +1180,38 @@
                   "color": "orange"
                 }
               }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
             }
           ],
           "color": {
-            "mode": "fixed",
-            "fixedColor": "gray"
-          }
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "links": [
+            {
+              "title": "Open Pipeline Diagnostics",
+              "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "includeVars": false,
+              "targetBlank": false
+            }
+          ]
         },
         "overrides": []
       },
@@ -1246,7 +1261,7 @@
         "h": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK.",
+      "description": "SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK. Valid-empty evidence stays VALID EMPTY. Request failure is QUERY ERROR.",
       "options": {
         "showHeader": true,
         "cellHeight": "sm",

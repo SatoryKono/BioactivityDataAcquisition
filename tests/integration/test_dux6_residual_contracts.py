@@ -209,18 +209,24 @@ def test_pfill_10_provider_missing_series_has_reason_and_action() -> None:
         (DASH / "bioetl-provider-health-v2.json").read_text(encoding="utf-8")
     )
     panels = {panel.get("id"): panel for panel in _walk(data.get("panels"))}
-    status = panels[9401]
-    matrix = panels[9101]
-    freshness = panels[9104]
+    assert not {9401, 9101, 9104} & set(panels)
+    verdict = panels[9461]
+    evidence = panels[9460]
 
-    for panel in (status, matrix):
-        description = str(panel.get("description") or "").lower()
-        assert "telemetry missing" in description
-        assert "healthy fleet" in description
-    freshness_expr = str((freshness.get("targets") or [])[0].get("expr") or "")
-    assert "bioetl_provider_current_status" in freshness_expr
-    assert "or vector(0)" not in freshness_expr
-    assert "fail-closed unknown" in str(freshness.get("description") or "").lower()
+    description = str(verdict.get("description") or "").lower()
+    assert "unknown" in description
+    assert "not live fleet health" in description
+    evidence_description = str(evidence.get("description") or "").lower()
+    assert "unknown" in evidence_description or "valid empty" in evidence_description
+    link_titles = [
+        str(link.get("title") or "")
+        for link in verdict.get("links") or []
+        if isinstance(link, dict)
+    ]
+    assert any(
+        "pipeline diagnostics" in title.lower() or "run explorer" in title.lower()
+        for title in link_titles
+    )
 
 
 def test_percent_scores_integer_precision() -> None:
@@ -237,7 +243,7 @@ def test_percent_scores_integer_precision() -> None:
 def test_primary_status_documents_unknown_class() -> None:
     for path, status_id in (
         (DASH / "bioetl-runtime.json", 9998),
-        (DASH / "bioetl-overview-v2.json", 214),
+        (DASH / "bioetl-overview-v2.json", 9603),
     ):
         data = json.loads(path.read_text(encoding="utf-8"))
         status = next(p for p in _walk(data.get("panels")) if p.get("id") == status_id)

@@ -13,7 +13,7 @@ def apply_overall_verdict(payload: dict) -> None:
     panel = {
         "id": 9604,
         "type": "stat",
-        "title": "Overall verdict",
+        "title": "Review Overall Verdict",
         "description": "Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
         "gridPos": {"x": 17, "y": 2, "w": 7, "h": 3},
         "datasource": deepcopy(source["datasource"]),
@@ -45,8 +45,20 @@ def apply_overall_verdict(payload: dict) -> None:
                                 "SELECT RUN": "gray",
                             }.items()
                         },
-                    }
+                    },
+                    {
+                        "type": "special",
+                        "options": {
+                            "match": "null",
+                            "result": {"text": "UNKNOWN", "color": "gray"},
+                        },
+                    },
                 ],
+                "color": {"mode": "thresholds"},
+                "thresholds": {
+                    "mode": "absolute",
+                    "steps": [{"color": "green", "value": None}],
+                },
             },
             "overrides": [],
         },

@@ -238,7 +238,8 @@
         "query": {
           "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
           "refId": "StandardVariableQuery"
-        }
+        },
+        "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
       }
     ]
   },
@@ -353,18 +354,6 @@
           "includeVars": false,
           "asDropdown": false,
           "tags": []
-        },
-        {
-          "title": "Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "Run Explorer (Run Explorer). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
         }
       ]
     },
@@ -392,7 +381,7 @@
     {
       "id": 9604,
       "type": "stat",
-      "title": "Overall verdict",
+      "title": "Review Overall Verdict",
       "description": "Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
       "gridPos": {
         "x": 17,
@@ -470,8 +459,30 @@
                   "color": "gray"
                 }
               }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
             }
-          ]
+          ],
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
         },
         "overrides": []
       },
@@ -504,7 +515,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "SELECTED RUN · Columns are Result, Status, Evidence, and Rules. Status is the verdict. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
+      "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -1079,9 +1090,9 @@
       "title": "Review Run Identity",
       "gridPos": {
         "x": 0,
-        "y": 14,
-        "w": 24,
-        "h": 8
+        "y": 11,
+        "w": 12,
+        "h": 7
       },
       "description": "SELECTED RUN · Shows HTTP-backed identity for an exact Run ID. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live before treating the result as expected. Open Run Explorer for complete run evidence. Inspect value opens full identifiers as selectable plain text.",
       "datasource": "BioETL Ops HTTP",
@@ -1333,10 +1344,10 @@
       "type": "table",
       "title": "Review Processed Records",
       "gridPos": {
-        "x": 0,
-        "y": 22,
-        "w": 24,
-        "h": 8
+        "x": 12,
+        "y": 11,
+        "w": 12,
+        "h": 7
       },
       "description": "SELECTED RUN · Shows HTTP-backed Bronze, Silver, and Gold record counts and outcomes. Zero is a recorded count. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live. Open Run Explorer for complete accounting. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
       "datasource": "BioETL Ops HTTP",
