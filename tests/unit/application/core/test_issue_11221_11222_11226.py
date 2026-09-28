@@ -6,6 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from bioetl.application.core.batch_executor_loop_helpers import (
     BatchExtractionIterationContext,
     BatchExtractionLoopState,

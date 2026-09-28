@@ -175,6 +175,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ai/opencode/check_agent_headers.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the tested OpenCode agent-header checker (unit-covered via tests/unit/scripts/ai/test_opencode_agent_headers.py, documented --check/--update CLI); keep it supporting unless it gains workflow callers, then re-triage references.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-17"
+    },
     "scripts/ai/mcp/_patch_grok_mcp_tokens.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a bounded one-time Grok MCP config migration helper for Ref headers and startup timeouts; do not use it for Codex configuration and remove it after supported Grok configs no longer require migration.",

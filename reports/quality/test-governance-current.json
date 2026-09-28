@@ -1,18 +1,8 @@
 {
   "assertion_branch_reachability": {
-    "finding_count": 1,
-    "findings": [
-      {
-        "disposition": "fail-unreviewed",
-        "line": "558",
-        "owner": "unassigned",
-        "path": "tests/integration/test_grafana_dashboard_links.py",
-        "reason": "continue_before_assertion",
-        "reviewed": "false",
-        "test_name": "test_navigation_panel_html_links_open_in_same_window"
-      }
-    ],
-    "metric_percent": 99.73,
+    "finding_count": 0,
+    "findings": [],
+    "metric_percent": 100.0,
     "scan_paths": [
       "tests/architecture/test_determinism_identity_policy.py",
       "tests/architecture/test_replay_time_seam_inventory.py",
@@ -38,9 +28,9 @@
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
     "scanned_test_count": 370,
-    "unreviewed_count": 1
+    "unreviewed_count": 0
   },
-  "assertion_branch_reachability_percent": 99.73,
+  "assertion_branch_reachability_percent": 100.0,
   "assertless_candidates": [
     {
       "category": "intentional_no_exception_contract",
@@ -991,38 +981,7 @@
     }
   },
   "assertless_total_candidates": 83,
-  "budget_violations": [
-    {
-      "actual": 1,
-      "budget": "duplicate_test_names_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_names"
-    },
-    {
-      "actual": 2,
-      "budget": "duplicate_test_name_occurrences_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_name_occurrences"
-    },
-    {
-      "actual": 39,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    },
-    {
-      "actual": 2,
-      "budget": "uuid4_call_sites_max",
-      "expected_max": 0,
-      "metric": "uuid4_call_sites"
-    },
-    {
-      "actual": 1,
-      "budget": "unreviewed_assertion_bypass_max",
-      "expected_max": 0,
-      "metric": "unreviewed_assertion_bypass_count"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1167,30 +1126,16 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/application/services/test_selected_run_replay_readiness.py:120",
-        "tests/unit/interfaces/http/test_selected_run_status.py:306"
-      ],
-      "name": "test_rebuild_only_inside_family_boundary_is_insufficient",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 1,
-    "duplicate_occurrences": 2,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 1
+    "total_duplicate_names": 0
   },
-  "duplicate_test_name_occurrences": 2,
-  "duplicate_test_names": 1,
+  "duplicate_test_name_occurrences": 0,
+  "duplicate_test_names": 0,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1210,48 +1155,8 @@
     ]
   },
   "intentional_no_exception_contract": 83,
-  "markerless_examples": [
-    "tests/integration/test_pipeline_diagnostics_evidence_actions.py:21",
-    "tests/integration/test_pipeline_diagnostics_evidence_actions.py:44",
-    "tests/integration/test_pipeline_diagnostics_evidence_actions.py:59",
-    "tests/unit/application/core/test_issue_11221_11222_11226.py:103",
-    "tests/unit/application/core/test_issue_11221_11222_11226.py:122",
-    "tests/unit/application/core/test_issue_11221_11222_11226.py:131",
-    "tests/unit/application/core/test_issue_11221_11222_11226.py:139",
-    "tests/unit/application/services/test_selected_run_replay_readiness.py:42",
-    "tests/unit/application/services/test_selected_run_replay_readiness.py:51",
-    "tests/unit/application/services/test_selected_run_replay_readiness.py:62",
-    "tests/unit/application/services/test_selected_run_replay_readiness.py:80",
-    "tests/unit/application/services/test_selected_run_replay_readiness.py:93",
-    "tests/unit/application/services/test_selected_run_replay_readiness.py:108",
-    "tests/unit/application/services/test_selected_run_replay_readiness.py:120",
-    "tests/unit/application/services/test_selected_run_replay_readiness.py:136",
-    "tests/unit/application/services/test_selected_run_replay_readiness.py:155",
-    "tests/unit/application/services/control_plane/test_issue_11250_layering.py:19",
-    "tests/unit/application/services/control_plane/test_issue_11250_layering.py:24",
-    "tests/unit/application/services/control_plane/test_issue_11250_layering.py:77",
-    "tests/unit/application/services/control_plane/test_issue_11250_layering.py:93",
-    "tests/unit/domain/test_issue_11241_composition_layering.py:19",
-    "tests/unit/domain/test_issue_11241_composition_layering.py:29",
-    "tests/unit/domain/test_issue_11241_composition_layering.py:47",
-    "tests/unit/domain/ports/test_resolve_metric_labels.py:14",
-    "tests/unit/domain/ports/test_resolve_metric_labels.py:19",
-    "tests/unit/domain/ports/test_resolve_metric_labels.py:26",
-    "tests/unit/domain/ports/test_resolve_metric_labels.py:40",
-    "tests/unit/domain/ports/test_resolve_metric_labels.py:45",
-    "tests/unit/domain/run_reports/test_stage_diagnostics.py:8",
-    "tests/unit/domain/run_reports/test_stage_diagnostics.py:31",
-    "tests/unit/domain/run_reports/test_stage_diagnostics.py:39",
-    "tests/unit/domain/run_reports/test_stage_diagnostics.py:45",
-    "tests/unit/domain/run_reports/test_stage_diagnostics.py:59",
-    "tests/unit/domain/run_reports/test_stage_diagnostics.py:77",
-    "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:19",
-    "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:30",
-    "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:35",
-    "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:41",
-    "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:47"
-  ],
-  "markerless_test_functions": 39,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1265,19 +1170,9 @@
   },
   "report": {
     "assertion_branch_reachability": {
-      "finding_count": 1,
-      "findings": [
-        {
-          "disposition": "fail-unreviewed",
-          "line": "558",
-          "owner": "unassigned",
-          "path": "tests/integration/test_grafana_dashboard_links.py",
-          "reason": "continue_before_assertion",
-          "reviewed": "false",
-          "test_name": "test_navigation_panel_html_links_open_in_same_window"
-        }
-      ],
-      "metric_percent": 99.73,
+      "finding_count": 0,
+      "findings": [],
+      "metric_percent": 100.0,
       "scan_paths": [
         "tests/architecture/test_determinism_identity_policy.py",
         "tests/architecture/test_replay_time_seam_inventory.py",
@@ -1303,9 +1198,9 @@
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
       "scanned_test_count": 370,
-      "unreviewed_count": 1
+      "unreviewed_count": 0
     },
-    "assertion_branch_reachability_percent": 99.73,
+    "assertion_branch_reachability_percent": 100.0,
     "assertless_candidates": [
       {
         "category": "intentional_no_exception_contract",
@@ -2068,30 +1963,16 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/application/services/test_selected_run_replay_readiness.py:120",
-          "tests/unit/interfaces/http/test_selected_run_status.py:306"
-        ],
-        "name": "test_rebuild_only_inside_family_boundary_is_insufficient",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 1,
-      "duplicate_occurrences": 2,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 1
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2110,48 +1991,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:21",
-      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:44",
-      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:59",
-      "tests/unit/application/core/test_issue_11221_11222_11226.py:103",
-      "tests/unit/application/core/test_issue_11221_11222_11226.py:122",
-      "tests/unit/application/core/test_issue_11221_11222_11226.py:131",
-      "tests/unit/application/core/test_issue_11221_11222_11226.py:139",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:42",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:51",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:62",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:80",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:93",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:108",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:120",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:136",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:155",
-      "tests/unit/application/services/control_plane/test_issue_11250_layering.py:19",
-      "tests/unit/application/services/control_plane/test_issue_11250_layering.py:24",
-      "tests/unit/application/services/control_plane/test_issue_11250_layering.py:77",
-      "tests/unit/application/services/control_plane/test_issue_11250_layering.py:93",
-      "tests/unit/domain/test_issue_11241_composition_layering.py:19",
-      "tests/unit/domain/test_issue_11241_composition_layering.py:29",
-      "tests/unit/domain/test_issue_11241_composition_layering.py:47",
-      "tests/unit/domain/ports/test_resolve_metric_labels.py:14",
-      "tests/unit/domain/ports/test_resolve_metric_labels.py:19",
-      "tests/unit/domain/ports/test_resolve_metric_labels.py:26",
-      "tests/unit/domain/ports/test_resolve_metric_labels.py:40",
-      "tests/unit/domain/ports/test_resolve_metric_labels.py:45",
-      "tests/unit/domain/run_reports/test_stage_diagnostics.py:8",
-      "tests/unit/domain/run_reports/test_stage_diagnostics.py:31",
-      "tests/unit/domain/run_reports/test_stage_diagnostics.py:39",
-      "tests/unit/domain/run_reports/test_stage_diagnostics.py:45",
-      "tests/unit/domain/run_reports/test_stage_diagnostics.py:59",
-      "tests/unit/domain/run_reports/test_stage_diagnostics.py:77",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:19",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:30",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:35",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:41",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:47"
-    ],
-    "markerless_test_functions": 39,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2210,76 +2051,27 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/application/services/test_selected_run_replay_readiness.py:120",
-          "tests/unit/interfaces/http/test_selected_run_status.py:306"
-        ],
-        "name": "test_rebuild_only_inside_family_boundary_is_insufficient"
-      }
-    ],
+    "top_duplicate_test_names": [],
     "total_test_files": 2948,
-    "total_test_functions": 28928,
-    "unreviewed_assertion_bypass_count": 1,
-    "uuid4_call_sites": 2
+    "total_test_functions": 28931,
+    "unreviewed_assertion_bypass_count": 0,
+    "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "6334a05c2c320f87b2eeb99426a5d5f2970d9535be873f6d00e26732604ed667",
+  "source_tree_sha256": "55da7fd5e4db90b4ca313ecea5f3b81640d1544a395987deb4ef5e68c02352fd",
   "summary": {
-    "assertion_branch_reachability_percent": 99.73,
+    "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 83,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "intentional_no_exception_contract": 83,
-    "markerless_examples": [
-      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:21",
-      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:44",
-      "tests/integration/test_pipeline_diagnostics_evidence_actions.py:59",
-      "tests/unit/application/core/test_issue_11221_11222_11226.py:103",
-      "tests/unit/application/core/test_issue_11221_11222_11226.py:122",
-      "tests/unit/application/core/test_issue_11221_11222_11226.py:131",
-      "tests/unit/application/core/test_issue_11221_11222_11226.py:139",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:42",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:51",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:62",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:80",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:93",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:108",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:120",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:136",
-      "tests/unit/application/services/test_selected_run_replay_readiness.py:155",
-      "tests/unit/application/services/control_plane/test_issue_11250_layering.py:19",
-      "tests/unit/application/services/control_plane/test_issue_11250_layering.py:24",
-      "tests/unit/application/services/control_plane/test_issue_11250_layering.py:77",
-      "tests/unit/application/services/control_plane/test_issue_11250_layering.py:93",
-      "tests/unit/domain/test_issue_11241_composition_layering.py:19",
-      "tests/unit/domain/test_issue_11241_composition_layering.py:29",
-      "tests/unit/domain/test_issue_11241_composition_layering.py:47",
-      "tests/unit/domain/ports/test_resolve_metric_labels.py:14",
-      "tests/unit/domain/ports/test_resolve_metric_labels.py:19",
-      "tests/unit/domain/ports/test_resolve_metric_labels.py:26",
-      "tests/unit/domain/ports/test_resolve_metric_labels.py:40",
-      "tests/unit/domain/ports/test_resolve_metric_labels.py:45",
-      "tests/unit/domain/run_reports/test_stage_diagnostics.py:8",
-      "tests/unit/domain/run_reports/test_stage_diagnostics.py:31",
-      "tests/unit/domain/run_reports/test_stage_diagnostics.py:39",
-      "tests/unit/domain/run_reports/test_stage_diagnostics.py:45",
-      "tests/unit/domain/run_reports/test_stage_diagnostics.py:59",
-      "tests/unit/domain/run_reports/test_stage_diagnostics.py:77",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:19",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:30",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:35",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:41",
-      "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py:47"
-    ],
-    "markerless_test_functions": 39,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
-    "unreviewed_assertion_bypass_count": 1,
-    "uuid4_call_sites": 2
+    "unreviewed_assertion_bypass_count": 0,
+    "uuid4_call_sites": 0
   },
   "test_file_inventory": {
     "pytest_python_files": [
@@ -2327,18 +2119,9 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/application/services/test_selected_run_replay_readiness.py:120",
-        "tests/unit/interfaces/http/test_selected_run_status.py:306"
-      ],
-      "name": "test_rebuild_only_inside_family_boundary_is_insufficient"
-    }
-  ],
+  "top_duplicate_test_names": [],
   "total_test_files": 2948,
-  "total_test_functions": 28928,
-  "unreviewed_assertion_bypass_count": 1,
-  "uuid4_call_sites": 2
+  "total_test_functions": 28931,
+  "unreviewed_assertion_bypass_count": 0,
+  "uuid4_call_sites": 0
 }

@@ -75,7 +75,6 @@ def _guard_histogram_generation(expression: str) -> str:
 
 _TABLE_TARGETS = {
     "bioetl-dq-v2": (9102,),
-    "bioetl-runtime": (9101, 243, 2460),
     "bioetl-overview-v2": (215, 9603),
     "bioetl-run-explorer-v1": (3010,),
     "bioetl-incident-v1": (2010, 22010),
@@ -293,6 +292,30 @@ def _correct_incident(uid: object, panels: dict[int, dict]) -> None:
             ("job", 185),
         ):
             _override(panels[panel_id], field, _WIDTH, width)
+    status = panels.get(9401)
+    if isinstance(status, dict):
+        diagnostics_url = (
+            "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}"
+            "&${pipeline:queryparam}&${run_type:queryparam}"
+            "&${run_id:queryparam}&${__url_time_range}"
+        )
+        links = [
+            link
+            for link in status.get("links") or []
+            if not (
+                isinstance(link, dict)
+                and link.get("title") == "Open Pipeline Diagnostics"
+            )
+        ]
+        links.append(
+            {
+                "title": "Open Pipeline Diagnostics",
+                "url": diagnostics_url,
+                "includeVars": False,
+                "targetBlank": False,
+            }
+        )
+        status["links"] = links
 
 
 def _correct_provider_fleet_panel(
@@ -837,14 +860,6 @@ def _dedupe_width_overrides(panels: dict[int, dict]) -> None:
                 width_fields.add(field)
 
 
-def _strip_named_widths(panel: dict, names: tuple[str, ...]) -> None:
-    for override in panel["fieldConfig"]["overrides"]:
-        if override["matcher"].get("options") in names:
-            override["properties"] = [
-                prop for prop in override["properties"] if prop["id"] != _WIDTH
-            ]
-
-
 def _correct_runtime_evidence_actions(panels: dict[int, dict]) -> None:
     """Explain saved evidence without changing its verdict or raw report."""
     if 9451 in panels:
@@ -859,125 +874,54 @@ def _correct_runtime_evidence_actions(panels: dict[int, dict]) -> None:
             panels[9451],
             "Reason",
             "mappings",
-            [{"type": "value", "options": {
-                code: {"text": label} for code, label in reasons.items()
-            }}],
+            [
+                {
+                    "type": "value",
+                    "options": {
+                        code: {"text": label} for code, label in reasons.items()
+                    },
+                }
+            ],
         )
     if 9403 in panels:
-        panels[9403]["fieldConfig"]["defaults"]["links"] = [{
-            "title": "Open saved run report",
-            "url": (
-                "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/"
-                "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}"
-                "&run_id=${run_id:percentencode}&format=pipeline_run_report_json"
-            ),
-            "targetBlank": True,
-        }]
+        panels[9403]["fieldConfig"]["defaults"]["links"] = [
+            {
+                "title": "Open saved run report",
+                "url": (
+                    "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/"
+                    "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}"
+                    "&run_id=${run_id:percentencode}&format=pipeline_run_report_json"
+                ),
+                "targetBlank": True,
+            }
+        ]
 
 
 def _correct_runtime(uid: object, panels: dict[int, dict]) -> None:
-    if uid == "bioetl-runtime":
-        _correct_runtime_evidence_actions(panels)
-    if uid == "bioetl-runtime" and 9998 in panels:
+    if uid != "bioetl-runtime":
+        return
+    _correct_runtime_evidence_actions(panels)
+    if 9998 in panels:
         # Reserve room for long verdicts; evidence uses the remaining panel width.
         _override(panels[9998], "Result", _WIDTH, 125)
         _override(panels[9998], "Status", _WIDTH, 125)
-    if uid != "bioetl-runtime" or 2460 not in panels:
-        return
-    coverage = panels[9102]
-    merged = (
-        'label_replace(min(bioetl_rt_stage_ratio{pipeline=~"$pipeline",run_type=~"$run_type"}) '
-        'or on() vector(-1),"k","stages","","") or '
-        'label_replace(bioetl_runtime_trust_gap_active_10m,"k","quality","","")'
-    )
-    kept = [t for t in coverage["targets"] if t.get("refId") not in {"B", "D"}]
-    kept.append(
-        {
-            "expr": merged,
-            "refId": "B",
-            "instant": True,
-            "legendFormat": "{{k}}",
-        }
-    )
-    coverage["targets"] = sorted(kept, key=lambda item: str(item.get("refId")))
-    _override(coverage, "stages", "displayName", "Expected stage signals")
-    _override(coverage, "quality", "displayName", "Monitoring quality (10m)")
-    _override(
-        coverage,
-        "quality",
-        "mappings",
-        [
-            {
-                "type": "value",
-                "options": {
-                    "0": {"text": "OK", "color": "green"},
-                    "1": {"text": "DEGRADED", "color": "orange"},
-                },
-            }
-        ],
-    )
-    coverage["description"] = (
-        "CURRENT · Endpoint is scrape availability; expected stage signals measure presence, not freshness. "
-        "Rule age is evaluation age, not event freshness. Monitoring quality (10m) reports missing telemetry, "
-        "rule failures or missed evaluations in the last 10 minutes, including recovered events. "
-        "DEGRADED is a monitoring warning, not proof that the selected pipeline has incomplete stage evidence."
-    )
-    _override(panels[243], "Expected", "noValue", "N/A: not declared")
-    _override(panels[243], "Expected", _WIDTH, 150)
-    _override(panels[243], "Observed Records", _WIDTH, 150)
-    stage_panel = panels[2460]
-    for field in ("Backlog", "Lag", "Throughput"):
-        _override(stage_panel, field, _WIDTH, 100)
-    _override(
-        stage_panel,
-        "scope_stage\\measure",
-        "displayName",
-        "Pipeline / Run Type / Stage",
-    )
-    for field in ("reason",):
-        _override(panels[9101], field, "links", [])
-        _override(
-            panels[9101],
-            field,
-            _CELL,
-            {"type": "auto", "wrapText": True},
-        )
-    _override(panels[9101], "severity", _WIDTH, 110)
-    _override(panels[9101], "Action", _WIDTH, 110)
-    _override(panels[9101], "action_target", _INSPECT, False)
-    _override(panels[9101], "Count", _HIDDEN, True)
-    for transform in panels[9101].get("transformations", []):
-        if transform["id"] == "organize":
-            transform["options"]["excludeByName"].update(pipeline=False, run_type=False)
-    for field in ("pipeline", "run_type"):
-        _override(panels[9101], field, _HIDDEN, True)
-    _override(
-        panels[9101],
-        "action_target",
-        "links",
-        [
-            {
-                "title": "Open blocker diagnostics",
-                "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}&${__data.fields.action_scope:raw}&var-run_type=${__data.fields.run_type:percentencode}&${run_id:queryparam}&${__url_time_range}",
-                "targetBlank": False,
-            }
-        ],
-    )
-    _override(
-        panels[9101],
-        "Reason",
-        _CELL,
-        {"type": "auto", "wrapText": False},
-    )
-    _strip_named_widths(panels[9101], ("Status", "Severity", "Pipeline"))
-    for target in panels[2460].get("targets", []):
-        if "legendFormat" in target:
-            target["legendFormat"] = "{{stage}}"
 
 
 def _dq_processed_records(panel: dict) -> None:
     """Join saved stage inputs to the existing outcome accounting rows."""
-    names = ["01 bronze_records", "02 silver_valid_records", "03 silver_filtered_out_records", "04 silver_quarantined_records", "05 silver_skipped_records", "06 silver_deduplicated_records", "07 gold_written_records", "08 gold_excluded_by_contract_records", "09 gold_quarantined_records", "10 gold_skipped_records", "11 gold_deduplicated_records"]
+    names = [
+        "01 bronze_records",
+        "02 silver_valid_records",
+        "03 silver_filtered_out_records",
+        "04 silver_quarantined_records",
+        "05 silver_skipped_records",
+        "06 silver_deduplicated_records",
+        "07 gold_written_records",
+        "08 gold_excluded_by_contract_records",
+        "09 gold_quarantined_records",
+        "10 gold_skipped_records",
+        "11 gold_deduplicated_records",
+    ]
     names = [name for name in names if "_skipped_" not in name]
     parameters = "[" + ",".join("'" + name + "'" for name in names) + "]"
     expression = (
@@ -992,11 +936,44 @@ def _dq_processed_records(panel: dict) -> None:
         "$merge([$r, {'percentage': $contains($string($r.percentage), '%') ? "
         "$formatNumber($number($substringBefore($r.percentage, '%')), '0.0') & '%' : $r.percentage}])})"
     )
-    panel["targets"][0].update(parser="uql", uql='parse-json | jsonata "' + outcome_expression + '"')
-    panel["targets"].append({"refId": "StageInput", "type": "json", "source": "url", "parser": "uql", "format": "table", "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}", "url_options": {"method": "GET", "data": ""}, "uql": 'parse-json | jsonata "' + expression + '"'})
+    panel["targets"][0].update(
+        parser="uql", uql='parse-json | jsonata "' + outcome_expression + '"'
+    )
+    panel["targets"].append(
+        {
+            "refId": "StageInput",
+            "type": "json",
+            "source": "url",
+            "parser": "uql",
+            "format": "table",
+            "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+            "url_options": {"method": "GET", "data": ""},
+            "uql": 'parse-json | jsonata "' + expression + '"',
+        }
+    )
     panel["transformations"] = [
         {"id": "joinByField", "options": {"byField": "parameter", "mode": "outer"}},
-        {"id": "organize", "options": {"excludeByName": {"row_status": True}, "indexByName": {"parameter": 0, "count in": 1, "count in StageInput": 1, "value": 2, "value A": 2, "percentage": 3, "percentage A": 3}, "renameByName": {"value": "count out", "value A": "count out", "count in StageInput": "count in", "percentage A": "percentage"}}},
+        {
+            "id": "organize",
+            "options": {
+                "excludeByName": {"row_status": True},
+                "indexByName": {
+                    "parameter": 0,
+                    "count in": 1,
+                    "count in StageInput": 1,
+                    "value": 2,
+                    "value A": 2,
+                    "percentage": 3,
+                    "percentage A": 3,
+                },
+                "renameByName": {
+                    "value": "count out",
+                    "value A": "count out",
+                    "count in StageInput": "count in",
+                    "percentage A": "percentage",
+                },
+            },
+        },
     ]
     for override in panel["fieldConfig"]["overrides"]:
         for prop in override["properties"]:
@@ -1012,13 +989,36 @@ def _dq_processed_records(panel: dict) -> None:
     _override(panel, "percentage", _WIDTH, 100)
     _override(panel, "percentage", "displayName", "percentage")
     _override(panel, "percentage A", "displayName", "percentage")
-    for field in ("value", "value A", "count", "count in", "count out", "percentage", "percentage A"):
+    for field in (
+        "value",
+        "value A",
+        "count",
+        "count in",
+        "count out",
+        "percentage",
+        "percentage A",
+    ):
         _override(panel, field, "noValue", "N/A")
-        _override(panel, field, "mappings", [{"type": "value", "options": {"UNKNOWN": {"text": "N/A", "color": "gray"}, "No data": {"text": "N/A", "color": "gray"}}}])
+        _override(
+            panel,
+            field,
+            "mappings",
+            [
+                {
+                    "type": "value",
+                    "options": {
+                        "UNKNOWN": {"text": "N/A", "color": "gray"},
+                        "No data": {"text": "N/A", "color": "gray"},
+                    },
+                }
+            ],
+        )
     panel["options"]["footer"]["enablePagination"] = False
     panel["options"]["cellHeight"] = "sm"
     panel["gridPos"]["h"] = 13
-    panel["description"] = "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden."
+    panel["description"] = (
+        "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. N/A means the value was not recorded. Skipped outcomes are hidden."
+    )
 
 
 def _correct_dq(uid: object, panels: dict[int, dict]) -> None:
@@ -1027,11 +1027,19 @@ def _correct_dq(uid: object, panels: dict[int, dict]) -> None:
         summary = panels[9406]
         summary["transformations"] = [
             {"id": "limit", "options": {"limitField": 1}},
-            {"id": "filterFieldsByName", "options": {"include": {"names": ["verdict"]}}},
-            {"id": "organize", "options": {"renameByName": {"verdict": "Overall verdict"}}},
+            {
+                "id": "filterFieldsByName",
+                "options": {"include": {"names": ["verdict"]}},
+            },
+            {
+                "id": "organize",
+                "options": {"renameByName": {"verdict": "Overall verdict"}},
+            },
         ]
         summary["options"]["cellHeight"] = "sm"
-        summary["fieldConfig"]["defaults"].setdefault("custom", {}).update(wrapText=False, inspect=True)
+        summary["fieldConfig"]["defaults"].setdefault("custom", {}).update(
+            wrapText=False, inspect=True
+        )
         for field in ("Result", "Status", "Trust", "Reason"):
             _override(summary, field, "custom.wrapText", False)
             _override(summary, field, _CELL, {"type": "auto", "wrapText": False})
@@ -1135,7 +1143,6 @@ def _include_action_scope(routed_panel: dict) -> None:
 def _correct_routed_action_scope(uid: object, panels: dict[int, dict]) -> None:
     routed_panel_id = {
         "bioetl-overview-v2": 215,
-        "bioetl-runtime": 9101,
         "bioetl-dq-v2": 9102,
     }.get(uid)
     if routed_panel_id not in panels:

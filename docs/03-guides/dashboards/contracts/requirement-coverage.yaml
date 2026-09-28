@@ -43,11 +43,12 @@ dashboards:
   bioetl-provider-health-v2:
     question: Which provider is degraded/failing, and why?
     answer_panel_ids:
-      - 9401
+      - 9461
     next_action_tokens:
-      - Review severity matrix
+      - Pipeline Diagnostics
     basis_tokens:
-      - CURRENT
+      - SELECTED RUN
+      - QUERY ERROR
   bioetl-dq-v2:
     question: What is the DQ assessment of the selected Run ID?
     answer_panel_ids:
@@ -71,9 +72,9 @@ dashboards:
     answer_panel_ids:
       - 3010
     next_action_tokens:
-      - Click a Run cell
+      - opens the persisted Report
     basis_tokens:
-      - SELECTED RUN
+      - no exact run
       - VALID EMPTY
 
 allowlists:
@@ -93,13 +94,33 @@ allowlists:
         Runs is the exact-run picker, not forensic evidence.
       retire_when: browse table is retitled without Inspect or replaced as answer panel
     - dashboard: bioetl-provider-health-v2.json
-      id: 9107
+      id: 9402
       owner: "@bioetl-observability"
       rationale: >-
-        First-window cause companion to Monitor Fleet Severity (9101). Shows
-        current status reason for the worst providers, not a collapsed forensic
-        row.
-      retire_when: status-reason table moves into a collapsed row at y >= first_window_y
+        First-window run identity for the selected Run ID on Provider Health,
+        same HTTP table as Data Quality.
+      retire_when: 9402 leaves the first window or is retitled without Inspect
+    - dashboard: bioetl-provider-health-v2.json
+      id: 9403
+      owner: "@bioetl-observability"
+      rationale: >-
+        First-window processed-record accounting for the selected Run ID on
+        Provider Health, same HTTP table as Data Quality.
+      retire_when: 9403 leaves the first window or is retitled without Inspect
+    - dashboard: bioetl-runtime.json
+      id: 9402
+      owner: "@bioetl-observability"
+      rationale: >-
+        First-window identity for the selected Run ID on Pipeline Diagnostics.
+        Inspect names the HTTP evidence table, not a collapsed forensic row.
+      retire_when: 9402 leaves the first window or is retitled without Inspect
+    - dashboard: bioetl-runtime.json
+      id: 9403
+      owner: "@bioetl-observability"
+      rationale: >-
+        First-window processed-record accounting for the selected Run ID on
+        Pipeline Diagnostics, same HTTP table as Data Quality.
+      retire_when: 9403 leaves the first window or is retitled without Inspect
     - dashboard: bioetl-dq-v2.json
       id: 9402
       owner: "@bioetl-observability"

@@ -513,7 +513,6 @@ def processing_trust_violations(
 ) -> list[str]:
     violations: list[str] = []
     required_split = {
-        ("bioetl-control-plane-v1.json", 9401),
         ("bioetl-control-plane-v1.json", 9418),
     }
     for panel in get_dashboard_panels(dashboard):

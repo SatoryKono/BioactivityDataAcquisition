@@ -10,6 +10,11 @@ import copy
 from pathlib import Path
 from typing import Any
 
+from scripts.ops.observability.grafana._selected_run_panels import (
+    _STAGE_FIELDS,
+    _STAGE_RENAMES,
+)
+
 ROOT = Path(__file__).resolve().parents[4]
 DASH = ROOT / "grafana/dashboards"
 MISSING = "TELEMETRY MISSING — no series for this scope; not a zero"
@@ -163,7 +168,9 @@ def full_list(dashboard: dict[str, Any], panel: dict[str, Any], limit: int) -> N
     title = f"Show all rows and total (summary: up to {limit})"
     links = panel.setdefault("links", [])
     links[:] = [
-        link for link in links if not link.get("title", "").startswith(SHOW_ALL_ROWS_PREFIX)
+        link
+        for link in links
+        if not link.get("title", "").startswith(SHOW_ALL_ROWS_PREFIX)
     ]
     links.append(
         {
@@ -235,8 +242,7 @@ def _rename_event_age_fields(panel: dict[str, Any]) -> None:
 
 def _rename_filter_timing_fields(options: dict[str, Any]) -> None:
     options["include"]["names"] = [
-        _TIMING_DISPLAY_FIELDS.get(name, name)
-        for name in options["include"]["names"]
+        _TIMING_DISPLAY_FIELDS.get(name, name) for name in options["include"]["names"]
     ]
 
 
@@ -298,6 +304,19 @@ def _clear_wrap_overrides(panel: dict[str, Any]) -> None:
 
 
 def _stamp_trust_table(panel: dict[str, Any]) -> None:
+    overrides = panel["fieldConfig"].setdefault("overrides", [])
+    stale_names = {"Processing", "Trust", "Observed at", "Reasons"}
+    seen: set[object] = set()
+    kept: list[dict[str, Any]] = []
+    for item in overrides:
+        matcher = item.get("matcher") or {}
+        options = matcher.get("options")
+        if matcher.get("id") == "byName":
+            if options in stale_names or options in seen:
+                continue
+            seen.add(options)
+        kept.append(item)
+    overrides[:] = kept
     panel["options"]["cellHeight"] = "sm"
     panel["options"].pop("maxRowHeight", None)
     # Grafana 12 can measure only one wrapped field per row. Let its
@@ -307,9 +326,13 @@ def _stamp_trust_table(panel: dict[str, Any]) -> None:
         "wrapText": True,
     }
     _clear_wrap_overrides(panel)
-    for name, width in (("Processing", 85), ("Trust", 100), ("Observed at", 115)):
+    for name, width in (
+        ("Processing result", 85),
+        ("Saved trust verdict", 100),
+        ("Assessed at", 115),
+    ):
         override(panel, name, **{CUSTOM_WIDTH: width})
-    override(panel, "Reasons", **{"custom.inspect": True, "links": []})
+    override(panel, "Reason count", **{"custom.inspect": True, "links": []})
     panel["description"] = panel["description"].replace(
         "Select Reasons to inspect", "Use the panel link to inspect"
     )
@@ -344,31 +367,18 @@ def _apply_control_plane(
     _stamp_trust_table(panels[9418])
     _restack_accounting_row(dashboard, panels[9403], panels[9402])
 
+
 def _apply_overview(
     dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
 ) -> None:
-        p = panels[215]
-        p["targets"][0]["expr"] = (
-            'bioetl_first_action{workflow=~"$workflow",pipeline=~"$pipeline",run_type=~"$run_type"}>0 or on() label_replace(label_replace(bioetl_fa_gap,"pipeline","$pipeline","",""),"workflow","$workflow","","")'
-        )
-        p["description"] = p["description"].replace(
-            "before the two-row limit", "with all routes available through pagination"
-        )
-        panels[9601]["fieldConfig"]["defaults"]["noValue"] = (
-            "UNKNOWN — no alert rows; verify rule evaluation and telemetry coverage"
-        )
-        override(panels[9603], "status", **{CUSTOM_WIDTH: 145})
-        panels[9603]["fieldConfig"]["defaults"]["noValue"] = (
-            "UNKNOWN — summary unavailable; check Ops HTTP. No selection is SELECT RUN; absent report is REPORT MISSING."
-        )
-        full_list(dashboard, p, 2)
-        detail_link = next(
-            link for link in p["links"] if link["title"].startswith(SHOW_ALL_ROWS_PREFIX)
-        )
-        override(p, "Priority", links=[detail_link])
-        p["links"] = [
-            link for link in p["links"] if not link["title"].startswith(SHOW_ALL_ROWS_PREFIX)
-        ]
+    status = panels.get(9603)
+    if status is None:
+        return
+    override(status, "status", **{CUSTOM_WIDTH: 145})
+    status["fieldConfig"]["defaults"]["noValue"] = (
+        "UNKNOWN — summary unavailable; check Ops HTTP. No selection is SELECT RUN; absent report is REPORT MISSING."
+    )
+
 
 def strip_runtime_non_run_panels(dashboard: dict[str, Any]) -> None:
     """Drop Diagnostics panels that do not assess the always-selected Run ID."""
@@ -453,7 +463,8 @@ def _ensure_stage_panel(by_id: dict[int, dict[str, Any]]) -> None:
         "type": "table",
         "title": "Inspect Selected Run Stages",
         "description": (
-            "SELECTED RUN · Saved stage rows for the exact Run ID. "
+            "SELECTED RUN · Saved stage rows for the exact Run ID; "
+            "the table shows at most 12 stages. "
             "SUCCESS with missing stage evidence stays INCOMPLETE. "
             "A recorded zero stays 0. An unknown count is empty, not 0. "
             "UNFINISHED means no terminal event. Prometheus does not change this table."
@@ -477,214 +488,113 @@ def _ensure_stage_panel(by_id: dict[int, dict[str, Any]]) -> None:
         ],
         "fieldConfig": {"defaults": {}, "overrides": []},
         "options": {"showHeader": True, "cellHeight": "sm", "footer": {"show": False}},
+        "transformations": [
+            {"id": "limit", "options": {"limitField": 12}},
+            {
+                "id": "filterFieldsByName",
+                "options": {"include": {"names": list(_STAGE_FIELDS)}},
+            },
+            {
+                "id": "organize",
+                "options": {
+                    "indexByName": {
+                        name: index for index, name in enumerate(_STAGE_FIELDS)
+                    },
+                    "renameByName": dict(_STAGE_RENAMES),
+                },
+            },
+        ],
     }
     parent.setdefault("panels", []).append(panel)
     by_id[9460] = panel
 
 
 def _apply_runtime(
-    dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
+    dashboard: dict[str, Any], _panels: dict[int, dict[str, Any]]
 ) -> None:
-        if 9401 not in panels or 2460 not in panels:
-            strip_runtime_non_run_panels(dashboard)
-            return
-        panels[9401]["options"]["colorMode"] = "value"
-        p = panels[2460]
-        p["targets"][0]["expr"] = (
-            'bioetl_runtime_stage_progress_by_scope{pipeline=~"$pipeline",run_type=~"$run_type"}'
-        )
-        # A row retains its pipeline and run type even when a caller passes All.
-        for t in p.get("transformations", []):
-            if t["id"] == "groupingToMatrix":
-                t["options"]["rowField"] = "scope_stage"
-            if t["id"] == "organize":
-                for key in ("pipeline", "run_type"):
-                    t["options"].setdefault("excludeByName", {})[key] = False
-        full_list(dashboard, p, 3)
-        if not any(child.get("id") == 2461 for child in walk(dashboard["panels"])):
-            detail_row = next(row for row in dashboard["panels"] if row["id"] == 32460)
-            detail_row["panels"].append(
-                {
-                    "id": 2461,
-                    "type": "table",
-                    "title": "Inspect Current Missing Stage Signals",
-                    "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
-                    "gridPos": {
-                        "x": 0,
-                        "y": detail_row["gridPos"]["y"] + 13,
-                        "w": 24,
-                        "h": 8,
-                    },
-                    "datasource": {"type": "prometheus", "uid": "prometheus"},
-                    "targets": [
-                        {
-                            "refId": "A",
-                            "expr": 'bioetl_runtime_stage_evidence_detail{pipeline=~"$pipeline",run_type=~"$run_type"}',
-                            "format": "table",
-                            "instant": True,
-                        }
-                    ],
-                    "fieldConfig": {
-                        "defaults": {
-                            "custom": {
-                                "inspect": True,
-                                "minWidth": 70,
-                                "cellOptions": {"type": "auto"},
-                            },
-                            "noValue": "UNKNOWN — stage coverage unavailable",
-                            "unit": "none",
-                        },
-                        "overrides": [],
-                    },
-                    "options": {
-                        "showHeader": True,
-                        "cellHeight": "sm",
-                        "footer": {"show": False, "enablePagination": True},
-                    },
-                    "transformations": [
-                        {
-                            "id": "organize",
-                            "options": {
-                                "excludeByName": {
-                                    "Time": True,
-                                    "__name__": True,
-                                    "Value": True,
-                                },
-                                "renameByName": {
-                                    "pipeline": "Pipeline",
-                                    "run_type": "Run type",
-                                    "stage": "Stage",
-                                    "signal": "Evidence",
-                                },
-                            },
-                        }
-                    ],
-                }
-            )
-        coverage_link = {
-            "title": "Inspect missing stage signals",
-            "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&viewPanel=2461&${__url_time_range}",
-            "includeVars": False,
-            "targetBlank": False,
-        }
-        links = panels[9102].setdefault("links", [])
-        if coverage_link not in links:
-            links.append(coverage_link)
-        panels[9102]["targets"][2]["expr"] = "bioetl_runtime_required_rule_age_seconds"
-        panels[9102]["description"] += (
-            ""
-            if "oldest required" in panels[9102]["description"]
-            else " Rule age is the oldest required group; missing groups return UNKNOWN."
-        )
-        strip_runtime_non_run_panels(dashboard)
+    # Pipeline Diagnostics keeps only panels that assess the selected Run ID;
+    # CURRENT Pipeline/Run Type panels were removed and must not return.
+    strip_runtime_non_run_panels(dashboard)
 
-def _apply_provider_health(
-    _dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
-) -> None:
-        # Legacy context remains a compatibility input, never the authority over
-        # the visible Pipeline selector. Adapter evidence is explicitly global.
-        for pid in (31, 32):
-            p = panels[pid]
-            p["description"] += (
-                ""
-                if "GLOBAL ADAPTER" in p["description"]
-                else " GLOBAL ADAPTER evidence: covers all adapters, independent of Provider and Pipeline."
-            )
-            p["title"] = (
-                p["title"]
-                .replace("Monitor Circuit", "Monitor Global Circuit")
-                .replace("Track Circuit", "Track Global Circuit")
-            )
-        for pid in (9103,):
-            p = panels[pid]
-            p["fieldConfig"]["defaults"]["links"] = [
-                {
-                    "title": "Inspect fleet telemetry coverage",
-                    "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=$__all&viewPanel=9104&${__url_time_range}",
-                }
+
+def _apply_dq(_dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]) -> None:
+    p = panels[9406]
+    for t in p["transformations"]:
+        if t["id"] == "filterFieldsByName":
+            names = t["options"]["include"]["names"]
+            for name in ("started_at", "coverage_chip"):
+                if name not in names:
+                    names.insert(0, name)
+        if t["id"] == "organize":
+            o = t["options"]
+            names = ["started_at", "coverage_chip"] + [
+                n for n in o["indexByName"] if n not in {"started_at", "coverage_chip"}
             ]
-
-def _apply_dq(
-    _dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
-) -> None:
-        p = panels[9406]
-        for t in p["transformations"]:
-            if t["id"] == "filterFieldsByName":
-                names = t["options"]["include"]["names"]
-                for name in ("started_at", "coverage_chip"):
-                    if name not in names:
-                        names.insert(0, name)
-            if t["id"] == "organize":
-                o = t["options"]
-                names = ["started_at", "coverage_chip"] + [
-                    n
-                    for n in o["indexByName"]
-                    if n not in {"started_at", "coverage_chip"}
-                ]
-                o["indexByName"] = {n: i for i, n in enumerate(names)}
-                o.setdefault("excludeByName", {})["started_at"] = False
-                o.setdefault("renameByName", {}).update(
-                    started_at="Started", coverage_chip="Coverage"
-                )
-        if not any(t["id"] == "convertFieldType" for t in p["transformations"]):
-            p["transformations"].insert(
-                0,
-                {
-                    "id": "convertFieldType",
-                    "options": {
-                        "conversions": [
-                            {"targetField": "started_at", "destinationType": "time"}
-                        ]
-                    },
-                },
+            o["indexByName"] = {n: i for i, n in enumerate(names)}
+            o.setdefault("excludeByName", {})["started_at"] = False
+            o.setdefault("renameByName", {}).update(
+                started_at="Started", coverage_chip="Coverage"
             )
-        override(p, "Started", **{"unit": "time:YYYY-MM-DD HH:mm", CUSTOM_WIDTH: 155})
-        override(p, "Coverage", **{CUSTOM_WIDTH: 150})
-        p["description"] += (
-            ""
-            if "Silver Q means" in p["description"]
-            else " Silver Q means Silver quarantine; Gold Q means Gold quarantine. Excl % = contract exclusions / Silver accepted records × 100. Started and Coverage describe persisted history, not current health."
+    if not any(t["id"] == "convertFieldType" for t in p["transformations"]):
+        p["transformations"].insert(
+            0,
+            {
+                "id": "convertFieldType",
+                "options": {
+                    "conversions": [
+                        {"targetField": "started_at", "destinationType": "time"}
+                    ]
+                },
+            },
         )
+    override(p, "Started", **{"unit": "time:YYYY-MM-DD HH:mm", CUSTOM_WIDTH: 155})
+    override(p, "Coverage", **{CUSTOM_WIDTH: 150})
+    p["description"] += (
+        ""
+        if "Silver Q means" in p["description"]
+        else " Silver Q means Silver quarantine; Gold Q means Gold quarantine. Excl % = contract exclusions / Silver accepted records × 100. Started and Coverage describe persisted history, not current health."
+    )
+
 
 def _apply_incident(
     dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
 ) -> None:
-        for pid in (2010, 2005):
-            for target in panels[pid]["targets"]:
-                expr = target.get("expr", "")
-                if expr.startswith("topk("):
-                    # These shipped targets wrap a single ranked vector.
-                    prefix, rest = expr.split(",", 1)
-                    if prefix in {"topk(3", "topk(4"} and rest.endswith(")"):
-                        target["expr"] = rest[:-1].strip()
-        override(
-            panels[2010],
-            "Confidence",
-            **{
-                CUSTOM_WIDTH: 130,
-                "custom.cellOptions": {"type": "auto", "wrapText": True},
-            },
-        )
-        p = panels[2010]
-        p["targets"][0]["expr"] = (
-            'label_replace(bioetl_incident_ranked_evidence,"route_pipeline","$pipeline","pipeline","unknown")'
-        )
-        override(p, "route_pipeline", **{"custom.hidden": True})
-        override(
-            p,
-            "Action",
-            links=[
-                {
-                    "title": "Open domain diagnostics",
-                    "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.route_pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
-                    "targetBlank": False,
-                }
-            ],
-        )
+    for pid in (2010, 2005):
+        for target in panels[pid]["targets"]:
+            expr = target.get("expr", "")
+            if expr.startswith("topk("):
+                # These shipped targets wrap a single ranked vector.
+                prefix, rest = expr.split(",", 1)
+                if prefix in {"topk(3", "topk(4"} and rest.endswith(")"):
+                    target["expr"] = rest[:-1].strip()
+    override(
+        panels[2010],
+        "Confidence",
+        **{
+            CUSTOM_WIDTH: 130,
+            "custom.cellOptions": {"type": "auto", "wrapText": True},
+        },
+    )
+    p = panels[2010]
+    p["targets"][0]["expr"] = (
+        'label_replace(bioetl_incident_ranked_evidence,"route_pipeline","$pipeline","pipeline","unknown")'
+    )
+    override(p, "route_pipeline", **{"custom.hidden": True})
+    override(
+        p,
+        "Action",
+        links=[
+            {
+                "title": "Open domain diagnostics",
+                "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.route_pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
+                "targetBlank": False,
+            }
+        ],
+    )
 
-        _rewrite_incident_route_links(p)
-        for pid in (2010, 2005):
-            full_list(dashboard, panels[pid], 2)
+    _rewrite_incident_route_links(p)
+    for pid in (2010, 2005):
+        full_list(dashboard, panels[pid], 2)
 
 
 def _rewrite_incident_route_links(value: Any) -> None:
@@ -706,7 +616,6 @@ _UID_APPLIERS = {
     "bioetl-control-plane-v1": _apply_control_plane,
     "bioetl-overview-v2": _apply_overview,
     "bioetl-runtime": _apply_runtime,
-    "bioetl-provider-health-v2": _apply_provider_health,
     "bioetl-dq-v2": _apply_dq,
     "bioetl-incident-v1": _apply_incident,
 }

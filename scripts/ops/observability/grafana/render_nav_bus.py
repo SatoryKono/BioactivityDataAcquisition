@@ -118,8 +118,7 @@ _MINIMUM_FIRST_WINDOW_HEIGHTS: dict[str, dict[int, int]] = {
 # minimum height after reclaiming one native-zoom nav row.
 _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-run-explorer-v1": {3010: 10},
-    "bioetl-overview-v2": {215: 5, 9002: 5},
-    "bioetl-provider-health-v2": {9101: 4, 9107: 4},
+    "bioetl-overview-v2": {9002: 5},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 3, 24, 2),
@@ -205,11 +204,19 @@ _DQ_SCOPE_HTML = (
     "CURRENT pipeline status and TIME RANGE scores are not on this page."
     "</div></div>"
 )
+_OVERVIEW_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
+    99: (0, 2, 17, 3),
+    9604: (17, 2, 7, 3),
+    9603: (0, 5, 12, 6),
+    9002: (12, 5, 12, 6),
+    9300: (0, 18, 24, 8),
+    9301: (0, 26, 24, 8),
+}
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 2, 24, 3),
-    9406: (0, 18, 24, 4),
-    9402: (0, 5, 12, 13),
-    9403: (12, 5, 12, 13),
+    9406: (0, 5, 24, 5),
+    9402: (0, 10, 12, 7),
+    9403: (12, 10, 12, 7),
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
@@ -767,21 +774,6 @@ def _normalize_overview_domain_snapshots(panels: list[object]) -> None:
             )
 
 
-def _normalize_runtime_record_delta_scope(panels: list[object]) -> None:
-    """Distinguish observed counter increases from persisted selected-run totals."""
-    for panel in _walk_panels(panels):
-        if panel.get("id") == 241:
-            panel["description"] = (
-                "TIME RANGE · Observed selected-range processed-record counter increases by Stage and Run Type "
-                "for the selected Pipeline and Stage. Run ID does not filter this query. "
-                "Prometheus increase estimates changes between scraped samples; the initial "
-                "counter value is not an observed increase. These values can differ from "
-                "persisted selected-run totals. Use Run Explorer for exact-run counts. "
-                "An empty chart means no matching samples or unavailable telemetry, not "
-                "successful processing. TELEMETRY MISSING is not a zero and not VALID EMPTY."
-            )
-
-
 def _layout_overview_detail_panels(panels: list[object]) -> None:
     """Keep small status tables compact while retaining all rows in scroll views."""
     layouts = {
@@ -826,60 +818,6 @@ def _clear_run_column_width(child: dict[str, object]) -> None:
             override["properties"] = [
                 prop for prop in override["properties"] if prop["id"] != CUSTOM_WIDTH
             ]
-
-
-def _stamp_duration_quantile(child: dict[str, object]) -> None:
-    for target in child.get("targets", []):
-        expr = target.get("expr", "")
-        if expr and not expr.endswith(" >= 0"):
-            target["expr"] = f"({expr}) >= 0"
-    field_config = child.setdefault("fieldConfig", {})
-    defaults = field_config.setdefault("defaults", {})
-    custom = defaults.setdefault("custom", {})
-    custom["showPoints"] = "always"
-    child["description"] = (
-        "TIME RANGE · Duration quantiles require observed histogram increments "
-        "within the rate interval. An empty chart is UNKNOWN, not zero duration "
-        "or a failed run. NaN quantiles are omitted; isolated valid observations "
-        "are shown as points."
-    )
-
-
-def _layout_runtime_detail_panels(panels: list[object]) -> None:
-    """Fill detail rows and preserve explicit absence of duration observations."""
-    layouts = {
-        252: {220: (0, 22, 24, 3)},
-        253: {9991: (0, 12, 24, 2)},
-        254: {
-            230: (0, 3, 8, 4),
-            236: (8, 3, 8, 4),
-            21: (16, 3, 8, 4),
-            4: (0, 10, 8, 4),
-            5: (8, 10, 8, 4),
-            6: (16, 10, 8, 4),
-            259: (0, 14, 12, 4),
-            7: (12, 14, 12, 4),
-        },
-        9992: {237: (0, 0, 8, 4), 16: (8, 0, 8, 4), 205: (16, 0, 8, 4)},
-        9993: {9998: (0, 6, 24, 4)},
-        9994: {9996: (0, 0, 12, 4), 9997: (12, 0, 12, 4)},
-        32460: {22460: (0, 0, 24, 6), 2461: (0, 6, 24, 6)},
-    }
-    for row in _root_panels(panels):
-        layout = layouts.get(row.get("id"))
-        if layout is None:
-            continue
-        base_y = row["gridPos"]["y"] + 1
-        children = row.get("panels", [])
-        for child in children:
-            if position := layout.get(child.get("id")):
-                x, offset, width, height = position
-                child["gridPos"].update(x=x, y=base_y + offset, w=width, h=height)
-            if child.get("id") == 9998:
-                _clear_run_column_width(child)
-            if child.get("id") in {207, 239}:
-                _stamp_duration_quantile(child)
-        children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
 
 
 def _layout_dq_detail_panels(panels: list[object]) -> None:
@@ -1027,6 +965,43 @@ def _shift_panel_tree(panel: dict[str, object], *, delta: int) -> None:
         grid = _panel_grid(descendant)
         if grid is not None and isinstance(grid.get("y"), int):
             grid["y"] = int(grid["y"]) + delta
+
+
+_INCIDENT_TAIL_ROW_ORDER = (8808, 32010, 32005, 9450, 9700)
+
+
+def _pack_incident_tail_rows(payload: dict[str, object]) -> None:
+    """Pin generated tail rows so repeated renders do not drift downward."""
+    if payload.get("uid") != "bioetl-incident-v1":
+        return
+    panels = payload.get("panels") or []
+    tail = [
+        panel
+        for panel in panels
+        if isinstance(panel, dict)
+        and panel.get("type") == "row"
+        and panel.get("id") in _INCIDENT_TAIL_ROW_ORDER
+    ]
+    tail_ids = {id(panel) for panel in tail}
+    tail.sort(key=lambda panel: _INCIDENT_TAIL_ROW_ORDER.index(panel.get("id")))
+    cursor = 0
+    for panel in panels:
+        if id(panel) in tail_ids or not isinstance(panel, dict):
+            continue
+        for descendant in _walk_panels([panel]):
+            grid = descendant.get("gridPos")
+            if (
+                isinstance(grid, dict)
+                and isinstance(grid.get("y"), int)
+                and isinstance(grid.get("h"), int)
+            ):
+                cursor = max(cursor, grid["y"] + grid["h"])
+    for row in tail:
+        grid = row.get("gridPos")
+        if not isinstance(grid, dict) or not isinstance(grid.get("y"), int):
+            continue
+        _shift_panel_tree(row, delta=cursor - int(grid["y"]))
+        cursor += int(grid.get("h") or 1)
 
 
 def _pack_control_plane_rows(root: list[dict[str, object]]) -> None:
@@ -1286,8 +1261,8 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
         if isinstance(link, dict) and "viewPanel=" not in str(link.get("url", ""))
     ]
     panel["description"] = (
-        "SELECTED RUN · Processing result is the saved ETL outcome. "
-        "Saved trust verdict is the historical Trust assessment and does not "
+        "SELECTED RUN · processing_status is the saved ETL outcome. "
+        "trust_status is the historical Trust assessment and does not "
         "authorize replay. Reason count is the number of saved remarks: 0 is no, "
         "and missing data stays —. Assessed at is when that assessment was recorded, "
         "not manifest creation time, and is unavailable when the query fails. "
@@ -1415,8 +1390,6 @@ def _stamp_trust_override(override: dict[str, object]) -> None:
 
 def _layout_uid_detail_panels(panels: list[object], *, current_uid: str) -> None:
     if current_uid == "bioetl-runtime":
-        _normalize_runtime_record_delta_scope(panels)
-        _layout_runtime_detail_panels(panels)
         return
     if current_uid == "bioetl-control-plane-v1":
         _layout_control_plane_detail_panels(panels)
@@ -1834,38 +1807,11 @@ def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
             panels, _RUNTIME_SELECTED_GEOMETRY, uid=current_uid
         )
         return
-    if current_uid == "bioetl-runtime" and any(
-        panel.get("id") == 9101 for panel in _root_panels(panels)
-    ):
-        for panel in _root_panels(panels):
-            if panel.get("id") == 9401:
-                panel["description"] = (
-                    "CURRENT · Pipeline / Run Type readiness. Mapping: "
-                    "0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. "
-                    "Missing publication or expected stage evidence makes readiness "
-                    "INCOMPLETE even when no active blockers are observed. "
-                    "Inspect Monitor Coverage and Review Stage Progress. "
-                    "This verdict does not describe the selected run's processing "
-                    "or trust status (processing_status or trust_status)."
-                )
-        # Wrapped blocker reasons need three full 52px rows. Stage progress
-        # uses compact single-line rows and can donate one grid row safely.
+    if current_uid == "bioetl-overview-v2":
         _apply_first_window_geometry(
-            panels,
-            {9101: (0, 5, 16, 7), 9102: (16, 5, 8, 7), 2460: (0, 12, 24, 5)},
-            uid=current_uid,
+            panels, _OVERVIEW_FIRST_WINDOW_GEOMETRY, uid=current_uid
         )
-    if current_uid == "bioetl-provider-health-v2":
-        for panel in _root_panels(panels):
-            if panel.get("id") == 9107:
-                panel["description"] = (
-                    "CURRENT · Remote API evidence. Cached Bronze replay does not "
-                    "exercise the API and proves neither outage nor health. "
-                    "missing_health_status = no observation; invalid_health_timestamp = "
-                    "missing, zero or future timestamp. Both are UNKNOWN. "
-                    "The latest valid observation has no age expiry. "
-                    "GLOBAL: independent of selected run."
-                )
+        return
     if current_uid == "bioetl-control-plane-v1":
         _layout_control_plane_first_window(panels)
         return
@@ -2537,6 +2483,7 @@ def apply_to_dashboard(
     )
 
     apply_run_explorer_columns(payload)
+    _pack_incident_tail_rows(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

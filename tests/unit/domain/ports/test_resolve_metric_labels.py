@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from bioetl.domain.ports.observability.metrics import (
     ALLOWED_CORE_METRIC_LABEL_KEYS,
     ALLOWED_METRIC_LABEL_KEYS,

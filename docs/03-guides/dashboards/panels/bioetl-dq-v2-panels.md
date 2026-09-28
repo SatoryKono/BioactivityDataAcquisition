@@ -38,5 +38,5 @@ Selected-run accounting includes input, accepted, Silver/Gold quarantine, contra
 ### Inspect Saved Run Evidence
 - **Type:** Row
 - **Purpose:** Saved domain and identity detail for the same Run ID.
-- **Panels:** `Inspect Selected Run Domains`, `Inspect Selected Run Identity`.
+- **Panels:** `Inspect Selected Run Domains` (domain verdicts of this Run ID; not the page status), `Inspect Selected Run Identity` (full identifiers; the short table is `Inspect Run Identity` on the first screen).
 - **Data sources:** `/ops/observability/selected-run-status` with `run_id`.

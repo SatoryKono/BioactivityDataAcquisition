@@ -52,16 +52,16 @@
     {
       "evidence_metrics": {
         "families_at_budget_count": 1,
-        "hotspot_budget_warning_count": 2,
+        "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
         "lazy_util": 0.0,
         "total_duplicate_clusters": 0
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
-      "score": 8.2,
+      "score": 9.2,
       "weight": 0.14,
-      "weighted_score": 1.148
+      "weighted_score": 1.288
     },
     {
       "evidence_metrics": {
@@ -117,7 +117,7 @@
       "evidence_metrics": {
         "composition_util": 0.9458,
         "expired_compat_count": 0,
-        "hotspot_budget_warning_count": 2,
+        "hotspot_budget_warning_count": 0,
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0,
@@ -128,9 +128,9 @@
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 9.8,
+      "score": 10.0,
       "weight": 0.06,
-      "weighted_score": 0.588
+      "weighted_score": 0.6
     }
   ],
   "debt_budget_policy": {
@@ -185,7 +185,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.74,
+  "integral_score": 9.89,
   "interpretation": "excellent",
   "metrics": {
     "accepted_adr_count": 59,
@@ -204,7 +204,7 @@
       "application_core"
     ],
     "families_at_budget_count": 1,
-    "hotspot_budget_warning_count": 2,
+    "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
     "lazy_import_cap": 0,
@@ -254,7 +254,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "52886acda65a8dc3d833ba91fedc376d3692642b16db983425d7ce140d2a3d6b"
+      "source_fingerprint": "a13038516bebc5736152fa97d32fedb52705bf0617687a804e46ef38bbe587d1"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -266,14 +266,14 @@
       "total_duplicate_clusters": 0
     },
     "hotspot_family_baseline": {
-      "budget_warnings": 2,
+      "budget_warnings": 0,
       "path": "reports/quality/hotspot-family-baseline.json",
       "snapshot_date": "2026-09-11"
     },
     "module_coverage_inventory": {
       "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "d013f3e059ae21dd0bc3edc79c326492f9c089408670e1058110282c2db12458"
+      "source_tree_sha256": "8843b3099920fc3f236fdeea5836ed6b399592b618a12940f2647751b2e564e6"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
