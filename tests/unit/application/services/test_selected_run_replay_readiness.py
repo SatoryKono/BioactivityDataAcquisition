@@ -90,6 +90,21 @@ def test_hash_without_object_is_not_ready() -> None:
     assert projection["verdict"] == BLOCKED
 
 
+def test_hash_without_recorded_verification_is_unknown() -> None:
+    manifest = dict(_PASSING_MANIFEST)
+    manifest.pop("objects", None)
+    projection = project_selected_run_replay_readiness(
+        identity=_PASSING_IDENTITY,
+        inventory_present=True,
+        manifest=manifest,
+        artifact_probes=(_pass_probe(),),
+    )
+    assert projection["verdict"] == INSUFFICIENT
+    checks = {item["code"]: item for item in projection["checks"]}
+    assert checks["effective_config_hash"]["result"] == "unknown"
+    assert checks["effective_config_hash"]["reason"] == "object_not_verified"
+
+
 def test_source_run_without_replay_of_run_id_can_be_ready() -> None:
     projection = project_selected_run_replay_readiness(
         identity=_PASSING_IDENTITY,

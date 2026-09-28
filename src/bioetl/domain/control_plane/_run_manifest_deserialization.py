@@ -68,6 +68,15 @@ def _load_object_mapping(raw_mapping: object) -> dict[str, object]:
     return {str(key): value for key, value in raw_mapping.items()}
 
 
+def _load_verified_objects(raw_mapping: object) -> dict[str, bool]:
+    """Load recorded object verifications, dropping non-boolean noise (#11711)."""
+    if not isinstance(raw_mapping, dict):
+        return {}
+    return {
+        str(key): value for key, value in raw_mapping.items() if isinstance(value, bool)
+    }
+
+
 def _require_key(item: dict[str, object], field_name: str, *, context: str) -> object:
     """Return a required mapping field or raise a descriptive ValueError."""
     if field_name not in item:
