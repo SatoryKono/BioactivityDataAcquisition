@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `f7b3d3473c8666c5f126730076901f44526699879a7ef63c84a2830450e717d4`
+Evidence surface SHA-256: `ad9eb771d33c42d130fffe9b59e63f81a499b373b3bb0a2e1f80c0cbca6b82ba`
 
 Evidence metadata refresh (2026-09-26): rebind after main suite-green merge. Current headline evidence:
 Debt-governance gates: **43 pass / 3 fail**;
@@ -76,7 +76,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "f7b3d3473c8666c5f126730076901f44526699879a7ef63c84a2830450e717d4",
+  "evidence_surface_sha256": "ad9eb771d33c42d130fffe9b59e63f81a499b373b3bb0a2e1f80c0cbca6b82ba",
   "metrics": {
     "architecture_integral_score": 9.89,
     "architecture_interpretation": "excellent",
