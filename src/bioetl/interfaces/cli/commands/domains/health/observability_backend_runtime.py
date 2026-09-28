@@ -3,10 +3,14 @@
 
 from __future__ import annotations
 
+import shutil
+import subprocess
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from os import environ as os_environ
 from typing import TYPE_CHECKING, Any, cast
+
+import click
 
 from bioetl.application.services.ops.observability_backend_startup import (
     ensure_observability_backend_started_impl,
@@ -242,6 +246,31 @@ def attach_observability_backend_to_cli_input[
     return cli_input
 
 
+def docker_engine_not_ready_message() -> str | None:
+    """Return an operator message when Docker CLI exists but the engine is down."""
+    docker = shutil.which("docker")
+    if docker is None:
+        return None
+    try:
+        completed = subprocess.run(
+            [docker, "info"],
+            capture_output=True,
+            timeout=8,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return (
+            "Docker engine is not reachable. Wait until `docker info` succeeds "
+            "before starting bioetl run / workflow run with observability backend."
+        )
+    if completed.returncode != 0:
+        return (
+            "Docker engine is not ready. Wait until `docker info` succeeds "
+            "before starting bioetl run / workflow run with observability backend."
+        )
+    return None
+
+
 def should_disable_transient_health_server(
     *,
     health_server_enabled: bool,
@@ -329,6 +358,10 @@ def ensure_observability_backend_started(
     Runtime hooks (``probe_fn``, ``start_fn``, printers, ...) may be overridden
     via ``**hook_overrides`` for tests while keeping S107 under budget.
     """
+    if enabled:
+        docker_error = docker_engine_not_ready_message()
+        if docker_error is not None:
+            raise click.ClickException(docker_error)
     ready_timeout_seconds, required_probe_timeout_seconds, poll_seconds = timing
     defaults = _observability_backend_runtime_hooks(
         probe_fn=probe_observability_backend,
@@ -401,6 +434,7 @@ __all__ = [
     "build_observability_backend_cli_kwargs",
     "build_observability_backend_health_url",
     "build_observability_backend_required_probe_paths",
+    "docker_engine_not_ready_message",
     "ensure_observability_backend_started",
     "probe_observability_backend",
     "probe_observability_backend_required_paths",

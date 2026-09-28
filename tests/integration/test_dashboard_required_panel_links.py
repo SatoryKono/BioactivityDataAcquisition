@@ -60,9 +60,7 @@ def test_dq_dashboard_required_panel_links():
 
     assert 9102 not in panels
     assert 9406 in panels
-    links = (
-        panels[9406].get("fieldConfig", {}).get("defaults", {}).get("links") or []
-    )
+    links = panels[9406].get("fieldConfig", {}).get("defaults", {}).get("links") or []
     assert any(link.get("title") == "Open Run Explorer" for link in links)
 
 

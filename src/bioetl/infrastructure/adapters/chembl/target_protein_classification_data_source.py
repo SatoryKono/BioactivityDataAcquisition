@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, cast
-
 import asyncio
 from collections.abc import AsyncIterator, Callable
 from types import TracebackType
-from typing import cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 import pyarrow as pa
 
@@ -17,15 +15,14 @@ if TYPE_CHECKING:
     )
 
 
-from bioetl.domain.exceptions.internal_state import InvalidStateError
-from bioetl.domain.ports import DeltaReaderPort, LoggerPort
-from bioetl.domain.types import HealthStatus, JsonDict
-
 from bioetl.domain.chembl.target_protein_classification import (
     _TARGET_PROTEIN_CLASSIFICATION_ENTITY_TYPE,
     build_target_component_indexes,
     resolve_target_ids,
 )
+from bioetl.domain.exceptions.internal_state import InvalidStateError
+from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.chembl.protein_classification_source_manifest import (
     source_manifest,
     with_source_manifest,

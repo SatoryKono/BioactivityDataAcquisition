@@ -7,4 +7,4 @@ from bioetl.domain.serialization.snapshot_serialization import (
     to_serializable_mapping,
 )
 
-__all__ = ['normalize_snapshot', 'to_serializable_mapping']
+__all__ = ["normalize_snapshot", "to_serializable_mapping"]

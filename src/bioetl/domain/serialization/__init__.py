@@ -46,9 +46,7 @@ def __getattr__(name: str) -> object:
     try:
         return getattr(_codec, name)
     except AttributeError:
-        raise AttributeError(
-            f"module {__name__!r} has no attribute {name!r}"
-        ) from None
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from None
 
 
 sys.modules[__name__].__class__ = _CodecDelegatingModule

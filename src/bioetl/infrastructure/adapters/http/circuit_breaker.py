@@ -182,7 +182,13 @@ class CircuitBreakerGuard:
                 self._trips_total += trips_delta
             raise
         else:
-            if isinstance(result, httpx.Response) and result.status_code in {429, 500, 502, 503, 504}:
+            if isinstance(result, httpx.Response) and result.status_code in {
+                429,
+                500,
+                502,
+                503,
+                504,
+            }:
                 async with self._lock:
                     self._last_failure_time = _now()
                     self._state, self._failure_count, trips_delta = record_failure(

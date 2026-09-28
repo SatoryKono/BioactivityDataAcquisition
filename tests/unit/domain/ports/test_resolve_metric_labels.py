@@ -17,7 +17,7 @@ def test_resolve_metric_labels_none_and_empty() -> None:
 
 
 def test_resolve_metric_labels_allows_core_keys() -> None:
-    labels = {key: "x" for key in sorted(ALLOWED_CORE_METRIC_LABEL_KEYS)}
+    labels = dict.fromkeys(sorted(ALLOWED_CORE_METRIC_LABEL_KEYS), "x")
     resolved = resolve_metric_labels(labels)
     assert resolved == labels
     assert resolved is not labels

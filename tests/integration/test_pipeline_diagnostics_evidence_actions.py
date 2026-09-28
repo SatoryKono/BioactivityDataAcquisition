@@ -27,7 +27,8 @@ def test_domain_reason_labels_preserve_unknown_codes_and_queries() -> None:
         prop["value"]
         for override in panels[9451]["fieldConfig"]["overrides"]
         if override["matcher"] == {"id": "byName", "options": "Reason"}
-        for prop in override["properties"] if prop["id"] == "mappings"
+        for prop in override["properties"]
+        if prop["id"] == "mappings"
     )
     assert all(item["type"] == "value" for item in mapping)
     labels = {k: v["text"] for item in mapping for k, v in item["options"].items()}
@@ -45,7 +46,10 @@ def test_accounting_links_reference_exact_saved_run_only() -> None:
     panels = {p["id"]: p for p in _panels(payload["panels"])}
     links = panels[9403]["fieldConfig"]["defaults"]["links"]
     assert len(links) == 1
-    assert "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}" in links[0]["url"]
+    assert (
+        "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}"
+        in links[0]["url"]
+    )
     assert "run_id=${run_id:percentencode}" in links[0]["url"]
     untouched = deepcopy(payload)
     _correct_runtime("another-dashboard", panels)
@@ -53,7 +57,9 @@ def test_accounting_links_reference_exact_saved_run_only() -> None:
 
 
 def test_panel_guide_covers_every_shipped_panel() -> None:
-    guide = (ROOT / "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md").read_text()
+    guide = (
+        ROOT / "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md"
+    ).read_text()
     for panel in _panels(_dashboard()["panels"]):
         assert str(panel["id"]) in guide
     assert "bioetl_runtime_current_status_trusted" not in guide

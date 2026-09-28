@@ -51,9 +51,7 @@ def validate_required_persistence_profile(
         exact_replay_execution_context_supported=(
             exact_replay_execution_context_supported
         ),
-        composite_resume_rich_replay_supported=(
-            composite_resume_rich_replay_supported
-        ),
+        composite_resume_rich_replay_supported=(composite_resume_rich_replay_supported),
         missing_artifact_lineage_layers=missing_artifact_lineage_layers,
     )
 

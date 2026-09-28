@@ -17,7 +17,8 @@ from bioetl.application.core.preflight.health_aggregator_runtime import (
 )
 from bioetl.application.services.run_reports.observations import observed_health_report
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
-from bioetl.domain.exceptions import BioETLError, InfrastructureError
+from bioetl.domain.exceptions import BioETLError, InfrastructureError, NetworkError
+from bioetl.domain.exceptions.network import is_dns_resolution_failure
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
 
 if TYPE_CHECKING:
@@ -219,10 +220,16 @@ class HealthAggregator:
             f"{failure.component}: {failure.error_message or 'check failed'}"
             for failure in failures
         ]
-        raise InfrastructureError(
+        details = (
             f"Health check failed for: {', '.join(failed_components)}. "
             f"Details: {'; '.join(error_messages)}"
         )
+        if any(
+            is_dns_resolution_failure(message=failure.error_message)
+            for failure in failures
+        ):
+            raise NetworkError(details)
+        raise InfrastructureError(details)
 
 
 # Backward-compatible alias kept for transitional imports.

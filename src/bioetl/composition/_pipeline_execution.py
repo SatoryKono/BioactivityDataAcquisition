@@ -32,6 +32,9 @@ from bioetl.composition.runtime_builders.config_access import (
 from bioetl.composition.observability_runtime import (
     push_metrics_to_gateway as push_metrics_to_gateway_impl,
 )
+from bioetl.application.services.execution.pipeline_run_execution_service import (
+    format_run_error_message,
+)
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
@@ -241,7 +244,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         TypeError,
     ) as e:
         status = PipelineRunResult.FAILED
-        error_message = str(e)
+        error_message = format_run_error_message(e)
         error_type = type(e).__name__
     else:
         try:
@@ -250,7 +253,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
             status = PipelineRunResult.SHUTDOWN
         except (BioETLError, OSError, RuntimeError, ValueError, TypeError) as e:
             status = PipelineRunResult.FAILED
-            error_message = str(e)
+            error_message = format_run_error_message(e)
             error_type = type(e).__name__
 
     completed_at, _ = derive_completion_timestamp(

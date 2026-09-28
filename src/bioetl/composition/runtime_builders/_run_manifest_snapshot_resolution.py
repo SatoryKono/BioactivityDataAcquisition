@@ -10,4 +10,10 @@ from bioetl.domain.control_plane.snapshot_field_resolution import (
     resolve_replay_parentage_mapping_value,
 )
 
-__all__ = ['as_runtime_config_mapping', 'coerce_optional_text', 'resolve_mapping_text', 'resolve_name_component', 'resolve_replay_parentage_mapping_value']
+__all__ = [
+    "as_runtime_config_mapping",
+    "coerce_optional_text",
+    "resolve_mapping_text",
+    "resolve_name_component",
+    "resolve_replay_parentage_mapping_value",
+]

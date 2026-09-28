@@ -82,10 +82,9 @@ def test_required_inbound_paths_match_overview_first_action_mirror() -> None:
     overview = json.loads(
         (_DASHBOARDS_DIR / "bioetl-overview-v2.json").read_text(encoding="utf-8")
     )
-    first_action = next(panel for panel in overview["panels"] if panel.get("id") == 9002)
-    urls = {
-        str(link.get("url", ""))
-        for link in (first_action.get("links") or [])
-    }
+    first_action = next(
+        panel for panel in overview["panels"] if panel.get("id") == 9002
+    )
+    urls = {str(link.get("url", "")) for link in (first_action.get("links") or [])}
     for target_uid in target_uids:
         assert any(url.startswith(f"/d/{target_uid}/") for url in urls)

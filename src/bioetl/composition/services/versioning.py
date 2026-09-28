@@ -11,4 +11,11 @@ from bioetl.infrastructure.provenance.code_revision import (
     get_pipeline_version,
 )
 
-__all__ = ['CodeRevisionProvenance', 'compute_config_hash', 'get_code_revision_provenance', 'get_dependency_lock_hash', 'get_git_commit', 'get_pipeline_version']
+__all__ = [
+    "CodeRevisionProvenance",
+    "compute_config_hash",
+    "get_code_revision_provenance",
+    "get_dependency_lock_hash",
+    "get_git_commit",
+    "get_pipeline_version",
+]

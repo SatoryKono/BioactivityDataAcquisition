@@ -32,7 +32,6 @@ if TYPE_CHECKING:
     import pandera.pandas as pa
 
 
-
 def _materialize_pandera_schema(schema: object | None) -> object | None:
     """Resolve DataFrameModel classes to ``DataFrameSchema`` via ``to_schema``.
 

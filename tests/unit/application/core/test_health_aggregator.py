@@ -42,7 +42,7 @@ import pytest
 from bioetl.application.core.preflight.service import (
     _HealthAggregator as HealthAggregator,
 )
-from bioetl.domain.exceptions import InfrastructureError
+from bioetl.domain.exceptions import InfrastructureError, NetworkError
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
 
@@ -491,6 +491,24 @@ class TestHealthAggregatorAssertHealthy:
         error_msg = str(exc_info.value)
         assert "storage" in error_msg
         assert "data_source" in error_msg
+
+    def test_assert_healthy_raises_network_error_for_dns_failure(
+        self, health_aggregator
+    ):
+        results = [
+            ComponentHealthResult(
+                "data_source",
+                HealthStatus.UNHEALTHY,
+                0.1,
+                "[Errno 11001] getaddrinfo failed",
+            ),
+        ]
+        report = HealthReport(results=results)
+
+        with pytest.raises(NetworkError) as exc_info:
+            health_aggregator.assert_healthy(report)
+
+        assert "getaddrinfo failed" in str(exc_info.value)
 
 
 @pytest.mark.unit

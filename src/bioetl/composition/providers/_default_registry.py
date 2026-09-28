@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING, TypeVar, cast, overload
 from bioetl.composition.contracts.providers import (
     SupportsDefaultRegistry,
     SupportsProviderRegistryStore,
-    SupportsProviderStore,
 )
 
 if TYPE_CHECKING:

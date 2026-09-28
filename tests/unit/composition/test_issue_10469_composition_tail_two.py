@@ -89,6 +89,11 @@ def test_http_api_key_mapping_rejects_non_key_setting() -> None:
     assert HttpClientFactory._api_key_setting_name("BIOETL_TOKEN") is None
 
 
+def test_semanticscholar_unauthenticated_retry_budget_is_capped() -> None:
+    cfg = HttpClientFactory._resolve_config("semanticscholar", None)
+    assert cfg.max_retries <= 2
+
+
 def test_checkpoint_context_and_snapshots_are_empty_without_runtime_services(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -502,10 +502,8 @@ def _configure_wsl_cache_dir(config: pytest.Config) -> None:
     cache_dir = root / "cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
     # pytest's cache provider reads cache_dir from config option; set ini override.
-    try:
+    with contextlib.suppress(AttributeError):
         config.option.cache_dir = str(cache_dir)
-    except AttributeError:
-        pass
     # Hypothesis uses database file; keep it local to avoid per-example fsync on /mnt.
     hypothesis_dir = cache_dir / "hypothesis"
     hypothesis_dir.mkdir(parents=True, exist_ok=True)

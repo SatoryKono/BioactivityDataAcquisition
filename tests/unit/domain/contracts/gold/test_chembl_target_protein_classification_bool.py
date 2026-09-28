@@ -7,7 +7,9 @@ import pytest
 from bioetl.domain.contracts.gold._chembl_target_lookup_schemas import (
     ChEMBLTargetProteinClassificationGoldSchema,
 )
-from bioetl.infrastructure.validation.contract_validator import ContractAwareGoldValidator
+from bioetl.infrastructure.validation.contract_validator import (
+    ContractAwareGoldValidator,
+)
 from bioetl.infrastructure.validation.pandera_validator import PanderaGoldValidator
 
 _HASH_A = "0" * 64
@@ -19,7 +21,7 @@ _SCHEMA_COLS = list(
 
 def _tpc_gold_rows() -> list[dict[str, object]]:
     """Minimal gold rows with every schema column present (production projects them)."""
-    base = {name: None for name in _SCHEMA_COLS}
+    base = dict.fromkeys(_SCHEMA_COLS)
     return [
         {
             **base,

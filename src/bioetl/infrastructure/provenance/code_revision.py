@@ -20,7 +20,7 @@ from functools import lru_cache
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as pkg_version
 from pathlib import Path
-from typing import TYPE_CHECKING, cast, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.normalization import serialize_json_canonical
 

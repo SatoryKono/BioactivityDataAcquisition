@@ -853,9 +853,7 @@ def test_dq_first_screen_panels_expose_actionable_datalinks() -> None:
     )
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     status = next(
-        panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("id") == 9406
+        panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 9406
     )
     links = (status.get("fieldConfig") or {}).get("defaults", {}).get("links") or []
     assert any(link.get("title") == "Open Run Explorer" for link in links)

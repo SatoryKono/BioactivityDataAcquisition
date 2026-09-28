@@ -7,4 +7,4 @@ from bioetl.domain.config.effective_config_serializer import (
     create_effective_config_serializer,
 )
 
-__all__ = ['EffectiveConfigSerializer', 'create_effective_config_serializer']
+__all__ = ["EffectiveConfigSerializer", "create_effective_config_serializer"]

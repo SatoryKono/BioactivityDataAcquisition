@@ -26,6 +26,7 @@ from __future__ import annotations
 from bioetl.domain.exceptions.network.connection import (
     NetworkError,
     RetryExhaustedError,
+    is_dns_resolution_failure,
 )
 from bioetl.domain.exceptions.network.service import (
     ApiError,
@@ -53,4 +54,5 @@ __all__ = [
     "ServiceAuthenticationError",
     "ServiceUnavailableError",
     "TimeoutError",
+    "is_dns_resolution_failure",
 ]

@@ -27,11 +27,14 @@ def test_metrics_and_run_type_modes() -> None:
 
 
 def test_runtime_projection_decisions() -> None:
-    assert resolve_health_check_mode(
-        test_mode=True,
-        configured_mode="strict",
-        default_health_check_mode="strict",
-    ) == "probe"
+    assert (
+        resolve_health_check_mode(
+            test_mode=True,
+            configured_mode="strict",
+            default_health_check_mode="strict",
+        )
+        == "probe"
+    )
     assert resolve_skip_gold(cli_skip_gold=False, gold_sink_enabled=False) is True
     assert memory_adaptive_sizing_allowed(exact_replay=True) is False
     assert pipeline_name_fallbacks("chembl_activity") == ("chembl", "activity")
