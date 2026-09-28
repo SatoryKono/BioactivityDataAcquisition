@@ -148,6 +148,22 @@ legacy N/A is never rewritten to OK.
   per missing DOI and can exceed the 7200s enricher timeout. Config already
   marks this enricher `required: false` (high rate limits, ok to skip).
 
+## Archive evidence (Saved Evidence column)
+
+Every manifest records `launch_context.archive_policy`. Control Plane check
+`retention-compliance.archive` reads it, then hash-verifies the local pack:
+
+| Profile | Archive check | Saved Evidence |
+| --- | --- | --- |
+| `degraded_observable` + `archive_not_applicable` | OK/N/A | OK — off-host archive is not required |
+| `replay_ready` / `forensic_grade` + verified `index.json` | OK (`archive_restore_verified`) | OK |
+| Pack checksum mismatch / create fail | ERROR | ERROR — never INCOMPLETE-from-UNKNOWN |
+| No policy and no pack | UNKNOWN (`archive_evidence_not_recorded`) | INCOMPLETE until the P0 policy/create fix lands on new runs |
+
+How to inspect: Trust `reasons_text=archive_evidence_not_recorded`; Control
+Plane `retention-compliance.archive`. Old runs do not recolor without
+`refresh_archived_assessment` — judge new `run_id`s, not historical ones.
+
 Equivalent bash:
 
 ```bash
