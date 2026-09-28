@@ -1,9 +1,17 @@
 """Run Explorer statuses must follow verified, exact-run evidence."""
 
+import json
+from dataclasses import replace
 from unittest.mock import Mock
 
 import pytest
 
+from bioetl.application.services.run_reports.writer import write_pipeline_run_report
+from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+from bioetl.domain.run_reports.selected_status import DOMAINS
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
 from bioetl.interfaces.http import _recent_run_presentation as presentation
 
 pytestmark = pytest.mark.unit
@@ -94,3 +102,70 @@ def test_legacy_missing_evaluations_are_na_not_progress(monkeypatch):
 
 def test_absent_workflow_has_no_passport():
     assert presentation._passport("workflows", "—") == ""
+
+
+def test_snapshot_backed_success_run_scores_saved_evidence_ok(tmp_path):
+    """#11697: finalization publishes snapshot+revision, so a new run never shows N/A."""
+    draft = build_pipeline_run_report(
+        identity={
+            "pipeline_name": "chembl_assay",
+            "run_id": "run-se-ok",
+            "status": "success",
+            "run_type": "incremental",
+            "provider": "chembl",
+            "started_at": "2026-09-27T11:00:00+00:00",
+            "completed_at": "2026-09-27T11:02:00+00:00",
+        },
+        metrics={"records_fetched": 10, "records_bronze": 10},
+    )
+    report = replace(
+        draft,
+        observations={
+            name: {"verdict": "OK", "reason": "checked", "facts": {"count": 0}}
+            for name in DOMAINS[1:]
+        },
+    )
+    written = write_pipeline_run_report(
+        report, root=tmp_path, store=FileRunReportStoreAdapter()
+    )
+    payload = json.loads(written.json_path.read_text(encoding="utf-8"))
+    revision = payload["selected_run_snapshot"]["revision"]
+    assert (written.json_path.parent / "status-revisions" / f"{revision}.json").is_file()
+
+    result = presentation.recent_run_presentation(
+        {"pipeline": "chembl_assay", "run_id": "run-se-ok"},
+        root=tmp_path,
+        manifest_port=None,
+    )
+    assert result["saved_evidence_status"] == "OK"
+    assert result["data_quality_status"] == "OK"
+    assert result["replay_readiness_status"] == "INCOMPLETE"
+
+
+def test_outside_boundary_replay_is_na_never_error_for_scored_run(monkeypatch):
+    """#11697: a scored (snapshot-backed) run outside the exact-replay family stays N/A."""
+    monkeypatch.setattr(
+        presentation,
+        "load_selected_run_status",
+        lambda **kw: {
+            "evidence_availability": "AVAILABLE",
+            "evidence_completeness": "COMPLETE",
+            "replay_readiness_now": "UNSUPPORTED",
+            "replay_checks": [
+                {
+                    "evidence_ref": "#/artifacts/0",
+                    "reason": "digest_matches",
+                    "result": "pass",
+                }
+            ],
+            "domains": [{"domain": "Data Quality", "verdict": "OK"}],
+        },
+    )
+    result = presentation.recent_run_presentation(
+        {"pipeline": "chembl_assay", "run_id": "exact-id"},
+        root=None,
+        manifest_port=None,
+    )
+    assert result["replay_readiness_status"] == "N/A"
+    assert result["saved_evidence_status"] == "OK"
+    assert result["data_quality_status"] == "OK"
