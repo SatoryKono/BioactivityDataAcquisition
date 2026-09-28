@@ -404,6 +404,22 @@ def _correct_provider_cause_panel(panel: dict) -> None:
 def _correct_provider(uid: object, panels: dict[int, dict]) -> None:
     if uid != "bioetl-provider-health-v2":
         return
+    answer = panels.get(9461)
+    if isinstance(answer, dict):
+        data_links = answer.setdefault("options", {}).setdefault("dataLinks", [])
+        if not any(
+            str(link.get("url", "")).startswith("/d/bioetl-runtime/")
+            for link in data_links
+            if isinstance(link, dict)
+        ):
+            data_links.append(
+                {
+                    "title": OPEN_PIPELINE_DIAGNOSTICS_TITLE,
+                    "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                    "targetBlank": False,
+                    "includeVars": False,
+                }
+            )
     if 9401 not in panels or 9101 not in panels or 9107 not in panels:
         return
     # Sparse real counter observations (including a single zero) need a
@@ -1022,7 +1038,7 @@ def _dq_processed_records(panel: dict) -> None:
         )
     panel["options"]["footer"]["enablePagination"] = False
     panel["options"]["cellHeight"] = "sm"
-    panel["gridPos"]["h"] = 13
+    panel["gridPos"].update(x=14, y=10, w=10, h=8)
     panel["fieldConfig"]["defaults"]["noValue"] = _PROCESSED_RECORDS_NOVALUE
     panel["description"] = _PROCESSED_RECORDS_DESCRIPTION
 
@@ -1031,6 +1047,10 @@ def _correct_dq(uid: object, panels: dict[int, dict]) -> None:
     if uid == "bioetl-dq-v2" and 9403 in panels:
         _dq_processed_records(panels[9403])
         summary = panels[9406]
+        summary["gridPos"].update(x=0, y=5, w=24, h=5)
+        panels[9402]["gridPos"].update(x=0, y=10, w=14, h=8)
+        if 9450 in panels:
+            panels[9450]["gridPos"].update(x=0, y=18, w=24, h=1)
         summary["transformations"] = [
             {"id": "limit", "options": {"limitField": 1}},
             {
