@@ -275,9 +275,8 @@ def test_missing_report_markdown_blocks_readiness(tmp_path):
 
 def test_manifest_without_input_snapshot_is_not_ready(tmp_path):
     from types import SimpleNamespace
-    from uuid import uuid4
 
-    run_id = str(uuid4())
+    run_id = "11111111-1111-4111-8111-111111111111"
     persist(tmp_path, report(run_id=run_id))
     port = MagicMock()
     port.get_by_run_id.return_value = SimpleNamespace(
@@ -305,9 +304,8 @@ def test_manifest_without_input_snapshot_is_not_ready(tmp_path):
 
 def test_rebuild_only_http_status_is_insufficient(tmp_path):
     from types import SimpleNamespace
-    from uuid import uuid4
 
-    run_id = str(uuid4())
+    run_id = "22222222-2222-4222-8222-222222222222"
     persist(tmp_path, report(run_id=run_id))
     port = MagicMock()
     port.get_by_run_id.return_value = SimpleNamespace(

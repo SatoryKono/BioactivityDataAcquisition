@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.control_plane.artifact_lineage_layers import (
     resolve_required_artifact_lineage_layers,
 )
@@ -14,6 +16,8 @@ from bioetl.domain.runtime.composition_boundary_policy import (
     resolve_skip_gold,
     resolve_uniprot_mapping_databases,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_metrics_and_run_type_modes() -> None:

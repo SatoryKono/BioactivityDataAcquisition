@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.services.control_plane.manifest.diagnostics.selected_run_replay_readiness import (
     BLOCKED,
     INSUFFICIENT,
@@ -9,6 +11,8 @@ from bioetl.application.services.control_plane.manifest.diagnostics.selected_run
     UNSUPPORTED,
     project_selected_run_replay_readiness,
 )
+
+pytestmark = pytest.mark.unit
 
 _PASSING_IDENTITY = {
     "pipeline_name": "chembl_activity",

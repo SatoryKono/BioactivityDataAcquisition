@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from bioetl.infrastructure.adapters.common.deduplication import build_record_dedup_key
 from bioetl.infrastructure.adapters.uniprot.filtering_adapter_mixin import (
     extract_uniprot_accession,

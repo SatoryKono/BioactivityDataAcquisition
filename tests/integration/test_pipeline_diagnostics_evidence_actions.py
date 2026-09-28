@@ -6,10 +6,14 @@ from copy import deepcopy
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.ops.observability.grafana._gr_db_corrections import (
     _correct_runtime,
     _panels,
 )
+
+pytestmark = pytest.mark.integration
 
 ROOT = Path(__file__).resolve().parents[2]
 

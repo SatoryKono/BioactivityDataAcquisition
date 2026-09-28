@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostics
+
+pytestmark = pytest.mark.unit
 
 
 def test_success_with_balanced_funnel_keeps_zero_and_coverage() -> None:

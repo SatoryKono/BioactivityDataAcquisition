@@ -244,40 +244,40 @@
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "zero_reference_supporting_script_count",
       "name": "supporting_scripts_zero_reference_count",
       "remediation": "Triage or remove zero-reference supporting scripts; budgets must not grow.",
       "source_artifact": "configs/quality/scripts_inventory_manifest.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "untriaged_zero_reference_supporting_script_count",
       "name": "supporting_scripts_untriaged_zero_reference_count",
       "remediation": "Add owner/removal metadata for every zero-reference supporting script.",
       "source_artifact": "configs/quality/scripts_inventory_manifest.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
-      "current": 2,
+      "current": 0,
       "limit": 0,
       "metric": "budget_violations",
       "name": "test_governance_budget_violations",
       "remediation": "Fix test governance budget violations before closeout.",
       "source_artifact": "reports/quality/test-governance-current.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
-      "current": 2,
+      "current": 0,
       "limit": 0,
       "metric": "uuid4_call_sites",
       "name": "test_governance_uuid4_call_sites",
       "remediation": "Replace uuid4 tests with deterministic factories or explicit IDs.",
       "source_artifact": "reports/quality/test-governance-current.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -467,23 +467,19 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 5,
-    "pass": 41,
+    "fail": 1,
+    "pass": 45,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.74,
     "architecture_quality_scorecard_interpretation": "excellent",
-    "fail_count": 5,
+    "fail_count": 1,
     "failing_gates": [
-      "hotspot_family_baseline_budget_warnings",
-      "supporting_scripts_zero_reference_count",
-      "supporting_scripts_untriaged_zero_reference_count",
-      "test_governance_budget_violations",
-      "test_governance_uuid4_call_sites"
+      "hotspot_family_baseline_budget_warnings"
     ],
     "gate_count": 46,
-    "pass_count": 41,
+    "pass_count": 45,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []

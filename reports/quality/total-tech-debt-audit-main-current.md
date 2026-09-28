@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `a387a7d66bddf56c0b91e1311dbdd72c524dc74001288e593d8917002fec323c`
+Evidence surface SHA-256: `1baad5e9c2bb05c5064d3cb63ab630ae1b8f83e926f6043d6e893d869014f38f`
 
 Evidence metadata refresh (2026-09-26): rebind after main suite-green merge. Current headline evidence:
 Debt-governance gates: **43 pass / 3 fail**;
@@ -76,15 +76,15 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "a387a7d66bddf56c0b91e1311dbdd72c524dc74001288e593d8917002fec323c",
+  "evidence_surface_sha256": "1baad5e9c2bb05c5064d3cb63ab630ae1b8f83e926f6043d6e893d869014f38f",
   "metrics": {
-    "architecture_integral_score": 10.0,
+    "architecture_integral_score": 9.74,
     "architecture_interpretation": "excellent",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 46,
-    "debt_gate_fail_count": 3,
-    "debt_gate_pass_count": 43,
+    "debt_gate_fail_count": 1,
+    "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 2483,
@@ -150,3 +150,19 @@ python -m scripts.engineering.qa check-exemptions
 ## Guard
 
 - **REJECTED_POLICY:** any increase of tech-debt budgets / exemptions / hotspot caps
+
+Evidence metadata refresh (2026-09-28): wave-2 test-governance paydown (duplicate names, assertion bypass, 39 markers, deterministic run IDs, zero-ref triage). Current headline evidence:
+Debt-governance gates: **45 pass / 1 fail**;
+Architecture quality integral score: **9.74** (`excellent`);
+source_module_count: **2491**;
+fully_covered: **2483**;
+partially_covered: **7**;
+no_executable_lines: **1**;
+uncovered: **0**;
+unmeasured: **0**;
+= 2491 == source_module_count;
+Contract coverage matrix schema: **contract-coverage-matrix-v3**;
+Constructor waivers (shrink-only inventory): **1** entries;
+Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**;
+Layer violations: **0**.
+Residual fail: hotspot_family_baseline_budget_warnings (3 modules ≥250 LOC pending split).
