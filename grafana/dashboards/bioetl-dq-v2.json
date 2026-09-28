@@ -1597,93 +1597,96 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Reason"
+                  "options": "stage_id"
                 },
                 "properties": [
                   {
-                    "id": "custom.wrapText",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
+                    "id": "displayName",
+                    "value": "Stage"
                   }
                 ]
               },
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Duration"
+                  "options": "state"
                 },
                 "properties": [
                   {
-                    "id": "noValue",
-                    "value": "Not recorded"
-                  },
+                    "id": "displayName",
+                    "value": "Status"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "records_in"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Records in"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "records_out"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Records out"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "duration_seconds"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Duration"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Source"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "duration_seconds"
+                },
+                "properties": [
                   {
                     "id": "unit",
                     "value": "s"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "In"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": ""
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Out"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": ""
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Source"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "report.funnel": {
-                            "text": "Open report"
-                          },
-                          "report.stage_timings": {
-                            "text": "Open report"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Open saved run report (JSON)",
-                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
-                        "targetBlank": true
-                      }
-                    ]
                   }
                 ]
               }
@@ -1709,45 +1712,6 @@
               "id": "limit",
               "options": {
                 "limitField": 12
-              }
-            },
-            {
-              "id": "filterFieldsByName",
-              "options": {
-                "include": {
-                  "names": [
-                    "stage_id",
-                    "state",
-                    "reason",
-                    "records_in",
-                    "records_out",
-                    "duration_seconds",
-                    "source"
-                  ]
-                }
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "indexByName": {
-                  "stage_id": 0,
-                  "state": 1,
-                  "reason": 2,
-                  "records_in": 3,
-                  "records_out": 4,
-                  "duration_seconds": 5,
-                  "source": 6
-                },
-                "renameByName": {
-                  "stage_id": "Stage",
-                  "state": "Status",
-                  "reason": "Reason",
-                  "records_in": "In",
-                  "records_out": "Out",
-                  "duration_seconds": "Duration",
-                  "source": "Source"
-                }
               }
             }
           ],
