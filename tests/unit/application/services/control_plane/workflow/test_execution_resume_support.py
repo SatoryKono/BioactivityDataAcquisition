@@ -29,7 +29,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from types import SimpleNamespace
 from uuid import UUID
 
@@ -164,6 +164,26 @@ def test_validate_resume_state_requires_explicit_repair_or_force() -> None:
             force_steps=(),
             repair_steps=(),
         )
+
+
+def test_validate_resume_state_accepts_skipped_steps() -> None:
+    state = replace(
+        _state(),
+        steps=(
+            WorkflowStepState(step_id="seed", step_kind="pipeline", status="success"),
+            WorkflowStepState(
+                step_id="enrich", step_kind="transform", status="skipped"
+            ),
+        ),
+    )
+
+    support.validate_resume_state(
+        latest_state=state,
+        workflow_name="chembl_publication",
+        current_fingerprint="fingerprint-1",
+        force_steps=(),
+        repair_steps=(),
+    )
 
 
 def test_load_resume_manifest_errors_when_persisted_manifest_missing() -> None:
