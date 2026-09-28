@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   328 (was 290 core-only); add `%% @nodes` on 35 canonical diagrams; refresh
   `current-state-diagrams.md` Last verified to 2026-09-24.
 
+- **Run Explorer expected columns (#11697):** `bounded-pipeline-smoke.md` now
+  pins Processing / Data Quality / Saved Evidence / Replay per launch.
+  `degraded_observable` never yields Replay ERROR; a new run without a complete
+  snapshot stays INCOMPLETE, never N/A; legacy `legacy_no_snapshot` runs stay
+  N/A and are never upgraded to OK. Presentation docstrings state the same
+  N/A-vs-INCOMPLETE contract, and end-to-end tests pin a snapshot-backed
+  success run to Saved Evidence=OK.
+
 ### Fixed
 
 - **Provider DNS fail-closed:** `getaddrinfo` / errno 11001 on data-source health
