@@ -526,9 +526,11 @@ Canonical examples:
 
 ```bash
 bioetl workflow run chembl_reference_pack --dry-run
+bioetl workflow run chembl_reference_pack --limit 100 --required-persistence-profile degraded_observable --no-health-server --no-ensure-observability-backend
 bioetl workflow run chembl_reference_pack --use-cached-bronze --cached-bronze-date 2026-06-29
 bioetl workflow run chembl_reference_pack --resume-last
 bioetl workflow run chembl_reference_pack --only-steps run_chembl_target,run_chembl_target_component
+bioetl workflow run chembl_reference_pack --limit 100 --only-steps run_chembl_subcellular_fraction,run_chembl_publication_term --required-persistence-profile degraded_observable --no-health-server --no-ensure-observability-backend
 ```
 
 Operator notes:
@@ -537,6 +539,10 @@ Operator notes:
   `replay_ready` persistence floor;
 - use `--only-steps` for bounded target/classification refreshes, but remember
   the workflow engine still pulls required dependencies into the execution set;
+- derived steps `run_chembl_subcellular_fraction` and `run_chembl_publication_term`
+  smoke with `--limit 100`. A `--limit 1000` window can hang one ChEMBL page
+  past the derived-scan hang detector. Independent later steps still run after
+  a derived fail; use `workflow status` and `--only-steps` to retry those two;
 - use `workflow status` after partial or repaired runs because the pack can have
   multiple in-flight step outcomes at once.
 

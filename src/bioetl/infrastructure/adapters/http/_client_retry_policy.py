@@ -8,6 +8,7 @@ from email.utils import parsedate_to_datetime
 import httpx
 
 from bioetl.domain.exceptions import RecoverableError
+from bioetl.domain.exceptions.network import is_dns_resolution_failure
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.time.system_clock import SystemClock
@@ -96,6 +97,8 @@ def _is_retryable_error(
     exc: Exception,
 ) -> bool:
     """Return True when exception is retryable by policy."""
+    if is_dns_resolution_failure(exc):
+        return False
     if isinstance(
         exc,
         httpx.TimeoutException

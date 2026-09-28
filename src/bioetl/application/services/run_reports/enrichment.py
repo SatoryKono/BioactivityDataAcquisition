@@ -42,9 +42,12 @@ def build_failure_block(
         return None
     if status in {"success", "dry_run"}:
         return None
+    message = result.error_message
+    if not message:
+        message = result.error_type
     return {
         "error_type": result.error_type,
-        "error_message": result.error_message,
+        "error_message": message,
         "failed_stage": None,
         "exit_hint": _exit_hint(status, result.error_type),
     }

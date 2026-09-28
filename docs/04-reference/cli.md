@@ -187,6 +187,7 @@ bioetl workflow run chembl_core --resume-last
 bioetl workflow run chembl_core --resume-manifest-id wf-manifest-2026-06-30-001
 bioetl workflow run chembl_core --resume-run-id 00000000-0000-0000-0000-000000000111
 bioetl workflow run chembl_core --resume-last --repair-steps reconcile_assay_target_orphans
+bioetl workflow run chembl_reference_pack --limit 100 --required-persistence-profile degraded_observable --no-health-server --no-ensure-observability-backend
 bioetl workflow run chembl_reference_pack --observability-backend-port 18081
 bioetl workflow status chembl_core
 bioetl workflow status chembl_core --run-id 00000000-0000-0000-0000-000000000111

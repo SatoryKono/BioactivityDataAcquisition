@@ -17,6 +17,7 @@ from bioetl.domain.types import JsonDict
 __all__ = [
     "PipelineExecutionResult",
     "PipelineRunExecutionService",
+    "format_run_error_message",
 ]
 
 _PIPELINE_RUN_ERRORS = (
@@ -27,6 +28,17 @@ _PIPELINE_RUN_ERRORS = (
     TypeError,
     LookupError,
 )
+
+
+def format_run_error_message(exc: BaseException) -> str:
+    """Keep empty ``TypeError()`` (and similar) visible in run reports."""
+    text = str(exc).strip()
+    if text:
+        return text
+    if exc.args:
+        return f"{type(exc).__name__}: {exc.args!r}"
+    return f"{type(exc).__name__}()"
+
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -95,7 +107,7 @@ class PipelineRunExecutionService:
             run_logger.warning("Pipeline was gracefully shut down")
         except _PIPELINE_RUN_ERRORS as exc:
             status = "failed"
-            error_message = str(exc)
+            error_message = format_run_error_message(exc)
             error_type = type(exc).__name__
             run_logger.exception(
                 "Pipeline failed with exception",

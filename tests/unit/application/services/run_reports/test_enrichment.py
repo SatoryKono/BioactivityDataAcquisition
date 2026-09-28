@@ -104,6 +104,18 @@ def test_build_failure_block_explains_non_successful_runs(
     assert hint in block["exit_hint"]
 
 
+def test_build_failure_block_fills_empty_typeerror_message() -> None:
+    block = build_failure_block(
+        _result(
+            status=SimpleNamespace(value="failed"),
+            error_type="TypeError",
+            error_message="",
+        )
+    )
+    assert block is not None
+    assert block["error_message"] == "TypeError"
+
+
 def test_build_io_block_supports_result_only_and_bounded_filter_metadata() -> None:
     assert build_io_block(_result(), options=None) == {
         "pipeline_name": "chembl_activity",
