@@ -151,8 +151,8 @@ def _stamp_control_plane_copy(panel: dict[str, object], uid: object) -> None:
             target["url"] = STATUS_URL
             target["root_selector"] = "trust"
         panel["description"] = (
-            "SELECTED RUN · Processing result is the saved ETL outcome. "
-            "Saved trust verdict is the historical Trust assessment and does not "
+            "SELECTED RUN · processing_status is the saved ETL outcome. "
+            "trust_status is the historical Trust assessment and does not "
             "authorize replay. Reason count is the number of saved remarks. "
             "Assessed at is when that assessment was recorded."
         )

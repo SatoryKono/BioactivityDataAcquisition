@@ -207,9 +207,9 @@ _DQ_SCOPE_HTML = (
 )
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 2, 24, 3),
-    9406: (0, 18, 24, 4),
-    9402: (0, 5, 12, 13),
-    9403: (12, 5, 12, 13),
+    9406: (0, 5, 24, 5),
+    9402: (0, 10, 12, 8),
+    9403: (12, 10, 12, 8),
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
@@ -813,7 +813,6 @@ def _clear_run_column_width(child: dict[str, object]) -> None:
             ]
 
 
-
 def _layout_dq_detail_panels(panels: list[object]) -> None:
     """Keep paired DQ evidence panels aligned during Grafana grid compaction."""
     layouts = {
@@ -1211,8 +1210,8 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
         if isinstance(link, dict) and "viewPanel=" not in str(link.get("url", ""))
     ]
     panel["description"] = (
-        "SELECTED RUN · Processing result is the saved ETL outcome. "
-        "Saved trust verdict is the historical Trust assessment and does not "
+        "SELECTED RUN · processing_status is the saved ETL outcome. "
+        "trust_status is the historical Trust assessment and does not "
         "authorize replay. Reason count is the number of saved remarks: 0 is no, "
         "and missing data stays —. Assessed at is when that assessment was recorded, "
         "not manifest creation time, and is unavailable when the query fails. "

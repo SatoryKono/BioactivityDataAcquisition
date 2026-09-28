@@ -292,6 +292,30 @@ def _correct_incident(uid: object, panels: dict[int, dict]) -> None:
             ("job", 185),
         ):
             _override(panels[panel_id], field, _WIDTH, width)
+    status = panels.get(9401)
+    if isinstance(status, dict):
+        diagnostics_url = (
+            "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}"
+            "&${pipeline:queryparam}&${run_type:queryparam}"
+            "&${run_id:queryparam}&${__url_time_range}"
+        )
+        links = [
+            link
+            for link in status.get("links") or []
+            if not (
+                isinstance(link, dict)
+                and link.get("title") == "Open Pipeline Diagnostics"
+            )
+        ]
+        links.append(
+            {
+                "title": "Open Pipeline Diagnostics",
+                "url": diagnostics_url,
+                "includeVars": False,
+                "targetBlank": False,
+            }
+        )
+        status["links"] = links
 
 
 def _correct_provider_fleet_panel(

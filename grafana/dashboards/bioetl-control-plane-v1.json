@@ -460,7 +460,7 @@
         "y": 7
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Processing result is the saved ETL outcome. Saved trust verdict is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded.",
+      "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -845,6 +845,43 @@
                     "targetBlank": false
                   }
                 ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Processing result"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Saved trust verdict"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Assessed at"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason count"
+            },
+            "properties": [
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "links",
+                "value": []
               }
             ]
           }

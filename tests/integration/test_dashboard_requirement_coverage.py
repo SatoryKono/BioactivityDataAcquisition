@@ -79,7 +79,7 @@ def test_dash_arch_001_grafana_is_optional_and_read_only() -> None:
 
 def test_dash_arch_001_fails_closed_on_write_admin_url() -> None:
     dashboard = copy.deepcopy(load_dashboard(_CONTROL_PLANE))
-    panel = _panel_by_id(dashboard, 9401)
+    panel = _panel_by_id(dashboard, 9418)
     defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
     links = list(defaults.get("links") or [])
     links.append({"title": "Grafana admin", "url": "/api/admin/users"})
@@ -101,16 +101,19 @@ def test_dash_data_001_ops_http_and_recording_rules_cover_seven_uids() -> None:
 
 
 def test_dash_data_001_fails_closed_on_invented_series_and_off_allowlist_url() -> None:
-    dashboard = copy.deepcopy(load_dashboard(_RUNTIME))
+    incident = Path("grafana/dashboards/bioetl-incident-v1.json")
+    dashboard = copy.deepcopy(load_dashboard(incident))
     panel = _panel_by_id(dashboard, 9401)
     targets = list(panel.get("targets") or [])
-    assert targets, "runtime 9401 must have PromQL targets"
+    assert targets, "incident 9401 must have PromQL targets"
     mutated_target = copy.deepcopy(targets[0])
     mutated_target["expr"] = "bioetl_invented_metric_total"
     panel["targets"] = [mutated_target]
     valid = get_all_valid_metric_names()
     with pytest.raises(AssertionError, match="invented series"):
-        violations = invented_metric_violations("bioetl-runtime.json", dashboard, valid)
+        violations = invented_metric_violations(
+            "bioetl-incident-v1.json", dashboard, valid
+        )
         assert not violations, "\n".join(violations)
 
     http_dashboard = copy.deepcopy(load_dashboard(_CONTROL_PLANE))
@@ -133,16 +136,15 @@ def test_dash_state_001_zero_001_synthetic_zero_allowlist() -> None:
 
 
 def test_dash_state_001_fails_closed_on_verdict_synthetic_zero() -> None:
-    dashboard = copy.deepcopy(load_dashboard(_CONTROL_PLANE))
+    incident = Path("grafana/dashboards/bioetl-incident-v1.json")
+    dashboard = copy.deepcopy(load_dashboard(incident))
     panel = _panel_by_id(dashboard, 9401)
     targets = list(panel.get("targets") or [])
     mutated = copy.deepcopy(targets[0])
     mutated["expr"] = f"{mutated.get('expr')} or vector(0)"
     panel["targets"] = [mutated]
     with pytest.raises(AssertionError, match="synthetic zero"):
-        violations = synthetic_zero_violations(
-            "bioetl-control-plane-v1.json", dashboard
-        )
+        violations = synthetic_zero_violations("bioetl-incident-v1.json", dashboard)
         assert not violations, "\n".join(violations)
 
 
@@ -321,12 +323,12 @@ def test_dash_copy_001_data_panels_name_empty_state() -> None:
 
 def test_dash_copy_001_fails_closed_without_empty_state_copy() -> None:
     dashboard = copy.deepcopy(load_dashboard(_RUNTIME))
-    panel = _panel_by_id(dashboard, 9401)
+    panel = _panel_by_id(dashboard, 9998)
     panel["description"] = "Pipeline status."
     defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
     defaults["noValue"] = ""
     violations = data_panel_empty_state_violations("bioetl-runtime.json", dashboard)
-    assert violations, "mutated runtime 9401 must fail DASH-COPY-001 empty-state copy"
+    assert violations, "mutated runtime 9998 must fail DASH-COPY-001 empty-state copy"
 
 
 def test_requirement_coverage_module_is_wired_as_required_dashboard_check() -> None:
