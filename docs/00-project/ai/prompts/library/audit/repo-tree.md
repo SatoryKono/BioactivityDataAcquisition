@@ -54,7 +54,7 @@ generated content wrongly under version control.
 | Param | Default |
 | --- | --- |
 | `SCOPE` | repo root + first levels (or path) |
-| `MODE` | `audit` \| `propose-patches` |
+| `MODE` | `audit` (default) \| `propose-patches` (approval only) |
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
 | `REQUIRE_GH_TRACKING` | `false` |
@@ -62,14 +62,14 @@ generated content wrongly under version control.
 ## BioETL facts
 
 - Tracked root **must** match `.github/root-allowlist.txt`
-- Scratch: `scripts/**` or `reports/**` — never root `_tmp_*` / `nul`
+- Scratch: `scripts/**` or `reports/**` — never root `_tmp_*` / `_cr_*` / `_publish_*` / ad-hoc `test_*.py` / device names (`nul`)
 - `.env` is secret-bearing (env-guardrail)
 
 ## Method
 
 1. Inventory root and shallow tree; classify source/test/docs/scripts/config/
    infra/vendor/generated/build/cache/temp/binary/unknown.
-2. Diff root tracked files vs root-allowlist.
+2. Diff root tracked files vs root-allowlist (files only: plain `ls-tree --name-only` lists dirs such as `src/`; compare slash-free paths from `git ls-tree -r --name-only`).
 3. Check `.gitignore`, `.gitattributes`, lockfiles, manifests, tool-version files.
 4. Large tracked files; potential credential **signals** (not proof alone).
 5. Dry-run only: `git clean -ndX` / `git clean -n` — never delete in audit.
