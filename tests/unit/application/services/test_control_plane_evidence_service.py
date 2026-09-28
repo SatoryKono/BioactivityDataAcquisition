@@ -551,6 +551,68 @@ def test_retention_uses_current_archive_verdict(verified, reason, expected) -> N
     verifier.verify.assert_called_once_with(manifest=manifest, plan=plan)
 
 
+@pytest.mark.parametrize(
+    ("policy", "verified", "reason", "expected"),
+    [
+        (
+            {"required": True, "policy_ref": "persistence-profile:replay_ready"},
+            True,
+            "archive_restore_verified",
+            "OK",
+        ),
+        (
+            {"required": True, "policy_ref": "persistence-profile:replay_ready"},
+            False,
+            "archive_checksum_mismatch",
+            "ERROR",
+        ),
+        (
+            {"required": True, "policy_ref": "persistence-profile:replay_ready"},
+            None,
+            "archive_evidence_not_recorded",
+            "ERROR",
+        ),
+        (
+            {"required": False, "policy_ref": ""},
+            None,
+            "archive_evidence_not_recorded",
+            "UNKNOWN",
+        ),
+        ({}, None, "archive_evidence_not_recorded", "UNKNOWN"),
+    ],
+)
+def test_required_archive_policy_escalates_missing_pack_to_error(
+    policy: dict[str, object],
+    verified: bool | None,
+    reason: str,
+    expected: str,
+) -> None:
+    from unittest.mock import Mock
+
+    manifest = _manifest(
+        launch_context={
+            "archive_policy": policy,
+            "required_persistence_profile": "replay_ready",
+        }
+    )
+    plan = ControlPlaneArtifactLifecyclePlan(
+        generated_at=_NOW,
+        cutoff=_NOW,
+        dry_run=True,
+        artifacts=(),
+    )
+    verifier = Mock()
+    verifier.verify.return_value = (verified, reason)
+    service = ControlPlaneEvidenceService(
+        lifecycle_planner=_LifecyclePlanner(plan),
+        archive_verifier=verifier,
+    )
+    payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
+    archive = next(row for row in _payload_rows(payload) if row["check"] == "archive")
+    assert archive["status"] == expected
+    assert archive["reason"] == reason
+
+
 def test_not_required_archive_does_not_claim_verified_copies() -> None:
     from unittest.mock import Mock
 

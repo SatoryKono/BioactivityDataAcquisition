@@ -1024,6 +1024,51 @@ def test_build_launch_context_snapshot_marks_source_run_exact_replay_boundary_fo
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    ("profile", "expected"),
+    [
+        (
+            "degraded_observable",
+            {"required": False, "policy_ref": "persistence-profile:degraded_observable"},
+        ),
+        (
+            "replay_ready",
+            {"required": True, "policy_ref": "persistence-profile:replay_ready"},
+        ),
+        (
+            "forensic_grade",
+            {"required": True, "policy_ref": "persistence-profile:forensic_grade"},
+        ),
+    ],
+)
+def test_build_launch_context_snapshot_records_archive_policy(
+    profile: str, expected: dict[str, object]
+) -> None:
+    launch_context = build_launch_context_snapshot(
+        _make_run_context(limit=10),
+        run_type_value="incremental",
+        execution_context_value="pipeline",
+        required_persistence_profile=profile,
+    )
+
+    assert launch_context["archive_policy"] == expected
+
+
+@pytest.mark.unit
+def test_build_launch_context_snapshot_omits_archive_policy_for_unknown_profile() -> (
+    None
+):
+    launch_context = build_launch_context_snapshot(
+        _make_run_context(limit=10),
+        run_type_value="incremental",
+        execution_context_value="pipeline",
+        required_persistence_profile="bogus_profile",
+    )
+
+    assert "archive_policy" not in launch_context
+
+
+@pytest.mark.unit
 def test_resolve_contract_identity_reads_registry_entry(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

@@ -13,6 +13,9 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_resolution impor
 from bioetl.composition.snapshot_serialization import (
     to_serializable_mapping as to_serializable_mapping,
 )
+from bioetl.domain.control_plane.reproducibility_policy import (
+    archive_policy_for_persistence_profile,
+)
 from bioetl.domain.runtime.composition_boundary_policy import (
     pipeline_name_fallbacks,
 )
@@ -50,6 +53,9 @@ def build_launch_context_snapshot(
     )
     if required_persistence_profile_opt_down:
         snapshot["required_persistence_profile_opt_down"] = True
+    archive_policy = archive_policy_for_persistence_profile(required_persistence_profile)
+    if archive_policy is not None:
+        snapshot["archive_policy"] = archive_policy
     _add_reproducibility_profile_fields(
         snapshot,
         strict_exact_replay_supported=strict_exact_replay_supported,
