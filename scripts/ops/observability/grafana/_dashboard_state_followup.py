@@ -354,30 +354,13 @@ def _apply_control_plane(
 def _apply_overview(
     dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
 ) -> None:
-    p = panels[215]
-    p["targets"][0]["expr"] = (
-        'bioetl_first_action{workflow=~"$workflow",pipeline=~"$pipeline",run_type=~"$run_type"}>0 or on() label_replace(label_replace(bioetl_fa_gap,"pipeline","$pipeline","",""),"workflow","$workflow","","")'
-    )
-    p["description"] = p["description"].replace(
-        "before the two-row limit", "with all routes available through pagination"
-    )
-    panels[9601]["fieldConfig"]["defaults"]["noValue"] = (
-        "UNKNOWN — no alert rows; verify rule evaluation and telemetry coverage"
-    )
-    override(panels[9603], "status", **{CUSTOM_WIDTH: 145})
-    panels[9603]["fieldConfig"]["defaults"]["noValue"] = (
+    status = panels.get(9603)
+    if status is None:
+        return
+    override(status, "status", **{CUSTOM_WIDTH: 145})
+    status["fieldConfig"]["defaults"]["noValue"] = (
         "UNKNOWN — summary unavailable; check Ops HTTP. No selection is SELECT RUN; absent report is REPORT MISSING."
     )
-    full_list(dashboard, p, 2)
-    detail_link = next(
-        link for link in p["links"] if link["title"].startswith(SHOW_ALL_ROWS_PREFIX)
-    )
-    override(p, "Priority", links=[detail_link])
-    p["links"] = [
-        link
-        for link in p["links"]
-        if not link["title"].startswith(SHOW_ALL_ROWS_PREFIX)
-    ]
 
 
 def strip_runtime_non_run_panels(dashboard: dict[str, Any]) -> None:
@@ -517,33 +500,6 @@ def _apply_runtime(
     strip_runtime_non_run_panels(dashboard)
 
 
-def _apply_provider_health(
-    _dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
-) -> None:
-    # Legacy context remains a compatibility input, never the authority over
-    # the visible Pipeline selector. Adapter evidence is explicitly global.
-    for pid in (31, 32):
-        p = panels[pid]
-        p["description"] += (
-            ""
-            if "GLOBAL ADAPTER" in p["description"]
-            else " GLOBAL ADAPTER evidence: covers all adapters, independent of Provider and Pipeline."
-        )
-        p["title"] = (
-            p["title"]
-            .replace("Monitor Circuit", "Monitor Global Circuit")
-            .replace("Track Circuit", "Track Global Circuit")
-        )
-    for pid in (9103,):
-        p = panels[pid]
-        p["fieldConfig"]["defaults"]["links"] = [
-            {
-                "title": "Inspect fleet telemetry coverage",
-                "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=$__all&viewPanel=9104&${__url_time_range}",
-            }
-        ]
-
-
 def _apply_dq(_dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]) -> None:
     p = panels[9406]
     for t in p["transformations"]:
@@ -643,7 +599,6 @@ _UID_APPLIERS = {
     "bioetl-control-plane-v1": _apply_control_plane,
     "bioetl-overview-v2": _apply_overview,
     "bioetl-runtime": _apply_runtime,
-    "bioetl-provider-health-v2": _apply_provider_health,
     "bioetl-dq-v2": _apply_dq,
     "bioetl-incident-v1": _apply_incident,
 }

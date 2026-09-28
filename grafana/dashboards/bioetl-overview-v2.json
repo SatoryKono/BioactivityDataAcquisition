@@ -498,13 +498,13 @@
         "x": 0,
         "y": 5,
         "w": 12,
-        "h": 4
+        "h": 6
       },
       "datasource": {
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
+      "description": "SELECTED RUN · Columns are Result, Status, Evidence, and Rules. Status is the verdict. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -834,7 +834,7 @@
         "x": 12,
         "y": 5,
         "w": 12,
-        "h": 4
+        "h": 6
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -1079,8 +1079,8 @@
       "title": "Review Run Identity",
       "gridPos": {
         "x": 0,
-        "y": 9,
-        "w": 12,
+        "y": 14,
+        "w": 24,
         "h": 8
       },
       "description": "SELECTED RUN · Shows HTTP-backed identity for an exact Run ID. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live before treating the result as expected. Open Run Explorer for complete run evidence. Inspect value opens full identifiers as selectable plain text.",
@@ -1333,9 +1333,9 @@
       "type": "table",
       "title": "Review Processed Records",
       "gridPos": {
-        "x": 12,
-        "y": 9,
-        "w": 12,
+        "x": 0,
+        "y": 22,
+        "w": 24,
         "h": 8
       },
       "description": "SELECTED RUN · Shows HTTP-backed Bronze, Silver, and Gold record counts and outcomes. Zero is a recorded count. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live. Open Run Explorer for complete accounting. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
