@@ -26,6 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   matching the payload contract and the sibling `runtime_source_id` field;
   `test_routing_support_dispatches_control_plane_branches` is green.
 
+- **Replay Readiness with unverified objects (#11710):** smoke and
+  run-manifest-inspection runbooks now state that success + Saved Evidence=OK
+  + Data Quality=OK + Replay Readiness=INCOMPLETE is expected when hashes are
+  recorded but objects are `object_not_verified` under `degraded_observable`;
+  9422 `unknown_checks` and `run-manifest show <id> --format json` are the
+  documented inspection paths.
+
 ### Fixed
 
 - **Provider DNS fail-closed:** `getaddrinfo` / errno 11001 on data-source health
