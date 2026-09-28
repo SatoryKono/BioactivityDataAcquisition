@@ -11,6 +11,9 @@ from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy i
 from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy import (
     validate_strict_data_root_policy as _validate_strict_data_root_policy,
 )
+from bioetl.domain.control_plane.artifact_lineage_layers import (
+    resolve_required_artifact_lineage_layers as _resolve_artifact_lineage_layers,
+)
 from bioetl.domain.control_plane.reproducibility_policy import (
     validate_required_persistence_profile as domain_validate_required_persistence_profile,
 )
@@ -25,11 +28,7 @@ def resolve_required_artifact_lineage_layers(
     skip_gold: bool = False,
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     """Return active sink layers and layers missing metadata sidecars."""
-    from bioetl.domain.control_plane.artifact_lineage_layers import (
-        resolve_required_artifact_lineage_layers as resolve_layers,
-    )
-
-    return resolve_layers(yaml_config=yaml_config, skip_gold=skip_gold)
+    return _resolve_artifact_lineage_layers(yaml_config=yaml_config, skip_gold=skip_gold)
 
 
 def validate_required_persistence_profile(
