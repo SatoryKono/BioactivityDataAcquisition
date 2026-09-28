@@ -123,6 +123,22 @@ Expected Run Explorer / Trust (panel 9422) columns for this smoke:
 | family outside the exact-replay boundary (`exact_replay_supported=false`) | UNSUPPORTED | N/A |
 
 INCOMPLETE / N/A on Replay during `degraded_observable` smoke is expected. Do not treat it as a failed workflow. See [Run Manifest Inspection](run-manifest-inspection.md) for `replay_capability` and check `exact_replay_family`.
+
+Run Explorer four columns per launch (Saved Evidence / Replay semantics for
+new runs are pinned in #11697):
+
+| Launch | Processing | Data Quality | Saved Evidence | Replay |
+| --- | --- | --- | --- | --- |
+| live extract, `degraded_observable`, empty `source_refs.input_snapshots` | OK | OK | OK when every saved probe and domain is complete; INCOMPLETE names the first gap — never N/A for a new run | INCOMPLETE (`run_missing_input_snapshots`) |
+| family outside the exact-replay boundary (`exact_replay_supported=false`) | OK | OK | same as above | N/A (`UNSUPPORTED`) — expected, never ERROR |
+| `--use-cached-bronze --exact-replay --replay-of-run-id` + `replay_ready` | OK | OK | OK — `selected_run_snapshot` and `status-revisions/<revision>.json` are published at finalization | OK (`READY`) |
+| legacy run written before snapshot publication (`legacy_no_snapshot`) | OK | OK | N/A — nothing verified to score, never upgraded to OK | N/A |
+
+All four columns green requires the `replay_ready` evidence floor: a
+published snapshot plus its content-addressed revision, and input snapshots
+inside the exact-replay boundary. `degraded_observable` never yields Replay
+ERROR; a missing snapshot on a new run stays INCOMPLETE, never N/A, and
+legacy N/A is never rewritten to OK.
 - `--no-health-server` — sequential smokes must not fight over `:8000`.
 - `--no-ensure-observability-backend` — keep the default-off Ops HTTP backend
   off unless Grafana ID panels are in scope.
