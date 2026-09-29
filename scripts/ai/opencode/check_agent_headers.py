@@ -61,6 +61,26 @@ def _confine_under(root: Path, candidate: Path) -> Path:
     return resolved
 
 
+def _write_confined_agent(agent_dir: Path, name: str, content: str) -> str:
+    """Write *content* to an allowlisted basename under *agent_dir*.
+
+    Rebuilds the target from the resolved directory and a regex-checked
+    filename so S2083 taint from globbed Path objects cannot reach write_text.
+    """
+    if not _AGENT_NAME_RE.fullmatch(name) or Path(name).name != name:
+        raise ValueError(f"refusing to write {name!r}")
+    root = agent_dir.resolve()
+    confined = _confine_under(root, root / name)
+    if confined.parent != root:
+        raise ValueError(f"path escapes agent directory: {name}")
+    safe_path = root.joinpath(confined.name)
+    safe_path.write_text(  # NOSONAR - allowlisted basename joined under resolved agent_dir
+        content,
+        encoding="utf-8",
+    )
+    return confined.name
+
+
 def load_core(canon_path: Path = CANON_PATH) -> str:
     """Read the canonical core block (exactly as embedded in agents)."""
     if canon_path == CANON_PATH:
@@ -212,19 +232,11 @@ def update_headers(
             continue
         if fixed != text:
             try:
-                target = _confine_under(agent_dir, path)
+                written = _write_confined_agent(agent_dir, path.name, fixed)
             except ValueError as exc:
                 report.add_error("agent_path_escape", str(exc), path.as_posix())
                 continue
-            if not _AGENT_NAME_RE.fullmatch(target.name):
-                report.add_error(
-                    "agent_name_invalid",
-                    f"refusing to write {target.name!r}",
-                    target.as_posix(),
-                )
-                continue
-            target.write_text(fixed, encoding="utf-8")
-            updated.append(target.name)
+            updated.append(written)
     report.stats = {
         "agents": len(files),
         "updated": len(updated),

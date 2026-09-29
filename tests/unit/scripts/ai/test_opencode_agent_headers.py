@@ -8,6 +8,7 @@ import pytest
 
 from scripts.ai.opencode.check_agent_headers import (
     _confine_under,
+    _write_confined_agent,
     agent_files,
     check_headers,
     load_core,
@@ -127,3 +128,25 @@ def test_update_headers_does_not_write_outside_agent_dir(tmp_path: Path) -> None
     assert updated == []
     assert outside.read_text(encoding="utf-8") == "secret"
     assert report.ok or "agents_missing" in {item.code for item in report.errors}
+
+
+def test_write_confined_agent_rejects_traversal(tmp_path: Path) -> None:
+    root = tmp_path / "agent"
+    root.mkdir()
+    outside = tmp_path / "evil.md"
+    outside.write_text("secret", encoding="utf-8")
+    with pytest.raises(ValueError, match="refusing to write"):
+        _write_confined_agent(root, "../evil.md", "pwned")
+    with pytest.raises(ValueError, match="refusing to write"):
+        _write_confined_agent(root, "nested/x.md", "pwned")
+    assert outside.read_text(encoding="utf-8") == "secret"
+    assert not (root / "evil.md").exists()
+
+
+def test_write_confined_agent_writes_allowlisted_basename(tmp_path: Path) -> None:
+    root = tmp_path / "agent"
+    root.mkdir()
+    payload = "ok" + chr(10)
+    written = _write_confined_agent(root, "demo.md", payload)
+    assert written == "demo.md"
+    assert (root / "demo.md").read_text(encoding="utf-8") == payload
