@@ -6,10 +6,10 @@ from bioetl.application.composite.column_orderer_group_flow import apply_renames
 from bioetl.application.composite.column_priority_orderer import get_enricher_prefix
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
 
-__all__ = ["ColumnOrderStageDelegates"]
+__all__ = ["ColumnOrderStageMixin"]
 
 
-class ColumnOrderStageDelegates:
+class ColumnOrderStageMixin:
     """Rename, enricher-prefix, and pipeline-name helpers for column ordering."""
 
     @staticmethod

@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-import json
 import shutil
 from pathlib import Path
+
+import orjson
 
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 from bioetl.infrastructure.storage.file_metadata_index import FileMetadataIndex
@@ -13,15 +14,15 @@ __all__ = ["FileRunReportStoreAdapter"]
 
 
 def _identity_projection(raw: str) -> str:
-    payload = json.loads(raw)
+    payload = orjson.loads(raw)
     if not isinstance(payload, dict):
         return "{}"
-    return json.dumps(
+    return orjson.dumps(
         {
             "identity": payload.get("identity"),
             "schema_version": payload.get("schema_version"),
         }
-    )
+    ).decode("utf-8")
 
 
 _REPORT_IDENTITIES = FileMetadataIndex(_identity_projection)

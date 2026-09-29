@@ -1029,7 +1029,10 @@ def test_build_launch_context_snapshot_marks_source_run_exact_replay_boundary_fo
     [
         (
             "degraded_observable",
-            {"required": False, "policy_ref": "persistence-profile:degraded_observable"},
+            {
+                "required": False,
+                "policy_ref": "persistence-profile:degraded_observable",
+            },
         ),
         (
             "replay_ready",

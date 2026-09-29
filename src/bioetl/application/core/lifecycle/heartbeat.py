@@ -110,7 +110,7 @@ class HeartbeatTask:
                 )
             except Exception as exc:
                 self._logger.error(
-                    f"Heartbeat failed during execution: {type(exc).__name__}"
+                    "Heartbeat failed during execution: %s", type(exc).__name__
                 )
                 self._shutdown_signal.request()
                 return

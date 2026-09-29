@@ -8,11 +8,9 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 AGENT_DIR = REPO_ROOT / ".opencode" / "agent"
-CORE_FIXTURE = (
-    REPO_ROOT / "tests" / "fixtures" / "opencode_header_core.txt"
-)
+CORE_FIXTURE = REPO_ROOT / "tests" / "fixtures" / "opencode_header_core.txt"
 
 AGENT_FILES = (
     "bugfix.md",

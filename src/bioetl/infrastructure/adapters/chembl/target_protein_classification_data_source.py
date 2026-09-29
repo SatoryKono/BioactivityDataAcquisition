@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Callable, Iterable, Mapping
 from types import TracebackType
 from typing import TYPE_CHECKING, Protocol, cast
 
@@ -14,12 +14,6 @@ if TYPE_CHECKING:
         ProteinClassTargetTypeMappingData,
     )
 
-
-from bioetl.domain.chembl.target_protein_classification import (
-    _TARGET_PROTEIN_CLASSIFICATION_ENTITY_TYPE,
-    build_target_component_indexes,
-    resolve_target_ids,
-)
 from bioetl.domain.exceptions.internal_state import InvalidStateError
 from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 from bioetl.domain.types import HealthStatus, JsonDict
@@ -44,6 +38,13 @@ class _ResolutionService(Protocol):
     ) -> object: ...
 
 
+IndexBuilder = Callable[
+    [Iterable[Mapping[str, object]]],
+    tuple[dict[str, tuple[int, ...]], dict[int, tuple[str, ...]]],
+]
+TargetIdResolver = Callable[..., tuple[str, ...]]
+
+
 class TargetProteinClassificationSnapshotDataSource:
     """Expose relation rows from materialized local ChEMBL snapshot tables.
 
@@ -60,12 +61,18 @@ class TargetProteinClassificationSnapshotDataSource:
         invalid_record_policy: str = "quarantine",
         target_type_mapping_data: ProteinClassTargetTypeMappingData | None = None,
         resolution_factory: Callable[..., object] | None = None,
+        entity_type: str,
+        index_builder: IndexBuilder,
+        target_id_resolver: TargetIdResolver,
     ) -> None:
         self._delta_reader = delta_reader
         self._logger = logger
         self._invalid_record_policy = invalid_record_policy
         self._target_type_mapping_data = target_type_mapping_data
         self._resolution_factory = resolution_factory
+        self._entity_type = entity_type
+        self._index_builder = index_builder
+        self._target_id_resolver = target_id_resolver
         self._load_lock = asyncio.Lock()
         self._loaded = False
         self._target_component_ids: dict[str, tuple[int, ...]] = {}
@@ -115,10 +122,10 @@ class TargetProteinClassificationSnapshotDataSource:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:
-        if entity_type != _TARGET_PROTEIN_CLASSIFICATION_ENTITY_TYPE:
+        if entity_type != self._entity_type:
             raise ValueError(
                 "TargetProteinClassificationSnapshotDataSource only serves "
-                f"{_TARGET_PROTEIN_CLASSIFICATION_ENTITY_TYPE}, got {entity_type}"
+                f"{self._entity_type}, got {entity_type}"
             )
         return self._iter_relation_rows(
             limit=limit,
@@ -165,7 +172,7 @@ class TargetProteinClassificationSnapshotDataSource:
     ) -> AsyncIterator[JsonDict]:
         del query
         await self._ensure_loaded()
-        target_ids = resolve_target_ids(
+        target_ids = self._target_id_resolver(
             filter_ids=filter_ids,
             filter_field=filter_field,
             target_component_ids=self._target_component_ids,
@@ -191,15 +198,15 @@ class TargetProteinClassificationSnapshotDataSource:
         filters: dict[str, list[str]],
         limit: int | None,
     ) -> AsyncIterator[JsonDict]:
-        if entity_type != _TARGET_PROTEIN_CLASSIFICATION_ENTITY_TYPE:
+        if entity_type != self._entity_type:
             raise ValueError(
                 "TargetProteinClassificationSnapshotDataSource only serves "
-                f"{_TARGET_PROTEIN_CLASSIFICATION_ENTITY_TYPE}, got {entity_type}"
+                f"{self._entity_type}, got {entity_type}"
             )
         await self._ensure_loaded()
         target_id_sets = [
             set(
-                resolve_target_ids(
+                self._target_id_resolver(
                     filter_ids=filter_ids,
                     filter_field=filter_field,
                     target_component_ids=self._target_component_ids,
@@ -281,7 +288,7 @@ class TargetProteinClassificationSnapshotDataSource:
             (
                 self._target_component_ids,
                 self._target_ids_by_component,
-            ) = build_target_component_indexes(target_rows)
+            ) = self._index_builder(target_rows)
             self._source_manifest = source_manifest(
                 target_rows=target_rows,
                 target_component_rows=target_component_rows,

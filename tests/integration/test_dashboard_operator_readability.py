@@ -463,7 +463,9 @@ def test_dq_9406_description_names_verdict_columns() -> None:
         "SELECTED RUN · Overall verdict is the data quality assessment"
     )
     assert "Processing is the ETL outcome" in description
-    assert "Trust is the saved Trust verdict and does not authorize replay" in description
+    assert (
+        "Trust is the saved Trust verdict and does not authorize replay" in description
+    )
 
 
 def test_dq_9450_row_names_three_tables() -> None:
@@ -560,8 +562,7 @@ def test_dq_renderer_copy_matches_shipped() -> None:
     assert str(panels[9406].get("description") or "").startswith(STATUS_DESCRIPTION)
     assert panels[9403]["description"] == _PROCESSED_RECORDS_DESCRIPTION
     assert (
-        panels[9403]["fieldConfig"]["defaults"]["noValue"]
-        == _PROCESSED_RECORDS_NOVALUE
+        panels[9403]["fieldConfig"]["defaults"]["noValue"] == _PROCESSED_RECORDS_NOVALUE
     )
     assert panels[9450]["description"] == ROW_9450_DESCRIPTION
     assert panels[9451]["description"] == _DQ_DOMAINS_DESCRIPTION

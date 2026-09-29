@@ -405,7 +405,9 @@ def test_runtime_alert_condition_panels_use_recording_rules(
         ),
         None,
     )
-    assert panel is not None, f"Panel '{panel_title}' not found in bioetl-incident-v1.json"
+    assert panel is not None, (
+        f"Panel '{panel_title}' not found in bioetl-incident-v1.json"
+    )
 
     expressions = [
         target.get("expr", "")
