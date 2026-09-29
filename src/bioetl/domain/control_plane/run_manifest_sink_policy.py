@@ -50,6 +50,17 @@ def _validate_append_layer_contract(
     return contract
 
 
+def _append_replay_guidance(*, append_layers: list[str]) -> str:
+    """Build the remediation guidance for append-mode replay rejection."""
+    details = ", ".join(
+        f"sink.{layer_name}.mode=append" for layer_name in append_layers
+    )
+    return (
+        f"semantic outputs ({details}); use merge/upsert, overwrite, or SCD2 "
+        "semantics with stable keys instead"
+    )
+
+
 def _reject_append_for_replay(
     *,
     strict_replay_requested: bool,
@@ -61,13 +72,7 @@ def _reject_append_for_replay(
         return
     if not (strict_replay_requested or replay_capable_family):
         return
-    details = ", ".join(
-        f"sink.{layer_name}.mode=append" for layer_name in append_layers
-    )
-    guidance = (
-        f"semantic outputs ({details}); use merge/upsert, overwrite, or SCD2 "
-        "semantics with stable keys instead"
-    )
+    guidance = _append_replay_guidance(append_layers=append_layers)
     if strict_replay_requested:
         raise RuntimeError(
             "Strict reproducibility contexts cannot use append-mode "

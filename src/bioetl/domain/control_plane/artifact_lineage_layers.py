@@ -53,6 +53,25 @@ def _classify_layer(
         missing_lineage_layers.append(layer)
 
 
+def _classify_sink_layers(
+    *,
+    yaml_config: object,
+    skip_gold: bool,
+    active_layer_names: list[str],
+    missing_lineage_layers: list[str],
+) -> None:
+    """Classify every persistence layer for lineage sidecar coverage."""
+    for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS:
+        if layer == "gold" and skip_gold:
+            continue
+        _classify_layer(
+            yaml_config=yaml_config,
+            layer=layer,
+            active_layer_names=active_layer_names,
+            missing_lineage_layers=missing_lineage_layers,
+        )
+
+
 def resolve_required_artifact_lineage_layers(
     *,
     yaml_config: object | None,
@@ -63,13 +82,10 @@ def resolve_required_artifact_lineage_layers(
         return _default_active_layers(skip_gold=skip_gold), ()
     active_layer_names: list[str] = []
     missing_lineage_layers: list[str] = []
-    for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS:
-        if layer == "gold" and skip_gold:
-            continue
-        _classify_layer(
-            yaml_config=yaml_config,
-            layer=layer,
-            active_layer_names=active_layer_names,
-            missing_lineage_layers=missing_lineage_layers,
-        )
+    _classify_sink_layers(
+        yaml_config=yaml_config,
+        skip_gold=skip_gold,
+        active_layer_names=active_layer_names,
+        missing_lineage_layers=missing_lineage_layers,
+    )
     return tuple(active_layer_names), tuple(missing_lineage_layers)
