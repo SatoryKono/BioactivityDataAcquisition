@@ -31,6 +31,20 @@ Local pytest defaults remain **serial** (`forbid_global_xdist_addopts`). CI enab
 6. **e2e-smoke**: advisory/nightly serial lane. `e2e-matrix-health.yml` may run
    on pull_request as a GHA-017 satellite; it is **not** GitHub-required and is
    **not** a `pr-gate-complete` owner (#10412).
+   - **Blocking e2e** (merge wall via `tests.yml` control-plane completeness):
+     `tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle`
+     (PubChem compound full cycle) — the only e2e that blocks merge.
+   - **Nightly/advisory only**: the full e2e matrix. Sixteen pipelines stay out
+     of PR e2e-smoke via `MATRIX_REPLAY_DEFERRED_PIPELINES` selection exclusion
+     (owner `@bioetl-platform`, #9729; list in
+     `configs/quality/test_skip_inventory.yaml` `e2e_matrix_replay_deferred`):
+     chembl_cell_line, chembl_tissue, chembl_compound_record,
+     chembl_assay_parameters, chembl_protein_class, chembl_publication_similarity,
+     chembl_publication_term, chembl_subcellular_fraction, chembl_target_component,
+     chembl_target_protein_classification, composite_activity, composite_assay,
+     composite_molecule, composite_publication, composite_target,
+     uniprot_idmapping. Do not expand PR smoke to this set without a dedicated
+     owner and cassette contract.
 
 ## Do not
 
