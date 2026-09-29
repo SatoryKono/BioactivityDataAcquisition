@@ -38,7 +38,7 @@ class ComparisonMethod(StrEnum):
 class CrossValidationVerdict(StrEnum):
     """Verdict for a single seed-enricher record pair."""
 
-    PASS = "pass"  # nosec B105
+    PASS = "pass"  # nosec B105 - see suppression registry
     WARNING = "warning"
     ENRICHER_ERROR = "enricher_error"
 

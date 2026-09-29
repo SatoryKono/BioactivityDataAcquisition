@@ -1,51 +1,148 @@
 {
+  "version": "2.1",
+  "generated_from": "wiki.json",
+  "repo_notes": [
+    {
+      "content": "Treat canonical docs, ADRs, configs, tests, and runtime source as source of truth. DeepWiki is a derived navigation surface only and must not contradict AGENTS.md, docs/00-project/ai/memory/README.md, or docs/00-project/ai/memory/agent-memory.md."
+    }
+  ],
   "pages": [
     {
       "title": "Run Control Plane and Observability",
-      "purpose": "Index of run manifest, control plane, quarantine system, metrics/tracing/logging, and Grafana dashboards.",
+      "purpose": "Index of the metrics, tracing, logging, dashboard, and operational surfaces that keep BioETL observable and safe to run.",
       "page_notes": [
         {
-          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md, docs/02-architecture/decisions/ADR-017-observability-architecture.md, src/bioetl/application/services/control_plane/."
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Alert Semantics",
+      "parent": "Run Control Plane and Observability",
+      "purpose": "Explains how alert rules map to metrics semantics, the label contracts they depend on, and how alerting stays aligned with dashboard views.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: grafana/dashboards/, docs/05-operations/, tests/integration/test_grafana_dashboard_first_screen_contract.py, tests/unit/scripts/ops/observability/."
+        }
+      ]
+    },
+    {
+      "title": "Metric Labels",
+      "parent": "Alert Semantics",
+      "purpose": "Defines the label conventions used by metrics and alert rules.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: grafana/prometheus-rules/, grafana/dashboards/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Alert Severity Mapping",
+      "parent": "Alert Semantics",
+      "purpose": "Maps alert severities to the metric semantics that trigger them.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: grafana/prometheus-rules/, grafana/dashboards/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Health Contracts",
+      "parent": "Run Control Plane and Observability",
+      "purpose": "Describes the health endpoints, health-server routing, and the contract between interface surfaces and monitoring tooling.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schemas/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
         }
       ]
     },
     {
       "title": "Run Manifest and Control Plane",
-      "purpose": "Documentation for immutable run manifests, append-only ledgers, provenance tracking, and workflow control plane.",
-      "parent": "Run Control Plane and Observability",
+      "purpose": "Immutable run manifests, append-only ledgers, provenance tracking, and the workflow control plane.",
       "page_notes": [
         {
-          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md, docs/02-architecture/decisions/ADR-047-workflow-control-plane.md, src/bioetl/application/services/control_plane/."
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md, docs/02-architecture/decisions/ADR-047-workflow-control-plane.md, src/bioetl/application/services/control_plane/, src/bioetl/infrastructure/control_plane/."
         }
-      ]
+      ],
+      "parent": "Run Control Plane and Observability"
     },
     {
       "title": "Quarantine System",
-      "purpose": "Documentation for the quarantine system, quarantine entry aggregates, and quarantine inspection/replay operations.",
-      "parent": "Run Control Plane and Observability",
+      "purpose": "Quarantine entry aggregates, persistence, and inspection/replay operations for records that fail validation.",
       "page_notes": [
         {
-          "content": "Canonical anchors: src/bioetl/domain/aggregates/_quarantine_aggregate.py, src/bioetl/infrastructure/storage/quarantine/, docs/05-operations/runbooks/quarantine-*.md."
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-051-quarantine-entry-aggregate-surface.md, src/bioetl/domain/aggregates/quarantine_entry.py, src/bioetl/infrastructure/quarantine/, docs/05-operations/runbooks/."
+        }
+      ],
+      "parent": "Run Control Plane and Observability"
+    },
+    {
+      "title": "Quarantine",
+      "purpose": "Covers quarantine persistence, validation guards, and how failed records are isolated without mutating the domain model.",
+      "parent": "Quarantine System",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/quarantine/, src/bioetl/infrastructure/validation/, tests/unit/infrastructure/."
         }
       ]
     },
     {
       "title": "Metrics, Tracing, and Logging",
-      "purpose": "Documentation for observability ports, Prometheus metrics, OpenTelemetry tracing, and structured logging.",
-      "parent": "Run Control Plane and Observability",
+      "purpose": "Observability ports, Prometheus metrics, OpenTelemetry tracing, and structured UnifiedLogger logging.",
       "page_notes": [
         {
-          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-017-observability-architecture.md, docs/02-architecture/decisions/ADR-019-observability-port-enforcement.md, src/bioetl/domain/ports/observability/."
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-017-observability-architecture.md, docs/02-architecture/decisions/ADR-019-observability-port-enforcement.md, src/bioetl/domain/ports/observability/, src/bioetl/infrastructure/observability/."
+        }
+      ],
+      "parent": "Run Control Plane and Observability"
+    },
+    {
+      "title": "Monitoring",
+      "purpose": "Covers the dashboard, alerting, and metric inventory that operators use to monitor BioETL.",
+      "parent": "Metrics, Tracing, and Logging",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: grafana/dashboards/, docs/05-operations/, tests/integration/test_grafana_dashboard_first_screen_contract.py."
         }
       ]
     },
     {
       "title": "Grafana Dashboards",
-      "purpose": "Documentation for Grafana dashboards, panel configuration, and monitoring setup.",
-      "parent": "Run Control Plane and Observability",
+      "purpose": "Grafana dashboard contracts, panel configuration, first-screen constraints, and monitoring views.",
       "page_notes": [
         {
-          "content": "Canonical anchors: grafana/dashboards/, docs/03-guides/dashboards/, docs/03-guides/dashboards/monitoring-index.md."
+          "content": "Canonical anchors: grafana/dashboards/, docs/03-guides/dashboards/, tests/integration/test_grafana_dashboard_first_screen_contract.py."
+        }
+      ],
+      "parent": "Run Control Plane and Observability"
+    },
+    {
+      "title": "Grafana Contracts",
+      "parent": "Grafana Dashboards",
+      "purpose": "Documents the dashboard contract surface, including panel expectations, first-screen constraints, and the relationship between metrics and operator views.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schemas/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Panel Queries",
+      "parent": "Grafana Contracts",
+      "purpose": "Defines the query-shape rules for dashboard panels so shipped observability surfaces stay deterministic.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: grafana/dashboards/, tests/integration/test_grafana_dashboard_first_screen_contract.py, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Query Stability",
+      "parent": "Grafana Contracts",
+      "purpose": "Explains how dashboard queries remain stable and how panel changes are reviewed for regressions.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: grafana/dashboards/, tests/integration/test_grafana_dashboard_first_screen_contract.py, tests/architecture/."
         }
       ]
     }

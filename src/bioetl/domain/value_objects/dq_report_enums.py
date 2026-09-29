@@ -16,7 +16,7 @@ class DQReportFormat(StrEnum):
 class DQCheckStatus(StrEnum):
     """Status of individual DQ check."""
 
-    PASS = "pass"  # nosec B105
+    PASS = "pass"  # nosec B105 - see suppression registry
     WARN = "warn"
     FAIL = "fail"
 
@@ -24,7 +24,7 @@ class DQCheckStatus(StrEnum):
 class DQReportStatus(StrEnum):
     """Overall status of DQ report."""
 
-    PASS = "pass"  # nosec B105
+    PASS = "pass"  # nosec B105 - see suppression registry
     WARNING = "warning"
     FAIL = "fail"
 

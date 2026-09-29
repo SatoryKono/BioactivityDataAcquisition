@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-28T09:02:00.629296+00:00",
+  "generated_at": "2026-09-29T11:46:50.540043+00:00",
   "summary": {
-    "total_scripts": 630,
+    "total_scripts": 631,
     "status_counts": {
-      "active": 341,
+      "active": 342,
       "supporting": 289
     },
     "reference_group_coverage": {
-      "agents": 9,
+      "agents": 10,
       "build": 17,
-      "ci": 85,
+      "ci": 86,
       "docs": 261,
       "other": 48,
       "scripts": 528,
       "skills": 12,
-      "tests": 441
+      "tests": 442
     }
   },
   "scripts": [
@@ -4993,7 +4993,7 @@
         },
         {
           "path": "tests/unit/scripts/ai/test_opencode_agent_headers.py",
-          "line": 41,
+          "line": 42,
           "source_group": "tests",
           "text": "from scripts.ai.opencode.check_agent_headers import AGENT_DIR"
         }
@@ -5555,13 +5555,13 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 263,
+          "line": 261,
           "source_group": "build",
-          "text": "@echo \"Or use: python scripts/ai/update_deepwiki.py --check\""
+          "text": "@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --emit-modules"
         },
         {
           "path": "Makefile",
-          "line": 267,
+          "line": 266,
           "source_group": "build",
           "text": "@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --validate"
         }
@@ -7330,7 +7330,7 @@
         },
         {
           "path": "Makefile",
-          "line": 407,
+          "line": 406,
           "source_group": "build",
           "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
         },
@@ -7692,7 +7692,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 404,
+          "line": 403,
           "source_group": "build",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile pr"
         },
@@ -9709,7 +9709,7 @@
         },
         {
           "path": "Makefile",
-          "line": 370,
+          "line": 369,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.ci quality-gate \\"
         },
@@ -11397,7 +11397,7 @@
         },
         {
           "path": "Makefile",
-          "line": 378,
+          "line": 377,
           "source_group": "build",
           "text": "BIOETL_PYTEST_SHARDED_TEST_HEALTH_SUITE=architecture-fast-boundary bash scripts/engineering/dev/run_pytest_sharded.sh --shard S7-architecture-fast-boundary --stream -- tests/architecture/ -m \"architec"
         },
@@ -12128,19 +12128,19 @@
         },
         {
           "path": "Makefile",
-          "line": 354,
+          "line": 353,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.diagnostics cleanup"
         },
         {
           "path": "Makefile",
-          "line": 357,
+          "line": 356,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.diagnostics cleanup $(if $(DRY_RUN),,--apply) $(if $(PURGE_LOGS),--purge-logs,)"
         },
         {
           "path": "Makefile",
-          "line": 364,
+          "line": 363,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.diagnostics cleanup --apply --purge-logs"
         },
@@ -12776,19 +12776,19 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1466,
+          "line": 1463,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
         {
           "path": "tests/integration/test_grafana_stream1_empty_states.py",
-          "line": 81,
+          "line": 64,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import check_dashboard_visual_semantics as subject"
         },
         {
           "path": "tests/integration/test_grafana_stream1_empty_states.py",
-          "line": 95,
+          "line": 78,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import check_dashboard_visual_semantics as subject"
         },
@@ -16702,19 +16702,19 @@
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 286,
+          "line": 290,
           "source_group": "docs",
           "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-dis"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 287,
+          "line": 291,
           "source_group": "docs",
           "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-rep"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 325,
+          "line": 329,
           "source_group": "docs",
           "text": "- `run_historical_replay_closure_campaign.py` is the deterministic batch path"
         },
@@ -16753,19 +16753,19 @@
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 288,
+          "line": 292,
           "source_group": "docs",
           "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_universe_campaign.py --external-pack path/to/archive-pack.json --write-report"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 289,
+          "line": 293,
           "source_group": "docs",
           "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_universe_campaign.py --external-pack path/to/archive-pack.json --write-report --require-universal-claim --require-durable-evidence-cover"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 330,
+          "line": 334,
           "source_group": "docs",
           "text": "- `run_historical_replay_universe_campaign.py` is the full-universe path: it"
         },
@@ -17658,6 +17658,33 @@
           "line": 24,
           "source_group": "tests",
           "text": "from scripts.engineering.repo import check_github_actions_runtime_policy as policy"
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/repo/check_no_partial_tree.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": ".github/workflows/no-partial-tree-commits.yml",
+          "line": 52,
+          "source_group": "ci",
+          "text": "uv run --frozen --no-build python scripts/engineering/repo/check_no_partial_tree.py \\"
+        },
+        {
+          "path": "AGENTS.md",
+          "line": 151,
+          "source_group": "agents",
+          "text": "`python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`."
+        },
+        {
+          "path": "tests/unit/scripts/repo/test_check_no_partial_tree.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo import check_no_partial_tree as module"
         }
       ]
     },
@@ -19093,49 +19120,49 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 271,
+          "line": 270,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh check main"
         },
         {
           "path": "Makefile",
-          "line": 283,
+          "line": 282,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh start main"
         },
         {
           "path": "Makefile",
-          "line": 287,
+          "line": 286,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh start-full"
         },
         {
           "path": "Makefile",
-          "line": 291,
+          "line": 290,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh monitoring"
         },
         {
           "path": "Makefile",
-          "line": 294,
+          "line": 293,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh stop monitoring"
         },
         {
           "path": "Makefile",
-          "line": 298,
+          "line": 297,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh stop main"
         },
         {
           "path": "Makefile",
-          "line": 302,
+          "line": 301,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh stop-full"
         },
         {
           "path": "Makefile",
-          "line": 306,
+          "line": 305,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh logs main"
         }
@@ -19456,7 +19483,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 351,
+          "line": 350,
           "source_group": "build",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
@@ -19999,7 +20026,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2468,
+          "line": 2436,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20020,12 +20047,18 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2514,
+          "line": 2482,
           "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._evidence_readability import ("
+        },
+        {
+          "path": "tests/integration/test_dashboard_operator_readability.py",
+          "line": 542,
+          "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
         {
@@ -20051,7 +20084,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_evidence_readability.py",
@@ -20061,9 +20094,15 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2511,
+          "line": 2479,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
+        },
+        {
+          "path": "tests/integration/test_dashboard_operator_readability.py",
+          "line": 547,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana._gr_db_corrections import ("
         },
         {
           "path": "tests/integration/test_grafana_trust_provider_corrections.py",
@@ -20073,7 +20112,7 @@
         },
         {
           "path": "tests/integration/test_pipeline_diagnostics_evidence_actions.py",
-          "line": 9,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import ("
         }
@@ -20088,7 +20127,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_evidence_readability.py",
-          "line": 842,
+          "line": 843,
           "source_group": "scripts",
           "text": "from ._incident_explanations import explain_incident"
         }
@@ -20107,7 +20146,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 18,
+          "line": 19,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._latest_complete_run_panel import ("
         },
@@ -20132,7 +20171,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_run_explorer_columns.py",
-          "line": 9,
+          "line": 10,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._overall_verdict import apply_overall_verdict"
         }
@@ -20147,7 +20186,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_evidence_readability.py",
-          "line": 851,
+          "line": 852,
           "source_group": "scripts",
           "text": "from ._replay_readiness_design import apply_replay_readiness_design"
         }
@@ -20162,7 +20201,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2525,
+          "line": 2493,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         }
@@ -20173,17 +20212,23 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
         {
-          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 21,
+          "path": "scripts/ops/observability/grafana/_dashboard_state_followup.py",
+          "line": 13,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1432,
+          "line": 22,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
+        },
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 1407,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import STATUS_URL"
         },
@@ -20192,6 +20237,12 @@
           "line": 24,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import SELECTOR_ROWS"
+        },
+        {
+          "path": "tests/integration/test_dashboard_operator_readability.py",
+          "line": 552,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
         {
           "path": "tests/integration/test_grafana_config.py",
@@ -20232,7 +20283,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2506,
+          "line": 2474,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
@@ -20251,7 +20302,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2519,
+          "line": 2487,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope"
         },
@@ -20272,11 +20323,17 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
+          "path": "scripts/ops/observability/grafana/_gr_db_corrections.py",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.action_target_routes import ("
+        },
+        {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.action_target_routes import ("
         },
@@ -20624,13 +20681,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 28,
+          "line": 29,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2462,
+          "line": 2430,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
@@ -20943,7 +21000,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",
@@ -22035,13 +22092,13 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 333,
+          "line": 332,
           "source_group": "build",
           "text": "$(RUN) python scripts/ops/runtime/docker/runtime_manager.py ensure-networks --stack main"
         },
         {
           "path": "Makefile",
-          "line": 337,
+          "line": 336,
           "source_group": "build",
           "text": "$(RUN) python scripts/ops/runtime/docker/runtime_manager.py clean --stack main --confirm-destructive CLEAN"
         },
@@ -22094,11 +22151,11 @@
       "agent_usage": [
         "observability-dashboard"
       ],
-      "reference_count": 14,
+      "reference_count": 16,
       "references": [
         {
           "path": ".codex/skills/observability-dashboard/SKILL.md",
-          "line": 47,
+          "line": 49,
           "source_group": "skills",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         },

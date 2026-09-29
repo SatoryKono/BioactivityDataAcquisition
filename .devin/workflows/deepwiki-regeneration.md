@@ -45,63 +45,63 @@ Regenerate DeepWiki when:
 
 ### Phase 2: Targeted Updates via DeepWiki MCP
 
-Use `mcp_call_tool` with `deepwiki` server for targeted updates:
+The public `deepwiki` MCP endpoint exposes `read_wiki_structure`,
+`read_wiki_contents`, and `ask_wiki_question`. Use `mcp_call_tool` with the
+`deepwiki` server for content sync — e.g. read a remote section and align the
+matching `wiki.json` subtree:
 
-**Core modules:**
 ```python
 mcp_call_tool(
     server_name="deepwiki",
-    tool_name="ask_question",
+    tool_name="read_wiki_structure",
+    arguments={"repoName": "SatoryKono/BioactivityDataAcquisition"}
+)
+
+mcp_call_tool(
+    server_name="deepwiki",
+    tool_name="read_wiki_contents",
+    arguments={"repoName": "SatoryKono/BioactivityDataAcquisition"}
+)
+
+mcp_call_tool(
+    server_name="deepwiki",
+    tool_name="ask_wiki_question",
     arguments={
         "repoName": "SatoryKono/BioactivityDataAcquisition",
-        "question": "Update the AI Runtime Governance section to reflect current Devin skills, workflows, and MCP configuration..."
+        "question": "Summarize the Run Control Plane section..."
     }
 )
 ```
 
-**Architecture module:**
-```python
-mcp_call_tool(
-    server_name="deepwiki",
-    tool_name="ask_question",
-    arguments={
-        "repoName": "SatoryKono/BioactivityDataAcquisition",
-        "question": "Update architecture documentation to reflect recent changes in composition layer, application core, and quality ports..."
-    }
-)
+### Phase 3: Local Wiki Files
+
+`.devin/wiki.json` is the single source of truth (monolith, consumed by memory
+RAG via `src/memory/rag/devin_wiki.py`). Its top-level sections mirror the
+remote DeepWiki taxonomy:
+
+1. BioETL Overview
+2. Architecture (incl. Medallion Data Architecture, ADRs)
+3. Data Pipelines (incl. Provider Adapters, Transformers, Configuration)
+4. Run Control Plane and Observability
+5. Quality Governance and CI/CD (incl. Schema Governance)
+6. Diagram and Documentation Generation
+7. AI Agent Subsystem and Memory
+8. Operations and Deployment
+9. Glossary
+
+Module files under `.devin/wiki-*.json` are **generated projections** — do not
+edit by hand. Regenerate after editing `wiki.json`:
+
+```bash
+python scripts/ai/update_deepwiki.py --emit-modules   # all modules
+python scripts/ai/update_deepwiki.py --update core    # single module
 ```
 
-**Observability module:**
-```python
-mcp_call_tool(
-    server_name="deepwiki",
-    tool_name="ask_question",
-    arguments={
-        "repoName": "SatoryKono/BioactivityDataAcquisition",
-        "question": "Update observability documentation to reflect current Grafana dashboards, metrics catalog, and monitoring infrastructure..."
-    }
-)
-```
-
-**Reference module:**
-```python
-mcp_call_tool(
-    server_name="deepwiki",
-    tool_name="ask_question",
-    arguments={
-        "repoName": "SatoryKono/BioactivityDataAcquisition",
-        "question": "Update API reference documentation to reflect current CLI commands, interfaces, and public APIs..."
-    }
-)
-```
-
-### Phase 3: Manual Updates
-
-Apply DeepWiki responses to local wiki files:
-- `.devin/wiki-core.json` - AI Runtime Governance, Memory Workflow, MCP Surfaces
-- `.devin/wiki-architecture.json` - Architecture layers, ADR updates
-- `.devin/wiki-observability.json` - Dashboards, metrics, alerting, observability skills
-- `.devin/wiki-reference.json` - CLI commands, configuration, operational procedures
+Module mapping: `wiki-core` = Overview + AI Agent Subsystem, `wiki-architecture`
+= Architecture, `wiki-pipelines` = Data Pipelines (minus adapters),
+`wiki-providers` = Provider Adapters subtree, `wiki-schemas` = Schema Governance
+subtree, `wiki-observability` = Run Control Plane, `wiki-reference` = Quality
+Governance remainder + Diagrams + Operations + Glossary.
 
 ### Phase 4: Validation
 
@@ -184,6 +184,17 @@ Apply DeepWiki responses to local wiki files:
 
 ## Automation
 
-For future automation, see:
-- `scripts/ai/update_deepwiki.py` - Automated update script (to be created)
-- `Makefile` targets: `deepwiki-backup`, `deepwiki-update`, `deepwiki-validate`
+- `scripts/ai/update_deepwiki.py` - implemented:
+  - `--emit-modules` / `--update <module>` regenerate `wiki-*.json` projections
+    from `wiki.json` (deterministic, idempotent)
+  - `--validate` checks JSON validity, parent integrity, and that every
+    `Canonical anchors:` path exists on disk
+  - `--check` runs credential preflight + validation + summary
+- `Makefile` targets: `deepwiki-backup`, `deepwiki-update` (runs
+  `--emit-modules`), `deepwiki-validate`
+- Remote regeneration: `generate_wiki` is a private-mode DeepWiki MCP tool and
+  requires the devin.ai endpoint with `DEEPWIKI_API_KEY` /
+  `DEEPWIKI_ORGANISATION_ID`; the public `mcp.deepwiki.com` endpoint exposes
+  only `ask_wiki_question`, `read_wiki_contents`, `read_wiki_structure`. The
+  remote wiki reindexes on its own cadence — verify freshness with
+  `ask_wiki_question` (e.g. latest known ADR) before requesting regeneration.

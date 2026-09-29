@@ -13,7 +13,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_YAML = ROOT / "configs" / "quality" / "security_suppression_registry.yaml"
 POLICY_TODAY = date(2026, 9, 18)
-SUPPRESSION_RE = re.compile(r"#\s*nosec\s+(B40[45]|B60[34])\b")
+SUPPRESSION_RE = re.compile(r"#\s*nosec\s+(B40[45]|B60[34]|B105|B110|B506)\b")
 POINTER_TEXT = "suppression registry"
 ALLOWED_OWNERS = frozenset({"stream-a", "stream-b"})
 
@@ -42,7 +42,15 @@ def test_suppression_registry_has_expected_shape() -> None:
     assert payload["version"] == 1
     assert payload["policy_scope"] == "security_suppressions"
     assert payload["scope"]["roots"] == ["src/"]
-    assert set(payload["scope"]["rules"]) >= {"B404", "B405", "B603"}
+    assert set(payload["scope"]["rules"]) >= {
+        "B404",
+        "B405",
+        "B603",
+        "B604",
+        "B105",
+        "B110",
+        "B506",
+    }
 
     seen_ids: set[str] = set()
     for entry in payload["entries"]:

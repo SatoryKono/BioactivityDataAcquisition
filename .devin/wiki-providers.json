@@ -1,12 +1,99 @@
 {
+  "version": "2.1",
+  "generated_from": "wiki.json",
+  "repo_notes": [
+    {
+      "content": "Treat canonical docs, ADRs, configs, tests, and runtime source as source of truth. DeepWiki is a derived navigation surface only and must not contradict AGENTS.md, docs/00-project/ai/memory/README.md, or docs/00-project/ai/memory/agent-memory.md."
+    }
+  ],
   "pages": [
     {
-      "title": "Provider Documentation",
-      "purpose": "Index of provider-specific documentation including API details, rate limits, and normalization rules.",
-      "parent": "Data Pipelines",
+      "title": "Provider Adapters",
+      "purpose": "Index of the adapter layer, HTTP resilience patterns, and the child pages for provider-specific integrations.",
       "page_notes": [
         {
-          "content": "Canonical anchors: docs/04-reference/providers/, configs/entities/, src/bioetl/infrastructure/adapters/."
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ],
+      "parent": "Data Pipelines"
+    },
+    {
+      "title": "HTTP Client",
+      "purpose": "Documents the UnifiedHTTPClient, circuit breaker (CLOSED/OPEN/HALF_OPEN states), token-bucket rate limiter, retry mixin, and the ErrorService taxonomy. Explains how adapters share these cross-cutting concerns.",
+      "parent": "Provider Adapters",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/unit/infrastructure/adapters/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Unified Client",
+      "parent": "HTTP Client",
+      "purpose": "Describes the shared HTTP client abstraction, request lifecycle, and the policy surface that adapters must use instead of ad hoc transport code.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/unit/infrastructure/adapters/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Request Normalization",
+      "parent": "Unified Client",
+      "purpose": "Explains request normalization steps that keep downstream HTTP behavior stable and reproducible.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/http/, tests/unit/infrastructure/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Response Handling",
+      "parent": "Unified Client",
+      "purpose": "Explains response handling in the shared HTTP client and how response shape is normalized for callers.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/http/, tests/unit/infrastructure/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Retry Policy",
+      "parent": "HTTP Client",
+      "purpose": "Explains circuit-breaker transitions, retry semantics, and the failure modes that adapters inherit from the shared resilience layer.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md, docs/02-architecture/decisions/, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md."
+        }
+      ]
+    },
+    {
+      "title": "Retry Budget",
+      "parent": "Retry Policy",
+      "purpose": "Describes how retry budgets are computed so retries stay bounded, deterministic, and observable.",
+      "page_notes": [
+        {
+          "content": "Coverage: retry budgeting, bounded backoff, and deterministic request pacing. Canonical anchors: src/bioetl/infrastructure/adapters/http/, tests/unit/infrastructure/, docs/01-requirements/REQUIREMENTS.md."
+        }
+      ]
+    },
+    {
+      "title": "Retry Accounting",
+      "parent": "Retry Policy",
+      "purpose": "Explains how retry attempts are counted and reported so the retry policy stays bounded and observable.",
+      "page_notes": [
+        {
+          "content": "Coverage: retry counters, observability hooks, and policy enforcement for request retries. Canonical anchors: src/bioetl/infrastructure/adapters/http/, tests/unit/infrastructure/, docs/01-requirements/REQUIREMENTS.md."
+        }
+      ]
+    },
+    {
+      "title": "Rate Limiter",
+      "parent": "HTTP Client",
+      "purpose": "Documents rate limiting, backoff behavior, and the transport policy that keeps provider access stable and predictable under load.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md, docs/02-architecture/decisions/, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md."
         }
       ]
     }

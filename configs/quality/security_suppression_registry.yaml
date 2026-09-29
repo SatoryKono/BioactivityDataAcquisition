@@ -1,8 +1,8 @@
 # Accepted bandit suppressions for src/ (AUD-012, #10537).
 #
-# Every `nosec B404/B405/B603/B604` in src/ MUST have one entry here with a
-# rationale and a review date. `line` is advisory (code may shift); the lock
-# test matches entries by (path, rule) and requires a
+# Every `nosec B404/B405/B603/B604/B105/B110/B506` in src/ MUST have one
+# entry here with a rationale and a review date. `line` is advisory (code
+# may shift); the lock test matches entries by (path, rule) and requires a
 # "see suppression registry" pointer on the suppression line.
 # scripts/** suppressions are dev-tooling only and out of scope: the bandit
 # product gate targets src/.
@@ -20,6 +20,9 @@ scope:
     - B405
     - B603
     - B604
+    - B105
+    - B110
+    - B506
 entries:
   # --- xml.etree.ElementTree (B405): typing/traversal only, parse via defusedxml ---
   - id: SUP-ET-001
@@ -158,16 +161,16 @@ entries:
       parse_response uses defused_ET.fromstring; stdlib ET is used for Element
       types and ParseError handling only.
   # --- subprocess imports (B404) ---
-  - id: SUP-SP-001
-    path: src/bioetl/composition/services/versioning.py
+  - id: SUP-SP-004
+    path: src/bioetl/infrastructure/provenance/code_revision.py
     line: 17
     rule: B404
     symbol: subprocess
-    owner: stream-b
+    owner: stream-a
     review_date: "2027-03-18"
     rationale: >-
       Supports git-provenance calls with fixed argv, resolved executable,
-      no shell, and a timeout (see SUP-SR-001/SUP-SR-002).
+      no shell, and a timeout (see SUP-SR-007).
   - id: SUP-SP-002
     path: src/bioetl/infrastructure/observability/observability_backend_process.py
     line: 8
@@ -189,26 +192,17 @@ entries:
       Supports the Windows E2E isolation path that re-executes sys.executable
       with a fixed payload, no shell, and a timeout (see SUP-SR-006).
   # --- subprocess.run without shell (B603) ---
-  - id: SUP-SR-001
-    path: src/bioetl/composition/services/versioning.py
+  - id: SUP-SR-007
+    path: src/bioetl/infrastructure/provenance/code_revision.py
     line: 95
     rule: B603
     symbol: subprocess.run
-    owner: stream-b
+    owner: stream-a
     review_date: "2027-03-18"
     rationale: >-
-      Git executable resolved via shutil.which with fixed rev-parse argv;
-      no shell, timeout=5, errors contained.
-  - id: SUP-SR-002
-    path: src/bioetl/composition/services/versioning.py
-    line: 112
-    rule: B603
-    symbol: subprocess.run
-    owner: stream-b
-    review_date: "2027-03-18"
-    rationale: >-
-      Windows fallback over explicit git.exe paths from PATH entries with
-      fixed argv; no shell, timeout=5, errors contained.
+      Git executable resolved via shutil.which with fixed argv, no shell,
+      timeout=5, errors contained; Windows fallback over explicit git.exe
+      paths likewise fixed argv.
   - id: SUP-SR-003
     path: src/bioetl/infrastructure/observability/observability_backend_process.py
     line: 88
@@ -250,3 +244,63 @@ entries:
       Re-executes sys.executable -c with a module-constant payload and JSON
       argv; no shell or user-controlled command; timeout enforced and the
       arrow payload file is always cleaned up.
+  # --- hardcoded string assignments (B105): schema defaults / status literals ---
+  - id: SUP-PW-001
+    path: src/bioetl/application/pipelines/chembl/molecule_transformer.py
+    line: 66
+    rule: B105
+    symbol: None
+    owner: stream-b
+    review_date: "2027-03-18"
+    rationale: >-
+      None-valued ChEMBL property schema defaults keyed by field name
+      ("full_molformula", "ro3_pass"); no credentials or secret material.
+  - id: SUP-PW-002
+    path: src/bioetl/domain/composite/cross_validation.py
+    line: 41
+    rule: B105
+    symbol: PASS
+    owner: stream-b
+    review_date: "2027-03-18"
+    rationale: >-
+      DQ status enum literal "pass"; not a credential.
+  - id: SUP-PW-003
+    path: src/bioetl/domain/types/dq_contracts.py
+    line: 19
+    rule: B105
+    symbol: PASS
+    owner: stream-b
+    review_date: "2027-03-18"
+    rationale: >-
+      DQ contract status literal "pass"; not a credential.
+  - id: SUP-PW-004
+    path: src/bioetl/domain/value_objects/dq_report_enums.py
+    line: 19
+    rule: B105
+    symbol: PASS
+    owner: stream-b
+    review_date: "2027-03-18"
+    rationale: >-
+      DQ status enum literals "pass" (check and report status); not credentials.
+  # --- yaml.load with SafeLoader subclass (B506) ---
+  - id: SUP-YL-001
+    path: src/bioetl/domain/control_plane/config_source_hashing.py
+    line: 75
+    rule: B506
+    symbol: yaml.load
+    owner: stream-b
+    review_date: "2027-03-18"
+    rationale: >-
+      Loader is _UniqueKeySafeLoader, a yaml.SafeLoader subclass with
+      duplicate-key rejection; no arbitrary object construction.
+  # --- best-effort telemetry cleanup (B110) ---
+  - id: SUP-TE-001
+    path: src/bioetl/infrastructure/observability/tracing.py
+    line: 352
+    rule: B110
+    symbol: try/except/pass
+    owner: stream-a
+    review_date: "2027-03-18"
+    rationale: >-
+      Tracing provider shutdown swallows only named exceptions so pipeline
+      work never fails on telemetry cleanup; narrow and intentional.

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
 from scripts.ops.observability.grafana._overall_verdict import apply_overall_verdict
 
@@ -70,7 +71,7 @@ _FILTER_ROOT = (
 )
 
 
-def _rename_text(value: object) -> object:
+def _rename_text(value: Any) -> Any:
     if isinstance(value, str):
         for old, new in _RENAMES.items():
             value = value.replace(old, new)
@@ -82,7 +83,7 @@ def _rename_text(value: object) -> object:
     return value
 
 
-def apply_run_explorer_columns(payload: dict) -> None:
+def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     """Run last so older readability passes cannot restore obsolete columns."""
     payload.update(_rename_text(payload))
     if payload.get("uid") in TITLES:
@@ -196,9 +197,9 @@ def apply_run_explorer_columns(payload: dict) -> None:
             "/d/bioetl-control-plane-v1/1-trust?" + _CONTEXT,
         ),
     }
-    overrides = []
+    overrides: list[dict[str, Any]] = []
     for name, width, min_width in _COLUMNS.values():
-        properties = [
+        properties: list[dict[str, Any]] = [
             {"id": "custom.minWidth", "value": min_width},
             {"id": "custom.inspect", "value": name in {"Workflow", "Pipeline"}},
         ]
@@ -360,7 +361,7 @@ def _http_filter_variable(
     }
 
 
-def _apply_run_explorer_templating(payload: dict) -> None:
+def _apply_run_explorer_templating(payload: dict[str, Any]) -> None:
     variables = {item["name"]: item for item in payload["templating"]["list"]}
     variables["workflow"] = _http_filter_variable(
         name="workflow",

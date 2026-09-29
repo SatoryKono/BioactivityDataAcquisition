@@ -349,7 +349,7 @@ class OpenTelemetryTracer:
         try:
             self.flush()
             self._provider.shutdown()
-        except (RuntimeError, OSError, ValueError, TypeError, AttributeError):  # nosec B110
+        except (RuntimeError, OSError, ValueError, TypeError, AttributeError):  # nosec B110 - see suppression registry
             # Best effort - don't fail the pipeline on tracing cleanup
             pass
         self._closed = True
