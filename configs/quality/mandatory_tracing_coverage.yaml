@@ -15,7 +15,7 @@ surfaces:
           - http.url
           - bioetl.provider
           - bioetl.run_id
-      - path: src/bioetl/infrastructure/adapters/http/client_retry_mixin.py
+      - path: src/bioetl/infrastructure/adapters/http/_client_retry_request_flow.py
         required_terms:
           - start_request_span
           - finalize_request_observability

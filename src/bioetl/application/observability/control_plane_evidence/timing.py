@@ -1,5 +1,7 @@
 """Request-local evidence stage observations, propagated through to_thread."""
 
+from __future__ import annotations
+
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from contextvars import ContextVar

@@ -19,7 +19,7 @@ from bioetl.application.composite.column_service_priority import (
     ColumnPriorityOrderingPolicy as ColumnPriorityOrderingPolicy,
 )
 from bioetl.application.composite.column_service_stage_delegates import (
-    ColumnOrderStageDelegates,
+    ColumnOrderStageMixin,
 )
 from bioetl.application.composite.column_service_support import (
     collect_explicit_group_columns,
@@ -51,7 +51,7 @@ __all__ = [
 ]
 
 
-class ColumnOrderService(ColumnOrderStageDelegates):
+class ColumnOrderService(ColumnOrderStageMixin):
     """Unified service for column ordering supporting semantic and priority strategies."""
 
     def __init__(

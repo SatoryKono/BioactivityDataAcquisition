@@ -7,6 +7,11 @@ from typing import TYPE_CHECKING
 from bioetl.application.services.protein.classification_resolution import (
     ProteinClassificationResolutionService,
 )
+from bioetl.domain.chembl.target_protein_classification import (
+    _TARGET_PROTEIN_CLASSIFICATION_ENTITY_TYPE,
+    build_target_component_indexes,
+    resolve_target_ids,
+)
 from bioetl.infrastructure.adapters.chembl.protein_classification_graph import (
     ChEMBLProteinClassificationGraph,
 )
@@ -42,6 +47,9 @@ class TargetProteinClassificationSnapshotDataSource(_SnapshotDataSource):
 
     def __init__(self, **kwargs: object) -> None:
         kwargs.setdefault("resolution_factory", _resolution_factory)
+        kwargs.setdefault("entity_type", _TARGET_PROTEIN_CLASSIFICATION_ENTITY_TYPE)
+        kwargs.setdefault("index_builder", build_target_component_indexes)
+        kwargs.setdefault("target_id_resolver", resolve_target_ids)
         super().__init__(**kwargs)  # type: ignore[arg-type]
 
 
