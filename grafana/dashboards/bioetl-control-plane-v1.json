@@ -400,7 +400,7 @@
       "title": "",
       "gridPos": {
         "h": 3,
-        "w": 24,
+        "w": 12,
         "x": 0,
         "y": 2
       },
@@ -446,7 +446,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 5
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded.",
@@ -1447,7 +1447,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 5
       },
       "id": 9416,
       "options": {
@@ -1569,7 +1569,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 14
       },
       "id": 9419,
       "title": "Review Lineage Validation",
@@ -1786,7 +1786,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 18
+            "y": 15
           },
           "id": 9415,
           "options": {
@@ -1833,7 +1833,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 15
       },
       "id": 902,
       "title": "Inspect Checkpoint and Replay Checks",
@@ -2023,7 +2023,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 19,
+            "y": 16,
             "w": 24,
             "h": 6
           },
@@ -2087,7 +2087,7 @@
           ],
           "gridPos": {
             "x": 0,
-            "y": 25,
+            "y": 22,
             "w": 24,
             "h": 8
           },
@@ -2164,7 +2164,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 16
       },
       "id": 901,
       "title": "Inspect Manifest Validation",
@@ -2354,7 +2354,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 20,
+            "y": 17,
             "w": 24,
             "h": 9
           },
@@ -2403,7 +2403,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 17
       },
       "id": 905,
       "title": "Inspect Run Identity Evidence",
@@ -2910,7 +2910,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 21,
+            "y": 18,
             "w": 24,
             "h": 8
           },
@@ -2999,7 +2999,7 @@
           "description": "Shown when Inspect Identity Values has no rows for this Run ID. SELECT RUN means no run is selected. QUERY ERROR means the request failed. An empty table is not a failed identity check.",
           "gridPos": {
             "x": 0,
-            "y": 29,
+            "y": 26,
             "w": 12,
             "h": 3
           },
@@ -3030,7 +3030,7 @@
           "description": "Record counts are not in this identity row. Open Inspect Run Details and read Review Processed Records for this Run ID. An empty identity table is not zero records.",
           "gridPos": {
             "x": 12,
-            "y": 29,
+            "y": 26,
             "w": 12,
             "h": 3
           },
@@ -3547,7 +3547,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 32,
+            "y": 29,
             "w": 24,
             "h": 7
           },
@@ -4154,7 +4154,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 39,
+            "y": 36,
             "w": 24,
             "h": 8
           },
@@ -4778,7 +4778,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 47,
+            "y": 44,
             "w": 24,
             "h": 8
           },
@@ -5386,7 +5386,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 55,
+            "y": 52,
             "w": 24,
             "h": 8
           },
@@ -5464,7 +5464,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 63,
+            "y": 60,
             "w": 24,
             "h": 3
           },
@@ -5492,7 +5492,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 18
       },
       "id": 9412,
       "description": "Expand for the identity card, record counts, and failure categories of this Run ID.",
@@ -5503,7 +5503,7 @@
           "title": "Review Run Summary",
           "gridPos": {
             "x": 0,
-            "y": 22,
+            "y": 19,
             "w": 24,
             "h": 8
           },
@@ -5835,7 +5835,7 @@
           "title": "Review Processed Records",
           "gridPos": {
             "x": 0,
-            "y": 30,
+            "y": 27,
             "w": 24,
             "h": 8
           },
@@ -6504,7 +6504,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 38,
+            "y": 35,
             "w": 24,
             "h": 7
           },
@@ -6554,9 +6554,9 @@
       "title": "Review Exact Replay Readiness",
       "gridPos": {
         "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 5
+        "w": 12,
+        "x": 12,
+        "y": 2
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Exact replay readiness of the selected Run ID from saved inputs. READY means required checks passed, not that a replay already ran and not permission to write current tables. BLOCKED is a proven gap. INSUFFICIENT means a required check could not be completed. UNSUPPORTED means this family cannot exact-replay. SELECT RUN and QUERY ERROR are request states. N/A is not zero. CURRENT Prometheus does not change this verdict.",
@@ -6671,7 +6671,7 @@
       "description": "Expand to search persisted runs and choose a Run ID. This row does not score the run already selected.",
       "gridPos": {
         "x": 0,
-        "y": 22,
+        "y": 19,
         "w": 24,
         "h": 1
       },
@@ -6682,7 +6682,7 @@
           "title": "Inspect Latest Complete Run",
           "gridPos": {
             "x": 0,
-            "y": 23,
+            "y": 20,
             "w": 24,
             "h": 6
           },

@@ -1,61 +1,458 @@
 {
+  "version": "2.1",
+  "generated_from": "wiki.json",
+  "repo_notes": [
+    {
+      "content": "Treat canonical docs, ADRs, configs, tests, and runtime source as source of truth. DeepWiki is a derived navigation surface only and must not contradict AGENTS.md, docs/00-project/ai/memory/README.md, or docs/00-project/ai/memory/agent-memory.md."
+    }
+  ],
   "pages": [
     {
       "title": "Data Pipelines",
-      "purpose": "Index of provider-specific pipelines, composite pipelines, and pipeline configuration.",
+      "purpose": "Index of provider pipeline families, adapters, transformers, composite pipelines, and pipeline configuration surfaces.",
       "page_notes": [
         {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, configs/entities/, src/bioetl/."
+          "content": "Canonical anchors: src/bioetl/application/pipelines/, src/bioetl/infrastructure/adapters/, configs/entities/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Pipeline Transformers",
+      "purpose": "Index of the transformer families, dependency context, and the child pages for publication and ChEMBL/bio-entity processing.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/pipelines/, tests/unit/application/, tests/fixtures/vcr/."
+        }
+      ],
+      "parent": "Data Pipelines"
+    },
+    {
+      "title": "Transformer Context",
+      "parent": "Pipeline Transformers",
+      "purpose": "Explains the dependency context used by transformers, including shared dependencies, entity inflation, and the boundary between orchestration and field mapping.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/pipelines/, tests/unit/application/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Publication Families",
+      "parent": "Pipeline Transformers",
+      "purpose": "Breaks down publication transformers by provider family and explains how XML, metadata, and citation fields are normalized.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/pipelines/, tests/unit/application/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Publication Parsing",
+      "parent": "Publication Families",
+      "purpose": "Breaks publication transformers into parsing-oriented child pages so extraction and shaping responsibilities stay visible.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/pipelines/, tests/unit/application/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Parsing Stages",
+      "parent": "Publication Families",
+      "purpose": "Breaks publication transformers into parsing stages so extraction and shaping boundaries stay visible.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/pipelines/, tests/unit/application/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Transformer Families",
+      "parent": "Pipeline Transformers",
+      "purpose": "Breaks down ChEMBL and bio-entity transformers, covering entity inflation, mapping rules, and shared pipeline family patterns.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/pipelines/, tests/unit/application/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Entity Linking",
+      "parent": "Transformer Families",
+      "purpose": "Describes the child transformers that link ChEMBL records to normalized bio-entity outputs.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/pipelines/, tests/unit/application/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "ChEMBL Boundaries",
+      "parent": "Transformer Families",
+      "purpose": "Separates raw ChEMBL extraction from normalized bio-entity transformation steps.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/pipelines/, tests/unit/application/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Publication Processing",
+      "purpose": "Details transformers for PubMed (XML extraction blocks, MeSH terms, author parsing), OpenAlex (bundle pattern, inverted-index abstract, FWCI), CrossRef (DOI validation, Crossmark), SemanticScholar (TLDR, citation context), and ChEMBL publications. Covers PII hashing and content hash generation.",
+      "parent": "Pipeline Transformers",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/pipelines/, tests/unit/application/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Entity Transformers",
+      "purpose": "Documents ChEMBL transformers for activity, assay, molecule, target, target-component, cell-line, and tissue. Covers the base ChEMBL transformer, FieldSpec/FieldGroup DSL, and UniProt/PubChem transformers.",
+      "parent": "Pipeline Transformers",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/pipelines/, tests/unit/application/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Provider Pipelines",
+      "purpose": "Summarises the provider catalog, the entity pipeline families, and where provider-specific configs and tests live. Orients readers around how provider coverage maps to runtime and validation surfaces.",
+      "parent": "Data Pipelines",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: configs/entities/, configs/composites/, src/bioetl/infrastructure/adapters/, tests/fixtures/vcr/, tests/integration/."
         }
       ]
     },
     {
       "title": "ChEMBL Pipelines",
-      "purpose": "Documentation for ChEMBL provider pipelines including activity, assay, molecule, target, and publication entities.",
-      "parent": "Data Pipelines",
+      "purpose": "ChEMBL entity pipeline family: activity, assay, molecule, target, publication, and cell-line extraction plus transformation.",
       "page_notes": [
         {
-          "content": "Canonical anchors: configs/entities/chembl/, src/bioetl/infrastructure/adapters/chembl/, tests/integration/chembl/."
+          "content": "Canonical anchors: src/bioetl/application/pipelines/chembl/, src/bioetl/infrastructure/adapters/, configs/entities/, tests/fixtures/vcr/."
+        }
+      ],
+      "parent": "Data Pipelines"
+    },
+    {
+      "title": "ChEMBL Adapter",
+      "purpose": "Details the ChEMBL adapter: adaptive batch-size reduction on DEGRADED health, composite-key deduplication for unstable pagination, health probe, and the ChEMBL entity mapper. Covers activity, assay, molecule, target, publication, and cell-line entities.",
+      "parent": "ChEMBL Pipelines",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
         }
       ]
     },
     {
-      "title": "Publication Pipelines",
-      "purpose": "Documentation for publication providers: PubMed, OpenAlex, CrossRef, and Semantic Scholar.",
-      "parent": "Data Pipelines",
+      "title": "Publication Pipelines (PubMed, OpenAlex, CrossRef, SemanticScholar)",
+      "purpose": "Publication pipeline family covering PubMed, OpenAlex, CrossRef, and SemanticScholar adapters/transformers with shared fallback orchestration.",
       "page_notes": [
         {
-          "content": "Canonical anchors: configs/entities/{pubmed,openalex,crossref,semanticscholar}/, src/bioetl/infrastructure/adapters/{pubmed,openalex,crossref,semanticscholar}/."
+          "content": "Canonical anchors: src/bioetl/application/pipelines/pubmed/, src/bioetl/application/pipelines/openalex/, src/bioetl/application/pipelines/crossref/, src/bioetl/application/pipelines/semanticscholar/, tests/fixtures/vcr/."
+        }
+      ],
+      "parent": "Data Pipelines"
+    },
+    {
+      "title": "Publication Adapters",
+      "purpose": "Documents adapters for PubMed (Entrez E-utilities, XML parsing, title fallback), OpenAlex (Polite Pool, cursor pagination, inverted-index reconstruction), CrossRef (DOI-centric, CrossRefQueryBuilder), and SemanticScholar (batch lookups, TLDR). Covers shared fallback orchestration.",
+      "parent": "Publication Pipelines (PubMed, OpenAlex, CrossRef, SemanticScholar)",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "PubMed/OpenAlex Flows",
+      "parent": "Publication Adapters",
+      "purpose": "Covers the PubMed and OpenAlex adapter flows, including query shaping, pagination, reconstruction, and fallback behavior.",
+      "page_notes": [
+        {
+          "content": "Coverage: publication search flows, adapter contracts, and VCR-backed regression coverage. Canonical anchors: src/bioetl/infrastructure/adapters/, tests/unit/infrastructure/adapters/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "PubMed Search",
+      "parent": "PubMed/OpenAlex Flows",
+      "purpose": "Covers the PubMed search path, query shaping, and adapter contract boundaries it must preserve.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/fixtures/vcr/, tests/unit/infrastructure/."
+        }
+      ]
+    },
+    {
+      "title": "OpenAlex Search",
+      "parent": "PubMed/OpenAlex Flows",
+      "purpose": "Explains the OpenAlex search path and how it fits into the shared publication provider contract.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/fixtures/vcr/, tests/unit/infrastructure/."
+        }
+      ]
+    },
+    {
+      "title": "CrossRef Scholar Flows",
+      "parent": "Publication Adapters",
+      "purpose": "Covers the CrossRef and SemanticScholar adapter flows, including DOI-centric lookup, batch operations, and TLDR citation handling.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/unit/infrastructure/adapters/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "CrossRef Lookup",
+      "parent": "CrossRef Scholar Flows",
+      "purpose": "Covers the CrossRef lookup path and the publication-enrichment adapter contract.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/fixtures/vcr/, tests/unit/infrastructure/."
+        }
+      ]
+    },
+    {
+      "title": "CrossRef Backoff",
+      "parent": "CrossRef Scholar Flows",
+      "purpose": "Covers CrossRef throttling, backoff, and request pacing rules for the publication adapter.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/fixtures/vcr/, tests/unit/infrastructure/."
         }
       ]
     },
     {
       "title": "UniProt and PubChem Pipelines",
-      "purpose": "Documentation for UniProt protein and PubChem compound pipelines.",
-      "parent": "Data Pipelines",
+      "purpose": "UniProt protein and PubChem compound pipelines: adapters, ID mapping, and normalization flows.",
       "page_notes": [
         {
-          "content": "Canonical anchors: configs/entities/{uniprot,pubchem}/, src/bioetl/infrastructure/adapters/{uniprot,pubchem}/."
+          "content": "Canonical anchors: src/bioetl/application/pipelines/uniprot/, src/bioetl/application/pipelines/pubchem/, src/bioetl/infrastructure/adapters/."
+        }
+      ],
+      "parent": "Data Pipelines"
+    },
+    {
+      "title": "PubChem UniProt Adapters",
+      "purpose": "Documents the PubChem adapter (pubchempy sync wrapper, fetch by SMILES/CID/name, BaseSyncAdapter thread-pool pattern) and the UniProt adapter (paginated protein/feature/sequence fetching, ID mapping client, idmapping_transformer).",
+      "parent": "UniProt and PubChem Pipelines",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/unit/infrastructure/adapters/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "PubChem Flow",
+      "parent": "PubChem UniProt Adapters",
+      "purpose": "Explains the PubChem adapter flow, including lookup modes, SMILES/CID/name handling, and sync-wrapper behavior.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/unit/infrastructure/adapters/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Compound Search",
+      "parent": "PubChem Flow",
+      "purpose": "Explains the compound search path and how PubChem responses are normalized into stable records.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/fixtures/vcr/, tests/unit/infrastructure/."
+        }
+      ]
+    },
+    {
+      "title": "PubChem Result Mapping",
+      "parent": "PubChem Flow",
+      "purpose": "Describes how PubChem search results are mapped into stable internal records.",
+      "page_notes": [
+        {
+          "content": "Coverage: PubChem result normalization, adapter mapping, and fixture-backed regression coverage. Canonical anchors: src/bioetl/infrastructure/adapters/, tests/fixtures/vcr/, tests/unit/infrastructure/."
+        }
+      ]
+    },
+    {
+      "title": "UniProt Flow",
+      "parent": "PubChem UniProt Adapters",
+      "purpose": "Explains the UniProt adapter flow, including protein fetch paths, ID mapping, and paginated data acquisition.",
+      "page_notes": [
+        {
+          "content": "Coverage: UniProt search and mapping behavior, adapter contracts, and VCR-backed regression coverage. Canonical anchors: src/bioetl/infrastructure/adapters/, tests/unit/infrastructure/adapters/, tests/fixtures/vcr/."
+        }
+      ]
+    },
+    {
+      "title": "Protein Lookup",
+      "parent": "UniProt Flow",
+      "purpose": "Explains the UniProt protein lookup path, including ID mapping, pagination, and normalized record output.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/fixtures/vcr/, tests/unit/infrastructure/."
+        }
+      ]
+    },
+    {
+      "title": "UniProt ID Mapping",
+      "parent": "UniProt Flow",
+      "purpose": "Covers how UniProt identifiers are mapped into stable internal records for downstream processing.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/fixtures/vcr/, tests/unit/infrastructure/."
         }
       ]
     },
     {
       "title": "Composite Pipelines",
-      "purpose": "Documentation for composite pipelines that combine data from multiple providers using the Seed → Dependency → Enricher → Merge pattern.",
-      "parent": "Data Pipelines",
+      "purpose": "Composite pipeline pattern (ADR-026): seed, dependency, enricher, and merge phases combining multiple providers with checkpoint resumability.",
       "page_notes": [
         {
-          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026-composite-pipeline-pattern.md, configs/composites/, src/bioetl/application/services/composite/."
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026-composite-pipeline-pattern.md, src/bioetl/application/composite/, configs/composites/."
+        }
+      ],
+      "parent": "Data Pipelines"
+    },
+    {
+      "title": "Composite Pipeline Pattern",
+      "purpose": "Explains ADR-026: the Seed → Dependency → Enricher → Merge pattern for combining data from multiple providers. Covers MergeService, EnrichmentCoordinatorService, CompositePipelineState FSM, conflict resolution strategies, and checkpoint resumability.",
+      "parent": "Composite Pipelines",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, src/bioetl/application/, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Composite Seed",
+      "purpose": "Describes the seed and dependency phases of the composite pipeline pattern, including provider ordering and prerequisites.",
+      "parent": "Composite Pipeline Pattern",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/composite/, docs/02-architecture/decisions/ADR-026*.md."
+        }
+      ]
+    },
+    {
+      "title": "Composite Merge",
+      "purpose": "Explains the enricher and merge phases, conflict handling, and how composite state transitions preserve resumability.",
+      "parent": "Composite Pipeline Pattern",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/composite/, tests/unit/application/pipelines/"
         }
       ]
     },
     {
       "title": "Pipeline Configuration",
-      "purpose": "Documentation for unified entity configuration format, pipeline YAML structure, and configuration validation.",
-      "parent": "Data Pipelines",
+      "purpose": "Pipeline and entity YAML configuration contracts, runtime resolution rules, and generated config snapshots.",
       "page_notes": [
         {
-          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-039-unified-entity-config-format.md, configs/entities/, scripts/schema/."
+          "content": "Canonical anchors: configs/entities/, configs/composites/, scripts/schema/, tests/unit/scripts/."
+        }
+      ],
+      "parent": "Data Pipelines"
+    },
+    {
+      "title": "Configuration System",
+      "purpose": "Index of the YAML config hierarchy, validation rules, runtime resolution, and the child pages for entity and pipeline config surfaces.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: configs/entities/, configs/composites/, scripts/schema/, tests/unit/scripts/, tests/architecture/."
+        }
+      ],
+      "parent": "Pipeline Configuration"
+    },
+    {
+      "title": "Entity YAML Contracts",
+      "parent": "Configuration System",
+      "purpose": "Documents the entity YAML contract surface, including provider/entity ownership, canonical path patterns, and validation expectations.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schemas/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Pipeline Config",
+      "parent": "Configuration System",
+      "purpose": "Explains how pipeline config schemas resolve at runtime, including defaults, overlays, and the runtime resolution rules used by the launcher.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schemas/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Config Snapshots",
+      "parent": "Configuration System",
+      "purpose": "Describes generated config snapshots, how they are produced, and which tests or checks keep them aligned with source configs.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: configs/entities/, configs/composites/, scripts/schema/, tests/unit/scripts/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Snapshot Diff",
+      "parent": "Config Snapshots",
+      "purpose": "Defines how generated config snapshots are compared and which diffs matter.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: tests/architecture/, scripts/engineering/repo/, configs/."
+        }
+      ]
+    },
+    {
+      "title": "Snapshot Review",
+      "parent": "Config Snapshots",
+      "purpose": "Classifies config snapshot diffs as meaningful changes or generation noise.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: tests/architecture/, scripts/engineering/repo/, configs/."
+        }
+      ]
+    },
+    {
+      "title": "Entity Configs",
+      "purpose": "Documents the unified entity YAML format: column_groups (system/business/dq), quality validations, SCD2 settings, filter rules, and composite pipeline configs. Covers all supported entities (ChEMBL activity/assay/molecule/target, UniProt protein, PubChem compound, publications).",
+      "parent": "Configuration System",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: configs/entities/, configs/composites/, scripts/schema/, tests/unit/scripts/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Runtime Projection",
+      "purpose": "Explains how config overrides are merged, how runtime projections are derived, and where env and generated config snapshots are validated.",
+      "parent": "Configuration System",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schemas/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Runtime Snapshots",
+      "parent": "Runtime Projection",
+      "purpose": "Explains how runtime projections are snapshotted so config overrides remain reproducible and reviewable.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Runtime Merge Contract",
+      "parent": "Runtime Projection",
+      "purpose": "Describes the merge contract that turns config overrides into runtime projections.",
+      "page_notes": [
+        {
+          "content": "Coverage: config overlay rules, runtime projection, and snapshot reproducibility. Canonical anchors: configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
         }
       ]
     }

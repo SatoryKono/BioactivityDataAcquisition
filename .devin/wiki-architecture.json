@@ -1,4 +1,11 @@
 {
+  "version": "2.1",
+  "generated_from": "wiki.json",
+  "repo_notes": [
+    {
+      "content": "Treat canonical docs, ADRs, configs, tests, and runtime source as source of truth. DeepWiki is a derived navigation surface only and must not contradict AGENTS.md, docs/00-project/ai/memory/README.md, or docs/00-project/ai/memory/agent-memory.md."
+    }
+  ],
   "pages": [
     {
       "title": "Architecture",
@@ -10,28 +17,228 @@
       ]
     },
     {
+      "title": "Layer Boundaries",
+      "parent": "Architecture",
+      "purpose": "Defines the layer separation rules and import boundaries that protect the domain from infrastructure leakage.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Ports",
+      "parent": "Architecture",
+      "purpose": "Shows how the domain port facade and adapter-facing APIs keep the public surface narrow and explicit.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Wiring Rules",
+      "parent": "Architecture",
+      "purpose": "Explains how composition wires interfaces, adapters, and application services without moving policy into runtime glue.",
+      "page_notes": [
+        {
+          "content": "Coverage: composition root, bootstrap ordering, and DI compliance. Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/test_di_compliance.py, src/bioetl/composition/."
+        }
+      ]
+    },
+    {
       "title": "Domain Layer",
-      "purpose": "Deep dive into the pure domain layer: Ports (Protocol interfaces), Aggregates, Value Objects, Entities, Schemas (Pandera DataFrameModel), Exceptions hierarchy, and the domain's public API facade.",
+      "purpose": "Deep dive into the pure domain layer: Ports (Protocol interfaces), Aggregates, Value Objects, Entities, Schemas (Pandera DataFrameModel), Exceptions hierarchy, and the domain's public API facade. Covers domain purity rules and allowed imports.",
       "parent": "Architecture",
       "page_notes": [
         {
           "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Domain Ports",
+      "purpose": "Documents the Protocol and ABC interfaces that define the domain contract boundaries.",
+      "parent": "Domain Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/ports/, tests/architecture/test_domain_ports_inventory_gate.py, tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py, docs/02-architecture/decisions/ADR-021*.md."
+        }
+      ]
+    },
+    {
+      "title": "Port Direction",
+      "parent": "Domain Ports",
+      "purpose": "Explains which dependencies point inward, how ports are named, and how port direction is enforced in the domain layer.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/ports/, tests/architecture/test_di_compliance.py, docs/02-architecture/decisions/ADR-005-composition-layer-separation.md."
+        }
+      ]
+    },
+    {
+      "title": "Port Policy",
+      "parent": "Domain Ports",
+      "purpose": "Explains how port names map to inward dependencies and how directionality is checked in domain code.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/ports/, tests/architecture/test_di_compliance.py, docs/02-architecture/decisions/ADR-005-composition-layer-separation.md."
+        }
+      ]
+    },
+    {
+      "title": "Port Versioning",
+      "parent": "Domain Ports",
+      "purpose": "Documents how port signatures evolve without breaking compatibility in the surrounding runtime surfaces.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/ports/, tests/architecture/, docs/00-project/RULES.md."
+        }
+      ]
+    },
+    {
+      "title": "Aggregates",
+      "purpose": "Explains the aggregate and value-object model, deterministic identity rules, and immutability expectations in the domain layer.",
+      "parent": "Domain Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/, tests/architecture/test_determinism_identity_policy.py, docs/02-architecture/decisions/ADR-021*.md."
+        }
+      ]
+    },
+    {
+      "title": "Aggregate Invariants",
+      "parent": "Aggregates",
+      "purpose": "Lists the invariant families that aggregates and value objects must preserve across replay and merge paths.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/, tests/unit/domain/, tests/architecture/test_import_graph_invariants.py."
+        }
+      ]
+    },
+    {
+      "title": "Aggregate Identity",
+      "parent": "Aggregates",
+      "purpose": "Explains aggregate identity/version boundaries and how versioning stays stable across replay-sensitive flows.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/, tests/unit/domain/, tests/architecture/test_import_graph_invariants.py."
+        }
+      ]
+    },
+    {
+      "title": "Schema Exceptions",
+      "purpose": "Covers domain schemas, schema contracts, and the exception hierarchy for invariant violations.",
+      "parent": "Domain Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schemas/, src/bioetl/domain/exceptions/, tests/architecture/test_pandera_schema_boundary_policy.py, tests/architecture/test_gold_schema_contracts.py."
         }
       ]
     },
     {
       "title": "Application Layer",
-      "purpose": "Covers the orchestration layer: BasePipeline, PipelineRunner, RecordProcessor, BatchExecutor, BaseTransformer, and the data-quality service.",
+      "purpose": "Covers the orchestration layer: BasePipeline, PipelineRunner, RecordProcessor, BatchExecutor, BaseTransformer, and the data-quality service. Explains how a pipeline run flows from runner to batch to record processing.",
       "parent": "Architecture",
       "page_notes": [
         {
           "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Batch Flow",
+      "purpose": "Walks through pipeline execution from runner to batch executor and where orchestration stops before adapter logic begins.",
+      "parent": "Application Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/core/, src/bioetl/application/pipelines/, tests/unit/application/."
+        }
+      ]
+    },
+    {
+      "title": "Batch Lifecycle",
+      "parent": "Batch Flow",
+      "purpose": "Covers the lifecycle of a batch run from launch through completion, including manifest assembly and replay-sensitive steps.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/core/, tests/integration/, docs/02-architecture/decisions/."
+        }
+      ]
+    },
+    {
+      "title": "Batch Manifests",
+      "parent": "Batch Flow",
+      "purpose": "Covers how batch runs emit manifests and why manifest ordering matters for replay and auditability.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/core/, tests/integration/, docs/02-architecture/decisions/."
+        }
+      ]
+    },
+    {
+      "title": "Records",
+      "purpose": "Describes record-level processing, enrichment coordination, and how per-record policy stays separate from adapter implementations.",
+      "parent": "Application Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/services/, src/bioetl/application/core/, tests/unit/application/services/."
+        }
+      ]
+    },
+    {
+      "title": "Record Transitions",
+      "parent": "Records",
+      "purpose": "Describes the allowed state transitions during record processing and how processing stays batch-safe.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/core/, src/bioetl/application/services/, tests/unit/application/."
+        }
+      ]
+    },
+    {
+      "title": "Record Errors",
+      "parent": "Records",
+      "purpose": "Describes error handling during record processing and how failures stay isolated from successful record flows.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/core/, tests/unit/application/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "DQ Services",
+      "purpose": "Covers the data-quality service, validation hooks, and application error taxonomy.",
+      "parent": "Application Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/services/dq/, src/bioetl/infrastructure/errors/, tests/unit/application/services/."
+        }
+      ]
+    },
+    {
+      "title": "DQ Service Boundaries",
+      "parent": "DQ Services",
+      "purpose": "Shows how data-quality services stay in application scope and how error handling stays separate from infrastructure concerns.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/, tests/unit/application/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "DQ Severity Routing",
+      "parent": "DQ Services",
+      "purpose": "Shows how data-quality findings are routed by severity and how application-level error handling stays deterministic.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/, tests/unit/application/, tests/integration/."
         }
       ]
     },
     {
       "title": "Infrastructure Layer",
-      "purpose": "Covers concrete adapters, HTTP client, storage writers, observability implementations, quarantine, locking, and validation.",
+      "purpose": "Covers concrete adapters, HTTP client, storage writers, observability implementations, quarantine, locking, and validation. Explains how infrastructure implements domain ports.",
       "parent": "Architecture",
       "page_notes": [
         {
@@ -40,12 +247,492 @@
       ]
     },
     {
-      "title": "Composition and Interfaces Layers",
-      "purpose": "Explains the Dependency Injection wiring layer and CLI/HTTP interfaces.",
-      "parent": "Architecture",
+      "title": "Storage Writers",
+      "purpose": "Explains Bronze/Silver/Gold writers, checkpoint persistence, and the storage boundary between application policy and infrastructure I/O.",
+      "parent": "Infrastructure Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/storage/, src/bioetl/infrastructure/checkpoint/, tests/unit/infrastructure/."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Resilience",
+      "purpose": "Documents retry, circuit breaker, rate limiting, and unified HTTP client behavior for adapters.",
+      "parent": "Infrastructure Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/http/, src/bioetl/infrastructure/adapters/, tests/unit/infrastructure/adapters/."
+        }
+      ]
+    },
+    {
+      "title": "Medallion Data Architecture",
+      "purpose": "Index of the Bronze → Silver → Gold lifecycle, layer-specific write rules, and the Composite Pipeline pattern.",
       "page_notes": [
         {
           "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ],
+      "parent": "Architecture"
+    },
+    {
+      "title": "Bronze Write Lifecycle",
+      "parent": "Medallion Data Architecture",
+      "purpose": "Details raw ingestion, append-only guarantees, metadata sidecars, and the write lifecycle for Bronze artifacts.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, src/bioetl/application/, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Silver Upsert",
+      "parent": "Medallion Data Architecture",
+      "purpose": "Covers normalized Delta Lake writes, merge behavior, drift detection, and Silver DQ signals.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, src/bioetl/application/, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Gold Policy",
+      "parent": "Medallion Data Architecture",
+      "purpose": "Covers analysis-ready Gold tables, strict validation, rollout modes, and publishing rules.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schemas/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Bronze Layer",
+      "purpose": "Details raw data ingestion: JSONL+zstd format, path conventions, metadata sidecars, atomic writes, BronzeWriter implementation, and the append-only immutability guarantee.",
+      "parent": "Medallion Data Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, src/bioetl/application/, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Bronze Lifecycle",
+      "purpose": "Details how bronze ingestion writes checkpoints, tracks replay state, and preserves idempotent writes.",
+      "parent": "Bronze Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/storage/bronze/, tests/unit/infrastructure/storage/, docs/03-guides/"
+        }
+      ]
+    },
+    {
+      "title": "Bronze Replay",
+      "parent": "Bronze Lifecycle",
+      "purpose": "Defines bronze replay safety, checkpoint recovery, and idempotent repeated writes.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Checkpoint Recovery",
+      "parent": "Bronze Lifecycle",
+      "purpose": "Explains how checkpoint recovery works when bronze ingestion resumes after interruption or replay.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Bronze Writes",
+      "parent": "Bronze Layer",
+      "purpose": "Explains bronze write semantics, including append behavior, checkpoints, and the rules that preserve idempotent ingestion.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Bronze Reprocessing",
+      "parent": "Bronze Layer",
+      "purpose": "Covers bronze reprocessing paths and the safeguards that keep repeated loads deterministic.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, src/bioetl/application/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Silver Layer",
+      "purpose": "Covers normalized Delta Lake tables: schema enforcement via PyArrow, Pandera validation, upsert/merge operations, schema drift detection, DQ metrics computation, SilverWriter write lifecycle, and metadata sidecars.",
+      "parent": "Medallion Data Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, src/bioetl/application/, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Silver Merge",
+      "purpose": "Explains silver merge behavior, conflict handling, and the replay-safe guards that keep writes idempotent.",
+      "parent": "Silver Layer",
+      "page_notes": [
+        {
+          "content": "Coverage: merge semantics, replay safety, and storage-side idempotency rules. Canonical anchors: src/bioetl/infrastructure/storage/silver/, tests/unit/infrastructure/storage/, configs/entities/."
+        }
+      ]
+    },
+    {
+      "title": "Silver Replay",
+      "parent": "Silver Merge",
+      "purpose": "Covers merge replay safety, conflict handling, and how silver upserts avoid duplicate side effects.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, src/bioetl/application/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Duplicate Resolution",
+      "parent": "Silver Merge",
+      "purpose": "Explains how duplicate silver records are resolved without breaking replay idempotency.",
+      "page_notes": [
+        {
+          "content": "Coverage: duplicate resolution, merge conflict handling, and replay-sensitive application logic. Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, src/bioetl/application/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Silver Policy",
+      "parent": "Silver Layer",
+      "purpose": "Describes the merge contracts that silver outputs must satisfy before downstream promotion.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, src/bioetl/application/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Silver Boundaries",
+      "parent": "Silver Layer",
+      "purpose": "Defines the silver replay boundaries and the invariants that prevent duplicate side effects.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, src/bioetl/application/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Gold Layer",
+      "purpose": "Covers analysis-ready Gold tables: strict Pandera validation, write modes (overwrite, append, SCD2), dual-write/shadow-write rollout, GoldWriter pipeline, content-hash guard, and Gold schema contracts.",
+      "parent": "Medallion Data Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, src/bioetl/application/, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Gold Rollout",
+      "purpose": "Covers Gold rollout gates, validation checks, and the safe backfill strategy.",
+      "parent": "Gold Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/storage/gold/, tests/unit/infrastructure/storage/, docs/02-architecture/decisions/"
+        }
+      ]
+    },
+    {
+      "title": "Gold Backfill",
+      "parent": "Gold Rollout",
+      "purpose": "Defines the backfill strategy for rolling out strict Gold contracts safely.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, tests/architecture/, docs/05-operations/."
+        }
+      ]
+    },
+    {
+      "title": "Gold Validation",
+      "parent": "Gold Rollout",
+      "purpose": "Documents the validation matrix used to decide whether a Gold rollout can proceed.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Gold Enforcement",
+      "parent": "Gold Layer",
+      "purpose": "Describes how gold outputs are enforced against strict contracts before publication or promotion.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, src/bioetl/domain/schemas/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Gold Promotion",
+      "parent": "Gold Layer",
+      "purpose": "Covers the promotion criteria that decide when a gold result is safe to expose downstream.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, docs/05-operations/."
+        }
+      ]
+    },
+    {
+      "title": "Import Guards",
+      "purpose": "Explains the import graph rules and the tests that keep domain, application, infrastructure, composition, and interfaces separated.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, tests/architecture/test_import_graph_invariants.py, tests/architecture/test_layer_dependencies.py."
+        }
+      ]
+    },
+    {
+      "title": "Domain Import Matrix",
+      "parent": "Import Guards",
+      "purpose": "Shows which imports are allowed into domain code and which edges are blocked by the architecture guardrails.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: tests/architecture/test_import_graph_invariants.py, tests/architecture/test_layer_dependencies.py, docs/00-project/RULES.md."
+        }
+      ]
+    },
+    {
+      "title": "Import Matrix",
+      "parent": "Import Guards",
+      "purpose": "Documents the allowed import edges between composition and interfaces.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: tests/architecture/test_import_graph_invariants.py, tests/architecture/test_layer_dependencies.py, docs/02-architecture/decisions/ADR-005-composition-layer-separation.md."
+        }
+      ]
+    },
+    {
+      "title": "Adapter Contracts",
+      "purpose": "Shows where ports live, how facades expose them, and which adapter contracts must not leak infrastructure inward.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/ports/, src/bioetl/domain/context.py, docs/02-architecture/decisions/."
+        }
+      ]
+    },
+    {
+      "title": "Facade Exposure Rules",
+      "parent": "Adapter Contracts",
+      "purpose": "Describes which ports are exposed through facades and how adapter contracts stay stable while implementations evolve.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-005-composition-layer-separation.md, docs/00-project/RULES.md, src/bioetl/domain/."
+        }
+      ]
+    },
+    {
+      "title": "Facade Stability",
+      "parent": "Adapter Contracts",
+      "purpose": "Describes how adapter-facing facades stay stable while implementations and transport details evolve.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-005-composition-layer-separation.md, src/bioetl/composition/, tests/architecture/test_di_compliance.py."
+        }
+      ]
+    },
+    {
+      "title": "Composition Wiring",
+      "purpose": "Describes the wiring sequence from composition root to runtime services and the rules that keep policy out of glue code.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/composition/, tests/architecture/test_di_compliance.py, docs/02-architecture/decisions/ADR-005-composition-layer-separation.md."
+        }
+      ]
+    },
+    {
+      "title": "Composition and Interfaces Layers",
+      "purpose": "Combined view of the composition layer (DI wiring, factories, bootstrap) and the interfaces layer (CLI, HTTP health server).",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/composition/, src/bioetl/interfaces/, tests/architecture/test_di_compliance.py."
+        }
+      ],
+      "parent": "Architecture"
+    },
+    {
+      "title": "Composition Layer",
+      "purpose": "Explains the Dependency Injection wiring layer: factories, provider registry, runtime builders, bootstrap contexts, and how all components are assembled into a runnable pipeline. Covers entrypoints and the composition API.",
+      "parent": "Composition and Interfaces Layers",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Bootstrap Wiring",
+      "purpose": "Defines the bootstrap assembly and factory entry points that turn canonical config into runnable services.",
+      "parent": "Composition Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/composition/bootstrap/, src/bioetl/composition/bootstrap/runtime/, tests/unit/composition/bootstrap/."
+        }
+      ]
+    },
+    {
+      "title": "Bootstrap Ordering",
+      "parent": "Bootstrap Wiring",
+      "purpose": "Defines bootstrap ordering so factories, registries, and wiring stay deterministic.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/composition/, tests/architecture/test_di_compliance.py, docs/02-architecture/decisions/ADR-005-composition-layer-separation.md."
+        }
+      ]
+    },
+    {
+      "title": "Bootstrap Recovery",
+      "parent": "Bootstrap Wiring",
+      "purpose": "Describes how bootstrap failures are surfaced, recovered, and kept outside policy-bearing code paths.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/composition/, tests/architecture/test_di_compliance.py, docs/02-architecture/decisions/ADR-005-composition-layer-separation.md."
+        }
+      ]
+    },
+    {
+      "title": "Registry Builders",
+      "purpose": "Shows how composition resolves provider registries and runtime builders.",
+      "parent": "Composition Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/composition/runtime_builders/, src/bioetl/composition/registry_api.py, src/bioetl/composition/runtime_builders/, tests/unit/composition/."
+        }
+      ]
+    },
+    {
+      "title": "Registry Resolution",
+      "parent": "Registry Builders",
+      "purpose": "Explains how registry lookups resolve runtime builders and how registration order affects startup behavior.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/composition/, tests/unit/composition/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Registry Load Order",
+      "parent": "Registry Builders",
+      "purpose": "Explains how registry load order affects runtime builder resolution and startup determinism.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/composition/, tests/unit/composition/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Interfaces Layer",
+      "purpose": "Documents the CLI (Click-based), HTTP health server, and observability API surfaces. Lists all CLI command groups (run, health, quarantine, checkpoint, run-manifest, export, maintenance, diagnostics) and their options.",
+      "parent": "Composition and Interfaces Layers",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Runtime Diagnostics",
+      "purpose": "Covers CLI diagnostics and maintenance commands that are not part of the pipeline runtime but are still governed surfaces.",
+      "parent": "Interfaces Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/interfaces/cli/commands/domains/diagnostics/, src/bioetl/interfaces/cli/commands/domains/maintenance/, tests/unit/interfaces/cli/commands/."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Health",
+      "purpose": "Describes the health server, observability endpoints, and the contract between interface surfaces and monitoring tooling.",
+      "parent": "Interfaces Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/interfaces/http/, src/bioetl/interfaces/cli/commands/domains/health/, tests/unit/interfaces/http/."
+        }
+      ]
+    },
+    {
+      "title": "Health Probes",
+      "parent": "HTTP Health",
+      "purpose": "Describes the health probes exposed to operators and smoke tests, including the response contract they return.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/interfaces/http/, tests/integration/, docs/05-operations/."
+        }
+      ]
+    },
+    {
+      "title": "Probe Response Schema",
+      "parent": "HTTP Health",
+      "purpose": "Describes the health-probe payload schema and how response shape stays stable for operators and smoke tests.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/interfaces/http/, tests/integration/, docs/05-operations/."
+        }
+      ]
+    },
+    {
+      "title": "Architecture Decision Records (ADRs)",
+      "purpose": "ADR catalogue covering decisions ADR-001 through ADR-061: statuses, supersession, and traceability of architectural claims.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/, docs/02-architecture/adr-registry/registry.json, docs/00-project/RULES.md."
+        }
+      ],
+      "parent": "Architecture"
+    },
+    {
+      "title": "ADR Catalogue",
+      "parent": "Architecture Decision Records (ADRs)",
+      "purpose": "Explains how ADRs are indexed, how superseded decisions are handled, and how architectural claims must be traced back to maintained decision records.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md, docs/02-architecture/decisions/, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md."
+        }
+      ]
+    },
+    {
+      "title": "ADR Traceability",
+      "purpose": "Shows how superseded ADRs are traced, how policy claims are linked back to maintained decisions, and how review history stays authoritative.",
+      "parent": "Architecture Decision Records (ADRs)",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/, docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md."
+        }
+      ]
+    },
+    {
+      "title": "ADR Change Log",
+      "parent": "ADR Traceability",
+      "purpose": "Describes how ADR revisions, supersession, and traceability notes are recorded so decision history stays auditable.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/, docs/00-project/RULES.md, tests/architecture/test_docs_governance_workflow.py."
+        }
+      ]
+    },
+    {
+      "title": "ADR Migration",
+      "parent": "ADR Traceability",
+      "purpose": "Covers how ADRs are deprecated, superseded, and migrated without losing traceability across the decision log.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/, docs/00-project/RULES.md, tests/architecture/test_docs_governance_workflow.py."
         }
       ]
     }

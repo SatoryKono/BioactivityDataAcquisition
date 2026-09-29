@@ -15,6 +15,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 from scripts.ops.observability.grafana._latest_complete_run_panel import (
     stamp_latest_complete_run_panel,
@@ -122,12 +123,12 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-overview-v2": {9002: 5},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 3, 24, 3),
-    9422: (0, 6, 24, 3),
-    9418: (0, 9, 12, 8),
-    9416: (12, 9, 12, 8),
+    9400: (0, 3, 12, 3),
+    9422: (12, 3, 12, 3),
+    9418: (0, 6, 12, 8),
+    9416: (12, 6, 12, 8),
 }
-_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
+_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 14
 # Runtime already owns current readiness as 9401 Monitor Pipeline Status.
 _TRUST_DROP_PANEL_IDS = frozenset({9401, 9404, 9452})
 _TRUST_MOVE_PANEL_IDS = frozenset(
@@ -175,8 +176,8 @@ _TRUST_MOVE_PANEL_IDS = frozenset(
 _TRUST_DROP_EMPTY_ROW_IDS = frozenset({903, 904, 9490})
 _RUNTIME_RANGE_ROW_ID = 8800
 _RUNTIME_PANEL_ID_REMAP = {4: 8804, 5: 8805, 6: 8806, 7: 8807}
-_MOVED_TRUST_RANGE_PANELS: list[dict[str, object]] = []
-_MOVED_RUNTIME_FLEET: list[dict[str, object]] = []
+_MOVED_TRUST_RANGE_PANELS: list[dict[str, Any]] = []
+_MOVED_RUNTIME_FLEET: list[dict[str, Any]] = []
 _RUNTIME_SELECTED_IDS = (1000, 9400, 9998, 9402, 9403)
 _RUNTIME_DROP_IDS = frozenset({22460, 9451, 9452, 9460})
 _RUNTIME_FLEET_ID_REMAP = {9401: 18940}
@@ -345,10 +346,10 @@ def render_html(*, current_uid: str) -> str:
     return "".join(parts)
 
 
-def render_links(*, current_uid: str) -> list[dict[str, object]]:
+def render_links(*, current_uid: str) -> list[dict[str, Any]]:
     if current_uid == _RUN_EXPLORER_UID:
         return []
-    links: list[dict[str, object]] = []
+    links: list[dict[str, Any]] = []
     for item in BUS:
         if item["uid"] == current_uid:
             continue
@@ -369,8 +370,8 @@ def render_links(*, current_uid: str) -> list[dict[str, object]]:
     return links
 
 
-def _walk_panels(panels: list[object]) -> list[dict[str, object]]:
-    discovered: list[dict[str, object]] = []
+def _walk_panels(panels: list[object]) -> list[dict[str, Any]]:
+    discovered: list[dict[str, Any]] = []
     stack = list(panels)
     while stack:
         panel = stack.pop(0)
@@ -383,7 +384,7 @@ def _walk_panels(panels: list[object]) -> list[dict[str, object]]:
     return discovered
 
 
-def _remove_obsolete_provider_handoff_variable(payload: dict[str, object]) -> None:
+def _remove_obsolete_provider_handoff_variable(payload: dict[str, Any]) -> None:
     templating = payload.setdefault("templating", {})
     if not isinstance(templating, dict):
         raise SystemExit("dashboard templating must be an object")
@@ -409,7 +410,7 @@ def _rewrite_provider_handoff_text(text: str) -> str:
     return text.replace(_PROVIDER_HANDOFF_NEEDLE, _PROVIDER_HANDOFF_UNKNOWN)
 
 
-def _rewrite_mapping_provider_handoffs(value: dict[str, object]) -> None:
+def _rewrite_mapping_provider_handoffs(value: dict[str, Any]) -> None:
     for key, item in value.items():
         if isinstance(item, str):
             value[key] = _rewrite_provider_handoff_text(item)
@@ -435,19 +436,19 @@ def _fail_closed_provider_handoffs(value: object, *, provider_declared: bool) ->
         _rewrite_list_provider_handoffs(value)
 
 
-def _root_panels(panels: list[object]) -> list[dict[str, object]]:
+def _root_panels(panels: list[object]) -> list[dict[str, Any]]:
     """Return root panels without collapsed-row children."""
     return [panel for panel in panels if isinstance(panel, dict)]
 
 
-def _panel_grid(panel: object) -> dict[str, object] | None:
+def _panel_grid(panel: object) -> dict[str, Any] | None:
     if not isinstance(panel, dict):
         return None
     grid = panel.get("gridPos")
     return grid if isinstance(grid, dict) else None
 
 
-def _panel_geometry(panel: object) -> tuple[dict[str, object], int, int] | None:
+def _panel_geometry(panel: object) -> tuple[dict[str, Any], int, int] | None:
     grid = _panel_grid(panel)
     if grid is None:
         return None
@@ -471,11 +472,11 @@ def _first_window_overflow(panels: list[object]) -> int:
 
 
 def _slack_candidate(
-    panel: dict[str, object],
+    panel: dict[str, Any],
     *,
-    nav: dict[str, object],
+    nav: dict[str, Any],
     overflow: int,
-) -> tuple[int, dict[str, object]] | None:
+) -> tuple[int, dict[str, Any]] | None:
     geometry = _panel_geometry(panel)
     if panel is nav or panel.get("type") != "text" or geometry is None:
         return None
@@ -544,10 +545,10 @@ def _restore_minimum_first_window_heights(
 
 
 def _compact_shared_band(
-    slack: dict[str, object],
+    slack: dict[str, Any],
     panels: list[object],
     *,
-    nav: dict[str, object],
+    nav: dict[str, Any],
     overflow: int,
 ) -> None:
     geometry = _panel_geometry(slack)
@@ -555,7 +556,7 @@ def _compact_shared_band(
         raise SystemExit("slack text rail is missing gridPos")
     _, y, height = geometry
     old_bottom = y + height
-    band: list[dict[str, object]] = []
+    band: list[dict[str, Any]] = []
     for panel in _root_panels(panels):
         panel_geometry = _panel_geometry(panel)
         if panel is nav or panel.get("type") == "row" or panel_geometry is None:
@@ -586,7 +587,7 @@ def _compact_shared_band(
 
 
 def _fallback_compaction_anchor(
-    panel: dict[str, object],
+    panel: dict[str, Any],
     *,
     minimums: dict[int, int],
     overflow: int,
@@ -603,7 +604,7 @@ def _fallback_compaction_anchor(
 
 
 def _fallback_sibling_joins_band(
-    sibling: dict[str, object],
+    sibling: dict[str, Any],
     *,
     band_y: int,
     old_bottom: int,
@@ -633,7 +634,7 @@ def _fallback_compaction_band(
     old_bottom: int,
     overflow: int,
     minimums: dict[int, int],
-) -> list[dict[str, object]]:
+) -> list[dict[str, Any]]:
     return [
         sibling
         for sibling in _root_panels(panels)
@@ -649,7 +650,7 @@ def _fallback_compaction_band(
 
 def _apply_fallback_compaction(
     panels: list[object],
-    band: list[dict[str, object]],
+    band: list[dict[str, Any]],
     *,
     old_bottom: int,
     overflow: int,
@@ -694,7 +695,7 @@ def _compact_fallback_panel(
     return False
 
 
-def _organize_control_plane_status_columns(panel: dict[str, object]) -> None:
+def _organize_control_plane_status_columns(panel: dict[str, Any]) -> None:
     panel_id = panel.get("id")
     for transform in panel.get("transformations", []):
         if transform.get("id") != "organize":
@@ -725,7 +726,7 @@ def _layout_control_plane_detail_panels(panels: list[object]) -> None:
         9412: {9402: (0, 0, 24)},
     }
     for row in _root_panels(panels):
-        layout = layouts.get(row.get("id"))
+        layout = layouts.get(cast(int, row.get("id")))
         if layout is None:
             continue
         base_y = row["gridPos"]["y"] + 1
@@ -747,7 +748,7 @@ def _normalize_overview_domain_snapshots(panels: list[object]) -> None:
         9013: "workflow",
     }
     for panel in _walk_panels(panels):
-        domain = domains.get(panel.get("id"))
+        domain = domains.get(cast(int, panel.get("id")))
         if domain is None:
             continue
         panel["targets"] = [
@@ -803,7 +804,7 @@ def _layout_overview_detail_panels(panels: list[object]) -> None:
         30215: {20215: (0, 0, 24, 6)},
     }
     for row in _root_panels(panels):
-        if (layout := layouts.get(row.get("id"))) is None:
+        if (layout := layouts.get(cast(int, row.get("id")))) is None:
             continue
         base_y = row["gridPos"]["y"] + 1
         children = row.get("panels", [])
@@ -814,7 +815,7 @@ def _layout_overview_detail_panels(panels: list[object]) -> None:
         children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
 
 
-def _clear_run_column_width(child: dict[str, object]) -> None:
+def _clear_run_column_width(child: dict[str, Any]) -> None:
     for override in child["fieldConfig"]["overrides"]:
         if override.get("matcher", {}).get("options") in {"Run", "run_id"}:
             override["properties"] = [
@@ -844,7 +845,7 @@ def _layout_dq_detail_panels(panels: list[object]) -> None:
         },
     }
     for row in _root_panels(panels):
-        layout = layouts.get(row.get("id"))
+        layout = layouts.get(cast(int, row.get("id")))
         if layout is None:
             continue
         base_y = row["gridPos"]["y"] + 1
@@ -962,7 +963,7 @@ def _normalize_collapsed_row_children(panels: list[object]) -> None:
             child_grid["y"] = child_y - offset
 
 
-def _shift_panel_tree(panel: dict[str, object], *, delta: int) -> None:
+def _shift_panel_tree(panel: dict[str, Any], *, delta: int) -> None:
     for descendant in _walk_panels([panel]):
         grid = _panel_grid(descendant)
         if grid is not None and isinstance(grid.get("y"), int):
@@ -972,7 +973,7 @@ def _shift_panel_tree(panel: dict[str, object], *, delta: int) -> None:
 _INCIDENT_TAIL_ROW_ORDER = (8808, 32010, 32005, 9450, 9700)
 
 
-def _pack_incident_tail_rows(payload: dict[str, object]) -> None:
+def _pack_incident_tail_rows(payload: dict[str, Any]) -> None:
     """Pin generated tail rows so repeated renders do not drift downward."""
     if payload.get("uid") != "bioetl-incident-v1":
         return
@@ -1006,7 +1007,7 @@ def _pack_incident_tail_rows(payload: dict[str, object]) -> None:
         cursor += int(grid.get("h") or 1)
 
 
-def _pack_control_plane_rows(root: list[dict[str, object]]) -> None:
+def _pack_control_plane_rows(root: list[dict[str, Any]]) -> None:
     rows = [panel for panel in root if panel.get("type") == "row"]
     rows.sort(key=lambda panel: int((panel.get("gridPos") or {}).get("y") or 0))
     y = _CONTROL_PLANE_FIRST_DETAIL_ROW_Y
@@ -1018,7 +1019,7 @@ def _pack_control_plane_rows(root: list[dict[str, object]]) -> None:
 
 
 def _shift_control_plane_detail_rows(
-    root: list[dict[str, object]], *, first_row_y: int
+    root: list[dict[str, Any]], *, first_row_y: int
 ) -> None:
     row_delta = _CONTROL_PLANE_FIRST_DETAIL_ROW_Y - first_row_y
     if not row_delta:
@@ -1033,7 +1034,7 @@ def _shift_control_plane_detail_rows(
             _shift_panel_tree(panel, delta=row_delta)
 
 
-def _stamp_control_plane_recovery_cta(cta: dict[str, object]) -> None:
+def _stamp_control_plane_recovery_cta(cta: dict[str, Any]) -> None:
     cta["transparent"] = True
     options = cta.get("options")
     if not isinstance(options, dict):
@@ -1054,7 +1055,7 @@ def _stamp_control_plane_recovery_cta(cta: dict[str, object]) -> None:
     )
 
 
-def _stamp_control_plane_counts(by_id: dict[object, dict[str, object]]) -> None:
+def _stamp_control_plane_counts(by_id: dict[object, dict[str, Any]]) -> None:
     for panel_id in (891, 893, 907):
         if (count_panel := by_id.get(panel_id)) is None:
             continue
@@ -1081,7 +1082,7 @@ _RUN_EXPLORER_URL = (
 )
 
 
-def _stamp_recovery_copy(by_id: dict[object, dict[str, object]]) -> None:
+def _stamp_recovery_copy(by_id: dict[object, dict[str, Any]]) -> None:
     if 9400 not in by_id:
         return
     options = by_id[9400].setdefault("options", {})
@@ -1094,7 +1095,7 @@ def _stamp_recovery_copy(by_id: dict[object, dict[str, object]]) -> None:
     )
 
 
-def _stamp_current_readiness(by_id: dict[object, dict[str, object]]) -> None:
+def _stamp_current_readiness(by_id: dict[object, dict[str, Any]]) -> None:
     if 9401 not in by_id:
         return
     readiness = by_id[9401]
@@ -1112,13 +1113,13 @@ def _stamp_current_readiness(by_id: dict[object, dict[str, object]]) -> None:
     )
 
 
-def _update_value_mapping(override: dict[str, object], extra: dict) -> None:
+def _update_value_mapping(override: dict[str, Any], extra: dict[str, Any]) -> None:
     for prop in override.get("properties", []):
         if prop.get("id") == "mappings":
             prop["value"][0]["options"].update(extra)
 
 
-def _stamp_retention_copy(by_id: dict[object, dict[str, object]]) -> None:
+def _stamp_retention_copy(by_id: dict[object, dict[str, Any]]) -> None:
     if 9416 not in by_id:
         return
     retention = by_id[9416]
@@ -1133,7 +1134,7 @@ def _stamp_retention_copy(by_id: dict[object, dict[str, object]]) -> None:
         _stamp_retention_field_copy(override)
 
 
-def _stamp_retention_field_copy(override: dict[str, object]) -> None:
+def _stamp_retention_field_copy(override: dict[str, Any]) -> None:
     field = override.get("matcher", {}).get("options")
     if field == "check":
         _update_value_mapping(
@@ -1163,14 +1164,14 @@ def _stamp_retention_field_copy(override: dict[str, object]) -> None:
 
 
 def _stamp_retention_override(
-    override: dict[str, object],
+    override: dict[str, Any],
     widths: dict[str, int],
     wrap_fields: set[str],
 ) -> None:
     if not isinstance(override, dict):
         return
     matcher = override.get("matcher")
-    field = matcher.get("options") if isinstance(matcher, dict) else None
+    field: Any = matcher.get("options") if isinstance(matcher, dict) else None
     if field in widths:
         properties = override.setdefault("properties", [])
         properties[:] = [p for p in properties if p.get("id") != CUSTOM_WIDTH]
@@ -1208,7 +1209,7 @@ def _without_self_table_links(links: object) -> list[object]:
     ]
 
 
-def _stamp_retention_readability(by_id: dict[object, dict[str, object]]) -> None:
+def _stamp_retention_readability(by_id: dict[object, dict[str, Any]]) -> None:
     """Reserve compact status space and let the retention reason use the remainder."""
     panel = by_id.get(9416)
     if not isinstance(panel, dict):
@@ -1234,7 +1235,7 @@ def _stamp_retention_readability(by_id: dict[object, dict[str, object]]) -> None
         _stamp_retention_override(override, widths, wrap_fields)
 
 
-def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
+def _stamp_aggregate_trust(by_id: dict[object, dict[str, Any]]) -> None:
     if 9418 not in by_id:
         return
     panel = by_id[9418]
@@ -1304,7 +1305,7 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
     for override in field_config.setdefault("overrides", []):
         _stamp_trust_override(override)
         matcher = override.get("matcher", {})
-        field = matcher.get("options") if isinstance(matcher, dict) else None
+        field: Any = matcher.get("options") if isinstance(matcher, dict) else None
         if field in display_names:
             _set_override_value(override, "displayName", display_names[field])
         if field == "reasons_count":
@@ -1313,18 +1314,16 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
             _set_override_value(override, "noValue", "—")
 
 
-def _set_override_value(
-    override: dict[str, object], prop_id: str, value: object
-) -> None:
+def _set_override_value(override: dict[str, Any], prop_id: str, value: object) -> None:
     for prop in override.get("properties", []):
         if prop.get("id") == prop_id:
             prop["value"] = value
             return
 
 
-def _stamp_trust_override(override: dict[str, object]) -> None:
+def _stamp_trust_override(override: dict[str, Any]) -> None:
     matcher = override.get("matcher", {})
-    field = matcher.get("options") if isinstance(matcher, dict) else None
+    field: Any = matcher.get("options") if isinstance(matcher, dict) else None
     field = {
         "Processing": "Processing result",
         "Result": "Processing result",
@@ -1477,7 +1476,7 @@ def _ensure_exact_replay_readiness_panel(panels: list[object]) -> None:
     )
 
 
-def _set_panel_no_value(panel: dict[str, object], text: str) -> None:
+def _set_panel_no_value(panel: dict[str, Any], text: str) -> None:
     field_config = panel.setdefault("fieldConfig", {})
     if not isinstance(field_config, dict):
         return
@@ -1487,7 +1486,7 @@ def _set_panel_no_value(panel: dict[str, object], text: str) -> None:
 
 
 def _stamp_exact_replay_panel(panels: list[object]) -> None:
-    """Keep the readiness answer full-width and free of a self-link."""
+    """Keep the readiness answer compact and free of a self-link."""
     for panel in _walk_panels(panels):
         if not isinstance(panel, dict) or panel.get("id") != 9422:
             continue
@@ -1733,7 +1732,7 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
     _apply_first_window_geometry(
         panels, _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY, uid="bioetl-control-plane-v1"
     )
-    by_id = {panel.get("id"): panel for panel in root}
+    by_id: dict[Any, dict[str, Any]] = {panel.get("id"): panel for panel in root}
     _stamp_control_plane_counts(by_id)
     _pack_control_plane_rows(root)
     _stamp_recovery_copy(by_id)
@@ -1753,7 +1752,7 @@ def _apply_first_window_geometry(
     uid: str,
 ) -> None:
     root = _root_panels(panels)
-    by_id = {panel.get("id"): panel for panel in root}
+    by_id: dict[Any, dict[str, Any]] = {panel.get("id"): panel for panel in root}
     missing = set(spec) - set(by_id)
     if missing:
         raise SystemExit(f"{uid}: missing layout panels {sorted(missing)}")
@@ -1826,7 +1825,7 @@ def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
 
 
 def _reclaim_first_window_overflow(
-    nav: dict[str, object], panels: list[object], *, current_uid: str | None = None
+    nav: dict[str, Any], panels: list[object], *, current_uid: str | None = None
 ) -> None:
     """Compact a safe first-window band so nav h=4 still fits the fold."""
     overflow = _first_window_overflow(panels)
@@ -1852,7 +1851,7 @@ def _reclaim_first_window_overflow(
 
 
 def _expand_nav_height(
-    nav: dict[str, object], panels: list[object], *, new_height: int
+    nav: dict[str, Any], panels: list[object], *, new_height: int
 ) -> None:
     grid_pos = nav.setdefault("gridPos", {})
     if not isinstance(grid_pos, dict):
@@ -1875,7 +1874,7 @@ def _expand_nav_height(
             grid["y"] += delta
 
 
-def _stamp_nav_panel(nav: dict[str, object], panels: list[object]) -> None:
+def _stamp_nav_panel(nav: dict[str, Any], panels: list[object]) -> None:
     # The link-only navigation has no visible heading on any dashboard.
     # Keep its inventory name as metadata; links retain visible names and tooltips.
     nav["title"] = ""
@@ -1889,7 +1888,7 @@ def _stamp_nav_panel(nav: dict[str, object], panels: list[object]) -> None:
     grid_pos.update({"w": 24, "x": 0, "y": 0})
 
 
-def _attach_nav_bus(nav: dict[str, object], *, current_uid: str) -> None:
+def _attach_nav_bus(nav: dict[str, Any], *, current_uid: str) -> None:
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,
@@ -1897,7 +1896,7 @@ def _attach_nav_bus(nav: dict[str, object], *, current_uid: str) -> None:
     }
     bus_titles = {item["title"] for item in BUS}
     bus_uids = {item["uid"] for item in BUS}
-    previous_links = nav.get("links") if isinstance(nav.get("links"), list) else []
+    previous_links = raw if isinstance(raw := nav.get("links"), list) else []
     extra_links = [
         link
         for link in previous_links
@@ -1917,9 +1916,9 @@ def _attach_nav_bus(nav: dict[str, object], *, current_uid: str) -> None:
     nav.pop("transparent", None)
 
 
-def _detach_trust_range_panels(panels: list[object]) -> list[dict[str, object]]:
+def _detach_trust_range_panels(panels: list[object]) -> list[dict[str, Any]]:
     """Remove non-selected-run panels from a Trust panel tree."""
-    moved: list[dict[str, object]] = []
+    moved: list[dict[str, Any]] = []
     kept: list[object] = []
     for panel in panels:
         if not isinstance(panel, dict):
@@ -1948,14 +1947,14 @@ def _detach_trust_range_panels(panels: list[object]) -> list[dict[str, object]]:
     return moved
 
 
-def _stash_trust_range_panels(payload: dict[str, object]) -> None:
+def _stash_trust_range_panels(payload: dict[str, Any]) -> None:
     panels = payload.get("panels")
     if not isinstance(panels, list):
         return
     _MOVED_TRUST_RANGE_PANELS.extend(_detach_trust_range_panels(panels))
 
 
-def _attach_trust_range_panels(payload: dict[str, object]) -> None:
+def _attach_trust_range_panels(payload: dict[str, Any]) -> None:
     """Park relocated Trust range panels on Pipeline Diagnostics."""
     if not _MOVED_TRUST_RANGE_PANELS:
         return
@@ -2004,7 +2003,7 @@ def _attach_trust_range_panels(payload: dict[str, object]) -> None:
     _MOVED_TRUST_RANGE_PANELS.clear()
 
 
-def _retain_dq_selected_run_panels(payload: dict[str, object]) -> None:
+def _retain_dq_selected_run_panels(payload: dict[str, Any]) -> None:
     """Keep only panels that assess the selected Run ID.
 
     Run ID is always set on 5. Data Quality. Prometheus CURRENT and TIME RANGE
@@ -2013,7 +2012,7 @@ def _retain_dq_selected_run_panels(payload: dict[str, object]) -> None:
     panels = payload.get("panels")
     if not isinstance(panels, list):
         return
-    found: dict[int, dict[str, object]] = {}
+    found: dict[int, dict[str, Any]] = {}
 
     def _collect(items: list[object]) -> None:
         for panel in items:
@@ -2027,7 +2026,7 @@ def _retain_dq_selected_run_panels(payload: dict[str, object]) -> None:
                 _collect(children)
 
     _collect(panels)
-    missing = set(_DQ_SELECTED_RUN_IDS) - set(found)
+    missing = set(_DQ_SELECTED_RUN_IDS).difference(found)
     if missing:
         raise SystemExit(
             "bioetl-dq-v2: missing selected-run panels " + str(sorted(missing))
@@ -2060,7 +2059,7 @@ def _retain_dq_selected_run_panels(payload: dict[str, object]) -> None:
 _FLEET_STAGE_FILTER_RE = re.compile(r',?stage=~"\$stage"')
 
 
-def _stamp_runtime_fleet_panel(panel: dict[str, object]) -> None:
+def _stamp_runtime_fleet_panel(panel: dict[str, Any]) -> None:
     panel_id = panel.get("id")
     description = str(panel.get("description") or "")
     # The incident workspace has no $stage variable; the moved fleet panels
@@ -2094,7 +2093,7 @@ def _stamp_runtime_fleet_panel(panel: dict[str, object]) -> None:
         defaults["noValue"] = "UNKNOWN"
 
 
-def _stamp_runtime_answer(panel: dict[str, object]) -> None:
+def _stamp_runtime_answer(panel: dict[str, Any]) -> None:
     transforms = panel.setdefault("transformations", [])
     if isinstance(transforms, list) and not any(
         isinstance(item, dict) and item.get("id") == "limit" for item in transforms
@@ -2133,7 +2132,7 @@ def _stamp_runtime_answer(panel: dict[str, object]) -> None:
             links.append(link)
 
 
-def _stamp_runtime_scope(panel: dict[str, object]) -> None:
+def _stamp_runtime_scope(panel: dict[str, Any]) -> None:
     panel["title"] = ""
     panel["description"] = (
         "SELECTED RUN · This page assesses the selected Run ID from saved HTTP "
@@ -2154,13 +2153,13 @@ def _stamp_runtime_scope(panel: dict[str, object]) -> None:
     )
 
 
-def _retain_runtime_selected_run(payload: dict[str, object]) -> None:
+def _retain_runtime_selected_run(payload: dict[str, Any]) -> None:
     """Keep saved-run panels on Pipeline Diagnostics and park the fleet elsewhere."""
     panels = payload.get("panels")
     if not isinstance(panels, list):
         return
-    found: dict[int, dict[str, object]] = {}
-    moved: list[dict[str, object]] = []
+    found: dict[int, dict[str, Any]] = {}
+    moved: list[dict[str, Any]] = []
     moved_ids: set[object] = set()
 
     def collect(items: list[object]) -> None:
@@ -2190,7 +2189,7 @@ def _retain_runtime_selected_run(payload: dict[str, object]) -> None:
                 moved_ids.add(panel_id)
 
     collect(panels)
-    missing = set(_RUNTIME_SELECTED_IDS) - set(found)
+    missing = set(_RUNTIME_SELECTED_IDS).difference(found)
     if missing:
         raise SystemExit(
             "bioetl-runtime: missing selected-run panels " + str(sorted(missing))
@@ -2235,7 +2234,7 @@ def _strip_fleet_id_collisions(panels: list[object]) -> None:
     ]
 
 
-def _stamp_incident_row_help(payload: dict[str, object]) -> None:
+def _stamp_incident_row_help(payload: dict[str, Any]) -> None:
     """Collapsed Incident rows must say what the operator will see."""
     help_text = {
         2020: (
@@ -2262,7 +2261,7 @@ def _stamp_incident_row_help(payload: dict[str, object]) -> None:
         for panel in panels:
             if not isinstance(panel, dict):
                 continue
-            text = help_text.get(panel.get("id"))
+            text = help_text.get(cast(int, panel.get("id")))
             if text:
                 panel["description"] = text
             walk(panel.get("panels"))
@@ -2270,7 +2269,7 @@ def _stamp_incident_row_help(payload: dict[str, object]) -> None:
     walk(payload.get("panels"))
 
 
-def _pack_fleet_children(row: dict[str, object]) -> None:
+def _pack_fleet_children(row: dict[str, Any]) -> None:
     """Place fleet children on a shelf so expanded rows do not hide charts."""
     children = [
         child
@@ -2304,7 +2303,7 @@ def _pack_fleet_children(row: dict[str, object]) -> None:
     row["panels"] = children
 
 
-def _attach_runtime_fleet_row(payload: dict[str, object]) -> None:
+def _attach_runtime_fleet_row(payload: dict[str, Any]) -> None:
     panels = payload.get("panels")
     if not isinstance(panels, list):
         return
@@ -2324,7 +2323,7 @@ def _attach_runtime_fleet_row(payload: dict[str, object]) -> None:
                     _stamp_runtime_fleet_panel(child)
             _pack_fleet_children(existing)
         return
-    incoming: list[dict[str, object]] = []
+    incoming: list[dict[str, Any]] = []
     seen: set[object] = set()
     for panel in _MOVED_RUNTIME_FLEET:
         panel_id = panel.get("id")

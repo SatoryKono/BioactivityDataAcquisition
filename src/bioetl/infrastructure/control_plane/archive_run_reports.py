@@ -94,7 +94,12 @@ def selected_report_sources(
         return {}
     payload = _load_report(path, manifest)
     revisions = folder / "status-revisions"
-    files = [path, *_revision_sources(payload, revisions)]
+    markdown_path = folder / "pipeline-run-report.md"
+    files = [
+        path,
+        *([markdown_path] if markdown_path.is_file() else []),
+        *_revision_sources(payload, revisions),
+    ]
     result = {}
     for item in files:
         _validate_source(item, base, revisions, manifest)

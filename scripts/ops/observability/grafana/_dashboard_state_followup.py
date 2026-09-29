@@ -32,8 +32,8 @@ def walk(panels: list[dict[str, Any]]):
 
 
 def override(panel: dict[str, Any], name: str, **properties: Any) -> None:
-    overrides = panel["fieldConfig"].setdefault("overrides", [])
-    item = next(
+    overrides: list[dict[str, Any]] = panel["fieldConfig"].setdefault("overrides", [])
+    item: dict[str, Any] | None = next(
         (o for o in overrides if o["matcher"] == {"id": "byName", "options": name}),
         None,
     )
@@ -370,7 +370,7 @@ def _apply_control_plane(
 
 
 def _apply_overview(
-    dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
+    _dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
 ) -> None:
     status = panels.get(9603)
     if status is None:
@@ -459,7 +459,7 @@ def _ensure_stage_panel(by_id: dict[int, dict[str, Any]]) -> None:
     parent = by_id.get(9993)
     if parent is None:
         return
-    panel = {
+    panel: dict[str, Any] = {
         "id": 9460,
         "type": "table",
         "title": "Inspect Selected Run Stages",

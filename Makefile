@@ -258,9 +258,8 @@ deepwiki-backup:
 	@git commit -m "backup: wiki files before DeepWiki regeneration" || echo "No changes to backup"
 
 deepwiki-update:
-	@echo "Updating DeepWiki files..."
-	@echo "See .devin/workflows/deepwiki-regeneration.md for manual workflow"
-	@echo "Or use: python scripts/ai/update_deepwiki.py --check"
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --emit-modules
+	@echo "See .devin/workflows/deepwiki-regeneration.md for full workflow"
 
 deepwiki-validate:
 	@echo "Validating DeepWiki against canonical sources..."

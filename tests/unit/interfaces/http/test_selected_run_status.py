@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
+from typing import Any, cast
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -40,12 +41,12 @@ pytestmark = pytest.mark.unit
     "reasons,count", [("", 0), ("missing_archive\n\nmissing_lineage", 2)]
 )
 def test_saved_trust_reason_count_preserves_full_details(reasons, count):
-    saved = {
+    saved: dict[str, Any] = {
         "observations": {
             "Control Plane": {"facts": {"checks": {"trust": {"reasons_text": reasons}}}}
         }
     }
-    summary = dict.fromkeys(
+    summary: dict[str, Any] = dict.fromkeys(
         ("evaluation_at", "pipeline", "run_id", "rules_version", "revision"), "value"
     )
     summary["execution_state"] = "SUCCESS"
@@ -110,15 +111,20 @@ def persist(tmp_path, value=None, store=None):
     )
 
 
-def read(tmp_path, run_id="run-a"):
+def read(tmp_path, run_id="run-a") -> dict[str, Any]:
     return load_selected_run_status(
         pipeline="chembl_activity", run_id=run_id, root=tmp_path
     )
 
 
+def _run_observations() -> dict[str, Any]:
+    return run_observations()
+
+
 def test_domain_detail_exposes_all_frozen_trust_reasons(tmp_path):
     original = report()
     reasons = "lineage_fragments_missing\nlineage_identity_not_observable"
+    assert original.observations is not None
     value = replace(
         original,
         observations={
@@ -155,6 +161,7 @@ def test_late_assessment_time_is_separate_from_completion(tmp_path):
 
 def test_missing_validation_is_explained_without_changing_saved_trust(tmp_path):
     original = report()
+    assert original.observations is not None
     observations = dict(original.observations)
     observations.pop("Data Validation")
     persisted = persist(tmp_path, replace(original, observations=observations))
@@ -289,7 +296,7 @@ def test_manifest_without_input_snapshot_is_not_ready(tmp_path):
         replay_of_run_id=None,
         replay_of_manifest_id=None,
     )
-    result = load_selected_run_status(
+    result: dict[str, Any] = load_selected_run_status(
         pipeline="chembl_activity",
         run_id=run_id,
         root=tmp_path,
@@ -326,7 +333,7 @@ def test_recorded_object_verification_passes(tmp_path):
         replay_of_run_id=None,
         replay_of_manifest_id=None,
     )
-    result = load_selected_run_status(
+    result: dict[str, Any] = load_selected_run_status(
         pipeline="chembl_activity",
         run_id=run_id,
         root=tmp_path,
@@ -365,7 +372,7 @@ def test_snapshot_file_on_disk_verifies_bronze_fingerprint(tmp_path):
         replay_of_run_id=None,
         replay_of_manifest_id=None,
     )
-    result = load_selected_run_status(
+    result: dict[str, Any] = load_selected_run_status(
         pipeline="chembl_activity",
         run_id=run_id,
         root=tmp_path,
@@ -402,7 +409,7 @@ def test_missing_snapshot_file_stays_unverified(tmp_path):
         replay_of_run_id=None,
         replay_of_manifest_id=None,
     )
-    result = load_selected_run_status(
+    result: dict[str, Any] = load_selected_run_status(
         pipeline="chembl_activity",
         run_id=run_id,
         root=tmp_path,
@@ -430,7 +437,7 @@ def test_rebuild_only_http_status_is_insufficient(tmp_path):
         replay_of_manifest_id=None,
         launch_context={"strict_exact_replay_supported": True},
     )
-    result = load_selected_run_status(
+    result: dict[str, Any] = load_selected_run_status(
         pipeline="chembl_activity",
         run_id=run_id,
         root=tmp_path,
@@ -470,7 +477,7 @@ def test_finalization_idempotent_and_late_evidence_revision(tmp_path):
     persist(tmp_path)
     assert read(tmp_path) == first
     changed = report()
-    changed.observations["Provider"]["verdict"] = "ERROR"
+    cast(dict[str, Any], changed.observations)["Provider"]["verdict"] = "ERROR"
     persist(tmp_path, changed)
     second = read(tmp_path)
     assert second["verdict"] == "ERROR"
@@ -563,7 +570,7 @@ async def test_concurrent_observations_are_isolated_and_failures_not_erased():
             )
             await asyncio.sleep(0)
             record_run_observation("Provider", verdict="OK", reason="later", facts={})
-            return run_observations()
+            return _run_observations()
         finally:
             reset_run_observations(token)
 
@@ -574,7 +581,7 @@ async def test_concurrent_observations_are_isolated_and_failures_not_erased():
 
 
 def test_snapshot_tamper_invalidates_assessment():
-    snapshot = build_snapshot(report().to_dict())
+    snapshot: dict[str, Any] = build_snapshot(report().to_dict())
     snapshot["assessment"]["verdict"] = "N/A"
     assert not verify_snapshot(snapshot)
 
@@ -608,7 +615,7 @@ def test_workflow_completion_creates_explicit_child_revision(tmp_path):
 
     child = report()
     child.identity["workflow_run_id"] = "workflow-a"
-    child.observations.pop("Workflow")
+    cast(dict[str, Any], child.observations).pop("Workflow")
     persist(tmp_path, child)
     before = read(tmp_path)
     workflow = WorkflowRunReport(
@@ -669,6 +676,7 @@ def test_active_and_unfinalized_run_do_not_expire(
     value = active_run_diagnostics(
         host, pipeline, "00000000-0000-0000-0000-000000000001"
     )
+    assert value is not None
     assert value["verdict"] == expected
     assert value["heartbeat_now"] == "STALE"
 
@@ -834,7 +842,7 @@ def test_control_plane_capture_binds_exact_identity_and_completion(tmp_path, mis
     token = bind_run_observations()
     try:
         capture("chembl_activity", run_id, now)
-        observation = run_observations()["Control Plane"]
+        observation = _run_observations()["Control Plane"]
         assert observation["verdict"] == ("INCOMPLETE" if missing else "ERROR")
         manifests.get_by_run_id.assert_called_once_with(UUID(run_id))
         if not missing:
@@ -928,7 +936,10 @@ def test_active_run_requires_manifest_and_matching_ledger(scenario, expected):
     result = active_run_diagnostics(
         host, "chembl_activity", "3432761e-d4eb-511e-a62c-b186b301c758"
     )
-    assert result is None if expected is None else result["reason"] == expected
+    if expected is None:
+        assert result is None
+    else:
+        assert result is not None and result["reason"] == expected
 
 
 @pytest.mark.parametrize(
@@ -993,7 +1004,7 @@ def test_archive_refuses_corrupt_selected_evidence(tmp_path, fault, reason):
     else:
         (revisions / "unbound.json").write_text("{}")
     path.write_text(json.dumps(payload))
-    manifest = SimpleNamespace(run_id="run-a", pipeline_name="chembl_activity")
+    manifest: Any = SimpleNamespace(run_id="run-a", pipeline_name="chembl_activity")
     with pytest.raises(ValueError, match=reason):
         selected_report_sources(tmp_path, manifest)
 
@@ -1026,7 +1037,7 @@ def test_preflight_observations_retain_actual_probe_status(status, verdict):
         )
         record_gold_observation(False, 0)
         assert result.checked_at == observed
-        saved = run_observations()
+        saved = _run_observations()
         assert saved["Provider"]["verdict"] == verdict
         assert saved["Provider"]["facts"]["observed_at"] == observed.isoformat()
         assert saved["Data Validation"]["facts"] == {"valid": False, "records": 0}
@@ -1047,7 +1058,9 @@ def test_preflight_observations_retain_actual_probe_status(status, verdict):
 )
 def test_all_pipeline_selector_resolves_exact_saved_run(tmp_path, pipeline):
     persist(tmp_path)
-    result = load_selected_run_status(pipeline=pipeline, run_id="run-a", root=tmp_path)
+    result: dict[str, Any] = load_selected_run_status(
+        pipeline=pipeline, run_id="run-a", root=tmp_path
+    )
     assert result["pipeline"] == "chembl_activity"
     assert result["verdict"] == "OK"
     assert {row["pipeline"] for row in result["domains"]} == {"chembl_activity"}
@@ -1058,14 +1071,16 @@ def test_all_pipeline_selector_rejects_ambiguous_identity(tmp_path):
     other = report()
     other.identity["pipeline_name"] = "pubmed_publication"
     persist(tmp_path, other)
-    result = load_selected_run_status(pipeline=".*", run_id="run-a", root=tmp_path)
+    result: dict[str, Any] = load_selected_run_status(
+        pipeline=".*", run_id="run-a", root=tmp_path
+    )
     assert result["reason"] == "run_id_ambiguous"
     assert result["verdict"] == "ERROR"
 
 
 @pytest.mark.parametrize("bad", [float("nan"), float("inf"), object(), None])
 def test_snapshot_verifier_returns_false_for_malformed_evidence(bad):
-    snapshot = build_snapshot(report().to_dict())
+    snapshot: dict[str, Any] = build_snapshot(report().to_dict())
     snapshot["evidence"] = bad
     assert verify_snapshot(snapshot) is False
     snapshot["evidence"] = {"nested": bad}
@@ -1078,13 +1093,13 @@ def test_skip_gold_is_versioned_without_invalidating_old_rules():
     payload = report().to_dict()
     payload["io"] = {"skip_gold": True}
     payload["observations"].pop("Data Validation")
-    legacy = {
+    legacy: dict[str, Any] = {
         "schema_version": "selected_run_snapshot_v1",
         "evidence": payload,
         "assessment": assess_report(payload, rules_version="selected-run-v1"),
     }
     legacy["revision"] = evidence_digest(legacy)
-    current = build_snapshot(payload)
+    current: dict[str, Any] = build_snapshot(payload)
     assert verify_snapshot(legacy) and verify_snapshot(current)
     assert legacy["assessment"]["domains"][-1]["verdict"] == "INCOMPLETE"
     assert current["assessment"]["domains"][-1]["verdict"] == "N/A"
@@ -1145,10 +1160,10 @@ def test_archive_rejects_valid_revision_from_a_neighbour(tmp_path):
     )
 
     path = persist(tmp_path).json_path
-    other = build_snapshot(report("other-run").to_dict())
+    other: dict[str, Any] = build_snapshot(report("other-run").to_dict())
     revision = path.parent / "status-revisions" / (other["revision"] + ".json")
     revision.write_text(json.dumps(other))
-    manifest = SimpleNamespace(run_id="run-a", pipeline_name="chembl_activity")
+    manifest: Any = SimpleNamespace(run_id="run-a", pipeline_name="chembl_activity")
     with pytest.raises(ValueError, match="archive_revision_identity_mismatch"):
         selected_report_sources(tmp_path, manifest)
 
@@ -1216,7 +1231,6 @@ async def test_delegated_gold_rejection_distinguishes_storage_failure(
     from bioetl.application.services.run_reports.observations import (
         bind_run_observations,
         reset_run_observations,
-        run_observations,
         observe_gold_write,
     )
     from bioetl.domain.types.gold_contracts_rejects import (
@@ -1238,7 +1252,7 @@ async def test_delegated_gold_rejection_distinguishes_storage_failure(
     try:
         with pytest.raises((GoldContractValidationError, OSError)):
             await observe_gold_write(write(), 1)
-        observation = run_observations().get("Data Validation")
+        observation = _run_observations().get("Data Validation")
         assert (observation["verdict"] if observation else None) == expected
     finally:
         reset_run_observations(token)
@@ -1249,7 +1263,9 @@ async def test_delegated_gold_rejection_distinguishes_storage_failure(
 )
 def test_pipeline_list_does_not_retain_foreign_run(tmp_path, pipeline):
     persist(tmp_path)
-    result = load_selected_run_status(pipeline=pipeline, run_id="run-a", root=tmp_path)
+    result: dict[str, Any] = load_selected_run_status(
+        pipeline=pipeline, run_id="run-a", root=tmp_path
+    )
     assert result["reason"] == "run_not_found"
 
 
@@ -1258,7 +1274,7 @@ def test_pipeline_list_rejects_ambiguous_run(tmp_path):
     other = report()
     other.identity["pipeline_name"] = "pubmed_publication"
     persist(tmp_path, other)
-    result = load_selected_run_status(
+    result: dict[str, Any] = load_selected_run_status(
         pipeline="{chembl_activity,pubmed_publication}", run_id="run-a", root=tmp_path
     )
     assert result["reason"] == "run_id_ambiguous"
@@ -1274,7 +1290,7 @@ def test_archive_rejects_replay_evidence_from_previous_manifest(tmp_path, locati
     current = report()
     current.identity["manifest_id"] = "current-manifest"
     path = persist(tmp_path, current).json_path
-    manifest = SimpleNamespace(
+    manifest: Any = SimpleNamespace(
         run_id="run-a", pipeline_name="chembl_activity", manifest_id="current-manifest"
     )
     assert selected_report_sources(tmp_path, manifest)
@@ -1283,7 +1299,7 @@ def test_archive_rejects_replay_evidence_from_previous_manifest(tmp_path, locati
     if location == "report":
         persist(tmp_path, previous)
     else:
-        old = build_snapshot(previous.to_dict())
+        old: dict[str, Any] = build_snapshot(previous.to_dict())
         (path.parent / "status-revisions" / (old["revision"] + ".json")).write_text(
             json.dumps(old), encoding="utf-8"
         )
@@ -1311,7 +1327,7 @@ def test_provider_observation_preserves_probe_fallback(reason):
             ],
             datetime(2026, 1, 1, tzinfo=UTC),
         )
-        provider = run_observations()["Provider"]
+        provider = _run_observations()["Provider"]
         assert provider["verdict"] == "WARN"
         assert provider["facts"]["probe_fallback_reason"] == reason
     finally:
@@ -1330,16 +1346,13 @@ def test_completion_capture_failure_is_recorded() -> None:
 
     token = bind_run_observations()
     try:
-        capture_run_completion(
-            fail,
-            SimpleNamespace(
-                pipeline_name="chembl_activity",
-                run_id="run-a",
-                completed_at=datetime(2026, 1, 1, tzinfo=UTC),
-            ),
-            None,
+        run_result: Any = SimpleNamespace(
+            pipeline_name="chembl_activity",
+            run_id="run-a",
+            completed_at=datetime(2026, 1, 1, tzinfo=UTC),
         )
-        assert run_observations()["Control Plane"]["reason"] == (
+        capture_run_completion(fail, run_result, None)
+        assert _run_observations()["Control Plane"]["reason"] == (
             "completion_assessment_failed"
         )
     finally:
@@ -1353,7 +1366,7 @@ def test_dq_observation_returns_original_result() -> None:
         record_dq_observation,
     )
 
-    result = SimpleNamespace(
+    result: Any = SimpleNamespace(
         status=SimpleNamespace(value="warning"),
         error_rate=0.25,
         has_critical=False,
@@ -1362,7 +1375,7 @@ def test_dq_observation_returns_original_result() -> None:
     token = bind_run_observations()
     try:
         assert record_dq_observation(result) is result
-        assert run_observations()["Data Quality"]["verdict"] == "WARN"
+        assert _run_observations()["Data Quality"]["verdict"] == "WARN"
     finally:
         reset_run_observations(token)
 
@@ -1372,7 +1385,7 @@ def test_publish_snapshot_rejects_revision_content_conflict(tmp_path: Path) -> N
 
     store = FileRunReportStoreAdapter()
     path = tmp_path / "pipeline-run-report.json"
-    payload = publish_snapshot(report().to_dict(), path, store=store)
+    payload: dict[str, Any] = publish_snapshot(report().to_dict(), path, store=store)
     revision = payload["selected_run_snapshot"]["revision"]
     revision_path = path.parent / "status-revisions" / f"{revision}.json"
     revision_path.write_text("{}", encoding="utf-8")
@@ -1444,7 +1457,7 @@ def test_selected_status_rejects_invalid_observation_and_rules() -> None:
 
     value = report().to_dict()
     value["observations"]["Provider"]["verdict"] = "SURPRISE"
-    assessed = assess_report(value)
+    assessed: dict[str, Any] = assess_report(value)
     provider = next(row for row in assessed["domains"] if row["domain"] == "Provider")
     assert provider["verdict"] == "UNKNOWN"
     with pytest.raises(ValueError, match="assessment_rules_unsupported"):
@@ -1460,14 +1473,17 @@ def test_archive_report_source_empty_legacy_missing_and_containment(
         selected_report_sources,
     )
 
-    manifest = SimpleNamespace(run_id="run-a", pipeline_name="chembl_activity")
+    manifest: Any = SimpleNamespace(run_id="run-a", pipeline_name="chembl_activity")
     assert selected_report_sources(tmp_path, manifest) == {}
 
     path = persist(tmp_path).json_path
     payload = json.loads(path.read_text(encoding="utf-8"))
     payload.pop("selected_run_snapshot")
     path.write_text(json.dumps(payload), encoding="utf-8")
-    assert list(selected_report_sources(tmp_path, manifest).values()) == [path]
+    assert list(selected_report_sources(tmp_path, manifest).values()) == [
+        path,
+        path.with_suffix(".md"),
+    ]
 
     original_is_symlink = Path.is_symlink
     monkeypatch.setattr(
@@ -1478,7 +1494,7 @@ def test_archive_report_source_empty_legacy_missing_and_containment(
     with pytest.raises(ValueError, match="archive_report_symlink_rejected"):
         selected_report_sources(tmp_path, manifest)
 
-    escaped = SimpleNamespace(run_id="run-a", pipeline_name="../..")
+    escaped: Any = SimpleNamespace(run_id="run-a", pipeline_name="../..")
     with pytest.raises(ValueError, match="archive_report_outside_root"):
         selected_report_sources(tmp_path, escaped)
 
@@ -1563,7 +1579,9 @@ async def test_selected_status_handler_covers_selector_and_request_failures(
 def test_selection_presentation_keeps_canonical_domains_and_one_action():
     from bioetl.interfaces.http.selected_run_status import unavailable_status
 
-    payload = unavailable_status(".*", "-", "SELECT RUN", "selection_required")
+    payload: dict[str, Any] = unavailable_status(
+        ".*", "-", "SELECT RUN", "selection_required"
+    )
     assert len(payload["domains"]) == 6
     rows = payload["presentation_domains"]
     assert len(rows) == 1
@@ -1576,7 +1594,7 @@ def test_selection_presentation_keeps_canonical_domains_and_one_action():
 def test_error_presentation_never_collapses_into_selection_or_healthy_empty():
     from bioetl.interfaces.http.selected_run_status import unavailable_status
 
-    payload = unavailable_status(
+    payload: dict[str, Any] = unavailable_status(
         "chembl_activity", "run-1", "QUERY ERROR", "evidence_read_failed"
     )
     assert len(payload["presentation_domains"]) == 6
@@ -1592,7 +1610,9 @@ def test_error_presentation_never_collapses_into_selection_or_healthy_empty():
 def test_selection_presentation_does_not_imply_failed_execution():
     from bioetl.interfaces.http.selected_run_status import unavailable_status
 
-    payload = unavailable_status(".*", "-", "SELECT RUN", "selection_required")
+    payload: dict[str, Any] = unavailable_status(
+        ".*", "-", "SELECT RUN", "selection_required"
+    )
     assert payload["summary"][0]["execution_state"] == "UNKNOWN"
     assert payload["presentation_summary"][0]["execution_state"] == "SELECT RUN"
     assert payload["presentation_summary"][0]["pipeline"] == "No run selected"
@@ -1602,7 +1622,7 @@ def test_selection_presentation_does_not_imply_failed_execution():
 def test_selection_presentation_retains_summary_mirror_fields():
     from bioetl.interfaces.http import selected_run_status
 
-    payload = selected_run_status.unavailable_status(
+    payload: dict[str, Any] = selected_run_status.unavailable_status(
         ".*", "-", "SELECT RUN", "run_not_selected"
     )
     row = payload["presentation_domains"][0]
@@ -1620,9 +1640,10 @@ def test_chunked_artifact_hash_matches_single_read(tmp_path):
     candidate = tmp_path / "artifact.bin"
     candidate.write_bytes(bytes(range(256)) * 3000)
     assert candidate.stat().st_size > 256 * 1024
-    assert _hash_artifact_chunked(candidate) == hashlib.sha256(
-        candidate.read_bytes()
-    ).hexdigest()
+    assert (
+        _hash_artifact_chunked(candidate)
+        == hashlib.sha256(candidate.read_bytes()).hexdigest()
+    )
 
 
 def test_chunked_artifact_hash_stops_after_deadline(tmp_path, monkeypatch):

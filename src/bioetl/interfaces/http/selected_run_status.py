@@ -83,7 +83,7 @@ def unavailable_status(
     pipeline: str, run_id: str, state: str, reason: str
 ) -> dict[str, object]:
     """Emit explicit state rows so unavailable evidence never becomes a green zero."""
-    rows = [
+    rows: list[dict[str, object]] = [
         {
             "domain": domain,
             "verdict": state,
@@ -247,12 +247,12 @@ def _hash_artifact_chunked(candidate: Path) -> str:
 
 def _artifact_probes(
     report: Mapping[str, object], run_root: Path
-) -> tuple[list[dict[str, str]], bool]:
+) -> tuple[list[Mapping[str, object]], bool]:
     artifacts = report.get("artifacts")
     if not isinstance(artifacts, list) or not artifacts:
         return [], False
     root = run_root.resolve()
-    probes: list[dict[str, str]] = []
+    probes: list[Mapping[str, object]] = []
     for index, item in enumerate(artifacts):
         ref = f"#/artifacts/{index}"
         code = f"artifact_{index}"

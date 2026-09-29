@@ -49,6 +49,7 @@ def _assessment_case(archive_case, tmp_path, monkeypatch, *, dq="OK"):
         / "pipeline-run-report.json"
     )
     report = {
+        "schema_version": "pipeline_run_report_v1",
         "identity": {
             "pipeline_name": manifest.pipeline_name,
             "run_id": str(manifest.run_id),

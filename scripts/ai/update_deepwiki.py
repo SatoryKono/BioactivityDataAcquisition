@@ -1,22 +1,82 @@
 #!/usr/bin/env python3
-"""Automated DeepWiki update script for BioETL.
+"""Automated DeepWiki update utility for BioETL.
 
-This script helps regenerate and update local .devin/wiki-*.json files
-to reflect the current state of the repository using DeepWiki MCP.
+`.devin/wiki.json` is the single source of truth for the local derived wiki
+(consumed by memory RAG via src/memory/rag/devin_wiki.py). The modular
+`.devin/wiki-*.json` files are generated projections of the monolith — never
+edit them by hand; regenerate with --emit-modules / --update instead.
 
 Usage:
     python scripts/ai/update_deepwiki.py --backup
-    python scripts/ai/update_deepwiki.py --update core
+    python scripts/ai/update_deepwiki.py --emit-modules
+    python scripts/ai/update_deepwiki.py --update wiki-core.json
     python scripts/ai/update_deepwiki.py --validate
+    python scripts/ai/update_deepwiki.py --check
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
+import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
+
+
+MODULES = [
+    "wiki-core.json",
+    "wiki-architecture.json",
+    "wiki-pipelines.json",
+    "wiki-schemas.json",
+    "wiki-providers.json",
+    "wiki-observability.json",
+    "wiki-reference.json",
+]
+
+# Top-level DeepWiki section -> module file. The wiki.json monolith is
+# DFS-ordered, so each section's pages stay contiguous after filtering.
+SECTION_MODULE = {
+    "BioETL Overview": "wiki-core.json",
+    "AI Agent Subsystem and Memory": "wiki-core.json",
+    "Architecture": "wiki-architecture.json",
+    "Data Pipelines": "wiki-pipelines.json",
+    "Run Control Plane and Observability": "wiki-observability.json",
+    "Quality Governance and CI/CD": "wiki-reference.json",
+    "Diagram and Documentation Generation": "wiki-reference.json",
+    "Operations and Deployment": "wiki-reference.json",
+    "Glossary": "wiki-reference.json",
+}
+
+# Subtree overrides win over the top-level section mapping.
+SUBTREE_MODULE = {
+    "Provider Adapters": "wiki-providers.json",
+    "Schema Governance and Parity": "wiki-schemas.json",
+}
+
+# Reference tokens extracted from "Canonical anchors:" segments only:
+# directory-ish tokens end with "/", file tokens carry a known extension.
+_ANCHOR_RE = re.compile(r"[\w\./\*\-]+/|[\w\./\-]+\.(?:mdc|md|json|py|yaml|yml|toml)")
+_ANCHOR_SECTION_RE = re.compile(r"Canonical anchors?:\s*([^\.\n]+)")
+
+
+def _anchor_refs(payload: dict[str, Any]) -> list[str]:
+    """Extract canonical-anchor path refs from all page_notes."""
+    refs: list[str] = []
+    for page in payload.get("pages", []):
+        if not isinstance(page, dict):
+            continue
+        for note in page.get("page_notes", []):
+            content = note.get("content") if isinstance(note, dict) else note
+            if not isinstance(content, str):
+                continue
+            for segment in _ANCHOR_SECTION_RE.findall(content):
+                for token in segment.split(","):
+                    for match in _ANCHOR_RE.findall(token.strip()):
+                        refs.append(match)
+    return refs
 
 
 class DeepWikiUpdater:
@@ -25,22 +85,15 @@ class DeepWikiUpdater:
     def __init__(self, repo_path: Path):
         self.repo_path = repo_path
         self.wiki_dir = repo_path / ".devin"
-        self.modules = [
-            "wiki-core.json",
-            "wiki-architecture.json",
-            "wiki-pipelines.json",
-            "wiki-schemas.json",
-            "wiki-providers.json",
-            "wiki-observability.json",
-            "wiki-reference.json",
-        ]
+        self.monolith = self.wiki_dir / "wiki.json"
+        self.modules = list(MODULES)
 
     def backup_wiki_files(self) -> bool:
         """Create git commit with current wiki files."""
         print("Backing up wiki files...")
         try:
             subprocess.run(
-                ["git", "add", ".devin/wiki-*.json"],
+                ["git", "add", ".devin/wiki*.json"],
                 cwd=self.repo_path,
                 check=True,
                 capture_output=True,
@@ -56,124 +109,166 @@ class DeepWikiUpdater:
                 check=True,
                 capture_output=True,
             )
-            print("✓ Wiki files backed up successfully")
+            print("OK wiki files backed up")
             return True
         except subprocess.CalledProcessError as e:
-            print(f"✗ Backup failed: {e}")
+            print(f"FAIL backup: {e}")
             return False
 
-    def identify_changed_modules(self) -> list[str]:
-        """Identify which wiki modules need updates based on git changes."""
-        print("Identifying changed modules...")
-        # Get changed files in last 30 days
-        try:
-            result = subprocess.run(
-                [
-                    "git",
-                    "log",
-                    "--oneline",
-                    "--since='30 days ago'",
-                    "--name-only",
-                    "--",
-                    "docs/00-project/",
-                    "docs/02-architecture/decisions/",
-                    "AGENTS.md",
-                    ".devin/agents/",
-                    ".devin/skills/",
-                ],
-                cwd=self.repo_path,
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            changed_files = result.stdout.strip().split("\n")
-            print(f"Found {len(changed_files)} changed files in canonical sources")
+    def _load_monolith(self) -> dict[str, Any]:
+        return json.loads(self.monolith.read_text(encoding="utf-8"))
 
-            # Map changes to wiki modules
-            # This is a simplified mapping - in practice, you'd analyze
-            # which canonical anchors are affected
-            return self.modules
-        except subprocess.CalledProcessError as e:
-            print(f"✗ Failed to identify changes: {e}")
-            return self.modules
+    @staticmethod
+    def _ancestors(
+        page: dict[str, Any], by_title: dict[str, dict[str, Any]]
+    ) -> list[str]:
+        """Return ancestor titles from page up to the root, page first."""
+        chain = [page["title"]]
+        seen = {page["title"]}
+        cur = page
+        while cur.get("parent"):
+            parent = cur["parent"]
+            if parent in seen:
+                break
+            seen.add(parent)
+            chain.append(parent)
+            cur = by_title.get(parent, {})
+            if not cur:
+                break
+        return chain
+
+    def _module_for(
+        self, page: dict[str, Any], by_title: dict[str, dict[str, Any]]
+    ) -> str:
+        chain = self._ancestors(page, by_title)
+        for title in chain:  # nearest ancestor wins
+            if title in SUBTREE_MODULE:
+                return SUBTREE_MODULE[title]
+        return SECTION_MODULE.get(chain[-1], "wiki-reference.json")
+
+    def emit_modules(self, only: str | None = None) -> bool:
+        """Regenerate wiki-*.json module files from the wiki.json monolith."""
+        wiki = self._load_monolith()
+        pages = wiki.get("pages", [])
+        by_title = {p["title"]: p for p in pages}
+
+        buckets: dict[str, list[dict[str, Any]]] = {m: [] for m in self.modules}
+        for page in pages:
+            buckets[self._module_for(page, by_title)].append(page)
+
+        targets = [only] if only else self.modules
+        ok = True
+        for module in targets:
+            name = module if module.endswith(".json") else f"wiki-{module}.json"
+            if name not in buckets:
+                print(f"FAIL unknown module: {module}")
+                ok = False
+                continue
+            module_pages = buckets[name]
+            payload = {
+                "version": wiki.get("version", "2.1"),
+                "generated_from": "wiki.json",
+                "repo_notes": wiki.get("repo_notes", []),
+                "pages": module_pages,
+            }
+            text = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+            path = self.wiki_dir / name
+            if path.exists() and path.read_text(encoding="utf-8") == text:
+                print(f"OK {name} unchanged ({len(module_pages)} pages)")
+                continue
+            path.write_text(text, encoding="utf-8")
+            print(f"OK wrote {name} ({len(module_pages)} pages)")
+        return ok
 
     def validate_json_structure(self) -> bool:
-        """Validate JSON structure of all wiki files."""
+        """Validate JSON structure of monolith and module files."""
         print("Validating JSON structure...")
         all_valid = True
-        for module in self.modules:
-            module_path = self.wiki_dir / module
-            if not module_path.exists():
-                print(f"✗ {module} does not exist")
+        for name in ["wiki.json", *self.modules]:
+            path = self.wiki_dir / name
+            if not path.exists():
+                print(f"FAIL {name} does not exist")
                 all_valid = False
                 continue
             try:
-                with open(module_path, encoding="utf-8") as f:
-                    json.load(f)
-                print(f"✓ {module} is valid JSON")
+                json.loads(path.read_text(encoding="utf-8"))
+                print(f"OK {name} is valid JSON")
             except json.JSONDecodeError as e:
-                print(f"✗ {module} has invalid JSON: {e}")
+                print(f"FAIL {name} invalid JSON: {e}")
                 all_valid = False
         return all_valid
 
+    def validate_parents(self, payload: dict[str, Any] | None = None) -> bool:
+        """Check that every page's parent exists."""
+        if payload is None:
+            payload = self._load_monolith()
+        titles = {p.get("title") for p in payload.get("pages", [])}
+        missing = sorted(
+            {
+                p["parent"]
+                for p in payload.get("pages", [])
+                if isinstance(p, dict) and p.get("parent") and p["parent"] not in titles
+            }
+        )
+        if missing:
+            print(f"FAIL pages with missing parents: {missing}")
+            return False
+        print("OK all page parents resolve")
+        return True
+
     def validate_canonical_anchors(self) -> bool:
-        """Validate that canonical anchors exist."""
+        """Check that every path in Canonical anchors segments exists."""
         print("Validating canonical anchors...")
-        # This would check that all files referenced in page_notes exist
-        # For now, just check key files
-        key_files = [
-            "AGENTS.md",
-            "docs/00-project/ai/memory/README.md",
-            "docs/00-project/RULES.md",
-        ]
-        all_valid = True
-        for file_path in key_files:
-            if not (self.repo_path / file_path).exists():
-                print(f"✗ Canonical anchor {file_path} does not exist")
-                all_valid = False
-        if all_valid:
-            print("✓ All key canonical anchors exist")
-        return all_valid
+        missing: list[str] = []
+        total = 0
+        for ref in _anchor_refs(self._load_monolith()):
+            total += 1
+            if "*" in ref:
+                continue
+            if not (self.repo_path / ref.rstrip("/")).exists():
+                missing.append(ref)
+        if missing:
+            print(f"FAIL {len(missing)}/{total} anchor refs do not exist:")
+            for ref in sorted(set(missing)):
+                print(f"  MISSING {ref}")
+            return False
+        print(f"OK all {total} canonical anchor refs resolve")
+        return True
 
     def check_mcp_credentials(self) -> bool:
         """Check if DeepWiki MCP credentials are configured."""
         print("Checking DeepWiki MCP credentials...")
         env_file = self.repo_path / ".env"
         if not env_file.exists():
-            print("✗ .env file does not exist")
+            print("FAIL .env file does not exist")
             return False
 
-        with open(env_file, encoding="utf-8") as f:
-            content = f.read()
-            has_api_key = "DEEPWIKI_API_KEY" in content
-            has_org_id = "DEEPWIKI_ORGANISATION_ID" in content
+        content = env_file.read_text(encoding="utf-8")
+        has_api_key = "DEEPWIKI_API_KEY" in content
+        has_org_id = "DEEPWIKI_ORGANISATION_ID" in content
 
         if has_api_key and has_org_id:
-            print("✓ DeepWiki MCP credentials found")
+            print("OK DeepWiki MCP credentials found")
             return True
-        else:
-            print("✗ DeepWiki MCP credentials not found")
-            return False
+        print("FAIL DeepWiki MCP credentials not found")
+        return False
 
     def print_update_summary(self) -> None:
         """Print summary of what would be updated."""
         print("\n" + "=" * 60)
         print("DeepWiki Update Summary")
         print("=" * 60)
-        print("\nModules to update:")
+        print("\nModule projections (generated from wiki.json):")
         for module in self.modules:
             module_path = self.wiki_dir / module
-            if module_path.exists():
-                print(f"  ✓ {module}")
-            else:
-                print(f"  ✗ {module} (missing)")
+            status = "present" if module_path.exists() else "missing"
+            print(f"  {status:8} {module}")
         print("\nCanonical sources to check:")
         print("  - docs/00-project/")
         print("  - docs/02-architecture/decisions/")
         print("  - AGENTS.md")
-        print("  - .devin/agents/")
-        print("  - .devin/skills/")
-        print("\nSee .devin/workflows/deepwiki-regeneration.md for detailed workflow.")
+        print("  - .devin/agents/ , .devin/skills/")
+        print("\nSee .devin/workflows/deepwiki-regeneration.md for the workflow.")
         print("=" * 60)
 
 
@@ -185,7 +280,21 @@ def main() -> int:
     parser.add_argument(
         "--backup", action="store_true", help="Backup current wiki files"
     )
-    parser.add_argument("--validate", action="store_true", help="Validate wiki files")
+    parser.add_argument(
+        "--validate",
+        action="store_true",
+        help="Validate JSON, parent links, and canonical anchors",
+    )
+    parser.add_argument(
+        "--emit-modules",
+        action="store_true",
+        help="Regenerate all wiki-*.json module files from wiki.json",
+    )
+    parser.add_argument(
+        "--update",
+        metavar="MODULE",
+        help="Regenerate a single module (e.g. core or wiki-core.json)",
+    )
     parser.add_argument(
         "--check",
         action="store_true",
@@ -204,26 +313,37 @@ def main() -> int:
     if args.backup and not updater.backup_wiki_files():
         return 1
 
+    if args.update:
+        return 0 if updater.emit_modules(only=args.update) else 1
+
+    if args.emit_modules and not updater.emit_modules():
+        return 1
+
     if args.validate:
-        json_valid = updater.validate_json_structure()
-        anchors_valid = updater.validate_canonical_anchors()
-        if not (json_valid and anchors_valid):
+        ok = (
+            updater.validate_json_structure()
+            and updater.validate_parents()
+            and updater.validate_canonical_anchors()
+        )
+        if not ok:
             return 1
 
     if args.check:
         updater.check_mcp_credentials()
         updater.validate_json_structure()
+        updater.validate_parents()
         updater.validate_canonical_anchors()
         updater.print_update_summary()
         return 0
 
-    # Default: print summary
-    updater.print_update_summary()
-    print(
-        "\nUse --backup to backup, --validate to validate, or follow the manual workflow in .devin/workflows/deepwiki-regeneration.md"
-    )
+    if not (args.backup or args.update or args.emit_modules or args.validate):
+        updater.print_update_summary()
+        print(
+            "\nUse --backup, --emit-modules, --update MODULE, --validate, "
+            "or see .devin/workflows/deepwiki-regeneration.md"
+        )
     return 0
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())

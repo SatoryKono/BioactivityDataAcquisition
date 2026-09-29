@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from scripts.ops.observability.grafana.action_target_routes import (
     OPEN_PIPELINE_DIAGNOSTICS_TITLE,
@@ -14,16 +15,20 @@ _WIDTH = "custom.width"
 _CELL = "custom.cellOptions"
 
 
-def _panels(items: list[dict]):
+def _panels(items: list[dict[str, Any]]):
     for panel in items:
         yield panel
         yield from _panels(panel.get("panels", []))
 
 
-def _override(panel: dict, field: str, prop: str, value: object) -> None:
-    overrides = panel.setdefault("fieldConfig", {}).setdefault("overrides", [])
+def _override(panel: dict[str, Any], field: str, prop: str, value: Any) -> None:
+    overrides: list[dict[str, Any]] = panel.setdefault("fieldConfig", {}).setdefault(
+        "overrides", []
+    )
     matcher = {"id": "byName", "options": field}
-    entry = next((o for o in overrides if o.get("matcher") == matcher), None)
+    entry: dict[str, Any] | None = next(
+        (o for o in overrides if o.get("matcher") == matcher), None
+    )
     if entry is None:
         entry = {"matcher": matcher, "properties": []}
         overrides.append(entry)
@@ -116,7 +121,7 @@ _QUERY_ERROR_MAPPINGS = [
 ]
 
 
-def _correct_action_panel_dq(action_panel: dict) -> None:
+def _correct_action_panel_dq(action_panel: dict[str, Any]) -> None:
     _override(action_panel, "reason", "links", [])
     _override(action_panel, "severity", "links", [])
     _override(action_panel, "severity", _WIDTH, 90)
@@ -130,7 +135,7 @@ def _correct_action_panel_dq(action_panel: dict) -> None:
         action_panel["links"].append(runbook)
 
 
-def _correct_action_panel(uid: object, panels: dict[int, dict]) -> None:
+def _correct_action_panel(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     action_panel_id = {"bioetl-overview-v2": 215, "bioetl-dq-v2": 9102}.get(uid)
     if action_panel_id not in panels:
         return
@@ -166,7 +171,7 @@ def _correct_action_panel(uid: object, panels: dict[int, dict]) -> None:
         _correct_action_panel_dq(action_panel)
 
 
-def _correct_timeseries_legend(panel: dict) -> None:
+def _correct_timeseries_legend(panel: dict[str, Any]) -> None:
     legend = panel.get("options", {}).get("legend", {})
     if not (
         panel.get("type") == "timeseries"
@@ -192,7 +197,7 @@ def _correct_timeseries_legend(panel: dict) -> None:
         panel["description"] = panel.get("description", "") + explanation
 
 
-def _correct_stat_unknown_color(panel: dict) -> None:
+def _correct_stat_unknown_color(panel: dict[str, Any]) -> None:
     if not (
         panel.get("type") == "stat"
         and panel.get("options", {}).get("colorMode") == "value"
@@ -207,7 +212,7 @@ def _correct_stat_unknown_color(panel: dict) -> None:
                 value["color"] = "text"
 
 
-def _correct_deadline_reason_mappings(panel: dict) -> None:
+def _correct_deadline_reason_mappings(panel: dict[str, Any]) -> None:
     if not (
         any(
             "/ops/control-plane/" in target.get("url", "")
@@ -220,7 +225,7 @@ def _correct_deadline_reason_mappings(panel: dict) -> None:
         _override(panel, field, "mappings", _QUERY_ERROR_MAPPINGS)
 
 
-def _annotate_histogram_panel(panel: dict, target: dict) -> None:
+def _annotate_histogram_panel(panel: dict[str, Any], target: dict[str, Any]) -> None:
     target["expr"] = _guard_histogram_generation(target["expr"])
     explanation = (
         " Histogram generation guard: windows with a changed producer "
@@ -239,7 +244,7 @@ def _annotate_histogram_panel(panel: dict, target: dict) -> None:
     defaults.setdefault("custom", {})["showPoints"] = "always"
 
 
-def _guard_panel_histograms(panel: dict) -> None:
+def _guard_panel_histograms(panel: dict[str, Any]) -> None:
     for target in panel.get("targets", []):
         if "expr" not in target:
             continue
@@ -257,7 +262,7 @@ def _guard_panel_histograms(panel: dict) -> None:
             _annotate_histogram_panel(panel, target)
 
 
-def _apply_per_panel_corrections(panels: dict[int, dict]) -> None:
+def _apply_per_panel_corrections(panels: dict[int, dict[str, Any]]) -> None:
     for panel in panels.values():
         _correct_timeseries_legend(panel)
         _correct_stat_unknown_color(panel)
@@ -265,7 +270,7 @@ def _apply_per_panel_corrections(panels: dict[int, dict]) -> None:
         _guard_panel_histograms(panel)
 
 
-def _stamp_scope_copy(uid: object, panels: dict[int, dict]) -> None:
+def _stamp_scope_copy(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid not in _SCOPE_COPY:
         return
     panels[9400]["options"]["content"] = (
@@ -276,7 +281,7 @@ def _stamp_scope_copy(uid: object, panels: dict[int, dict]) -> None:
     )
 
 
-def _correct_incident(uid: object, panels: dict[int, dict]) -> None:
+def _correct_incident(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid != "bioetl-incident-v1":
         return
     for panel in panels.values():
@@ -323,7 +328,7 @@ def _correct_incident(uid: object, panels: dict[int, dict]) -> None:
 
 
 def _correct_provider_fleet_panel(
-    panel: dict, panel_id: int, fleet: str, empty: str
+    panel: dict[str, Any], panel_id: int, fleet: str, empty: str
 ) -> None:
     for item in panel["fieldConfig"]["overrides"]:
         item["properties"] = [
@@ -381,7 +386,7 @@ def _correct_provider_fleet_panel(
     )
 
 
-def _correct_provider_cause_panel(panel: dict) -> None:
+def _correct_provider_cause_panel(panel: dict[str, Any]) -> None:
     for field in ("cause", "Cause"):
         _override(
             panel,
@@ -405,7 +410,7 @@ def _correct_provider_cause_panel(panel: dict) -> None:
     _override(panel, "Value", _HIDDEN, True)
 
 
-def _correct_provider(uid: object, panels: dict[int, dict]) -> None:
+def _correct_provider(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid != "bioetl-provider-health-v2":
         return
     answer = panels.get(9461)
@@ -515,7 +520,7 @@ def _correct_provider(uid: object, panels: dict[int, dict]) -> None:
         _correct_provider_cause_panel(panels[panel_id])
 
 
-def _correct_control_plane(uid: object, panels: dict[int, dict]) -> None:
+def _correct_control_plane(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid != "bioetl-control-plane-v1":
         return
     retention = panels[9416]
@@ -612,7 +617,7 @@ def _correct_control_plane(uid: object, panels: dict[int, dict]) -> None:
         )
 
 
-def _compact_table_base(uid: object, panel_id: int, panel: dict) -> None:
+def _compact_table_base(uid: str, panel_id: int, panel: dict[str, Any]) -> None:
     custom = (
         panel.setdefault("fieldConfig", {})
         .setdefault("defaults", {})
@@ -647,7 +652,7 @@ def _compact_table_base(uid: object, panel_id: int, panel: dict) -> None:
         _override(panel, field, _WIDTH, width)
 
 
-def _correct_incident_table(panel: dict, panel_id: int) -> None:
+def _correct_incident_table(panel: dict[str, Any], panel_id: int) -> None:
     # Keep the summary readable; duplicated/raw details remain in 22010.
     if panel_id == 2010:
         for field in ("Details", "Domain"):
@@ -671,7 +676,7 @@ def _correct_incident_table(panel: dict, panel_id: int) -> None:
         _override(panel, field, _CELL, {"type": "auto", "wrapText": True})
 
 
-def _correct_run_explorer_index_compact(panel: dict) -> None:
+def _correct_run_explorer_index_compact(panel: dict[str, Any]) -> None:
     # The ten-run index stays compact; cell inspection exposes full IDs.
     custom = panel["fieldConfig"]["defaults"]["custom"]
     custom["wrapText"] = False
@@ -691,7 +696,9 @@ def _correct_run_explorer_index_compact(panel: dict) -> None:
     )
 
 
-def _correct_overview_action_table(panel: dict, panels: dict[int, dict]) -> None:
+def _correct_overview_action_table(
+    panel: dict[str, Any], panels: dict[int, dict[str, Any]]
+) -> None:
     panel["gridPos"]["h"] = 6
     panels[9603]["gridPos"].update(y=11, h=6)
     _override(panel, "Priority", _WIDTH, 90)
@@ -734,7 +741,7 @@ def _correct_overview_action_table(panel: dict, panels: dict[int, dict]) -> None
 
 
 def _apply_table_uid_extras(
-    uid: object, panel_id: int, panel: dict, panels: dict[int, dict]
+    uid: str, panel_id: int, panel: dict[str, Any], panels: dict[int, dict[str, Any]]
 ) -> None:
     if uid == "bioetl-incident-v1" and panel_id in (2010, 22010):
         _correct_incident_table(panel, panel_id)
@@ -746,7 +753,7 @@ def _apply_table_uid_extras(
         _correct_overview_action_table(panel, panels)
 
 
-def _apply_table_targets(uid: object, panels: dict[int, dict]) -> None:
+def _apply_table_targets(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     for panel_id in _TABLE_TARGETS.get(uid, ()):
         panel = panels.get(panel_id)
         if panel is None or panel.get("type") != "table":
@@ -756,12 +763,12 @@ def _apply_table_targets(uid: object, panels: dict[int, dict]) -> None:
         panel["options"]["cellHeight"] = "sm"
 
 
-def _lighten_mapping_value(value: dict) -> None:
+def _lighten_mapping_value(value: dict[str, Any]) -> None:
     if value.get("color") == "#555555":
         value["color"] = "#A3A3A3"
 
 
-def _lighten_override_mappings(item: dict) -> None:
+def _lighten_override_mappings(item: dict[str, Any]) -> None:
     for prop in item["properties"]:
         if prop["id"] != "mappings":
             continue
@@ -771,7 +778,7 @@ def _lighten_override_mappings(item: dict) -> None:
                     _lighten_mapping_value(value)
 
 
-def _organize_trust_reasons(trust: dict) -> None:
+def _organize_trust_reasons(trust: dict[str, Any]) -> None:
     for transform in trust.get("transformations", []):
         if transform.get("id") == "organize":
             options = transform["options"]
@@ -786,7 +793,7 @@ def _organize_trust_reasons(trust: dict) -> None:
             options["indexByName"]["trust_reasons_action"] = 4
 
 
-def _organize_trust_details(details: dict) -> None:
+def _organize_trust_details(details: dict[str, Any]) -> None:
     for transform in details.get("transformations", []):
         options = transform["options"]
         if transform["id"] == "filterFieldsByName":
@@ -809,7 +816,7 @@ def _organize_trust_details(details: dict) -> None:
             options["renameByName"]["display_verdict"] = "Status"
 
 
-def _correct_control_plane_trust(uid: object, panels: dict[int, dict]) -> None:
+def _correct_control_plane_trust(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid != "bioetl-control-plane-v1" or 9418 not in panels:
         return
     trust = panels[9418]
@@ -864,7 +871,7 @@ def _correct_control_plane_trust(uid: object, panels: dict[int, dict]) -> None:
         _lighten_override_mappings(item)
 
 
-def _dedupe_width_overrides(panels: dict[int, dict]) -> None:
+def _dedupe_width_overrides(panels: dict[int, dict[str, Any]]) -> None:
     # A display-name alias must not reserve the same column's width twice.
     for panel in panels.values():
         width_fields = set()
@@ -882,7 +889,7 @@ def _dedupe_width_overrides(panels: dict[int, dict]) -> None:
                 width_fields.add(field)
 
 
-def _correct_runtime_evidence_actions(panels: dict[int, dict]) -> None:
+def _correct_runtime_evidence_actions(panels: dict[int, dict[str, Any]]) -> None:
     """Explain saved evidence without changing its verdict or raw report."""
     if 9451 in panels:
         reasons = {
@@ -919,7 +926,7 @@ def _correct_runtime_evidence_actions(panels: dict[int, dict]) -> None:
         ]
 
 
-def _correct_runtime(uid: object, panels: dict[int, dict]) -> None:
+def _correct_runtime(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid != "bioetl-runtime":
         return
     _correct_runtime_evidence_actions(panels)
@@ -936,7 +943,7 @@ _PROCESSED_RECORDS_NOVALUE = (
 _PROCESSED_RECORDS_DESCRIPTION = "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden. Request failure is QUERY ERROR."
 
 
-def _dq_processed_records(panel: dict) -> None:
+def _dq_processed_records(panel: dict[str, Any]) -> None:
     """Join saved stage inputs to the existing outcome accounting rows."""
     names = [
         "01 bronze_records",
@@ -1049,7 +1056,7 @@ def _dq_processed_records(panel: dict) -> None:
     panel["description"] = _PROCESSED_RECORDS_DESCRIPTION
 
 
-def _correct_dq(uid: object, panels: dict[int, dict]) -> None:
+def _correct_dq(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid == "bioetl-dq-v2" and 9403 in panels:
         _dq_processed_records(panels[9403])
         summary = panels[9406]
@@ -1095,13 +1102,13 @@ def _correct_dq(uid: object, panels: dict[int, dict]) -> None:
     )
 
 
-def _correct_overview(uid: object, panels: dict[int, dict]) -> None:
+def _correct_overview(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid != "bioetl-overview-v2" or 215 not in panels:
         return
     _override(panels[215], "Action", _WIDTH, 150)
 
 
-def _correct_run_explorer(uid: object, panels: dict[int, dict]) -> None:
+def _correct_run_explorer(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid != "bioetl-run-explorer-v1" or 3010 not in panels:
         return
     _override(
@@ -1161,7 +1168,7 @@ def _correct_run_explorer(uid: object, panels: dict[int, dict]) -> None:
     )
 
 
-def _include_action_scope(routed_panel: dict) -> None:
+def _include_action_scope(routed_panel: dict[str, Any]) -> None:
     for transform in routed_panel.get("transformations", []):
         options = transform.get("options", {})
         if transform["id"] == "organize":
@@ -1172,7 +1179,7 @@ def _include_action_scope(routed_panel: dict) -> None:
                 names.append("action_scope")
 
 
-def _correct_routed_action_scope(uid: object, panels: dict[int, dict]) -> None:
+def _correct_routed_action_scope(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     routed_panel_id = {
         "bioetl-overview-v2": 215,
         "bioetl-dq-v2": 9102,
@@ -1184,9 +1191,9 @@ def _correct_routed_action_scope(uid: object, panels: dict[int, dict]) -> None:
     _override(routed_panel, "action_scope", _HIDDEN, True)
 
 
-def apply_corrections(payload: dict) -> None:
+def apply_corrections(payload: dict[str, Any]) -> None:
     """Apply idempotent source-level corrections before dashboard serialization."""
-    uid = payload.get("uid")
+    uid: str = payload.get("uid") or ""
     panels = {p["id"]: p for p in _panels(payload.get("panels", []))}
     _correct_action_panel(uid, panels)
     _apply_per_panel_corrections(panels)
