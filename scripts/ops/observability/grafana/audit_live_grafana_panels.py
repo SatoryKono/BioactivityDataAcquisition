@@ -277,34 +277,6 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         semantic_kind="http_table",
     ),
     PanelAuditSpec(
-        dashboard_uid="bioetl-control-plane-v1",
-        panel_id=132,
-        title="Monitor Manifest Failure Severity [30m]",
-        source_kind="prometheus",
-        semantic_kind="derived_status",
-    ),
-    PanelAuditSpec(
-        dashboard_uid="bioetl-control-plane-v1",
-        panel_id=133,
-        title="Monitor Ledger Failure Severity [30m]",
-        source_kind="prometheus",
-        semantic_kind="derived_status",
-    ),
-    PanelAuditSpec(
-        dashboard_uid="bioetl-dq-v2",
-        panel_id=101,
-        title="Review: Latest Successful Data Timestamp",
-        source_kind="prometheus",
-        semantic_kind="freshness",
-    ),
-    PanelAuditSpec(
-        dashboard_uid="bioetl-dq-v2",
-        panel_id=8,
-        title="Time Range · Worst Freshness Age (hours; SLA 24/72)",
-        source_kind="prometheus",
-        semantic_kind="freshness",
-    ),
-    PanelAuditSpec(
         dashboard_uid="bioetl-dq-v2",
         panel_id=9402,
         title="ID",
@@ -317,6 +289,7 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         title=PROCESSED_RECORDS_PANEL_TITLE,
         source_kind="http",
         semantic_kind="http_table",
+        target_ref_id="A",
     ),
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
