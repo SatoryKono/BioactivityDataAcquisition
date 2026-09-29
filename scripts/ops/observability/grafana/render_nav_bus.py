@@ -123,18 +123,8 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-overview-v2": {9002: 5},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-<<<<<<< HEAD
     9400: (0, 3, 18, 3),
     9422: (18, 3, 6, 3),
-||||||| 7fda0d1625eb
-    9400: (0, 3, 24, 3),
-    9422: (0, 6, 24, 3),
-    9418: (0, 9, 12, 8),
-    9416: (12, 9, 12, 8),
-=======
-    9400: (0, 3, 12, 3),
-    9422: (12, 3, 12, 3),
->>>>>>> master20260828-4
     9418: (0, 6, 12, 8),
     9416: (12, 6, 12, 8),
 }
