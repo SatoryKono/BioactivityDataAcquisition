@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -32,6 +33,16 @@ pytestmark = [
     pytest.mark.no_api,
     pytest.mark.asyncio,
 ]
+
+
+def _stable_source_refs(payload: dict) -> list[dict]:
+    """Compare content-addressed snapshots without per-run storage locations."""
+    refs = deepcopy(payload["source_refs"])
+    for source_ref in refs:
+        for snapshot in source_ref["input_snapshots"]:
+            if snapshot.get("snapshot_id") == f"sha256:{snapshot.get('content_hash')}":
+                snapshot.pop("immutable_uri", None)
+    return refs
 
 
 def _stable_manifest_payload(payload: dict) -> dict:
@@ -67,7 +78,7 @@ def _stable_manifest_payload(payload: dict) -> dict:
                 "dq_contract_compatibility_hash"
             ],
         },
-        "source_refs": payload["source_refs"],
+        "source_refs": _stable_source_refs(payload),
     }
 
 
@@ -112,7 +123,7 @@ async def test_consolidation_determinism_replay_guard(
     source_refs_second = second_manifest.get("source_refs")
     assert isinstance(source_refs_first, list) and source_refs_first
     assert isinstance(source_refs_second, list) and source_refs_second
-    assert source_refs_first == source_refs_second
+    assert _stable_source_refs(first_manifest) == _stable_source_refs(second_manifest)
 
     assert (
         first_manifest["code_provenance"]["effective_config_artifact_id"]
