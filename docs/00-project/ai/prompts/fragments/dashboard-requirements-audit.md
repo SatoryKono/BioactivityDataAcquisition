@@ -182,54 +182,20 @@ HTML copy roles (`DASH-COPY-008`): `<b>` numbered dashboard name, `<em>` panel t
 
 ### 4. Provider Health `bioetl-provider-health-v2`
 - Question: Which provider is degraded/failing, and why?
-- Answer panel: 9101 (requirements title Monitor Fleet Severity; confirm shipped title)
+- Answer panel: 9461 Review Provider Check
 - Next action token: Open selected provider context
-- Basis tokens: CURRENT; GLOBAL
-- Data: GLOBAL matrix vs SELECTED PROVIDER are not peer badges. Fleet CRIT with selected OK is allowed when copy says fleet vs selected.
-- Snapshot panels: 40. Refresh `60s`, timezone `browser`.
+- Basis tokens: CURRENT; SELECTED RUN
+- Data: Saved HTTP evidence for the selected provider context (selected-run redesign; legacy fleet matrix `9101` retired).
+- Snapshot panels: 6. Refresh `60s`, timezone `browser`.
 
 | id | y | band | type | title | datasource | role |
 | ---: | ---: | --- | --- | --- | --- | --- |
 | 1000 | 0 | first-window | text | Navigate Dashboards |  | chrome |
 | 9400 | 2 | first-window | text | Understand Evidence Scope |  | chrome |
-| 9401 | 2 | first-window | stat | Monitor Selected Provider | prometheus | data |
-| 9002 | 5 | first-window | text | Start Provider Triage |  | chrome |
-| 9101 | 7 | first-window | table | Monitor Fleet Status | prometheus | data |
-| 9107 | 7 | first-window | table | Inspect Health Evidence | prometheus | data |
-| 9104 | 15 | first-window | stat | Monitor Telemetry Presence | prometheus | data |
-| 9106 | 18 | first-load | row | Inspect Fleet Non-OK and Causes |  | chrome |
-| 9102 | 19 | first-load | table | Inspect Non-OK Providers | prometheus | data |
-| 9105 | 19 | first-load | row | Inspect Full Fleet Evidence |  | chrome |
-| 91 | 20 | first-load | row | Selected Provider Details |  | chrome |
-| 9111 | 20 | first-load | table | Inspect Full Fleet Severity | prometheus | data |
-| 106 | 21 | first-load | timeseries | Track Health Failures & Degradation | prometheus | data |
-| 9404 | 21 | first-load | row | Range & Debug Evidence |  | chrome |
-| 114 | 22 | first-load | table | Inspect Raw Health Status | prometheus | data |
-| 9405 | 22 | first-load | row | Run Context |  | chrome |
-| 9402 | 23 | first-load | table | Inspect Run Identity | BioETL Ops HTTP | data |
-| 9450 | 23 | first-load | row | Inspect Saved Run Evidence |  | chrome |
-| 9451 | 24 | first-load | table | Inspect Selected Run Domains | BioETL Ops HTTP | data |
-| 9112 | 25 | first-load | table | Inspect Full Non-OK Providers | prometheus | data |
-| 107 | 26 | first-load | table | Track Failure Share | prometheus | data |
-| 9103 | 27 | first-load | table | Inspect Top Provider Causes | prometheus | data |
-| 108 | 30 | below | table | Inspect Exhausted Retries | prometheus | data |
-| 9113 | 30 | below | table | Inspect Full Provider Causes | prometheus | data |
-| 1 | 32 | below | timeseries | Track Health-Check Latency p95 | prometheus | data |
-| 109 | 34 | below | timeseries | Track Exhausted Retries | prometheus | data |
-| 9403 | 35 | below | table | Inspect Processed Records | BioETL Ops HTTP | data |
-| 9452 | 36 | below | table | Inspect Selected Run Identity | BioETL Ops HTTP | data |
-| 102 | 39 | below | stat | Inspect Health p95 | prometheus | data |
-| 2 | 42 | below | stat | Monitor Healthy Checks | prometheus | data |
-| 105 | 45 | below | stat | Monitor Degraded Checks | prometheus | data |
-| 104 | 48 | below | stat | Track Failure Rate | prometheus | data |
-| 110 | 49 | below | timeseries | Track Request Latency p95 | prometheus | data |
-| 7 | 51 | below | stat | Monitor Health Checks | prometheus | data |
-| 111 | 59 | below | timeseries | Track Rate-Limit Errors | prometheus | data |
-| 115 | 64 | below | timeseries | Track Network & Timeout Errors | prometheus | data |
-| 112 | 69 | below | timeseries | Track Rate-Limiter Wait p95 | prometheus | data |
-| 113 | 74 | below | bargauge | Monitor Available Rate-Limit Tokens | prometheus | data |
-| 31 | 79 | below | stat | Monitor Global Circuit-Breaker State | prometheus | data |
-| 32 | 84 | below | timeseries | Track Global Circuit-Breaker Trips | prometheus | data |
+| 9461 | 2 | first-window | stat | Review Provider Check | BioETL Ops HTTP | data |
+| 9460 | 5 | first-window | table | Review Provider Evidence | BioETL Ops HTTP | data |
+| 9402 | 10 | first-window | table | Inspect Run Identity | BioETL Ops HTTP | data |
+| 9403 | 10 | first-window | table | Inspect Processed Records | BioETL Ops HTTP | data |
 
 ### 5. Data Quality `bioetl-dq-v2`
 - Question: What is the DQ assessment of the selected Run ID?

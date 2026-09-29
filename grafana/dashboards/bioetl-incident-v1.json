@@ -5316,7 +5316,7 @@
           },
           "id": 891,
           "options": {
-            "colorMode": "background",
+            "colorMode": "value",
             "dataLinks": [
               {
                 "targetBlank": true,
@@ -5405,7 +5405,7 @@
           },
           "id": 892,
           "options": {
-            "colorMode": "background",
+            "colorMode": "value",
             "graphMode": "none",
             "justifyMode": "center",
             "orientation": "horizontal",
@@ -5529,7 +5529,7 @@
           },
           "id": 893,
           "options": {
-            "colorMode": "background",
+            "colorMode": "value",
             "dataLinks": [
               {
                 "targetBlank": true,
@@ -5635,7 +5635,7 @@
           },
           "id": 907,
           "options": {
-            "colorMode": "background",
+            "colorMode": "value",
             "dataLinks": [
               {
                 "targetBlank": true,

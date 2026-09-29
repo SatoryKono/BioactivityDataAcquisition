@@ -43,6 +43,16 @@ Usage:
 
 Exit code: 0 = clean, 1 = violations found
 
+Non-goals (by design, see issues #11760):
+  - Fenced `python` blocks are token-checked for legacy identifiers only;
+    they are NOT `ast.parse` gates. Most fences are illustrative snippets
+    (measured 109/332 non-parseable), so a parse gate would false-positive.
+  - No secret scan of generated pages/logs here: secret coverage of all
+    tracked content (including docs/) is delegated to the repo security
+    gates — gitleaks (`security.yml` gitleaks job, `.gitleaks.toml`) and
+    detect-secrets baseline (`tests/architecture/test_detect_secrets.py`).
+    Generated output (`site/`, `reports/`) is git-ignored build scratch.
+
 References:
     - docs/04-reference/pipelines/README.md (canonical pipeline index)
     - ADR-027, ADR-028 (config structure)

@@ -251,7 +251,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | `bioetl-control-plane-v1` | `Review Exact Replay Readiness` (`9422`) | exact-run readiness from saved inputs; CURRENT `9401` is not this answer |
 | `bioetl-overview-v2` | `Review Selected Run Status` (`9603`) + `Review Run Domains` (`9002`) | Saved HTTP evidence for the selected Run ID. |
 | `bioetl-runtime` | `Review Selected Run Status` (`9998`) | saved HTTP evidence for the selected Run ID |
-| `bioetl-provider-health-v2` | `Monitor Fleet Severity` (`9101`) | GLOBAL provider matrix |
+| `bioetl-provider-health-v2` | `Review Provider Check` (`9461`) | saved HTTP evidence for the selected provider context |
 | `bioetl-dq-v2` | `Review Selected Run Status` (`9406`) | saved HTTP evidence for the selected Run ID |
 | `bioetl-incident-v1` | `Inspect Ranked Suspects` (`2010`) | highest-confidence suspect matrix |
 | `bioetl-run-explorer-v1` | `Inspect Recent Runs` (`3010`) | Browse/select the exact run. Identity and processed records live in collapsed `Selected Run Details` (`3022`/`3023`). |

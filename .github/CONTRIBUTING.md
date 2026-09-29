@@ -123,6 +123,12 @@ enforces exactly one required status context:
 - `pr-gate-complete` (from `.github/workflows/pr-required.yml`) — fail-closed
   aggregator. Keep this green before merge.
 
+> Enforcement is currently DISABLED (ruleset 13643213, #11180): Actions
+> billing will not return, so no required check can run. Do NOT re-enable
+> the ruleset — a required check that cannot run would block `main`. Until
+> billing returns, every merge to `main` MUST pass the manual merge gate
+> below instead of the automated `pr-gate-complete` context.
+
 Leaf jobs such as `checks-complete`, `coverage-verify`, `type-check`,
 schema governance, `detect-secrets`, and `root-hygiene` are consumed by the
 aggregator. They are not independent GitHub-required contexts. Docs-only PRs
@@ -168,6 +174,21 @@ Download and review `reports/ci/dependency-preflight.log` from its artifact and 
 - [ ] No hardcoded secrets or paths
 - [ ] Documentation updated if behavior changed
 - [ ] Follows Conventional Commits format
+
+### Manual merge gate (mandatory while CI enforcement is disabled, #11180)
+
+Owner: PR author executes; merging reviewer verifies each box. No merge to
+`main` without all boxes checked and evidence linked in the PR.
+
+- [ ] Required gates for this scope identified via
+  `configs/quality/github_required_checks.yaml`
+- [ ] Decision matrix produced locally and attached as
+  `reports/quality/pr-gate-decisions.json` (same classifier CI uses;
+  the classifier requires `GITHUB_OUTPUT`, point it at a scratch file):
+  `GITHUB_OUTPUT=reports/quality/pr-gate-github-output.txt uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify --catalog configs/quality/github_required_checks.yaml --event-name pull_request --base-sha <merge-base> --head-sha <pr-head> --artifact reports/quality/pr-gate-decisions.json`
+- [ ] Every `required` lane from the matrix executed locally; logs linked
+- [ ] A second person reviewed the matrix and the lane evidence
+- [ ] No direct push to `main`; merge only via PR with the above attached
 
 ## Getting Help
 
