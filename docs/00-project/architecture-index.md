@@ -73,7 +73,7 @@ hotspot coverage floors stay at those live counts without raising debt budgets.
 
 | Scanner | Artifact / command | What it counts |
 | --- | --- | --- |
-| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2492 rows; live tree 2492 files). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; new modules are added only from a coverage XML refresh (`--refresh-nonregressing-from-coverage-xml` or the coverage-verify lane). |
+| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2522 rows; live tree 2522 files). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; new modules are added only from a coverage XML refresh (`--refresh-nonregressing-from-coverage-xml` or the coverage-verify lane). |
 | Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2490). Excludes package-root modules without a hexagonal layer tag. |
 | import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (2426 files in the 2026-09-23 review pass; Windows: `importlinter.cli.lint_imports(..., no_cache=True)` when `lint-imports.exe` is absent). Excludes stubs / non-imported modules |
 

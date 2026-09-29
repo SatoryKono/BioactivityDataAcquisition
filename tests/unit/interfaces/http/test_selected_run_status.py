@@ -1465,7 +1465,10 @@ def test_archive_report_source_empty_legacy_missing_and_containment(
     payload = json.loads(path.read_text(encoding="utf-8"))
     payload.pop("selected_run_snapshot")
     path.write_text(json.dumps(payload), encoding="utf-8")
-    assert list(selected_report_sources(tmp_path, manifest).values()) == [path]
+    assert list(selected_report_sources(tmp_path, manifest).values()) == [
+        path,
+        path.with_suffix(".md"),
+    ]
 
     original_is_symlink = Path.is_symlink
     monkeypatch.setattr(
