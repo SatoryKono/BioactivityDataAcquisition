@@ -6559,7 +6559,7 @@
         "y": 2
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Exact replay readiness of the selected Run ID from saved inputs. READY means required checks passed, not that a replay already ran and not permission to write current tables. BLOCKED is a proven gap. INSUFFICIENT means a required check could not be completed. UNSUPPORTED means this family cannot exact-replay. SELECT RUN and QUERY ERROR are request states. N/A is not zero. CURRENT Prometheus does not change this verdict.",
+      "description": "SELECTED RUN · Exact replay readiness of the selected Run ID from saved inputs. READY means required checks passed, not that a replay already ran and not permission to write current tables. BLOCKED is a proven gap. INSUFFICIENT means a required check could not be completed. UNSUPPORTED means this family cannot exact-replay. SELECT RUN and QUERY ERROR are request states. N/A is not zero. CURRENT Prometheus does not change this verdict. OK/WARN/CRIT color the replay readiness verdict, not live fleet health.",
       "options": {
         "reduceOptions": {
           "values": false,

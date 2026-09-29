@@ -25,7 +25,7 @@ ______________________________________________________________________
 - [OS-specific wrappers](#os-specific-wrappers) — Windows / WSL helpers
 - [Memory workflow](#memory-workflow) — pre-task / post-task
 - [Build & Test CLI](#build-test-cli) — команды сборки и тестирования
-- [См. также](#see-also)
+- [См. также](#см-также)
 
 ______________________________________________________________________
 
@@ -805,7 +805,7 @@ Memory notes never outrank runtime code, configs, accepted ADRs, or runbooks ([A
 
 ______________________________________________________________________
 
-## См. также { #see-also }
+## См. также
 
 - [CLI Reference](../../04-reference/cli.md) — полная документация по CLI
 - [Running Pipelines](../running-pipelines.md) — руководство по запуску

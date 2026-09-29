@@ -47,17 +47,15 @@ first_window_inspect_tables:
     rationale: DASH-FIT-003 incident answer is the ranked-suspects table.
     retire_when: a Monitor* verdict card replaces 2010 as the answer panel
   - dashboard: bioetl-provider-health-v2.json
-    id: 9107
+    id: 9402
     owner: "@bioetl-observability"
-    rationale: >-
-      Compact status-reason companion to first-window Monitor Fleet Severity
-      (9101); not a forensic row group.
-    retire_when: reason text is inlined into 9101
+    rationale: Selected-run pipeline identity stays on the first window.
+    retire_when: 9402 leaves the first window
   - dashboard: bioetl-provider-health-v2.json
-    id: 9101
+    id: 9403
     owner: "@bioetl-observability"
-    rationale: First-window worst-four fleet severity table.
-    retire_when: 9101 is no longer a first-window table
+    rationale: Selected-run record counts stay on the first window.
+    retire_when: 9403 leaves the first window
   - dashboard: bioetl-overview-v2.json
     id: 9002
     owner: "@bioetl-observability"
@@ -112,10 +110,10 @@ operator_question:
     basis_tokens: [SELECTED RUN]
     next_action_tokens: [Open Run Explorer]
   bioetl-provider-health-v2.json:
-    answer_ids: [9401]
-    next_action_id: 9002
-    basis_tokens: [CURRENT]
-    next_action_tokens: [Start Provider Triage]
+    answer_ids: [9461]
+    next_action_id: 9460
+    basis_tokens: [SELECTED RUN]
+    next_action_tokens: [Run ID]
   bioetl-dq-v2.json:
     answer_ids: [9406]
     next_action_id: 9406
@@ -129,16 +127,10 @@ operator_question:
   bioetl-run-explorer-v1.json:
     answer_ids: [3010]
     next_action_id: 1
-    basis_tokens: [BROWSE]
-    next_action_tokens: [SELECTED RUN]
+    basis_tokens: [Browse]
+    next_action_tokens: [Run ID]
 
 # DASH-STATE-004: panels that must name both processing_status and trust_status.
 trust_split_panels:
   - dashboard: bioetl-control-plane-v1.json
-    id: 9401
-  - dashboard: bioetl-control-plane-v1.json
     id: 9418
-  - dashboard: bioetl-control-plane-v1.json
-    id: 9416
-  - dashboard: bioetl-runtime.json
-    id: 9401
