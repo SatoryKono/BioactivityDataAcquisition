@@ -30,7 +30,7 @@ max_body_lines: 40
 
 # Deprecated: cyclic pack
 
-Use [`prompt.audit.cycle`](cycle.md) plus `domains.yaml`.
+Use [`prompt.audit.cycle`](./cycle.md) plus `domains.yaml`.
 
 ```text
 python -m scripts.ai.prompts compile --domain docs --profile audit-readonly

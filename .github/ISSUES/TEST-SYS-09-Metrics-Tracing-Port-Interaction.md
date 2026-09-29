@@ -1,5 +1,5 @@
 ---
-title: "[P2][testing] TEST-SYS-09: MetricsPort/TracingPort interaction tests for top pipelines"
+title: "\[P2]\[testing] TEST-SYS-09: MetricsPort/TracingPort interaction tests for top pipelines"
 labels: P2, testing, observability, metrics, tracing, quality
 assignees: []
 github_issue: 7031

@@ -22,7 +22,7 @@
 - актуального consolidated backlog.
 
 Это **не** второй competing backlog вместо
-[consolidated-open-tasks-plan-2026-03-21.md](./consolidated-open-tasks-plan-2026-03-21.md).
+[consolidated-open-tasks-plan-2026-03-21.md](../../plans/consolidated-open-tasks-plan-2026-03-21.md).
 Его нужно использовать как supporting assessment snapshot:
 
 - для оценки качества текущего состояния;
@@ -32,14 +32,14 @@
 
 ## Источники
 
-- [consolidated-open-tasks-plan-2026-03-21.md](./consolidated-open-tasks-plan-2026-03-21.md)
-- [module-dependency-map.md](../02-architecture/generated/module-dependency-map.md)
-- [07-compatibility-facade-inventory.md](../02-architecture/07-compatibility-facade-inventory.md)
-- [RULES.md](../00-project/RULES.md)
-- [project-import-governance/SUMMARY.md](../reports/evidence/project-import-governance/SUMMARY.md)
-- [project-package-topology/SUMMARY.md](../reports/evidence/project-package-topology/SUMMARY.md)
-- [project-file-structure/04-decisions/SUMMARY.md](../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
-- [ADR-043-documentation-knowledge-management.md](../02-architecture/decisions/ADR-043-documentation-knowledge-management.md)
+- [consolidated-open-tasks-plan-2026-03-21.md](../../plans/consolidated-open-tasks-plan-2026-03-21.md)
+- [module-dependency-map.md](../../02-architecture/generated/module-dependency-map.md)
+- [07-compatibility-facade-inventory.md](../../02-architecture/07-compatibility-facade-inventory.md)
+- [RULES.md](../../00-project/RULES.md)
+- `reports/evidence/project-import-governance/SUMMARY.md`
+- `reports/evidence/project-package-topology/SUMMARY.md`
+- `reports/evidence/project-file-structure/04-decisions/SUMMARY.md`
+- [ADR-043-documentation-knowledge-management.md](../../02-architecture/decisions/ADR-043-documentation-knowledge-management.md)
 
 ## Итоговая оценка
 

@@ -47,11 +47,11 @@ families, invariants, and workflow state-machine semantics.
 | Surface | Purpose | Entry point |
 | --- | --- | --- |
 | Aggregates | Aggregate roots, lifecycle boundaries, child objects, and invariants | [aggregates.md](aggregates.md) |
-| Entities | Provider DTOs and domain entity record models (non-aggregate) | [entities.md](entities.md) |
+| Entities | Provider DTOs and domain entity record models (non-aggregate) | [entities.md](./entities.md) |
 | Value Objects | Immutable domain primitives and typed semantic families | [value-objects.md](value-objects.md) |
 | Events | Aggregate coordination events and observability event constants | [events.md](events.md) |
 | Control Plane | Run manifest, run ledger, workflow control-plane, contract-registry, and reproducibility domain surfaces | [control-plane.md](control-plane.md) |
-| Ports | Transport-neutral contracts for runtime, storage, observability, quality, and control plane | [ports.md](ports.md) |
+| Ports | Transport-neutral contracts for runtime, storage, observability, quality, and control plane | [ports.md](./ports.md) |
 | Contexts | `PipelineContext`, `PipelineRunContext`, and the shared context helper modules | [contexts.md](contexts.md) |
 | Invariants | Cross-cutting domain, workflow, replay, and schema-boundary rules | [invariants.md](invariants.md) |
 | Aggregate State Machines | Formal lifecycle transitions for `Batch`, `PipelineRun`, and `QuarantineEntry` | [aggregate-state-machines.md](aggregate-state-machines.md) |
@@ -61,7 +61,7 @@ families, invariants, and workflow state-machine semantics.
 ## Reading Order
 
 1. Start with [aggregates.md](aggregates.md) for lifecycle owners.
-2. Use [entities.md](entities.md) for provider record models and DTO surfaces.
+2. Use [entities.md](./entities.md) for provider record models and DTO surfaces.
 3. Continue with [invariants.md](invariants.md) for rules that must stay true
    across code, contracts, and runbooks.
 4. Use [control-plane.md](control-plane.md) for immutable provenance,
@@ -72,5 +72,5 @@ families, invariants, and workflow state-machine semantics.
    workflow/control-plane semantics.
 7. Use [contexts.md](contexts.md) when tracing runtime context ownership,
    deterministic time seams, or replay/control-plane anchors.
-8. Use [ports.md](ports.md) and [events.md](events.md) when wiring or auditing
+8. Use [ports.md](./ports.md) and [events.md](events.md) when wiring or auditing
    adapters, observability, or runtime orchestration.

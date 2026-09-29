@@ -51,14 +51,14 @@ max_body_lines: 140
 
 | Нужно | Полный текст | Source id |
 | --- | --- | --- |
-| Весь прогон 1→10 с ISSUE/FIX/CLOSE | [sequential-run source](../sequential-run.md) | `prompt.audit.sequential-run` |
-| Router 10 доменов | [cyclic-pack source](../cyclic-pack.md) | `prompt.audit.cyclic-pack` |
-| Документы | [cycle/docs source](../cycle/docs.md) | `prompt.audit.cycle.docs` |
-| Диаграммы | [cycle/diagrams source](../cycle/diagrams.md) | `prompt.audit.cycle.diagrams` |
-| Тесты | [cycle/tests source](../cycle/tests.md) | `prompt.audit.cycle.tests` |
-| Техдолг | [cycle/tech-debt source](../cycle/tech-debt.md) | `prompt.audit.cycle.tech-debt` |
-| Архитектура | [cycle/architecture source](../cycle/architecture.md) | `prompt.audit.cycle.architecture` |
-| Конфиги / агенты / telemetry / dashboards / CR | [cycle index](../cycle/README.md) | `prompt.audit.cycle.*` |
+| Весь прогон 1→10 с ISSUE/FIX/CLOSE | [sequential-run source](../../../00-project/ai/prompts/library/audit/sequential-run.md) | `prompt.audit.sequential-run` |
+| Router 10 доменов | [cyclic-pack source](../../../00-project/ai/prompts/library/audit/cyclic-pack.md) | `prompt.audit.cyclic-pack` |
+| Документы | cycle/docs source (`cycle/docs.md`) | `prompt.audit.cycle.docs` |
+| Диаграммы | [cycle/diagrams source](../../../00-project/ai/prompts/library/audit/diagrams.md) | `prompt.audit.cycle.diagrams` |
+| Тесты | cycle/tests source (`cycle/tests.md`) | `prompt.audit.cycle.tests` |
+| Техдолг | [cycle/tech-debt source](../../../00-project/ai/prompts/library/audit/tech-debt.md) | `prompt.audit.cycle.tech-debt` |
+| Архитектура | [cycle/architecture source](../../../00-project/ai/prompts/library/audit/architecture.md) | `prompt.audit.cycle.architecture` |
+| Конфиги / агенты / telemetry / dashboards / CR | cycle index (`cycle/README.md`) | `prompt.audit.cycle.*` |
 | Полные operator-paste snapshots | [materialized-v3 index](materialized-v3/README.md) | 24 frozen prompts + master |
 
 Порядок доменов: docs → diagrams → agents-memory → configs → tests →

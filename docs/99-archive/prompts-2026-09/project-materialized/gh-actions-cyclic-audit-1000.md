@@ -12,7 +12,7 @@ summary: Weak 1000x stub retired; use compiled github-actions overlay
 
 > **Removed as a weak duplicate.** A 1000-iteration empty loop is not an audit method.
 >
-> Use [`generated/github-actions/audit-readonly.md`](../../../generated/github-actions/audit-readonly.md)
+> Use `generated/github-actions/audit-readonly.md`
 > and `prompt.tests.fix-retest` for test→fix→retest.
 
 ```bash

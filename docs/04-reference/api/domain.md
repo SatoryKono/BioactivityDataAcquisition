@@ -200,4 +200,4 @@ The public-facade expectations on this page are guarded by:
 - [Domain Reference](../domain/README.md)
 - [Domain Contexts](../domain/contexts.md)
 - [Domain Ports](../domain/ports.md)
-- [API Reference: Domain Ports](domain/ports.md)
+- [API Reference: Domain Ports](./domain/ports.md)

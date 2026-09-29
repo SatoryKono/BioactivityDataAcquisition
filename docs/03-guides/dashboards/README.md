@@ -67,7 +67,7 @@ layout acceptance whenever an accessibility fix changes geometry or typography.
 | --- | --- | --- |
 | **Dashboard System 2.0 (stable shipped)** | `Status: active` / published | This index, `dashboard-v2-usage.md`, panel docs, `design-system.md`, `contracts/` |
 | **v3.0 execution-aware draft** | `Status: draft` / non-shipping | [`v3.0/`](v3.0/README.md) |
-| **DUX audit protocols** | archived | [`archive/`](archive/README.md) |
+| **DUX audit protocols** | archived | [`archive/`](./archive/README.md) |
 
 **Current stable version:** seven shipped JSON dashboards (bus `0..6`) under
 `grafana/dashboards/*.json`. Operator docs for that surface are the **v2 / System 2.0**

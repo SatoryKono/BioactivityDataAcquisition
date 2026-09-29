@@ -45,10 +45,10 @@ design rationale and layer structure.
 | GitHub Actions Workflows | Current CI / nightly / release workflow inventory under `.github/workflows/`        | [github-actions-workflows.md](github-actions-workflows.md) |
 | Pipeline Catalog  | Current provider and composite pipeline config catalog                                       | [pipeline-catalog.md](pipeline-catalog.md)             |
 | Passports         | Generated evidence-backed pipeline, composite, and workflow projections                       | [passports/index.md](passports/index.md)               |
-| Domain            | Canonical published catalog for aggregates, value objects, events, ports, invariants, and workflow lifecycle semantics | [domain/README.md](domain/README.md) |
-| Contracts         | Published contract pack for Gold, DQ, control-plane, and observability surfaces             | [contracts/README.md](contracts/README.md)             |
+| Domain            | Canonical published catalog for aggregates, value objects, events, ports, invariants, and workflow lifecycle semantics | [domain/README.md](./domain/README.md) |
+| Contracts         | Published contract pack for Gold, DQ, control-plane, and observability surfaces             | [contracts/README.md](./contracts/README.md)             |
 | Normalization     | Published normalization governance for provider fields and IDs                               | [normalization/chembl-normalization-overview.md](normalization/chembl-normalization-overview.md) |
-| Providers         | Provider-specific published specs and current config-linked field surfaces                   | [providers/README.md](providers/README.md)             |
+| Providers         | Provider-specific published specs and current config-linked field surfaces                   | [providers/README.md](./providers/README.md)             |
 | Pipelines         | Active pipeline specs linked to `configs/entities/**`, `configs/composites/**`, and providers | [pipelines/README.md](pipelines/README.md)           |
 | API               | Curated package/module API guidance mapped to the live `src/bioetl/**` tree                 | [api/index.md](api/index.md)                           |
 | Templates         | Reusable templates for ADRs, contracts, specs, and runbooks                                 | [templates/index.md](templates/index.md)               |
@@ -73,7 +73,7 @@ design rationale and layer structure.
 - [Workflow Catalog](workflow-catalog.md)
 - [Pipeline and Workflow Passports](passports/index.md)
 - [GitHub Actions Workflows](github-actions-workflows.md)
-- [Domain Reference](domain/README.md)
+- [Domain Reference](./domain/README.md)
 - [Domain Contexts](domain/contexts.md)
 - [Workflow State Machine](domain/workflow-state-machine.md)
 - [Observability Metrics](contracts/observability.md)

@@ -1,5 +1,5 @@
 > Archived snapshot. The maintained guide remains at
-> [DUX5 screenshot and accessibility regression protocol](../../../03-guides/dashboards/dux5-screenshot-regression-protocol.md).
+> [DUX5 screenshot and accessibility regression protocol](../../../03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md).
 
 # DUX5 screenshot & accessibility regression protocol
 

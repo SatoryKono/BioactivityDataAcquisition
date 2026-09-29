@@ -58,7 +58,7 @@ Bronze → Silver → Gold write-path, quarantine, atomicity и replay clocks.
 - **A Policy:** Map write modes vs policy/ADR; silent overwrite и missing fail-closed.
 - **B Layers:** Bronze/Silver/Gold writers, quarantine, Delta/time-travel claims, atomicity.
 - **C Replay:** Clocks, deterministic artifacts, PK/business uniqueness.
-- **D Issues:** PROVEN + requirement_id; title [medallion][REQ][P#].
+- **D Issues:** PROVEN + requirement_id; title \[medallion]\[REQ][P#].
 - **E Fix:** Минимальное storage/domain изменение; never main.
 - **F Validate:** Focused storage/architecture tests; close only on origin/main.
  

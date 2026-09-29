@@ -374,10 +374,10 @@ Current evidence bundle on `main`:
 
 - canonical plan: [normalization_plan_P0_P6.md](normalization_plan_P0_P6.md)
 - rebuild-only multi-pipeline matrix generator: [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/matrix/generate_pipeline_normalization_matrix.py)
-- published multi-pipeline matrix MD: [pipeline_normalization_field_matrix.md](../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
+- published multi-pipeline matrix MD: `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md`
 - published multi-pipeline matrix CSV: [pipeline_normalization_field_matrix.csv](../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.csv)
 - fallback inventory report: [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py)
-- published normalization reference entrypoint: [non-chembl-normalization-overview.md](../04-reference/normalization/non-chembl-normalization-overview.md)
+- published normalization reference entrypoint: [non-chembl-normalization-overview.md](../../04-reference/normalization/non-chembl-normalization-overview.md)
 - join-key policy seams: [join_keys.py](../../src/bioetl/domain/normalization/join_keys.py) and [join_key_normalization.py](../../src/bioetl/application/composite/join_key_normalization.py)
 - non-ChEMBL identifier and collection fixtures: [non_chembl_identifier_cases.yaml](../../tests/fixtures/normalization/non_chembl_identifier_cases.yaml)
 - non-ChEMBL observed-value fixtures: [non_chembl_observed_values.yaml](../../tests/fixtures/normalization/non_chembl_observed_values.yaml)
@@ -834,8 +834,8 @@ python3 -m scripts.docs generate-pipeline-normalization-matrix --check
 
 ## Related Documents
 
-- [RULES.md](../00-project/RULES.md)
-- [Content Hash Identity Policy](../02-architecture/policies/content-hash-identity-policy.md)
-- [ADR-014 Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)
-- [ADR-044 Run Manifest and Run Ledger](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
-- [Run Manifest Inspection](../05-operations/runbooks/run-manifest-inspection.md)
+- [RULES.md](../../00-project/RULES.md)
+- [Content Hash Identity Policy](../../02-architecture/policies/content-hash-identity-policy.md)
+- [ADR-014 Deterministic Writes](../../02-architecture/decisions/ADR-014-deterministic-writes.md)
+- [ADR-044 Run Manifest and Run Ledger](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
+- [Run Manifest Inspection](../../05-operations/runbooks/run-manifest-inspection.md)

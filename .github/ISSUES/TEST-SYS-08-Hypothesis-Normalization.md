@@ -1,5 +1,5 @@
 ---
-title: "[P2][testing] TEST-SYS-08: Hypothesis for identifier/normalization families"
+title: "\[P2]\[testing] TEST-SYS-08: Hypothesis for identifier/normalization families"
 labels: P2, testing, domain, determinism, quality, coverage
 assignees: []
 github_issue: 7030

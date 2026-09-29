@@ -8,7 +8,7 @@ profiles в BioETL.
 ## Surface Model
 
 - **Project memory entry point**:
-  [agent-memory.md](agent-memory.md)
+  [agent-memory.md](./agent-memory.md)
   — общий быстрый контекст по проекту, canonical docs anchors и operational
   shortcuts для новой AI-сессии.
 - **Role-specific memory snapshots**:
@@ -296,7 +296,7 @@ runtime source и canonical governance docs:
 
 ## Practical Reading Order
 
-1. [agent-memory.md](agent-memory.md)
+1. [agent-memory.md](./agent-memory.md)
 1. relevant `memory-py-*.md` file for the current role
 1. `docs/00-project/ai/agents/` for guides and runtime-facing mirrors
 

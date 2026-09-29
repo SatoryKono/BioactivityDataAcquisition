@@ -1,5 +1,5 @@
 ---
-title: "[P1][testing] TEST-SYS-06: VCR size/age budget + recert workflow flag truth"
+title: "\[P1]\[testing] TEST-SYS-06: VCR size/age budget + recert workflow flag truth"
 labels: P1, testing, performance, http, governance, ci, quality
 assignees: []
 github_issue: 7028

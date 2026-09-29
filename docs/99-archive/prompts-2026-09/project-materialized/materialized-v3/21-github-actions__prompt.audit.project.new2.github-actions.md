@@ -58,7 +58,7 @@ Workflow trust model, triggers, permissions, pins, shell safety, caches, artifac
 - **A Trust:** Events, pull_request_target, tokens, runners, environments and fork paths.
 - **B Pins:** Action SHA pins, local action ownership, Dependabot coverage.
 - **C Correctness:** Workflow catalog, required checks, concurrency, caches/artifacts, shell fail-closed.
-- **D Issues:** PROVEN + requirement_id; title [gha][REQ][P#].
+- **D Issues:** PROVEN + requirement_id; title \[gha]\[REQ][P#].
 - **E Fix:** Pin/permissions/docs; no admin bypass.
 - **F Validate:** YAML/schema lint, local action tests, catalog/required-check mapping.
  

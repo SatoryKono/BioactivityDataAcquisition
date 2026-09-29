@@ -41,7 +41,7 @@ for the current tree.
 ## Current Docs To Use
 
 - [Neo4j Memory Configuration Guide](neo4j-memory-setup.md)
-- [Deployment & Tooling Extras](README.md)
+- [Deployment & Tooling Extras](./README.md)
 - [MCP Neo4j Memory - Archived Implementation Snapshot](mcp-neo4j-memory-final-summary.md)
 
 ## Archive Boundary

@@ -1,5 +1,5 @@
 ---
-title: "[AUD-OBS-20260714][P1] Complete application-level observability validation and value reconciliation"
+title: "\[AUD-OBS-20260714]\[P1] Complete application-level observability validation and value reconciliation"
 labels: observability, grafana, runtime, validation, critical, prometheus
 assignees: []
 ---

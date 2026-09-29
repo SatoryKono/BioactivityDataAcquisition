@@ -1,5 +1,5 @@
 ---
-title: "[P1][testing] TEST-SYS-03: Architecture closeout consolidation + nightly split"
+title: "\[P1]\[testing] TEST-SYS-03: Architecture closeout consolidation + nightly split"
 labels: P1, testing, architecture-tests, ci, technical-debt, governance, cleanup
 assignees: []
 github_issue: 7025

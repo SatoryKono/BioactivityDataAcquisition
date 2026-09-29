@@ -58,7 +58,7 @@ Public commands, flags, exit codes, HTTP health/readiness and compatibility shim
 - **A Inventory:** Commands, flags, arguments, exit codes and HTTP endpoints vs docs.
 - **B Freeze:** Removed/renamed surfaces without migration; unstable output schemas.
 - **C Compat registry:** Sunset/expiry of aliases vs live code.
-- **D Issues:** PROVEN + requirement_id; title [cli][REQ][P#].
+- **D Issues:** PROVEN + requirement_id; title \[cli]\[REQ][P#].
 - **E Fix:** Docs or compatibility seam; no silent drops.
 - **F Validate:** CLI/help/output snapshot and HTTP contract tests.
  

@@ -101,4 +101,4 @@ standardized_record = {
 - [CrossRef Publication Pipeline](../providers/crossref/publication.md)
 - [OpenAlex Publication Pipeline](../providers/openalex/publication.md)
 - [PubMed Publication Pipeline](../providers/pubmed/publication.md)
-- [Internal/Extended Index](index.md)
+- [Internal/Extended Index](./index.md)

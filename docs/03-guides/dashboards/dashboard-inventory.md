@@ -109,7 +109,7 @@ python -m pytest tests/integration/ci/test_dashboard_active_docs_sync.py -q
 
 ## Related References
 
-- [Dashboards Docs Index](README.md)
+- [Dashboards Docs Index](./README.md)
 - [Monitoring Docs Index](monitoring-index.md)
 - [Dashboard Guide](../dashboard-guide.md)
 - `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`

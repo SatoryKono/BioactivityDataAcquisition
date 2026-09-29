@@ -58,7 +58,7 @@ Cassette placement, metadata, sanitization, deterministic replay и offline isol
 - **A Inventory:** Cassette tree vs policy; orphan/missing meta/owner.
 - **B Secrets:** Redacted scan without echoing values.
 - **C Determinism:** Timestamps, unordered JSON, host leakage, request matcher stability.
-- **D Issues:** PROVEN + requirement_id; title [vcr][REQ][P#].
+- **D Issues:** PROVEN + requirement_id; title \[vcr]\[REQ][P#].
 - **E Fix:** Redact/replace through vcr-record workflow.
 - **F Validate:** Targeted offline replay and two-run hash comparison.
  

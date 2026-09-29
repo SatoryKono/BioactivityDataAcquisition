@@ -29,4 +29,4 @@ frames / Ops HTTP empty responses.
 
 Bare `UNKNOWN` only when none of the above can be determined.
 
-See also [dux3-residual-contracts.md](dux3-residual-contracts.md) §3.
+See also [dux3-residual-contracts.md](./dux3-residual-contracts.md) §3.

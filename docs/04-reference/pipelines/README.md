@@ -35,7 +35,7 @@ Current live config baseline on `main`:
 - `7` provider-level source configs in `configs/providers/*.yaml`
 
 For audit-grade operational coverage across every active pipeline spec, use the
-[operational facet matrix](INDEX.md#operational-facet-coverage). It is the
+[operational facet matrix](./INDEX.md#operational-facet-coverage). It is the
 published supplement for Bronze, Silver, Gold, quarantine, DQ, replay,
 checkpoint, run lifecycle, and config-owner coverage where individual specs use
 shared control-plane docs instead of repeating the same runbook details.

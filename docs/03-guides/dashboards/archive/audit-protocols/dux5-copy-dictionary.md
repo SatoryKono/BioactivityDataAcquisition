@@ -69,4 +69,4 @@ No auto-shrink below floors; reflow/wrap/shorten instead.
 
 ## DUX6 residual
 
-Pixel residual after re-audit: [dux6-residual-readability.md](dux6-residual-readability.md).
+Pixel residual after re-audit: [dux6-residual-readability.md](./dux6-residual-readability.md).

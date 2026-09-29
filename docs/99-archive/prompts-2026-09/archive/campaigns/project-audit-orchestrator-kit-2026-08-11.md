@@ -2014,7 +2014,7 @@ Reopened
 Минимальный template issue для автоматизации:
 
 Поле	Формат	Gate
-title	[area][P0-P3] один проверяемый результат	одна цель
+title	\[area]\[P0-P3] один проверяемый результат	одна цель
 source finding	stable finding ID	обязателен
 evidence	path:line, command/run	обязателен
 problem	наблюдаемое состояние	без гипотез как фактов

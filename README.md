@@ -126,7 +126,7 @@ the source of truth.
 | `configs/`      | Provider, entity, composite, contract, and quality configuration assets                       | [configs/README.md](configs/README.md)                         |
 | `tests/`        | Unit, integration, e2e, smoke, contract, security, performance, and architecture verification | `tests/` mirrors source concerns by scope and policy surface   |
 | `docs/`         | Published documentation tree: canonical active docs plus selected extended mirrors            | Start at [Project Map](docs/00-project/00-map.md)              |
-| `docs/reports/` | Repo-only curated evidence and report artifacts (not published in MkDocs)                     | [docs/reports/index.md](docs/reports/index.md)                 |
+| `docs/reports/` | Repo-only curated evidence and report artifacts (not published in MkDocs)                     | `docs/reports/index.md`                 |
 | `reports/`      | Generated or working analysis outputs before curation                                         | [reports/README.md](reports/README.md)                         |
 | `scripts/`      | Canonical tooling by domain, with engineering governance indexed under `scripts/engineering/` | [scripts/engineering/README.md](scripts/engineering/README.md) |
 

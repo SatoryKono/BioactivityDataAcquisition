@@ -43,7 +43,7 @@ These items are preserved as historical intent only.
 ## Current Docs To Use
 
 - [Neo4j Memory Configuration Guide](neo4j-memory-setup.md)
-- [Deployment & Tooling Extras](README.md)
+- [Deployment & Tooling Extras](./README.md)
 - [BioETL Kubernetes Deployment Guide](deployment-guide.md)
 - [BioETL Kubernetes Manifests - Summary](k8s-summary.md)
 

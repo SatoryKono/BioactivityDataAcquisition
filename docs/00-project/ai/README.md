@@ -64,11 +64,11 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
 ## Main Entry Points
 
-- [AI Agents Context](agents/README.md) — runtime-specific agent guidance,
+- [AI Agents Context](./agents/README.md) — runtime-specific agent guidance,
   published mirrors, guides, policy notes
-- [AI Memory Surface](memory/README.md) — project memory entry point and
+- [AI Memory Surface](./memory/README.md) — project memory entry point and
   role-specific memory sheets
-- [AI Prompts Surface](prompts/README.md) — Prompt Library (registry, fragments,
+- [AI Prompts Surface](./prompts/README.md) — Prompt Library (registry, fragments,
   active paste cards, archive)
 - [Skills Mirror](skills/README.md) — published mirrors, practical indexes and
   skill references
@@ -85,7 +85,7 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
 ## Grok operator aids
 
-- [grok/README.md](grok/README.md) — skills, child agents, personas + install
+- [grok/README.md](./grok/README.md) — skills, child agents, personas + install
 - [agents/guides/grok-operator-runbook.md](agents/guides/grok-operator-runbook.md)
 - [agents/guides/grok-tui-config-checklist.md](agents/guides/grok-tui-config-checklist.md)
 - [prompts/library/session/bootstrap.md](prompts/library/session/bootstrap.md)
@@ -101,6 +101,6 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 - Orchestrated loop: `prompt.audit.orchestrator`
 - Dashboards: `prompt.observability.dashboard-audit-cycle`
 - Cyclic testing: `prompt.tests.cycle` (see
-  [prompts/README.md](prompts/README.md))
+  [prompts/README.md](./prompts/README.md))
 - Install skills: `.\scripts\ai\grok\install_skills.ps1`
 - CLI: `python -m scripts.ai.prompts list|render|check`

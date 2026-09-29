@@ -1,4 +1,4 @@
-# [AI runtime][P2] Eliminate tracked workstation paths from the Devin MCP projection
+# \[AI runtime]\[P2] Eliminate tracked workstation paths from the Devin MCP projection
 
 ## Summary
 

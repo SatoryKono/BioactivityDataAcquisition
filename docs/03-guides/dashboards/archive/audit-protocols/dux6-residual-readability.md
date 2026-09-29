@@ -24,8 +24,8 @@ The shipped dashboard JSON and archived evidence are the durable record;
 
 ## Copy SSOT
 
-- [dux5-copy-dictionary.md](dux5-copy-dictionary.md)
-- [dux5-screenshot-regression-protocol.md](dux5-screenshot-regression-protocol.md)
+- [dux5-copy-dictionary.md](./dux5-copy-dictionary.md)
+- [dux5-screenshot-regression-protocol.md](./dux5-screenshot-regression-protocol.md)
 - [verdict-ontology.md](../../verdict-ontology.md)
 
 ## Title policy
@@ -40,7 +40,7 @@ Operator expansion lives in Provenance + descriptions.
 ## Residual still live-only
 
 **CLOSED by DUX7** — see
-[dux7-live-residual-protocol.md](dux7-live-residual-protocol.md) and
+[dux7-live-residual-protocol.md](./dux7-live-residual-protocol.md) and
 `reports/quality/dux7-2026-07-29-closeout.md`.
 
 - ~~WCAG contrast~~ → DUX7 PASS
@@ -51,4 +51,4 @@ Operator expansion lives in Provenance + descriptions.
 
 ## DUX7 live residual
 
-Live residual closeout protocol: [dux7-live-residual-protocol.md](dux7-live-residual-protocol.md).
+Live residual closeout protocol: [dux7-live-residual-protocol.md](./dux7-live-residual-protocol.md).

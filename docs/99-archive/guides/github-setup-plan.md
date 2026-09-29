@@ -25,7 +25,7 @@ ______________________________________________________________________
 ## Текущее состояние
 
 Проект уже имеет развитую GitHub инфраструктуру:
-- ✅ 37 GitHub Actions workflows (see [canonical inventory](../04-reference/github-actions-workflows.md))
+- ✅ 37 GitHub Actions workflows (see [canonical inventory](../../04-reference/github-actions-workflows.md))
 - ✅ CODEOWNERS и branch protection policy
 - ✅ Dependabot для автоматических обновлений
 - ✅ Шаблоны для issues и pull requests
@@ -996,7 +996,7 @@ ___
 ______________________________________________________________________
 
 *См. также:*
-- *[.github/CONTRIBUTING.md](../../.github/CONTRIBUTING.md)*
-- *[docs/00-project/governance/05-github-policy.md](../00-project/governance/05-github-policy.md)*
-- *[docs/03-guides/github-local-workflow.md](./github-local-workflow.md)*
-- *[.github/SECURITY.md](../../.github/SECURITY.md)*
+- *[.github/CONTRIBUTING.md](../../../.github/CONTRIBUTING.md)*
+- *[docs/00-project/governance/05-github-policy.md](../../00-project/governance/05-github-policy.md)*
+- *[docs/03-guides/github-local-workflow.md](../../03-guides/github-local-workflow.md)*
+- *[.github/SECURITY.md](../../../.github/SECURITY.md)*

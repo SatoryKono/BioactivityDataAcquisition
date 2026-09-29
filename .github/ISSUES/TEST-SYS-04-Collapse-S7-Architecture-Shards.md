@@ -1,5 +1,5 @@
 ---
-title: "[P1][testing] TEST-SYS-04: Collapse redundant S7 architecture shards"
+title: "\[P1]\[testing] TEST-SYS-04: Collapse redundant S7 architecture shards"
 labels: P1, testing, architecture-tests, ci, performance, config
 assignees: []
 github_issue: 7026

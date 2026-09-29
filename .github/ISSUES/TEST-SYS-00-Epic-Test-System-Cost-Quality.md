@@ -1,5 +1,5 @@
 ---
-title: "[meta][testing] TEST-SYS-00: Epic — test system cost/quality optimization"
+title: "\[meta]\[testing] TEST-SYS-00: Epic — test system cost/quality optimization"
 labels: meta, testing, architecture-tests, quality, governance, P1
 assignees: []
 github_issue: 7020

@@ -77,7 +77,7 @@ Index: [sequence/README.md](sequence/README.md)
 
 ## Provider Data Flow Diagrams — issue #6545
 
-Index: [providers/README.md](providers/README.md)
+Index: [providers/README.md](./providers/README.md)
 
 Per provider (4 flows: API, transform, medallion, errors): `chembl`, `pubchem`,
 `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar` under `providers/`.

@@ -89,4 +89,4 @@ graph TD
 
 - [Composition Layer API Reference](../api/composition.md)
 - [Composition Layer Architecture](../../02-architecture/05-composition-layer.md)
-- [Internal/Extended Index](index.md)
+- [Internal/Extended Index](./index.md)

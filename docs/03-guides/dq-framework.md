@@ -87,7 +87,7 @@ config acceptance.
 
 - DQ CLI/config guide: [DQ Configuration](dq-configuration.md)
 - DQ dashboards: [Dashboard Guide](dashboard-guide.md)
-- Quarantine triage: [Troubleshooting](troubleshooting.md)
+- Quarantine triage: [Troubleshooting](./troubleshooting.md)
 - DQ contracts: [Data Contracts Current State](../04-reference/contracts/data-contracts-current.md)
 
 ## Quality Gates

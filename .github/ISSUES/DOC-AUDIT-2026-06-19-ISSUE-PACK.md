@@ -39,7 +39,7 @@ The pack covers only findings re-verified against the current repository state:
 
 - This pack intentionally does **not** propose runtime refactoring.
 - The issues are documentation-governance workstreams derived from
-  [review_documentation-cascade-audit_20260619_1230.md](../../reports/codex/review_documentation-cascade-audit_20260619_1230.md).
+  `reports/codex/review_documentation-cascade-audit_20260619_1230.md`.
 - The split keeps immediate operator-facing breakage separate from slower
   architecture/reference cleanup.
 

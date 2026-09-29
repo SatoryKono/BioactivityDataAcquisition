@@ -754,6 +754,6 @@ ______________________________________________________________________
 - [CLI Reference](../04-reference/cli.md) — полная документация CLI
 - [Pipeline Configuration](pipeline-configuration.md) — настройка конфигураций
 - [Metrics & Monitoring](metrics-monitoring.md) — метрики и мониторинг
-- [Troubleshooting](troubleshooting.md) — решение проблем
+- [Troubleshooting](./troubleshooting.md) — решение проблем
 - [Getting Started](getting-started.md) — начало работы
 - [Bounded Pipeline Smoke](../05-operations/runbooks/bounded-pipeline-smoke.md) — последовательный `--limit 100` / `--seed-limit 100` каталог

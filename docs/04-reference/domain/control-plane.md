@@ -114,7 +114,7 @@ and inspection adapters.
 
 - [Run Manifest and Run Ledger Contract](../contracts/run-manifest-ledger.md)
 - [Workflow State Machine](workflow-state-machine.md)
-- [Ports](ports.md)
+- [Ports](./ports.md)
 - [Invariants](invariants.md)
 - [ADR-044](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
 - [ADR-046](../../02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md)

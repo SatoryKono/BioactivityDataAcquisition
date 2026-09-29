@@ -1,5 +1,5 @@
 ---
-title: "[P1][testing] TEST-SYS-07: Raise floors on partial modules <80% (normalization/hash/identity)"
+title: "\[P1]\[testing] TEST-SYS-07: Raise floors on partial modules <80% (normalization/hash/identity)"
 labels: P1, testing, coverage, determinism, domain, quality
 assignees: []
 github_issue: 7029

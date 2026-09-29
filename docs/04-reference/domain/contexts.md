@@ -123,6 +123,6 @@ enters record-processing flow.
 
 ## Related References
 
-- [Domain Reference](README.md)
+- [Domain Reference](./README.md)
 - [Invariants](invariants.md)
 - [API Reference: Domain](../api/domain.md)

@@ -1,5 +1,5 @@
 ---
-title: "[P1][testing] TEST-SYS-05: Expand unit-parallel-safe + enforce repo_backed exclusion"
+title: "\[P1]\[testing] TEST-SYS-05: Expand unit-parallel-safe + enforce repo_backed exclusion"
 labels: P1, testing, ci, performance, quality, governance
 assignees: []
 github_issue: 7027

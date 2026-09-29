@@ -43,7 +43,7 @@ for published contracts, CLI surfaces, and specs.
 | Understand DQ framework boundaries | [dq-framework.md](dq-framework.md)                     |
 | Apply repository cleanup safely    | [cleanup.md](cleanup.md)                               |
 | Run tests and local verification   | [testing.md](testing.md)                               |
-| Debug common local problems        | [troubleshooting.md](troubleshooting.md)               |
+| Debug common local problems        | [troubleshooting.md](./troubleshooting.md)               |
 | Metrics and local monitoring setup | [metrics-monitoring.md](metrics-monitoring.md)         |
 | Observability architecture/runtime | [observability-guide.md](observability-guide.md)       |
 | Shipped dashboard inventory        | [dashboard-guide.md](dashboard-guide.md)               |
@@ -81,7 +81,7 @@ for published contracts, CLI surfaces, and specs.
   branch management, sync strategy, and PR creation process.
 - [GitHub Quick Reference](github-quick-reference.md): one-page cheatsheet with
   essential commands and procedures for daily GitHub workflow.
-- [GitHub Setup Plan](github-setup-plan.md): archived pointer only; not SSOT.
+- [GitHub Setup Plan](./github-setup-plan.md): archived pointer only; not SSOT.
 - [GitHub Workflow Diagrams](github-workflow-diagrams.md): visual Mermaid
   diagrams for feature development, CI pipeline, PR lifecycle, and troubleshooting.
 - [Docs Verification](docs-verification.md): published docs checks, strict
@@ -102,7 +102,7 @@ for published contracts, CLI surfaces, and specs.
 - [DQ Framework](dq-framework.md): DQ analyzers, checks, contracts, and
   quarantine boundaries.
 - [Testing](testing.md): test strategy, local execution paths, and governance.
-- [Troubleshooting](troubleshooting.md): symptom-oriented problem solving.
+- [Troubleshooting](./troubleshooting.md): symptom-oriented problem solving.
 - [Development Setup](development/pycharm-setup.md): IDE-specific local setup
   and repository integration notes.
 - [CLI Commands Cheatsheet](cheatsheets/cli-commands.md): quick reference for all

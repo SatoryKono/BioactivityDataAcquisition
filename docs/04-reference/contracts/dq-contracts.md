@@ -383,7 +383,7 @@ graph TD
 **To this page**:
 
 - Project Navigator: [`docs/00-project/00-map.md`](../../00-project/00-map.md)
-- Data Contracts Index: [`contracts/README.md`](README.md)
+- Data Contracts Index: [`contracts/README.md`](./README.md)
 - CLI Reference: [`cli.md`](../cli.md)
 - Run Manifest Inspection: [`run-manifest-ledger.md`](run-manifest-ledger.md)
 
@@ -553,7 +553,7 @@ pytest tests/architecture/test_dq_contract_patterns.py tests/architecture/test_c
 ### Current Documentation
 
 - [ADR-045: Data Quality Contract System](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
-- [Observability Metrics Contract](observability.md)
+- [Observability Metrics Contract](./observability.md)
 - [Run Manifest & Ledger Contract](run-manifest-ledger.md)
 - [Gold Schema Contracts](gold-schemas.md)
 

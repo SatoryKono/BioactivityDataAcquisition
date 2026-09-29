@@ -1,5 +1,5 @@
 ---
-title: "[AUD-OBS-20260714][P1] Add truthful CI and scheduled gates for observability validators"
+title: "\[AUD-OBS-20260714]\[P1] Add truthful CI and scheduled gates for observability validators"
 labels: observability, grafana, runtime, validation, critical, prometheus
 assignees: []
 ---

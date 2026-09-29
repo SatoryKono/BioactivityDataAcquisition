@@ -62,8 +62,8 @@ architecture section focuses on structure, boundaries, and design rationale.
 
 ### Diagrams
 
-- [diagrams/](diagrams/README.md) — Canonical Mermaid source files (`.mmd`)
-- [diagram catalog](diagrams/README.md) — Full diagram catalog, bundles, and generated views
+- [diagrams/](./diagrams/README.md) — Canonical Mermaid source files (`.mmd`)
+- [diagram catalog](./diagrams/README.md) — Full diagram catalog, bundles, and generated views
 - [diagrams/guide/index.md](diagrams/guide/index.md) — Inline diagram collection
 
 ### Architecture Decision Records (ADRs)

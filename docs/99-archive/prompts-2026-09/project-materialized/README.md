@@ -17,9 +17,9 @@ Navigation only, not runtime SSOT.
 - Kernel + overlays: [`overlays/`](../../../overlays/) → [`generated/`](../../../generated/)
 - Legacy id wrappers: [`compatibility/`](../../../compatibility/)
 - Router: [pack.md](pack.md) (`prompt.audit.project.pack`)
-- Ten cycle bookmarks: [cycle index](../cycle/README.md) (deprecated redirects)
-- Sequential run: [sequential-run.md](../sequential-run.md)
-- Cyclic router: [cyclic-pack.md](../cyclic-pack.md)
+- Ten cycle bookmarks: cycle index (`cycle/README.md`) (deprecated redirects)
+- Sequential run: [sequential-run.md](../../../00-project/ai/prompts/library/audit/sequential-run.md)
+- Cyclic router: [cyclic-pack.md](../../../00-project/ai/prompts/library/audit/cyclic-pack.md)
 
 ## Frozen snapshot
 
@@ -29,6 +29,6 @@ snapshot. Do not edit it as source.
 ## Retired trees
 
 `new/` and `new2/` were unregistered `ALLOW_*=true` megacards (ADR-060 D1/D2).
-They live under [`archive/retired-project-new/`](../../../archive/retired-project-new/README.md)
-and [`archive/retired-project-new2/`](../../../archive/retired-project-new2/README.md).
+They live under [`archive/retired-project-new/`](../archive/retired-project-new/README.md)
+and [`archive/retired-project-new2/`](../archive/retired-project-new2/README.md).
 Use `python -m scripts.ai.prompts compile --domain <domain> --profile audit-readonly`.

@@ -27,7 +27,7 @@ Primary supporting documents:
 - [root-hygiene-cleanup-hardening-2026-04-29.md](./root-hygiene-cleanup-hardening-2026-04-29.md)
 - [root-hygiene-review-lane-automation-2026-04-29.md](./root-hygiene-review-lane-automation-2026-04-29.md)
 - [repository-file-structure-remediation-plan-2026-04-28.md](./repository-file-structure-remediation-plan-2026-04-28.md)
-- [retention-sensitive-cleanup.md](../05-operations/runbooks/retention-sensitive-cleanup.md)
+- [retention-sensitive-cleanup.md](../../05-operations/runbooks/retention-sensitive-cleanup.md)
 
 ## Suggested dependency order
 

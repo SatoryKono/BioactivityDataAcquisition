@@ -1,5 +1,5 @@
 > Archived snapshot. The maintained guide remains at
-> [DUX4 title/scope harness](../../../03-guides/dashboards/dux4-title-scope-harness.md).
+> [DUX4 title/scope harness](../../../03-guides/dashboards/archive/audit-protocols/dux4-title-scope-harness.md).
 
 # DUX4-01 title/scope harness decision
 

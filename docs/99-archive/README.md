@@ -29,9 +29,9 @@ current documentation.
   archive lane for historical operational and deployment material.
 - [Plans Index](../plans/README.md) — retained planning artifacts that may still
   provide useful historical context.
-- [Archived Plans Index](plans/README.md) — completed or superseded plan
+- [Archived Plans Index](./plans/README.md) — completed or superseded plan
   artifacts moved out of the active plan set.
-- [Archived Engineering](engineering/README.md) — closeouts relocated from
+- [Archived Engineering](./engineering/README.md) — closeouts relocated from
   `docs/05-engineering/` (DOC-GOV-08).
 - [Archived Fix Notes](fixes/) — one-off Windows/WSL and dependency fix notes
   relocated from `docs/fixes/` (docs audit cycle 1 / #7420).
@@ -48,9 +48,9 @@ current documentation.
   surfaces.
 - `reports/quality/` and `reports/semantic_pipeline_audit/` — superseded
   quality and semantic report snapshots moved out of active report surfaces.
-- [Reports Index](../reports/index.md) — curated repo-only evidence and bounded
+- Reports Index (`docs/reports/index.md`) — curated repo-only evidence and bounded
   internal reports.
-- [Root Status Artifacts](root-status-artifacts/README.md) — historical root
+- Root Status Artifacts (`root-status-artifacts/`) — historical root
   completion notes, sync summaries, and one-off setup/recovery artifacts moved
   out of the repository root.
 - [Pipeline Specifications](pipelines/) — historical pipeline specifications and legacy contract details.

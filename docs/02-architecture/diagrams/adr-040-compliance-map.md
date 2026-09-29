@@ -12,7 +12,7 @@ ______________________________________________________________________
 
 Maps issue #6543 required diagram themes to **existing** ADR-040-governed sources under `docs/02-architecture/diagrams/`.
 
-**Policy and governance:** [ADR-040](../decisions/ADR-040-diagram-governance.md) · **Index:** [README.md](README.md)
+**Policy and governance:** [ADR-040](../decisions/ADR-040-diagram-governance.md) · **Index:** [README.md](./README.md)
 
 ## ADR-040 requirements (summary)
 
@@ -22,7 +22,7 @@ Maps issue #6543 required diagram themes to **existing** ADR-040-governed source
 | Location | All under `docs/02-architecture/diagrams/` |
 | Lint / quality | `python -m scripts.diagrams lint` · `make render-diagrams` · CI diagram jobs |
 | Rendered baselines | Tracked `svg/` / `png/` next to families |
-| Registry / catalog | [README.md](README.md#architecture-diagrams-52-core-49-52-added) |
+| Registry / catalog | [README.md](./README.md#architecture-diagrams-52-core-49-52-added) |
 | Views | `views/*.mermaid` presentation slices (not SSOT replacements) |
 
 ## Required themes → canonical sources
@@ -66,7 +66,7 @@ Maps issue #6543 required diagram themes to **existing** ADR-040-governed source
 
 ### 5. Sequence diagrams (core five)
 
-Documented in [README.md](README.md#sequence-diagrams-5-core-issue-6544):
+Documented in [README.md](./README.md#sequence-diagrams-5-core-issue-6544):
 
 1. `sequence/01-pipeline-execution-sequence.mmd`
 2. `sequence/02-composite-pipeline-sequence.mmd`
@@ -100,4 +100,4 @@ python -m scripts.diagrams  # see scripts.diagrams --help
 
 - [Architecture overview](../00-overview.md)
 - [ADR Decision Matrix](../../03-guides/cheatsheets/adr-matrix.md)
-- [Rendering workflow](README.md#rendering)
+- [Rendering workflow](./README.md#rendering)

@@ -86,7 +86,7 @@ ADR-048 ratifies the current boundary:
 
 - [Aggregates](aggregates.md)
 - [Aggregate State Machines](aggregate-state-machines.md)
-- [Ports](ports.md)
+- [Ports](./ports.md)
 - [Workflow State Machine](workflow-state-machine.md)
 - [ADR-044](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
 - [ADR-047](../../02-architecture/decisions/ADR-047-workflow-control-plane.md)

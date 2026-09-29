@@ -1,5 +1,5 @@
 ---
-title: "[P0][testing] TEST-SYS-01: Non-ChEMBL bronze exact-replay fixture promotion"
+title: "\[P0]\[testing] TEST-SYS-01: Non-ChEMBL bronze exact-replay fixture promotion"
 labels: P0, testing, replay, determinism, quality, golden, coverage
 assignees: []
 github_issue: 7022

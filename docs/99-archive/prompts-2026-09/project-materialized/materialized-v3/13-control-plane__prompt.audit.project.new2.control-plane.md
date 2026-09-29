@@ -58,7 +58,7 @@ RunManifest, RunLedger, checkpoint/resume/repair/force, fencing и operator insp
 - **A Surfaces:** Manifest, ledger, inspection, replay/resume, force/repair и CLI verbs.
 - **B Invariants:** Checkpoint vs ledger contract; fencing/lock; persistence cannot be silently skipped.
 - **C Drift:** Docs/runbooks/CLI claims vs code and stores.
-- **D Issues:** PROVEN + requirement_id; title [control-plane][REQ][P#].
+- **D Issues:** PROVEN + requirement_id; title \[control-plane]\[REQ][P#].
 - **E Fix:** Minimal service/composition change.
 - **F Validate:** Focused control-plane tests; failure/restart/resume scenarios; target-branch close.
  

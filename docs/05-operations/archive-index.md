@@ -31,10 +31,10 @@ ______________________________________________________________________
 ### Historical verification and release evidence
 
 - [Historical Release Checklist (v5.9)](release-checklist.md)
-- [Docker Helper Credential History Audit](verification/docker-helper-credential-history-audit.md)
-- [Endpoint Validation Checklist](verification/endpoint-validation-checklist.md)
-- [VCR Provider Rebalancing](verification/vcr-provider-rebalancing.md)
-- [VCR Test Tasks](verification/vcr-test-tasks.md)
+- [Docker Helper Credential History Audit](./verification/docker-helper-credential-history-audit.md)
+- [Endpoint Validation Checklist](./verification/endpoint-validation-checklist.md)
+- [VCR Provider Rebalancing](./verification/vcr-provider-rebalancing.md)
+- [VCR Test Tasks](./verification/vcr-test-tasks.md)
 
 ### Historical / auxiliary deployment notes
 
@@ -53,7 +53,7 @@ ______________________________________________________________________
 ## Canonical Current Guidance
 
 - For current operator workflows, start with:
-  - [Operations Documentation](README.md)
+  - [Operations Documentation](./README.md)
   - [Operations Runbooks](runbooks/index.md)
   - [Monitoring Guide](01-monitoring-guide.md)
   - [VACUUM Retention](vacuum-retention.md)

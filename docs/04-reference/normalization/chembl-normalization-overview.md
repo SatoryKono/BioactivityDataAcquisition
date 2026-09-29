@@ -128,5 +128,5 @@ Do not:
 - [Reference Index](../index.md)
 - [Data Providers Documentation](../providers/README.md)
 - [Non-ChEMBL Normalization Overview](non-chembl-normalization-overview.md)
-- [Publication Normalization](publication-normalization.md)
+- [Publication Normalization](./publication-normalization.md)
 - [Reference Identifiers](reference-identifiers.md)

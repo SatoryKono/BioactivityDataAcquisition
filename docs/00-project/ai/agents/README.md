@@ -56,7 +56,7 @@ Live runtime set is exactly the six `py-*` profiles in `.codex/agents/` (Junie/D
 - Gemini runtime copy: not tracked on `main`; treat Gemini orchestration refs as
   local-only or mirror guidance until a verified `.gemini/agents/**` tree is
   added
-- [ORCHESTRATION.md](agents/ORCHESTRATION.md) — published mirror for documentation/navigation
+- [ORCHESTRATION.md](./agents/ORCHESTRATION.md) — published mirror for documentation/navigation
 - [AGENT.md](guides/AGENT.md) — Core Engineering Guide
 - [CLAUDE.md](guides/CLAUDE.md) — Claude CLI specific guide
 - [GEMINI.md](guides/GEMINI.md) — Gemini CLI specific guide

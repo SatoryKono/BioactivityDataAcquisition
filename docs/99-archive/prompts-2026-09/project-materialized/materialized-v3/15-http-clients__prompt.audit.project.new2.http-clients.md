@@ -58,7 +58,7 @@ UnifiedHTTPClient, timeout, retry/backoff, QPS, User-Agent, pagination, circuit 
 - **A Inventory:** Shared HTTP stack vs provider-specific duplicates.
 - **B Contract:** Timeout, retry/backoff, QPS, UA, CB, 4xx/5xx and secret policy.
 - **C Pagination:** Completeness, offsets/tokens, partial failure, health-check paths.
-- **D Issues:** PROVEN + requirement_id; title [http][REQ][P#].
+- **D Issues:** PROVEN + requirement_id; title \[http]\[REQ][P#].
 - **E Fix:** Minimal adapter/client change; preserve port boundary.
 - **F Validate:** Unit/contract/VCR tests; bounded simulated failures.
  

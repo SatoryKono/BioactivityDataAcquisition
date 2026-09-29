@@ -186,4 +186,4 @@ data/
 - [Running Pipelines](running-pipelines.md) - Pipeline execution workflows and runtime control flow
 - [Docs Verification](docs-verification.md) - Published docs quality gates and recurring audit checklist
 - [Add New Source](add-new-source.md) - Integrate a new data provider
-- [Guides Index](index.md) - Browse the full how-to surface
+- [Guides Index](./index.md) - Browse the full how-to surface

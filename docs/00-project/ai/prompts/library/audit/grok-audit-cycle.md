@@ -46,7 +46,7 @@ max_body_lines: 40
 ---
 # Archived: grok audit cycle
 
-Use [`prompt.audit.cycle`](cycle.md).
+Use [`prompt.audit.cycle`](./cycle.md).
 
 ```text
 python -m scripts.ai.prompts render prompt.audit.cycle --param DOMAIN=docs --param SCOPE=docs/

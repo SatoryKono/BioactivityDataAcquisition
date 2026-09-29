@@ -98,6 +98,6 @@ expired and the owner has approved removal.
 
 ## Related contracts
 
-- [ADR-001: Delta Lake vs Parquet](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)
+- [ADR-001: Delta Lake vs Parquet](../../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)
 - [Local storage layout](local-storage-layout.md)
-- [Migrations inventory](../../scripts/ops/migrations/README.md)
+- [Migrations inventory](../../../scripts/ops/migrations/README.md)

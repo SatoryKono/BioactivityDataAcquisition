@@ -98,7 +98,7 @@ The following `sp-*` profiles live only under `docs/00-project/ai/agents/agents/
 
 ## Orchestration Workflow
 
-See [ORCHESTRATION.md](ORCHESTRATION.md) for the published mirror of the standard workflow, then confirm runtime-specific behavior in the active runtime registry when exact execution semantics matter.
+See [ORCHESTRATION.md](./ORCHESTRATION.md) for the published mirror of the standard workflow, then confirm runtime-specific behavior in the active runtime registry when exact execution semantics matter.
 
 Detailed profile mirrors remain repo-only under `docs/00-project/ai/agents/agents/`. When exact runtime behavior matters, prefer `.devin/agents/*.md` or the active runtime registry over the published catalog.
 

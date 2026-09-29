@@ -94,7 +94,7 @@ Do not:
 
 | Group | Current published detail |
 | --- | --- |
-| Publication providers | [publication-normalization.md](publication-normalization.md) |
+| Publication providers | [publication-normalization.md](./publication-normalization.md) |
 | PubChem molecule normalization | [pubchem-normalization.md](pubchem-normalization.md) |
 | UniProt protein and idmapping normalization | [uniprot-normalization.md](uniprot-normalization.md) |
 | Shared identifier namespaces | [reference-identifiers.md](reference-identifiers.md) |

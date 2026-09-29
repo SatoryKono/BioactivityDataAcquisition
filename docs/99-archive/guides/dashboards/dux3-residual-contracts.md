@@ -1,5 +1,5 @@
 > Archived snapshot. The maintained guide remains at
-> [DUX3 residual contracts](../../../03-guides/dashboards/dux3-residual-contracts.md).
+> [DUX3 residual contracts](../../../03-guides/dashboards/archive/audit-protocols/dux3-residual-contracts.md).
 
 ______________________________________________________________________
 

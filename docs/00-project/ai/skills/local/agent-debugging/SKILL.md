@@ -22,7 +22,7 @@ description: "Diagnose a concrete AI-agent trajectory with BioETL's safe optiona
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
 - Safe adapter: `../../../scripts/ai/agent_tools/README.md`
-- Shared contract: [references/advisory-contract.md](references/advisory-contract.md)
+- Shared contract: [references/advisory-contract.md](./references/advisory-contract.md)
 
 ## Trigger Scope
 

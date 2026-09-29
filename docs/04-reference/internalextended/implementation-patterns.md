@@ -229,4 +229,4 @@ pipeline_config = resolver.resolve("pipeline", raw_pipeline_config)
 
 - [Composition Layer Architecture](../../02-architecture/05-composition-layer.md)
 - [Architecture Overview](../../02-architecture/00-overview.md)
-- [Internal/Extended Index](index.md)
+- [Internal/Extended Index](./index.md)

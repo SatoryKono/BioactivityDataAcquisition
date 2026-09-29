@@ -52,4 +52,4 @@ This archive is **opt-in only** (Phase 3 / #8517).
 ## Related
 
 - Epic: #8513 · Phase 3: #8517
-- Active catalog: [`../generated/CATALOG.md`](../generated/CATALOG.md)
+- Active catalog: `generated/CATALOG.md`

@@ -1,5 +1,5 @@
 ---
-title: "[P2][testing] TEST-SYS-10: Basename dedup / multi-provider test naming hygiene"
+title: "\[P2]\[testing] TEST-SYS-10: Basename dedup / multi-provider test naming hygiene"
 labels: P2, testing, hygiene, refactor, quality
 assignees: []
 github_issue: 7032

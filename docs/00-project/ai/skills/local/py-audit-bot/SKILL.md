@@ -23,7 +23,7 @@ description: "Execute the BioETL py-audit-bot profile for baseline, final, targe
 
 - Primary profile: `../../agents/py-audit-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
-- Shared wrapper contract: [references/wrapper-contract.md](references/wrapper-contract.md)
+- Shared wrapper contract: [references/wrapper-contract.md](./references/wrapper-contract.md)
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
 - Role memory: `../../../docs/00-project/ai/memory/memory-py-audit-bot.md`
 

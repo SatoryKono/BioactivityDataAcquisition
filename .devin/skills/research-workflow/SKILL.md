@@ -469,14 +469,14 @@ skill research-workflow --phase complete
 
 ## References
 
-- [references/evidence-object-schema.md](references/evidence-object-schema.md) - Evidence YAML schema
-- [references/synthesis-template.md](references/synthesis-template.md) - Synthesis document template
-- [references/decision-ledger-schema.md](references/decision-ledger-schema.md) - DECISIONS.yaml schema
-- [references/risk-ledger-schema.md](references/risk-ledger-schema.md) - RISKS.yaml schema
-- [references/prd-template.md](references/prd-template.md) - PRD template
-- [references/architecture-template.md](references/architecture-template.md) - Architecture template
-- [references/constraint-rules.md](references/constraint-rules.md) - Detailed constraint rules
-- [references/brief-template.md](references/brief-template.md) - BRIEF.md template
-- [references/pillar-definitions.md](references/pillar-definitions.md) - Pillar definitions and scope
-- [references/id-generation-rules.md](references/id-generation-rules.md) - Semantic ID creation
-- [references/research-protocols.md](references/research-protocols.md) - Pillar-specific research guidance
+- [references/evidence-object-schema.md](./references/evidence-object-schema.md) - Evidence YAML schema
+- [references/synthesis-template.md](./references/synthesis-template.md) - Synthesis document template
+- [references/decision-ledger-schema.md](./references/decision-ledger-schema.md) - DECISIONS.yaml schema
+- [references/risk-ledger-schema.md](./references/risk-ledger-schema.md) - RISKS.yaml schema
+- [references/prd-template.md](./references/prd-template.md) - PRD template
+- [references/architecture-template.md](./references/architecture-template.md) - Architecture template
+- [references/constraint-rules.md](./references/constraint-rules.md) - Detailed constraint rules
+- [references/brief-template.md](./references/brief-template.md) - BRIEF.md template
+- [references/pillar-definitions.md](./references/pillar-definitions.md) - Pillar definitions and scope
+- [references/id-generation-rules.md](./references/id-generation-rules.md) - Semantic ID creation
+- [references/research-protocols.md](./references/research-protocols.md) - Pillar-specific research guidance

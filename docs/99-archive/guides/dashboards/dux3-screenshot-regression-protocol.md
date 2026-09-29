@@ -1,5 +1,5 @@
 > Archived snapshot. The maintained guide remains at
-> [DUX3 screenshot regression protocol](../../../03-guides/dashboards/dux3-screenshot-regression-protocol.md).
+> [DUX3 screenshot regression protocol](../../../03-guides/dashboards/archive/audit-protocols/dux3-screenshot-regression-protocol.md).
 
 ______________________________________________________________________
 

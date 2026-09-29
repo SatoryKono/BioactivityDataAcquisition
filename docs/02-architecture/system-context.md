@@ -143,5 +143,5 @@ ______________________________________________________________________
 ## Related Documents
 
 - **Data Flow**: [data-flow.md](diagrams/guide/data-flow-reference.md)
-- **Architecture Diagrams**: [diagram catalog](diagrams/README.md)
+- **Architecture Diagrams**: [diagram catalog](./diagrams/README.md)
 - **Local-Only ADR**: [ADR-010](decisions/ADR-010-local-only-deployment.md)

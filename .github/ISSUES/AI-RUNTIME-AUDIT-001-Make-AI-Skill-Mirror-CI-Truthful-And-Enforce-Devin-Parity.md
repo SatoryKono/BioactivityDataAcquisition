@@ -1,4 +1,4 @@
-# [AI runtime][P1] Make skill mirror CI truthful and enforce sanctioned Codex-Devin parity
+# \[AI runtime]\[P1] Make skill mirror CI truthful and enforce sanctioned Codex-Devin parity
 
 ## Summary
 

@@ -1,5 +1,5 @@
 ---
-title: "[P0][testing] TEST-SYS-02: Nominal unit coverage for control-plane, checkpoint, registry helpers"
+title: "\[P0]\[testing] TEST-SYS-02: Nominal unit coverage for control-plane, checkpoint, registry helpers"
 labels: P0, testing, control-plane, composition, coverage, architecture
 assignees: []
 github_issue: 7024

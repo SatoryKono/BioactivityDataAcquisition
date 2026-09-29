@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Pipeline Operational Coverage
 
-> **Canonical pipeline catalog:** [README.md](README.md)
+> **Canonical pipeline catalog:** [README.md](./README.md)
 >
 > This page is the operational facet supplement for the current catalog of
 > `27` active pipeline surfaces (`22` provider entity pipelines and `5`

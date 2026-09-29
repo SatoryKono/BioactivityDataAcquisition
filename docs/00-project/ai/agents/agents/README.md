@@ -64,7 +64,7 @@ workflow.
 
 ## Orchestration Workflow
 
-See [ORCHESTRATION.md](ORCHESTRATION.md) for the published mirror of the
+See [ORCHESTRATION.md](./ORCHESTRATION.md) for the published mirror of the
 standard workflow, then confirm runtime-specific behavior in the active runtime
 registry when exact execution semantics matter.
 

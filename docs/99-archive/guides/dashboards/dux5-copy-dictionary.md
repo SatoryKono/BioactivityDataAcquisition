@@ -1,5 +1,5 @@
 > Archived snapshot. The maintained guide remains at
-> [DUX5 operator copy dictionary](../../../03-guides/dashboards/dux5-copy-dictionary.md).
+> [DUX5 operator copy dictionary](../../../03-guides/dashboards/archive/audit-protocols/dux5-copy-dictionary.md).
 
 # DUX5 operator copy dictionary
 
@@ -72,4 +72,4 @@ No auto-shrink below floors; reflow/wrap/shorten instead.
 
 ## DUX6 residual
 
-Pixel residual after re-audit: [dux6-residual-readability.md](dux6-residual-readability.md).
+Pixel residual after re-audit: [dux6-residual-readability.md](./dux6-residual-readability.md).

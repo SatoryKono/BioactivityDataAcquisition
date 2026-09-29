@@ -1,5 +1,5 @@
 > Archived snapshot. The maintained guide remains at
-> [DUX3 semantic fixture matrix](../../../03-guides/dashboards/dux3-semantic-fixtures.md).
+> [DUX3 semantic fixture matrix](../../../03-guides/dashboards/archive/audit-protocols/dux3-semantic-fixtures.md).
 
 ______________________________________________________________________
 
@@ -32,4 +32,4 @@ frames / Ops HTTP empty responses.
 
 Bare `UNKNOWN` only when none of the above can be determined.
 
-See also [dux3-residual-contracts.md](dux3-residual-contracts.md) §3.
+See also [dux3-residual-contracts.md](./dux3-residual-contracts.md) §3.
