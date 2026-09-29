@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `ad9eb771d33c42d130fffe9b59e63f81a499b373b3bb0a2e1f80c0cbca6b82ba`
+Evidence surface SHA-256: `3147ffa56928e0b736afe1bff1d440a82a4761f148501cdee82b57018b74caaf`
 
 Evidence metadata refresh (2026-09-26): rebind after main suite-green merge. Current headline evidence:
 Debt-governance gates: **43 pass / 3 fail**;
@@ -76,7 +76,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "ad9eb771d33c42d130fffe9b59e63f81a499b373b3bb0a2e1f80c0cbca6b82ba",
+  "evidence_surface_sha256": "3147ffa56928e0b736afe1bff1d440a82a4761f148501cdee82b57018b74caaf",
   "metrics": {
     "architecture_integral_score": 9.89,
     "architecture_interpretation": "excellent",
@@ -87,11 +87,11 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 46,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 2483,
+    "fully_covered_module_count": 2490,
     "layer_violation_count": 0,
-    "no_executable_lines_module_count": 1,
-    "partially_covered_module_count": 7,
-    "source_module_count": 2491,
+    "no_executable_lines_module_count": 4,
+    "partially_covered_module_count": 28,
+    "source_module_count": 2522,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -150,6 +150,22 @@ python -m scripts.engineering.qa check-exemptions
 ## Guard
 
 - **REJECTED_POLICY:** any increase of tech-debt budgets / exemptions / hotspot caps
+
+Evidence metadata refresh (2026-09-29): workflow-evidence closeout and coverage inventory reconciliation. Current headline evidence:
+Debt-governance gates: **46 pass / 0 fail**;
+Architecture quality integral score: **9.89** (`excellent`);
+source_module_count: **2522**;
+fully_covered: **2490**;
+partially_covered: **28**;
+no_executable_lines: **4**;
+uncovered: **0**;
+unmeasured: **0**;
+= 2522 == source_module_count;
+Contract coverage matrix schema: **contract-coverage-matrix-v3**;
+Constructor waivers (shrink-only inventory): **1** entries;
+Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**;
+Layer violations: **0**.
+No budget growth.
 
 Evidence metadata refresh (2026-09-28): wave-2 test-governance paydown (duplicate names, assertion bypass, 39 markers, deterministic run IDs, zero-ref triage). Current headline evidence:
 Debt-governance gates: **45 pass / 1 fail**;

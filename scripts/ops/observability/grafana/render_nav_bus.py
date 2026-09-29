@@ -122,12 +122,12 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-overview-v2": {9002: 5},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 3, 24, 3),
-    9422: (0, 6, 24, 3),
-    9418: (0, 9, 12, 8),
-    9416: (12, 9, 12, 8),
+    9400: (0, 3, 18, 3),
+    9422: (18, 3, 6, 3),
+    9418: (0, 6, 12, 8),
+    9416: (12, 6, 12, 8),
 }
-_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
+_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 14
 # Runtime already owns current readiness as 9401 Monitor Pipeline Status.
 _TRUST_DROP_PANEL_IDS = frozenset({9401, 9404, 9452})
 _TRUST_MOVE_PANEL_IDS = frozenset(
@@ -1487,7 +1487,7 @@ def _set_panel_no_value(panel: dict[str, object], text: str) -> None:
 
 
 def _stamp_exact_replay_panel(panels: list[object]) -> None:
-    """Keep the readiness answer full-width and free of a self-link."""
+    """Keep the readiness answer compact and free of a self-link."""
     for panel in _walk_panels(panels):
         if not isinstance(panel, dict) or panel.get("id") != 9422:
             continue

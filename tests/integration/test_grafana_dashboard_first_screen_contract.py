@@ -180,7 +180,7 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
                 f"{dashboard_name}:id={panel_id} context band height must stay compact"
             )
             if dashboard_name == "bioetl-control-plane-v1.json" and panel_id == 9422:
-                assert grid_pos.get("w") == 24
+                assert grid_pos.get("w") == 6
                 assert panel.get("fieldConfig", {}).get("defaults", {}).get(
                     "noValue"
                 ) == (
@@ -507,12 +507,24 @@ def test_dashboard_top_level_grid_positions_do_not_leave_root_gaps() -> None:
         # Allow the documented single-row gap for dq-v2.
         if dashboard_path.name == "bioetl-dq-v2.json" and gaps == [(17, 17)]:
             continue
-        # Trust tables 9416/9418 end at row 12; collapsed lineage row 9419 starts at y=17.
-        if dashboard_path.name == "bioetl-control-plane-v1.json" and gaps == [(13, 16)]:
-            continue
         assert not gaps, (
             f"{dashboard_path.name} has unexplained empty root row gaps: {gaps}"
         )
+
+
+def test_control_plane_exact_readiness_shares_selected_run_row() -> None:
+    """The exact-replay verdict sits beside, not below, the selected-run rail."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-control-plane-v1.json")
+    )
+    panels = {panel.get("id"): panel for panel in dashboard.get("panels", [])}
+    selected_run = panels[9400]["gridPos"]
+    exact_readiness = panels[9422]["gridPos"]
+
+    assert exact_readiness["y"] == selected_run["y"]
+    assert selected_run["x"] == 0
+    assert exact_readiness["x"] == selected_run["w"]
+    assert selected_run["w"] + exact_readiness["w"] == 24
 
 
 def test_provider_and_dq_range_evidence_panels_are_below_first_screen() -> None:
