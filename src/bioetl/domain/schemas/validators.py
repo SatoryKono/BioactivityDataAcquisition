@@ -19,11 +19,10 @@ import json
 from typing import Any, cast
 
 import pandas as pd
-import pandera.extensions as pa_extensions
 import pandera.pandas as pa
 
 register_check_method = cast(
-    "Any", pa_extensions
+    "Any", pa.extensions
 ).register_check_method  # Any: incomplete Pandera stubs
 
 __all__ = [
