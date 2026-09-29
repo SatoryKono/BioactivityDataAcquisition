@@ -84,7 +84,7 @@ def test_protein_class_hierarchy_path_leaf_and_validation_branches() -> None:
     assert projected.path_labels == ("1:Root", "2")
     assert projected.depth == 1
     assert projected.root_id == 1
-    assert projected.is_leaf is False
+    assert projected.is_leaf is True
 
     leafed = ProteinClassHierarchy(
         l1=_level(1),
@@ -93,7 +93,7 @@ def test_protein_class_hierarchy_path_leaf_and_validation_branches() -> None:
         l4=_level(4),
         l5=_level(5),
         leaf_id=5,
-        path=(_level(1), _level(5)),
+        path=tuple(_level(i) for i in range(1, 6)),
     )
     assert leafed.is_leaf is True
     assert leafed.path_levels[-1].id == 5
