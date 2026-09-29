@@ -1088,7 +1088,7 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
     service.get_effective_config_artifact.side_effect = ValueError("bad effective")
     with pytest.raises(SystemExit) as exit_info:
         config_dq.show_effective_config_command.callback(
-            "chembl_activity", "json", ("bad",)
+            "chembl_activity", "json", ("batch_size=100",)
         )
     assert exit_info.value.code == int(ExitCode.CONFIG_ERROR)
     assert any(
