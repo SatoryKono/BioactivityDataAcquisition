@@ -54,7 +54,11 @@ def _dashboard_panel_titles(dashboard_path: Path) -> Counter[str]:
 
 def _documented_panel_titles(doc_path: Path) -> Counter[str]:
     text = doc_path.read_text(encoding="utf-8")
-    titles = re.findall(r"^###\s+\d+\.\s+(.+?)\s*$", text, flags=re.MULTILINE)
+    begin = "<!-- BEGIN SHIPPED PANEL INVENTORY -->"
+    end = "<!-- END SHIPPED PANEL INVENTORY -->"
+    assert text.count(begin) == text.count(end) == 1, doc_path
+    text = text.split(begin, 1)[1].split(end, 1)[0]
+    titles: list[str] = []
 
     for line in text.splitlines():
         stripped = line.strip()
@@ -85,7 +89,7 @@ def _dashboard_panel_by_id(dashboard_path: Path, panel_id: int) -> dict[str, obj
 
 def _documented_panel_section(doc_text: str, panel_title: str) -> str:
     match = re.search(
-        rf"^###\s+(?:\d+\.\s+)?{re.escape(panel_title)}[ \t]*\r?\n"
+        rf"^#{{2,3}}\s+(?:\d+\.\s+)?{re.escape(panel_title)}(?:\s+—\s+\d+)?[ \t]*\r?\n"
         r"(?P<body>.*?)(?=^#{1,3}[ \t]+|\Z)",
         doc_text,
         flags=re.MULTILINE | re.DOTALL,

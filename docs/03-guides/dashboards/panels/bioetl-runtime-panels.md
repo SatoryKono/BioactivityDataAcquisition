@@ -23,6 +23,8 @@ checks remain INCOMPLETE. Use Run Explorer to inspect the selected run.
 The Ops HTTP identity-table endpoint provides the run UUID, manifest, provider,
 contract and execution context. Pagination exposes additional parameters. Inspect
 value exposes complete identifiers. Aggregate Pipeline scope does not guess a run.
+This BioETL Ops HTTP control-plane identity endpoint is
+`/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
 ## Inspect Processed Records — 9403
 
@@ -30,6 +32,8 @@ The Ops HTTP processed-records endpoint provides Bronze, Silver and Gold account
 rows. Counts and percentages are neutral quantities, not verdicts. Zero means a
 recorded zero; absent evidence is not zero. Cell links open the saved report for
 the selected pipeline and run, so the operator can check the source counts.
+The BioETL Ops HTTP endpoint is `/ops/observability/processed-records`;
+this is not a Prometheus panel.
 
 ## Inspect Saved Run Evidence — 9450
 
@@ -71,3 +75,21 @@ empty response. QUERY ERROR means the request failed; inspect panel status and t
 Ops HTTP service before interpreting data. UNKNOWN and INCOMPLETE preserve missing
 required evidence. N/A is reserved for an explicitly inapplicable check. The raw
 report is authoritative; display mappings never manufacture success.
+
+<!-- BEGIN SHIPPED PANEL INVENTORY -->
+## Current shipped panel inventory
+
+Generated from the dashboard JSON. Earlier sections explain panel semantics; this table identifies the panels shipped in the current dashboard.
+
+| ID | Title | Type |
+| --- | --- | --- |
+| 9400 | Understand Pipeline Scope | text |
+| 9998 | Review Selected Run Status | table |
+| 9402 | Inspect Pipeline Identity | table |
+| 9403 | Inspect Processed Records | table |
+| 9450 | Inspect Saved Run Evidence | row |
+| 9460 | Inspect Selected Run Stages | table |
+| 9451 | Inspect Selected Run Domains | table |
+| 9452 | Inspect Selected Run Identity | table |
+| 9463 | Review Total Run Duration | stat |
+<!-- END SHIPPED PANEL INVENTORY -->

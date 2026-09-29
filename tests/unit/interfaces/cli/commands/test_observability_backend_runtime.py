@@ -63,6 +63,14 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def _stub_docker_readiness(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep backend unit tests independent of the host Docker daemon."""
+    monkeypatch.setattr(
+        runtime_subject, "docker_engine_not_ready_message", lambda: None
+    )
+
+
 def test_build_observability_backend_health_url_uses_host_and_port() -> None:
     assert (
         build_observability_backend_health_url(host="127.0.0.1", port=8081)

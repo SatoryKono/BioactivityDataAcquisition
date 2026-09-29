@@ -29,14 +29,33 @@ Selected-run accounting includes input, accepted, Silver/Gold quarantine, contra
 - **Type:** Table
 - **Purpose:** Manifest identity for the selected Run ID.
 - **Data sources:** `/ops/control-plane/identity-table` with `run_id`.
+- **Contract:** BioETL Ops HTTP control-plane identity endpoint; this is not a Prometheus panel.
 
 ### Inspect Processed Records
 - **Type:** Table
 - **Purpose:** Input, accepted, quarantine, exclusions and Gold output for the selected Run ID. Counts are not TIME RANGE scores. Gold/Silver percentages use the Bronze count as the denominator.
 - **Data sources:** `/ops/observability/processed-records` with `run_id`.
+- **Contract:** BioETL Ops HTTP; this is not a Prometheus panel.
 
 ### Inspect Saved Run Evidence
 - **Type:** Row
 - **Purpose:** Saved domain and identity detail for the same Run ID.
 - **Panels:** `Inspect Selected Run Stages` (saved stage rows for the exact Run ID), `Inspect Selected Run Domains` (domain verdicts of this Run ID; not the page status), `Inspect Selected Run Identity` (full identifiers; the short table is `Inspect Run Identity` on the first screen).
 - **Data sources:** `/ops/observability/selected-run-status` with `run_id`.
+
+<!-- BEGIN SHIPPED PANEL INVENTORY -->
+## Current shipped panel inventory
+
+Generated from the dashboard JSON. Earlier sections explain panel semantics; this table identifies the panels shipped in the current dashboard.
+
+| ID | Title | Type |
+| --- | --- | --- |
+| 9400 | Understand Evidence Scope | text |
+| 9406 | Review Selected Run Status | table |
+| 9402 | Inspect Run Identity | table |
+| 9403 | Inspect Processed Records | table |
+| 9450 | Inspect Saved Run Evidence | row |
+| 9460 | Inspect Selected Run Stages | table |
+| 9451 | Inspect Selected Run Domains | table |
+| 9452 | Inspect Selected Run Identity | table |
+<!-- END SHIPPED PANEL INVENTORY -->

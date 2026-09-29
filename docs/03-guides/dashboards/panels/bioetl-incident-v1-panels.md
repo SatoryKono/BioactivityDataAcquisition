@@ -139,3 +139,111 @@ at eight series per page while preserving complete alert and scope labels.
 ### 99. Inspect Global Signal Measurements
 
 GLOBAL / TIME RANGE. Runtime lag and non-validation backlog operands with thresholds, window and evaluation time. Missing observed/published timestamps leave freshness unverified.
+
+<!-- BEGIN SHIPPED PANEL INVENTORY -->
+## Current shipped panel inventory
+
+Generated from the dashboard JSON. Earlier sections explain panel semantics; this table identifies the panels shipped in the current dashboard.
+
+| ID | Title | Type |
+| --- | --- | --- |
+| 9400 | Understand Incident Scope | text |
+| 9401 | Monitor Scope Status | stat |
+| 2001 | Start Incident Triage | text |
+| 2010 | Inspect Ranked Suspects | table |
+| 2005 | Monitor Global Alerts | table |
+| 2020 | Review Alert Evidence | row |
+| 2006 | Track Alert State History | state-timeline |
+| 2007 | Assess Impact & Confidence | text |
+| 2099 | Domain Suspect Details · GLOBAL / CURRENT | row |
+| 2002 | Inspect Runtime Suspects | table |
+| 2003 | Inspect Provider Suspects | table |
+| 2004 | Inspect DQ Suspects | table |
+| 22011 | Inspect Global Signal Measurements | table |
+| 2100 | Inspect Selected Run Summary | row |
+| 2101 | Review Selected Run Status | table |
+| 8808 | Pipeline fleet and range, not this Run ID | row |
+| 18940 | Monitor Pipeline Status | stat |
+| 9101 | Review Runtime Blockers | table |
+| 9102 | Monitor Coverage | stat |
+| 2460 | Review Stage Progress | table |
+| 9463 | Review Total Run Duration | stat |
+| 238 | Track Stage Backlog Trend | timeseries |
+| 207 | Track Phase Duration | timeseries |
+| 239 | Track Pipeline Duration | timeseries |
+| 2541 | Review Runtime Escalation | text |
+| 237 | Monitor Worst Stage Lag | stat |
+| 16 | Monitor Active Blocker Count | stat |
+| 205 | Monitor Failed Runs | stat |
+| 230 | Monitor Pipeline Alerts | stat |
+| 9996 | Track Failed Workflow Runs | stat |
+| 236 | Monitor No-Records Runs | stat |
+| 9997 | Track Failed Workflow Steps | stat |
+| 21 | Monitor Memory Pressure | stat |
+| 256 | Review Errors by Stage & Code | table |
+| 241 | Compare Records by Stage & Run Type | table |
+| 891 | Monitor Replay | stat |
+| 892 | Track Checkpoint | stat |
+| 893 | Monitor Ledger | stat |
+| 907 | Monitor Telemetry | stat |
+| 2542 | Review Cross-Domain Handoffs | text |
+| 240 | Track Records by Stage / Interval | timeseries |
+| 4 | Inspect DQ Alert Conditions | stat |
+| 5 | Inspect Control Plane Alerts | stat |
+| 6 | Inspect Provider Alerts | stat |
+| 9991 | Start Pipeline Triage | text |
+| 894 | Review Coverage Limits | text |
+| 259 | Inspect Global Provider Alert Conditions | stat |
+| 908 | Review Observed Terminal Counters | table |
+| 7 | Inspect Entities Stale Over 24h | stat |
+| 8804 | Track Global Read Failures | stat |
+| 136 | Monitor Global Read Failures (30m) | stat |
+| 122 | Track Missing Lineage | stat |
+| 137 | Track Lineage Failures | stat |
+| 2 | Track Ledger Failures | stat |
+| 130 | Track Replay Blockers | stat |
+| 242 | Inspect Active Runtime Blocker Detail | table |
+| 2461 | Inspect Current Missing Stage Signals | table |
+| 2543 | Review Global Process Signals | text |
+| 8806 | Compare Global Reads by Store | timeseries |
+| 1 | Track Manifest Failures | stat |
+| 3 | Track Incompatibilities | stat |
+| 104 | Track Unreconstructable | stat |
+| 138 | Review Missing Lineage by Layer | table |
+| 120 | Track Replay Drift | stat |
+| 132 | Monitor Manifest (30m) | stat |
+| 209 | Track Global Shutdown Starts | timeseries |
+| 101 | Track Load Failures | stat |
+| 133 | Monitor Ledger (30m) | stat |
+| 210 | Track Global Shutdown Completions | timeseries |
+| 102 | Track Save Failures | stat |
+| 9491 | Inspect Telemetry Coverage | stat |
+| 103 | Track Global Admin Failures | stat |
+| 111 | Track Global Read Latency | timeseries |
+| 131 | Track Observed Manifest Write Increments | timeseries |
+| 121 | Track Peak Replay Lag | stat |
+| 107 | Compare Global Audit Write Outcomes | timeseries |
+| 134 | Track Replay Drift by Type | timeseries |
+| 9105 | Track Stage Lag | timeseries |
+| 8805 | Compare Checkpoint Outcomes | timeseries |
+| 108 | Compare Global Audit Query Outcomes | timeseries |
+| 135 | Track Replay Lag | timeseries |
+| 8807 | Compare Ledger Appends by Type & Status | timeseries |
+| 243 | Inspect Stage Expectedness | table |
+| 105 | Track Checkpoint Save Latency | timeseries |
+| 109 | Track Global Audit Write Latency | timeseries |
+| 106 | Track Global Checkpoint Admin Latency | timeseries |
+| 110 | Track Global Audit Query Latency | timeseries |
+| 220 | Monitor Runtime Error Rate | stat |
+| 112 | Compare Lineage Persistence Outcomes | timeseries |
+| 32010 | Browse Global Suspects | row |
+| 22010 | Inspect Global Suspects (Full) | table |
+| 32005 | Browse Global Alerts | row |
+| 22005 | Monitor Global Alerts (Full) | table |
+| 9450 | Inspect Saved Run Evidence | row |
+| 9460 | Inspect Selected Run Stages | table |
+| 9451 | Inspect Selected Run Domains | table |
+| 9452 | Inspect Selected Run Identity | table |
+| 9700 | Inspect Current Workflow Evidence | row |
+| 9701 | Review Current Workflow Evidence | table |
+<!-- END SHIPPED PANEL INVENTORY -->

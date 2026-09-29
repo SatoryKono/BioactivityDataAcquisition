@@ -1037,7 +1037,7 @@ def test_read_identity_preview_store_failure() -> None:
     )
 
     store = MagicMock()
-    store.read_text.side_effect = OSError("unreadable")
+    store.read_identity_text.side_effect = OSError("unreadable")
     assert read_identity_preview(Path("r.json"), store=store) == (
         IdentityIndexPreview(None, None, None, None, None, None)
     )
@@ -1050,7 +1050,7 @@ def test_read_identity_preview_missing_identity() -> None:
     )
 
     store = MagicMock()
-    store.read_text.return_value = '{"runs": []}'
+    store.read_identity_text.return_value = '{"runs": []}'
     assert read_identity_preview(Path("r.json"), store=store) == (
         IdentityIndexPreview(None, None, None, None, None, None)
     )

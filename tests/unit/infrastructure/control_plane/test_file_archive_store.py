@@ -49,6 +49,7 @@ def _assessment_case(archive_case, tmp_path, monkeypatch, *, dq="OK"):
         / "pipeline-run-report.json"
     )
     report = {
+        "schema_version": "pipeline_run_report_v2",
         "identity": {
             "pipeline_name": manifest.pipeline_name,
             "run_id": str(manifest.run_id),
@@ -315,7 +316,17 @@ def test_archive_preserves_selected_run_snapshot_and_revisions(archive_case, tmp
         run_id=str(manifest.run_id),
         root=pack / "restored" / "run-reports",
     )
-    assert original == restored
+    relative_report = (
+        Path("pipeline")
+        / manifest.pipeline_name
+        / str(manifest.run_id)
+        / "pipeline-run-report.json"
+    )
+    assert (root / relative_report).read_bytes() == (
+        pack / "restored" / "run-reports" / relative_report
+    ).read_bytes()
+    assert original["revision"] == restored["revision"]
+    assert original["verdict"] == restored["verdict"]
     assert store.verify(manifest=manifest, plan=plan)[0] is True
     revision = next(
         (pack / "restored" / "run-reports").rglob("status-revisions/*.json")

@@ -16287,7 +16287,7 @@
       "github_issue_url": null,
       "inbound_links": 2,
       "lifecycle": null,
-      "outbound_links": 11,
+      "outbound_links": 21,
       "owner": "BioETL Team",
       "path": "docs/00-project/ai/skills/local/research-workflow/SKILL.md",
       "recommended_action": "generate-automatically",

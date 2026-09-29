@@ -253,3 +253,18 @@ Complete evidence is available in the collapsed detail group. The table reuses t
 | 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 | 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 | 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+
+<!-- BEGIN SHIPPED PANEL INVENTORY -->
+## Current shipped panel inventory
+
+Generated from the dashboard JSON. Earlier sections explain panel semantics; this table identifies the panels shipped in the current dashboard.
+
+| ID | Title | Type |
+| --- | --- | --- |
+| 99 | Inspect Scope & Evidence | text |
+| 9604 | Review Overall Verdict | stat |
+| 9603 | Review Selected Run Status | table |
+| 9002 | Review Run Domains | table |
+| 9300 | Review Run Identity | table |
+| 9301 | Review Processed Records | table |
+<!-- END SHIPPED PANEL INVENTORY -->

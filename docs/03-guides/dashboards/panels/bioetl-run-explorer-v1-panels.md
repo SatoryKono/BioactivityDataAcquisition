@@ -73,3 +73,14 @@ Run the recent-run API tests, presentation tests, dashboard operator-readability
 first-window no-scroll and selection-action tests. Verify ten populated rows,
 status links and passport/report targets in the browser. A source-bound API with
 matching row fields is required; an old runtime image is not acceptance.
+
+<!-- BEGIN SHIPPED PANEL INVENTORY -->
+## Current shipped panel inventory
+
+Generated from the dashboard JSON. Earlier sections explain panel semantics; this table identifies the panels shipped in the current dashboard.
+
+| ID | Title | Type |
+| --- | --- | --- |
+| 1 | Understand Run Scope | text |
+| 3010 | Inspect Recent Runs (last 10) | table |
+<!-- END SHIPPED PANEL INVENTORY -->
