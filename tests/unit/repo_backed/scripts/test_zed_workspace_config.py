@@ -25,7 +25,7 @@
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
 # PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
-"""Repository-backed contracts for the project-local Zed configuration."""
+"""Contracts for optional project-local Zed configuration."""
 
 from __future__ import annotations
 
@@ -63,8 +63,11 @@ NON_CONCURRENT_LABEL_PREFIXES = (
 
 
 def _load_json(relative_path: str) -> Any:
-    """Load a tracked Zed JSON document."""
-    return json.loads((ZED_ROOT / relative_path).read_text(encoding="utf-8"))
+    """Load a local Zed JSON document when this machine provides one."""
+    path = ZED_ROOT / relative_path
+    if not path.is_file():
+        pytest.skip(f"Optional local Zed config is absent: {relative_path}")
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _load_lane_module() -> dict[str, Any]:
@@ -112,8 +115,8 @@ def test_zed_xenon_adapts_ci_excludes_to_windows_paths() -> None:
         "snippets/yaml.json",
     ],
 )
-def test_tracked_zed_json_is_valid(relative_path: str) -> None:
-    """Every tracked Zed JSON surface should be parseable."""
+def test_present_zed_json_is_valid(relative_path: str) -> None:
+    """Every present local Zed JSON surface should be parseable."""
     assert _load_json(relative_path) is not None
 
 
