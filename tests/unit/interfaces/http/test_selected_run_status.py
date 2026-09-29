@@ -32,6 +32,7 @@ from bioetl.interfaces.http.selected_run_status import (
     handle_selected_run_status,
     load_selected_run_status,
 )
+from tests.helpers.deterministic_ids import deterministic_run_id
 
 pytestmark = pytest.mark.unit
 
@@ -307,9 +308,8 @@ def test_manifest_without_input_snapshot_is_not_ready(tmp_path):
 
 def test_recorded_object_verification_passes(tmp_path):
     from types import SimpleNamespace
-    from uuid import uuid4
 
-    run_id = str(uuid4())
+    run_id = deterministic_run_id("selected_run_status.recorded_object_verification")
     persist(tmp_path, report(run_id=run_id))
     port = MagicMock()
     port.get_by_run_id.return_value = SimpleNamespace(
@@ -339,11 +339,10 @@ def test_recorded_object_verification_passes(tmp_path):
 
 def test_snapshot_file_on_disk_verifies_bronze_fingerprint(tmp_path):
     from types import SimpleNamespace
-    from uuid import uuid4
 
     batch = tmp_path / "bronze-batch.json"
     batch.write_text("{}", encoding="utf-8")
-    run_id = str(uuid4())
+    run_id = deterministic_run_id("selected_run_status.snapshot_file_on_disk")
     persist(tmp_path, report(run_id=run_id))
     port = MagicMock()
     port.get_by_run_id.return_value = SimpleNamespace(
@@ -378,9 +377,8 @@ def test_snapshot_file_on_disk_verifies_bronze_fingerprint(tmp_path):
 
 def test_missing_snapshot_file_stays_unverified(tmp_path):
     from types import SimpleNamespace
-    from uuid import uuid4
 
-    run_id = str(uuid4())
+    run_id = deterministic_run_id("selected_run_status.missing_snapshot_file")
     persist(tmp_path, report(run_id=run_id))
     port = MagicMock()
     port.get_by_run_id.return_value = SimpleNamespace(
