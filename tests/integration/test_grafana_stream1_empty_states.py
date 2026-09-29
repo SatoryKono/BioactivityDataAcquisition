@@ -239,8 +239,7 @@ def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
     expected = {
         9402: "SELECT RUN — no exact Run ID selected. Choose a run first.",
         9403: (
-            "SELECT RUN — no exact Run ID selected. "
-            "Choose this run in Run Explorer."
+            "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer."
         ),
         9406: "UNKNOWN",
     }

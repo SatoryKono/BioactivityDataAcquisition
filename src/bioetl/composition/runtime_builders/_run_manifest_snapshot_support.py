@@ -53,7 +53,9 @@ def build_launch_context_snapshot(
     )
     if required_persistence_profile_opt_down:
         snapshot["required_persistence_profile_opt_down"] = True
-    archive_policy = archive_policy_for_persistence_profile(required_persistence_profile)
+    archive_policy = archive_policy_for_persistence_profile(
+        required_persistence_profile
+    )
     if archive_policy is not None:
         snapshot["archive_policy"] = archive_policy
     _add_reproducibility_profile_fields(

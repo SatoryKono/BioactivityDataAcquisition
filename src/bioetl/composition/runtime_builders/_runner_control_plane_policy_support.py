@@ -28,7 +28,9 @@ def resolve_required_artifact_lineage_layers(
     skip_gold: bool = False,
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     """Return active sink layers and layers missing metadata sidecars."""
-    return _resolve_artifact_lineage_layers(yaml_config=yaml_config, skip_gold=skip_gold)
+    return _resolve_artifact_lineage_layers(
+        yaml_config=yaml_config, skip_gold=skip_gold
+    )
 
 
 def validate_required_persistence_profile(

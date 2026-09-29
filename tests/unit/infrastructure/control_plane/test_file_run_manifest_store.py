@@ -685,9 +685,7 @@ def test_read_path_needs_no_existence_precheck(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(Path, "exists", _forbid_precheck)
     assert store._load_manifest(manifest.manifest_id) == manifest
     assert store._load_manifest("manifest-absent") is None
-    assert (
-        store._load_manifest_id_for_run_id(manifest.run_id) == manifest.manifest_id
-    )
+    assert store._load_manifest_id_for_run_id(manifest.run_id) == manifest.manifest_id
     assert store._load_manifest_id_for_run_id(absent_run_id) is None
 
 
@@ -696,7 +694,9 @@ def test_read_path_raises_on_corrupt_manifest_payload(tmp_path) -> None:
     store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
     manifest = make_run_manifest(manifest_id="manifest-corrupt")
     store.save(manifest)
-    (store.base_path / "manifest-corrupt.json").write_text("{not json", encoding="utf-8")
+    (store.base_path / "manifest-corrupt.json").write_text(
+        "{not json", encoding="utf-8"
+    )
 
     with pytest.raises(ValueError, match="property name"):
         store._load_manifest("manifest-corrupt")

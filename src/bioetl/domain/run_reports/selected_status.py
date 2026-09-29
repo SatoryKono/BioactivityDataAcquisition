@@ -124,7 +124,12 @@ def provider_selector_options(report: Mapping[str, object]) -> list[dict[str, st
         names.append(identity_name.strip())
     for row in provider_check_rows(report):
         name = row.get("provider")
-        if isinstance(name, str) and name.strip() and name.strip() != "—" and name.strip() not in names:
+        if (
+            isinstance(name, str)
+            and name.strip()
+            and name.strip() != "—"
+            and name.strip() not in names
+        ):
             names.append(name.strip())
     return [{"text": name, "value": name} for name in names]
 
