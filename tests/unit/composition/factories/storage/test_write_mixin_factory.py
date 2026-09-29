@@ -155,8 +155,8 @@ async def test_write_silver_passes_key_nullability_rules() -> None:
         key_nullability_rules=rules,
     )
 
-    call_kwargs = silver.write_silver.call_args[1]
-    assert call_kwargs["key_nullability_rules"] is rules
+    silver.write_silver.assert_awaited_once()
+    assert silver.write_silver.await_args.args[0].key_nullability_rules is rules
 
 
 @pytest.mark.unit

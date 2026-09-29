@@ -26,6 +26,7 @@
     "execution_fingerprint": "legacy-fingerprint",
     "launch_context": {},
     "manifest_id": "legacy-manifest",
+    "objects": {},
     "pipeline_name": "unknown_pipeline",
     "planned_artifacts": [],
     "provider": "unknown",
@@ -263,6 +264,10 @@
       {
         "default": "literal",
         "name": "planned_artifacts"
+      },
+      {
+        "default": "factory",
+        "name": "objects"
       }
     ],
     "RunSourceRef": [

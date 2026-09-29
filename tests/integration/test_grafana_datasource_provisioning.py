@@ -113,7 +113,7 @@ def test_audit_overlay_no_longer_ships_loki_or_quarantine() -> None:
 
 
 def test_grafana_compose_pins_compatible_infinity_plugin() -> None:
-    """Grafana must enforce the Infinity version compatible with Grafana 12.0."""
+    """Grafana must enforce the Infinity version verified with Grafana 12.2."""
     monitoring = _load_monitoring_compose()
     grafana_environment = monitoring["services"]["grafana"]["environment"]
     assert (
@@ -138,8 +138,8 @@ def test_grafana_compose_pins_compatible_infinity_plugin() -> None:
 def test_monitoring_images_are_pinned_and_pushgateway_is_not_a_datasource() -> None:
     monitoring = _load_monitoring_compose()
     assert monitoring["services"]["grafana"]["image"] == (
-        "grafana/grafana:12.0.0@sha256:"
-        "263cbefd5d9b179893c47c415daab4da5c1f3d6770154741eca4f45c81119884"
+        "mirror.gcr.io/grafana/grafana:12.2.5@sha256:"
+        "e67fa772c14a0c728df61d7ac1b46d0da24e557efa729dbe1c404bf4403d6f35"
     )
     assert monitoring["services"]["prometheus"]["image"] == (
         "prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893"

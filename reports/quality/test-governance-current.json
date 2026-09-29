@@ -981,14 +981,7 @@
     }
   },
   "assertless_total_candidates": 83,
-  "budget_violations": [
-    {
-      "actual": 3,
-      "budget": "uuid4_call_sites_max",
-      "expected_max": 0,
-      "metric": "uuid4_call_sites"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -2060,12 +2053,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2949,
-    "total_test_functions": 28968,
+    "total_test_functions": 28969,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 3
+    "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "5550c6c47d1cfb892732f3c47577ee146bcd042103a2e8b454d19d1bd366fb06",
+  "source_tree_sha256": "160f914944be2d3657456adcd26ebc8bc37328b9d7f4229c889227242d27dac0",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 83,
@@ -2078,7 +2071,7 @@
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 3
+    "uuid4_call_sites": 0
   },
   "test_file_inventory": {
     "pytest_python_files": [
@@ -2128,7 +2121,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2949,
-  "total_test_functions": 28968,
+  "total_test_functions": 28969,
   "unreviewed_assertion_bypass_count": 0,
-  "uuid4_call_sites": 3
+  "uuid4_call_sites": 0
 }

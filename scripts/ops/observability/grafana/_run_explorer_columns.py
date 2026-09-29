@@ -133,7 +133,9 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     panel["targets"][0]["root_selector"] = (
         'index_state = "valid_empty" and $exists(items) and $count(items) = 0 '
         '? [{"pipeline": "VALID EMPTY"}] : items.($merge([$, '
-        '{"overview_handoff": "Open", "diagnostics_handoff": "Open", '
+        '{"workflow_id": workflow_passport_url != "" '
+        '? "[" & workflow_id & "](" & workflow_passport_url & ")" : "N/A", '
+        '"overview_handoff": "Open", "diagnostics_handoff": "Open", '
         '"provider_handoff": "Open", "quality_handoff": "Open"}]))'
     )
     panel["transformations"] = [
@@ -172,7 +174,6 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         minWidth=50, wrapText=False, cellOptions={"type": "auto", "wrapText": False}
     )
     links = {
-        "Workflow": ("Workflow passport", "${__data.fields.workflow_passport_url:raw}"),
         "Pipeline": ("Pipeline passport", "${__data.fields.pipeline_passport_url:raw}"),
         "Run ID": (
             "Report \u00b7 ${__data.fields.run_id}",
@@ -264,13 +265,8 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         if name == "Workflow":
             properties.append(
                 {
-                    "id": "mappings",
-                    "value": [
-                        {
-                            "type": "value",
-                            "options": {"\u2014": {"text": "N/A", "color": "#9CA3AF"}},
-                        }
-                    ],
+                    "id": "custom.cellOptions",
+                    "value": {"type": "markdown"},
                 }
             )
         if name == "Duration":
