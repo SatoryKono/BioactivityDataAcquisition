@@ -199,21 +199,21 @@ def test_trust_layout_preserves_scalar_area_and_detail_rows() -> None:
     nav_bus._layout_control_plane_first_window(panels)
     nav_bus._normalize_collapsed_row_children(panels)
 
-    assert scope["gridPos"] == {"x": 0, "y": 3, "w": 24, "h": 2}
+    assert scope["gridPos"] == {"x": 0, "y": 3, "w": 12, "h": 3}
     readiness = next(panel for panel in panels if panel.get("id") == 9422)
-    assert readiness["gridPos"] == {"x": 0, "y": 5, "w": 24, "h": 3}
+    assert readiness["gridPos"] == {"x": 12, "y": 3, "w": 12, "h": 3}
     assert readiness["links"] == []
     assert readiness["fieldConfig"]["defaults"]["noValue"] == "—"
-    assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 8
-    assert trust["gridPos"]["h"] == retention["gridPos"]["h"] == 9
+    assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 6
+    assert trust["gridPos"]["h"] == retention["gridPos"]["h"] == 8
     assert trust["targets"][0]["url"].count("error_as_row=1") == 1
     assert "run_id=${run_id}" in trust["targets"][0]["url"]
     assert "SELECT RUN" in trust["fieldConfig"]["defaults"]["noValue"]
     assert "QUERY ERROR" in trust["fieldConfig"]["defaults"]["noValue"]
     assert all(kpi["gridPos"]["y"] == 13 for kpi in kpis)
     assert all(kpi["gridPos"]["h"] == 4 for kpi in kpis)
-    assert recovery["gridPos"] == {"x": 0, "y": 18, "w": 24, "h": 3}
-    assert collapsed_row["gridPos"]["y"] == 17
+    assert recovery["gridPos"] == {"x": 0, "y": 15, "w": 24, "h": 3}
+    assert collapsed_row["gridPos"]["y"] == 14
     assert collapsed_row["title"] == "Inspect Checkpoint and Replay Checks"
     assert nav_bus._first_window_overflow(panels) == 0
 
