@@ -793,6 +793,7 @@ def _obs_report(rows, **identity):
 
 def _publish_verified_child(store, root, row, workflow_run_id="wrun1", **extra_child):
     child = {
+        "schema_version": "pipeline_run_report_v2",
         "identity": {
             "run_id": row.pipeline_run_id,
             "pipeline_name": row.pipeline_name,

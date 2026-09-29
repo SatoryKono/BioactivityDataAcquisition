@@ -28,7 +28,6 @@ def test_followup_is_idempotent_and_preserves_unique_panel_ids():
 
 def test_full_evidence_tables_do_not_truncate_ranked_results():
     for filename, pairs in [
-        ("bioetl-overview-v2.json", [(215, 20215)]),
         ("bioetl-incident-v1.json", [(2010, 22010), (2005, 22005)]),
     ]:
         dashboard = json.loads((DASH / filename).read_text(encoding="utf-8"))

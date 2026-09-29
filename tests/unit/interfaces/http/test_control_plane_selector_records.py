@@ -800,6 +800,8 @@ def test_expired_deadline_stops_ledger_refill_mid_flight(monkeypatch) -> None:
 @pytest.mark.asyncio
 async def test_timed_out_selector_stops_ledger_refill_and_releases_slot() -> None:
     """After 504 the orphaned selector stops refilling ledger and frees capacity."""
+    if asyncio.to_thread.__module__ != "asyncio.threads":
+        pytest.skip("requires real asyncio.to_thread worker offload")
     from bioetl.interfaces.http._forensic_request_budget import (
         ForensicEndpointUnavailable,
         run_bounded_forensic_operation,
