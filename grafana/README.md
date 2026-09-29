@@ -787,7 +787,7 @@ ______________________________________________________________________
 
 **Grafana:**
 
-- Image: `grafana/grafana:12.0.0`
+- Image: `mirror.gcr.io/grafana/grafana:12.2.5` (digest pinned in `docker-compose.monitoring.yml`)
 - Container: `bioetl-grafana`
 - Порт: `3000:3000`
 - Volumes:

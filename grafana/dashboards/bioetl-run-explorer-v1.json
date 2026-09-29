@@ -378,36 +378,10 @@
                 "value": true
               },
               {
-                "id": "links",
-                "value": [
-                  {
-                    "title": "Workflow passport",
-                    "url": "${__data.fields.workflow_passport_url:raw}",
-                    "includeVars": false,
-                    "targetBlank": true
-                  }
-                ]
-              },
-              {
-                "id": "color",
+                "id": "custom.cellOptions",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#93C5FD"
+                  "type": "markdown"
                 }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "—": {
-                        "text": "N/A",
-                        "color": "#9CA3AF"
-                      }
-                    }
-                  }
-                ]
               }
             ]
           },
@@ -1267,7 +1241,7 @@
           "format": "table",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items.($merge([$, {\"overview_handoff\": \"Open\", \"diagnostics_handoff\": \"Open\", \"provider_handoff\": \"Open\", \"quality_handoff\": \"Open\"}]))",
+          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items.($merge([$, {\"workflow_id\": workflow_passport_url != \"\" ? \"[\" & workflow_id & \"](\" & workflow_passport_url & \")\" : \"N/A\", \"overview_handoff\": \"Open\", \"diagnostics_handoff\": \"Open\", \"provider_handoff\": \"Open\", \"quality_handoff\": \"Open\"}]))",
           "source": "url",
           "type": "json",
           "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",

@@ -103,7 +103,7 @@ services:
       { driver: json-file, options: { max-size: "100m", max-file: "10" } }
 
   grafana:
-    image: grafana/grafana:12.0.0@sha256:263cbefd5d9b179893c47c415daab4da5c1f3d6770154741eca4f45c81119884
+    image: mirror.gcr.io/grafana/grafana:12.2.5@sha256:e67fa772c14a0c728df61d7ac1b46d0da24e557efa729dbe1c404bf4403d6f35
     container_name: bioetl-grafana
     ports:
       - "127.0.0.1:3000:3000"
@@ -126,9 +126,8 @@ services:
       - GF_DATE_FORMATS_INTERVAL_YEAR=YYYY
       - GF_DATE_FORMATS_USE_BROWSER_LOCALE=false
       # Required for BioETL Ops HTTP panels (Run Explorer, identity tables, etc.).
-      # Keep the frontend compatible with pinned Grafana 12.0.0. Infinity 3.11.3
-      # imports react/jsx-runtime, which this Grafana build does not expose and
-      # leaves the datasource-backed panels blank. Bootstrap enforces this pin.
+      # Infinity 3.8.0 is verified with pinned Grafana 12.2.5. Keep this pin
+      # until a newer plugin passes the Ops HTTP table render checks.
       - BIOETL_INFINITY_PLUGIN_VERSION=${BIOETL_INFINITY_PLUGIN_VERSION:-3.8.0}
       # Remote renderer is optional for UI. When renderer is down/OOM, Grafana must
       # fail screenshot/PDF calls quickly — not hang worker threads (was unbounded

@@ -588,3 +588,30 @@ def test_operator_readability_gate_is_wired_as_required_dashboard_check() -> Non
     assert "check-dashboard-operator-readability" in pre_commit
     assert "test_dashboard_operator_readability.py" in pre_commit
     assert "test_dashboard_operator_readability.py" in skill
+
+
+def test_run_explorer_workflow_passport_is_conditional_in_one_column() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
+    panel = next(
+        item for item in get_dashboard_panels(dashboard) if item.get("id") == 3010
+    )
+    selector = panel["targets"][0]["root_selector"]
+    assert 'workflow_passport_url != ""' in selector
+    assert '"[" & workflow_id & "](" & workflow_passport_url & ")" : "N/A"' in selector
+
+    organize = next(
+        item for item in panel["transformations"] if item["id"] == "organize"
+    )
+    displayed = list(organize["options"]["renameByName"].values())
+    assert displayed.count("Workflow") == 1
+    assert len(displayed) == 10
+    assert "Open" not in displayed
+
+    workflow_override = next(
+        item
+        for item in panel["fieldConfig"]["overrides"]
+        if item["matcher"] == {"id": "byName", "options": "Workflow"}
+    )
+    properties = {item["id"]: item["value"] for item in workflow_override["properties"]}
+    assert properties["custom.cellOptions"]["type"] == "markdown"
+    assert "links" not in properties
