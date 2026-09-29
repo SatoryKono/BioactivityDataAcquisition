@@ -51,7 +51,7 @@
       ".codex/agents/py-plan-bot.toml",
       ".codex/agents/py-test-bot.toml"
     ],
-    "junie_only": [".junie/agents/JUNIE-RUNTIME.md", ".junie/guidelines.md"]
+    "junie_only": [".junie/agents/JUNIE-RUNTIME.md", ".junie/guidelines.md", ".junie/agents/CODEX-RUNTIME.md"]
   },
   "runtime_semantics": {
     "junie_runtime_map": ".junie/agents/JUNIE-RUNTIME.md",

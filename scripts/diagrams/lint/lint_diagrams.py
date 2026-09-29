@@ -90,7 +90,7 @@ PLACEHOLDER_PATTERNS = {
 }
 DEFAULT_STALE_DAYS = 90
 ERROR_STALE_DAYS = 150
-DISALLOWED_SUBGRAPH_EMOJI = ("🟡", "🟢", "🔵", "🟣", "⚪")
+DISALLOWED_SUBGRAPH_EMOJI = ("🟡", "🟢", "🔵", "🟣", "⚪", "📋")
 # Canonical ADR-040 palette values that must not be flagged by COLOUR-001.
 CANONICAL_PALETTE = {
     "#f5f3ff",
