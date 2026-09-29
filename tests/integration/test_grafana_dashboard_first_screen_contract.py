@@ -180,13 +180,7 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
                 f"{dashboard_name}:id={panel_id} context band height must stay compact"
             )
             if dashboard_name == "bioetl-control-plane-v1.json" and panel_id == 9422:
-<<<<<<< HEAD
                 assert grid_pos.get("w") == 6
-||||||| 7fda0d1625eb
-                assert grid_pos.get("w") == 24
-=======
-                assert grid_pos.get("w") == 12
->>>>>>> master20260828-4
                 assert panel.get("fieldConfig", {}).get("defaults", {}).get(
                     "noValue"
                 ) == (
@@ -520,9 +514,7 @@ def test_dashboard_top_level_grid_positions_do_not_leave_root_gaps() -> None:
 
 def test_control_plane_exact_readiness_shares_selected_run_row() -> None:
     """The exact-replay verdict sits beside, not below, the selected-run rail."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-control-plane-v1.json")
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = {panel.get("id"): panel for panel in dashboard.get("panels", [])}
     selected_run = panels[9400]["gridPos"]
     exact_readiness = panels[9422]["gridPos"]
