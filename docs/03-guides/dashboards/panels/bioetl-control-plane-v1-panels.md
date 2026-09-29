@@ -203,3 +203,38 @@ panels; HTTP-backed identity panels are documented in the inventory above.
 | 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 | 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 | 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+
+<!-- BEGIN SHIPPED PANEL INVENTORY -->
+## Current shipped panel inventory
+
+Generated from the dashboard JSON. Earlier sections explain panel semantics; this table identifies the panels shipped in the current dashboard.
+
+| ID | Title | Type |
+| --- | --- | --- |
+| 9400 | Inspect Scope & Evidence | text |
+| 9418 | Review Selected-Run Trust | table |
+| 9416 | Review Retention Compliance | table |
+| 9419 | Review Lineage Validation | row |
+| 9415 | Review Lineage Validation | table |
+| 902 | Inspect Checkpoint and Replay Checks | row |
+| 9413 | Review Checkpoint Validation | table |
+| 9423 | Review Exact Replay Checks | table |
+| 901 | Inspect Manifest Validation | row |
+| 9414 | Review Manifest Validation | table |
+| 905 | Inspect Run Identity Evidence | row |
+| 9407 | Inspect Identity Values | table |
+| 9410 | Explain Missing Identity Data | text |
+| 9411 | Explain Missing Record Counts | text |
+| 9405 | Review Identity Gaps | table |
+| 9408 | Review Required Replay Anchors | table |
+| 9406 | Compare Checkpoint Anchors | table |
+| 9409 | Review Additional Forensic Anchors | table |
+| 139 | Review Uncovered Replay Signals | text |
+| 9412 | Inspect Run Details | row |
+| 9402 | Review Run Summary | table |
+| 9403 | Review Processed Records | table |
+| 9417 | Review Bounded Failure Reasons | table |
+| 9422 | Review Exact Replay Readiness | stat |
+| 9420 | Inspect Complete Run Discovery | row |
+| 9421 | Inspect Latest Complete Run | table |
+<!-- END SHIPPED PANEL INVENTORY -->

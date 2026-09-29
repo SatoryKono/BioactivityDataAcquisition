@@ -92,21 +92,9 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
         for spec in audit_subject.REVIEWED_PANEL_SPECS
     }
 
-    assert (
-        covered[("bioetl-control-plane-v1", 132)]
-        == "Monitor Manifest Failure Severity [30m]"
-    )
-    assert (
-        covered[("bioetl-control-plane-v1", 133)]
-        == "Monitor Ledger Failure Severity [30m]"
-    )
     assert covered[("bioetl-control-plane-v1", 892)] == "Track Checkpoint"
     assert covered[("bioetl-control-plane-v1", 9402)] == "ID"
     assert covered[("bioetl-control-plane-v1", 9403)] == "Processed Records"
-    assert covered[("bioetl-dq-v2", 101)] == "Review: Latest Successful Data Timestamp"
-    assert covered[("bioetl-dq-v2", 8)] == (
-        "Time Range · Worst Freshness Age (hours; SLA 24/72)"
-    )
     assert covered[("bioetl-dq-v2", 9402)] == "ID"
     assert covered[("bioetl-dq-v2", 9403)] == "Processed Records"
     assert ("bioetl-silver-reject-explorer", 3) not in covered

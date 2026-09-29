@@ -148,11 +148,20 @@ def run_export_script(
             f"& '{export_script_arg}' -RepoRoot '{repo_path}'{user_scope_arg}; "
             "exit $LASTEXITCODE"
         )
-        cmd = [POWERSHELL, "-NoProfile", "-Command", command]
+        cmd = [
+            POWERSHELL,
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            command,
+        ]
     else:
         cmd = [
             POWERSHELL,
             "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
             "-File",
             export_script_arg,
             "-RepoRoot",

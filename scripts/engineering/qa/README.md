@@ -98,8 +98,8 @@ python -m scripts.engineering.qa <command> [args...]
 | `reduce-architecture-debt`       | Before running the debt-reduction agent; classifies latest tasks into an execution order                                                         | Manual, on-demand                          |
 | `check-terminology`              | After adding domain terms; validates code uses canonical terminology per `glossary.md`                                                           | CI gate (`architecture.yml`)               |
 | `report-dep-map`                 | After changing imports in `src/bioetl/`; use `--check` for drift detection, `--update` to regenerate                                             | Pre-commit hook + CI gate                  |
-| `report-module-coverage`         | After `src/bioetl/**/*.py` changes; hash-only refresh with `--allow-missing-coverage-xml`, `--check` for source-tree freshness                   | CI `coverage-verify` + POST_CHANGE_VALIDATION |
-| `check-branch-coverage`          | After coverage XML is produced; blocking branch-coverage gate from the canonical coverage lane                                                   | CI `coverage-verify`                       |
+| `report-module-coverage`         | After `src/bioetl/**/*.py` changes; hash-only refresh with `--allow-missing-coverage-xml`, `--check` for source-tree freshness                   | Local 17-shard coverage producer + POST_CHANGE_VALIDATION |
+| `check-branch-coverage`          | After coverage XML is produced; blocking branch-coverage gate from the canonical coverage lane                                                   | Local 17-shard coverage producer           |
 | `report-contract-coverage-matrix` | After entity/config contract changes; use `--check` for committed matrix drift                                                                | CI quality-and-architecture                |
 | `report-port-adapter-factory-coverage` | After Port/adapter/factory wiring changes; use `--check` for matrix drift                                                                | CI quality-and-architecture                |
 | `report-compatibility-importer-census` | After sanctioned-seam or twin-module import changes; use `--check` for census drift                                                      | CI quality-and-architecture                |
@@ -120,8 +120,8 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-flaky-test-burndown-review` | After changing the curated flaky inventory or test-governance snapshot; use `--check` to fail on missing or stale review evidence              | Test governance / CI drift check           |
 | `report-dashboard-scenes-parity` | After changing shipped dashboard panels or ADR-053 route mappings; use `--check` to fail closed on parity drift | Optional Scenes shadow parity |
 | `report-adr-enforcement-matrix`  | When accepted ADR coverage must be mapped to implementation owners and enforcement owners                                                        | Architecture governance / CI drift check   |
-| `report-module-coverage`         | After changing `src/bioetl/` imports or adding modules; use `--check --allow-missing-coverage-xml` for hash-only refresh, `--check` for full drift | Module coverage / CI drift check            |
-| `check-branch-coverage`          | After changing branch coverage gates; enforces `reports/coverage/coverage.xml` thresholds                                                      | CI coverage gate                           |
+| `report-module-coverage`         | After changing `src/bioetl/` imports or adding modules; use `--check --allow-missing-coverage-xml` for hash-only refresh, `--check` for full drift | Module coverage / local drift check         |
+| `check-branch-coverage`          | After changing branch coverage gates; enforces `reports/coverage/coverage.xml` thresholds                                                      | Local coverage gate                        |
 | `report-contract-coverage-matrix` | After changing entity configs or contracts; validates cross-entity coverage                                                                  | Contract governance / CI drift check       |
 | `report-port-adapter-factory-coverage` | After changing port-adapter factories; validates core coverage matrix                                                                  | Architecture governance / CI drift check   |
 | `report-compatibility-importer-census` | After changing sanctioned seams or twin modules; generates deterministic census                                                        | Architecture / importer governance         |
@@ -246,7 +246,10 @@ informational; pytest exit codes and quality gates remain the blocking source of
 truth. `test-health` rollups and `reports/quality/test-runs/rollup.md` are
 historical lane history only. The authoritative committed telemetry baseline
 lives in `configs/quality/test_telemetry_baseline.yaml`, and current
-merge-blocking coverage status remains owned by the live `coverage-verify` lane.
+coverage acceptance is based on `python -m scripts.engineering.qa.run_local_coverage_verify`
+from one committed checkout. Its manifest must show all 17 shards and passing
+line and branch gates before regenerating the module inventory. GitHub Actions
+is not an acceptance source.
 
 The legacy direct paths for the historical architecture, application-deps, and
 constructor-args checks remain supported during the migration window, but new

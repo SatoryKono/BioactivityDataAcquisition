@@ -97,9 +97,10 @@ On native Windows, invoke `python -m …` as
     contents)
   - hash-only refresh (no new `coverage.xml` required):
     `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`
-  - full inventory regen (coverage rows changed): run the `coverage-verify`
+  - full inventory regen (coverage rows changed): complete all 17 shards with
+    `python -m scripts.engineering.qa.run_local_coverage_verify`, then run the
     generator from `scripts/engineering/qa/report_module_coverage_inventory.py`
-    against `reports/coverage/coverage.xml`
+    against its validated `reports/coverage/coverage.xml`
   - verify:
     `pytest tests/architecture/test_module_coverage_inventory_freshness.py`
   - on cloud-synced checkouts (for example Google Drive), wait for sync to finish

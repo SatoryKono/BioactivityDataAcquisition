@@ -591,7 +591,7 @@ def _assert_provenance_only_score(
     assert score["scale"] == "0-10"
     assert score["required_profile"] == "replay_ready"
     assert score["score_scope"] == "supported_boundary_run"
-    assert score["overall_score"] == pytest.approx(6.7)
+    assert score["overall_score"] == pytest.approx(6.4)
     assert score["thresholds"] == {
         "checkpoint_safety": 7,
         "replay_readiness": 7,
@@ -607,7 +607,7 @@ def _assert_provenance_only_score(
             "required": 7,
         },
         {
-            "actual": 3,
+            "actual": 1,
             "category": "replay_readiness",
             "reason": "below_required_threshold",
             "required": 7,
@@ -643,6 +643,7 @@ def _assert_provenance_only_score(
         "missing_immutable_input_snapshots",
         "artifact_publication_closure",
         "produced_artifact_trace",
+        "rebuild_replay_mode",
     ]
     assert "diagnostics.git_commit" in score["evidence_refs"]
     assert "diagnostics.source_revision_state" in score["evidence_refs"]

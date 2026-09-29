@@ -35,7 +35,7 @@ emits a machine-readable drift/sync report for owner review.
 | `py-doc-bot` | focused docs, broad docs audit, mirror sync |
 | `py-plan-bot` | implementation, refactor, release planning |
 | `py-test-bot` | focused tests, broad campaign, flake triage |
-| `research-workflow` | single-stream, multi-stream research and evidence |
+| `research-workflow` | single router, phases via --phase: initialize, evidence, synthesis, decisions, specs, complete |
 | `new-pipeline` | provider/entity scaffolding |
 | `observability-dashboard` | dashboard edit, render, query debug |
 | `observability-prometheus` | rule edit, rule test, query debug |
@@ -72,11 +72,3 @@ emits a machine-readable drift/sync report for owner review.
 ## Shared Generic Skills
 
 Additional non-BioETL generic skills may coexist under `.codex/skills/` (for example discovery, decision, and research helpers). They are intentionally excluded from the core catalog above.
-
-## Sanctioned Devin-only skill
-
-`coderabbit-audit/SKILL.md` is an optional Devin-only entrypoint for the CodeRabbit
-audit workflow. Its presence and content are explicitly sanctioned by
-`scripts/ai/codex/skills-mirror-contract.json` (`coderabbit-audit/*`). It is excluded
-from the shared core catalog and its strict link-membership validation; this is
-an intentional exception, not a missing Codex or docs-mirror counterpart.

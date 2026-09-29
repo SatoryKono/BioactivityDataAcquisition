@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import asyncio
-import time
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
+from threading import Event
 from typing import cast
 from uuid import UUID
 
@@ -807,25 +807,29 @@ async def test_timed_out_selector_stops_ledger_refill_and_releases_slot() -> Non
 
     limiter = asyncio.Semaphore(1)
     manifests = tuple(_manifest(index) for index in range(1, 7))
+    release_read = Event()
 
     class _SlowLedger(_Ledger):
         def list_entries_by_run_id(self, run_id):
-            time.sleep(0.2)
+            release_read.wait(timeout=10)
             return super().list_entries_by_run_id(run_id)
 
     slow_ledger = _SlowLedger({})
-    with pytest.raises(ForensicEndpointUnavailable) as exc_info:
-        await run_bounded_forensic_operation(
-            limiter=limiter,
-            operation_factory=lambda: asyncio.to_thread(
-                subject.build_selector_records, manifests, slow_ledger, None
-            ),
-            timeout_seconds=0.05,
-            endpoint="deadline-refill",
-        )
-    assert exc_info.value.status_code == 504
-    assert exc_info.value.reason == "deadline_exceeded"
-    assert limiter.locked()
+    try:
+        with pytest.raises(ForensicEndpointUnavailable) as exc_info:
+            await run_bounded_forensic_operation(
+                limiter=limiter,
+                operation_factory=lambda: asyncio.to_thread(
+                    subject.build_selector_records, manifests, slow_ledger, None
+                ),
+                timeout_seconds=0.05,
+                endpoint="deadline-refill",
+            )
+        assert exc_info.value.status_code == 504
+        assert exc_info.value.reason == "deadline_exceeded"
+        assert limiter.locked()
+    finally:
+        release_read.set()
     await asyncio.wait_for(limiter.acquire(), 5)
     limiter.release()
     assert len(slow_ledger.lookups) == 4

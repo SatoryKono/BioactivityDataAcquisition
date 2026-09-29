@@ -221,3 +221,17 @@ Circuit-breaker panels are GLOBAL ADAPTER evidence, independent of the Provider 
 | 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 | 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 | 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+
+<!-- BEGIN SHIPPED PANEL INVENTORY -->
+## Current shipped panel inventory
+
+Generated from the dashboard JSON. Earlier sections explain panel semantics; this table identifies the panels shipped in the current dashboard.
+
+| ID | Title | Type |
+| --- | --- | --- |
+| 9400 | Understand Selected Run | text |
+| 9402 | Inspect Run Identity | table |
+| 9403 | Inspect Processed Records | table |
+| 9461 | Review Provider Check | stat |
+| 9460 | Review Provider Evidence | table |
+<!-- END SHIPPED PANEL INVENTORY -->
