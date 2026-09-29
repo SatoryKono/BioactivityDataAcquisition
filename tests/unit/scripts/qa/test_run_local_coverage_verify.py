@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from scripts.engineering.qa.run_local_coverage_verify import SHARDS, _command, main
+
+pytestmark = pytest.mark.unit
 
 EXPECTED_SHARDS = (
     "smoke",
