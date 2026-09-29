@@ -2237,10 +2237,10 @@
         "src/bioetl/application/services/control_plane/"
       ],
       "duplication_clusters": 0,
-      "files": 126,
-      "total_loc": 14908,
+      "files": 128,
+      "total_loc": 15392,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.377,
+      "helper_function_ratio": 0.391,
       "max_internal_fan_in": 1,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
@@ -2250,7 +2250,7 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 22,
-          "1": 104
+          "1": 106
         },
         "modules": [
           {
@@ -2355,6 +2355,13 @@
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.application.services.control_plane.ledger.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.ledger.input_snapshot_recording",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.ledger.artifact_recording"
             ]
           },
           {
@@ -2651,6 +2658,13 @@
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness_checks",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.selected_run_replay_readiness"
             ]
           },
           {
@@ -3106,6 +3120,7 @@
           "bioetl.application.services.control_plane.ledger.core_events",
           "bioetl.application.services.control_plane.ledger.entry_diagnostic_details",
           "bioetl.application.services.control_plane.ledger.entry_support",
+          "bioetl.application.services.control_plane.ledger.input_snapshot_recording",
           "bioetl.application.services.control_plane.ledger.rich_events",
           "bioetl.application.services.control_plane.ledger.service",
           "bioetl.application.services.control_plane.manifest._inspection_json",
@@ -3144,6 +3159,7 @@
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_build_operator_replay_projection",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness_checks",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support_refresh_replay_summary_build_policy_assessment",
           "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_types",
@@ -3216,7 +3232,7 @@
       ],
       "duplication_clusters": 0,
       "files": 56,
-      "total_loc": 6654,
+      "total_loc": 6660,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.339,
       "max_internal_fan_in": 2,

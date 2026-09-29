@@ -9,6 +9,7 @@ import pytest
 from bioetl.composition.runtime_builders import (
     run_manifest_contract_identity as identity,
 )
+from bioetl.infrastructure.config import contract_identity_resolution as resolution
 
 pytestmark = pytest.mark.unit
 
@@ -17,7 +18,7 @@ def _set_registry_path(
     monkeypatch: pytest.MonkeyPatch,
     registry_path: Path,
 ) -> None:
-    monkeypatch.setattr(identity, "DEFAULT_CONTRACT_REGISTRY_PATH", registry_path)
+    monkeypatch.setattr(resolution, "DEFAULT_CONTRACT_REGISTRY_PATH", registry_path)
 
 
 def test_missing_registry_returns_compatibility_identity(
@@ -68,7 +69,7 @@ def test_non_mapping_registry_entry_is_absent_or_fails_closed(
     registry_path.touch()
     _set_registry_path(monkeypatch, registry_path)
     monkeypatch.setattr(
-        identity,
+        resolution,
         "load_contract_registry_entries",
         lambda _path: {"chembl.activity": "not-a-mapping"},
     )
@@ -98,7 +99,7 @@ def test_top_level_compatibility_fields_are_used_when_identity_is_not_mapping(
     registry_path.touch()
     _set_registry_path(monkeypatch, registry_path)
     monkeypatch.setattr(
-        identity,
+        resolution,
         "load_contract_registry_entries",
         lambda _path: {
             "chembl.activity": {
