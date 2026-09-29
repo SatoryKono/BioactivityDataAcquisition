@@ -43,8 +43,9 @@ def test_publish_snapshot_is_idempotent_for_identical_report() -> None:
 
     store = _DictReportStore()
     path = Path("reports/status.json")
-    first = publish_snapshot({"run": "a"}, path, store=store)
-    second = publish_snapshot({"run": "a"}, path, store=store)
+    report = {"schema_version": "pipeline_run_report_v2", "run": "a"}
+    first = publish_snapshot(report, path, store=store)
+    second = publish_snapshot(report, path, store=store)
     assert second["selected_run_snapshot"] == first["selected_run_snapshot"]
 
 
@@ -54,13 +55,12 @@ def test_publish_snapshot_rejects_conflicting_revision() -> None:
 
     store = _DictReportStore()
     path = Path("reports/status.json")
-    publish_snapshot({"run": "a"}, path, store=store)
-    revision = build_snapshot(
-        {**{"run": "a"}, "schema_version": "pipeline_run_report_v2"}
-    )["revision"]
+    report = {"schema_version": "pipeline_run_report_v2", "run": "a"}
+    publish_snapshot(report, path, store=store)
+    revision = build_snapshot(report)["revision"]
     store.files[f"reports/status-revisions/{revision}.json"] = "tampered"
     with pytest.raises(ValueError, match="revision conflict"):
-        publish_snapshot({"run": "a"}, path, store=store)
+        publish_snapshot(report, path, store=store)
 
 
 # --- _preflight_reporting (40) ---
