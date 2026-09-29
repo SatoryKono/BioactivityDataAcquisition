@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, is_dataclass
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
@@ -31,43 +31,87 @@ class _DictHost(Protocol):
 __all__ = ["normalize_snapshot", "to_serializable_mapping"]
 
 
-def normalize_snapshot(value: object) -> object:
-    """Normalize snapshot values into JSON-serializable primitives."""
+def _scalar_snapshot(value: object) -> tuple[bool, object]:
+    """Normalize scalar snapshot values, reporting whether handled."""
     if isinstance(value, Enum):
-        return value.value
+        return True, value.value
     if isinstance(value, (UUID, Decimal, Path)):
-        return str(value)
+        return True, str(value)
     if isinstance(value, datetime | date | time):
-        return value.isoformat()
+        return True, value.isoformat()
     if isinstance(value, timedelta):
-        return value.total_seconds()
+        return True, value.total_seconds()
+    return False, value
+
+
+def _is_plain_sequence(value: object) -> bool:
+    """Return True for non-text sequences that normalize element-wise."""
+    return isinstance(value, Sequence) and not isinstance(
+        value, (str, bytes, bytearray)
+    )
+
+
+def _iterable_snapshot(value: object) -> tuple[bool, object]:
+    """Normalize sequence/set snapshot values, reporting whether handled."""
+    if _is_plain_sequence(value) or isinstance(value, (set, frozenset)):
+        items = cast("Iterable[object]", value)
+        return True, [normalize_snapshot(item) for item in items]
+    return False, value
+
+
+def _compound_snapshot(value: object) -> tuple[bool, object]:
+    """Normalize dataclass/mapping snapshot values, reporting whether handled."""
     if not isinstance(value, type) and is_dataclass(value):
-        return normalize_snapshot(asdict(cast("DataclassInstance", value)))
+        return True, normalize_snapshot(asdict(cast("DataclassInstance", value)))
     if isinstance(value, Mapping):
-        return {str(key): normalize_snapshot(item) for key, item in value.items()}
-    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
-        return [normalize_snapshot(item) for item in value]
-    if isinstance(value, (set, frozenset)):
-        return [normalize_snapshot(item) for item in value]
+        return True, {
+            str(key): normalize_snapshot(item) for key, item in value.items()
+        }
+    return _iterable_snapshot(value)
+
+
+def _object_snapshot(value: object) -> tuple[bool, object]:
+    """Normalize public-attribute objects, reporting whether handled."""
     if hasattr(value, "__dict__") and not isinstance(value, type):
-        return normalize_snapshot(
+        return True, normalize_snapshot(
             {key: item for key, item in vars(value).items() if not key.startswith("_")}
         )
+    return False, value
+
+
+def normalize_snapshot(value: object) -> object:
+    """Normalize snapshot values into JSON-serializable primitives."""
+    for step in (_scalar_snapshot, _compound_snapshot, _object_snapshot):
+        handled, result = step(value)
+        if handled:
+            return result
     return value
+
+
+def _public_dict_payload(value: object) -> tuple[bool, object]:
+    """Extract the public-attribute payload, reporting whether handled."""
+    if hasattr(value, "__dict__") and not isinstance(value, type):
+        return True, {
+            key: item for key, item in vars(value).items() if not key.startswith("_")
+        }
+    return False, value
+
+
+def _snapshot_payload(value: object) -> object:
+    """Extract the raw payload for manifest mapping serialization."""
+    if isinstance(value, _ModelDumpHost):
+        return value.model_dump(mode="python", exclude_none=True)
+    if isinstance(value, _DictHost):
+        return value.dict(exclude_none=True)
+    handled, payload = _public_dict_payload(value)
+    if handled:
+        return payload
+    return normalize_snapshot(value)
 
 
 def to_serializable_mapping(value: object) -> dict[str, object]:
     """Return a normalized mapping for manifest payload serialization."""
-    if isinstance(value, _ModelDumpHost):
-        payload: object = value.model_dump(mode="python", exclude_none=True)
-    elif isinstance(value, _DictHost):
-        payload = value.dict(exclude_none=True)
-    elif hasattr(value, "__dict__") and not isinstance(value, type):
-        payload = {
-            key: item for key, item in vars(value).items() if not key.startswith("_")
-        }
-    else:
-        payload = normalize_snapshot(value)
+    payload = _snapshot_payload(value)
     if not isinstance(payload, dict):
         return {"value": normalize_snapshot(payload)}
     normalized = normalize_snapshot(payload)

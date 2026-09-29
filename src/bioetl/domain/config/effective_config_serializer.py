@@ -28,32 +28,62 @@ def _dataclass_to_dict(value: object) -> JsonDict | None:
     return asdict(value)
 
 
+def _jsonable_mapping(value: dict[object, object]) -> dict[str, object]:
+    """Convert one mapping level with sorted string keys."""
+    return {str(key): _to_jsonable(raw) for key, raw in sorted(value.items())}
+
+
+def _jsonable_iterable(value: list[object] | tuple[object, ...]) -> list[object]:
+    """Convert one sequence level element-wise."""
+    return [_to_jsonable(raw) for raw in value]
+
+
+def _jsonable_collection(value: dict[object, object] | list[object] | tuple[object, ...]) -> object:
+    """Convert one mapping/sequence level."""
+    if isinstance(value, dict):
+        return _jsonable_mapping(value)
+    return _jsonable_iterable(value)
+
+
+def _jsonable_dataclass(value: object) -> tuple[bool, object]:
+    """Convert a dataclass payload, reporting whether handled."""
+    dataclass_value = _dataclass_to_dict(value)
+    if dataclass_value is None:
+        return False, value
+    return True, {
+        key: _to_jsonable(raw) for key, raw in dataclass_value.items()
+    }
+
+
 def _to_jsonable(value: object) -> object:
     if isinstance(value, datetime):
         return value.isoformat()
     if isinstance(value, DQDisposition):
         return value.value
-    dataclass_value = _dataclass_to_dict(value)
-    if dataclass_value is not None:
-        return {key: _to_jsonable(raw) for key, raw in dataclass_value.items()}
-    if isinstance(value, dict):
-        return {str(key): _to_jsonable(raw) for key, raw in sorted(value.items())}
-    if isinstance(value, (list, tuple)):
-        return [_to_jsonable(raw) for raw in value]
+    handled, converted = _jsonable_dataclass(value)
+    if handled:
+        return converted
+    if isinstance(value, (dict, list, tuple)):
+        return _jsonable_collection(value)
     return value
 
 
 _VOLATILE_SECTION_HASH_KEYS = frozenset({"timestamp", "config_hash", "effective_hash"})
 
 
+def _without_volatile_dict_fields(value: dict[object, object]) -> dict[str, object]:
+    """Drop volatile bookkeeping keys from one mapping level."""
+    return {
+        str(key): _without_volatile_hash_fields(item)
+        for key, item in value.items()
+        if str(key) not in _VOLATILE_SECTION_HASH_KEYS
+    }
+
+
 def _without_volatile_hash_fields(value: object) -> object:
     """Drop bookkeeping fields so section hashes stay stable."""
     if isinstance(value, dict):
-        return {
-            str(key): _without_volatile_hash_fields(item)
-            for key, item in value.items()
-            if str(key) not in _VOLATILE_SECTION_HASH_KEYS
-        }
+        return _without_volatile_dict_fields(value)
     if isinstance(value, list):
         return [_without_volatile_hash_fields(item) for item in value]
     return value
@@ -218,18 +248,14 @@ class EffectiveConfigSerializer:
         overrides: RuntimeOverrideSnapshot,
     ) -> JsonDict:
         result: JsonDict = {}
-        if overrides.cli_overrides:
-            result["cli_overrides"] = self._normalize_config_data(
-                overrides.cli_overrides
-            )
-        if overrides.env_overrides:
-            result["env_overrides"] = self._normalize_config_data(
-                overrides.env_overrides
-            )
-        if overrides.runtime_adjustments:
-            result["runtime_adjustments"] = self._normalize_config_data(
-                overrides.runtime_adjustments
-            )
+        for field_name, key in (
+            ("cli_overrides", "cli_overrides"),
+            ("env_overrides", "env_overrides"),
+            ("runtime_adjustments", "runtime_adjustments"),
+        ):
+            raw = getattr(overrides, field_name)
+            if raw:
+                result[key] = self._normalize_config_data(raw)
         if result and overrides.override_hash:
             result["override_hash"] = overrides.override_hash
         return result

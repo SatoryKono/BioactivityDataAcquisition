@@ -236,6 +236,16 @@ class ReasonCatalog:
         return self.resolve(code).default_outcome
 
 
+def _valid_field_suffix(field: str | None, stripped_base: str) -> str:
+    """Return the field suffix when it may decorate the base code."""
+    if field is None or ":" in stripped_base:
+        return ""
+    stripped_field = str(field).strip()
+    if not stripped_field or _FIELD_REASON_TOKEN.fullmatch(stripped_field) is None:
+        return ""
+    return stripped_field
+
+
 def compose_field_reason_code(base: str, field: str | None) -> str:
     """Attach a field suffix when the token is a valid catalog field identifier.
 
@@ -246,26 +256,21 @@ def compose_field_reason_code(base: str, field: str | None) -> str:
     stripped_base = str(base).strip()
     if not stripped_base:
         return UNKNOWN_REASON
-    if field is None:
+    suffix = _valid_field_suffix(field, stripped_base)
+    if not suffix:
         return stripped_base
-    stripped_field = str(field).strip()
-    if not stripped_field or _FIELD_REASON_TOKEN.fullmatch(stripped_field) is None:
-        return stripped_base
-    if ":" in stripped_base:
-        return stripped_base
-    return f"{stripped_base}:{stripped_field}"
+    return f"{stripped_base}:{suffix}"
 
 
-def normalize_reason_code(
-    code: str | None, catalog: ReasonCatalog | None = None
-) -> str:
-    """Normalize a free reason string to a catalog code."""
-    active = _active_catalog(catalog)
-    stripped = "" if code is None else str(code).strip()
-    if not stripped:
-        return active.unknown_code
-    if stripped in active.entries:
-        return stripped
+def _strip_reason_code(code: str | None) -> str:
+    """Strip a free reason string, tolerating a missing code."""
+    if code is None:
+        return ""
+    return str(code).strip()
+
+
+def _match_compound_code(stripped: str, active: ReasonCatalog) -> str | None:
+    """Match a ``BASE:field`` code against catalog entries."""
     base, separator, field = stripped.partition(":")
     if (
         separator
@@ -273,7 +278,23 @@ def normalize_reason_code(
         and _FIELD_REASON_TOKEN.fullmatch(field) is not None
     ):
         return stripped
-    return active.unknown_code
+    return None
+
+
+def normalize_reason_code(
+    code: str | None, catalog: ReasonCatalog | None = None
+) -> str:
+    """Normalize a free reason string to a catalog code."""
+    active = _active_catalog(catalog)
+    stripped = _strip_reason_code(code)
+    if not stripped:
+        return active.unknown_code
+    if stripped in active.entries:
+        return stripped
+    matched = _match_compound_code(stripped, active)
+    if matched is None:
+        return active.unknown_code
+    return matched
 
 
 def _active_catalog(catalog: ReasonCatalog | None) -> ReasonCatalog:

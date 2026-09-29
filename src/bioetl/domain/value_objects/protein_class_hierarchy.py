@@ -112,46 +112,62 @@ class ProteinClassHierarchy:
         path_ids = self.path_ids
         return path_ids[0] if path_ids else None
 
-    @property
-    def is_leaf(self) -> bool:
-        """Return True when hierarchy resolves to this leaf identifier."""
-        if self.path is not None:
-            if not self.path:
-                return False
-            last = self.path[-1]
-            return last.id == self.leaf_id and not last.is_empty
+    def _path_leaf_id(self) -> int | None:
+        """Return the leaf identifier from the explicit path, if present."""
+        if not self.path:
+            return None
+        last = self.path[-1]
+        return None if last.is_empty else last.id
+
+    def _levels_leaf_id(self) -> int | None:
+        """Return the leaf identifier from populated levels, if present."""
         last_nonempty = next(
             (level for level in reversed(self.levels) if not level.is_empty),
             None,
         )
-        if last_nonempty is None:
-            return False
-        return last_nonempty.id == self.leaf_id
+        return None if last_nonempty is None else last_nonempty.id
+
+    @property
+    def is_leaf(self) -> bool:
+        """Return True when hierarchy resolves to this leaf identifier."""
+        if self.path is not None:
+            return self._path_leaf_id() == self.leaf_id
+        return self._levels_leaf_id() == self.leaf_id
 
     def _validate_path(self) -> None:
         if self.path is None:
             return
         _validate_path_levels(self.path, leaf_id=self.leaf_id)
 
+    def _validate_level_against_path(
+        self,
+        path: tuple[ProteinClassLevel, ...],
+        index: int,
+        level: ProteinClassLevel,
+    ) -> None:
+        """Validate one populated level against its path entry."""
+        if index >= len(path):
+            raise ValueError(
+                "populated protein class hierarchy levels exceed path depth"
+            )
+        path_level = path[index]
+        if (
+            path_level.id != level.id
+            or path_level.name != level.name
+            or path_level.desc != level.desc
+        ):
+            raise ValueError(
+                "protein class hierarchy levels must match path entries"
+            )
+
     def _validate_levels_match_path(self) -> None:
         if self.path is None:
             return
+        path = self.path
         for index, level in enumerate(self.levels):
             if level.is_empty:
                 continue
-            if index >= len(self.path):
-                raise ValueError(
-                    "populated protein class hierarchy levels exceed path depth"
-                )
-            path_level = self.path[index]
-            if (
-                path_level.id != level.id
-                or path_level.name != level.name
-                or path_level.desc != level.desc
-            ):
-                raise ValueError(
-                    "protein class hierarchy levels must match path entries"
-                )
+            self._validate_level_against_path(path, index, level)
 
 
 def _validate_level_id(level_id: int | None) -> None:

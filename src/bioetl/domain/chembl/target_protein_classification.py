@@ -60,6 +60,33 @@ def build_target_component_indexes(
     }
 
 
+def _resolve_target_field_ids(
+    *,
+    filter_ids: list[str],
+    target_component_ids: Mapping[str, tuple[int, ...]],
+) -> tuple[str, ...]:
+    """Resolve target IDs matching an explicit target identifier filter."""
+    requested = {str(value).strip() for value in filter_ids if str(value).strip()}
+    return tuple(
+        target_id for target_id in sorted(target_component_ids) if target_id in requested
+    )
+
+
+def _resolve_component_field_ids(
+    *,
+    filter_ids: list[str],
+    target_ids_by_component: Mapping[int, tuple[str, ...]],
+) -> tuple[str, ...]:
+    """Resolve target IDs linked to the filtered component identifiers."""
+    target_ids: set[str] = set()
+    for raw_component_id in filter_ids:
+        component_id = coerce_positive_int(raw_component_id)
+        if component_id is None:
+            continue
+        target_ids.update(target_ids_by_component.get(component_id, ()))
+    return tuple(sorted(target_ids))
+
+
 def resolve_target_ids(
     *,
     filter_ids: list[str] | None,
@@ -71,20 +98,13 @@ def resolve_target_ids(
     if not filter_ids:
         return tuple(sorted(target_component_ids))
     if filter_field in _SUPPORTED_TARGET_FILTER_FIELDS:
-        requested = {str(value).strip() for value in filter_ids if str(value).strip()}
-        return tuple(
-            target_id
-            for target_id in sorted(target_component_ids)
-            if target_id in requested
+        return _resolve_target_field_ids(
+            filter_ids=filter_ids, target_component_ids=target_component_ids
         )
     if filter_field in _SUPPORTED_COMPONENT_FILTER_FIELDS:
-        target_ids: set[str] = set()
-        for raw_component_id in filter_ids:
-            component_id = coerce_positive_int(raw_component_id)
-            if component_id is None:
-                continue
-            target_ids.update(target_ids_by_component.get(component_id, ()))
-        return tuple(sorted(target_ids))
+        return _resolve_component_field_ids(
+            filter_ids=filter_ids, target_ids_by_component=target_ids_by_component
+        )
     raise ValueError(
         f"Unsupported target protein classification filter_field: {filter_field}"
     )
@@ -112,6 +132,17 @@ def leaf_ids_from_component_row(record: Mapping[str, object]) -> tuple[int, ...]
     return leaf_ids_from_classification_objects(record.get("protein_classifications"))
 
 
+def _leaf_id_from_classification_object(item: object) -> int | None:
+    """Extract one leaf ID from a classification object mapping."""
+    if not isinstance(item, Mapping):
+        return None
+    return coerce_positive_int(
+        item.get("protein_classification_id")
+        or item.get("protein_class_id")
+        or item.get("leaf_id")
+    )
+
+
 def leaf_ids_from_classification_objects(value: object) -> tuple[int, ...]:
     """Extract leaf IDs from list-based classification objects."""
     if not isinstance(value, list):
@@ -119,15 +150,30 @@ def leaf_ids_from_classification_objects(value: object) -> tuple[int, ...]:
     leaf_ids = [
         leaf_id
         for item in value
-        if isinstance(item, Mapping)
-        if (
-            leaf_id := coerce_positive_int(
-                item.get("protein_classification_id")
-                or item.get("protein_class_id")
-                or item.get("leaf_id")
-            )
-        )
-        is not None
+        if (leaf_id := _leaf_id_from_classification_object(item)) is not None
+    ]
+    return tuple(dict.fromkeys(leaf_ids))
+
+
+def _load_leaf_id_payload(value: object) -> object:
+    """Load a leaf-ID payload from canonical JSON text or passthrough."""
+    if not isinstance(value, str):
+        return value
+    stripped = value.strip()
+    if not stripped:
+        return ()
+    try:
+        return json.loads(stripped)
+    except json.JSONDecodeError as exc:
+        raise ProteinClassificationResolutionError(
+            "protein_classification_ids must be canonical JSON"
+        ) from exc
+
+
+def _leaf_ids_from_scalars(loaded: Iterable[object]) -> tuple[int, ...]:
+    """Extract leaf IDs from iterable scalar payloads."""
+    leaf_ids = [
+        leaf_id for item in loaded if (leaf_id := coerce_positive_int(item)) is not None
     ]
     return tuple(dict.fromkeys(leaf_ids))
 
@@ -136,23 +182,30 @@ def leaf_ids_from_value(value: object) -> tuple[int, ...]:
     """Extract leaf IDs from canonical JSON or iterable scalar payloads."""
     if value is None:
         return ()
-    loaded = value
-    if isinstance(value, str):
-        stripped = value.strip()
-        if not stripped:
-            return ()
-        try:
-            loaded = json.loads(stripped)
-        except json.JSONDecodeError as exc:
-            raise ProteinClassificationResolutionError(
-                "protein_classification_ids must be canonical JSON"
-            ) from exc
+    loaded = _load_leaf_id_payload(value)
     if not isinstance(loaded, Iterable) or isinstance(loaded, (str, bytes)):
         return ()
-    leaf_ids = [
-        leaf_id for item in loaded if (leaf_id := coerce_positive_int(item)) is not None
-    ]
-    return tuple(dict.fromkeys(leaf_ids))
+    return _leaf_ids_from_scalars(loaded)
+
+
+def _positive_or_none(value: int) -> int | None:
+    """Keep positive integers, dropping zero and negative values."""
+    return value if value > 0 else None
+
+
+def _coerce_positive_int_from_text_or_float(value: float | str) -> int | None:
+    """Normalize float/str values to positive integers."""
+    if isinstance(value, float):
+        if not value.is_integer():
+            return None
+        return coerce_positive_int(int(value))
+    stripped = value.strip()
+    if not stripped:
+        return None
+    try:
+        return coerce_positive_int(int(stripped))
+    except ValueError:
+        return None
 
 
 def coerce_positive_int(value: object) -> int | None:
@@ -160,19 +213,9 @@ def coerce_positive_int(value: object) -> int | None:
     if value is None or isinstance(value, bool):
         return None
     if isinstance(value, int):
-        return value if value > 0 else None
-    if isinstance(value, float):
-        if not value.is_integer():
-            return None
-        return coerce_positive_int(int(value))
-    if isinstance(value, str):
-        stripped = value.strip()
-        if not stripped:
-            return None
-        try:
-            return coerce_positive_int(int(stripped))
-        except ValueError:
-            return None
+        return _positive_or_none(value)
+    if isinstance(value, (float, str)):
+        return _coerce_positive_int_from_text_or_float(value)
     return None
 
 

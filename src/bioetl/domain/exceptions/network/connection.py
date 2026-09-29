@@ -9,6 +9,7 @@ retry with exponential backoff is appropriate (per RULES.md §3.1.3).
 from __future__ import annotations
 
 import socket
+from collections.abc import Iterator
 
 from bioetl.domain.exceptions.base import RecoverableError
 from bioetl.domain.types import ErrorType
@@ -30,23 +31,36 @@ _DNS_MESSAGE_MARKERS = (
 )
 
 
+def _iter_exception_chain(
+    exc: BaseException | None, *, max_depth: int = 8
+) -> Iterator[BaseException]:
+    """Yield an exception chain following cause/context links."""
+    current = exc
+    depth = 0
+    while current is not None and depth < max_depth:
+        yield current
+        current = current.__cause__ or current.__context__
+        depth += 1
+
+
+def _chain_texts(exc: BaseException | None, message: str | None) -> str:
+    """Join the optional message with every chained exception message."""
+    texts = [message] if message else []
+    texts.extend(str(item) for item in _iter_exception_chain(exc))
+    return " ".join(texts).lower()
+
+
 def is_dns_resolution_failure(
     exc: BaseException | None = None,
     message: str | None = None,
 ) -> bool:
     """Return True when the failure is DNS resolution, not a transient TCP drop."""
-    texts: list[str] = []
-    if message:
-        texts.append(message)
-    current: BaseException | None = exc
-    depth = 0
-    while current is not None and depth < 8:
-        if isinstance(current, socket.gaierror):
-            return True
-        texts.append(str(current))
-        current = current.__cause__ or current.__context__
-        depth += 1
-    blob = " ".join(texts).lower()
+    if any(
+        isinstance(item, socket.gaierror)
+        for item in _iter_exception_chain(exc)
+    ):
+        return True
+    blob = _chain_texts(exc, message)
     return any(marker in blob for marker in _DNS_MESSAGE_MARKERS)
 
 

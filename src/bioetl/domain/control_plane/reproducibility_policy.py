@@ -281,6 +281,50 @@ def validate_exact_replay_boundary(
     )
 
 
+def _reconstructability_verdict(
+    *,
+    strict_requirement: bool,
+    supported: bool,
+    capability_ok: bool,
+) -> tuple[str, bool]:
+    """Return the reconstructability status for one strictness evaluation."""
+    not_ok = strict_requirement and (not supported or not capability_ok)
+    if not_ok:
+        return "not_reconstructable", strict_requirement
+    return "reconstructable", strict_requirement
+
+
+def _resolve_precomputed_reconstructability(
+    *,
+    replay_capability: ReplayCapability | str,
+    strict_exact_replay_supported: bool,
+    strict_requirement: bool,
+    precomputed: dict[str, object],
+) -> tuple[str, bool]:
+    """Resolve the status from a cached assessment envelope."""
+    strict_requirement = bool(
+        precomputed.get("strict_requirement_requested", strict_requirement)
+    )
+    assessment_capability = precomputed.get("replay_capability")
+    if isinstance(assessment_capability, str):
+        capability_value = assessment_capability
+    elif isinstance(replay_capability, ReplayCapability):
+        capability_value = replay_capability.value
+    else:
+        capability_value = str(replay_capability)
+    supported = bool(
+        precomputed.get(
+            "strict_exact_replay_supported", strict_exact_replay_supported
+        )
+    )
+    return _reconstructability_verdict(
+        strict_requirement=strict_requirement,
+        supported=supported,
+        capability_ok=capability_value
+        == ReplayCapability.EXACT_REPLAY_SUPPORTED.value,
+    )
+
+
 def resolve_replay_reconstructability_status(
     *,
     replay_capability: ReplayCapability | str,
@@ -290,38 +334,99 @@ def resolve_replay_reconstructability_status(
 ) -> tuple[str, bool]:
     """Return ``(status, effective_strict_requirement)`` for manifest metrics."""
     if precomputed is not None:
-        strict_requirement = bool(
-            precomputed.get("strict_requirement_requested", strict_requirement)
+        return _resolve_precomputed_reconstructability(
+            replay_capability=replay_capability,
+            strict_exact_replay_supported=strict_exact_replay_supported,
+            strict_requirement=strict_requirement,
+            precomputed=precomputed,
         )
-        assessment_capability = precomputed.get("replay_capability")
-        if isinstance(assessment_capability, str):
-            capability_value = assessment_capability
-        elif isinstance(replay_capability, ReplayCapability):
-            capability_value = replay_capability.value
-        else:
-            capability_value = str(replay_capability)
-        supported = bool(
-            precomputed.get(
-                "strict_exact_replay_supported", strict_exact_replay_supported
-            )
+    if isinstance(replay_capability, ReplayCapability):
+        capability_ok = (
+            replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
         )
-        not_ok = strict_requirement and (
-            not supported
-            or capability_value != ReplayCapability.EXACT_REPLAY_SUPPORTED.value
+    else:
+        capability_ok = (
+            str(replay_capability)
+            == ReplayCapability.EXACT_REPLAY_SUPPORTED.value
         )
-        return (
-            "not_reconstructable" if not_ok else "reconstructable",
-            strict_requirement,
-        )
-    capability_ok = (
-        replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
-        if isinstance(replay_capability, ReplayCapability)
-        else str(replay_capability) == ReplayCapability.EXACT_REPLAY_SUPPORTED.value
+    return _reconstructability_verdict(
+        strict_requirement=strict_requirement,
+        supported=strict_exact_replay_supported,
+        capability_ok=capability_ok,
     )
-    not_ok = strict_requirement and (
-        not strict_exact_replay_supported or not capability_ok
-    )
-    return ("not_reconstructable" if not_ok else "reconstructable", strict_requirement)
+
+
+def _require_manifest_for_strict_profile(
+    *, profile: str, manifest_enabled: bool, execution_label: str
+) -> None:
+    """Require run manifests for strict persistence profiles."""
+    if profile in STRICT_PERSISTENCE_PROFILES and not manifest_enabled:
+        raise RuntimeError(
+            f"{execution_label} requires run manifests for required persistence "
+            f"profile '{profile}'; set "
+            "pipeline.control_plane.run_manifest_enabled=true"
+        )
+
+
+def _require_exact_replay_context(
+    *,
+    profile: str,
+    exact_replay_execution_context_supported: bool,
+    execution_label: str,
+) -> None:
+    """Require an exact-replay-capable execution context for strict profiles."""
+    if (
+        profile in STRICT_PERSISTENCE_PROFILES
+        and not exact_replay_execution_context_supported
+    ):
+        raise RuntimeError(
+            f"{execution_label} cannot satisfy required persistence profile "
+            f"'{profile}' because this execution context is outside the strict "
+            "exact-replay support boundary"
+        )
+
+
+def _require_forensic_resume_evidence(
+    *,
+    profile: str,
+    composite_resume_rich_replay_supported: bool,
+    execution_label: str,
+) -> None:
+    """Require rich checkpoint evidence for forensic-grade replay."""
+    if profile == "forensic_grade" and not composite_resume_rich_replay_supported:
+        raise RuntimeError(
+            f"{execution_label} cannot satisfy required persistence profile "
+            f"'{profile}' because composite forensic replay requires rich "
+            "checkpoint evidence that is not persisted by the current resume model"
+        )
+
+
+def _require_ledger_for_strict_profile(
+    *, profile: str, ledger_enabled: bool, execution_label: str
+) -> None:
+    """Require run ledgers for strict persistence profiles."""
+    if profile in STRICT_PERSISTENCE_PROFILES and not ledger_enabled:
+        raise RuntimeError(
+            f"{execution_label} requires run ledgers for required persistence "
+            f"profile '{profile}'; set pipeline.control_plane.run_ledger_enabled=true"
+        )
+
+
+def _require_lineage_sidecars(
+    *,
+    profile: str,
+    execution_label: str,
+    missing_artifact_lineage_layers: tuple[str, ...],
+) -> None:
+    """Require metadata sidecars for strict profiles with active layers."""
+    if profile in STRICT_PERSISTENCE_PROFILES and missing_artifact_lineage_layers:
+        layers = ", ".join(missing_artifact_lineage_layers)
+        raise RuntimeError(
+            f"{execution_label} requires metadata sidecars / lineage persistence "
+            f"for active layers [{layers}] to satisfy required persistence profile "
+            f"'{profile}'; enable sink.<layer>.save_metadata for each active "
+            "published layer"
+        )
 
 
 def validate_required_persistence_profile(
@@ -336,40 +441,35 @@ def validate_required_persistence_profile(
 ) -> None:
     """Fail closed when static control-plane flags cannot satisfy required profile."""
     profile = normalize_required_persistence_profile(required_profile)
-    if profile in STRICT_PERSISTENCE_PROFILES and not manifest_enabled:
-        raise RuntimeError(
-            f"{execution_label} requires run manifests for required persistence "
-            f"profile '{profile}'; set "
-            "pipeline.control_plane.run_manifest_enabled=true"
-        )
-    if (
-        profile in STRICT_PERSISTENCE_PROFILES
-        and not exact_replay_execution_context_supported
-    ):
-        raise RuntimeError(
-            f"{execution_label} cannot satisfy required persistence profile "
-            f"'{profile}' because this execution context is outside the strict "
-            "exact-replay support boundary"
-        )
-    if profile == "forensic_grade" and not composite_resume_rich_replay_supported:
-        raise RuntimeError(
-            f"{execution_label} cannot satisfy required persistence profile "
-            f"'{profile}' because composite forensic replay requires rich "
-            "checkpoint evidence that is not persisted by the current resume model"
-        )
-    if profile in STRICT_PERSISTENCE_PROFILES and not ledger_enabled:
-        raise RuntimeError(
-            f"{execution_label} requires run ledgers for required persistence "
-            f"profile '{profile}'; set pipeline.control_plane.run_ledger_enabled=true"
-        )
-    if profile in STRICT_PERSISTENCE_PROFILES and missing_artifact_lineage_layers:
-        layers = ", ".join(missing_artifact_lineage_layers)
-        raise RuntimeError(
-            f"{execution_label} requires metadata sidecars / lineage persistence "
-            f"for active layers [{layers}] to satisfy required persistence profile "
-            f"'{profile}'; enable sink.<layer>.save_metadata for each active "
-            "published layer"
-        )
+    _require_manifest_for_strict_profile(
+        profile=profile,
+        manifest_enabled=manifest_enabled,
+        execution_label=execution_label,
+    )
+    _require_exact_replay_context(
+        profile=profile,
+        exact_replay_execution_context_supported=(
+            exact_replay_execution_context_supported
+        ),
+        execution_label=execution_label,
+    )
+    _require_forensic_resume_evidence(
+        profile=profile,
+        composite_resume_rich_replay_supported=(
+            composite_resume_rich_replay_supported
+        ),
+        execution_label=execution_label,
+    )
+    _require_ledger_for_strict_profile(
+        profile=profile,
+        ledger_enabled=ledger_enabled,
+        execution_label=execution_label,
+    )
+    _require_lineage_sidecars(
+        profile=profile,
+        execution_label=execution_label,
+        missing_artifact_lineage_layers=missing_artifact_lineage_layers,
+    )
 
 
 __all__ = [

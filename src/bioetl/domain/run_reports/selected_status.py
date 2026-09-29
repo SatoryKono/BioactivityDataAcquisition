@@ -70,42 +70,55 @@ def _saved_provider_name(
     return "—"
 
 
+def _cached_bronze_row(report: Mapping[str, object]) -> dict[str, object]:
+    """Project a cached-bronze probe row without invented results."""
+    return {
+        "provider": _saved_provider_name(report, {}),
+        "check_result": _NA,
+        "evidence": _NA,
+        "observed_at": None,
+    }
+
+
+def _missing_observation_row(provider_name: str) -> dict[str, object]:
+    """Project an incomplete row when the provider observation is absent."""
+    return {
+        "provider": provider_name,
+        "check_result": _INCOMPLETE,
+        "evidence": _PROVIDER_EVIDENCE_MISSING
+        if provider_name == "—"
+        else _INCOMPLETE,
+        "observed_at": None,
+    }
+
+
+def _resolve_provider_evidence(
+    *, provider_name: str, verdict: str
+) -> tuple[str, str]:
+    """Resolve the verdict/evidence pair for a present observation."""
+    if provider_name == "—":
+        return _INCOMPLETE, _INCOMPLETE
+    if verdict == _NA:
+        return verdict, _NA
+    return verdict, "PRESENT"
+
+
 def provider_check_rows(report: Mapping[str, object]) -> list[dict[str, object]]:
     """Project saved provider probes. A missing name does not invent OK."""
     if _mapping(report.get("io")).get("use_cached_bronze") is True:
-        return [
-            {
-                "provider": _saved_provider_name(report, {}),
-                "check_result": _NA,
-                "evidence": _NA,
-                "observed_at": None,
-            }
-        ]
+        return [_cached_bronze_row(report)]
     observations = _mapping(report.get("observations"))
     observation = _mapping(observations.get(PROVIDER))
     facts = _mapping(observation.get("facts"))
     provider_name = _saved_provider_name(report, facts)
     if not observation:
-        return [
-            {
-                "provider": provider_name,
-                "check_result": _INCOMPLETE,
-                "evidence": _PROVIDER_EVIDENCE_MISSING
-                if provider_name == "—"
-                else _INCOMPLETE,
-                "observed_at": None,
-            }
-        ]
+        return [_missing_observation_row(provider_name)]
     verdict = str(observation.get("verdict", _INCOMPLETE))
     if verdict not in {*_PRIORITY, _NA}:
         verdict = _UNKNOWN
-    if provider_name == "—":
-        verdict = _INCOMPLETE
-        evidence = _INCOMPLETE
-    elif verdict == _NA:
-        evidence = _NA
-    else:
-        evidence = "PRESENT"
+    verdict, evidence = _resolve_provider_evidence(
+        provider_name=provider_name, verdict=verdict
+    )
     return [
         {
             "provider": provider_name,
@@ -116,21 +129,33 @@ def provider_check_rows(report: Mapping[str, object]) -> list[dict[str, object]]
     ]
 
 
-def provider_selector_options(report: Mapping[str, object]) -> list[dict[str, str]]:
-    """Run participants for the Provider selector. All is not an option."""
-    names: list[str] = []
+def _collect_identity_name(
+    report: Mapping[str, object], names: list[str]
+) -> None:
+    """Seed selector names with the report identity provider, when present."""
     identity_name = _mapping(report.get("identity")).get("provider")
     if isinstance(identity_name, str) and identity_name.strip():
         names.append(identity_name.strip())
+
+
+def _clean_candidate_name(name: object, names: list[str]) -> str:
+    """Clean one selector candidate, dropping placeholders and duplicates."""
+    if not isinstance(name, str):
+        return ""
+    stripped = name.strip()
+    if not stripped or stripped == "—" or stripped in names:
+        return ""
+    return stripped
+
+
+def provider_selector_options(report: Mapping[str, object]) -> list[dict[str, str]]:
+    """Run participants for the Provider selector. All is not an option."""
+    names: list[str] = []
+    _collect_identity_name(report, names)
     for row in provider_check_rows(report):
-        name = row.get("provider")
-        if (
-            isinstance(name, str)
-            and name.strip()
-            and name.strip() != "—"
-            and name.strip() not in names
-        ):
-            names.append(name.strip())
+        candidate = _clean_candidate_name(row.get("provider"), names)
+        if candidate:
+            names.append(candidate)
     return [{"text": name, "value": name} for name in names]
 
 

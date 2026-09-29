@@ -28,28 +28,48 @@ def _has_lineage_sidecar_persistence(layer_config: object | None) -> bool:
     return bool(getattr(layer_config, "save_metadata", False))
 
 
+def _default_active_layers(*, skip_gold: bool) -> tuple[str, ...]:
+    """Return the default active layers, optionally skipping Gold."""
+    return tuple(
+        layer
+        for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS
+        if not (layer == "gold" and skip_gold)
+    )
+
+
+def _classify_layer(
+    *,
+    yaml_config: object,
+    layer: str,
+    active_layer_names: list[str],
+    missing_lineage_layers: list[str],
+) -> None:
+    """Classify one sink layer as active and/or missing lineage sidecars."""
+    layer_config = _resolve_sink_layer_config(yaml_config, layer)
+    if not _is_sink_layer_enabled(layer_config):
+        return
+    active_layer_names.append(layer)
+    if not _has_lineage_sidecar_persistence(layer_config):
+        missing_lineage_layers.append(layer)
+
+
 def resolve_required_artifact_lineage_layers(
     *,
     yaml_config: object | None,
     skip_gold: bool = False,
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     """Return active sink layers and layers missing metadata sidecars."""
-    default_active_layers = tuple(
-        layer
-        for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS
-        if not (layer == "gold" and skip_gold)
-    )
     if yaml_config is None or getattr(yaml_config, "sink", None) is None:
-        return default_active_layers, ()
+        return _default_active_layers(skip_gold=skip_gold), ()
     active_layer_names: list[str] = []
     missing_lineage_layers: list[str] = []
     for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS:
         if layer == "gold" and skip_gold:
             continue
-        layer_config = _resolve_sink_layer_config(yaml_config, layer)
-        if not _is_sink_layer_enabled(layer_config):
-            continue
-        active_layer_names.append(layer)
-        if not _has_lineage_sidecar_persistence(layer_config):
-            missing_lineage_layers.append(layer)
+        _classify_layer(
+            yaml_config=yaml_config,
+            layer=layer,
+            active_layer_names=active_layer_names,
+            missing_lineage_layers=missing_lineage_layers,
+        )
     return tuple(active_layer_names), tuple(missing_lineage_layers)

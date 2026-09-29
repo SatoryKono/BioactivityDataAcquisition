@@ -163,10 +163,21 @@ class StageAccountingSnapshotsMixin:
             return records_in, records_out, removed_total
         if removed_mapped > default_removed > 0:
             return records_in, records_out, removed_total
-        layer_removed = removed_mapped if removed_mapped > 0 else default_removed
+        layer_removed = self._layer_removed_budget(
+            removed_mapped=removed_mapped, default_removed=default_removed
+        )
         if default_in > 0 and default_in == default_out + layer_removed:
             return default_in, default_out, layer_removed
         return records_in, records_out, removed_total
+
+    @staticmethod
+    def _layer_removed_budget(
+        *, removed_mapped: int, default_removed: int
+    ) -> int:
+        """Prefer explicitly mapped removals over the layer default."""
+        if removed_mapped > 0:
+            return removed_mapped
+        return default_removed
 
     @staticmethod
     def _stage_defaults(

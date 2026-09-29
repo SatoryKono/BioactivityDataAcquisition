@@ -16,6 +16,70 @@ _TERMINAL = {"success", "failed", "shutdown", "dry_run"}
 _OPEN = {"running", "started"}
 
 
+def _requested_gap_row(
+    request_state: str, request_reason: str | None
+) -> dict[str, object]:
+    """Project the request-selection gap row."""
+    return _gap_row(
+        request_state, request_reason or "selection_required", "request"
+    )
+
+
+def _report_payload(report: Mapping[str, object] | None) -> Mapping[str, object]:
+    """Coerce the saved report to a mapping payload."""
+    if isinstance(report, Mapping):
+        return report
+    return {}
+
+
+def _ledger_event_mappings(
+    ledger_events: Sequence[Mapping[str, object]] | None,
+) -> list[Mapping[str, object]]:
+    """Filter ledger events down to mapping payloads."""
+    return [event for event in (ledger_events or ()) if isinstance(event, Mapping)]
+
+
+def _collect_stage_rows(
+    *,
+    payload: Mapping[str, object],
+    ledger_events: Sequence[Mapping[str, object]] | None,
+) -> list[dict[str, object]]:
+    """Assemble funnel, timing, and ledger stage rows."""
+    funnel = _mappings(payload.get("funnel"))
+    timings = _mapping(payload.get("stage_timings"))
+    events = _ledger_event_mappings(ledger_events)
+    rows = _rows_from_funnel(funnel, timings)
+    rows.extend(_rows_from_timings(timings, {str(row["stage_id"]) for row in rows}))
+    rows.extend(_rows_from_events(events, {str(row["stage_id"]) for row in rows}))
+    return rows
+
+
+def _empty_rows_gap(execution: str) -> dict[str, object]:
+    """Project the gap row when no stage evidence exists."""
+    if execution in _OPEN or execution not in _TERMINAL:
+        reason = "terminal_event_missing"
+    else:
+        reason = "stage_evidence_missing"
+    if execution in _OPEN:
+        return _gap_row(_UNFINISHED, reason, "report")
+    return _gap_row(_INCOMPLETE, reason, "report")
+
+
+def _mark_open_execution_rows(rows: list[dict[str, object]]) -> None:
+    """Demote OK rows while the execution is still open."""
+    for row in rows:
+        if row["state"] == _OK:
+            row["state"] = _UNFINISHED
+            row["reason"] = "terminal_event_missing"
+
+
+def _diagnostic_coverage(rows: list[dict[str, object]]) -> str:
+    """Derive COMPLETE coverage when every row is terminally resolved."""
+    if rows and all(row["state"] in {_OK, _NA} for row in rows):
+        return "COMPLETE"
+    return _INCOMPLETE
+
+
 def project_stage_diagnostics(
     report: Mapping[str, object] | None,
     *,
@@ -25,36 +89,16 @@ def project_stage_diagnostics(
 ) -> dict[str, object]:
     """Return stage rows, coverage, and blockers for one saved run."""
     if request_state is not None:
-        row = _gap_row(request_state, request_reason or "selection_required", "request")
-        return _envelope([row], _INCOMPLETE)
-    payload = report if isinstance(report, Mapping) else {}
+        return _envelope([_requested_gap_row(request_state, request_reason)], _INCOMPLETE)
+    payload = _report_payload(report)
     identity = _mapping(payload.get("identity"))
     execution = str(identity.get("status") or "unknown").lower()
-    funnel = _mappings(payload.get("funnel"))
-    timings = _mapping(payload.get("stage_timings"))
-    events = [event for event in (ledger_events or ()) if isinstance(event, Mapping)]
-    rows = _rows_from_funnel(funnel, timings)
-    rows.extend(_rows_from_timings(timings, {str(row["stage_id"]) for row in rows}))
-    rows.extend(_rows_from_events(events, {str(row["stage_id"]) for row in rows}))
+    rows = _collect_stage_rows(payload=payload, ledger_events=ledger_events)
     if not rows:
-        reason = (
-            "terminal_event_missing"
-            if execution in _OPEN or execution not in _TERMINAL
-            else "stage_evidence_missing"
-        )
-        state = _UNFINISHED if execution in _OPEN else _INCOMPLETE
-        rows = [_gap_row(state, reason, "report")]
+        rows = [_empty_rows_gap(execution)]
     elif execution in _OPEN:
-        for row in rows:
-            if row["state"] == _OK:
-                row["state"] = _UNFINISHED
-                row["reason"] = "terminal_event_missing"
-    coverage = (
-        "COMPLETE"
-        if rows and all(row["state"] in {_OK, _NA} for row in rows)
-        else _INCOMPLETE
-    )
-    return _envelope(rows, coverage)
+        _mark_open_execution_rows(rows)
+    return _envelope(rows, _diagnostic_coverage(rows))
 
 
 def _envelope(rows: list[dict[str, object]], coverage: str) -> dict[str, object]:
@@ -66,6 +110,15 @@ def _envelope(rows: list[dict[str, object]], coverage: str) -> dict[str, object]
     }
 
 
+def _funnel_balance_state(balance: str) -> tuple[str, str]:
+    """Resolve the state/reason pair for one funnel balance status."""
+    if balance == "OK":
+        return _OK, "stage_balanced"
+    if balance in {"DEGRADED", "FAILING"}:
+        return balance, "stage_balance_" + balance.lower()
+    return _INCOMPLETE, "stage_balance_unknown"
+
+
 def _rows_from_funnel(
     funnel: list[Mapping[str, object]], timings: Mapping[str, object]
 ) -> list[dict[str, object]]:
@@ -73,12 +126,7 @@ def _rows_from_funnel(
     for item in funnel:
         stage_id = str(item.get("stage_id") or "unknown")
         balance = str(item.get("balance_status") or "UNKNOWN")
-        if balance == "OK":
-            state, reason = _OK, "stage_balanced"
-        elif balance in {"DEGRADED", "FAILING"}:
-            state, reason = balance, "stage_balance_" + balance.lower()
-        else:
-            state, reason = _INCOMPLETE, "stage_balance_unknown"
+        state, reason = _funnel_balance_state(balance)
         rows.append(
             _stage_row(
                 stage_id,
@@ -114,19 +162,37 @@ def _rows_from_timings(
     return rows
 
 
+def _lifecycle_event_kind(event: Mapping[str, object]) -> str | None:
+    """Return the lifecycle kind for stage start/complete events."""
+    kind = str(event.get("event_type") or event.get("type") or "")
+    if kind not in {"stage_started", "stage_completed"}:
+        return None
+    return kind
+
+
+def _lifecycle_event(event: Mapping[str, object]) -> tuple[str, str, str] | None:
+    """Return the (stage_id, state, kind) triple for lifecycle events."""
+    kind = _lifecycle_event_kind(event)
+    if kind is None:
+        return None
+    stage_id = str(event.get("stage_id") or event.get("stage") or "unknown")
+    if kind == "stage_completed":
+        return stage_id, _OK, kind
+    return stage_id, _UNFINISHED, kind
+
+
 def _rows_from_events(
     events: Sequence[Mapping[str, object]], seen: set[str]
 ) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     for event in events:
-        kind = str(event.get("event_type") or event.get("type") or "")
-        if kind not in {"stage_started", "stage_completed"}:
+        lifecycle = _lifecycle_event(event)
+        if lifecycle is None:
             continue
-        stage_id = str(event.get("stage_id") or event.get("stage") or "unknown")
+        stage_id, state, kind = lifecycle
         if stage_id in seen:
             continue
         seen.add(stage_id)
-        state = _OK if kind == "stage_completed" else _UNFINISHED
         rows.append(
             _stage_row(
                 stage_id,
@@ -182,15 +248,21 @@ def _count(value: object) -> int | None:
     return None
 
 
+def _nested_duration(value: Mapping[str, object]) -> float | int | None:
+    """Extract a numeric duration_seconds payload from a mapping."""
+    nested = value.get("duration_seconds")
+    if isinstance(nested, int | float) and not isinstance(nested, bool):
+        return nested
+    return None
+
+
 def _duration(value: object) -> float | int | None:
     if isinstance(value, bool) or value is None:
         return None
     if isinstance(value, int | float):
         return value
     if isinstance(value, Mapping):
-        nested = value.get("duration_seconds")
-        if isinstance(nested, int | float) and not isinstance(nested, bool):
-            return nested
+        return _nested_duration(value)
     return None
 
 

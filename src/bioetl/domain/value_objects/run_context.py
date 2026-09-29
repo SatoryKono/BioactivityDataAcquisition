@@ -104,8 +104,8 @@ class RunContext:
     replay_of_manifest_id: str | None = None
     input_snapshot_fingerprint: str | None = None
 
-    def __post_init__(self) -> None:
-        """Validate run context after initialization."""
+    def _validate_started_at(self) -> None:
+        """Require a timezone-aware UTC start timestamp."""
         offset = self.started_at.utcoffset()
         if self.started_at.tzinfo is None or offset is None:
             raise ValueError(
@@ -114,14 +114,16 @@ class RunContext:
         if offset.total_seconds() != 0:
             raise ValueError("started_at must use a zero UTC offset")
 
-        if not self.pipeline_name:
-            raise ValueError("pipeline_name cannot be empty")
+    def _validate_required_names(self) -> None:
+        """Require non-empty pipeline/provider/entity names."""
+        for field_name in ("pipeline_name", "provider", "entity"):
+            if not getattr(self, field_name):
+                raise ValueError(f"{field_name} cannot be empty")
 
-        if not self.provider:
-            raise ValueError("provider cannot be empty")
-
-        if not self.entity:
-            raise ValueError("entity cannot be empty")
+    def __post_init__(self) -> None:
+        """Validate run context after initialization."""
+        self._validate_started_at()
+        self._validate_required_names()
 
     @classmethod
     def create(
