@@ -53,20 +53,20 @@ emits a machine-readable drift/sync report for owner review.
 
 ## Mirror Doc Index
 
-- [agent-debugging](agent-debugging/SKILL.md)
-- [new-pipeline](new-pipeline/SKILL.md)
-- [observability-dashboard](observability-dashboard/SKILL.md)
-- [observability-prometheus](observability-prometheus/SKILL.md)
-- [py-audit-bot](py-audit-bot/SKILL.md)
-- [py-config-bot](py-config-bot/SKILL.md)
-- [py-debug-bot](py-debug-bot/SKILL.md)
-- [py-doc-bot](py-doc-bot/SKILL.md)
-- [py-plan-bot](py-plan-bot/SKILL.md)
-- [py-test-bot](py-test-bot/SKILL.md)
-- [research-workflow](research-workflow/SKILL.md)
-- [technical-designer-mermaid](technical-designer-mermaid/SKILL.md)
-- [vcr-record](vcr-record/SKILL.md)
-- [verify-architecture](verify-architecture/SKILL.md)
+- [agent-debugging](./agent-debugging/SKILL.md)
+- [new-pipeline](./new-pipeline/SKILL.md)
+- [observability-dashboard](./observability-dashboard/SKILL.md)
+- [observability-prometheus](./observability-prometheus/SKILL.md)
+- [py-audit-bot](./py-audit-bot/SKILL.md)
+- [py-config-bot](./py-config-bot/SKILL.md)
+- [py-debug-bot](./py-debug-bot/SKILL.md)
+- [py-doc-bot](./py-doc-bot/SKILL.md)
+- [py-plan-bot](./py-plan-bot/SKILL.md)
+- [py-test-bot](./py-test-bot/SKILL.md)
+- [research-workflow](./research-workflow/SKILL.md)
+- [technical-designer-mermaid](./technical-designer-mermaid/SKILL.md)
+- [vcr-record](./vcr-record/SKILL.md)
+- [verify-architecture](./verify-architecture/SKILL.md)
 
 
 ## Shared Generic Skills

@@ -42,7 +42,7 @@ Current committed quality artifacts agree on the following architecture evidence
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
 | Coverage inventory status counts | `2491` fully covered, `27` partially covered, `4` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
-| Families at fan-in budget | `1` (`application_core`) | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
+| Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |
 | Debt-governance gates | `46` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
 | Full-app duplication hotspot baseline | `0` actionable / `58` raw excluded clusters | `reports/quality/full-app-duplication-baseline.json` |

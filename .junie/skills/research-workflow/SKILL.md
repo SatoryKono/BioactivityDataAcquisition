@@ -29,11 +29,11 @@ all phases through `--phase`, the same way `py-test-bot` serves
 
 | `--phase` | Stage | Phase file | Output |
 | --- | --- | --- | --- |
-| `initialize` | Workspace from brief | [references/phases/initialize.md](references/phases/initialize.md) | `BRIEF.md`, `PILLARS.md`, ledger dirs |
-| `evidence` | Evidence per pillar | [references/phases/evidence.md](references/phases/evidence.md) | `EV-*` objects, evidence gate |
-| `synthesis` | Insights from evidence | [references/phases/synthesis.md](references/phases/synthesis.md) | `SYN-*.md`, contradiction log |
-| `decisions` | Explicit decisions | [references/phases/decisions.md](references/phases/decisions.md) | `DECISIONS.yaml`, `RISKS.yaml` |
-| `specs` | Constrained specs | [references/phases/specs.md](references/phases/specs.md) | `PRD.md`, `ARCHITECTURE.md` (DEC-*-cited) |
+| `initialize` | Workspace from brief | [references/phases/initialize.md](./references/phases/initialize.md) | `BRIEF.md`, `PILLARS.md`, ledger dirs |
+| `evidence` | Evidence per pillar | [references/phases/evidence.md](./references/phases/evidence.md) | `EV-*` objects, evidence gate |
+| `synthesis` | Insights from evidence | [references/phases/synthesis.md](./references/phases/synthesis.md) | `SYN-*.md`, contradiction log |
+| `decisions` | Explicit decisions | [references/phases/decisions.md](./references/phases/decisions.md) | `DECISIONS.yaml`, `RISKS.yaml` |
+| `specs` | Constrained specs | [references/phases/specs.md](./references/phases/specs.md) | `PRD.md`, `ARCHITECTURE.md` (DEC-*-cited) |
 | `complete` | All phases in order | run the five files above in order | full ledger |
 
 ## Router Workflow
@@ -133,19 +133,19 @@ skill research-workflow --phase complete
 
 ## References
 
-- [references/phases/initialize.md](references/phases/initialize.md) - Phase router: workspace init
-- [references/phases/evidence.md](references/phases/evidence.md) - Phase router: evidence collection
-- [references/phases/synthesis.md](references/phases/synthesis.md) - Phase router: synthesis
-- [references/phases/decisions.md](references/phases/decisions.md) - Phase router: decisions and risks
-- [references/phases/specs.md](references/phases/specs.md) - Phase router: constrained specs
-- [references/evidence-object-schema.md](references/evidence-object-schema.md) - Evidence YAML schema
-- [references/synthesis-template.md](references/synthesis-template.md) - Synthesis document template
-- [references/decision-ledger-schema.md](references/decision-ledger-schema.md) - DECISIONS.yaml schema
-- [references/risk-ledger-schema.md](references/risk-ledger-schema.md) - RISKS.yaml schema
-- [references/prd-template.md](references/prd-template.md) - PRD template
-- [references/architecture-template.md](references/architecture-template.md) - Architecture template
-- [references/constraint-rules.md](references/constraint-rules.md) - Detailed constraint rules
-- [references/brief-template.md](references/brief-template.md) - BRIEF.md template
-- [references/pillar-definitions.md](references/pillar-definitions.md) - Pillar definitions and scope
-- [references/id-generation-rules.md](references/id-generation-rules.md) - Semantic ID creation
-- [references/research-protocols.md](references/research-protocols.md) - Pillar-specific research guidance
+- [references/phases/initialize.md](./references/phases/initialize.md) - Phase router: workspace init
+- [references/phases/evidence.md](./references/phases/evidence.md) - Phase router: evidence collection
+- [references/phases/synthesis.md](./references/phases/synthesis.md) - Phase router: synthesis
+- [references/phases/decisions.md](./references/phases/decisions.md) - Phase router: decisions and risks
+- [references/phases/specs.md](./references/phases/specs.md) - Phase router: constrained specs
+- [references/evidence-object-schema.md](./references/evidence-object-schema.md) - Evidence YAML schema
+- [references/synthesis-template.md](./references/synthesis-template.md) - Synthesis document template
+- [references/decision-ledger-schema.md](./references/decision-ledger-schema.md) - DECISIONS.yaml schema
+- [references/risk-ledger-schema.md](./references/risk-ledger-schema.md) - RISKS.yaml schema
+- [references/prd-template.md](./references/prd-template.md) - PRD template
+- [references/architecture-template.md](./references/architecture-template.md) - Architecture template
+- [references/constraint-rules.md](./references/constraint-rules.md) - Detailed constraint rules
+- [references/brief-template.md](./references/brief-template.md) - BRIEF.md template
+- [references/pillar-definitions.md](./references/pillar-definitions.md) - Pillar definitions and scope
+- [references/id-generation-rules.md](./references/id-generation-rules.md) - Semantic ID creation
+- [references/research-protocols.md](./references/research-protocols.md) - Pillar-specific research guidance
