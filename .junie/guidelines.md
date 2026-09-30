@@ -157,6 +157,11 @@ Minimum expectation:
   artifacts, not human source of truth.
 - **УВЕЛИЧИВАТЬ бюджеты тех. долга ЗАПРЕЩЕНО** — технический долг может только
   уменьшаться или оставаться неизменным, увеличение бюджетов запрещено.
+- **Full-tree commits only (#11709):** never commit from a partial checkout, sparse
+  index, or reports-only worktree into shared history — every commit must carry
+  the full top-level tree. Report-only snapshots go to PR artifacts or orphan
+  branches never merged into `main`. Gate:
+  `python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`.
 
 ## Dashboard Skill Routing
 

@@ -6,11 +6,13 @@ from dataclasses import dataclass
 
 from bioetl.domain.control_plane._reproducibility_policy_persistence import (
     STRICT_PERSISTENCE_PROFILES,
-    archive_policy_for_persistence_profile as archive_policy_for_persistence_profile,
     require_input_snapshots,
     resolve_replay_reconstructability_status,
     validate_exact_replay_boundary,
     validate_required_persistence_profile,
+)
+from bioetl.domain.control_plane._reproducibility_policy_persistence import (
+    archive_policy_for_persistence_profile as archive_policy_for_persistence_profile,
 )
 from bioetl.domain.control_plane._reproducibility_policy_profiles import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,

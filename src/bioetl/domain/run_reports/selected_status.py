@@ -85,16 +85,12 @@ def _missing_observation_row(provider_name: str) -> dict[str, object]:
     return {
         "provider": provider_name,
         "check_result": _INCOMPLETE,
-        "evidence": _PROVIDER_EVIDENCE_MISSING
-        if provider_name == "—"
-        else _INCOMPLETE,
+        "evidence": _PROVIDER_EVIDENCE_MISSING if provider_name == "—" else _INCOMPLETE,
         "observed_at": None,
     }
 
 
-def _resolve_provider_evidence(
-    *, provider_name: str, verdict: str
-) -> tuple[str, str]:
+def _resolve_provider_evidence(*, provider_name: str, verdict: str) -> tuple[str, str]:
     """Resolve the verdict/evidence pair for a present observation."""
     if provider_name == "—":
         return _INCOMPLETE, _INCOMPLETE
@@ -129,9 +125,7 @@ def provider_check_rows(report: Mapping[str, object]) -> list[dict[str, object]]
     ]
 
 
-def _collect_identity_name(
-    report: Mapping[str, object], names: list[str]
-) -> None:
+def _collect_identity_name(report: Mapping[str, object], names: list[str]) -> None:
     """Seed selector names with the report identity provider, when present."""
     identity_name = _mapping(report.get("identity")).get("provider")
     if isinstance(identity_name, str) and identity_name.strip():

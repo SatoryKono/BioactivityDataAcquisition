@@ -341,7 +341,7 @@ ______________________________________________________________________
 1. **No blind changes**: код не меняется без предварительного плана (`RF-*`).
 1. **No untested changes**: каждый `RF-*` проверяется через `py-test-bot`.
 1. **Architecture gate**: финальный аудит (`py-audit-bot`) является обязательным gate перед завершением задачи.
-1. **Config compliance gate**: `py-config-bot-1.py` MUST иметь 0 critical findings после `py-config-bot`.
+1. **Config compliance gate**: `python -m scripts.schema validate-configs` MUST иметь 0 critical findings после `py-config-bot`.
 1. **Zone isolation**: orchestrator writes `src/`, py-config-bot — только в `configs/`, py-doc-bot — только в `docs/` + docstrings + diagrams.
 1. **Foreground/background safety**: critical changes (writes, config edits) требуют foreground mode для approval.
 

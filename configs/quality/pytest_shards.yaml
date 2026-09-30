@@ -317,6 +317,8 @@ shards:
       - tests/architecture/test_issue_10595_composition_util_shrink.py
       - tests/architecture/test_issue_10596_cast_any_census.py
       - tests/architecture/test_issue_10597_export_facade_shrink.py
+      - tests/architecture/test_issue_11102_unsupported_k8s_manifests.py
+      - tests/architecture/test_issue_11133_chembl_integration_diagram.py
       - tests/architecture/test_issue_5053_pipeline_transformer_closeout.py
       - tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py
       - tests/architecture/test_observability_export_dashboard_rollout_closeout.py

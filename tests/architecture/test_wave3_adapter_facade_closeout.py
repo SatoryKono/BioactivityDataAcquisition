@@ -24,15 +24,14 @@ FACADE_RATCHETS: dict[str, tuple[int, set[str]]] = {
         350,
         {
             "bioetl.infrastructure.adapters._health_check_observability",
-            "bioetl.infrastructure.adapters._health_check_policy",
         },
     ),
     "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py": (
         335,
         {
-            "bioetl.infrastructure.adapters.http._client_retry_flow",
             "bioetl.infrastructure.adapters.http._client_retry_models",
             "bioetl.infrastructure.adapters.http._client_retry_policy",
+            "bioetl.infrastructure.adapters.http._client_retry_request_flow",
         },
     ),
     "src/bioetl/infrastructure/adapters/http/health_monitor.py": (
