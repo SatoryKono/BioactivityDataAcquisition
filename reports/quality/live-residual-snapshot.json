@@ -14,9 +14,9 @@
     "application_core": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 6,
-      "helper_function_ratio": 0.384,
+      "helper_function_ratio": 0.387,
       "files": 199,
-      "total_loc": 24498,
+      "total_loc": 24559,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
@@ -39,11 +39,11 @@
       "budget_max_internal_fan_in": 3
     },
     "application_services_control_plane": {
-      "files_ge_250_loc": 0,
+      "files_ge_250_loc": 1,
       "max_internal_fan_in": 1,
-      "helper_function_ratio": 0.391,
+      "helper_function_ratio": 0.403,
       "files": 128,
-      "total_loc": 15412,
+      "total_loc": 15526,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
@@ -58,10 +58,10 @@
     }
   },
   "dead_code": {
-    "repo_wide_zero_import_candidate_count": 4,
-    "repo_wide_untriaged_zero_import_candidate_count": 2,
+    "repo_wide_zero_import_candidate_count": 2,
+    "repo_wide_untriaged_zero_import_candidate_count": 0,
     "repo_wide_classified_zero_import_candidate_count": 2,
-    "repo_wide_candidates_without_owner_tests_count": 2
+    "repo_wide_candidates_without_owner_tests_count": 0
   },
   "config_surface": {
     "duplicate_cluster_count": 6

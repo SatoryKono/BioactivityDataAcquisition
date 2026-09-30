@@ -46,24 +46,24 @@
       "status": "pass"
     },
     {
-      "current": "993bd00a00bd241b461af4f3e529765668fef1e2e2f86ccf9de7cb8833393919",
-      "limit": "de76d02183ffa9ab97d190635f38a35137a0141f5eb5ca04e3971d3e1dfbb752",
+      "current": "d6fa74c5c3b27fa7eb221e8c0c05f14052daa9f5c190ca29b686002621dcde98",
+      "limit": "d6fa74c5c3b27fa7eb221e8c0c05f14052daa9f5c190ca29b686002621dcde98",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": {
         "source_module_count": 2522,
-        "source_tree_sha256": "de76d02183ffa9ab97d190635f38a35137a0141f5eb5ca04e3971d3e1dfbb752",
+        "source_tree_sha256": "d6fa74c5c3b27fa7eb221e8c0c05f14052daa9f5c190ca29b686002621dcde98",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2522,
-        "source_tree_sha256": "de76d02183ffa9ab97d190635f38a35137a0141f5eb5ca04e3971d3e1dfbb752",
+        "source_tree_sha256": "d6fa74c5c3b27fa7eb221e8c0c05f14052daa9f5c190ca29b686002621dcde98",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -92,13 +92,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 1,
       "limit": 0,
       "metric": "budget_warnings",
       "name": "hotspot_family_baseline_budget_warnings",
       "remediation": "Reduce hotspot-family metrics to stay at or below reviewed budgets.",
       "source_artifact": "reports/quality/hotspot-family-baseline.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -145,13 +145,13 @@
       "status": "pass"
     },
     {
-      "current": 2,
+      "current": 0,
       "limit": 0,
       "metric": "repo_wide_untriaged_zero_import_candidate_count",
       "name": "dead_code_untriaged_zero_import_candidates",
       "remediation": "Classify zero-import candidates and attach owner tests before closeout.",
       "source_artifact": "reports/quality/dead-code-inventory.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "672c7e03dfa3550a4aa80c390b96908b73716bd8285594d757ad3a827e96ad1f",
+      "current": "12d8680225d1ea240b63e1aaf2a54d696cfbb70a00e4d5574d5c5103c2fc2d84",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -425,17 +425,15 @@
     },
     {
       "current": {
-        "artifacts": [
-          "module_coverage_inventory"
-        ],
-        "count": 1
+        "artifacts": [],
+        "count": 0
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: module_coverage_inventory",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -465,26 +463,24 @@
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": false,
-    "module_coverage_inventory": true,
+    "module_coverage_inventory": false,
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 4,
-    "pass": 42,
+    "fail": 2,
+    "pass": 44,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 9.94,
+    "architecture_quality_scorecard_integral_score": 9.92,
     "architecture_quality_scorecard_interpretation": "excellent",
-    "fail_count": 4,
+    "fail_count": 2,
     "failing_gates": [
-      "module_coverage_source_tree_hash_current",
-      "dead_code_untriaged_zero_import_candidates",
-      "test_governance_budget_violations",
-      "generated_artifact_drift"
+      "hotspot_family_baseline_budget_warnings",
+      "test_governance_budget_violations"
     ],
     "gate_count": 46,
-    "pass_count": 42,
+    "pass_count": 44,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
