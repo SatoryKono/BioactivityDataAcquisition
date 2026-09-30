@@ -2231,25 +2231,6 @@
       "disposition": "route-primary",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-overview-v2",
-      "panel_id": 215,
-      "panel_title": "Review First Action",
-      "route": "operations-home",
-      "source": {
-        "datasource_type": "prometheus",
-        "datasource_uid": "prometheus",
-        "expressions": [
-          "max without(run_type)(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0) or on() bioetl_l0_next_action_no_route"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "Context Bar",
-      "dashboard_uid": "bioetl-overview-v2",
-      "disposition": "route-primary",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-overview-v2",
       "panel_id": 9002,
       "panel_title": "Review Run Domains",
       "route": "operations-home",
@@ -2581,23 +2562,6 @@
         "expressions": [
           "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-overview-v2",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-overview-v2",
-      "panel_id": 20215,
-      "panel_title": "Inspect Full First Action",
-      "route": "operations-home",
-      "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
         "target_count": 1
       }
     },
@@ -4180,7 +4144,7 @@
     "dashboard_uid_count": 7,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 220,
+    "panel_disposition_count": 218,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],
