@@ -161,11 +161,10 @@ uses the remaining 17 columns.
 - **Data sources:** BioETL Ops HTTP control-plane identity endpoint
   `/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
-### 23. Review Processed Records
-- **Type:** Table
-- **Purpose:** Show Bronze/Silver/Gold counts and denominator-explicit percentages; both numeric columns are right-aligned.
-- **Data sources:** BioETL Ops HTTP
-  `/ops/observability/processed-records`; this is not a Prometheus panel.
+### 23. Review Processed Records — removed
+
+Removed from Run Overview. Run Domains uses the wider left column; the compact
+Selected Run Status and Run Identity panels occupy the right column.
 
 ### 24. Inspect Alerts
 - **Type:** Row
@@ -272,5 +271,4 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9603 | Review Selected Run Status | table |
 | 9002 | Review Run Domains | table |
 | 9300 | Review Run Identity | table |
-| 9301 | Review Processed Records | table |
 <!-- END SHIPPED PANEL INVENTORY -->

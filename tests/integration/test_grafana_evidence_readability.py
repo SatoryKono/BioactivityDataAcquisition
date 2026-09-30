@@ -51,11 +51,14 @@ def test_overview_paired_tables_have_fixed_rows_and_inspectable_reasons():
     summary, domains = panels[9603], panels[9002]
     assert summary["gridPos"]["y"] == domains["gridPos"]["y"]
     assert domains["gridPos"]["x"] == 0
-    assert summary["gridPos"]["x"] == 12
+    assert summary["gridPos"]["x"] == 15
+    assert summary["gridPos"]["w"] == 9
+    assert summary["gridPos"]["h"] == 4
+    assert domains["gridPos"]["h"] == 11
+    assert 9301 not in panels
     for panel in (summary, domains):
         assert panel["options"]["cellHeight"] == "lg"
         assert panel["options"]["footer"]["enablePagination"] is False
-        assert panel["gridPos"]["h"] == summary["gridPos"]["h"]
         custom = panel["fieldConfig"]["defaults"]["custom"]
         assert custom["inspect"] is True
         assert custom["wrapText"] is False

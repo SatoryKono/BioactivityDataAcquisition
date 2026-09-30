@@ -780,7 +780,8 @@ def _style_provider_check(panels: list[dict]) -> None:
         }
     ]
     for panel_id in (9402, 9403):
-        by_id[panel_id]["gridPos"]["y"] = 10
+        if panel_id in by_id:
+            by_id[panel_id]["gridPos"]["y"] = 10
 
 
 def prune_provider_health_panels(payload: dict[str, object]) -> None:
