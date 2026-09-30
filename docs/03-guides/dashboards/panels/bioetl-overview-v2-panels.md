@@ -12,6 +12,17 @@ multiple runs; use RunLedger for exact reconciliation.
 
 ## Key Panels
 
+Review Run Identity shows the full Run ID, Pipeline, Run Type and Started at
+(with its saved UTC offset), without pagination. Pipeline plus Run ID identifies the persisted run;
+type and start time provide its execution context. Manifest, schema and available
+source revision remain under Inspect Additional Run Identity. Missing historical
+values are not reconstructed from the current configuration.
+
+Review Processed Records prefers the saved pipeline report matching Pipeline,
+Run ID and Run Type, then the exact-run ledger when that report is unavailable.
+It never substitutes current Prometheus totals for a selected run. Recorded zero
+and missing accounting remain distinct; SUCCESS alone does not supply counters.
+
 ### Overall verdict
 
 The stat panel beside the selected-run scope banner repeats `run_verdict` from

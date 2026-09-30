@@ -13,9 +13,9 @@ from bioetl.interfaces.http._forensic_request_budget import (
 from bioetl.interfaces.http._health_server_observability_protocols import (
     _HealthObservabilityRoutingHost,
 )
+from bioetl.interfaces.http._processed_records_report import saved_report_records
 from bioetl.interfaces.http.processed_records_table import (
     build_processed_records_table_payload_from_ledger,
-    build_processed_records_table_payload_from_prometheus,
     read_processed_records_run_id,
 )
 
@@ -49,31 +49,30 @@ async def handle_processed_records_table(
             }
 
         operation = build_selection_required
-    elif run_ledger is not None:
+    else:
 
         def build_from_ledger() -> dict[str, object]:
+            saved = saved_report_records(
+                pipeline=pipeline,
+                run_id=str(selected_run_id),
+                run_type=run_type,
+            )
+            if saved is not None:
+                return saved
             # Empty ledger entries stay UNKNOWN (DASH-STATE-001). Prometheus
             # current metrics are pipeline/run_type aggregates and MUST NOT
             # be presented as the selected UUID (DASH-SCOPE-001 / DASH-DATA-002).
             return build_processed_records_table_payload_from_ledger(
                 ledger_entries=tuple(
                     run_ledger.list_entries_by_run_id(selected_run_id)
+                    if run_ledger is not None
+                    else ()
                 ),
                 pipeline=pipeline,
                 run_type=run_type,
             )
 
         operation = build_from_ledger
-    else:
-
-        def build_from_prometheus() -> dict[str, object]:
-            return build_processed_records_table_payload_from_prometheus(
-                prometheus_base_url=host._prometheus_base_url,
-                pipeline=pipeline,
-                run_type=run_type,
-            )
-
-        operation = build_from_prometheus
 
     try:
         payload = await run_bounded_forensic_operation(

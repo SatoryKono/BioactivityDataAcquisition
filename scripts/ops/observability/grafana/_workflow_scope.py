@@ -413,6 +413,9 @@ def _retain_selected_run_overview(payload: dict) -> None:
         )
     _place_selected_run_window(payload["panels"])
     _lift_overview_identity(payload)
+    from scripts.ops.observability.grafana._overview_identity import apply_overview_identity
+
+    apply_overview_identity(payload)
     domains = next(panel for panel in payload["panels"] if panel.get("id") == 9002)
     handoff = domains.get("fieldConfig", {}).get("defaults", {}).get("links") or []
     domains["links"] = [dict(link) for link in handoff]
