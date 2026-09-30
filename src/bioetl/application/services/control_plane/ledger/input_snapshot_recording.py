@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, TypedDict, cast
 
 from bioetl.domain.control_plane import RunInputSnapshotRef, RunSourceRef
 from bioetl.domain.control_plane.reproducibility_policy import resolve_replay_capability
@@ -17,13 +18,27 @@ if TYPE_CHECKING:
     from bioetl.domain.control_plane import RunManifest
 
 
+class _SnapshotPublishKwargs(TypedDict):
+    """Publish kwargs for one validated input-snapshot payload."""
+
+    provider: str
+    entity: str
+    pipeline_name: str
+    snapshot_id: str
+    content_hash: str
+    immutable_uri: str
+    bronze_batch_ref: str
+    query_fingerprint: str | None
+    details: Mapping[str, object]
+
+
 def _published_snapshot_kwargs(
     snapshot: dict[str, object],
     *,
     details: dict[str, object],
     artifact_path: str,
     snapshot_id: str,
-) -> dict[str, Any]:
+) -> _SnapshotPublishKwargs:
     """Build publish kwargs for one validated snapshot payload."""
     return {
         "provider": str(details.get("provider") or ""),
@@ -123,7 +138,7 @@ def _local_batch_file_verified(artifact_path: str) -> bool | None:
 
 def _load_manifest_for_persist(
     service: RunLedgerService,
-) -> tuple[Any, RunManifest] | None:
+) -> tuple[Callable[[RunManifest], None], RunManifest] | None:
     """Return the manifest saver and manifest when the ledger can persist."""
     port = getattr(service, "manifest_port", None)
     manifest_id = str(getattr(service, "manifest_id", "") or "").strip()

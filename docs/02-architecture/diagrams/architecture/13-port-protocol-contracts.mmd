@@ -1,11 +1,13 @@
 %% BioETL — Port/Protocol Contracts (Full Map)
 %% Domain ports mapped to their current application consumers and infrastructure adapters.
+%% keep-orphan ports (FDSP, HCP, MCP, DNP, DQMP, SHP) are declared domain Protocols
+%% without a bound consumer/adapter in any view yet; detail lives in 13a–13f/13i.
 
 %% @version 1.1.0
 %% @date    2026-09-03
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   48
+%% @nodes   49
 %% @reference  Decomposed into 13a, 13b, 13c, 13d, 13e, 13f sub-diagrams
 %% Legend: docs/02-architecture/diagrams/views/00-legend.mermaid
 
@@ -77,7 +79,8 @@ graph LR
         UQ["UnifiedQuarantine"]:::size-sm
         FA["FileAuditAdapter"]:::size-sm
         UL["UnifiedLogger"]:::size-sm
-        MCO["MetricsCollector"]:::size-sm
+        MCO["MetricsCollector<br/>compat wrapper"]:::size-sm
+        PME["PrometheusMetrics<br/>impl MetricsPort"]:::size-sm
         OTT["OpenTelemetryTracer"]:::size-sm
         CB["CircuitBreaker"]:::size-sm
         TB_I["TokenBucket"]:::size-sm
@@ -102,7 +105,8 @@ graph LR
     QRP --- UQ
     ADP --- FA
     LGP --- UL
-    MTP --- MCO
+    MTP --- PME
+    MCO -.compat wrapper over exported metric families.-> PME
     TRP --- OTT
     CBP --- CB
     RLP --- TB_I
@@ -134,5 +138,5 @@ graph LR
     classDef app fill:#f0fdf4,stroke:#16a34a
 
     class DSP,FDSP,STP,LKP,CKP,CCP,QRP,ADP,LGP,MTP,TRP,CBP,RLP,SVP,GVP,HCP,PIIP,MWP,MCP,DNP,DRP,IFP,DQMP,BDQP,SDQP,GDQP,DQRWP,JEP,MMP,SHP,RMP,RLP2,LSP port
-    class CA,BW,ML,LC,UQ,FA,UL,MCO,OTT,CB,TB_I,PSV,SPH,MW_I,DR_I,CSVR,DQRW_I,SJE,MMGR,FRM,FRL,FLS infra
+    class CA,BW,ML,LC,UQ,FA,UL,MCO,PME,OTT,CB,TB_I,PSV,SPH,MW_I,DR_I,CSVR,DQRW_I,SJE,MMGR,FRM,FRL,FLS infra
     class BDA,SDA,GDA,RMS,RLS,LIS,CCS app

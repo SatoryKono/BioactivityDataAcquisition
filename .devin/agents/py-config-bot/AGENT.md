@@ -78,7 +78,7 @@ ______________________________________________________________________
 yamllint configs/
 
 # Schema validation
-python scripts/agents/py-config-bot-1.py -v
+python -m scripts.schema validate-configs
 ```
 
 ______________________________________________________________________

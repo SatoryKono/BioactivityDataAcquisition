@@ -1,5 +1,6 @@
 %% BioETL — Port Contracts: Data Sources
-%% Covers DataSourcePort and FilterableDataSourcePort implementations per provider.
+%% Covers DataSourcePort implementations per provider. FilterableDataSourcePort
+%% is shown without provider bindings in this view (keep-orphan).
 
 %% @version 1.0.0
 %% @date    2026-07-31
@@ -30,6 +31,12 @@ graph LR
 
     subgraph Infrastructure["Infrastructure Layer"]
         CA["ChemblAdapter"]:::size-sm
+        PA["PubMedAdapter"]:::size-sm
+        UA["UniProtAdapter"]:::size-sm
+        CRA["CrossRefAdapter"]:::size-sm
+        OAA["OpenAlexAdapter"]:::size-sm
+        SSA["SemanticScholarAdapter"]:::size-sm
+        PCA["PubChemAdapter"]:::size-sm
     end
 
     DSP --- CA & PA & UA & CRA & OAA & SSA & PCA

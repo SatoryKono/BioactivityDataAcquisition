@@ -231,31 +231,31 @@
       "runtime_checkable": true
     },
     {
-      "line": 159,
+      "line": 150,
       "name": "MetricsPort",
       "path": "src/bioetl/domain/ports/observability/metrics.py",
       "runtime_checkable": true
     },
     {
-      "line": 213,
+      "line": 204,
       "name": "ExecutorMetricsPort",
       "path": "src/bioetl/domain/ports/observability/metrics.py",
       "runtime_checkable": true
     },
     {
-      "line": 234,
+      "line": 225,
       "name": "MetricsServerPort",
       "path": "src/bioetl/domain/ports/observability/metrics.py",
       "runtime_checkable": true
     },
     {
-      "line": 278,
+      "line": 269,
       "name": "MetricsPublisherPort",
       "path": "src/bioetl/domain/ports/observability/metrics.py",
       "runtime_checkable": true
     },
     {
-      "line": 304,
+      "line": 295,
       "name": "HealthMetricsExpositionPort",
       "path": "src/bioetl/domain/ports/observability/metrics.py",
       "runtime_checkable": true

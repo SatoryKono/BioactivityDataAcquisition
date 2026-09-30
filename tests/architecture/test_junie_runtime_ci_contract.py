@@ -90,3 +90,10 @@ def test_junie_guidelines_include_environment_configuration() -> None:
     for content in (agents, guidelines):
         assert "## Environment Configuration" in content
         assert "MUST use tokens and parameters from the repository root" in content
+
+
+def test_junie_guidelines_include_full_tree_commits() -> None:
+    """Junie Guardrails must mirror the full-tree commit gate (#11709/#11786)."""
+    guidelines = JUNIE_GUIDELINES_PATH.read_text(encoding="utf-8")
+    assert "Full-tree commits only" in guidelines
+    assert "check_no_partial_tree.py" in guidelines

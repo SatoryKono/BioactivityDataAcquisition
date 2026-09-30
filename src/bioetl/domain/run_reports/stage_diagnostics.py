@@ -20,9 +20,7 @@ def _requested_gap_row(
     request_state: str, request_reason: str | None
 ) -> dict[str, object]:
     """Project the request-selection gap row."""
-    return _gap_row(
-        request_state, request_reason or "selection_required", "request"
-    )
+    return _gap_row(request_state, request_reason or "selection_required", "request")
 
 
 def _report_payload(report: Mapping[str, object] | None) -> Mapping[str, object]:
@@ -56,10 +54,11 @@ def _collect_stage_rows(
 
 def _empty_rows_gap(execution: str) -> dict[str, object]:
     """Project the gap row when no stage evidence exists."""
-    if execution in _OPEN or execution not in _TERMINAL:
-        reason = "terminal_event_missing"
-    else:
-        reason = "stage_evidence_missing"
+    reason = (
+        "terminal_event_missing"
+        if execution in _OPEN or execution not in _TERMINAL
+        else "stage_evidence_missing"
+    )
     if execution in _OPEN:
         return _gap_row(_UNFINISHED, reason, "report")
     return _gap_row(_INCOMPLETE, reason, "report")
@@ -89,7 +88,9 @@ def project_stage_diagnostics(
 ) -> dict[str, object]:
     """Return stage rows, coverage, and blockers for one saved run."""
     if request_state is not None:
-        return _envelope([_requested_gap_row(request_state, request_reason)], _INCOMPLETE)
+        return _envelope(
+            [_requested_gap_row(request_state, request_reason)], _INCOMPLETE
+        )
     payload = _report_payload(report)
     identity = _mapping(payload.get("identity"))
     execution = str(identity.get("status") or "unknown").lower()

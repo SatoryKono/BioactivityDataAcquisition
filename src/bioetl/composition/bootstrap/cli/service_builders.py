@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import TYPE_CHECKING
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.lifecycle import (
     CheckpointCompatibilityService,
@@ -24,11 +24,12 @@ from bioetl.application.services.workflow.observability_workflow_service import 
     ObservabilityWorkflowService,
 )
 from bioetl.application.services.quality.quarantine_service import QuarantineService
+from bioetl.composition.contracts.structural import ModelDumpProvider
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     build_effective_config_source_refs,
 )
 from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
-from bioetl.domain.types import RunID
+from bioetl.domain.types import JsonDict, RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.time import SystemClock
 
@@ -246,3 +247,20 @@ def build_cli_quarantine_service(
             else None
         ),
     )
+
+
+def get_pipeline_yaml_for_dq(
+    pipeline_name: str,
+    *,
+    pipeline_config_loader: Callable[[str], object],
+) -> JsonDict:
+    """Return pipeline config as mapping data for DQ config services."""
+    config = pipeline_config_loader(pipeline_name)
+    if isinstance(config, ModelDumpProvider):
+        payload = config.model_dump()
+        if not isinstance(payload, Mapping):
+            raise TypeError("Pipeline model_dump() must return a mapping")
+        return cast("JsonDict", dict(payload))
+    if isinstance(config, Mapping):
+        return dict(config)
+    raise TypeError("Pipeline YAML config must provide model_dump() or be a mapping")
