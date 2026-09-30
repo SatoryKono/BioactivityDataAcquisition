@@ -3,12 +3,17 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
+from bioetl.application.services.run_reports.artifact_digest import (
+    canonical_report_sha256,
+    file_sha256,
+)
 from bioetl.application.services.run_reports.markdown import (
     render_pipeline_run_report_markdown,
     render_workflow_run_report_markdown,
@@ -92,6 +97,13 @@ def resolve_workflow_report_dir(
     )
 
 
+def _stored_sha256(path: Path, store: RunReportStorePort) -> str:
+    """Hash persisted bytes when the path is on disk, else the stored UTF-8 text."""
+    if path.is_file():
+        return file_sha256(path)
+    return hashlib.sha256(store.read_text(str(path)).encode("utf-8")).hexdigest()
+
+
 def _atomic_write_text(path: Path, content: str, *, store: RunReportStorePort) -> None:
     """Atomically replace one UTF-8 text artifact through the store port."""
     writer = store
@@ -141,6 +153,21 @@ def _with_self_artifacts(
     return tuple(items)
 
 
+def _with_kind_digest(
+    artifacts: tuple[dict[str, Any], ...],
+    *,
+    kind: str,
+    sha256: str,
+) -> tuple[dict[str, Any], ...]:
+    items: list[dict[str, Any]] = []
+    for item in artifacts:
+        if str(item.get("kind")) == kind:
+            items.append({**item, "sha256": sha256})
+        else:
+            items.append(item)
+    return tuple(items)
+
+
 def _write_latest_pointer(
     *,
     owner_dir: Path,
@@ -171,23 +198,28 @@ def write_pipeline_run_report(
     writer.mkdir(str(out_dir))
     json_path = out_dir / "pipeline-run-report.json"
     md_path = out_dir / "pipeline-run-report.md"
-    enriched = _require_pipeline_run_report(
-        replace(
-            report,
-            artifacts=_with_self_artifacts(
-                report.artifacts,
-                json_path=json_path,
-                markdown_path=md_path,
-            ),
-        )
+    artifacts = _with_self_artifacts(
+        report.artifacts,
+        json_path=json_path,
+        markdown_path=md_path,
     )
+    enriched = _require_pipeline_run_report(replace(report, artifacts=artifacts))
+    markdown = render_pipeline_run_report_markdown(enriched)
+    partial_md = out_dir / f"{md_path.name}.partial"
+    _atomic_write_text(partial_md, markdown, store=writer)
+    md_digest = _stored_sha256(partial_md, writer)
+    artifacts = _with_kind_digest(
+        artifacts, kind="pipeline_run_report_md", sha256=md_digest
+    )
+    json_kind = "pipeline_run_report_json"
+    json_digest = canonical_report_sha256(
+        _require_pipeline_run_report(replace(enriched, artifacts=artifacts)).to_dict()
+    )
+    artifacts = _with_kind_digest(artifacts, kind=json_kind, sha256=json_digest)
+    enriched = _require_pipeline_run_report(replace(enriched, artifacts=artifacts))
     payload = publish_snapshot(enriched.to_dict(), json_path, store=writer)
     write_json(json_path, payload, store=writer)
-    _atomic_write_text(
-        md_path,
-        render_pipeline_run_report_markdown(enriched),
-        store=writer,
-    )
+    _atomic_write_text(md_path, writer.read_text(str(partial_md)), store=writer)
     latest_path = _write_latest_pointer(
         owner_dir=resolved_dir.parent,
         payload={
@@ -198,6 +230,8 @@ def write_pipeline_run_report(
             "completed_at": identity.get("completed_at"),
             "json_path": str(json_path.as_posix()),
             "markdown_path": str(md_path.as_posix()),
+            "json_sha256": json_digest,
+            "markdown_sha256": md_digest,
         },
         store=writer,
     )

@@ -187,14 +187,14 @@ def finalize_pipeline_run_report(
             identity=identity,
             metrics=metrics,
             accounting=accounting,
-            artifacts=build_artifacts_from_result(result),
+            artifacts=build_artifacts_from_result(result, options=options),
         )
         reasons = draft.reasons_top_n
         report = build_pipeline_run_report(
             identity=identity,
             metrics=metrics,
             accounting=accounting,
-            artifacts=build_artifacts_from_result(result),
+            artifacts=build_artifacts_from_result(result, options=options),
             optional_blocks=PipelineRunReportOptionalBlocks(
                 failure=build_failure_block(result),
                 io=build_io_block(result, options=options),

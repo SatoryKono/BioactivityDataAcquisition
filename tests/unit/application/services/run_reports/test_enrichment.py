@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import replace
+from pathlib import Path
 from typing import cast
 
 import pytest
@@ -54,6 +55,50 @@ def test_build_artifacts_from_result_handles_absent_and_hashed_export() -> None:
     ) == ({"kind": "debug_export", "ref": "debug.xlsx", "hash": "sha256:abc"},)
     assert build_artifacts_from_result(_result(debug_export_uri="debug.xlsx")) == (
         {"kind": "debug_export", "ref": "debug.xlsx"},
+    )
+
+
+def test_build_artifacts_from_result_adds_existing_cached_bronze_batches(
+    tmp_path: Path,
+) -> None:
+    from bioetl.application.services.run_reports.artifact_digest import file_sha256
+
+    day = tmp_path / "2026-01-01"
+    day.mkdir()
+    batch = day / "batch_0001.jsonl.zst"
+    batch.write_bytes(b"bronze-bytes")
+    artifacts = build_artifacts_from_result(
+        _result(),
+        options=_options(
+            use_cached_bronze=True,
+            cached_bronze_path=str(tmp_path),
+            cached_bronze_date="2026-01-01",
+        ),
+    )
+    assert artifacts == (
+        {
+            "kind": "bronze_batch",
+            "ref": str(batch.as_posix()),
+            "sha256": file_sha256(batch),
+        },
+    )
+
+
+def test_build_artifacts_from_result_skips_missing_cached_bronze(
+    tmp_path: Path,
+) -> None:
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    assert (
+        build_artifacts_from_result(
+            _result(),
+            options=_options(
+                use_cached_bronze=True,
+                cached_bronze_path=str(empty),
+                cached_bronze_date="2026-01-01",
+            ),
+        )
+        == ()
     )
 
 
