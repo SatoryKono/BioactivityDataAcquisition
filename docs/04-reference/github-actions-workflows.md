@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **50** live GitHub Actions
+This page is the canonical published inventory of the **51** live GitHub Actions
 workflow files tracked under `.github/workflows/` on the default branch.
 The count is derived from those tracked `*.yml` files; it is not a separately
 maintained target and it is **not** equal to the GitHub Actions API
@@ -77,6 +77,7 @@ new spend/safety decision.
 | `duplication-complexity.yml` | `Duplication and Complexity Checks` | `workflow_call`, `push` | `active` | `active` | Duplication, constructor-args, and complexity gates |
 | `e2e-matrix-health.yml` | `E2E Matrix Health` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | `active` | `active` | Blocking and nightly E2E matrix smoke lanes |
 | `import-linter.yml` | `Lint and Architecture Gates` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Ruff/import-linter/architecture fast gates |
+| `no-partial-tree-commits.yml` | `No partial-tree commits` | `push`, `pull_request` | `active` | `active` | Rejects partial-tree commits that would collapse history for downstream PRs (#11709) |
 | `opencode-pr-review.yml` | `opencode-pr-review` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
 | `opencode-triage.yml` | `opencode-triage` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
 | `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; GitHub required context is job `pr-gate-complete` (ruleset 13643213) |
@@ -110,10 +111,10 @@ new spend/safety decision.
 | `mutation-testing.yml` | `Mutation Testing` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Mutation-testing lane with scheduled coverage |
 | `nightly-replay-parity.yml` | `nightly-replay-parity` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Replay/determinism parity validation |
 | `performance-nightly.yml` | `Performance Nightly` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Performance-regression gate |
-| `pr-hygiene.yml` | `PR Hygiene` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Stale report-noise draft PR cleanup under repository hygiene policy |
-| `quality-debt-weekly.yml` | `Quality Debt Weekly` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly quality-debt scorecard/report lane |
+| `pr-hygiene.yml` | `PR Hygiene` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Stale report-noise draft PR cleanup under repository hygiene policy |
+| `quality-debt-weekly.yml` | `Quality Debt Weekly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly quality-debt scorecard/report lane |
 | `scorecard.yml` | `OpenSSF Scorecard` | `schedule`, `workflow_dispatch`, `push` | `active` | `active` | Weekly non-blocking OpenSSF Scorecard baseline |
-| `stale.yml` | `Stale` | `schedule` | `disabled_manually` | `keep-disabled` | Issue/PR staleness automation |
+| `stale.yml` | `Stale` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Issue/PR staleness automation |
 | `vacuum.yml` | `Weekly VACUUM` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Schedule removed; local vacuum only (#11189) |
 
 ### Release, packaging, and repository automation
@@ -122,7 +123,7 @@ new spend/safety decision.
 | --- | --- | --- | --- | --- | --- |
 | `dashboard-render-host.yml` | `Dashboard render release evidence (host-only)` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Dashboard rendering and release evidence generation on self-hosted runner |
 | `docker.yml` | `Docker Build & Compose Validation` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Optional helper-image and compose validation |
-| `labeler.yml` | `Labeler` | `pull_request_target` | `disabled_manually` | `keep-disabled` | Applies repository labels to PRs |
+| `labeler.yml` | `Labeler` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Applies repository labels to PRs |
 | `release.yml` | `Release` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Publish stays outside Actions (#11182) |
 
 ### Reusable / compatibility-only helpers
