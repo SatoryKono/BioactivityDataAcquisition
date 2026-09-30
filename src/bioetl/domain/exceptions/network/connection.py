@@ -8,7 +8,6 @@ retry with exponential backoff is appropriate (per RULES.md §3.1.3).
 
 from __future__ import annotations
 
-import socket
 from collections.abc import Iterator
 
 from bioetl.domain.exceptions.base import RecoverableError
@@ -55,11 +54,6 @@ def is_dns_resolution_failure(
     message: str | None = None,
 ) -> bool:
     """Return True when the failure is DNS resolution, not a transient TCP drop."""
-    if any(
-        isinstance(item, socket.gaierror)
-        for item in _iter_exception_chain(exc)
-    ):
-        return True
     blob = _chain_texts(exc, message)
     return any(marker in blob for marker in _DNS_MESSAGE_MARKERS)
 

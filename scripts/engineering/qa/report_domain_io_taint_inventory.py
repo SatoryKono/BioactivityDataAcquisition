@@ -104,6 +104,14 @@ ALLOWED_CALL_EXCEPTIONS = {
         "StageAccountingSnapshotsMixin._removals_for_bucket",
         "self._catalog.resolve",
     ): _REASON_CATALOG_RESOLVE,
+    # serialization package: resolves the sibling codec file path once at
+    # import so the #11241 package split can load the codec without a
+    # package-relative import cycle. No I/O is performed by resolve() itself.
+    (
+        "src/bioetl/domain/serialization/__init__.py",
+        "<module>",
+        "resolve",
+    ): "Resolves the sibling serialization codec path at import time.",
 }
 
 
