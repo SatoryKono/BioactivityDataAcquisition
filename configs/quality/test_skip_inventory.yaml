@@ -161,7 +161,7 @@ entries:
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 3
+    reviewed_skip_calls: 4
     vcr_related: false
     review_date: "2026-09-30"
     rationale: ChEMBL live canary skips closed when unreachable or rate-limited (HTTP 429) after bounded retries; a received HTTP 5xx fails closed via pytest.fail (#11772).

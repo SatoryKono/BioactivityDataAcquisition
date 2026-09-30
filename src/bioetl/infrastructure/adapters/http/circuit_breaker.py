@@ -23,6 +23,7 @@ from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import CircuitBreakerState
 from bioetl.infrastructure.adapters.http._circuit_breaker_support import (
     CALL_OPERATION_ERRORS,
+    RETRYABLE_HTTP_STATUS_CODES,
     decide_attempt_state,
     emit_counter_metric,
     emit_state_metric,
@@ -87,16 +88,10 @@ class CircuitBreakerGuard:
 
     def get_last_failure_time(self) -> float | None:
         """Monotonic timestamp of the last recorded failure, if any."""
-        if self._last_failure_time <= 0.0:
-            return None
-        return float(self._last_failure_time)
+        return float(self._last_failure_time) if self._last_failure_time > 0.0 else None
 
     def snapshot(self) -> object:
-        """Return a public typed snapshot of circuit-breaker state.
-
-        Prefer this over reading private fields such as ``_last_failure_time``.
-        Returns a ``CircuitBreakerSnapshot`` instance.
-        """
+        """Return a public typed snapshot of circuit-breaker state."""
         from bioetl.infrastructure.adapters.circuit_breaker_contract import (
             CircuitBreakerSnapshot,
         )
@@ -140,18 +135,8 @@ class CircuitBreakerGuard:
         function itself executes outside the lock, and state updates
         use a second acquisition only on completion.
 
-        Args:
-            func: Async function to call
-            *args: Positional arguments for func
-            **kwargs: Keyword arguments for func
-
-        Returns:
-            Result from func
-
         Raises:
             CircuitBreakerOpenError: If circuit is open
-            Re-raises operational exceptions from func after failure accounting
-
         """
         async with self._lock:
             now = _now()
@@ -186,13 +171,10 @@ class CircuitBreakerGuard:
             await self._note_failure()
             raise
         else:
-            if isinstance(result, httpx.Response) and result.status_code in {
-                429,
-                500,
-                502,
-                503,
-                504,
-            }:
+            if (
+                isinstance(result, httpx.Response)
+                and result.status_code in RETRYABLE_HTTP_STATUS_CODES
+            ):
                 await self._note_failure()
                 return result
             async with self._lock:

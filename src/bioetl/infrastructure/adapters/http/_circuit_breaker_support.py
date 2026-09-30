@@ -26,6 +26,8 @@ if TYPE_CHECKING:
 METRIC_CIRCUIT_BREAKER_SUCCESS = "bioetl_circuit_breaker_success_total"
 METRIC_CIRCUIT_BREAKER_FAILURE = "bioetl_circuit_breaker_failure_total"
 
+RETRYABLE_HTTP_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
+
 CALL_OPERATION_ERRORS: tuple[type[Exception], ...] = (
     BioETLError,
     httpx.HTTPError,

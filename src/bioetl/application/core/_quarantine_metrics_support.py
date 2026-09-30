@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core._quarantine_entries import DQQuarantineEntry
 from bioetl.application.core.batch_metrics_accounting import (
@@ -15,13 +15,30 @@ from bioetl.domain.types import BronzeRecord, ErrorType, JsonDict
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
 
-    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.observability.pipeline_metrics import (
         PipelineMetricsRecorder,
     )
     from bioetl.domain.ports import MetricsPort
 
 FILTERED_OUT_SILVER = "FILTERED_OUT_SILVER"
+
+
+class _BatchMetricsRecorderProtocol(Protocol):
+    """Structural surface of ``BatchMetricsRecorderService`` used by helpers.
+
+    Kept local so this leaf never imports ``batch_metrics`` (reportImportCycles).
+    """
+
+    def track_quarantined_records(
+        self,
+        error_type: ErrorType,
+        count: int,
+        *,
+        stage: str = "silver",
+        reason_code: str | None = None,
+    ) -> None: ...
+
+    def track_processed_records(self, stage: str, count: int) -> None: ...
 
 
 def iter_dq_quarantine_parts(
@@ -43,7 +60,7 @@ def track_quarantine_metrics(
     *,
     metrics: MetricsPort | None,
     pipeline_metrics: PipelineMetricsRecorder,
-    batch_metrics: BatchMetricsRecorderService | None,
+    batch_metrics: _BatchMetricsRecorderProtocol | None,
     pipeline_name: str,
     run_type: str,
     error_type: ErrorType,
@@ -86,7 +103,7 @@ def track_quarantine_metrics(
 def track_processed_quarantined(
     *,
     metrics: MetricsPort | None,
-    batch_metrics: BatchMetricsRecorderService | None,
+    batch_metrics: _BatchMetricsRecorderProtocol | None,
     pipeline_name: str,
     run_type: str,
     count: int,
