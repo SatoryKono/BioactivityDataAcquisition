@@ -47,7 +47,7 @@ Before hashing:
 1. Normalize values (`NaN/Inf -> null`, float rounding, date ISO, string strip).
 1. Exclude all technical metadata fields from identity.
 1. Serialize only through the canonical JSON helper in
-   `src/bioetl/domain/serialization.py` /
+   `src/bioetl/domain/serialization/` /
    `src/bioetl/domain/normalization/json.py`.
 
 ## Ordered vs Set-Like Fields
