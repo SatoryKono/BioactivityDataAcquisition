@@ -14,6 +14,100 @@ def _as_nonempty_str(value: object) -> str | None:
     return stripped or None
 
 
+def publication_pubmed_id(record: BronzeRecord) -> str | None:
+    """Return a non-empty PubMed ID string from a ChEMBL publication record."""
+    value = record.get("pubmed_id")
+    if isinstance(value, bool) or value is None:
+        return None
+    if isinstance(value, int):
+        return str(value) if value > 0 else None
+    if isinstance(value, str):
+        stripped = value.strip()
+        return stripped or None
+    return None
+
+
+def _heading_as_mapping(heading: object) -> dict[str, object] | None:
+    """Normalize a PubMed MeSH heading object to a string-key mapping."""
+    if isinstance(heading, dict):
+        return heading
+    descriptor_name = getattr(heading, "descriptor_name", None)
+    descriptor_ui = getattr(heading, "descriptor_ui", None)
+    qualifiers = getattr(heading, "qualifiers", None)
+    if descriptor_name is None and descriptor_ui is None:
+        return None
+    return {
+        "descriptor_name": descriptor_name,
+        "descriptor_ui": descriptor_ui,
+        "qualifiers": qualifiers,
+    }
+
+
+def _qualifier_name(qualifier: object) -> str | None:
+    """Extract a MeSH qualifier display name from a string or mapping."""
+    if isinstance(qualifier, str):
+        return _as_nonempty_str(qualifier)
+    if isinstance(qualifier, dict):
+        for key in ("name", "qualifier_name", "descriptor_name"):
+            parsed = _as_nonempty_str(qualifier.get(key))
+            if parsed is not None:
+                return parsed
+    name = getattr(qualifier, "name", None)
+    return _as_nonempty_str(name) if isinstance(name, str) else None
+
+
+def mesh_terms_from_pubmed_headings(
+    mesh_headings: object,
+    keywords: object = None,
+) -> tuple[list[dict[str, str | None]], list[str]]:
+    """Map PubMed MeSH headings/keywords onto ChEMBL ``mesh_terms`` shape.
+
+    One heading dict carries the first qualifier so ``extract_terms_from_publication``
+    emits both ``MESH_HEADING`` and ``MESH_QUALIFIER``. Extra qualifiers are
+    qualifier-only dicts so the heading ``entity_id`` stays unique.
+    """
+    mesh_terms: list[dict[str, str | None]] = []
+    if isinstance(mesh_headings, list):
+        for heading in mesh_headings:
+            mapping = _heading_as_mapping(heading)
+            if mapping is None:
+                continue
+            heading_name = _as_nonempty_str(mapping.get("descriptor_name"))
+            mesh_id = _as_nonempty_str(mapping.get("descriptor_ui"))
+            if heading_name is None:
+                continue
+            qualifier_names: list[str] = []
+            raw_qualifiers = mapping.get("qualifiers")
+            if isinstance(raw_qualifiers, list):
+                for qualifier in raw_qualifiers:
+                    parsed = _qualifier_name(qualifier)
+                    if parsed is not None:
+                        qualifier_names.append(parsed)
+            mesh_terms.append(
+                {
+                    "mesh_heading": heading_name,
+                    "mesh_id": mesh_id,
+                    "mesh_qualifier": qualifier_names[0] if qualifier_names else None,
+                }
+            )
+            for extra in qualifier_names[1:]:
+                mesh_terms.append(
+                    {
+                        "mesh_heading": None,
+                        "mesh_id": mesh_id,
+                        "mesh_qualifier": extra,
+                    }
+                )
+    keyword_terms: list[str] = []
+    if isinstance(keywords, list):
+        for keyword in keywords:
+            if isinstance(keyword, str):
+                stripped = keyword.strip()
+                if stripped:
+                    keyword_terms.append(stripped)
+    return mesh_terms, keyword_terms
+
+
 def extract_terms_from_publication(
     record: BronzeRecord, publication_id: str
 ) -> list[BronzeRecord]:
@@ -115,4 +209,6 @@ __all__ = [
     "compute_term_entity_id",
     "create_term_record",
     "extract_terms_from_publication",
+    "mesh_terms_from_pubmed_headings",
+    "publication_pubmed_id",
 ]
