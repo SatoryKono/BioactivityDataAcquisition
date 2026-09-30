@@ -7,6 +7,7 @@ from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import TransformerDependencyContext
@@ -57,7 +58,7 @@ def initialize_next_transformer_mro(
     kwargs: Mapping[str, object],
 ) -> None:
     """Initialize the next transformer class in ``owner_type`` MRO."""
-    super(cast(Any, owner_type), transformer).__init__(  # Any: TYPE-002 MRO host
+    super(as_mixin_host(owner_type), transformer).__init__(
         provider,
         **cast(Any, dict(kwargs)),  # Any: TYPE-002 kwargs bridge
     )

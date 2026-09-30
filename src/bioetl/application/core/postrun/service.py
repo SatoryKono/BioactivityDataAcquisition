@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_shared_operation_errors import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
@@ -26,6 +26,7 @@ from bioetl.application.core.postrun._service_support import (
 )
 from bioetl.application.services.medallion.medallion_types import VacuumResult
 from bioetl.application.services.quality.data_quality_service import DataQualityService
+from bioetl.domain.mixin_host import as_mixin_host
 from bioetl.domain.ports import ExecutorMetricsPort
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
@@ -169,7 +170,7 @@ class PostrunService(PostrunServiceSupportMixin):
         dq_context: DQReportContext | None,
     ) -> PostrunResult:
         """Execute compaction, DQ, reporting, metadata, and vacuum in order."""
-        host = cast(Any, self)  # Any: phased postrun methods are supplied by mixins
+        host = as_mixin_host(self)
         compaction = await host._run_compaction_phase()
         dq_result = host._run_dq_phase(executor)
         dq_reports = await host._run_dq_report_phase(dq_context)
