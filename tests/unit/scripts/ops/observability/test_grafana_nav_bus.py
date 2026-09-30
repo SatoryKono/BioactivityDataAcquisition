@@ -244,8 +244,8 @@ def test_run_explorer_restores_scope_and_compacts_reviewed_table() -> None:
         nav, panels, current_uid="bioetl-run-explorer-v1"
     )
 
-    assert scope["gridPos"] == {"x": 0, "y": 4, "w": 24, "h": 3}
-    assert browse["gridPos"] == {"x": 0, "y": 7, "w": 24, "h": 10}
+    assert scope["gridPos"] == {"x": 0, "y": 4, "w": 24, "h": 2}
+    assert browse["gridPos"] == {"x": 0, "y": 6, "w": 24, "h": 11}
     assert collapsed_row["gridPos"]["y"] == 17
 
 
@@ -267,7 +267,7 @@ def test_apply_to_dashboard_expands_nav_and_reclaims_first_window(
 
     assert nav_bus.apply_to_dashboard(
         dashboard,
-        current_uid="bioetl-overview-v2",
+        current_uid="bioetl-provider-health-v2",
     )
 
     rendered = json.loads(dashboard.read_text(encoding="utf-8"))
@@ -281,6 +281,6 @@ def test_apply_to_dashboard_expands_nav_and_reclaims_first_window(
     assert "bioetl-panel-title" not in nav["options"]["content"]
     before_check = dashboard.read_bytes()
     assert nav_bus.apply_to_dashboard(
-        dashboard, current_uid="bioetl-overview-v2", check=True
+        dashboard, current_uid="bioetl-provider-health-v2", check=True
     )
     assert dashboard.read_bytes() == before_check
