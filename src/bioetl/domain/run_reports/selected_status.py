@@ -72,11 +72,20 @@ def _saved_provider_name(
 
 def _cached_bronze_row(report: Mapping[str, object]) -> dict[str, object]:
     """Project a cached-bronze probe row without invented results."""
+    observation = _mapping(_mapping(report.get("observations")).get(PROVIDER))
+    facts = _mapping(observation.get("facts"))
+    local_check = "Not recorded"
+    if facts.get("probe_fallback_reason") == "cached_bronze_api_not_exercised":
+        local_check = str(observation.get("verdict", "Not recorded"))
     return {
         "provider": _saved_provider_name(report, {}),
         "check_result": _NA,
         "evidence": _NA,
         "observed_at": None,
+        "reason": "cached_bronze_no_remote_probe",
+        "reason_display": "Cached Bronze used; provider API was not called.",
+        "check_result_display": "Not checked",
+        "local_bronze_check": local_check,
     }
 
 

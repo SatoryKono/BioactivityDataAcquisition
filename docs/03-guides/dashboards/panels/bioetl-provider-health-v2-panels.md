@@ -4,6 +4,16 @@
 
 ## Overview
 
+For the selected-run profile, `Review Provider Check` (9461) and `Review
+Provider Evidence` (9460) describe the saved check for the selected Run ID.
+When `use_cached_bronze=true`, the API result remains `N/A` in the evidence
+contract and is displayed as `Not checked`, with the reason `Cached Bronze
+used; provider API was not called.` No API check time is invented: the table
+shows `Not performed`. `Local Bronze check` is a separate saved observation;
+it shows `Not recorded` unless an explicit local-check result exists. Neither
+cached input nor a successful local check proves current API availability.
+The same explanation appears in Run Overview's Provider domain row.
+
 Dashboard `4. Provider Health` monitors provider current status, health-check latency/outcomes, adapter retry exhaustion, HTTP errors, rate limiting, and circuit breaker state. Shipped dashboard JSON is the source of truth.
 
 Failure-rate, degraded-check, network/timeout, and rate-limit diagnostics retain

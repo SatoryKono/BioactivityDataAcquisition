@@ -61,7 +61,7 @@ def capture_run_completion(
     options: RunOptions | None,
 ) -> None:
     """Capture completion checks without allowing their failure to lose the run report."""
-    if capture is None or result.completed_at is None or (options and options.dry_run):
+    if capture is None or (options and options.dry_run):
         return
     try:
         capture(result.pipeline_name, result.run_id, result.completed_at)

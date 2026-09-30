@@ -19,6 +19,26 @@ from bioetl.domain.types import ComponentHealthResult, HealthStatus
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("recorded", [False, True])
+def test_cached_bronze_distinguishes_local_check_from_api(recorded: bool) -> None:
+    report = {"io": {"use_cached_bronze": True}, "identity": {"provider": "chembl"}}
+    if recorded:
+        report["observations"] = {
+            "Provider": {
+                "verdict": "OK",
+                "facts": {
+                    "probe_fallback_reason": "cached_bronze_api_not_exercised",
+                },
+            }
+        }
+    row = provider_check_rows(report)[0]
+    assert row["check_result"] == "N/A"
+    assert row["observed_at"] is None
+    assert row["check_result_display"] == "Not checked"
+    assert row["reason"] == "cached_bronze_no_remote_probe"
+    assert row["local_bronze_check"] == ("OK" if recorded else "Not recorded")
+
+
 def test_missing_provider_observation_is_not_ok() -> None:
     rows = provider_check_rows({})
     assert rows == [

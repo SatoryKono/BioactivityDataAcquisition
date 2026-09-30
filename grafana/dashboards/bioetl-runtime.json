@@ -421,7 +421,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 14,
         "x": 0,
         "y": 2
@@ -430,7 +430,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Pipeline Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">SELECTED RUN. Saved pipeline evidence for this Run ID. Fleet and time-range charts are on Incident Workspace.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">${pipeline:text} | ${run_type:text} | ${run_id}<br>Saved pipeline evidence for this Run ID. Fleet and time-range charts are on Incident Workspace.</div>"
       },
       "links": []
     },
@@ -652,7 +652,7 @@
       "gridPos": {
         "x": 0,
         "y": 7,
-        "w": 12,
+        "w": 14,
         "h": 7
       },
       "datasource": "BioETL Ops HTTP",
@@ -906,9 +906,9 @@
       "type": "table",
       "title": "Inspect Processed Records",
       "gridPos": {
-        "x": 12,
+        "x": 14,
         "y": 7,
-        "w": 12,
+        "w": 10,
         "h": 7
       },
       "datasource": "BioETL Ops HTTP",
@@ -1230,7 +1230,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. Unknown input/output counts are empty. Unknown outcome counts stay UNKNOWN. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -1297,6 +1297,66 @@
                   {
                     "id": "displayName",
                     "value": "Records out"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "filtered_out"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Filtered out"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "quarantined"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Quarantined"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "deduplicated"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Deduplicated"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "excluded"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Excluded"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "skipped"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Skipped"
                   }
                 ]
               },
@@ -1463,6 +1523,11 @@
                     "reason",
                     "records_in",
                     "records_out",
+                    "filtered_out",
+                    "quarantined",
+                    "deduplicated",
+                    "excluded",
+                    "skipped",
                     "duration_seconds",
                     "source"
                   ]
@@ -1478,8 +1543,13 @@
                   "reason": 2,
                   "records_in": 3,
                   "records_out": 4,
-                  "duration_seconds": 5,
-                  "source": 6
+                  "filtered_out": 5,
+                  "quarantined": 6,
+                  "deduplicated": 7,
+                  "excluded": 8,
+                  "skipped": 9,
+                  "duration_seconds": 10,
+                  "source": 11
                 }
               }
             }

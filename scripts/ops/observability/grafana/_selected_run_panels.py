@@ -282,6 +282,11 @@ _STAGE_RENAMES = {
     "reason": "Reason",
     "records_in": "Records in",
     "records_out": "Records out",
+    "filtered_out": "Filtered out",
+    "quarantined": "Quarantined",
+    "deduplicated": "Deduplicated",
+    "excluded": "Excluded",
+    "skipped": "Skipped",
     "duration_seconds": "Duration",
     "source": "Source",
 }
@@ -290,14 +295,30 @@ _STAGE_DISPLAY_ORDER = [
     "state",
     "records_in",
     "records_out",
+    "filtered_out",
+    "quarantined",
+    "deduplicated",
+    "excluded",
+    "skipped",
     "duration_seconds",
     "reason",
     "source",
 ]
 
 
-def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
+def _stage_panel(
+    grid: dict[str, int], *, include_outcomes: bool = False
+) -> dict[str, object]:
     """Saved stage rows for the selected Run ID. They precede domain evidence."""
+    fields = list(_STAGE_FIELDS)
+    if include_outcomes:
+        fields[5:5] = [
+            "filtered_out",
+            "quarantined",
+            "deduplicated",
+            "excluded",
+            "skipped",
+        ]
     return {
         "id": 9460,
         "type": "table",
@@ -308,7 +329,8 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
             "SELECTED RUN · Saved stage rows for the exact Run ID; "
             "the table shows at most 12 stages. "
             "SUCCESS with missing stage evidence stays INCOMPLETE. "
-            "A recorded zero stays 0. An unknown count is empty, not 0. "
+            "A recorded zero stays 0. Unknown input/output counts are empty. "
+            "Unknown outcome counts stay UNKNOWN. "
             "UNFINISHED means no terminal event. "
             "Prometheus does not change this table. "
             "Request failure is QUERY ERROR."
@@ -337,6 +359,7 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
                         ],
                     }
                     for field in _STAGE_DISPLAY_ORDER
+                    if field in fields
                 ],
                 {
                     "matcher": {"id": "byName", "options": "reason"},
@@ -408,14 +431,12 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
             {"id": "limit", "options": {"limitField": 12}},
             {
                 "id": "filterFieldsByName",
-                "options": {"include": {"names": _STAGE_FIELDS}},
+                "options": {"include": {"names": fields}},
             },
             {
                 "id": "organize",
                 "options": {
-                    "indexByName": {
-                        name: index for index, name in enumerate(_STAGE_FIELDS)
-                    },
+                    "indexByName": {name: index for index, name in enumerate(fields)},
                 },
             },
         ],
@@ -498,7 +519,10 @@ def _append_saved_run_evidence_row(
         default=0,
     )
     offset = 3 if include_duration else 0
-    stages = _stage_panel({"x": 0, "y": y + 1 + offset, "w": 24, "h": 8})
+    stages = _stage_panel(
+        {"x": 0, "y": y + 1 + offset, "w": 24, "h": 8},
+        include_outcomes=include_duration,
+    )
     details = _panel(
         9451,
         "Inspect Selected Run Domains",
@@ -625,12 +649,22 @@ def _provider_check_panel(
         "Run ID is always set on this dashboard. A report without a provider id is not OK. "
         "Valid-empty evidence stays VALID EMPTY. Request failure is QUERY ERROR."
     )
-    panel["targets"][0]["root_selector"] = "provider_checks"
+    panel["targets"][0]["root_selector"] = (
+        'provider_checks.($merge([$, {"check_result": '
+        'reason = "cached_bronze_no_remote_probe" ? "Not checked" : check_result, '
+        '"reason_display": reason_display ? reason_display : evidence, '
+        '"local_bronze_check": local_bronze_check ? local_bronze_check : "N/A", '
+        '"checked_at_display": reason = "cached_bronze_no_remote_probe" ? "Not performed" : '
+        '(observed_at ? $fromMillis($toMillis(observed_at), "[Y0001]-[M01]-[D01] [H01]:[m01]") : "Not recorded")}]))'
+    )
     labels = {
         "provider": "Provider",
-        "check_result": "Check result",
+        "check_result": "API check",
         "evidence": "Evidence",
         "observed_at": "Observed at",
+        "reason_display": "Reason",
+        "local_bronze_check": "Local Bronze check",
+        "checked_at_display": "Checked at (UTC)",
     }
     transforms = [
         item
@@ -701,6 +735,13 @@ def _style_provider_check(panels: list[dict]) -> None:
     review = by_id[9461]
     review["gridPos"].update(x=18, y=2, w=6, h=3)
     review["type"] = "stat"
+    review["links"] = [
+        {
+            "title": "Open run in Run Explorer",
+            "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+            "targetBlank": False,
+        }
+    ]
     review["description"] = (
         "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. "
         "OK/WARN/CRIT color the saved check verdict, not live fleet health."
@@ -721,6 +762,7 @@ def _style_provider_check(panels: list[dict]) -> None:
         "colorMode": "background",
         "graphMode": "none",
         "textMode": "value",
+        "text": {"valueSize": 18},
     }
     review["fieldConfig"] = {
         "defaults": {
@@ -739,6 +781,10 @@ def _style_provider_check(panels: list[dict]) -> None:
                         "CRIT": {"text": "CRIT", "color": "red"},
                         "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
                         "N/A": {"text": "N/A", "color": "gray"},
+                        "Not checked": {
+                            "text": "Not checked · Cached Bronze · API not called",
+                            "color": "gray",
+                        },
                         "SELECT RUN": {"text": "SELECT RUN", "color": "gray"},
                         "INCOMPLETE": {"text": "INCOMPLETE", "color": "orange"},
                     },
@@ -761,23 +807,24 @@ def _style_provider_check(panels: list[dict]) -> None:
     }
     evidence = by_id[9460]
     evidence["gridPos"].update(y=5)
-    if not any(t["id"] == "convertFieldType" for t in evidence["transformations"]):
-        evidence["transformations"].insert(
-            0,
-            {
-                "id": "convertFieldType",
-                "options": {
-                    "conversions": [
-                        {"targetField": "observed_at", "destinationType": "time"}
-                    ]
-                },
-            },
-        )
     evidence["fieldConfig"]["overrides"] = [
         {
-            "matcher": {"id": "byName", "options": "Observed at"},
-            "properties": [{"id": "unit", "value": "time:YYYY-MM-DD HH:mm"}],
+            "matcher": {"id": "byName", "options": name},
+            "properties": [
+                {"id": "custom.width", "value": width},
+                {
+                    "id": "custom.cellOptions",
+                    "value": {"type": "auto", "wrapText": True},
+                },
+            ],
         }
+        for name, width in (
+            ("Provider", 100),
+            ("API check", 120),
+            ("Reason", 400),
+            ("Checked at (UTC)", 180),
+            ("Local Bronze check", 160),
+        )
     ]
     for panel_id in (9402, 9403):
         by_id[panel_id]["gridPos"]["y"] = 10
@@ -831,8 +878,9 @@ def prune_provider_health_panels(payload: dict[str, object]) -> None:
                 '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
                 "font-size:16px;line-height:1.2;white-space:normal;"
                 'overflow-wrap:anywhere;max-width:96ch">'
-                "SELECTED RUN · Provider evidence is the saved check for this Run ID. "
-                "Fleet and current telemetry are not shown here.</div>"
+                "${pipeline:text} | ${run_type:text} | ${run_id}<br>"
+                "Provider evidence is the saved check for this Run ID. "
+                "Runs using cached Bronze do not call the provider API.</div>"
             )
             options["bioetlDisplayTitle"] = "Understand Selected Run"
             panel["description"] = (
@@ -856,7 +904,13 @@ def prune_provider_health_panels(payload: dict[str, object]) -> None:
         9460,
         "Review Provider Evidence",
         {"x": 0, "y": 7, "w": 24, "h": 5},
-        ["provider", "check_result", "evidence", "observed_at"],
+        [
+            "provider",
+            "check_result",
+            "reason_display",
+            "checked_at_display",
+            "local_bronze_check",
+        ],
         limit=None,
     )
     evidence.setdefault("options", {}).setdefault("footer", {})["enablePagination"] = (

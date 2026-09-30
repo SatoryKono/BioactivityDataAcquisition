@@ -640,7 +640,8 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
         "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; "
         "$issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; "
         "$map(presentation_domains, function($d) { $merge([$d, {"
-        "'status_display': $d.domain = 'Workflow' and $d.verdict = 'N/A' ? '—' : $d.verdict, "
+        "'status_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Not checked' : ($d.domain = 'Workflow' and $d.verdict = 'N/A' ? '—' : $d.verdict), "
+        "'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, "
         "'run_execution': $s.execution_state, 'run_verdict': $s.verdict, "
         "'saved_trust': $t, "
         "'run_reason': $r ? $r : ("
@@ -764,8 +765,38 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
         _apply_reason_columns(panel, fields)
     _override(summary, "Result", "displayName", "Processing")
     _override(summary, "Status", "displayName", "Overall verdict")
+    if not overview:
+        for name, width in (
+            ("execution_state", 85),
+            ("Overall verdict", 95),
+            ("Trust", 60),
+            ("Reason", 175),
+        ):
+            _override(summary, name, "custom.width", width)
+        _override(summary, "execution_state", "displayName", "Processing")
+        _override(
+            summary, "Reason", "custom.cellOptions", {"type": "auto", "wrapText": True}
+        )
+        summary.setdefault("options", {})["cellHeight"] = "sm"
     if overview:
         _overview_selected_run_layout(p, summary)
+        _override(p[9002], "Reason", "custom.wrapText", True)
+        _override(
+            p[9002], "Reason", "custom.cellOptions", {"type": "auto", "wrapText": True}
+        )
+        _override(
+            p[9002],
+            "Status",
+            "mappings",
+            [
+                {
+                    "type": "value",
+                    "options": {
+                        "Not checked": {"text": "Not checked", "color": "gray"},
+                    },
+                }
+            ],
+        )
 
 
 def _apply_stat_value_sizes(p: dict[int, dict]) -> None:

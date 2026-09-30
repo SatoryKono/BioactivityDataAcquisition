@@ -183,10 +183,10 @@ _RUNTIME_DROP_IDS = frozenset({22460, 9451, 9452, 9460})
 _RUNTIME_FLEET_ID_REMAP = {9401: 18940}
 _RUNTIME_FLEET_ROW_ID = 8808
 _RUNTIME_SELECTED_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 2, 14, 4),
+    9400: (0, 2, 14, 5),
     9998: (14, 2, 10, 5),
-    9402: (0, 7, 12, 7),
-    9403: (12, 7, 12, 7),
+    9402: (0, 7, 14, 7),
+    9403: (14, 7, 10, 7),
 }
 _INCIDENT_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     2001: (0, 6, 24, 2),
@@ -202,7 +202,8 @@ _DQ_SCOPE_DESCRIPTION = (
 _DQ_SCOPE_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;'
     'line-height:1.2;white-space:normal;overflow-wrap:anywhere"><div style="max-width:96ch">'
-    "SELECTED RUN · Saved evidence for the selected Run ID. "
+    "${pipeline:text} | ${run_type:text} | ${run_id}<br>"
+    "Saved evidence for the selected Run ID. "
     "CURRENT pipeline status and TIME RANGE scores are not on this page. "
     "A time-range value never proves this run."
     "</div></div>"
@@ -216,10 +217,10 @@ _OVERVIEW_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9301: (0, 18, 24, 8),
 }
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 2, 24, 3),
-    9406: (0, 5, 24, 5),
-    9402: (0, 10, 12, 7),
-    9403: (12, 10, 12, 7),
+    9400: (0, 2, 14, 5),
+    9406: (14, 2, 10, 5),
+    9402: (0, 7, 14, 8),
+    9403: (14, 7, 10, 8),
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'

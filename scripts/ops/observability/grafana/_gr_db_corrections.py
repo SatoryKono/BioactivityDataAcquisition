@@ -91,7 +91,8 @@ _TABLE_TARGETS = {
 
 _SCOPE_COPY = {
     "bioetl-runtime": (
-        "SELECTED RUN. Saved pipeline evidence for this Run ID. "
+        "${pipeline:text} | ${run_type:text} | ${run_id}<br>"
+        "Saved pipeline evidence for this Run ID. "
         "Fleet and time-range charts are on Incident Workspace."
     ),
     "bioetl-incident-v1": (
@@ -1051,7 +1052,7 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
         )
     panel["options"]["footer"]["enablePagination"] = False
     panel["options"]["cellHeight"] = "sm"
-    panel["gridPos"].update(x=14, y=10, w=10, h=8)
+    panel["gridPos"].update(x=14, y=7, w=10, h=8)
     panel["fieldConfig"]["defaults"]["noValue"] = _PROCESSED_RECORDS_NOVALUE
     panel["description"] = _PROCESSED_RECORDS_DESCRIPTION
 
@@ -1060,10 +1061,11 @@ def _correct_dq(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid == "bioetl-dq-v2" and 9403 in panels:
         _dq_processed_records(panels[9403])
         summary = panels[9406]
-        summary["gridPos"].update(x=0, y=5, w=24, h=5)
-        panels[9402]["gridPos"].update(x=0, y=10, w=14, h=8)
+        summary["gridPos"].update(x=14, y=2, w=10, h=5)
+        panels[9400]["gridPos"].update(x=0, y=2, w=14, h=5)
+        panels[9402]["gridPos"].update(x=0, y=7, w=14, h=8)
         if 9450 in panels:
-            panels[9450]["gridPos"].update(x=0, y=18, w=24, h=1)
+            panels[9450]["gridPos"].update(x=0, y=15, w=24, h=1)
         summary["transformations"] = [
             {"id": "limit", "options": {"limitField": 1}},
             {

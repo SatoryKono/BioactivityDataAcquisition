@@ -395,16 +395,16 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
-        "w": 24,
         "x": 0,
-        "y": 2
+        "y": 2,
+        "w": 14,
+        "h": 5
       },
       "description": "SELECTED RUN · This page assesses the selected Run ID from saved HTTP evidence. CURRENT pipeline status and TIME RANGE scores are not on this page. A time-range value never proves this run.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Evidence Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">SELECTED RUN · Saved evidence for the selected Run ID. CURRENT pipeline status and TIME RANGE scores are not on this page. A time-range value never proves this run.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">${pipeline:text} | ${run_type:text} | ${run_id}<br>Saved evidence for the selected Run ID. CURRENT pipeline status and TIME RANGE scores are not on this page. A time-range value never proves this run.</div></div>"
       },
       "links": []
     },
@@ -413,10 +413,10 @@
       "type": "table",
       "title": "Review Selected Run Status",
       "gridPos": {
-        "h": 5,
-        "w": 24,
-        "x": 0,
-        "y": 5
+        "x": 14,
+        "y": 2,
+        "w": 10,
+        "h": 5
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
@@ -541,6 +541,10 @@
                   "type": "auto",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 60
               }
             ]
           },
@@ -553,13 +557,6 @@
               {
                 "id": "custom.wrapText",
                 "value": true
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
               },
               {
                 "id": "displayName",
@@ -605,6 +602,17 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 175
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
               }
             ]
           },
@@ -652,12 +660,40 @@
                 ]
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "execution_state"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 85
+              },
+              {
+                "id": "displayName",
+                "value": "Processing"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Overall verdict"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 95
+              }
+            ]
           }
         ]
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "lg",
+        "cellHeight": "sm",
         "footer": {
           "show": false
         }
@@ -730,7 +766,7 @@
       "title": "Inspect Run Identity",
       "gridPos": {
         "x": 0,
-        "y": 10,
+        "y": 7,
         "w": 14,
         "h": 8
       },
@@ -986,7 +1022,7 @@
       "title": "Inspect Processed Records",
       "gridPos": {
         "x": 14,
-        "y": 10,
+        "y": 7,
         "w": 10,
         "h": 8
       },
@@ -1583,7 +1619,7 @@
       "description": "Expand for saved stage rows (Inspect Selected Run Stages), domain verdicts (Inspect Selected Run Domains), and full identity (Inspect Selected Run Identity) of the selected Run ID.",
       "gridPos": {
         "x": 0,
-        "y": 18,
+        "y": 15,
         "w": 24,
         "h": 1
       },

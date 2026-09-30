@@ -14,6 +14,7 @@ _OK = "OK"
 _NA = "N/A"
 _TERMINAL = {"success", "failed", "shutdown", "dry_run"}
 _OPEN = {"running", "started"}
+_OUTCOMES = ("filtered_out", "quarantined", "deduplicated", "excluded", "skipped")
 
 
 def _requested_gap_row(
@@ -137,6 +138,7 @@ def _rows_from_funnel(
                 records_out=_count(item.get("records_out")),
                 duration_seconds=_duration(timings.get(stage_id)),
                 source="report.funnel",
+                removals=item.get("removals"),
             )
         )
     return rows
@@ -217,6 +219,7 @@ def _stage_row(
     records_out: int | None,
     duration_seconds: float | int | None,
     source: str,
+    removals: object = None,
 ) -> dict[str, object]:
     return {
         "stage_id": stage_id,
@@ -226,7 +229,26 @@ def _stage_row(
         "records_out": records_out,
         "duration_seconds": duration_seconds,
         "source": source,
+        **_outcome_counts(removals),
     }
+
+
+def _outcome_counts(removals: object) -> dict[str, int | None]:
+    """Sum saved reason counts; absent or malformed evidence remains unknown."""
+    counts: dict[str, int | None] = dict.fromkeys(_OUTCOMES)
+    if not isinstance(removals, list):
+        return counts
+    for outcome in _OUTCOMES:
+        values = [
+            _count(item.get("count"))
+            for item in removals
+            if isinstance(item, Mapping) and item.get("outcome") == outcome
+        ]
+        if any(not isinstance(item, Mapping) for item in removals):
+            continue
+        if all(value is not None and value >= 0 for value in values):
+            counts[outcome] = sum(value for value in values if value is not None)
+    return counts
 
 
 def _gap_row(state: str, reason: str, source: str) -> dict[str, object]:

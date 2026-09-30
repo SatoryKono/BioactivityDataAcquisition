@@ -9,6 +9,55 @@ from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostic
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    ("removals", "expected"),
+    [
+        (None, None),
+        ([], 0),
+        ([{"outcome": "filtered_out", "count": 0}], 0),
+        (
+            [
+                {"outcome": "filtered_out", "count": 2},
+                {"outcome": "filtered_out", "count": 3},
+            ],
+            5,
+        ),
+        ([{"outcome": "filtered_out", "count": True}], None),
+        ([{"outcome": "filtered_out", "count": -1}], None),
+    ],
+)
+def test_saved_stage_removal_counts_preserve_missing_and_zero(removals, expected):
+    payload = project_stage_diagnostics(
+        {
+            "identity": {"status": "success"},
+            "funnel": [{"stage_id": "silver", "removals": removals}],
+        }
+    )
+    assert payload["stage_diagnostics"][0]["filtered_out"] == expected
+
+
+def test_stage_outcomes_are_summed_independently():
+    outcomes = ("filtered_out", "quarantined", "deduplicated", "excluded", "skipped")
+    payload = project_stage_diagnostics(
+        {
+            "identity": {"status": "success"},
+            "funnel": [
+                {
+                    "stage_id": "silver",
+                    "removals": [
+                        {"outcome": outcome, "count": count}
+                        for count, outcome in enumerate(outcomes)
+                    ],
+                }
+            ],
+        }
+    )
+    row = payload["stage_diagnostics"][0]
+    assert [row[outcome] for outcome in outcomes] == [0, 1, 2, 3, 4]
+    gap = project_stage_diagnostics(None)["stage_diagnostics"][0]
+    assert all(gap[outcome] is None for outcome in outcomes)
+
+
 def test_success_with_balanced_funnel_keeps_zero_and_coverage() -> None:
     payload = project_stage_diagnostics(
         {

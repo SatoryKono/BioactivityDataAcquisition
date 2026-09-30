@@ -6,7 +6,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 from bioetl.application.services.execution.pipeline_runner_models import (
@@ -40,7 +40,7 @@ from bioetl.domain.run_reports.pipeline_builder import (
     PipelineRunReportOptionalBlocks,
     build_pipeline_run_report,
 )
-from bioetl.domain.types import RunID
+from bioetl.domain.types import JsonDict, RunID
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_run_execution_service import (
@@ -79,7 +79,7 @@ def build_dry_run_result(
 
 def _seed_gold_removals_from_metrics(
     accounting: StageAccountingAccumulator,
-    metrics: dict[str, Any],  # Any: report/json payload shape is dynamic
+    metrics: JsonDict,
 ) -> None:
     """Fail when Gold exclusions were counted without a per-record reason."""
     excluded = int(metrics.get("records_gold_excluded_by_contract", 0) or 0)
@@ -89,7 +89,7 @@ def _seed_gold_removals_from_metrics(
     if accounted != excluded:
         raise ValueError(
             "gold exclusions lack a per-record reason: "
-            f"records_gold_excluded_by_contract={excluded} accounted={accounted}"
+            + f"records_gold_excluded_by_contract={excluded} accounted={accounted}"
         )
 
 
@@ -105,8 +105,8 @@ def _identity_from_result(
     *,
     options: RunOptions | None,
     duration: float | None,
-) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
-    identity: dict[str, Any] = {  # Any: report/json payload shape is dynamic
+) -> JsonDict:
+    identity: JsonDict = {
         "run_id": result.run_id,
         "manifest_id": result.manifest_id,
         "pipeline_name": result.pipeline_name,
@@ -114,12 +114,8 @@ def _identity_from_result(
         "entity": None,
         "run_type": result.run_type,
         "status": result.status.value,
-        "started_at": (
-            result.started_at.isoformat() if result.started_at is not None else None
-        ),
-        "completed_at": (
-            result.completed_at.isoformat() if result.completed_at is not None else None
-        ),
+        "started_at": result.started_at.isoformat(),
+        "completed_at": result.completed_at.isoformat(),
         "duration_seconds": duration,
         "workflow_id": options.workflow_id if options is not None else None,
         "workflow_run_id": options.workflow_run_id if options is not None else None,
@@ -145,7 +141,7 @@ def finalize_pipeline_run_report(
     options: RunOptions | None = None,
     report_root: Path | None = None,
     stage_timings: dict[str, float | int | None] | None = None,
-    http_summary: dict[str, Any] | None = None,  # Any: dynamic HTTP report payload
+    http_summary: JsonDict | None = None,
     store: RunReportStorePort,
 ) -> RunResult:
     """Build and persist pipeline run report; attach paths onto result."""
@@ -261,16 +257,15 @@ def build_pipeline_run_result(
         run_id=str(run_id),
         manifest_id=getattr(runner, "manifest_id", None),
         run_type=run_type,
-        records_fetched=metrics.get("records_fetched", 0),
-        records_bronze=metrics.get("records_bronze", 0),
-        records_silver=metrics.get("records_silver", 0),
-        records_gold=metrics.get("records_gold", 0),
-        records_gold_excluded_by_contract=metrics.get(
-            "records_gold_excluded_by_contract",
-            0,
+        records_fetched=int(metrics.get("records_fetched", 0) or 0),
+        records_bronze=int(metrics.get("records_bronze", 0) or 0),
+        records_silver=int(metrics.get("records_silver", 0) or 0),
+        records_gold=int(metrics.get("records_gold", 0) or 0),
+        records_gold_excluded_by_contract=int(
+            metrics.get("records_gold_excluded_by_contract", 0) or 0
         ),
-        records_quarantined=metrics.get("records_quarantined", 0),
-        records_filtered_out=metrics.get("records_filtered_out", 0),
+        records_quarantined=int(metrics.get("records_quarantined", 0) or 0),
+        records_filtered_out=int(metrics.get("records_filtered_out", 0) or 0),
         started_at=started_at,
         completed_at=outcome.completed_at,
         error_message=outcome.error_message,
@@ -362,7 +357,7 @@ def constructor_failure_recorder(
             timestamp=completed_at,
             error_type=type(exc).__name__,
         )
-        finalize(
+        _ = finalize(
             RunResult(
                 status=PipelineRunResult.FAILED,
                 pipeline_name=pipeline_name,

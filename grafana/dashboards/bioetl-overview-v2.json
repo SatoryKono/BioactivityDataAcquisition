@@ -366,7 +366,7 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">SELECTED RUN · ${pipeline:text} / ${run_type:text} / ${run_id}. This page assesses that run only. Identity and processed records are on this screen. UNKNOWN means saved evidence is missing.</div>",
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">${pipeline:text} | ${run_type:text} | ${run_id}<br>This page assesses that run only. Identity and processed records are on this screen. UNKNOWN means saved evidence is missing.</div>",
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence"
       },
@@ -897,17 +897,6 @@
             },
             "properties": [
               {
-                "id": "custom.wrapText",
-                "value": false
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              },
-              {
                 "id": "displayName",
                 "value": "Reason"
               },
@@ -955,6 +944,17 @@
               {
                 "id": "custom.inspect",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
               }
             ]
           },
@@ -987,6 +987,20 @@
               {
                 "id": "links",
                 "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Not checked": {
+                        "text": "Not checked",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
@@ -999,13 +1013,13 @@
           "source": "url",
           "parser": "uql",
           "format": "table",
-          "root_selector": "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': $d.domain = 'Workflow' and $d.verdict = 'N/A' ? '—' : $d.verdict, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))",
+          "root_selector": "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Not checked' : ($d.domain = 'Workflow' and $d.verdict = 'N/A' ? '—' : $d.verdict), 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': $d.domain = 'Workflow' and $d.verdict = 'N/A' ? '—' : $d.verdict, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))\""
+          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Not checked' : ($d.domain = 'Workflow' and $d.verdict = 'N/A' ? '—' : $d.verdict), 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))\""
         }
       ],
       "options": {

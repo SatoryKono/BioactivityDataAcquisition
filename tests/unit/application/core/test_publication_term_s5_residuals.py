@@ -3,6 +3,9 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING, cast
+
 import pytest
 
 from bioetl.application.core.data_sources.publication_term import (
@@ -24,20 +27,22 @@ def test_normalize_publication_term_limit_accepts_zero_and_rejects_invalid() -> 
     assert normalize_publication_term_limit(0) == 0
     assert normalize_publication_term_limit(3) == 3
     with pytest.raises(ValueError, match="limit must be >= 0"):
-        normalize_publication_term_limit(-1)
+        _ = normalize_publication_term_limit(-1)
     with pytest.raises(TypeError):
-        normalize_publication_term_limit(True)  # type: ignore[arg-type]
+        _ = normalize_publication_term_limit(True)
 
 
 def test_resolve_target_fallback_upstream_limit_treats_zero_as_zero() -> None:
     class _Src:
-        async def fetch(self, **kwargs):  # type: ignore[no-untyped-def]
-            if False:
+        async def fetch(self, **_kwargs: object) -> AsyncIterator[dict[str, object]]:
+            if TYPE_CHECKING:
                 yield {}
             raise AssertionError("upstream fetch must not run for pure limit math")
 
     wrapper = PublicationTermDataSource(data_source=_Src())  # type: ignore[arg-type]
-    resolve_limit = wrapper._resolve_target_fallback_upstream_limit
+    resolve_limit = (
+        wrapper._resolve_target_fallback_upstream_limit  # pyright: ignore[reportPrivateUsage]
+    )
     assert callable(resolve_limit)
     assert resolve_limit(0) == 0
     assert resolve_limit(2) == (
@@ -50,11 +55,11 @@ def test_resolve_target_fallback_upstream_limit_treats_zero_as_zero() -> None:
 async def test_fetch_limit_zero_yields_empty_without_upstream_records() -> None:
     class _Src:
         def __init__(self) -> None:
-            self.calls = 0
+            self.calls: int = 0
 
-        async def fetch(self, **kwargs):  # type: ignore[no-untyped-def]
+        async def fetch(self, **_kwargs: object) -> AsyncIterator[dict[str, object]]:
             self.calls += 1
-            if False:
+            if TYPE_CHECKING:
                 yield {}
 
     source = _Src()
@@ -71,12 +76,16 @@ async def test_fetch_limit_slices_filter_ids_to_term_cap() -> None:
             self.filter_ids: list[str] | None = None
             self.limit: int | None = None
 
-        async def fetch(self, **kwargs: object):
+        async def fetch(self, **kwargs: object) -> AsyncIterator[dict[str, object]]:
             raw_ids = kwargs.get("filter_ids")
-            self.filter_ids = list(raw_ids) if isinstance(raw_ids, list) else None
+            self.filter_ids = (
+                [str(item) for item in cast("list[object]", raw_ids)]
+                if isinstance(raw_ids, list)
+                else None
+            )
             raw_limit = kwargs.get("limit")
             self.limit = raw_limit if isinstance(raw_limit, int) else None
-            if False:
+            if TYPE_CHECKING:
                 yield {}
 
     source = _Src()

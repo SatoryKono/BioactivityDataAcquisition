@@ -400,7 +400,7 @@ def _retain_selected_run_overview(payload: dict) -> None:
         panel["options"]["content"] = (
             '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
             'font-size:16px;line-height:1.2;overflow-wrap:anywhere">'
-            "SELECTED RUN · ${pipeline:text} / ${run_type:text} / ${run_id}. "
+            "${pipeline:text} | ${run_id}<br>"
             "This page assesses that run only. "
             "Identity and processed records are on this screen. "
             "UNKNOWN means saved evidence is missing."

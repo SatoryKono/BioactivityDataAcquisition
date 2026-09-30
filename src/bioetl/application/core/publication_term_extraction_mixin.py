@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Awaitable, Callable
-from typing import TYPE_CHECKING, ClassVar, Protocol, cast
+from typing import TYPE_CHECKING, ClassVar, Protocol, cast, overload
 
 from bioetl.application.core.derived_scan_budget import DEFAULT_SCAN_RECORDS
 from bioetl.application.core.publication_term_enrichment import (
@@ -24,10 +24,10 @@ if TYPE_CHECKING:
 async def _close_publications(publications: AsyncIterator[BronzeRecord]) -> None:
     aclose = getattr(publications, "aclose", None)
     if callable(aclose):
-        await cast(Callable[[], Awaitable[object]], aclose)()
+        _ = await cast(Callable[[], Awaitable[object]], aclose)()
 
 
-def normalize_publication_term_limit(limit: int | None) -> int | None:
+def normalize_publication_term_limit(limit: object) -> int | None:
     """Validate and normalize an optional term-record limit.
 
     Returns:
@@ -69,6 +69,14 @@ def resolve_publication_upstream_limit(
     return normalized_limit, publication_limit
 
 
+@overload
+def _cap_filter_ids(
+    filter_ids: list[str], term_limit: int | None, pub_limit: int | None
+) -> tuple[list[str], int | None]: ...
+@overload
+def _cap_filter_ids(
+    filter_ids: list[str] | None, term_limit: int | None, pub_limit: int | None
+) -> tuple[list[str] | None, int | None]: ...
 def _cap_filter_ids(
     filter_ids: list[str] | None, term_limit: int | None, pub_limit: int | None
 ) -> tuple[list[str] | None, int | None]:
@@ -207,8 +215,6 @@ class PublicationTermExtractionMixin:
         filter_ids, publication_limit = _cap_filter_ids(
             filter_ids, normalized_limit, publication_limit
         )
-        if filter_ids is None:
-            return
         publications = filterable.fetch_filtered(
             entity_type=self.SOURCE_ENTITY_TYPE,
             filter_ids=filter_ids,

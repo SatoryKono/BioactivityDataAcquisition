@@ -207,7 +207,8 @@ def test_dq_10253_selected_run_summary_is_first_window() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     root = {panel.get("id"): panel for panel in dashboard.get("panels") or []}
     summary = root[9406]
-    assert summary.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 5}
+    assert summary.get("gridPos") == {"h": 5, "w": 10, "x": 14, "y": 2}
+    assert root[9400]["gridPos"] == {"h": 5, "w": 14, "x": 0, "y": 2}
     organize = next(
         item
         for item in summary.get("transformations") or []

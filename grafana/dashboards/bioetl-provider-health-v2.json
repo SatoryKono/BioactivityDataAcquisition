@@ -474,7 +474,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Selected Run",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">SELECTED RUN · Provider evidence is the saved check for this Run ID. Fleet and current telemetry are not shown here.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">${pipeline:text} | ${run_type:text} | ${run_id}<br>Provider evidence is the saved check for this Run ID. Runs using cached Bronze do not call the provider API.</div>"
       },
       "links": []
     },
@@ -1107,7 +1107,7 @@
         "h": 3
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. Valid-empty evidence stays VALID EMPTY. Select run context via dashboard variables. A failed request is QUERY ERROR; backend unavailable returns 504.",
+      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health.",
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -1119,17 +1119,8 @@
         "colorMode": "background",
         "graphMode": "none",
         "textMode": "value",
-        "dataLinks": [
-          {
-            "title": "Open Pipeline Diagnostics",
-            "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ],
         "text": {
-          "valueSize": 20,
-          "titleSize": 14
+          "valueSize": 18
         }
       },
       "fieldConfig": {
@@ -1179,6 +1170,10 @@
                   "text": "N/A",
                   "color": "gray"
                 },
+                "Not checked": {
+                  "text": "Not checked · Cached Bronze · API not called",
+                  "color": "gray"
+                },
                 "SELECT RUN": {
                   "text": "SELECT RUN",
                   "color": "gray"
@@ -1222,7 +1217,7 @@
           "source": "url",
           "parser": "backend",
           "format": "table",
-          "root_selector": "provider_checks",
+          "root_selector": "provider_checks.($merge([$, {\"check_result\": reason = \"cached_bronze_no_remote_probe\" ? \"Not checked\" : check_result, \"reason_display\": reason_display ? reason_display : evidence, \"local_bronze_check\": local_bronze_check ? local_bronze_check : \"N/A\", \"checked_at_display\": reason = \"cached_bronze_no_remote_probe\" ? \"Not performed\" : (observed_at ? $fromMillis($toMillis(observed_at), \"[Y0001]-[M01]-[D01] [H01]:[m01]\") : \"Not recorded\")}]))",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
@@ -1250,10 +1245,9 @@
       ],
       "links": [
         {
-          "title": "Open Pipeline Diagnostics",
-          "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
+          "title": "Open run in Run Explorer",
+          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "targetBlank": false
         }
       ]
     },
@@ -1294,12 +1288,95 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Observed at"
+              "options": "Provider"
             },
             "properties": [
               {
-                "id": "unit",
-                "value": "time:YYYY-MM-DD HH:mm"
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "API check"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 400
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Checked at (UTC)"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 180
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Local Bronze check"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
               }
             ]
           }
@@ -1312,7 +1389,7 @@
           "source": "url",
           "parser": "backend",
           "format": "table",
-          "root_selector": "provider_checks",
+          "root_selector": "provider_checks.($merge([$, {\"check_result\": reason = \"cached_bronze_no_remote_probe\" ? \"Not checked\" : check_result, \"reason_display\": reason_display ? reason_display : evidence, \"local_bronze_check\": local_bronze_check ? local_bronze_check : \"N/A\", \"checked_at_display\": reason = \"cached_bronze_no_remote_probe\" ? \"Not performed\" : (observed_at ? $fromMillis($toMillis(observed_at), \"[Y0001]-[M01]-[D01] [H01]:[m01]\") : \"Not recorded\")}]))",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
@@ -1322,25 +1399,15 @@
       ],
       "transformations": [
         {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [
-              {
-                "targetField": "observed_at",
-                "destinationType": "time"
-              }
-            ]
-          }
-        },
-        {
           "id": "filterFieldsByName",
           "options": {
             "include": {
               "names": [
                 "provider",
                 "check_result",
-                "evidence",
-                "observed_at"
+                "reason_display",
+                "checked_at_display",
+                "local_bronze_check"
               ]
             }
           }
@@ -1351,14 +1418,16 @@
             "indexByName": {
               "provider": 0,
               "check_result": 1,
-              "evidence": 2,
-              "observed_at": 3
+              "reason_display": 2,
+              "checked_at_display": 3,
+              "local_bronze_check": 4
             },
             "renameByName": {
               "provider": "Provider",
-              "check_result": "Check result",
-              "evidence": "Evidence",
-              "observed_at": "Observed at"
+              "check_result": "API check",
+              "reason_display": "Reason",
+              "checked_at_display": "Checked at (UTC)",
+              "local_bronze_check": "Local Bronze check"
             }
           }
         }
