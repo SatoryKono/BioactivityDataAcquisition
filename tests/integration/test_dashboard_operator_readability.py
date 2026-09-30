@@ -616,3 +616,26 @@ def test_run_explorer_workflow_passport_is_conditional_in_one_column() -> None:
     properties = {item["id"]: item["value"] for item in workflow_override["properties"]}
     assert properties["custom.cellOptions"]["type"] == "markdown"
     assert "links" not in properties
+
+
+def test_run_explorer_pipeline_passport_uses_a_fixed_allowed_origin() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
+    panel = next(
+        item for item in get_dashboard_panels(dashboard) if item.get("id") == 3010
+    )
+    pipeline = next(
+        item
+        for item in panel["fieldConfig"]["overrides"]
+        if item["matcher"].get("options") == "Pipeline"
+    )
+    link = next(prop for prop in pipeline["properties"] if prop["id"] == "links")[
+        "value"
+    ][0]
+    assert link["url"] == (
+        "https://github.com/SatoryKono/BioactivityDataAcquisition/"
+        "${__data.fields.pipeline_passport_path:raw}"
+    )
+    assert (
+        '"pipeline_passport_path": $substringAfter(pipeline_passport_url, '
+        in panel["targets"][0]["root_selector"]
+    )

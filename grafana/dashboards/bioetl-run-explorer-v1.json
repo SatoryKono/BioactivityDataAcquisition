@@ -404,7 +404,7 @@
                 "value": [
                   {
                     "title": "Pipeline passport",
-                    "url": "${__data.fields.pipeline_passport_url:raw}",
+                    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/${__data.fields.pipeline_passport_path:raw}",
                     "includeVars": false,
                     "targetBlank": true
                   }
@@ -1128,6 +1128,18 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "pipeline_passport_path"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "status"
             },
             "properties": [
@@ -1241,7 +1253,7 @@
           "format": "table",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items.($merge([$, {\"workflow_id\": workflow_passport_url != \"\" ? \"[\" & workflow_id & \"](\" & workflow_passport_url & \")\" : \"N/A\", \"overview_handoff\": \"Open\", \"diagnostics_handoff\": \"Open\", \"provider_handoff\": \"Open\", \"quality_handoff\": \"Open\"}]))",
+          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items.($merge([$, {\"workflow_id\": workflow_passport_url != \"\" ? \"[\" & workflow_id & \"](\" & workflow_passport_url & \")\" : \"N/A\", \"pipeline_passport_path\": $substringAfter(pipeline_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\"), \"overview_handoff\": \"Open\", \"diagnostics_handoff\": \"Open\", \"provider_handoff\": \"Open\", \"quality_handoff\": \"Open\"}]))",
           "source": "url",
           "type": "json",
           "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",
@@ -1284,7 +1296,8 @@
                 "report_url",
                 "report_label",
                 "workflow_passport_url",
-                "pipeline_passport_url"
+                "pipeline_passport_url",
+                "pipeline_passport_path"
               ]
             }
           }
@@ -1309,7 +1322,8 @@
               "report_url": 13,
               "report_label": 14,
               "workflow_passport_url": 15,
-              "pipeline_passport_url": 16
+              "pipeline_passport_url": 16,
+              "pipeline_passport_path": 17
             },
             "renameByName": {
               "workflow_id": "Workflow",

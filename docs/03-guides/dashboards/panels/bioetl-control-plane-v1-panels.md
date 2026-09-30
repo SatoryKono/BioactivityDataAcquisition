@@ -9,6 +9,12 @@ checkpoint freshness, explicit checkpoint/manifest/lineage validation, retention
 compliance, bounded failure reasons, audit activity, and lineage evidence.
 Shipped dashboard JSON is the source of truth.
 
+The first-window answer `9422` is a saved exact-replay assessment. Its missing
+value is `UNKNOWN`, never `READY`. `SELECT RUN` means no Run ID is selected;
+`QUERY ERROR` means a failed request or unavailable backend. These states remain
+explicit in the description and value mappings. Open replay checks `9423` for
+the recorded basis; missing verification remains `INCOMPLETE`.
+
 Diagnostic failure, incompatibility, replay, and lineage panels preserve empty
 Prometheus results as `No data`/`UNKNOWN`; they do not synthesize zero. A visible
 zero is therefore evidence from a present series, not proof inferred from metric

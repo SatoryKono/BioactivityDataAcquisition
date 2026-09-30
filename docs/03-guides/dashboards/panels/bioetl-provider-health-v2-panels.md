@@ -6,6 +6,12 @@
 
 Dashboard `4. Provider Health` monitors provider current status, health-check latency/outcomes, adapter retry exhaustion, HTTP errors, rate limiting, and circuit breaker state. Shipped dashboard JSON is the source of truth.
 
+The current first-window answer `9461` reports the saved provider check for the
+selected Run ID. `SELECT RUN` means a Run ID has not been selected; `VALID EMPTY`
+means no saved provider check; `QUERY ERROR` means backend or request failure.
+A missing verdict stays `UNKNOWN`. The saved verdict does not assess live fleet
+health, and a failed request must not be interpreted as an empty successful check.
+
 Failure-rate, degraded-check, network/timeout, and rate-limit diagnostics retain
 empty Prometheus results as `No data`/`UNKNOWN`; metric absence is never rendered
 as a synthetic green zero.

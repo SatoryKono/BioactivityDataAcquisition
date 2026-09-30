@@ -5,6 +5,7 @@ from dataclasses import replace
 from unittest.mock import Mock
 
 import pytest
+from urllib.parse import urlsplit
 
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
 from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
@@ -102,6 +103,30 @@ def test_legacy_missing_evaluations_are_na_not_progress(monkeypatch):
 
 def test_absent_workflow_has_no_passport():
     assert presentation._passport("workflows", "—") == ""
+
+
+@pytest.mark.parametrize(
+    "pipeline",
+    [
+        "chembl_assay",
+        "../outside",
+        "//evil.test/path",
+        "javascript:alert(1)",
+        "name?#%",
+        "имя_pipeline",
+    ],
+)
+def test_pipeline_passport_resolver_keeps_fixed_origin_and_encoded_path(pipeline):
+    """The dashboard path field cannot introduce a scheme or another origin."""
+    url = presentation._passport("pipelines", pipeline)
+    parts = urlsplit(url)
+    assert (parts.scheme, parts.netloc) == ("https", "github.com")
+    prefix = "https://github.com/SatoryKono/BioactivityDataAcquisition/"
+    path = url.partition(prefix)[2]
+    assert path.startswith("blob/main/docs/04-reference/passports/pipelines/")
+    assert parts.query == parts.fragment == ""
+    assert "/../" not in path
+    assert prefix + path == url
 
 
 def test_snapshot_backed_success_run_scores_saved_evidence_ok(tmp_path):

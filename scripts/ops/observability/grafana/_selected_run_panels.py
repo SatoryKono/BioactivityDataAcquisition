@@ -704,6 +704,8 @@ def _style_provider_check(panels: list[dict]) -> None:
     review["description"] = (
         "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. "
         "OK/WARN/CRIT color the saved check verdict, not live fleet health."
+        " SELECT RUN means no Run ID is selected. VALID EMPTY means no saved "
+        "provider check. QUERY ERROR means backend unavailable or request failure."
     )
     review["transformations"] = [
         {"id": "limit", "options": {"limitField": 1}},

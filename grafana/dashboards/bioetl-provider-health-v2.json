@@ -1107,7 +1107,7 @@
         "h": 3
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. Valid-empty evidence stays VALID EMPTY. Select run context via dashboard variables. A failed request is QUERY ERROR; backend unavailable returns 504.",
+      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. SELECT RUN means no Run ID is selected. VALID EMPTY means no saved provider check. QUERY ERROR means backend unavailable or request failure.",
       "options": {
         "reduceOptions": {
           "calcs": [
