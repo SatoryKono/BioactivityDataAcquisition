@@ -135,6 +135,7 @@ markdown_extensions:
   - attr_list
   - toc:
       permalink: true
+      slugify: !!python/name:markdown.extensions.toc.slugify_unicode
 
 # Mermaid init (theme sync + adaptive layout).
 extra_javascript:
