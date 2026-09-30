@@ -1,13 +1,13 @@
 %% BioETL — Port/Protocol Contracts (Full Map)
 %% Domain ports mapped to their current application consumers and infrastructure adapters.
-%% keep-orphan ports (FDSP, HCP, MCP, DNP, DQMP, SHP) are declared domain Protocols
-%% without a bound consumer/adapter in any view yet; detail lives in 13a–13f/13i.
+%% All declared domain ports are bound to their consumers/implementations
+%% (adapter names follow views/30-port-adapter-mapping-full.mermaid).
 
 %% @version 1.1.0
 %% @date    2026-09-03
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   49
+%% @nodes   70
 %% @reference  Decomposed into 13a, 13b, 13c, 13d, 13e, 13f sub-diagrams
 %% Legend: docs/02-architecture/diagrams/views/00-legend.mermaid
 
@@ -24,7 +24,6 @@
 }}%%
 %% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
 graph LR
-%% keep-orphan: FDSP, HCP, MCP, DNP, DQMP, SHP
     subgraph Domain["Domain ports (Protocols)"]
         DSP["DataSourcePort"]:::size-sm
         FDSP["FilterableDataSourcePort"]:::size-sm
@@ -69,6 +68,10 @@ graph LR
         RLS["RunLedgerService"]:::size-sm
         LIS["LineageInspectionService"]:::size-sm
         CCS["CompositeCheckpointService"]:::size-sm
+        FDS["FilteredDataSource"]:::size-sm
+        MCOR["MetadataCoordinator"]:::size-sm
+        SHS["ShutdownService"]:::size-sm
+        TRF["BaseTransformer"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure adapters"]
@@ -95,6 +98,9 @@ graph LR
         FRM["FileRunManifestStore"]:::size-sm
         FRL["FileRunLedgerStore"]:::size-sm
         FLS["FileLineageStore"]:::size-sm
+        CBDS["CachedBronzeDataSource"]:::size-sm
+        HCM["HealthCheckMixin"]:::size-sm
+        DQM["DataQualityMonitor"]:::size-sm
     end
 
     DSP --- CA
@@ -122,6 +128,12 @@ graph LR
     RMP --- FRM
     RLP2 --- FRL
     LSP --- FLS
+    FDSP --- FDS
+    FDSP --- CBDS
+    HCP --- HCM
+    MCP --- MCOR
+    DQMP --- DQM
+    SHP --- SHS
 
     BDQP --- BDA
     SDQP --- SDA
@@ -131,6 +143,7 @@ graph LR
     LIS --> LSP
     LIS --> RMP
     CCS --> CCP
+    TRF --> DNP
     BW --> LSP
 
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
@@ -138,5 +151,5 @@ graph LR
     classDef app fill:#f0fdf4,stroke:#16a34a
 
     class DSP,FDSP,STP,LKP,CKP,CCP,QRP,ADP,LGP,MTP,TRP,CBP,RLP,SVP,GVP,HCP,PIIP,MWP,MCP,DNP,DRP,IFP,DQMP,BDQP,SDQP,GDQP,DQRWP,JEP,MMP,SHP,RMP,RLP2,LSP port
-    class CA,BW,ML,LC,UQ,FA,UL,MCO,PME,OTT,CB,TB_I,PSV,SPH,MW_I,DR_I,CSVR,DQRW_I,SJE,MMGR,FRM,FRL,FLS infra
-    class BDA,SDA,GDA,RMS,RLS,LIS,CCS app
+    class CA,BW,ML,LC,UQ,FA,UL,MCO,PME,OTT,CB,TB_I,PSV,SPH,MW_I,DR_I,CSVR,DQRW_I,SJE,MMGR,FRM,FRL,FLS,CBDS,HCM,DQM infra
+    class BDA,SDA,GDA,RMS,RLS,LIS,CCS,FDS,MCOR,SHS,TRF app

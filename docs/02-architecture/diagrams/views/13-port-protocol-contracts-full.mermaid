@@ -1,9 +1,10 @@
 %% View: Full | Parent: 13-port-protocol-contracts.mmd
 %% Parent source: docs/02-architecture/diagrams/architecture/13-port-protocol-contracts.mmd
 %% Full reference diagram retained after decomposition.
+%% All declared domain ports are bound to their consumers/implementations
+%% (adapter names follow views/30-port-adapter-mapping-full.mermaid).
 %% @uniform width=220 height=72 max_title_len=20 max_desc_lines=1
 graph LR
-%% keep-orphan: FDSP, HCP, MCP, DNP, DQMP, SHP
     subgraph Domain["Domain ports (Protocols)"]
         DSP["DataSourcePort"]:::size-sm
         FDSP["FilterableDataSourcePort"]:::size-sm
@@ -48,6 +49,10 @@ graph LR
         RLS["RunLedgerService"]:::size-sm
         LIS["LineageInspectionService"]:::size-sm
         CCS["CompositeCheckpointService"]:::size-sm
+        FDS["FilteredDataSource"]:::size-sm
+        MCOR["MetadataCoordinator"]:::size-sm
+        SHS["ShutdownService"]:::size-sm
+        TRF["BaseTransformer"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure adapters"]
@@ -58,7 +63,8 @@ graph LR
         UQ["UnifiedQuarantine"]:::size-sm
         FA["FileAuditAdapter"]:::size-sm
         UL["UnifiedLogger"]:::size-sm
-        MCO["MetricsCollector"]:::size-sm
+        MCO["MetricsCollector<br/>compat wrapper"]:::size-sm
+        PME["PrometheusMetrics<br/>impl MetricsPort"]:::size-sm
         OTT["OpenTelemetryTracer"]:::size-sm
         CB["CircuitBreaker"]:::size-sm
         TB_I["TokenBucket"]:::size-sm
@@ -73,6 +79,9 @@ graph LR
         FRM["FileRunManifestStore"]:::size-sm
         FRL["FileRunLedgerStore"]:::size-sm
         FLS["FileLineageStore"]:::size-sm
+        CBDS["CachedBronzeDataSource"]:::size-sm
+        HCM["HealthCheckMixin"]:::size-sm
+        DQM["DataQualityMonitor"]:::size-sm
     end
 
     DSP --- CA
@@ -83,7 +92,8 @@ graph LR
     QRP --- UQ
     ADP --- FA
     LGP --- UL
-    MTP --- MCO
+    MTP --- PME
+    MCO -.compat wrapper over exported metric families.-> PME
     TRP --- OTT
     CBP --- CB
     RLP --- TB_I
@@ -99,6 +109,12 @@ graph LR
     RMP --- FRM
     RLP2 --- FRL
     LSP --- FLS
+    FDSP --- FDS
+    FDSP --- CBDS
+    HCP --- HCM
+    MCP --- MCOR
+    DQMP --- DQM
+    SHP --- SHS
 
     BDQP --- BDA
     SDQP --- SDA
@@ -108,6 +124,7 @@ graph LR
     LIS --> LSP
     LIS --> RMP
     CCS --> CCP
+    TRF --> DNP
     BW --> LSP
 
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
@@ -115,5 +132,5 @@ graph LR
     classDef app fill:#f0fdf4,stroke:#16a34a
 
     class DSP,FDSP,STP,LKP,CKP,CCP,QRP,ADP,LGP,MTP,TRP,CBP,RLP,SVP,GVP,HCP,PIIP,MWP,MCP,DNP,DRP,IFP,DQMP,BDQP,SDQP,GDQP,DQRWP,JEP,MMP,SHP,RMP,RLP2,LSP port
-    class CA,BW,ML,LC,UQ,FA,UL,MCO,OTT,CB,TB_I,PSV,SPH,MW_I,DR_I,CSVR,DQRW_I,SJE,MMGR,FRM,FRL,FLS infra
-    class BDA,SDA,GDA,RMS,RLS,LIS,CCS app
+    class CA,BW,ML,LC,UQ,FA,UL,MCO,PME,OTT,CB,TB_I,PSV,SPH,MW_I,DR_I,CSVR,DQRW_I,SJE,MMGR,FRM,FRL,FLS,CBDS,HCM,DQM infra
+    class BDA,SDA,GDA,RMS,RLS,LIS,CCS,FDS,MCOR,SHS,TRF app
