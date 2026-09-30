@@ -167,7 +167,7 @@ def _command(shard: Shard, junit: Path) -> list[str]:
         "--timeout=300",
         "-p",
         "no:cacheprovider",
-        f"--junitxml={junit}",
+        f"--junitxml={junit.as_posix()}",
     ]
     if shard.parallel:
         command.extend(("-n", "2", "--dist=loadscope", "--max-worker-restart=0"))
@@ -265,7 +265,7 @@ def main(argv: list[str] | None = None) -> int:
         junit = junit_dir / f"{shard.name}.xml"
         log = logs_dir / f"{shard.name}.log"
         command = _command(shard, junit)
-        env["COVERAGE_FILE"] = str(coverage_file)
+        env["COVERAGE_FILE"] = coverage_file.as_posix()
         print(f"[local-coverage] start {shard.name}", flush=True)
         started = time.monotonic()
         exit_code = _run_logged(command, log, env=env)
