@@ -6,18 +6,18 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.core._batch_write_events import (
+    emit_batch_failed,
+    emit_batch_written,
+    emit_domain_event,
+)
 from bioetl.application.core._batch_write_schema_quarantine import (
     quarantine_schema_violation,
-)
-from bioetl.application.core.batch_operation_errors import (
-    OPERATION_ERRORS as DOMAIN_EVENT_EMISSION_ERRORS,
 )
 from bioetl.application.core.quarantine_manager import (
     QuarantineRuntimeService,
 )
-from bioetl.domain.aggregates.events import BatchFailed, BatchWritten, DomainEvent
 from bioetl.domain.exceptions import SchemaViolationError
-from bioetl.domain.medallion import Layer
 from bioetl.domain.types import BatchID, RunID
 
 if TYPE_CHECKING:
@@ -29,77 +29,12 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
-
-def emit_domain_event(
-    emitter: DomainEventEmitterProtocol | None,
-    event: DomainEvent,
-    *,
-    logger: LoggerPort | None = None,
-) -> None:
-    """Best-effort publish; log emitter failures when a logger is available."""
-    if emitter is None:
-        return
-    try:
-        emitter.emit_domain_event(event)
-    except DOMAIN_EVENT_EMISSION_ERRORS as error:
-        if logger is not None:
-            logger.warning(
-                "domain_event_emit_failed",
-                error=str(error),
-                error_type=type(error).__name__,
-                event_type=type(event).__name__,
-            )
-
-
-def emit_batch_written(
-    *,
-    emitter: DomainEventEmitterProtocol | None,
-    run_id: RunID | None,
-    batch_id: BatchID,
-    layer: str,
-    record_count: int,
-    occurred_at: datetime,
-    logger: LoggerPort | None = None,
-) -> None:
-    if run_id is None:
-        return
-    emit_domain_event(
-        emitter,
-        BatchWritten(
-            occurred_at=occurred_at,
-            run_id=run_id,
-            batch_id=batch_id,
-            layer=Layer(layer),
-            record_count=record_count,
-        ),
-        logger=logger,
-    )
-
-
-def emit_batch_failed(
-    *,
-    emitter: DomainEventEmitterProtocol | None,
-    run_id: RunID | None,
-    batch_id: BatchID,
-    layer: str,
-    error: Exception,
-    occurred_at: datetime,
-    logger: LoggerPort | None = None,
-) -> None:
-    if run_id is None:
-        return
-    emit_domain_event(
-        emitter,
-        BatchFailed(
-            occurred_at=occurred_at,
-            run_id=run_id,
-            batch_id=batch_id,
-            layer=Layer(layer),
-            error=str(error),
-            error_type=type(error).__name__,
-        ),
-        logger=logger,
-    )
+__all__ = [
+    "emit_batch_failed",
+    "emit_batch_written",
+    "emit_domain_event",
+    "safe_write_layer",
+]
 
 
 async def _execute_layer_write(
@@ -122,17 +57,21 @@ async def _execute_layer_write(
         )
     else:
         operation = writer.write_gold(records, silver_refs=silver_refs)
+
+    def _track_write_error(error: Exception) -> None:
+        writer.log_and_track_write_error(
+            layer,
+            error,
+            batch_id,
+            record_count=len(records),
+        )
+
     return await execute_with_span(
         f"write_{layer}",
         operation,
         batch_id,
         len(records),
-        on_error=lambda error: writer.log_and_track_write_error(
-            layer,
-            error,
-            batch_id,
-            record_count=len(records),
-        ),
+        on_error=_track_write_error,
     )
 
 

@@ -11,7 +11,14 @@ from bioetl.domain.run_reports.workflow_reasons import (
     build_reasons_rollup,
     normalize_top_reasons,
 )
-from bioetl.domain.run_reports.workflow_totals import _as_int, _build_totals
+from bioetl.domain.run_reports.workflow_totals import (
+    _as_int,
+    _build_totals,
+    _first_attribute,
+    _first_present,
+    _optional_int,
+    _optional_text,
+)
 
 _COUNT_FIELDS = (
     "records_extracted",
@@ -34,11 +41,6 @@ class _RowFaults:
     error_message: object = None
     skip_reason: object = None
     gold_excluded_by_contract: object = None
-
-
-def _optional_int(source: Mapping[str, object], name: str) -> int | None:
-    value = source.get(name)
-    return None if value is None else _as_int(value)
 
 
 def _payload_mapping(payload: object) -> Mapping[str, object]:
@@ -67,19 +69,6 @@ def _extract_counts(payload: object) -> dict[str, int | None]:
         "records_silver": _optional_int(source, "records_silver"),
         "records_gold": _optional_int(source, "records_gold"),
     }
-
-
-def _first_present(source: Mapping[str, object], *names: str) -> object:
-    return next(
-        (source.get(name) for name in names if source.get(name) is not None), None
-    )
-
-
-def _first_attribute(source: object, *names: str) -> object:
-    return next(
-        (getattr(source, name, None) for name in names if getattr(source, name, None)),
-        None,
-    )
 
 
 def _mapping_counts(raw: Mapping[str, object]) -> dict[str, int | None]:
@@ -144,10 +133,6 @@ def _object_execution(raw: object) -> _NormalizedExecution:
             gold_excluded_by_contract=getattr(raw, "gold_excluded_by_contract", None),
         ),
     )
-
-
-def _optional_text(value: object) -> str | None:
-    return None if value in (None, "") else str(value)
 
 
 def _reconciliation_details(payload: object) -> dict[str, object] | None:

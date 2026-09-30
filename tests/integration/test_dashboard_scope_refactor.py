@@ -7,6 +7,14 @@
 # pyright: reportOptionalMemberAccess=false
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownParameterType=false
+# pyright: reportUnknownVariableType=false
+# pyright: reportAny=false
+# pyright: reportPrivateLocalImportUsage=false
+# pyright: reportPrivateUsage=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """DASH-SCOPE #9009 contracts: scope_class, coverage CTA, chips, refresh, D6."""
 
 from __future__ import annotations

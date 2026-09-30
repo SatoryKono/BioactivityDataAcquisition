@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="1.869" timestamp="2026-09-29T18:11:51.211132+00:00" hostname="DESKTOP-AITNV0T"><testcase classname="" name="tests.unit.scripts.ai.agent_tools.test_cli" time="0.000"><error message="collection failure">ImportError while importing test module '/mnt/e/github/BioactivityDataAcquisition/tests/unit/scripts/ai/agent_tools/test_cli.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+tests/unit/scripts/ai/agent_tools/test_cli.py:14: in &lt;module&gt;
+    from scripts.ai.agent_tools import __main__ as cli
+scripts/ai/agent_tools/__main__.py:26: in &lt;module&gt;
+    from memory.proof import canonical_digest, command_set_hash, load_policy
+src/memory/proof.py:14: in &lt;module&gt;
+    from jsonschema import Draft202012Validator, FormatChecker
+E   ModuleNotFoundError: No module named 'jsonschema'</error></testcase></testsuite></testsuites>

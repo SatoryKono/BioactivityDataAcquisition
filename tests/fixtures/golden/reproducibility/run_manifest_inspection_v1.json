@@ -1794,6 +1794,7 @@
       "required_persistence_profile": "replay_ready"
     },
     "manifest_id": "manifest-golden-001",
+    "objects": {},
     "pipeline_name": "chembl_activity",
     "planned_artifacts": [
       {

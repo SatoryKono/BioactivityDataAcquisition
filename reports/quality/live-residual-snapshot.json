@@ -3,7 +3,7 @@
   "linked_issue": "#6891",
   "follow_up_issue": "#7464",
   "parent_epic": "#6890",
-  "snapshot_date": "2026-09-29",
+  "snapshot_date": "2026-09-30",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
   "policy": {
     "direction": "shrink_only",
@@ -13,10 +13,10 @@
   "hotspot_families": {
     "application_core": {
       "files_ge_250_loc": 0,
-      "max_internal_fan_in": 7,
-      "helper_function_ratio": 0.383,
-      "files": 197,
-      "total_loc": 24451,
+      "max_internal_fan_in": 6,
+      "helper_function_ratio": 0.384,
+      "files": 199,
+      "total_loc": 24498,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
@@ -43,7 +43,7 @@
       "max_internal_fan_in": 1,
       "helper_function_ratio": 0.391,
       "files": 128,
-      "total_loc": 15392,
+      "total_loc": 15412,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
@@ -52,16 +52,16 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.339,
       "files": 56,
-      "total_loc": 6660,
+      "total_loc": 6664,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }
   },
   "dead_code": {
-    "repo_wide_zero_import_candidate_count": 2,
-    "repo_wide_untriaged_zero_import_candidate_count": 0,
+    "repo_wide_zero_import_candidate_count": 4,
+    "repo_wide_untriaged_zero_import_candidate_count": 2,
     "repo_wide_classified_zero_import_candidate_count": 2,
-    "repo_wide_candidates_without_owner_tests_count": 0
+    "repo_wide_candidates_without_owner_tests_count": 2
   },
   "config_surface": {
     "duplicate_cluster_count": 6

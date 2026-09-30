@@ -16,18 +16,8 @@ from bioetl.application.services.ops.observability_backend_startup import (
     ensure_observability_backend_started_impl,
 )
 from bioetl.application.services.ops.observability_backend_startup_types import (
-    _DropStaleBackendFn,
-    _ListenerPidFn,
-    _MessagePrinter,
-    _ObservabilityBackendFailureHandlers,
-    _ObservabilityBackendRuntimeHooks,
     _ObservabilityBackendStartupKwargs,
-    _ProbeFn,
-    _RequiredProbeFn,
     _StartedBackendProcess,
-    _StartFn,
-    _WaitFn,
-    _WaitRequiredPathsFn,
 )
 from bioetl.composition.observability_backend import (
     DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
@@ -51,6 +41,10 @@ from bioetl.composition.observability_backend import (
 from bioetl.composition.observability_backend import (
     start_detached_quarantine_backend as _composition_start_detached_quarantine_backend,
 )
+from bioetl.interfaces.cli.commands.domains.health._observability_backend_ensure_parts import (
+    _observability_backend_runtime_hooks,
+    _require_integral_backend_port,
+)
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
     _append_backend_startup_diagnostic,
     _build_startup_failure_detail,
@@ -65,6 +59,10 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
 from bioetl.interfaces.cli.formatters import echo_info, echo_warning
 
 if TYPE_CHECKING:
+    from bioetl.application.services.ops.observability_backend_startup_types import (
+        _ObservabilityBackendFailureHandlers,
+        _ObservabilityBackendRuntimeHooks,
+    )
     from bioetl.interfaces.cli.commands.domains.run.command_policy import (
         RunCommandInput,
     )
@@ -168,12 +166,6 @@ def _parse_observability_backend_port(raw_port: object) -> int:
     if isinstance(raw_port, float):
         _require_integral_backend_port(raw_port)
     return port
-
-
-def _require_integral_backend_port(raw_port: float) -> None:
-    """Reject floats that would be truncated by ``int`` conversion."""
-    if not raw_port.is_integer():
-        raise TypeError("observability_backend_port must be an integral CLI value")
 
 
 @dataclass(frozen=True, slots=True)
@@ -310,31 +302,6 @@ def _observability_backend_startup_kwargs(
         "required_probe_timeout_seconds": required_probe_timeout_seconds,
         "poll_seconds": poll_seconds,
         "required_probe_paths": required_probe_paths,
-    }
-
-
-def _observability_backend_runtime_hooks(
-    *,
-    probe_fn: _ProbeFn,
-    required_probe_fn: _RequiredProbeFn,
-    start_fn: _StartFn,
-    wait_fn: _WaitFn,
-    wait_required_paths_fn: _WaitRequiredPathsFn,
-    drop_stale_backend_fn: _DropStaleBackendFn,
-    listener_pid_fn: _ListenerPidFn,
-    info_printer: _MessagePrinter,
-    warning_printer: _MessagePrinter,
-) -> _ObservabilityBackendRuntimeHooks:
-    return {
-        "probe_fn": probe_fn,
-        "required_probe_fn": required_probe_fn,
-        "start_fn": start_fn,
-        "wait_fn": wait_fn,
-        "wait_required_paths_fn": wait_required_paths_fn,
-        "drop_stale_backend_fn": drop_stale_backend_fn,
-        "listener_pid_fn": listener_pid_fn,
-        "info_printer": info_printer,
-        "warning_printer": warning_printer,
     }
 
 

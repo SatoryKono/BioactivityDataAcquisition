@@ -3,16 +3,17 @@
 from __future__ import annotations
 
 from collections import Counter
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core._quarantine_entries import DQQuarantineEntry
 from bioetl.application.core.batch_metrics_accounting import (
     _record_silver_removal_accounting,
     _silver_filter_rejection_labels,
 )
-from bioetl.domain.types import ErrorType, JsonDict
+from bioetl.domain.types import BronzeRecord, ErrorType, JsonDict
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Iterator, Sequence
 
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.observability.pipeline_metrics import (
@@ -25,16 +26,16 @@ FILTERED_OUT_SILVER = "FILTERED_OUT_SILVER"
 
 def iter_dq_quarantine_parts(
     records: Sequence[object],
-):
+) -> Iterator[tuple[BronzeRecord, ErrorType, str, str]]:
     """Yield record, error type, message, and catalog reason code."""
-    from bioetl.application.core.quarantine_manager import DQQuarantineEntry
-
     for item in records:
         if isinstance(item, DQQuarantineEntry):
             reason_code = item.reason_code or item.error_type.value
             yield item.record, item.error_type, item.error_details, reason_code
             continue
-        record, error_type, error_details = item  # type: ignore[misc]
+        record, error_type, error_details = cast(
+            "tuple[BronzeRecord, ErrorType, str]", item
+        )
         yield record, error_type, error_details, error_type.value
 
 
@@ -124,7 +125,8 @@ def filtered_reason_code_from_details(
     """Prefer ``details.reason_code`` for accounting; else the filter baseline."""
     if not isinstance(details, dict):
         return fallback
-    raw = details.get("reason_code")
+    details_map = cast("dict[str, object]", details)
+    raw = details_map.get("reason_code")
     if isinstance(raw, str) and raw.strip():
         return raw.strip()
     return fallback

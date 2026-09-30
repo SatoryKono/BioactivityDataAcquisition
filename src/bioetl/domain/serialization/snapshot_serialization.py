@@ -64,9 +64,7 @@ def _compound_snapshot(value: object) -> tuple[bool, object]:
     if not isinstance(value, type) and is_dataclass(value):
         return True, normalize_snapshot(asdict(cast("DataclassInstance", value)))
     if isinstance(value, Mapping):
-        return True, {
-            str(key): normalize_snapshot(item) for key, item in value.items()
-        }
+        return True, {str(key): normalize_snapshot(item) for key, item in value.items()}
     return _iterable_snapshot(value)
 
 

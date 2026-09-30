@@ -7,6 +7,14 @@ import json
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
 
+from bioetl.domain.config.effective_config_payloads import (
+    _dq_policy_ref_payload,
+    _dq_policy_snapshot_payload,
+    _effective_config_payload,
+    _resolution_policy_payload,
+    _resolved_config_payload,
+    _runtime_overrides_payload,
+)
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
     ConfigSourceRef,
@@ -38,7 +46,9 @@ def _jsonable_iterable(value: list[object] | tuple[object, ...]) -> list[object]
     return [_to_jsonable(raw) for raw in value]
 
 
-def _jsonable_collection(value: dict[object, object] | list[object] | tuple[object, ...]) -> object:
+def _jsonable_collection(
+    value: dict[object, object] | list[object] | tuple[object, ...],
+) -> object:
     """Convert one mapping/sequence level."""
     if isinstance(value, dict):
         return _jsonable_mapping(value)
@@ -50,9 +60,7 @@ def _jsonable_dataclass(value: object) -> tuple[bool, object]:
     dataclass_value = _dataclass_to_dict(value)
     if dataclass_value is None:
         return False, value
-    return True, {
-        key: _to_jsonable(raw) for key, raw in dataclass_value.items()
-    }
+    return True, {key: _to_jsonable(raw) for key, raw in dataclass_value.items()}
 
 
 def _to_jsonable(value: object) -> object:
@@ -229,69 +237,30 @@ class EffectiveConfigSerializer:
         self,
         policy: ConfigResolutionPolicy,
     ) -> JsonDict:
-        return {
-            "merge_strategy": policy.merge_strategy,
-            "default_materialization": policy.default_materialization,
-            "strict_validation": policy.strict_validation,
-            "allow_runtime_overrides": policy.allow_runtime_overrides,
-        }
+        return _resolution_policy_payload(policy)
 
     def _resolved_config_to_dict(self, config: ResolvedConfigSnapshot) -> JsonDict:
-        return {
-            "config_type": config.config_type,
-            "config_data": self._normalize_config_data(config.config_data),
-            "config_hash": config.config_hash,
-        }
+        return _resolved_config_payload(config, self._normalize_config_data)
 
     def _runtime_overrides_to_dict(
         self,
         overrides: RuntimeOverrideSnapshot,
     ) -> JsonDict:
-        result: JsonDict = {}
-        for field_name, key in (
-            ("cli_overrides", "cli_overrides"),
-            ("env_overrides", "env_overrides"),
-            ("runtime_adjustments", "runtime_adjustments"),
-        ):
-            raw = getattr(overrides, field_name)
-            if raw:
-                result[key] = self._normalize_config_data(raw)
-        if result and overrides.override_hash:
-            result["override_hash"] = overrides.override_hash
-        return result
+        return _runtime_overrides_payload(overrides, self._normalize_config_data)
 
     def _effective_config_to_dict(
         self, config: EffectiveExecutionConfig
     ) -> JsonDict:  # Any: EffectiveExecutionConfig serialization
-        return {
-            "config_data": self._normalize_config_data(config.config_data),
-            "effective_hash": config.effective_hash,
-        }
+        return _effective_config_payload(config, self._normalize_config_data)
 
     def _dq_policy_ref_to_dict(self, policy_ref: DQPolicyRef) -> JsonDict:
-        return {
-            "contract_ref": policy_ref.contract_ref,
-            "contract_version": policy_ref.contract_version,
-            "rule_bundle_version": policy_ref.rule_bundle_version,
-            "policy_hash": policy_ref.policy_hash,
-        }
+        return _dq_policy_ref_payload(policy_ref)
 
     def _dq_policy_snapshot_to_dict(
         self,
         snapshot: DQPolicySnapshot,
     ) -> JsonDict:  # Any: DQPolicySnapshot serialization
-        return {
-            "contract_ref": snapshot.contract_ref,
-            "contract_version": snapshot.contract_version,
-            "rule_bundle_version": snapshot.rule_bundle_version,
-            "policy_hash": snapshot.policy_hash,
-            "default_disposition": snapshot.default_disposition.value,
-            "disposition_overrides": {
-                str(key): value.value
-                for key, value in snapshot.disposition_overrides.items()
-            },
-            "strictness_mode": snapshot.strictness_mode,
-        }
+        return _dq_policy_snapshot_payload(snapshot)
 
     def _normalize_config_data(self, data: JsonDict) -> JsonDict:
         normalized: JsonDict = {}

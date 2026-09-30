@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="10.486" timestamp="2026-09-29T18:11:36.586831+00:00" hostname="DESKTOP-AITNV0T"><testcase classname="" name="tests.unit.scripts.qa.test_report_debt_governance_gates" time="0.000"><error message="collection failure">ImportError while importing test module '/mnt/e/github/BioactivityDataAcquisition/tests/unit/scripts/qa/test_report_debt_governance_gates.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+tests/unit/scripts/qa/test_report_debt_governance_gates.py:22: in &lt;module&gt;
+    from scripts.engineering.qa import report_debt_governance_gates as gates
+scripts/engineering/qa/report_debt_governance_gates.py:48: in &lt;module&gt;
+    from memory.proof import emit_receipt_from_environment
+src/memory/proof.py:14: in &lt;module&gt;
+    from jsonschema import Draft202012Validator, FormatChecker
+E   ModuleNotFoundError: No module named 'jsonschema'</error></testcase></testsuite></testsuites>

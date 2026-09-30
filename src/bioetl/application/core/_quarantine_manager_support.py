@@ -23,6 +23,7 @@ from bioetl.application.core._quarantine_support import (
 from bioetl.domain.types import BatchID, ErrorType, JsonDict, RunID
 
 if TYPE_CHECKING:
+    from bioetl.application.core._quarantine_entries import DQQuarantineEntry
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterProtocol,
@@ -116,7 +117,7 @@ class QuarantineManagerSupportMixin:
 
     async def quarantine_records(
         self,
-        records: Sequence[tuple[BronzeRecord, ErrorType, str]],
+        records: Sequence[DQQuarantineEntry | tuple[BronzeRecord, ErrorType, str]],
         batch_id: BatchID,
         run_id: RunID | None = None,
         *,

@@ -96,7 +96,7 @@ def test_hash_without_object_is_not_ready() -> None:
 
 def test_hash_without_recorded_verification_is_unknown() -> None:
     manifest = dict(_PASSING_MANIFEST)
-    manifest.pop("objects", None)
+    _ = manifest.pop("objects", None)
     projection = project_selected_run_replay_readiness(
         identity=_PASSING_IDENTITY,
         inventory_present=True,

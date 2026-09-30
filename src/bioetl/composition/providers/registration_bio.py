@@ -26,10 +26,6 @@ from bioetl.composition.factories.datasource.adapter_helpers import (
 from bioetl.composition.factories.datasource.pubchem import (
     create_pubchem_adapter,
 )
-from bioetl.domain.runtime.composition_boundary_policy import (
-    resolve_uniprot_mapping_databases,
-)
-
 from bioetl.composition.providers._config_helpers import (
     _build_provider_family_config_map,
     _get_adapter_config,
@@ -50,6 +46,12 @@ from bioetl.composition.providers._registration_contracts import (
 )
 from bioetl.composition.providers._chembl_target_protein_classification_data_source import (
     TargetProteinClassificationSnapshotDataSource,
+)
+from bioetl.composition.providers.registration_bio_uniprot import (
+    _extract_uniprot_mapping_seed_ids,
+    _resolve_uniprot_mapping_base_url,
+    _resolve_uniprot_mapping_databases,
+    _resolve_uniprot_mapping_input_path,
 )
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.adapters.chembl import ChemblAdapter
@@ -243,53 +245,6 @@ def _create_uniprot_idmapping_data_source(
         to_db=to_db,
         seed_ids=_extract_uniprot_mapping_seed_ids(filter_config),
     )
-
-
-def _resolve_uniprot_mapping_base_url(pipeline_config: PipelineYamlConfig) -> str:
-    """Resolve UniProt ID Mapping base URL from config with safe default."""
-    if pipeline_config.source.api and pipeline_config.source.api.base_url:
-        return str(pipeline_config.source.api.base_url)
-    return str(UNIPROT_API_BASE)
-
-
-def _resolve_uniprot_mapping_input_path(
-    pipeline_config: PipelineYamlConfig,
-    filter_config: InputFilterConfig | None = None,
-) -> str:
-    """Resolve input CSV path for UniProt ID Mapping seed IDs."""
-    if filter_config and filter_config.enabled and filter_config.source_path:
-        return filter_config.source_path
-    configured = getattr(pipeline_config.source, "input_path", None)
-    return configured or "data/input/target.csv"
-
-
-def _resolve_uniprot_mapping_databases(
-    pipeline_config: PipelineYamlConfig,
-) -> tuple[str, str]:
-    """Resolve source/target database names for UniProt mapping API."""
-
-    configured_from = None
-    configured_to = None
-    if pipeline_config.source.api:
-        configured_from = getattr(pipeline_config.source.api, "from_db", None)
-        configured_to = getattr(pipeline_config.source.api, "to_db", None)
-    return resolve_uniprot_mapping_databases(
-        configured_from_db=configured_from,
-        configured_to_db=configured_to,
-    )
-
-
-def _extract_uniprot_mapping_seed_ids(
-    filter_config: InputFilterConfig | None,
-) -> list[str] | None:
-    """Extract optional seed IDs from input filter config."""
-    if (
-        filter_config is not None
-        and filter_config.enabled
-        and filter_config.direct_filter_ids
-    ):
-        return list(filter_config.direct_filter_ids)
-    return None
 
 
 def _build_bio_http_provider_specs(

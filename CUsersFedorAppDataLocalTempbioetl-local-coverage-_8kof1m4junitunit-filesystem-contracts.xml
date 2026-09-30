@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="205.920" timestamp="2026-09-29T18:11:57.179969+00:00" hostname="DESKTOP-AITNV0T"><testcase classname="" name="tests.unit.domain.run_reports.test_contracts" time="0.000"><error message="collection failure">ImportError while importing test module '/mnt/e/github/BioactivityDataAcquisition/tests/unit/domain/run_reports/test_contracts.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+tests/unit/domain/run_reports/test_contracts.py:37: in &lt;module&gt;
+    from jsonschema.validators import validator_for
+E   ModuleNotFoundError: No module named 'jsonschema'</error></testcase></testsuite></testsuites>

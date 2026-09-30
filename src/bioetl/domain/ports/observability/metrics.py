@@ -127,19 +127,10 @@ FORBIDDEN_METRIC_LABEL_KEYS = frozenset(
 def resolve_metric_labels(
     labels: MetricLabels | None = None,
 ) -> MetricLabels:
-    """Resolve canonical metric labels.
+    """Resolve canonical labels, rejecting forbidden or unrecognized keys.
 
-    Accepts only keys in :data:`ALLOWED_METRIC_LABEL_KEYS` (core seven keys
-    plus the documented superseding extended bounded set). Raises
-    :class:`ValueError` for forbidden identity/free-form keys or any
-    unrecognized key. Returns a shallow copy so callers cannot mutate the
-    resolved mapping through the input dict.
-
-    Args:
-        labels: Canonical metric labels dict.
-
-    Returns:
-        Resolved metric labels dict. Returns an empty dict if ``labels`` is None.
+    Returns a shallow copy (empty dict when ``labels`` is None) so callers
+    cannot mutate the resolved mapping through the input dict.
     """
     if not labels:
         return {}

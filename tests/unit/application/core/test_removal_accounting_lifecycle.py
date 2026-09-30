@@ -1,6 +1,10 @@
+# pyright: reportAny=false
+# pyright: reportPrivateUsage=false
 """Regression: one rejected record remains one removal after quarantine writes."""
 
+from collections.abc import Awaitable
 from datetime import UTC, datetime
+from typing import cast
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID
 
@@ -14,6 +18,8 @@ from bioetl.application.core.batch_transformer_attempt_failures import (
     handle_filtered_out_error,
 )
 from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
+from bioetl.domain.config import DQConfig
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
 from bioetl.domain.run_reports.context import (
     bind_stage_accounting,
@@ -22,6 +28,16 @@ from bioetl.domain.run_reports.context import (
 from bioetl.domain.types import BatchID, ErrorType
 
 pytestmark = pytest.mark.unit
+
+
+class _FakeTransformContext:
+    def __init__(self, logger: LoggerPort) -> None:
+        self.logger: LoggerPort = logger
+
+
+class _FakeTransformConfig:
+    def __init__(self, dq_config: object | None) -> None:
+        self.dq_config: object | None = dq_config
 
 
 @pytest.mark.asyncio
@@ -48,8 +64,13 @@ async def test_gold_schema_quarantine_preserves_silver_and_zero_gold(
         write_gold=AsyncMock(side_effect=SchemaViolationError("gold", ["invalid"])),
     )
 
-    async def execute_span(name, operation, *args, **kwargs):
-        return await operation
+    async def execute_span(
+        _name: object,
+        operation: object,
+        *_args: object,
+        **_kwargs: object,
+    ) -> object:
+        return await cast("Awaitable[object]", operation)
 
     try:
         metrics.track_processed_records("bronze", 2)
@@ -121,6 +142,7 @@ async def test_rejection_and_durable_quarantine_count_once(
                 debug_export_service=None,
                 index=0,
             )
+            assert outcome.dq_entry is not None
             await quarantine.quarantine_records(
                 [outcome.dq_entry],
                 batch_id,
@@ -140,8 +162,6 @@ async def test_rejection_and_durable_quarantine_count_once(
 
 @pytest.mark.asyncio
 async def test_filtered_skip_policy_accounts_without_durable_write() -> None:
-    from bioetl.domain.config import DQConfig
-
     accounting = StageAccountingAccumulator()
     token = bind_stage_accounting(accounting)
     metrics = BatchMetricsRecorderService(None, "chembl_activity", "incremental")
@@ -190,6 +210,7 @@ async def test_failed_quarantine_write_does_not_claim_durable_removal() -> None:
             debug_export_service=None,
             index=0,
         )
+        assert outcome.dq_entry is not None
         with pytest.raises(OSError, match="disk full"):
             await quarantine.quarantine_records(
                 [outcome.dq_entry],
@@ -254,7 +275,6 @@ def test_failed_batch_retains_durable_bronze_before_transform() -> None:
 
 @pytest.mark.asyncio
 async def test_hard_threshold_persists_quarantine_before_abort() -> None:
-    from types import SimpleNamespace
     from bioetl.application.core.batch_transformer_finalization import (
         finalize_batch_transform_result,
     )
@@ -283,20 +303,22 @@ async def test_hard_threshold_persists_quarantine_before_abort() -> None:
             debug_export_service=None,
             index=0,
         )
+        assert outcome.dq_entry is not None
+        dq_entry = outcome.dq_entry
 
-        async def flush():
+        async def flush() -> int:
             await quarantine.quarantine_records(
-                [outcome.dq_entry],
+                [dq_entry],
                 BatchID(UUID("11111111-1111-4111-8111-111111111111")),
                 ingestion_ts=datetime(2026, 9, 21, tzinfo=UTC),
             )
             return 0
 
         with pytest.raises(DataQualityThresholdError):
-            await finalize_batch_transform_result(
-                context=SimpleNamespace(logger=MagicMock()),
-                config=SimpleNamespace(
-                    dq_config=SimpleNamespace(soft_threshold=0.1, hard_threshold=0.5)
+            _ = await finalize_batch_transform_result(
+                context=_FakeTransformContext(logger=MagicMock()),
+                config=_FakeTransformConfig(
+                    dq_config=DQConfig(soft_fail_threshold=0.1, hard_fail_threshold=0.5)
                 ),
                 batch_metrics=metrics,
                 state=TransformAggregationState(silver_records=[], gold_records=[]),
@@ -313,8 +335,8 @@ async def test_hard_threshold_persists_quarantine_before_abort() -> None:
 @pytest.mark.asyncio
 @pytest.mark.parametrize("previous", [None, "OK", "ERROR"])
 async def test_no_gold_candidates_records_not_applicable_without_erasing_checks(
-    previous,
-):
+    previous: str | None,
+) -> None:
     from bioetl.application.core._batch_processing_layer_write_support import (
         write_silver_then_gold,
     )
@@ -327,8 +349,13 @@ async def test_no_gold_candidates_records_not_applicable_without_erasing_checks(
 
     token = bind_run_observations()
 
-    async def execute_span(name, operation, *args, **kwargs):
-        return await operation
+    async def execute_span(
+        _name: object,
+        operation: object,
+        *_args: object,
+        **_kwargs: object,
+    ) -> object:
+        return await cast("Awaitable[object]", operation)
 
     writer = MagicMock(
         write_silver=AsyncMock(return_value=True), write_gold=AsyncMock()

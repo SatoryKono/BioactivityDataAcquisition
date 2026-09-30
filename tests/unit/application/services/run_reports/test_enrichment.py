@@ -1,11 +1,20 @@
+# pyright: reportAny=false
+# pyright: reportPrivateUsage=false
 """Behavioral tests for optional pipeline report enrichment blocks."""
 
 from __future__ import annotations
 
-from types import SimpleNamespace
+from collections.abc import Mapping
+from dataclasses import replace
+from typing import cast
 
 import pytest
 
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunOptions,
+    RunResult,
+)
 from bioetl.application.services.run_reports.enrichment import (
     _filter_metadata,
     _hash_ids,
@@ -22,39 +31,20 @@ from bioetl.application.services.run_reports.enrichment import (
 pytestmark = pytest.mark.unit
 
 
-def _result(**overrides: object) -> SimpleNamespace:
-    values: dict[str, object] = {
-        "debug_export_uri": None,
-        "debug_export_hash": None,
-        "status": SimpleNamespace(value="success"),
-        "error_type": None,
-        "error_message": None,
-        "pipeline_name": "chembl_activity",
-        "run_type": "incremental",
-        "records_quarantined": 0,
-        "records_filtered_out": 0,
-    }
-    values.update(overrides)
-    return SimpleNamespace(**values)
+def _result(**overrides: object) -> RunResult:
+    return replace(
+        RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="run-1",
+            run_type="incremental",
+        ),
+        **overrides,
+    )
 
 
-def _options(**overrides: object) -> SimpleNamespace:
-    values: dict[str, object] = {
-        "run_type": None,
-        "limit": None,
-        "start_offset": None,
-        "input_csv": None,
-        "filter_column": None,
-        "filter_field": None,
-        "skip_gold": False,
-        "dry_run": False,
-        "use_cached_bronze": False,
-        "cached_bronze_path": None,
-        "filter_ids": None,
-        "multi_filter_ids": None,
-    }
-    values.update(overrides)
-    return SimpleNamespace(**values)
+def _options(**overrides: object) -> RunOptions:
+    return replace(RunOptions(), **overrides)
 
 
 def test_build_artifacts_from_result_handles_absent_and_hashed_export() -> None:
@@ -69,11 +59,11 @@ def test_build_artifacts_from_result_handles_absent_and_hashed_export() -> None:
 
 @pytest.mark.parametrize("status", ["success", "dry_run"])
 def test_build_failure_block_omits_successful_runs(status: str) -> None:
-    assert build_failure_block(_result(status=SimpleNamespace(value=status))) is None
+    assert build_failure_block(_result(status=PipelineRunResult(status))) is None
     assert (
         build_failure_block(
             _result(
-                status=SimpleNamespace(value=status),
+                status=PipelineRunResult(status),
                 error_type="ignored",
                 error_message="ignored",
             )
@@ -95,7 +85,7 @@ def test_build_failure_block_explains_non_successful_runs(
 ) -> None:
     block = build_failure_block(
         _result(
-            status=SimpleNamespace(value=status),
+            status=PipelineRunResult(status),
             error_type=error_type,
             error_message="boom",
         )
@@ -107,7 +97,7 @@ def test_build_failure_block_explains_non_successful_runs(
 def test_build_failure_block_fills_empty_typeerror_message() -> None:
     block = build_failure_block(
         _result(
-            status=SimpleNamespace(value="failed"),
+            status=PipelineRunResult.FAILED,
             error_type="TypeError",
             error_message="",
         )
@@ -126,8 +116,8 @@ def test_build_io_block_supports_result_only_and_bounded_filter_metadata() -> No
         options=_options(
             run_type="backfill",
             filter_field="molecule_id",
-            filter_ids=["b", "a"],
-            multi_filter_ids={"target_id": ["T1", "T2"]},
+            filter_ids=("b", "a"),
+            multi_filter_ids={"target_id": ("T1", "T2")},
         ),
     )
     assert block is not None
@@ -202,8 +192,15 @@ def test_schema_versions_only_adds_available_fingerprints() -> None:
 
 def test_stage_timings_filters_missing_and_invalid_values() -> None:
     assert build_stage_timings(None) is None
-    assert build_stage_timings({"extract": None, "load": "bad"}) is None
-    assert build_stage_timings({"extract": 1, "transform": "2.5"}) == {
+    assert (
+        build_stage_timings(
+            cast("Mapping[str, float | int | None]", {"extract": None, "load": "bad"})
+        )
+        is None
+    )
+    assert build_stage_timings(
+        cast("Mapping[str, float | int | None]", {"extract": 1, "transform": "2.5"})
+    ) == {
         "extract": 1.0,
         "transform": 2.5,
     }
