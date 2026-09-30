@@ -866,7 +866,7 @@
         "x": 0,
         "y": 5,
         "w": 15,
-        "h": 11
+        "h": 12
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
