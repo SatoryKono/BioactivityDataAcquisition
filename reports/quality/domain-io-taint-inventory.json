@@ -1,5 +1,5 @@
 {
-  "allowed_exception_count": 118,
+  "allowed_exception_count": 120,
   "allowed_exceptions": [
     {
       "kind": "import:pandera",
@@ -238,6 +238,20 @@
       "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "StageAccountingSnapshotsMixin._removals_for_bucket"
+    },
+    {
+      "kind": "attribute_call:resolve",
+      "line": 238,
+      "path": "src/bioetl/domain/run_reports/reason_catalog_data.py",
+      "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
+      "symbol": "ReasonCatalog.family_for"
+    },
+    {
+      "kind": "attribute_call:resolve",
+      "line": 241,
+      "path": "src/bioetl/domain/run_reports/reason_catalog_data.py",
+      "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
+      "symbol": "ReasonCatalog.default_outcome_for"
     },
     {
       "kind": "import:pandera",
@@ -832,21 +846,6 @@
   "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",
   "scanned_file_count": 628,
   "schema_version": 1,
-  "violation_count": 2,
-  "violations": [
-    {
-      "kind": "attribute_call:resolve",
-      "line": 238,
-      "path": "src/bioetl/domain/run_reports/reason_catalog_data.py",
-      "reason": "filesystem resolution",
-      "symbol": "ReasonCatalog.family_for"
-    },
-    {
-      "kind": "attribute_call:resolve",
-      "line": 241,
-      "path": "src/bioetl/domain/run_reports/reason_catalog_data.py",
-      "reason": "filesystem resolution",
-      "symbol": "ReasonCatalog.default_outcome_for"
-    }
-  ]
+  "violation_count": 0,
+  "violations": []
 }
