@@ -49,3 +49,22 @@ def test_domain_io_taint_inventory_records_explicit_schema_boundary_exceptions()
     }
 
     assert {"import:pandera", "import:pandas"} <= exception_kinds
+
+
+def test_domain_io_taint_inventory_forbids_import_graph_bypass() -> None:
+    """#11788 (ARCH-002): domain must load modules through the import graph only."""
+    payload = build_payload(ROOT)
+    banned_kind_fragments = (
+        "spec_from_file_location",
+        "module_from_spec",
+        "exec_module",
+    )
+    findings = [*payload["violations"], *payload["allowed_exceptions"]]
+    offenders = [
+        (finding["path"], finding["kind"])
+        for finding in findings
+        if finding["kind"] == "import:socket"
+        or any(fragment in finding["kind"] for fragment in banned_kind_fragments)
+    ]
+
+    assert offenders == []

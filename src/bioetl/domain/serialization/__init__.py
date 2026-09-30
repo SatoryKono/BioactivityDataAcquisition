@@ -5,7 +5,7 @@ Centralized JSON serialization for deterministic content hashing.
 
 The canonical JSON codec merged into this package from the former
 ``domain/serialization.py`` module (#11788), so the package loads through the
-normal import graph instead of ``importlib.util.spec_from_file_location``.
+normal import graph instead of a filesystem-based module load.
 Snapshot helpers from ``snapshot_serialization`` are re-exported alongside the
 codec API (#11241).
 
