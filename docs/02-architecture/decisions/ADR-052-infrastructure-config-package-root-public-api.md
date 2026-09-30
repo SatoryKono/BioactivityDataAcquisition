@@ -14,7 +14,7 @@ ______________________________________________________________________
 **Status:** Accepted  
 **Linked issues:** #6790, #6624 (TD-08 design), #6682 (decision note)  
 **Related:** `docs/02-architecture/compatibility/infrastructure-config-package-root-sunset.md`  
-**Related note (archived):** [decision note](../../99-archive/decisions/notes/2026-07-27-infrastructure-config-public-api-decision.md)
+**Related note (archived):** `docs/99-archive/decisions/notes/2026-07-27-infrastructure-config-public-api-decision.md`
 
 ## Context
 

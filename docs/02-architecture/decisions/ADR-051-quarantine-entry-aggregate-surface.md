@@ -13,7 +13,7 @@ ______________________________________________________________________
 **Date:** 2026-07-27
 **Status:** Accepted
 **Linked issue:** #6685 (TD-R-09)
-**Related note (archived):** [decision note](../../99-archive/decisions/notes/2026-07-27-quarantine-entry-constructor-intentional.md)
+**Related note (archived):** `docs/99-archive/decisions/notes/2026-07-27-quarantine-entry-constructor-intentional.md`
 **Note:** Numbered ADR-051 because ADR-050 is already assigned to the
 Silver structural / Gold semantic filter boundary decision.
 
