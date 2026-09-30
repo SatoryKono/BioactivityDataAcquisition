@@ -151,7 +151,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 99 | Inspect Scope & Evidence |
 | bioetl-overview-v2.json | 9603 | Review Selected Run Status |
 | bioetl-overview-v2.json | 214 | Monitor Scope Health |
-| bioetl-overview-v2.json | 215 | Review First Action |
 | bioetl-overview-v2.json | 9002 | Review Run Domains |
 | bioetl-overview-v2.json | 9600 | Inspect Alerts |
 | bioetl-overview-v2.json | 9601 | Review Active Alerts |
@@ -175,8 +174,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9602 | Inspect Run Context |
 | bioetl-overview-v2.json | 9300 | Review Run Identity |
 | bioetl-overview-v2.json | 9301 | Review Processed Records |
-| bioetl-overview-v2.json | 30215 | Inspect Full First Action |
-| bioetl-overview-v2.json | 20215 | Inspect Full First Action |
 | bioetl-overview-v2.json | 9450 | Inspect Saved Run Evidence |
 | bioetl-overview-v2.json | 9451 | Inspect Selected Run Domains |
 | bioetl-overview-v2.json | 9452 | Inspect Selected Run Identity |

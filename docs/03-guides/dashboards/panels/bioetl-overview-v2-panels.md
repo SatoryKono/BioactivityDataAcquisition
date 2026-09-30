@@ -30,23 +30,9 @@ uses the remaining 17 columns.
 - **Purpose:** Current severity for the selected scope.
 - **Data sources:** `bioetl_l0_status` (recording rule with label_replace for workflow pipeline mapping)
 
-### 4. Review First Action
-- **Type:** Table (`id=215`)
-- **Purpose:** Rank up to two urgency-ordered next actions for the current
-  selectors/fleet and hand off to the recommended board.
-- **Data sources:** Positive `bioetl_l0_next_action_route` rows, deduplicated
-  across run types before the two-row display limit; the full list reuses the untruncated response. `bioetl_l0_next_action_no_route` supplies
-  an absence-only UNKNOWN fallback.
-- **Layout:** First Action `w=16`, Domain Status `w=8`; two visible bounded rows.
-- **Columns:** Priority, Pipeline, Why, Action. Priority describes routing
-  urgency: UNKNOWN, WATCH, REVIEW, HIGH or URGENT, not alert severity.
-- **Presentation:** Priority colors its own column; Action remains the visible
-  CTA. Raw route metadata stays in Inspect and supports the row's data link.
-  Different pipelines/actions/reasons remain distinct.
-- **Empty/OK:** NO_ROUTE is UNKNOWN. Continue monitoring only when supported by
-  the current status and available evidence.
-- **Notes:** `run_id` is URL handoff context, never a Prometheus label. The
-  Action cell preserves the domain target and the row's pipeline.
+### 4. Review First Action — REMOVED
+
+Intentionally removed from `bioetl-overview-v2.json` (RF-006 #11257, live-verified 2026-09-30): no `id=215` panel is shipped. The next-action answer is the Status/Domains handoff (`9604`/`9603`/`9002`) plus nav links (`1000`) preserving `pipeline`/`run_type`/`run_id`/time range. Series `bioetl_first_action`/`bioetl_fa_gap`/`bioetl_l0_next_action_route` are still recorded in Prometheus; the Scenes parity rows are JSON-fallback only.
 
 ### 5. Review Run Domains
 - **Type:** Table (`id=9002`)
@@ -166,8 +152,7 @@ uses the remaining 17 columns.
 ### 24. Inspect Alerts
 - **Type:** Row
 - **Purpose:** Expanded alert/SLO evidence immediately after the first-level
-  matrix. The visible `Status` and `First Action` retain the critical verdict
-  and route, while this compact table exposes alert-level impact.
+  matrix. The `Status` panel retains the critical verdict, while this compact table exposes alert-level impact.
 - **Data sources:** `bioetl_alerts`, `bioetl_slo_pressure`
 
 ### 25. Review Active Alerts
@@ -225,10 +210,9 @@ Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider
 - The full-width `Inputs` matrix is the deviation-first subsystem summary.
   Repeated Control Plane, Runtime, Data Quality, Provider, Data Validation, and
   Workflow mirrors live in the collapsed `Inspect Domain Diagnostics` row.
-- `Inspect Alerts` is collapsed by default (first screen is Status + First
-  Action + Domain Status). L1 Historical Trends, Range Evidence, and Domain
+- `Inspect Alerts` is collapsed by default (first screen is Status + Domain Status). L1 Historical Trends, Range Evidence, and Domain
   Diagnostics stay collapsed progressive disclosure.
-- First Action panel provides operator guidance based on current state.
+- First Action was removed (see §4 above); operator guidance is the Status/Domains handoff.
 
 ## Additional shipped panels
 ### 27. Review All Domain Status
@@ -238,13 +222,13 @@ Shipped in `bioetl-overview-v2.json`.
 
 Shipped in `bioetl-overview-v2.json`.
 
-### 100. Inspect Full First Action
+### 100. Inspect Full First Action — REMOVED
 
-Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
+Not shipped (`id=20215` absent from `bioetl-overview-v2.json`, RF-006 #11257).
 
-### 101. Inspect Full First Action
+### 101. Inspect Full First Action — REMOVED
 
-Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
+Not shipped (`id=30215` absent from `bioetl-overview-v2.json`, RF-006 #11257).
 
 ## Saved evidence and discovery panels
 
