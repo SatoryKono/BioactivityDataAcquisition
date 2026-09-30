@@ -83,7 +83,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "899",
+      "line": "915",
       "path": "tests/unit/application/test_issue_10518_application_svc1a.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_skips_rows_without_identity"
@@ -629,7 +629,7 @@
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
     "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
-    "tests/unit/application/test_issue_10518_application_svc1a.py:899",
+    "tests/unit/application/test_issue_10518_application_svc1a.py:915",
     "tests/unit/application/test_issue_10518_application_svc2.py:1552",
     "tests/unit/application/test_issue_10518_application_tail1a.py:981",
     "tests/unit/application/core/test_batch_metrics_accounting.py:48",
@@ -1264,7 +1264,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "899",
+        "line": "915",
         "path": "tests/unit/application/test_issue_10518_application_svc1a.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_skips_rows_without_identity"
@@ -1810,7 +1810,7 @@
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
       "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
-      "tests/unit/application/test_issue_10518_application_svc1a.py:899",
+      "tests/unit/application/test_issue_10518_application_svc1a.py:915",
       "tests/unit/application/test_issue_10518_application_svc2.py:1552",
       "tests/unit/application/test_issue_10518_application_tail1a.py:981",
       "tests/unit/application/core/test_batch_metrics_accounting.py:48",
@@ -2025,8 +2025,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2951,
-      "test_python_file_count": 3185,
+      "test_glob_file_count": 2952,
+      "test_python_file_count": 3186,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2067,13 +2067,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2951,
-    "total_test_functions": 28982,
+    "total_test_files": 2952,
+    "total_test_functions": 28987,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "2fb324fb4c0cb50473ee7a5e02d5b717c1f9faf835fcbe1cef76186fc1ac8962",
+  "source_tree_sha256": "221d12b8b2674df0544689390d08bac96740411cd2b7cda3212c288d28b19f04",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 83,
@@ -2097,8 +2097,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2951,
-    "test_python_file_count": 3185,
+    "test_glob_file_count": 2952,
+    "test_python_file_count": 3186,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2139,8 +2139,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2951,
-  "total_test_functions": 28982,
+  "total_test_files": 2952,
+  "total_test_functions": 28987,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

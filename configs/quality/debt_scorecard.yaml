@@ -461,9 +461,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 199
-      total_loc: 24498
+      total_loc: 24559
       files_ge_250_loc: 0
-      helper_function_ratio: 0.384
+      helper_function_ratio: 0.387
       max_internal_fan_in: 6
       max_internal_fan_in_module: bioetl.application.core.quarantine_manager
     trend:
@@ -543,9 +543,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 128
-      total_loc: 15412
-      files_ge_250_loc: 0
-      helper_function_ratio: 0.391
+      total_loc: 15526
+      files_ge_250_loc: 1
+      helper_function_ratio: 0.403
       max_internal_fan_in: 1
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:

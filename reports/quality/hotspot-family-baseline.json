@@ -3,7 +3,7 @@
     "snapshot_date": "2026-09-11",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 0,
+    "budget_warnings": 1,
     "budget_review_notes": 1
   },
   "families": [
@@ -18,9 +18,9 @@
       ],
       "duplication_clusters": 0,
       "files": 199,
-      "total_loc": 24498,
+      "total_loc": 24559,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.384,
+      "helper_function_ratio": 0.387,
       "max_internal_fan_in": 6,
       "max_internal_fan_in_module": "bioetl.application.core.quarantine_manager",
       "bounded_growth_budgets": {
@@ -2238,9 +2238,9 @@
       ],
       "duplication_clusters": 0,
       "files": 128,
-      "total_loc": 15412,
-      "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.391,
+      "total_loc": 15526,
+      "files_ge_250_loc": 1,
+      "helper_function_ratio": 0.403,
       "max_internal_fan_in": 1,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
@@ -3216,7 +3216,9 @@
           "bioetl.application.services.control_plane.workflow.manifest_models"
         ]
       },
-      "budget_warnings": [],
+      "budget_warnings": [
+        "over_budget:files_ge_250_loc=1/0"
+      ],
       "budget_review_notes": [],
       "at_budget_modules": [],
       "at_budget_module_count": 0

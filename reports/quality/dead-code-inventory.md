@@ -6,11 +6,11 @@
 - next_review_by: 2026-12-10
 - review_cycle_days: 90
 - triaged_entry_count: 17
-- repo_wide_zero_import_candidate_count: 4
+- repo_wide_zero_import_candidate_count: 2
 - repo_wide_classified_zero_import_candidate_count: 2
-- repo_wide_untriaged_zero_import_candidate_count: 2
+- repo_wide_untriaged_zero_import_candidate_count: 0
 - repo_wide_owner_test_anchored_candidate_count: 2
-- repo_wide_candidates_without_owner_tests_count: 2
+- repo_wide_candidates_without_owner_tests_count: 0
 - repo_wide_non_static_reachability_candidate_count: 1
 - triaged_retained_owner_test_anchored_count: 13
 - triaged_retained_without_owner_tests_count: 0
@@ -44,8 +44,6 @@
 | Module | Disposition | Path |
 | --- | --- | --- |
 | `bioetl.interfaces.cli.commands.maintenance` | `retain_public_facade` | `src/bioetl/interfaces/cli/commands/maintenance.py` |
-| `bioetl.interfaces.http._selected_run_artifact_probes` | `untriaged` | `src/bioetl/interfaces/http/_selected_run_artifact_probes.py` |
-| `bioetl.interfaces.http._selected_run_report_assessment` | `untriaged` | `src/bioetl/interfaces/http/_selected_run_report_assessment.py` |
 | `bioetl.domain.ports.stage_accounting` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/stage_accounting.py` |
 
 ## Retained Owner-Test Evidence

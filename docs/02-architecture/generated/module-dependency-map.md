@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2530`
-- Internal import edges (raw): `7939`
+- Scanned modules: `2533`
+- Internal import edges (raw): `7947`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `335`
@@ -30,10 +30,10 @@ flowchart LR
     domain -->|1275 OK| domain
     infrastructure -->|772 OK| domain
     infrastructure -->|1232 OK| infrastructure
-    interfaces -->|66 OK| application
+    interfaces -->|69 OK| application
     interfaces -->|59 OK| composition
-    interfaces -->|78 OK| domain
-    interfaces -->|435 OK| interfaces
+    interfaces -->|79 OK| domain
+    interfaces -->|439 OK| interfaces
 ```
 
 ## Layer Edge Table
@@ -49,10 +49,10 @@ flowchart LR
 | `domain`         | `domain`         |    1275 | allowed |
 | `infrastructure` | `domain`         |     772 | allowed |
 | `infrastructure` | `infrastructure` |    1232 | allowed |
-| `interfaces`     | `application`    |      66 | allowed |
+| `interfaces`     | `application`    |      69 | allowed |
 | `interfaces`     | `composition`    |      59 | allowed |
-| `interfaces`     | `domain`         |      78 | allowed |
-| `interfaces`     | `interfaces`     |     435 | allowed |
+| `interfaces`     | `domain`         |      79 | allowed |
+| `interfaces`     | `interfaces`     |     439 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
@@ -77,7 +77,7 @@ flowchart LR
 | `application.core`             | `domain.ports`                             |      31 |
 | `composition.runtime_builders` | `domain.control_plane`                     |      31 |
 | `infrastructure.storage`       | `domain.medallion`                         |      31 |
-| `interfaces.cli`               | `application.services`                     |      30 |
+| `interfaces.cli`               | `application.services`                     |      31 |
 | `composition.bootstrap`        | `domain.ports`                             |      28 |
 | `infrastructure.control_plane` | `domain.control_plane`                     |      28 |
 | `composition.factories`        | `infrastructure.adapters`                  |      26 |
