@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from collections.abc import Mapping
 from pathlib import Path
 
+from bioetl.application.services.run_reports.artifact_digest import (
+    canonical_report_sha256,
+)
 from bioetl.interfaces.http._forensic_request_budget import (
     _deadline_exceeded_error,
     request_deadline_exceeded,
@@ -25,6 +29,10 @@ _SELF_REPORT_FILENAMES = {
     "workflow_run_report_json": "workflow-run-report.json",
     "workflow_run_report_md": "workflow-run-report.md",
 }
+_JSON_SELF_REPORT_KINDS = frozenset(
+    {"pipeline_run_report_json", "workflow_run_report_json"}
+)
+_LAYER_KINDS = frozenset({"bronze_batch", "bronze", "silver", "gold"})
 
 
 def _resolve_artifact_path(
@@ -39,6 +47,8 @@ def _resolve_artifact_path(
     raw = Path(relative)
     if raw.is_absolute():
         candidate = raw.resolve()
+        if kind in _LAYER_KINDS and candidate.is_file():
+            return candidate, ""
         if not candidate.is_relative_to(root):
             return None, "artifact_path_escape"
         return candidate, ""
@@ -53,6 +63,15 @@ def _resolve_artifact_path(
 
 
 _HASH_READ_CHUNK_SIZE = 256 * 1024
+
+
+def _probe_digest(candidate: Path, kind: str) -> str:
+    """Hash JSON self-reports canonically; other artifacts as raw bytes."""
+    if kind in _JSON_SELF_REPORT_KINDS:
+        payload = json.loads(candidate.read_text(encoding="utf-8"))
+        if isinstance(payload, dict):
+            return canonical_report_sha256(payload)
+    return _hash_artifact_chunked(candidate)
 
 
 def _hash_artifact_chunked(candidate: Path) -> str:
@@ -135,7 +154,7 @@ def _artifact_probes(
                 }
             )
             continue
-        actual = _hash_artifact_chunked(candidate)
+        actual = _probe_digest(candidate, kind)
         if actual != digest.strip().lower():
             probes.append(
                 {

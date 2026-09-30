@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Mapping, Sequence
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
+
+from bioetl.application.services.run_reports.artifact_digest import file_sha256
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_models import (
@@ -15,6 +18,8 @@ if TYPE_CHECKING:
 
 def build_artifacts_from_result(
     result: RunResult,
+    *,
+    options: RunOptions | None = None,
 ) -> tuple[dict[str, Any], ...]:  # Any: artifact payload
     """Collect known artifact refs available at report finalize time."""
     items: list[dict[str, Any]] = []  # Any: artifact payload
@@ -26,7 +31,42 @@ def build_artifacts_from_result(
         if result.debug_export_hash:
             item["hash"] = str(result.debug_export_hash)
         items.append(item)
+    items.extend(_cached_bronze_batch_artifacts(options))
     return tuple(items)
+
+
+def _cached_bronze_batch_artifacts(
+    options: RunOptions | None,
+) -> list[dict[str, Any]]:
+    if (
+        options is None
+        or not options.use_cached_bronze
+        or not options.cached_bronze_path
+    ):
+        return []
+    bronze_root = Path(options.cached_bronze_path)
+    search_root = (
+        bronze_root / options.cached_bronze_date
+        if options.cached_bronze_date
+        else bronze_root
+    )
+    if not search_root.exists():
+        return []
+    pattern = (
+        "batch_*.jsonl.zst" if options.cached_bronze_date else "**/batch_*.jsonl.zst"
+    )
+    items: list[dict[str, Any]] = []
+    for batch_file in sorted(search_root.glob(pattern)):
+        if not batch_file.is_file():
+            continue
+        items.append(
+            {
+                "kind": "bronze_batch",
+                "ref": str(batch_file.as_posix()),
+                "sha256": file_sha256(batch_file),
+            }
+        )
+    return items
 
 
 def build_failure_block(
