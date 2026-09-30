@@ -1490,7 +1490,7 @@
       "targets": [
         {
           "format": "table",
-          "parser": "backend",
+          "parser": "uql",
           "refId": "A",
           "root_selector": "rows",
           "source": "url",
@@ -1499,7 +1499,8 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          }
+          },
+          "uql": "parse-json | jsonata \"$map(rows[parameter != '05 silver_skipped_records' and parameter != '10 gold_skipped_records'], function($r) {$merge([$r, {'percentage': $contains($string($r.percentage), '%') ? $formatNumber($number($substringBefore($r.percentage, '%')), '0.0') & '%' : $r.percentage}])})\""
         },
         {
           "refId": "StageInput",
@@ -1521,33 +1522,6 @@
           "options": {
             "byField": "parameter",
             "mode": "outer"
-          }
-        },
-        {
-          "id": "filterByValue",
-          "options": {
-            "type": "exclude",
-            "match": "any",
-            "filters": [
-              {
-                "fieldName": "parameter",
-                "config": {
-                  "id": "equal",
-                  "options": {
-                    "value": "05 silver_skipped_records"
-                  }
-                }
-              },
-              {
-                "fieldName": "parameter",
-                "config": {
-                  "id": "equal",
-                  "options": {
-                    "value": "10 gold_skipped_records"
-                  }
-                }
-              }
-            ]
           }
         },
         {
