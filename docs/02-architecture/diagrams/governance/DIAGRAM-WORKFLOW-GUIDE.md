@@ -296,6 +296,7 @@ ______________________________________________________________________
 | LINK-001    | WARN     | Плотный flowchart использует только один тип стрелок                     |
 | LINK-002    | WARN     | Хрупкий singleton-паттерн в `linkStyle` (много индексных строк `1:1`)    |
 | GRAPH-001   | WARN     | Orphan-ноды (определены, но не в рёбрах)                                 |
+| GRAPH-003   | WARN     | ID в ребре без labeled declaration (`ID["label"]`)                       |
 | NBSP-001    | ERROR    | Используется `&nbsp;`-padding в исходнике                                |
 | CLASS-001   | WARN     | Неэкранированный dunder-метод в classDiagram (`__enter__`)               |
 | CLASS-002   | WARN     | Смешанный стиль return-нотации методов (`): Type` и `) Type`)            |

@@ -117,9 +117,7 @@ TEXT_INK_PALETTE = {
     "#111827",
     "#212121",
 }
-_FILL_OR_STROKE_HEX_RE = re.compile(
-    r"(?i)\b(?:fill|stroke)\s*:\s*(#[0-9a-f]{6})\b"
-)
+_FILL_OR_STROKE_HEX_RE = re.compile(r"(?i)\b(?:fill|stroke)\s*:\s*(#[0-9a-f]{6})\b")
 _TEXT_COLOR_HEX_RE = re.compile(r"(?i)\bcolor\s*:\s*(#[0-9a-f]{6})\b")
 # Legacy palette values blocked in style/classDef rules.
 DEPRECATED_PALETTE = {
@@ -1155,6 +1153,56 @@ def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:
     return issues
 
 
+def check_undeclared_edge_nodes(path: Path, lines: list[str]) -> list[Issue]:
+    """Check edge-referenced IDs for a labeled declaration — GRAPH-003.
+
+    A node that appears in an edge must have a visible shape/label token
+    somewhere in the file (standalone ``ID["label"]`` or inline on the edge).
+    Bare IDs such as ``DSP --- CA & PA`` without ``PA["PubMedAdapter"]`` fail.
+    """
+    import sys as _sys
+
+    repo_root = str(Path(__file__).resolve().parents[3])
+    if repo_root not in _sys.path:
+        _sys.path.insert(0, repo_root)
+    try:
+        from scripts.diagrams.fix.prune_orphan_nodes import (
+            detect_diagram_type,
+            parse_undeclared_edge_ids,
+        )
+    except ImportError as exc:
+        return [
+            Issue(
+                file=str(path),
+                severity="ERROR",
+                rule="GRAPH-002",
+                message=(
+                    "Undeclared-edge parser could not be imported from "
+                    f"scripts.diagrams.fix.prune_orphan_nodes: {exc}"
+                ),
+            )
+        ]
+
+    if detect_diagram_type(lines) != "flowchart":
+        return []
+    undeclared = parse_undeclared_edge_ids(lines)
+    if not undeclared:
+        return []
+    return [
+        Issue(
+            file=str(path),
+            severity="WARNING",
+            rule="GRAPH-003",
+            message=(
+                "Edge-referenced node(s) lack a labeled declaration: "
+                f"{', '.join(sorted(undeclared))}. "
+                'Add ID["label"] (standalone or on the edge), or '
+                "%% keep-undeclared: NodeId"
+            ),
+        )
+    ]
+
+
 def lint_file(path: Path, stale_days: int) -> list[Issue]:
     """Run all checks on a single diagram file."""
     try:
@@ -1193,6 +1241,7 @@ def _collect_file_issues(
         check_label_readability(path, lines),
         check_class_method_render_safety(path, lines),
         check_orphan_nodes(path, lines),
+        check_undeclared_edge_nodes(path, lines),
     )
     issues: list[Issue] = []
     for group in issue_groups:

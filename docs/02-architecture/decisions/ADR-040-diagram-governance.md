@@ -191,6 +191,7 @@ View-файлы с ≥3 типами связей и >5 соединениями
 | COLOUR-001 | Использование deprecated pre-ADR-040 палитры в `style`/`classDef` → ERROR            |
 | COLOUR-002 | Emoji в subgraph labels → ERROR                                                      |
 | GRAPH-001  | Orphan nodes (defined but not in any edge) в `flowchart`/`sequenceDiagram` → WARN    |
+| GRAPH-003  | Edge-referenced node IDs without a labeled declaration в `flowchart`/`graph` → WARN  |
 | NBSP-001   | Использование `&nbsp;`-padding в исходнике → ERROR                                   |
 
 Примечание по реализации `SIZE-*`:
@@ -227,6 +228,24 @@ python scripts/diagrams/fix/prune_orphan_nodes.py --check      # аудит
 python scripts/diagrams/fix/prune_orphan_nodes.py --fix         # удалить garbage orphans
 python scripts/diagrams/fix/prune_orphan_nodes.py --grandfather # exemption для всех текущих
 ```
+
+#### GRAPH-003 — Labeled Edge Node Rule
+
+Реализован в `scripts/diagrams/lint/lint_diagrams.py` (`check_undeclared_edge_nodes`)
+с разбором рёбер из `scripts/diagrams/fix/prune_orphan_nodes.py`.
+
+Нода флагируется, если:
+
+- Участвует в ребре flowchart/graph (`A --> B`, `A --- B & C`, …)
+- В том же файле нет shape/label токена (`ID["label"]`, `ID(label)`, …) ни
+  standalone, ни inline на ребре
+- Нет `%% keep-undeclared: NodeId`
+
+Severity WARN (как GRAPH-001), пока foundation-набор голых id не выжжен.
+ERROR на всём дереве без grandfather краснит CI (#11785 prefetch: 18 files).
+
+**Исключения:** `%% keep-undeclared: NodeId`; subgraph id; `classDiagram` и
+прочие non-flowchart типы.
 
 ### D7: Tool Selection Criteria
 

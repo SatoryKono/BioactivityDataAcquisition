@@ -616,6 +616,7 @@ ______________________________________________________________________
 | LINK-001   | Dense flowchart uses only one arrow semantic style                        | WARN     |
 | LINK-002   | Fragile singleton-index `linkStyle` pattern (many one-by-one index lines) | WARN     |
 | GRAPH-001  | Orphan nodes (defined but not in any edge)                                | WARN     |
+| GRAPH-003  | Edge-referenced node IDs without a labeled declaration                    | WARN     |
 | NBSP-001   | `&nbsp;` padding detected in source                                       | ERROR    |
 | STALE-001  | `%% @date`/`%% Updated:` is older than 150 days                           | ERROR    |
 | STALE-002  | `%% @date`/`%% Updated:` is older than 90 days                            | WARN     |
