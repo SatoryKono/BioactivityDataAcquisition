@@ -697,9 +697,9 @@ def _bind_provider_variable_to_run(variable: dict) -> None:
 
 def _style_provider_check(panels: list[dict]) -> None:
     by_id = {panel["id"]: panel for panel in panels}
-    by_id[9400]["gridPos"].update(x=0, y=2, w=18, h=3)
+    by_id[9400]["gridPos"].update(x=0, y=2, w=15, h=3)
     review = by_id[9461]
-    review["gridPos"].update(x=18, y=2, w=6, h=3)
+    review["gridPos"].update(x=15, y=2, w=9, h=3)
     review["type"] = "stat"
     review["description"] = (
         "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. "

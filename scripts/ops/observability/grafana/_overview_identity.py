@@ -6,7 +6,12 @@ from copy import deepcopy
 def apply_overview_identity(payload: dict) -> None:
     """Keep the exact run key visible; retain manifest details below the fold."""
     panels = payload["panels"]
+    panels[:] = [panel for panel in panels if panel.get("id") != 9301]
+    by_id = {panel["id"]: panel for panel in panels}
+    by_id[9002]["gridPos"].update(x=0, y=5, w=15, h=11)
+    by_id[9603]["gridPos"].update(x=15, y=5, w=9, h=4)
     identity = next(p for p in panels if p.get("id") == 9300)
+    identity["gridPos"].update(x=15, y=9, w=9, h=8)
     if not any(p.get("id") == 9399 for p in panels):
         details = deepcopy(identity)
         details.update(id=9390, title="Inspect Full Run Identity")

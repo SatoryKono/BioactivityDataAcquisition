@@ -402,7 +402,7 @@ def _retain_selected_run_overview(payload: dict) -> None:
             'font-size:16px;line-height:1.2;overflow-wrap:anywhere">'
             "${pipeline:text} | ${run_id}<br>"
             "This page assesses that run only. "
-            "Identity and processed records are on this screen. "
+            "Run identity and domain assessments are on this screen. "
             "UNKNOWN means saved evidence is missing."
             "</div>"
         )
