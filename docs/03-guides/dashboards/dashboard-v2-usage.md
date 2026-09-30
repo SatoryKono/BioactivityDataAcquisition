@@ -100,7 +100,7 @@ HTTP identity backend contract:
 | Dashboard                 | UID                             | Для чего                                                                                   |
 | ------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
 | 1. Trust          | `bioetl-control-plane-v1`       | Replay/resume safety: manifest, ledger, checkpoint, telemetry confidence |
-| 2. Overview (Fleet)       | `bioetl-overview-v2`            | L0 answer-first Fleet: Status + Inputs evidence + First Action routes |
+| 2. Overview (Fleet)       | `bioetl-overview-v2`            | L0 answer-first Fleet: Status + Inputs evidence + Status/Domains handoff |
 | 3. Pipeline Diagnostics                | `bioetl-runtime`                | Blockers, latency, telemetry gap; workflow band merged in |
 | 4. Provider Health        | `bioetl-provider-health-v2`     | Population-first fleet severity + top causes |
 | 5. Data Quality           | `bioetl-dq-v2`                  | Now / Run / Range lanes; quarantine aggregates |
@@ -189,7 +189,9 @@ mention `6. Alerts & SLO` / Explore Logs / Explore Traces as removed surfaces.
 
 Policy reminder:
 - every dashboard still needs one `ONE BIG QUESTION`
-- first-screen scope and `First Action` remain mandatory
+- first-screen scope remains mandatory; `First Action` panel removed from
+  Overview intentionally (RF-006 #11257, issue #11809) — next-action handoff
+  via Status/Domains/nav, панель не возвращать
 - provenance/risk context may stay distributed across scope panels, current
   status surfaces, descriptions and linked runbooks
 
@@ -232,15 +234,16 @@ with a space as the thousands separator, left-pads shorter values to the
 displayed `bronze [total]` width, and right-aligns both numeric columns. The
 internal `row_status` field is hidden; the payload exposes canonical
 `percentage` only. It does not replace the dashboard-specific `Status` or
-`First Action` route.
+Status/Domains next-action handoff.
 If this table is empty, distinguish backend unavailable, no selected run/scope,
 and true zero accounting rows before acting: the card links the Quarantine
 Explorer health probe and monitoring setup docs for that reason.
 
 1. `bioetl-overview-v2`, first screen (no scroll):
-   `Inspect Scope & Evidence`, `Status`, `First Action`, `ID`, and `Processed Records` answer
+   `Inspect Scope & Evidence`, `Status`, `ID`, and `Processed Records` answer
    the L0 question: what is broken/degraded, what exact control-plane identity
-   is selected or resolved, and where to open drilldown first. `OK` requires
+   is selected or resolved, and where to open drilldown first (`First Action`
+   panel removed intentionally, RF-006 #11257, issue #11809). `OK` requires
    recent activity; missing current evidence remains `UNKNOWN`, not green zero.
    Compact current-state cards for Control Plane, Runtime, Data Quality,
    Provider, and Data Validation follow the answer band, then `Inputs` and
@@ -251,8 +254,9 @@ Explorer health probe and monitoring setup docs for that reason.
    collapsed.
 1. `bioetl-runtime`, first-screen answer area (без скролла):
    `Inspect Scope & Evidence`, `Status`, `ID`, `Processed Records`, then
-   `Runtime Status`, `Runtime Blockers` и
-   `First Action` отвечают на L2 current-cause вопрос и next operator move.
+   `Runtime Status` и `Runtime Blockers`
+   отвечают на L2 current-cause вопрос и next operator move (`First Action`
+   панели нет в shipped JSON — снята намеренно, RF-006 #11257, issue #11809).
    `Status` is the compact shared-shell verdict; `Runtime Status` is an
    expanded first-screen mirror of the same trust-gated current-status
    recording rule next to blocker causes, not an independent second signal.
@@ -298,9 +302,11 @@ Explorer health probe and monitoring setup docs for that reason.
   signals` row backed by `/ops/control-plane/identity-evidence`.
 1. `bioetl-provider-health-v2`, first-screen GLOBAL answer row:
    `GLOBAL Provider Scope`, `Monitor GLOBAL Provider Severity Matrix`,
-   `Inspect Critical Providers`, `Inspect Provider Top Causes`,
-   `Monitor Provider Telemetry Freshness` и `First Action`
-   отвечают на вопрос «какой provider degraded/failing и почему». Panel `id=114`
+   `Inspect Critical Providers`, `Inspect Provider Top Causes` и
+   `Monitor Provider Telemetry Freshness`
+   отвечают на вопрос «какой provider degraded/failing и почему» (`First Action`
+   панели `id=9002` нет в shipped JSON — снята намеренно, RF-006 #11257,
+   issue #11809). Panel `id=114`
    (`Review Raw Provider Health Enum`) остаётся raw source enum
    (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже first screen как evidence.
   `Monitor Provider Telemetry Freshness` отделяет empty severity matrix от
@@ -319,9 +325,9 @@ Explorer health probe and monitoring setup docs for that reason.
   `Inspect Critical Providers`, and `Inspect Provider Top Causes` are GLOBAL
   fleet posture and may disagree by design. Shared `ID` и `Processed Records`
   cards на том же first screen остаются bounded pipeline-context evidence и не
-  доказывают current provider health. `First Action` spells out this read order:
-  GLOBAL severity, telemetry freshness, critical providers/top causes, then
-  selected-provider supporting evidence. `Inspect Provider Top Causes` может
+  доказывают current provider health. Порядок чтения тот же, что раньше
+  задавала снятая `First Action` панель: GLOBAL severity, telemetry freshness,
+  critical providers/top causes, затем selected-provider supporting evidence. `Inspect Provider Top Causes` может
   оставаться
    непустой даже при `GLOBAL severity = OK`, потому что canonical cause
    projection включает early-warning provider signals независимо от
@@ -335,14 +341,15 @@ Explorer health probe and monitoring setup docs for that reason.
    collapsed under `Selected Provider Details`; no-data
    in those panels does not refute current provider severity and should not
    dominate the first-screen verdict path.
-   `First Action` is the bounded CTA surface for this dashboard: review the
-   severity matrix, inspect critical providers, or inspect provider top causes
-   before leaving the page.
+   Bounded CTA surface for this dashboard (бывшая `First Action` панель снята,
+   см. выше): review the severity matrix, inspect critical providers, or
+   inspect provider top causes before leaving the page.
 1. `bioetl-dq-v2`, first-screen answer row:
-   `Monitor DQ Current Status`, `Now · DQ Threshold State`,
-   `Now · DQ Current Reasons` и `Review: First Action`
+   `Monitor DQ Current Status`, `Now · DQ Threshold State` и
+   `Now · DQ Current Reasons`
    отвечают на вопрос «DQ сейчас OK/WARN/CRIT/UNKNOWN и какое действие
-   первое». `Status` is the compact shared-shell verdict; `Monitor DQ Current
+   первое» (панели `Review: First Action` `id=9103` нет в shipped JSON —
+   снята намеренно, RF-006 #11257, issue #11809). `Status` is the compact shared-shell verdict; `Monitor DQ Current
    Status` is an expanded first-screen mirror beside threshold/reason
    explainability, not an independent second signal. All three current panels
    use one instant snapshot. If status is WARN/CRIT while the bounded current
@@ -359,9 +366,10 @@ Explorer health probe and monitoring setup docs for that reason.
    inside collapsed diagnostics as deeper selected-range evidence. Это
    pipeline-wide snapshot; `$run_type` and stage filters below control only
    selected-range evidence.
-   `Review: First Action` stays the canonical DQ CTA: review current status,
-   inspect current reasons, then expand the relevant selected-run/range lane or
-   use the documented quarantine CLI without leaking unsupported scope.
+   Канонический DQ CTA — review current status, inspect current reasons, then
+   expand the relevant selected-run/range lane or use the documented quarantine
+   CLI without leaking unsupported scope (бывшая `Review: First Action` панель
+   снята, см. выше).
 1. `bioetl-overview-v2`, routing and evidence rows:
    `Control Plane`, `Runtime`, `Data Quality`, `Provider`,
    `Data Validation`, `Inputs`, и `Workflow` показывают current-only operator
@@ -369,7 +377,7 @@ Explorer health probe and monitoring setup docs for that reason.
    только окраску ячейки `Status`. Compact historical trend/evidence panels
    вынесены ниже первого экрана в collapsed `L1 Historical Trends` и
    `Range Evidence`; они служат selected-range/L1 evidence и не определяют
-   `Status` или `First Action`. `Diagnostics & Docs` содержит routing по
+   `Status` или Domains-вердикт. `Diagnostics & Docs` содержит routing по
    logs/traces/raw metrics.
 1. `bioetl-workflow-overview`, panels `id=2`, `id=3`, `id=6`, `id=7`, `id=4`,
    `id=5`, `id=8`:
@@ -400,8 +408,8 @@ Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренн
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ Provenance                                                      │ Status      │
 ├──────────────────────┬──────────────┬────────────────────────────────────────┤
-│ ID                   │ Processed    │ First Action                           │
-│                      │ Records      │                                        │
+│ ID                   │ Processed    │ Run Domains (9002)                     │
+│                      │ Records      │ (First Action removed, #11809)         │
 ├──────────────┬───────┬──────────────┬──────────┬─────────────────────────────┤
 │ Control Plane│ Runtime│ Data Quality │ Provider │ Data Validation             │
 ├──────────────────────────────────────┬───────────────────────────────────────┤
@@ -418,7 +426,7 @@ Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренн
 - что сломано: `Status` + compact L1 current-state cards + deviation-first
   `Inputs` / `Workflow`; `Triage Alert State` раскрывается после первичного
   narrowing, когда нужен alert-level context;
-- куда идти дальше: `First Action` с `action_target/action_reason/action_dashboard_uid`;
+- куда идти дальше: Status/Domains handoff с сохранением фильтров (`First Action` с `action_target/...` снята, #11809);
 - какая execution identity выбрана: `ID`, backed by local control-plane manifests;
 - что было в окне времени: collapsed `L1 Historical Trends` и `Range Evidence`;
 - где искать сырые traces/logs/metrics: collapsed `Diagnostics & Docs`.
@@ -445,7 +453,8 @@ Compact evidence ниже первого экрана:
   `Open Control Plane` and `Open Runtime`.
 
 Эти пять panels retained intentionally. Current verdict по-прежнему определяется
-только first-screen `Status`, `First Action`, `Inputs` и current L1 cards.
+только first-screen `Status`, `Inputs` и current L1 cards (`First Action`
+снята, RF-006 #11257, issue #11809).
 ## Silver Filter Rejects workflow
 
 - Для быстрых summary используйте `Silver Rejects + Rate` в
@@ -467,7 +476,7 @@ Compact evidence ниже первого экрана:
      severity и первое действие.
   1. **L1 cause narrowing:** раскройте collapsed-by-default rows `Silver Structural / Gold Contract-Semantic Rejects` и `Validation Failures / Runtime Diagnostics / Trends`. В reject row сначала проверьте trust guard `Monitor: Silver Filter Reject Accounting Mismatch`, затем `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields`, и только после этого переходите к pipeline distribution через `Inspect: Silver Filter Rejects by Pipeline`.
   1. **L2 forensics (CLI):** record-level Silver structural list is **not** a Grafana board (Explorer removed 2026-07-23). Use `bioetl quarantine inspect` with `reason_code` / `field` / `quarantine_run_id` / `payload_hash` filters. For Gold contract/semantic rejects use Gold reject panels in `5. Data Quality`; `FILTERED_OUT_SILVER` is a legacy alias for Silver structural rejects only.
-  1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный BioETL Ops HTTP и ненулевой Bronze denominator; zero-reject workflow run is a valid empty explorer state only after those checks pass. Zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
+  1. **L2 no-data gate:** считайте `0` rejects нормой только когда Status/Domains evidence подтверждает конкретный pipeline, доступный BioETL Ops HTTP и ненулевой Bronze denominator (бывшая проверка `Review: First Action / No-Data Semantics`; FA-панель снята, RF-006 #11257, issue #11809); zero-reject workflow run is a valid empty explorer state only after those checks pass. Zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
   - растёт ли объём `filtered_out`;
@@ -544,13 +553,13 @@ Variable handoff policy for dashboard links remains strict and bounded:
   operator drill down first? Top-level dashboard links follow the `0..6` bus
   and do not duplicate panel-level dashboard links.
   Cross-dashboard URLs передают только target-scoped variables; provider/workflow
-  dashboards не наследуют unsupported selector leakage. `Status` and
-  `First Action` are the first operator answer and both stay in the selected
+  dashboards не наследуют unsupported selector leakage. `Status` and Domains
+  are the first operator answer and both stay in the selected
   `$pipeline/$run_type` scope; subsystem cards preserve explicit drilldown links.
 
 ## First 2 clicks scenario (operator)
 
-1. **Click #1:** открыть `bioetl-overview-v2`, прочитать `Status` + `First Action`.
+1. **Click #1:** открыть `bioetl-overview-v2`, прочитать `Status` + Domains (`First Action` панель снята, RF-006 #11257, issue #11809).
 2. **Click #2:** открыть рекомендуемый dashboard из top-level bus (`1. Trust`, `3. Pipeline Diagnostics`, `4. Provider Health`, `5. Data Quality`, `6. Incident Workspace`, `0. Run Explorer`).
 
 Цель сценария: root-cause направление должно быть определено максимум за 2 клика без обязательной прокрутки по нечастым CTA.
@@ -636,11 +645,12 @@ Variable handoff policy for dashboard links remains strict and bounded:
   workflow-specific metrics.
 - `bioetl-runtime`: workflow panels use selected-range event-delta evidence
   with zero-valid fallback for empty selected ranges.
-- `CLI quarantine inspect`: `Review: First Action / No-Data Semantics`
-  now also carries bounded CTA row links (`Review total rejects`,
-  `Review scoped summary`, `Open Data Quality`) so the first-screen forensic
-  interpretation panel remains actionable without leaking `quarantine_run_id` or
-  `payload_hash` into cross-dashboard handoffs.
+- `CLI quarantine inspect`: forensic interpretation carries bounded CTA row
+  links (`Review total rejects`, `Review scoped summary`, `Open Data Quality`)
+  so the first-screen forensic interpretation panel remains actionable without
+  leaking `quarantine_run_id` or `payload_hash` into cross-dashboard handoffs
+  (бывшая `Review: First Action / No-Data Semantics` панель снята, RF-006
+  #11257, issue #11809).
   The visual sequence is scope → `Monitor Explorer Backend Health` → one action
   → summary → top causes. `Trends · expand when rejects exist` and `Records and
   selected detail · expand after narrowing` remain collapsed until relevant.
@@ -690,19 +700,13 @@ Variable handoff policy for dashboard links remains strict and bounded:
 ## Важные пороги (из JSON)
 
 - `overview.id=214 (Status)`: `CRIT` при runtime blocker `>0`, DQ hard fail `>0`, blocking data-validation lifecycle или control-plane blocker `>0`; `WARN` при non-fatal warning-only сигналах; `UNKNOWN` при no recent samples. Panel links route directly to Runtime / Control Plane / Data Quality / Provider Health / Workflow with the current time range.
-- `overview.id=215 (Review First Action)`: shows at most **two** positive
-  routes. Rows keep pipeline and run type. Column order is **Priority →
-  Workflow → Why → Action**. Priority is routing urgency, not health and not
-  alert severity: `1=—` (No action required), `15=VERIFY`, `10=REVIEW`,
-  `20/30=HIGH`, `35/40/50=URGENT`, `60=CRIT`. Workflow All adds standalone
-  pipelines that are outside `bioetl_workflow_scope_universe`. A concrete
-  missing workflow does not fall through to another workflow or to pipeline
-  routes; `bioetl_fa_gap` is VERIFY with the selected scope kept on the link.
-  Confirmed health is `No action required` with no diagnostic link. Run ID does
-  not change CURRENT. `UNKNOWN` stays a Monitor Scope Health state. Provider
-  routes for a selected pipeline are scope-local, not a global degradation flag.
-  First Action occupies `w=16`, paired with Domain Status at `w=8`.
-  Inspect retains routing metadata; no healthy zero is manufactured.
+- `overview.id=215 (Review First Action)` — removed from shipped JSON
+  (RF-006 #11257, issue #11809): панели не существует, не возвращать; ниже
+  краткая историческая сводка. Было: at most **two** positive routes,
+  Priority → Workflow → Why → Action; `1=—`, `15=VERIFY`, `10=REVIEW`,
+  `20/30=HIGH`, `35/40/50=URGENT`, `60=CRIT`; `bioetl_fa_gap` is VERIFY;
+  `No action required` with no diagnostic link; layout `w=16` + Domain Status
+  `w=8`.
 - `overview` first-screen selected-scope cards normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading `bioetl_l0_*` / `bioetl_l1_*` summary recording rules. For example, `workflow_chembl_assay` resolves to the same current-state summary rows as `chembl_assay`.
 - `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
 - `overview.id=9002 (Review Domain Status)`: использует `topk(4, max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"}))`. First-screen таблица показывает четыре worst/UNKNOWN domain status; полный six-domain matrix остаётся в `overview.id=9031` под `Domain Status Tracks`.
@@ -736,14 +740,12 @@ Variable handoff policy for dashboard links remains strict and bounded:
   отсутствии blockers/warnings. Panel-level links duplicate the canonical
   Runtime / Control Plane / Data Quality / Provider Health / Workflow bus for
   first-click triage.
-- `overview.First Action`: runtime имеет приоритет над control-plane,
-  blocking gold lifecycle, DQ, provider и workflow; row
-  `action_target/action_reason/action_dashboard_uid`
-  replaces the old opaque severity-only handoff. `NO_ROUTE` means the selected
-  `pipeline/run_type` scope is not present in the overview universe and should
-  be validated before deeper drilldown. Panel data links preserve the same
-  time range and provide explicit operator handoff even when the next-action route
-  itself resolves to `MONITOR`.
+- `overview.First Action` — removed from shipped JSON (RF-006 #11257,
+  issue #11809): панели не существует, не возвращать. Было: runtime-приоритет
+  над control-plane / blocking gold lifecycle / DQ / provider / workflow; row
+  `action_target/action_reason/action_dashboard_uid`; `NO_ROUTE` требует
+  валидации scope; data links сохраняли time range. Сейчас next-action handoff
+  дают Status (9604) / Domains (9002) / nav.
 - `overview.Data Validation`: first-screen table now aggregates the worst
   current gold lifecycle status by `pipeline` across the selected `run_type`
   scope. Exact `lifecycle_state` detail remains available in Runtime / trend
@@ -815,7 +817,7 @@ Event age — возраст последнего события ledger для r
 Время scrape и mtime файла не используются. Отсутствующее время остаётся
 UNKNOWN.
 
-Overview сначала показывает CURRENT health и First Action, затем SELECTED RUN.
+Overview сначала показывает CURRENT health (Status/Domains; `First Action` снята, #11809), затем SELECTED RUN.
 Все шесть доменов видны в матрице; VERIFY означает проверку отсутствующего
 источника evidence. UNKNOWN не превращается в подтверждённый инцидент.
 Set range to this run применяет период запуска к текущему дашборду.
