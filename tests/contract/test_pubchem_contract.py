@@ -57,14 +57,16 @@ async def _request_or_skip(
     url: str,
     **kwargs: object,
 ) -> httpx.Response:
-    """Execute request and skip on transient network/provider outages."""
+    """Skip when unreachable or rate-limited; fail closed on provider 5xx (#11772)."""
     try:
         response = await client.request(method, url, **kwargs)
     except httpx.TransportError as exc:
         pytest.skip(f"PubChem endpoint not reachable: {exc}")
 
+    if response.status_code == 429:
+        pytest.skip(f"PubChem rate limited: HTTP {response.status_code}")
     if response.status_code >= 500:
-        pytest.skip(f"PubChem temporary server error: HTTP {response.status_code}")
+        pytest.fail(f"PubChem server error: HTTP {response.status_code}")
     return response
 
 

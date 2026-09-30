@@ -112,6 +112,21 @@ class CircuitBreakerGuard:
         """Return cumulative OPEN transitions since initialization."""
         return self._trips_total
 
+    async def _note_failure(self) -> None:
+        """Account one failure under the guard lock."""
+        async with self._lock:
+            self._last_failure_time = _now()
+            self._state, self._failure_count, trips_delta = record_failure(
+                state=self._state,
+                failure_count=self._failure_count,
+                failure_threshold=self.failure_threshold,
+                metrics=self.metrics,
+                provider=self.provider,
+                state_metric_name=METRIC_CIRCUIT_BREAKER_STATE,
+                trip_metric_name=METRIC_CIRCUIT_BREAKER_TRIPS,
+            )
+            self._trips_total += trips_delta
+
     async def call(
         self,
         func: Callable[P, Awaitable[T]],
@@ -168,18 +183,7 @@ class CircuitBreakerGuard:
         try:
             result = await func(*args, **kwargs)
         except CALL_OPERATION_ERRORS:
-            async with self._lock:
-                self._last_failure_time = _now()
-                self._state, self._failure_count, trips_delta = record_failure(
-                    state=self._state,
-                    failure_count=self._failure_count,
-                    failure_threshold=self.failure_threshold,
-                    metrics=self.metrics,
-                    provider=self.provider,
-                    state_metric_name=METRIC_CIRCUIT_BREAKER_STATE,
-                    trip_metric_name=METRIC_CIRCUIT_BREAKER_TRIPS,
-                )
-                self._trips_total += trips_delta
+            await self._note_failure()
             raise
         else:
             if isinstance(result, httpx.Response) and result.status_code in {
@@ -189,18 +193,7 @@ class CircuitBreakerGuard:
                 503,
                 504,
             }:
-                async with self._lock:
-                    self._last_failure_time = _now()
-                    self._state, self._failure_count, trips_delta = record_failure(
-                        state=self._state,
-                        failure_count=self._failure_count,
-                        failure_threshold=self.failure_threshold,
-                        metrics=self.metrics,
-                        provider=self.provider,
-                        state_metric_name=METRIC_CIRCUIT_BREAKER_STATE,
-                        trip_metric_name=METRIC_CIRCUIT_BREAKER_TRIPS,
-                    )
-                    self._trips_total += trips_delta
+                await self._note_failure()
                 return result
             async with self._lock:
                 self._failure_count = 0

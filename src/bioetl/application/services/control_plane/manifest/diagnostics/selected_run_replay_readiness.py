@@ -146,8 +146,12 @@ def project_selected_run_replay_readiness(
     )
     blockers = [item["code"] for item in checks if item["result"] == "fail"]
     unknown = [item["code"] for item in checks if item["result"] == "unknown"]
+    identity_fields = _readiness_identity_fields(identity)
     return {
-        **_readiness_identity_fields(identity),
+        "run_id": identity_fields["run_id"],
+        "pipeline": identity_fields["pipeline"],
+        "run_type": identity_fields["run_type"],
+        "replay_mode": identity_fields["replay_mode"],
         "verdict": verdict,
         "domain_verdict": domain_verdict.value,
         "checks": checks,

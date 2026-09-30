@@ -136,7 +136,7 @@ async def _request_or_skip(
     url: str,
     **kwargs: object,
 ) -> httpx.Response:
-    """Execute request with light retry and cache for transient provider outages."""
+    """Skip when unreachable/rate-limited; fail closed on 5xx after retries (#11772)."""
     cache_key = _request_cache_key(method, url, **kwargs)
     cached_response = _CHEMBL_RESPONSE_CACHE.get(cache_key)
     if cached_response is not None:
@@ -161,9 +161,15 @@ async def _request_or_skip(
             if response.status_code not in _CHEMBL_TRANSIENT_STATUS_CODES:
                 _CHEMBL_RESPONSE_CACHE[cache_key] = response
                 return response
-            if attempt >= _CHEMBL_REQUEST_RETRY_ATTEMPTS:
-                pytest.skip(
-                    f"ChEMBL temporary server error after {_CHEMBL_REQUEST_RETRY_ATTEMPTS} attempts: "
+            if response.status_code == 429:
+                if attempt >= _CHEMBL_REQUEST_RETRY_ATTEMPTS:
+                    pytest.skip(
+                        f"ChEMBL rate limited after {_CHEMBL_REQUEST_RETRY_ATTEMPTS} attempts: "
+                        f"HTTP {response.status_code}"
+                    )
+            elif attempt >= _CHEMBL_REQUEST_RETRY_ATTEMPTS:
+                pytest.fail(
+                    f"ChEMBL server error after {_CHEMBL_REQUEST_RETRY_ATTEMPTS} attempts: "
                     f"HTTP {response.status_code}"
                 )
 

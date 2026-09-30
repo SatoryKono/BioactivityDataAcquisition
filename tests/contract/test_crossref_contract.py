@@ -47,7 +47,6 @@ CROSSREF_API_BASE = "https://api.crossref.org"
 STABLE_DOI = "10.1038/s41586-020-2649-2"
 SEARCH_TITLE = "SARS-CoV-2"
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
-TRANSIENT_PROVIDER_STATUSES = {429, 500, 502, 503, 504}
 pytestmark = pytest.mark.network
 
 
@@ -57,14 +56,16 @@ async def _request_or_skip(
     url: str,
     **kwargs: object,
 ) -> httpx.Response:
-    """Execute request and skip on transient network/provider outages."""
+    """Skip when unreachable or rate-limited; fail closed on provider 5xx (#11772)."""
     try:
         response = await client.request(method, url, **kwargs)
     except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
         pytest.skip(f"Crossref endpoint not reachable: {exc}")
 
-    if response.status_code in TRANSIENT_PROVIDER_STATUSES:
-        pytest.skip(f"Crossref temporary server error: HTTP {response.status_code}")
+    if response.status_code == 429:
+        pytest.skip(f"Crossref rate limited: HTTP {response.status_code}")
+    if response.status_code >= 500:
+        pytest.fail(f"Crossref server error: HTTP {response.status_code}")
     return response
 
 

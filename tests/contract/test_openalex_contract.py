@@ -56,14 +56,16 @@ async def _request_or_skip(
     url: str,
     **kwargs: object,
 ) -> httpx.Response:
-    """Execute request and skip on transient network/provider outages."""
+    """Skip when unreachable or rate-limited; fail closed on provider 5xx (#11772)."""
     try:
         response = await client.request(method, url, **kwargs)
     except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
         pytest.skip(f"OpenAlex endpoint not reachable: {exc}")
 
-    if response.status_code in {429, 502, 503, 504}:
-        pytest.skip(f"OpenAlex temporary server error: HTTP {response.status_code}")
+    if response.status_code == 429:
+        pytest.skip(f"OpenAlex rate limited: HTTP {response.status_code}")
+    if response.status_code >= 500:
+        pytest.fail(f"OpenAlex server error: HTTP {response.status_code}")
     return response
 
 

@@ -49,7 +49,6 @@ from tests.contract._provider_contract_drift import (
 EUTILS_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 STABLE_PMID = "33408181"
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
-TRANSIENT_PROVIDER_STATUSES = frozenset({429, 500, 502, 503, 504})
 pytestmark = pytest.mark.network
 
 
@@ -59,14 +58,16 @@ async def _request_or_skip(
     url: str,
     **kwargs: object,
 ) -> httpx.Response:
-    """Execute request and skip on transient network/provider outages."""
+    """Skip when unreachable or rate-limited; fail closed on provider 5xx (#11772)."""
     try:
         response = await client.request(method, url, **kwargs)
     except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
         pytest.skip(f"PubMed/NCBI E-utilities endpoint not reachable: {exc}")
 
-    if response.status_code in TRANSIENT_PROVIDER_STATUSES:
-        pytest.skip(f"PubMed/NCBI temporary server error: HTTP {response.status_code}")
+    if response.status_code == 429:
+        pytest.skip(f"PubMed/NCBI rate limited: HTTP {response.status_code}")
+    if response.status_code >= 500:
+        pytest.fail(f"PubMed/NCBI server error: HTTP {response.status_code}")
     return response
 
 

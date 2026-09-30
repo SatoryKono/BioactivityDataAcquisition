@@ -161,40 +161,40 @@ entries:
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 4
+    reviewed_skip_calls: 3
     vcr_related: false
-    review_date: "2026-06-02"
-    rationale: ChEMBL live canary tests tolerate transient transport and server outages by skipping closed after bounded retries.
+    review_date: "2026-09-30"
+    rationale: ChEMBL live canary skips closed when unreachable or rate-limited (HTTP 429) after bounded retries; a received HTTP 5xx fails closed via pytest.fail (#11772).
   - path: tests/contract/test_crossref_contract.py
     suite: contract
     category: live_endpoint_unavailability
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 2
+    reviewed_skip_calls: 1
     vcr_related: false
-    review_date: "2026-06-02"
-    rationale: Crossref live contract tests may skip on endpoint unavailability or transient 5xx failures.
+    review_date: "2026-09-30"
+    rationale: Crossref live contract tests skip closed only when the endpoint is unreachable or rate-limited (HTTP 429); a received HTTP 5xx fails closed via pytest.fail (#11772).
   - path: tests/contract/test_openalex_contract.py
     suite: contract
     category: live_endpoint_unavailability
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 2
+    reviewed_skip_calls: 1
     vcr_related: false
-    review_date: "2026-06-02"
-    rationale: OpenAlex live contract tests may skip on endpoint unavailability or transient 5xx failures.
+    review_date: "2026-09-30"
+    rationale: OpenAlex live contract tests skip closed only when the endpoint is unreachable or rate-limited (HTTP 429); a received HTTP 5xx fails closed via pytest.fail (#11772).
   - path: tests/contract/test_pubchem_contract.py
     suite: contract
     category: live_endpoint_unavailability
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 2
+    reviewed_skip_calls: 1
     vcr_related: false
-    review_date: "2026-06-02"
-    rationale: PubChem live contract tests may skip on endpoint unavailability or transient 5xx failures.
+    review_date: "2026-09-30"
+    rationale: PubChem live contract tests skip closed only when the endpoint is unreachable or rate-limited (HTTP 429); a received HTTP 5xx fails closed via pytest.fail (#11772).
   - path: tests/contract/test_pubmed_contract.py
     suite: contract
     category: live_endpoint_unavailability
@@ -205,8 +205,8 @@ entries:
     vcr_related: false
     review_date: "2026-07-22"
     rationale:
-      PubMed/NCBI contract tests may skip on ConnectError/timeouts or temporary provider 5xx via _request_or_skip (aligned
-      with Crossref/OpenAlex).
+      PubMed/NCBI contract tests skip closed on ConnectError/timeouts or HTTP 429 via _request_or_skip; a received
+      provider 5xx fails closed via pytest.fail (aligned with Crossref/OpenAlex, #11772).
   - path: tests/contract/test_uniprot_contract.py
     suite: contract
     category: live_endpoint_unavailability
