@@ -1,6 +1,6 @@
 ---
 id: prompt.fragment.dashboard-requirements-audit
-version: 1.0.0
+version: 1.0.1
 status: active
 class: fragment
 owner: BioETL Team
@@ -14,7 +14,7 @@ Machine lock: `docs/03-guides/dashboards/contracts/requirement-coverage.yaml` an
 Palette and copy: `docs/03-guides/dashboards/verdict-ontology.md`, `design-system.md` §1–§3, §9.1.
 Do not invent panels or `DASH-*` ids. If this roster and the audited JSON disagree, the JSON wins and the diff is recorded. A missing required answer id is `DASH-FIT-003`, not a roster update.
 
-Roster snapshot: `origin/main` `1de34832856da16781f939cf10187cd99168354c` on 2026-09-26. Re-walk `grafana/dashboards/*.json` every cycle.
+Roster snapshot: `origin/main` `50d92e502e16a424fc8a31a2f7860c28f89fa858` on 2026-09-30. Re-walk `grafana/dashboards/*.json` every cycle.
 
 Older design-system sentences that still name Loki, Tempo, or an L0 "what is broken now" Overview question are not the shipping question when they disagree with §7.
 
@@ -45,7 +45,7 @@ Area fill only for `gridPos.y < 18` and only with a textual state. Below the fol
 Clock text is `YYYY-MM-DD HH:MM`. Grafana unit is `time:YYYY-MM-DD HH:mm` (`MM` is months and is forbidden) (`DASH-TIME-001`).
 Content titles start with `Monitor`, `Inspect`, `Track`, `Compare`, `Review`, or `Investigate` (`DASH-COPY-003`). Text, row, and shell titles may use `Navigate`, `Understand`, `Start`, `Assess`, `Explain`, `Continue`.
 First-window `Monitor*` panels must not use `$__range` (`DASH-COPY-004`).
-Verdict cards state `OK` / `WARN` / `CRIT` / `UNKNOWN` in the description. Trust gates `1. Trust` and runtime `9401` also state `INCOMPLETE` (`DASH-COPY-006`).
+Verdict cards state `OK` / `WARN` / `CRIT` / `UNKNOWN` in the description. Trust gates `1. Trust` (`9422`) and runtime `9998` also state `INCOMPLETE` (`DASH-COPY-006`).
 HTML copy roles (`DASH-COPY-008`): `<b>` numbered dashboard name, `<em>` panel title, CAPS status/scope without bold, `<code style="font-size:16px">` field token, regular `16px` body. Navigation chips are exempt.
 
 ### Shared data and layout
@@ -78,65 +78,54 @@ HTML copy roles (`DASH-COPY-008`): `<b>` numbered dashboard name, `<em>` panel t
 | Scalar density | `python -m scripts.engineering.qa report-dashboard-scalar-density --check` |
 | Performance | `python -m scripts.engineering.qa check-dashboard-performance-budgets` |
 
-`role=chrome` below means the snapshot target had neither a PromQL `expr` nor an HTTP `url`. Re-check before calling a required answer panel non-data (`DASH-COPY-007`).
+`role=chrome` below means no data target; Dashboard-datasource references are data even without their own PromQL `expr` or HTTP `url`. Re-check before calling a required answer panel non-data (`DASH-COPY-007`).
 
 ### 0. Run Explorer `bioetl-run-explorer-v1`
 - Question: Which pipelines ran most recently, and where are their reports?
-- Answer panel: 3010 Inspect Recent Runs
-- Next action token: Click a Run cell
-- Basis tokens: SELECTED RUN; VALID EMPTY
-- Data: HTTP index. No Prometheus run_id label. Empty index is VALID EMPTY, not a healthy fleet.
-- Snapshot panels: 6. Refresh `60s`, timezone `browser`.
+- Answer panel: 3010 Inspect Recent Runs (last 10)
+- Next action token: opens the persisted Report
+- Basis tokens: no exact run; VALID EMPTY
+- Data: HTTP index. No Prometheus run_id label. Empty index is VALID EMPTY, not a healthy fleet. Picker 3010 only; identity/records are on destination dashboards.
+- Snapshot panels: 2. Refresh `60s`, timezone `browser`.
 
 | id | y | band | type | title | datasource | role |
 | ---: | ---: | --- | --- | --- | --- | --- |
-| 1000 | 0 | first-window | text | Navigate Dashboards |  | chrome |
-| 1 | 2 | first-window | text | Understand Run Scope |  | chrome |
-| 3010 | 5 | first-window | table | Inspect Recent Runs (last 10) | BioETL Ops HTTP | data |
-| 9450 | 17 | first-window | row | Inspect Saved Run Evidence |  | chrome |
-| 9451 | 18 | first-load | table | Inspect Selected Run Domains | BioETL Ops HTTP | data |
-| 9452 | 30 | below | table | Inspect Selected Run Identity | BioETL Ops HTTP | data |
+| 1 | 0 | first-window | text | (empty in JSON) |  | chrome |
+| 3010 | 3 | first-window | table | Inspect Recent Runs (last 10) | BioETL Ops HTTP | data |
 
 ### 1. Trust `bioetl-control-plane-v1`
 - Question: Can the selected run be exactly replayed from saved inputs?
 - Answer panel: 9422 Review Exact Replay Readiness
-- Next action token: Inspect Replay Safety State
+- Next action token: View replay checks
 - Basis tokens: CURRENT; processing_status; trust_status
 - Data: Exact-run HTTP. CURRENT 9401 is not this answer. INCOMPLETE when checkpoint/scrape evidence is missing. processing_status is not trust_status.
-- Snapshot panels: 30. Refresh `60s`, timezone `browser`.
+- Snapshot panels: 27. Refresh `60s`, timezone `browser`.
 
 | id | y | band | type | title | datasource | role |
 | ---: | ---: | --- | --- | --- | --- | --- |
-| 1000 | 0 | first-window | text | Navigate Dashboards |  | chrome |
-| 9400 | 2 | first-window | text | Inspect Scope & Evidence |  | chrome |
-| 9422 | 2 | first-window | table | Review Exact Replay Readiness | BioETL Ops HTTP | data |
-| 9416 | 5 | first-window | table | Review Retention Compliance | BioETL Ops HTTP | data |
+| 1000 | 0 | first-window | text | (empty in JSON) |  | chrome |
+| 9400 | 2 | first-window | text | (empty in JSON) |  | chrome |
+| 9422 | 2 | first-window | stat | Review Exact Replay Readiness | BioETL Ops HTTP | data |
 | 9418 | 5 | first-window | table | Review Selected-Run Trust | BioETL Ops HTTP | data |
-| 9419 | 17 | first-window | row | Review Lineage Validation |  | chrome |
-| 902 | 18 | first-load | row | Inspect Replay & Checkpoint Evidence |  | chrome |
-| 9415 | 18 | first-load | table | Review Lineage Validation | BioETL Ops HTTP | data |
-| 901 | 19 | first-load | row | Inspect Manifest & Ledger Evidence |  | chrome |
-| 9413 | 19 | first-load | table | Review Checkpoint Validation | BioETL Ops HTTP | data |
-| 9414 | 20 | first-load | table | Review Manifest Validation | BioETL Ops HTTP | data |
-| 905 | 22 | first-load | row | Inspect Run Identity Evidence |  | chrome |
-| 9404 | 23 | first-load | table | Review Identity Anchors | BioETL Ops HTTP | data |
-| 9412 | 23 | first-load | row | Inspect Run Details |  | chrome |
-| 9402 | 24 | first-load | table | Review Run Summary | BioETL Ops HTTP | data |
-| 9420 | 24 | first-load | row | Inspect Complete Run Discovery |  | chrome |
-| 9421 | 25 | first-load | table | Inspect Latest Complete Run | BioETL Ops HTTP | data |
-| 9450 | 25 | first-load | row | Inspect Saved Run Evidence |  | chrome |
-| 9451 | 26 | first-load | table | Inspect Selected Run Domains | BioETL Ops HTTP | data |
-| 9407 | 35 | below | table | Inspect Identity Values | BioETL Ops HTTP | data |
-| 9403 | 36 | below | table | Review Processed Records | BioETL Ops HTTP | data |
-| 9452 | 38 | below | table | Inspect Selected Run Identity | BioETL Ops HTTP | data |
-| 9410 | 43 | below | text | Explain Missing Identity Data |  | chrome |
-| 9411 | 43 | below | text | Explain Missing Record Counts |  | chrome |
-| 9405 | 48 | below | table | Review Identity Gaps | BioETL Ops HTTP | data |
-| 9417 | 48 | below | table | Review Bounded Failure Reasons | BioETL Ops HTTP | data |
-| 9408 | 55 | below | table | Review Required Replay Anchors | BioETL Ops HTTP | data |
-| 9406 | 67 | below | table | Compare Checkpoint Anchors | BioETL Ops HTTP | data |
-| 9409 | 79 | below | table | Review Additional Forensic Anchors | BioETL Ops HTTP | data |
-| 139 | 91 | below | text | Review Uncovered Replay Signals |  | chrome |
+| 9416 | 5 | first-window | table | Review Retention Compliance | BioETL Ops HTTP | data |
+| 9419 | 14 | first-window | row | Review Lineage Validation |  | chrome |
+| 9415 | 15 | first-window | table | Review Lineage Validation | BioETL Ops HTTP | data |
+| 902 | 15 | first-window | row | Inspect Checkpoint and Replay Checks |  | chrome |
+| 9413 | 16 | first-window | table | Review Checkpoint Validation | BioETL Ops HTTP | data |
+| 901 | 16 | first-window | row | Inspect Manifest Validation |  | chrome |
+| 9414 | 17 | first-window | table | Review Manifest Validation | BioETL Ops HTTP | data |
+| 905 | 17 | first-window | row | Inspect Run Identity Evidence |  | chrome |
+| 9407 | 18 | first-load | table | Inspect Identity Values | BioETL Ops HTTP | data |
+| 9412 | 18 | first-load | row | Inspect Run Details |  | chrome |
+| 9402 | 19 | first-load | table | Review Run Summary | BioETL Ops HTTP | data |
+| 9420 | 19 | first-load | row | Inspect Complete Run Discovery |  | chrome |
+| 9421 | 20 | first-load | table | Inspect Latest Complete Run | BioETL Ops HTTP | data |
+| 9423 | 22 | first-load | table | Review Exact Replay Checks | BioETL Ops HTTP | data |
+| 9410 | 26 | first-load | text | Explain Missing Identity Data |  | chrome |
+| 9411 | 26 | first-load | text | Explain Missing Record Counts |  | chrome |
+| 9403 | 27 | first-load | table | Review Processed Records | BioETL Ops HTTP | data |
+
+Below-fold: walk the shipped JSON, not this fragment.
 
 ### 2. Overview `bioetl-overview-v2`
 - Question: What is the saved assessment of the selected Run ID?
@@ -144,54 +133,51 @@ HTML copy roles (`DASH-COPY-008`): `<b>` numbered dashboard name, `<em>` panel t
 - Next action token: Open Run Explorer
 - Basis tokens: SELECTED RUN; QUERY ERROR
 - Data: Saved HTTP evidence. CURRENT fleet chips must not replace 9603/9002. QUERY ERROR is not OK.
-- Snapshot panels: 10. Refresh `60s`, timezone `browser`.
+- Snapshot panels: 7. Refresh `60s`, timezone `browser`.
 
 | id | y | band | type | title | datasource | role |
 | ---: | ---: | --- | --- | --- | --- | --- |
-| 1000 | 0 | first-window | text | Navigate Dashboards |  | chrome |
-| 99 | 2 | first-window | text | Inspect Scope & Evidence |  | chrome |
+| 1000 | 0 | first-window | text | (empty in JSON) |  | chrome |
+| 99 | 2 | first-window | text | (empty in JSON) |  | chrome |
+| 9604 | 2 | first-window | stat | Review Overall Verdict | -- Dashboard -- | data |
+| 9603 | 5 | first-window | table | Review Selected Run Status | -- Dashboard -- | data |
 | 9002 | 5 | first-window | table | Review Run Domains | BioETL Ops HTTP | data |
-| 9603 | 5 | first-window | table | Review Selected Run Status | datasource | chrome |
-| 9602 | 11 | first-window | row | Inspect Run Context |  | chrome |
-| 9300 | 12 | first-window | table | Review Run Identity | BioETL Ops HTTP | data |
-| 9301 | 12 | first-window | table | Review Processed Records | BioETL Ops HTTP | data |
-| 9450 | 12 | first-window | row | Inspect Saved Run Evidence |  | chrome |
-| 9451 | 13 | first-window | table | Inspect Selected Run Domains | BioETL Ops HTTP | data |
-| 9452 | 25 | first-load | table | Inspect Selected Run Identity | BioETL Ops HTTP | data |
+| 9300 | 11 | first-window | table | Review Run Identity | BioETL Ops HTTP | data |
+| 9301 | 11 | first-window | table | Review Processed Records | BioETL Ops HTTP | data |
 
 ### 3. Pipeline Diagnostics `bioetl-runtime`
-- Question: What currently blocks runtime delivery?
-- Answer panel: 9401 Monitor Pipeline Status
-- Next action token: Open Runtime Blockers
-- Basis tokens: CURRENT; UNKNOWN
-- Data: Trust-gated current verdict. Missing 9401 in a snapshot is a DASH-FIT-003 gap, not a waiver. INCOMPLETE on telemetry gap.
+- Question: What is the saved runtime assessment of the selected Run ID?
+- Answer panel: 9998 Review Selected Run Status
+- Next action token: Open Run Explorer
+- Basis tokens: SELECTED RUN; QUERY ERROR
+- Data: Saved HTTP evidence for the selected Run ID. Missing 9998 is DASH-FIT-003. INCOMPLETE on missing required evidence; QUERY ERROR is not OK.
 - Snapshot panels: 10. Refresh `60s`, timezone `browser`.
 
 | id | y | band | type | title | datasource | role |
 | ---: | ---: | --- | --- | --- | --- | --- |
-| 1000 | 0 | first-window | text | Navigate Dashboards |  | chrome |
-| 9400 | 2 | first-window | text | Understand Pipeline Scope |  | chrome |
-| 9993 | 5 | first-window | row | Inspect Run Context |  | chrome |
-| 9998 | 6 | first-window | table | Review Selected Run Status | BioETL Ops HTTP | data |
-| 9402 | 10 | first-window | table | Inspect Pipeline Identity | BioETL Ops HTTP | data |
-| 9403 | 10 | first-window | table | Inspect Processed Records | BioETL Ops HTTP | data |
-| 9450 | 16 | first-window | row | Inspect Saved Run Evidence |  | chrome |
-| 9451 | 17 | first-window | table | Inspect Selected Run Domains | BioETL Ops HTTP | data |
-| 9452 | 25 | first-load | table | Inspect Selected Run Identity | BioETL Ops HTTP | data |
-| 9460 | 33 | below | table | Inspect Selected Run Stages | BioETL Ops HTTP | data |
+| 1000 | 0 | first-window | text | (empty in JSON) |  | chrome |
+| 9400 | 2 | first-window | text | (empty in JSON) |  | chrome |
+| 9998 | 2 | first-window | table | Review Selected Run Status | BioETL Ops HTTP | data |
+| 9402 | 7 | first-window | table | Inspect Pipeline Identity | BioETL Ops HTTP | data |
+| 9403 | 7 | first-window | table | Inspect Processed Records | BioETL Ops HTTP | data |
+| 9450 | 14 | first-window | row | Inspect Saved Run Evidence |  | chrome |
+| 9460 | 15 | first-window | table | Inspect Selected Run Stages | BioETL Ops HTTP | data |
+| 9451 | 23 | first-load | table | Inspect Selected Run Domains | BioETL Ops HTTP | data |
+
+Below-fold: walk the shipped JSON, not this fragment.
 
 ### 4. Provider Health `bioetl-provider-health-v2`
 - Question: Which provider is degraded/failing, and why?
 - Answer panel: 9461 Review Provider Check
-- Next action token: Open selected provider context
-- Basis tokens: CURRENT; SELECTED RUN
-- Data: Saved HTTP evidence for the selected provider context (selected-run redesign; legacy fleet matrix `9101` retired).
+- Next action token: Pipeline Diagnostics
+- Basis tokens: SELECTED RUN; QUERY ERROR
+- Data: Saved HTTP evidence for the selected provider context. Legacy `9101` is not this answer; it lives on Incident below the fold.
 - Snapshot panels: 6. Refresh `60s`, timezone `browser`.
 
 | id | y | band | type | title | datasource | role |
 | ---: | ---: | --- | --- | --- | --- | --- |
-| 1000 | 0 | first-window | text | Navigate Dashboards |  | chrome |
-| 9400 | 2 | first-window | text | Understand Evidence Scope |  | chrome |
+| 1000 | 0 | first-window | text | (empty in JSON) |  | chrome |
+| 9400 | 2 | first-window | text | (empty in JSON) |  | chrome |
 | 9461 | 2 | first-window | stat | Review Provider Check | BioETL Ops HTTP | data |
 | 9460 | 5 | first-window | table | Review Provider Evidence | BioETL Ops HTTP | data |
 | 9402 | 10 | first-window | table | Inspect Run Identity | BioETL Ops HTTP | data |
@@ -203,52 +189,37 @@ HTML copy roles (`DASH-COPY-008`): `<b>` numbered dashboard name, `<em>` panel t
 - Next action token: Open Run Explorer
 - Basis tokens: SELECTED RUN; QUERY ERROR
 - Data: Saved HTTP evidence. NOW / RUN / RANGE are not equal severity chips.
-- Snapshot panels: 8. Refresh `60s`, timezone `browser`.
+- Snapshot panels: 9. Refresh `60s`, timezone `browser`.
 
 | id | y | band | type | title | datasource | role |
 | ---: | ---: | --- | --- | --- | --- | --- |
-| 1000 | 0 | first-window | text | Navigate Dashboards |  | chrome |
-| 9400 | 2 | first-window | text | Understand Evidence Scope |  | chrome |
+| 1000 | 0 | first-window | text | (empty in JSON) |  | chrome |
+| 9400 | 2 | first-window | text | (empty in JSON) |  | chrome |
 | 9406 | 5 | first-window | table | Review Selected Run Status | BioETL Ops HTTP | data |
 | 9402 | 10 | first-window | table | Inspect Run Identity | BioETL Ops HTTP | data |
 | 9403 | 10 | first-window | table | Inspect Processed Records | BioETL Ops HTTP | data |
-| 9450 | 15 | first-window | row | Inspect Saved Run Evidence |  | chrome |
-| 9451 | 16 | first-window | table | Inspect Selected Run Domains | BioETL Ops HTTP | data |
-| 9452 | 28 | below | table | Inspect Selected Run Identity | BioETL Ops HTTP | data |
+| 9450 | 18 | first-load | row | Inspect Saved Run Evidence |  | chrome |
+| 9460 | 19 | first-load | table | Inspect Selected Run Stages | BioETL Ops HTTP | data |
+| 9451 | 27 | first-load | table | Inspect Selected Run Domains | BioETL Ops HTTP | data |
+
+Below-fold: walk the shipped JSON, not this fragment.
 
 ### 6. Incident Workspace `bioetl-incident-v1`
 - Question: What is the highest-confidence active suspect?
 - Answer panel: 2010 Inspect Ranked Suspects
 - Next action token: Open Pipeline Diagnostics
-- Basis tokens: TIME RANGE; VALID_EMPTY
+- Basis tokens: TIME RANGE; VALID EMPTY
 - Data: Suspects are GLOBAL. VALID_EMPTY is not a healthy fleet. Scope status palette is OK/WARN/CRIT/UNKNOWN. CRIT is rule urgency, not confirmed cause.
-- Snapshot panels: 25. Refresh `60s`, timezone `browser`.
+- Snapshot panels: 100. Refresh `60s`, timezone `browser`.
 
 | id | y | band | type | title | datasource | role |
 | ---: | ---: | --- | --- | --- | --- | --- |
-| 1000 | 0 | first-window | text | Navigate Dashboards |  | chrome |
-| 9400 | 2 | first-window | text | Understand Incident Scope |  | chrome |
+| 1000 | 0 | first-window | text | (empty in JSON) |  | chrome |
+| 9400 | 2 | first-window | text | (empty in JSON) |  | chrome |
 | 9401 | 2 | first-window | stat | Monitor Scope Status | prometheus | data |
-| 2001 | 5 | first-window | text | Start Incident Triage |  | chrome |
+| 2001 | 5 | first-window | text | (empty in JSON) |  | chrome |
 | 2010 | 7 | first-window | table | Inspect Ranked Suspects | prometheus | data |
 | 2005 | 12 | first-window | table | Monitor Global Alerts | prometheus | data |
 | 2020 | 17 | first-window | row | Review Alert Evidence |  | chrome |
-| 2006 | 18 | first-load | state-timeline | Track Alert State History | prometheus | data |
-| 2099 | 18 | first-load | row | Domain Suspect Details · GLOBAL / CURRENT |  | chrome |
-| 2002 | 19 | first-load | table | Inspect Runtime Suspects | prometheus | data |
-| 2100 | 19 | first-load | row | Inspect Selected Run Summary |  | chrome |
-| 2101 | 20 | first-load | table | Review Selected Run Status | BioETL Ops HTTP | data |
-| 32010 | 20 | first-load | row | Browse Global Suspects |  | chrome |
-| 22010 | 21 | first-load | table | Inspect Global Suspects (Full) | datasource | chrome |
-| 32005 | 21 | first-load | row | Browse Global Alerts |  | chrome |
-| 9450 | 22 | first-load | row | Inspect Saved Run Evidence |  | chrome |
-| 22005 | 22 | first-load | table | Monitor Global Alerts (Full) | datasource | chrome |
-| 9451 | 23 | first-load | table | Inspect Selected Run Domains | BioETL Ops HTTP | data |
-| 9700 | 23 | first-load | row | Inspect Current Workflow Evidence |  | chrome |
-| 9701 | 24 | first-load | table | Review Current Workflow Evidence | prometheus | data |
-| 2003 | 26 | first-load | table | Inspect Provider Suspects | prometheus | data |
-| 2004 | 30 | below | table | Inspect DQ Suspects | prometheus | data |
-| 2007 | 32 | below | text | Assess Impact & Confidence |  | chrome |
-| 9452 | 35 | below | table | Inspect Selected Run Identity | BioETL Ops HTTP | data |
-| 22011 | 37 | below | table | Inspect Global Signal Measurements | prometheus | data |
 
+Below-fold: walk the shipped JSON, not this fragment.

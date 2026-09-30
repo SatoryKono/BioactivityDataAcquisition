@@ -25,6 +25,6 @@ Deprecated prompts have no workflow: `prompt.audit.cyclic-pack` and
 | `prompt.audit.cycle` | `library/audit/cycle.md` | `.muse/workflows/audit/audit-cycle.js` | `DOMAIN, SCOPE, MODE, CYCLE_COUNT, AUDIT_MODE, REQUIRE_GH_TRACKING, REPO, BASE, WORK_BRANCH, LANGUAGE` |
 | `prompt.audit.orchestrator` | `library/audit/orchestrator.md` | `.muse/workflows/audit/orchestrator.js` | `N, SCOPE, AUDIT_PROMPT_SOURCE, MODE, ALLOW_*, MAX_ISSUES_PER_ITERATION, BASE_BRANCH, REPO, LANGUAGE` |
 | `prompt.architecture.cycle` | `library/audit/architecture.md` | `.muse/workflows/audit/cyclic-audit.js` | `CYCLE_KIND=architecture, N=10, SCOPE, MODE, LAYERS, SCORE_SOURCE, ALLOW_*, LANGUAGE` |
-| `prompt.observability.dashboard-audit-cycle` | `library/audit/dashboard.md` | `.muse/workflows/audit/cyclic-audit.js` | `CYCLE_KIND=dashboard, N=20, SCOPE, CONTOURS, VIEWPORT, THEME, ALLOW_*, LANGUAGE` |
+| `prompt.observability.dashboard-audit-cycle` | `library/audit/dashboard.md` | `.muse/workflows/audit/cyclic-audit.js` | `CYCLE_KIND=dashboard, N=1, SCOPE, CONTOURS, VIEWPORT, THEME, ALLOW_*, LANGUAGE` |
 | `prompt.audit.sequential-run` | `library/audit/sequential-run.md` | `.muse/workflows/audit/cyclic-audit.js` | `CYCLE_KIND=sequential, N, SCOPE, DEPTH, MONITORING, ALLOW_*, MAX_ISSUES_PER_STEP, LANGUAGE` |
 | `prompt.observability.sequential-run` | `library/audit/observability-sequential.md` | `.muse/workflows/audit/cyclic-audit.js` | `CYCLE_KIND=observability-sequential, SCOPE, MONITORING, ALLOW_*, MAX_ISSUES_PER_STEP, LANGUAGE` |

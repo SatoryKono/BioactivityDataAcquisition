@@ -254,7 +254,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | `bioetl-provider-health-v2` | `Review Provider Check` (`9461`) | saved HTTP evidence for the selected provider context |
 | `bioetl-dq-v2` | `Review Selected Run Status` (`9406`) | saved HTTP evidence for the selected Run ID |
 | `bioetl-incident-v1` | `Inspect Ranked Suspects` (`2010`) | highest-confidence suspect matrix |
-| `bioetl-run-explorer-v1` | `Inspect Recent Runs` (`3010`) | Browse/select the exact run. Identity and processed records live in collapsed `Selected Run Details` (`3022`/`3023`). |
+| `bioetl-run-explorer-v1` | `Inspect Recent Runs` (`3010`) | Browse/select the exact run via picker `3010` only. Identity and processed records are on destination dashboards, not this UID. |
 
 ## 8. Verification contract
 

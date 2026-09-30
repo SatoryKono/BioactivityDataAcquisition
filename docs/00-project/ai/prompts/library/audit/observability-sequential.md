@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.sequential-run
-version: 1.2.1
+version: 1.2.2
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -135,8 +135,7 @@ master vs specialists; BI-V/L/D vs grafana-audit; cycle (step 7) не повто
 A. Прочитать карточку + includes. Read-only карточка не правит JSON во время аудита.
 B. Dedupe по ledger + `gh issue list --state all` + open PRs.
 C. **ISSUE GATE** только если нет native create
-   (`dashboard-panel-audit` при `REQUIRE_GH_TRACKING=true`,
-   `dashboard-audit-cycle` при `ALLOW_ISSUE_WRITE=true`).
+   (`dashboard-audit-cycle` при `ALLOW_ISSUE_WRITE=true`, step 7).
    Иначе ≤ `MAX_ISSUES_PER_STEP` на PROVEN P0–P2 (P3 — только если блокирует роль).
 D. **CLOSEOUT GATE** только если нет native close. Fix на `WORK_BRANCH`,
    не дублируя чужой open PR. `ALLOW_MERGE=false` по умолчанию.
@@ -152,8 +151,8 @@ F. В ledger обязателен исход шага, даже `issues=0`.
 | 2 | `grafana-audit.visual` | wrapper |
 | 3 | `grafana-audit.layout` | wrapper |
 | 4 | `grafana-audit.data-integrity` | live query только при `MONITORING=true` |
-| 5 | `bi-dashboard-acceptance` | `DEPTH=detailed` если `MONITORING=false` |
-| 6 | `dashboard-panel-audit` | native 3–5; `CYCLE_COUNT=1` |
+| 5 | SKIP | BI kit archived; visual/layout/data covered by steps 2–4 |
+| 6 | SKIP | panel-audit archived; native issues in step 7 when `ALLOW_ISSUE_WRITE=true` |
 | 7 | `dashboard-audit-cycle` | `N=1`, `CONTOURS=density-area,density-scalar,fill,pipeline,fit` |
 | 8 | `grafana-audit.regression` | только если есть candidate ≠ BASE |
 | 9 | Final sweep | все issue# из ledger |
@@ -169,10 +168,11 @@ python -m scripts.engineering.qa report-dashboard-scalar-density --check
 ```
 
 `check-dashboard-visual-semantics` PASS ≠ нет visual-дефектов.
-Не запускать `prompt.audit.cycle.dashboards` вторым полным проходом на том же SHA.
+Не запускать `prompt.audit.cycle` + overlay `dashboards` вторым полным проходом на том же SHA.
 
 Focused/manual (вне шагов 1–8, не второй grafana-six):
-`prompt.observability.dashboard-manual-validation` — DASH-REFLOW-001,
+Нет active manual card; live FIT/RENDER/reflow при `MONITORING=true`
+выполнять в master/visual/cycle: DASH-REFLOW-001,
 computed `DASH-TYPOGRAPHY-001`, live `DASH-FIT-004`, `DASH-RENDER-001`,
 operator `DASH-FIRST-001`, UI `DASH-STATE-002`, contrast `DASH-COLOR-001`.
 При `MONITORING=false` live-строки = `Not Verifiable`. Не reopen `#8986`.
