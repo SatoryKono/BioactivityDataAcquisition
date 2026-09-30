@@ -1268,7 +1268,7 @@
         "h": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK. Valid-empty evidence stays VALID EMPTY. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK. Valid-empty evidence stays VALID EMPTY. Request failure is QUERY ERROR. Backend unavailable is QUERY ERROR.",
       "options": {
         "showHeader": true,
         "cellHeight": "sm",
