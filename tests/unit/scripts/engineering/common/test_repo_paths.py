@@ -15,15 +15,18 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from scripts.engineering.common.repo_paths import (
     REPO_ROOT,
     argparse_repo_path,
     confined_io_path,
     ensure_path_within_root,
     ensure_repo_path,
+    open_confined,
+    read_text_confined,
+    read_text_confined_or_none,
     rebuild_confined_path,
     resolve_cli_path,
+    write_text_confined,
 )
 
 pytestmark = pytest.mark.unit
@@ -134,3 +137,70 @@ def test_confined_io_path_allows_external_absolute_under_custom_root(
     target.write_text("{}", encoding="utf-8")
     resolved = confined_io_path(target, root=tmp_path, allow_external_absolute=True)
     assert resolved == target.resolve()
+
+
+def test_read_text_confined_reads_file_under_root(tmp_path: Path) -> None:
+    target = tmp_path / "nested" / "input.txt"
+    target.parent.mkdir(parents=True)
+    target.write_text("payload", encoding="utf-8")
+    assert read_text_confined(target, root=tmp_path) == "payload"
+
+
+def test_read_text_confined_rejects_traversal(tmp_path: Path) -> None:
+    outside = tmp_path.parent / "outside.txt"
+    outside.write_text("x", encoding="utf-8")
+    with pytest.raises(ValueError, match="refusing path outside"):
+        read_text_confined(tmp_path / ".." / "outside.txt", root=tmp_path)
+
+
+def test_read_text_confined_or_none_returns_none_for_missing(
+    tmp_path: Path,
+) -> None:
+    missing = tmp_path / "missing.txt"
+    assert read_text_confined_or_none(missing, root=tmp_path) is None
+
+
+def test_read_text_confined_or_none_reads_existing(tmp_path: Path) -> None:
+    target = tmp_path / "present.txt"
+    target.write_text("{}", encoding="utf-8")
+    assert read_text_confined_or_none(target, root=tmp_path) == "{}"
+
+
+def test_write_text_confined_writes_under_root(tmp_path: Path) -> None:
+    target = tmp_path / "deep" / "dir" / "out.txt"
+    written = write_text_confined(target, "content", root=tmp_path)
+    assert written == target.resolve()
+    assert target.read_text(encoding="utf-8") == "content"
+
+
+def test_write_text_confined_rejects_escape_without_writing(tmp_path: Path) -> None:
+    outside = tmp_path.parent / "escape-write.txt"
+    with pytest.raises(ValueError, match="refusing path outside"):
+        write_text_confined(tmp_path / ".." / "escape-write.txt", "x", root=tmp_path)
+    assert not outside.exists()
+
+
+def test_write_text_confined_allows_external_absolute(tmp_path: Path) -> None:
+    target = tmp_path / "external-out.txt"
+    written = write_text_confined(
+        target, "ok", root=REPO_ROOT, allow_external_absolute=True
+    )
+    assert written.read_text(encoding="utf-8") == "ok"
+
+
+def test_open_confined_reads_csv_rows(tmp_path: Path) -> None:
+    import csv
+
+    target = tmp_path / "rows.csv"
+    target.write_text("a,b\n1,2\n", encoding="utf-8")
+    with open_confined(
+        target, "r", root=tmp_path, encoding="utf-8", newline=""
+    ) as handle:
+        assert list(csv.DictReader(handle)) == [{"a": "1", "b": "2"}]
+
+
+def test_open_confined_rejects_traversal(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="refusing path outside"):
+        open_confined(
+            tmp_path / ".." / "nope.txt", "r", root=tmp_path, encoding="utf-8"
+        )

@@ -62,13 +62,11 @@ class BenchmarkDegradation:
 
 
 def _load_budgets(path: Path, *, root: Path | None = None) -> dict[str, HotspotBudget]:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import confined_io_path
+    from scripts.engineering.common.repo_paths import read_text_confined
 
-        path = confined_io_path(path, root=root, allow_external_absolute=True)
     payload = json.loads(
-        path.read_text(encoding="utf-8")
-    )  # NOSONAR - confined_io_path rebuilt under root
+        read_text_confined(path, root=root, allow_external_absolute=True)
+    )
     raw_map: dict[str, Any] = payload.get("benchmarks", {})
     return {
         key: HotspotBudget(
@@ -86,17 +84,14 @@ def _load_budgets(path: Path, *, root: Path | None = None) -> dict[str, HotspotB
 def _load_observations(
     path: Path, *, root: Path | None = None
 ) -> dict[str, list[HotspotObservation]]:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import confined_io_path
+    from scripts.engineering.common.repo_paths import read_text_confined_or_none
 
-        path = confined_io_path(path, root=root, allow_external_absolute=True)
-    if not path.exists():
+    content = read_text_confined_or_none(path, root=root, allow_external_absolute=True)
+    if content is None:
         return {}
 
     grouped: dict[str, list[HotspotObservation]] = {}
-    for line in path.read_text(
-        encoding="utf-8"
-    ).splitlines():  # NOSONAR - confined_io_path rebuilt under root
+    for line in content.splitlines():
         payload = line.strip()
         if not payload:
             continue
@@ -299,33 +294,28 @@ def _write_json_report(
     window_size: int,
     root: Path | None = None,
 ) -> None:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import confined_io_path
+    from scripts.engineering.common.repo_paths import write_text_confined
 
-        path = confined_io_path(path, root=root, allow_external_absolute=True)
     payload = {
         "window_size": window_size,
         "summary": summary,
         "benchmarks": [asdict(item) for item in report],
     }
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(payload, ensure_ascii=True, indent=2) + "\n", "utf-8"
-    )  # NOSONAR - confined_io_path rebuilt under root
+    write_text_confined(
+        path,
+        json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
+        root=root,
+        allow_external_absolute=True,
+    )
 
 
 def _write_markdown_report(
     path: Path, markdown: str, *, root: Path | None = None
 ) -> None:
     """Write markdown degradation report."""
-    if root is not None:
-        from scripts.engineering.common.repo_paths import confined_io_path
+    from scripts.engineering.common.repo_paths import write_text_confined
 
-        path = confined_io_path(path, root=root, allow_external_absolute=True)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        markdown, encoding="utf-8"
-    )  # NOSONAR - confined_io_path rebuilt under root
+    write_text_confined(path, markdown, root=root, allow_external_absolute=True)
 
 
 def main() -> int:
