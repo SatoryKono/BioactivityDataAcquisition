@@ -234,22 +234,22 @@
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 216,
+      "line": 191,
       "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "StageAccountingSnapshotsMixin._removals_for_bucket"
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 233,
-      "path": "src/bioetl/domain/run_reports/reason_catalog.py",
+      "line": 238,
+      "path": "src/bioetl/domain/run_reports/reason_catalog_data.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "ReasonCatalog.family_for"
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 236,
-      "path": "src/bioetl/domain/run_reports/reason_catalog.py",
+      "line": 241,
+      "path": "src/bioetl/domain/run_reports/reason_catalog_data.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "ReasonCatalog.default_outcome_for"
     },
@@ -835,32 +835,17 @@
       "symbol": "<module>"
     },
     {
-      "kind": "import:pandera",
-      "line": 23,
-      "path": "src/bioetl/domain/schemas/validators.py",
-      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
+      "kind": "attribute_call:resolve",
+      "line": 19,
+      "path": "src/bioetl/domain/serialization/__init__.py",
+      "reason": "Resolves the sibling serialization codec path at import time.",
       "symbol": "<module>"
     }
   ],
   "domain_root": "src/bioetl/domain",
   "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",
-  "scanned_file_count": 624,
+  "scanned_file_count": 628,
   "schema_version": 1,
-  "violation_count": 2,
-  "violations": [
-    {
-      "kind": "import:socket",
-      "line": 11,
-      "path": "src/bioetl/domain/exceptions/network/connection.py",
-      "reason": "network socket",
-      "symbol": "<module>"
-    },
-    {
-      "kind": "attribute_call:resolve",
-      "line": 19,
-      "path": "src/bioetl/domain/serialization/__init__.py",
-      "reason": "filesystem resolution",
-      "symbol": "<module>"
-    }
-  ]
+  "violation_count": 0,
+  "violations": []
 }
