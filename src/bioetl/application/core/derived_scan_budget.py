@@ -76,6 +76,67 @@ def iter_derived_source[T](
     )
 
 
+async def _cancel_scan_pending[T](pending: asyncio.Task[T] | None) -> None:
+    """Cancel one in-flight upstream read without surfacing cancellation."""
+    if pending is None:
+        return
+    pending.cancel()
+    try:
+        await pending
+    except (asyncio.CancelledError, StopAsyncIteration, TimeoutError):
+        pass
+
+
+def _raise_scan_timeout(exc: TimeoutError) -> None:
+    """Fail closed when a second hang window expires on the same wait."""
+    raise InvalidStateError(
+        "derived_scan_budget_exceeded: upstream time budget exhausted; "
+        "narrow the input selection before retrying.",
+        current_state="incomplete_scan",
+    ) from exc
+
+
+def _raise_scan_budget_exceeded(max_records: int) -> None:
+    """Fail closed once the record ceiling is passed."""
+    raise InvalidStateError(
+        f"derived_scan_budget_exceeded: scanned {max_records} source rows; "
+        "narrow the input selection before retrying.",
+        current_state="incomplete_scan",
+    )
+
+
+async def _resolve_scan_timeout[T](
+    *,
+    pending: asyncio.Task[T] | None,
+    hang_retries: int,
+    exc: TimeoutError,
+) -> int:
+    """Consume one hang window: retry once, then cancel and fail closed."""
+    if pending is not None and pending.done():
+        raise exc
+    if hang_retries > 0:
+        await _cancel_scan_pending(pending)
+        _raise_scan_timeout(exc)
+    return hang_retries + 1
+
+
+async def _close_scan[T](
+    pending: asyncio.Task[T] | None,
+    source: AsyncIterator[T],
+) -> None:
+    """Cancel an in-flight read and close the upstream iterator on every exit."""
+    if pending is not None and not pending.done():
+        await _cancel_scan_pending(pending)
+    close = getattr(source, "aclose", None)
+    if close is not None:
+        await close()
+
+
+async def _anext_source_record[T](source: AsyncIterator[T]) -> T:
+    """Re-wrap ``anext`` as a Coroutine so ``asyncio.create_task`` accepts it."""
+    return await anext(source)
+
+
 async def bounded_source_records[T](
     source: AsyncIterator[T],
     *,
@@ -104,7 +165,7 @@ async def bounded_source_records[T](
     try:
         while True:
             if pending is None:
-                pending = asyncio.create_task(anext(source))  # type: ignore[arg-type]
+                pending = asyncio.create_task(_anext_source_record(source))
             try:
                 record = await asyncio.wait_for(
                     asyncio.shield(pending),
@@ -114,42 +175,19 @@ async def bounded_source_records[T](
                 pending = None
                 return
             except TimeoutError as exc:
-                if pending is not None and pending.done():
-                    pending = None
-                    raise
-                if hang_retries == 0:
-                    hang_retries += 1
-                    continue
-                pending.cancel()
-                try:
-                    await pending
-                except (asyncio.CancelledError, StopAsyncIteration, TimeoutError):
-                    pass
-                pending = None
-                raise InvalidStateError(
-                    "derived_scan_budget_exceeded: upstream time budget exhausted; "
-                    "narrow the input selection before retrying.",
-                    current_state="incomplete_scan",
-                ) from exc
+                hang_retries = await _resolve_scan_timeout(
+                    pending=pending,
+                    hang_retries=hang_retries,
+                    exc=exc,
+                )
+                continue
             pending = None
             consumed += 1
             hang_retries = 0
             if consumed > max_records:
                 if stop_on_exhaustion:
                     return
-                raise InvalidStateError(
-                    f"derived_scan_budget_exceeded: scanned {max_records} source rows; "
-                    "narrow the input selection before retrying.",
-                    current_state="incomplete_scan",
-                )
+                _raise_scan_budget_exceeded(max_records)
             yield record
     finally:
-        if pending is not None and not pending.done():
-            pending.cancel()
-            try:
-                await pending
-            except (asyncio.CancelledError, StopAsyncIteration, TimeoutError):
-                pass
-        close = getattr(source, "aclose", None)
-        if close is not None:
-            await close()
+        await _close_scan(pending, source)

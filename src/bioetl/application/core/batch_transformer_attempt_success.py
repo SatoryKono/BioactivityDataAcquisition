@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from inspect import isawaitable
 from typing import TYPE_CHECKING, cast
 
@@ -84,27 +85,32 @@ def _build_gold_record(
     return gold_record, False, None
 
 
+def _outcome_dq_fields(outcome: object, disposition: object) -> list[str]:
+    """Collect field tokens contributed by one blocking DQ outcome."""
+    if getattr(outcome, "disposition", None) != disposition:
+        return []
+    tokens = [
+        token
+        for field in getattr(outcome, "affected_fields", ()) or ()
+        if (token := str(field).strip())
+    ]
+    if tokens:
+        return tokens
+    rule_id = str(getattr(outcome, "rule_id", "") or "")
+    parts = rule_id.split(".")
+    if len(parts) >= 3 and parts[0] == "field" and parts[1]:
+        return [parts[1]]
+    return []
+
+
 def _primary_dq_affected_field(
-    outcomes: list[object],
+    outcomes: Sequence[object],
     disposition: object,
 ) -> str | None:
     """Pick a deterministic field name from blocking DQ rule outcomes."""
     fields: set[str] = set()
     for outcome in outcomes:
-        if getattr(outcome, "disposition", None) != disposition:
-            continue
-        contributed = False
-        for field in getattr(outcome, "affected_fields", ()) or ():
-            token = str(field).strip()
-            if token:
-                fields.add(token)
-                contributed = True
-        if contributed:
-            continue
-        rule_id = str(getattr(outcome, "rule_id", "") or "")
-        parts = rule_id.split(".")
-        if len(parts) >= 3 and parts[0] == "field" and parts[1]:
-            fields.add(parts[1])
+        fields.update(_outcome_dq_fields(outcome, disposition))
     if not fields:
         return None
     return sorted(fields)[0]

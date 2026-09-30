@@ -46,19 +46,24 @@ class ReplayReadinessProjection(TypedDict):
     evidence_revision: str
 
 
+def _only_family_blocked(required: list[dict[str, str]]) -> bool:
+    """Return True when the replay family gate is the sole failing check."""
+    return any(
+        item["code"] == "exact_replay_family" and item["result"] == "fail"
+        for item in required
+    ) and not any(
+        item["result"] == "fail" and item["code"] != "exact_replay_family"
+        for item in required
+    )
+
+
 def _operator_verdict(
     checks: list[dict[str, str]],
     domain_verdict: ReplayReadinessVerdict,
 ) -> str:
     required = [item for item in checks if item["result"] != "n/a"]
     if any(item["result"] == "fail" for item in required):
-        if any(
-            item["code"] == "exact_replay_family" and item["result"] == "fail"
-            for item in required
-        ) and not any(
-            item["result"] == "fail" and item["code"] != "exact_replay_family"
-            for item in required
-        ):
+        if _only_family_blocked(required):
             return UNSUPPORTED
         return BLOCKED
     if any(item["result"] == "unknown" for item in required):
@@ -66,6 +71,56 @@ def _operator_verdict(
     if domain_verdict != ReplayReadinessVerdict.EXACT_REPLAY_READY:
         return UNSUPPORTED
     return READY
+
+
+def _resolve_domain_verdict(
+    identity: Mapping[str, object],
+    manifest: Mapping[str, object] | None,
+    checks: list[dict[str, str]],
+) -> ReplayReadinessVerdict:
+    """Resolve the domain replay verdict for the current blocking gaps."""
+    capability, _known = _capability(manifest or {})
+    blocking = tuple(
+        item["code"] for item in checks if item["result"] in {"fail", "unknown"}
+    )
+    return resolve_replay_readiness_verdict(
+        replay_capability=capability,
+        strict_requirement_requested=True,
+        strict_exact_replay_supported=capability
+        == ReplayCapability.EXACT_REPLAY_SUPPORTED,
+        blocking_gaps=blocking,
+        exact_replay_requested=True,
+        run_type=identity.get("run_type"),
+    )
+
+
+def _settle_operator_verdict(
+    verdict: str,
+    *,
+    checks: list[dict[str, str]],
+    inventory_present: bool,
+) -> str:
+    """Downgrade READY unless every applicable check passed with inventory."""
+    if verdict == READY and (
+        not inventory_present
+        or any(item["result"] != "pass" for item in checks if item["result"] != "n/a")
+    ):
+        return INSUFFICIENT
+    return verdict
+
+
+def _readiness_identity_fields(identity: Mapping[str, object]) -> dict[str, str]:
+    """Project run identity labels for one readiness projection."""
+    run_type = str(identity.get("run_type") or "")
+    replay_mode = "exact_replay" if identity.get("exact_replay") is True else run_type
+    return {
+        "run_id": str(identity.get("run_id") or ""),
+        "pipeline": str(
+            identity.get("pipeline_name") or identity.get("pipeline") or ""
+        ),
+        "run_type": run_type,
+        "replay_mode": replay_mode or "—",
+    }
 
 
 def project_selected_run_replay_readiness(
@@ -83,36 +138,16 @@ def project_selected_run_replay_readiness(
         *_manifest_checks(manifest),
         *_artifact_checks(artifact_probes, inventory_present=inventory_present),
     ]
-    capability, _known = _capability(manifest or {})
-    blocking = tuple(
-        item["code"] for item in checks if item["result"] in {"fail", "unknown"}
+    domain_verdict = _resolve_domain_verdict(identity, manifest, checks)
+    verdict = _settle_operator_verdict(
+        _operator_verdict(checks, domain_verdict),
+        checks=checks,
+        inventory_present=inventory_present,
     )
-    domain_verdict = resolve_replay_readiness_verdict(
-        replay_capability=capability,
-        strict_requirement_requested=True,
-        strict_exact_replay_supported=capability
-        == ReplayCapability.EXACT_REPLAY_SUPPORTED,
-        blocking_gaps=blocking,
-        exact_replay_requested=True,
-        run_type=identity.get("run_type"),
-    )
-    verdict = _operator_verdict(checks, domain_verdict)
-    if verdict == READY and (
-        not inventory_present
-        or any(item["result"] != "pass" for item in checks if item["result"] != "n/a")
-    ):
-        verdict = INSUFFICIENT
     blockers = [item["code"] for item in checks if item["result"] == "fail"]
     unknown = [item["code"] for item in checks if item["result"] == "unknown"]
-    run_type = str(identity.get("run_type") or "")
-    replay_mode = "exact_replay" if identity.get("exact_replay") is True else run_type
     return {
-        "run_id": str(identity.get("run_id") or ""),
-        "pipeline": str(
-            identity.get("pipeline_name") or identity.get("pipeline") or ""
-        ),
-        "run_type": run_type,
-        "replay_mode": replay_mode or "—",
+        **_readiness_identity_fields(identity),
         "verdict": verdict,
         "domain_verdict": domain_verdict.value,
         "checks": checks,

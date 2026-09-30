@@ -370,7 +370,9 @@ def ensure_observability_backend_started(
             poll_seconds=poll_seconds,
             required_probe_paths=required_probe_paths,
         ),
-        runtime_hooks=cast("_ObservabilityBackendRuntimeHooks", runtime_hooks),
+        runtime_hooks=cast(
+            "_ObservabilityBackendRuntimeHooks", cast("object", runtime_hooks)
+        ),
         failure_handlers=_observability_backend_failure_kwargs(),
         result_factory=ObservabilityBackendEnsureResult,
     )

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Literal
+from typing import Literal, cast
 
 from bioetl.domain.control_plane import ReplayCapability
 
@@ -227,7 +227,7 @@ def _artifact_checks(
     for index, probe in enumerate(probes):
         raw_result = str(probe.get("result") or "unknown")
         result: CheckResult = (
-            raw_result
+            cast("CheckResult", raw_result)
             if raw_result in {"pass", "fail", "unknown", "n/a"}
             else "unknown"
         )
