@@ -49,15 +49,15 @@ def check_null_rates_stats(df: pl.DataFrame) -> tuple[list[NullRateResult], floa
         Columns with null rate above 50% receive WARN status.
     """
     results: list[NullRateResult] = []
-    total_nulls = 0
-    total_cells = 0
     row_count = len(df)
 
     null_counts = df.null_count().row(0, named=True) if df.columns else {}
+    # ⚡ Bolt: compute aggregates outside the loop to avoid Python execution overhead
+    total_nulls = sum(null_counts.values()) if null_counts else 0
+    total_cells = row_count * len(null_counts)
+
     for col, null_count in null_counts.items():
         null_rate = null_count / row_count if row_count > 0 else 0.0
-        total_nulls += null_count
-        total_cells += row_count
         status = DQCheckStatus.WARN if null_rate > 0.5 else DQCheckStatus.PASS
         results.append(
             NullRateResult(
