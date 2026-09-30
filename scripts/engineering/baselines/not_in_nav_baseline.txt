@@ -5,6 +5,7 @@
 00-project/ai/agents/agents/py-debug-bot.md
 00-project/ai/agents/agents/py-plan-bot.md
 00-project/ai/agents/guides/GOVERNANCE_ARTIFACT_REFRESH.md
+00-project/ai/agents/guides/KIMI.md
 00-project/ai/agents/guides/MEMORY_USAGE.md
 00-project/ai/agents/guides/MUSE.md
 00-project/ai/agents/orchestration/ORCHESTRATION.md
@@ -108,6 +109,11 @@
 00-project/ai/skills/local/research-workflow/references/evidence-decision-contract.md
 00-project/ai/skills/local/research-workflow/references/evidence-object-schema.md
 00-project/ai/skills/local/research-workflow/references/id-generation-rules.md
+00-project/ai/skills/local/research-workflow/references/phases/decisions.md
+00-project/ai/skills/local/research-workflow/references/phases/evidence.md
+00-project/ai/skills/local/research-workflow/references/phases/initialize.md
+00-project/ai/skills/local/research-workflow/references/phases/specs.md
+00-project/ai/skills/local/research-workflow/references/phases/synthesis.md
 00-project/ai/skills/local/research-workflow/references/pillar-definitions.md
 00-project/ai/skills/local/research-workflow/references/prd-template.md
 00-project/ai/skills/local/research-workflow/references/research-protocols.md
@@ -172,6 +178,7 @@
 03-guides/development/coderabbit-local-reviews.md
 03-guides/development/mistral-vibe-wsl2-setup.md
 03-guides/development/pycharm-baseline.md
+03-guides/freshness-hold-2026-09-25.md
 03-guides/github-setup-plan.md
 03-guides/github-workflow-diagrams.md
 03-guides/script-management/README.md
@@ -235,10 +242,7 @@
 05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md
 DOCKER_QUICKSTART.md
 DOCKER_SETUP.md
-devin-optimization-analysis.md
-docs-folder-analysis.md
 filters/README.md
 filters/inventory-baseline.md
-reports-migration-analysis.md
 security/export-policy.md
 security/rbac-matrix.md

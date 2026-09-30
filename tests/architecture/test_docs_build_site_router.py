@@ -18,7 +18,6 @@ from pathlib import Path
 import pytest
 import yaml
 
-
 pytestmark = pytest.mark.architecture
 
 
@@ -55,7 +54,10 @@ def test_build_site_router_targets_importable_backend() -> None:
 
 def test_strict_docs_build_enforces_heading_anchors() -> None:
     root = Path(__file__).resolve().parents[2]
-    config = yaml.safe_load((root / "mkdocs.yml").read_text(encoding="utf-8"))
+    config = yaml.load(
+        (root / "mkdocs.yml").read_text(encoding="utf-8"),
+        Loader=yaml.BaseLoader,
+    )
 
     assert config["validation"]["links"]["anchors"] in {"warn", "error"}
     assert "attr_list" in config["markdown_extensions"]
