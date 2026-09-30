@@ -14,7 +14,7 @@ description: "Execute the BioETL py-audit-bot profile for baseline, final, targe
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Primary profile: `../../agents/py-audit-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
-- Shared wrapper contract: [references/wrapper-contract.md](references/wrapper-contract.md)
+- Shared wrapper contract: [references/wrapper-contract.md](./references/wrapper-contract.md)
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
 - Role memory: `../../../docs/00-project/ai/memory/memory-py-audit-bot.md`
