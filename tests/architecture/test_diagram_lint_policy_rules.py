@@ -68,6 +68,66 @@ def test_colour_rule_flags_deprecated_palette() -> None:
     assert "COLOUR-001" in rules
 
 
+_LEGACY_13G_UNLABELED_ADAPTERS = [
+    "graph LR",
+    "%% keep-orphan: FDSP",
+    'subgraph Infrastructure["Infrastructure Layer"]',
+    '        CA["ChemblAdapter"]:::size-sm',
+    "end",
+    "DSP --- CA & PA & UA & CRA & OAA & SSA & PCA",
+]
+
+
+def test_graph_003_flags_unlabeled_ids_on_edges() -> None:
+    """GRAPH-003 locks the 13g unlabeled-adapter regression (#11785 / #9730)."""
+    lint = _load_lint_module()
+    issues = lint.check_undeclared_edge_nodes(
+        Path(
+            "docs/02-architecture/diagrams/architecture/13g-port-contracts-data-sources.mmd"
+        ),
+        _LEGACY_13G_UNLABELED_ADAPTERS,
+    )
+    assert [issue.rule for issue in issues] == ["GRAPH-003"]
+    message = issues[0].message
+    for node_id in ("PA", "UA", "CRA", "OAA", "SSA", "PCA"):
+        assert node_id in message
+
+
+def test_graph_003_accepts_inline_edge_labels() -> None:
+    lint = _load_lint_module()
+    issues = lint.check_undeclared_edge_nodes(
+        Path("docs/02-architecture/diagrams/architecture/demo.mmd"),
+        [
+            "flowchart LR",
+            'DSP["DataSourcePort"] --- PA["PubMedAdapter"]',
+        ],
+    )
+    assert issues == []
+
+
+def test_graph_003_keep_undeclared_exempts_bare_ids() -> None:
+    lint = _load_lint_module()
+    issues = lint.check_undeclared_edge_nodes(
+        Path("docs/02-architecture/diagrams/architecture/demo.mmd"),
+        [
+            "flowchart LR",
+            "%% keep-undeclared: PA",
+            'DSP["DataSourcePort"] --- PA',
+        ],
+    )
+    assert issues == []
+
+
+def test_current_13g_has_labeled_provider_adapters() -> None:
+    lint = _load_lint_module()
+    path = Path(
+        "docs/02-architecture/diagrams/architecture/13g-port-contracts-data-sources.mmd"
+    )
+    lines = path.read_text(encoding="utf-8").splitlines()
+    issues = lint.check_undeclared_edge_nodes(path, lines)
+    assert issues == []
+
+
 def test_emoji_rule_flags_subgraph_prefix_icons() -> None:
     """COLOUR-002 must reject emoji prefixes in subgraph labels."""
     lint = _load_lint_module()

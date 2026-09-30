@@ -137,6 +137,17 @@ _NODE_SHAPE_RE = re.compile(
 
 # keep-orphan annotation
 _KEEP_ORPHAN_RE = re.compile(r"%%\s*keep-orphan\s*:\s*(.*)")
+_KEEP_UNDECLARED_RE = re.compile(r"%%\s*keep-undeclared\s*:\s*(.*)")
+
+# Labeled node token anywhere on a line: ID["label"], ID(label), ID{{label}}, …
+_LABELED_NODE_RE = re.compile(
+    rf"(?<![\w])({_NID})\s*(?:"
+    r"\[{1,2}[^\]]+\]"
+    r"|\({1,2}[^)]+\)"
+    r"|\{{1,2}[^}]+\}"
+    r"|\x3e[^\]]+\]"
+    r")"
+)
 
 # Sequence: message line  A ->> B: msg  or  A --> B
 _SEQ_MESSAGE_RE = re.compile(
@@ -255,14 +266,60 @@ def detect_diagram_type(lines: list[str]) -> str:
 
 def parse_keep_orphans(lines: list[str]) -> set[str]:
     """Return set of node IDs explicitly exempted from orphan detection."""
+    return _parse_keep_annotation(lines, _KEEP_ORPHAN_RE)
+
+
+def parse_keep_undeclared(lines: list[str]) -> set[str]:
+    """Return node IDs exempted from GRAPH-003 undeclared-edge detection."""
+    return _parse_keep_annotation(lines, _KEEP_UNDECLARED_RE)
+
+
+def _parse_keep_annotation(lines: list[str], pattern: re.Pattern[str]) -> set[str]:
     kept: set[str] = set()
     for ln in lines:
-        m = _KEEP_ORPHAN_RE.search(ln)
-        if m:
-            for nid in re.split(NODE_ID_SPLIT_PATTERN, m.group(1).strip()):
+        match = pattern.search(ln)
+        if match:
+            for nid in re.split(NODE_ID_SPLIT_PATTERN, match.group(1).strip()):
                 if nid:
                     kept.add(nid)
     return kept
+
+
+def parse_labeled_node_ids(lines: list[str]) -> set[str]:
+    """Return node IDs that carry a visible shape/label token in the file."""
+    labeled: set[str] = set()
+    for raw in lines:
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("%%"):
+            continue
+        if _is_skippable_flowchart_line(stripped):
+            continue
+        if re.match(r"^subgraph\b", stripped, re.IGNORECASE):
+            continue
+        if _STYLE_DIRECTIVE_RE.match(stripped):
+            continue
+        labeled.update(_LABELED_NODE_RE.findall(stripped))
+    return labeled
+
+
+def parse_undeclared_edge_ids(lines: list[str]) -> set[str]:
+    """Return edge-referenced flowchart IDs that have no labeled declaration."""
+    keep = parse_keep_undeclared(lines)
+    labeled = parse_labeled_node_ids(lines)
+    connected: set[str] = set()
+    for raw in lines:
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("%%"):
+            continue
+        if _is_skippable_flowchart_line(stripped):
+            continue
+        _consume_flowchart_edge_line(raw, connected)
+    subgraph_names: set[str] = set()
+    for raw in lines:
+        match = _SUBGRAPH_RE.match(raw.strip())
+        if match:
+            subgraph_names.add(match.group(1))
+    return (connected - labeled - keep) - subgraph_names
 
 
 # ── Flowchart parser ──────────────────────────────────────────────────────────

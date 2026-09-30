@@ -124,6 +124,7 @@ Otherwise use generic Mermaid mode.
 
 - If source `.mmd/.mermaid` changed, ensure rendered `svg/png` outputs are updated in commit.
 - Resolve or explicitly justify orphan nodes (`GRAPH-001`) using `%% keep-orphan: ...` only when intentional.
+- Edge-referenced flowchart IDs must have a labeled declaration (`GRAPH-003`); use `%% keep-undeclared: ...` only with a reason.
 
 ## Output Rules
 
