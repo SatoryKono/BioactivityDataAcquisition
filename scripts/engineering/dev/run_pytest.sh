@@ -566,9 +566,11 @@ if [[ "${BIOETL_SKIP_PREFLIGHT:-0}" != "1" && "${BIOETL_SKIP_SETUP_PLUGINS:-0}" 
     bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only
 fi
 
-if [[ -f "$PYTEST_RUNTIME_ENV_FILE" ]]; then
+if [[ -f "$PYTEST_RUNTIME_ENV_FILE" && -z "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]]; then
     # setup_plugins.sh may provision a temporary pytest runtime under /tmp when
-    # the configured WSL venv is missing pytest or is not writable.
+    # the configured WSL venv is missing pytest or is not writable. An explicit
+    # caller-provided BIOETL_PYTEST_RUNTIME_PYTHON must win over the generated
+    # file, which can hold a stale WSL-only path.
     # shellcheck disable=SC1090
     source "$PYTEST_RUNTIME_ENV_FILE"
 fi

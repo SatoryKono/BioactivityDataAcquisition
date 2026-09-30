@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -170,9 +171,47 @@ def _bash_safe_path(path: Path) -> str:
         return resolved.as_posix()
 
 
+def _windows_bash() -> str:
+    """Resolve a Windows Git-bash for shard runners.
+
+    Bare ``bash`` resolves through the Windows PATH inside ``subprocess``,
+    where ``C:\\Windows\\System32\\bash.exe`` (the WSL launcher) wins over Git
+    Bash. WSL does not inherit lane env vars (COVERAGE_FILE,
+    BIOETL_PYTEST_RUNTIME_PYTHON, skip flags), which drops coverage and sends
+    shards down the ``uv run`` fallback. Prefer an explicit override and Git's
+    own bin directories before PATH lookup.
+    """
+    override = os.environ.get("BIOETL_LANE_BASH")
+    candidates = [override] if override else []
+    git = shutil.which("git")
+    if git:
+        git_root = Path(git).resolve().parent.parent
+        candidates.extend(
+            str(git_root / name)
+            for name in ("bin/bash.exe", "usr/bin/bash.exe", "mingw64/bin/bash.exe")
+        )
+    program_files = os.environ.get("ProgramFiles", r"C:\Program Files")
+    candidates.extend(
+        str(Path(program_files) / suffix)
+        for suffix in (
+            Path("Git/bin/bash.exe"),
+            Path("Git/usr/bin/bash.exe"),
+            Path("Git/mingw64/bin/bash.exe"),
+        )
+    )
+    for candidate in candidates:
+        if (
+            candidate
+            and "system32" not in candidate.lower()
+            and Path(candidate).is_file()
+        ):
+            return candidate
+    return "bash"
+
+
 def _command(shard: Shard, junit: Path) -> list[str]:
     command = [
-        "bash",
+        _windows_bash(),
         "scripts/engineering/dev/run_pytest.sh",
         "--narrow",
         *shard.paths,
