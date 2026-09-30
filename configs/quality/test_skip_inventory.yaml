@@ -171,7 +171,7 @@ entries:
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 1
+    reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-09-30"
     rationale: Crossref live contract tests skip closed only when the endpoint is unreachable or rate-limited (HTTP 429); a received HTTP 5xx fails closed via pytest.fail (#11772).
@@ -181,7 +181,7 @@ entries:
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 1
+    reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-09-30"
     rationale: OpenAlex live contract tests skip closed only when the endpoint is unreachable or rate-limited (HTTP 429); a received HTTP 5xx fails closed via pytest.fail (#11772).
@@ -191,7 +191,7 @@ entries:
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 1
+    reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-09-30"
     rationale: PubChem live contract tests skip closed only when the endpoint is unreachable or rate-limited (HTTP 429); a received HTTP 5xx fails closed via pytest.fail (#11772).
@@ -201,7 +201,7 @@ entries:
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 1
+    reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-09-30"
     rationale:
@@ -213,7 +213,7 @@ entries:
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 1
+    reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-09-30"
     rationale: UniProt live contract tests skip closed only when the endpoint is unreachable or rate-limited (HTTP 429); a received HTTP 5xx fails closed via pytest.fail (#11772).
