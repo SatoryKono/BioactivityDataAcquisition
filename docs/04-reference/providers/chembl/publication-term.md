@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-09-30'
 
 ______________________________________________________________________
 
@@ -89,6 +89,12 @@ Identity payload сначала проходит тот же canonicalization se
 
 1. `mesh_terms` — массив MeSH-терминов (heading + qualifier)
 1. `keywords` — массив ключевых слов авторов
+
+Live ChEMBL `/document` не возвращает `mesh_terms` / `keywords`. Если оба поля
+пусты и у документа есть `pubmed_id`, composition-слой запрашивает PubMed
+`efetch` пакетом PMIDs и мапит `MeshHeading` / `Keyword` в ту же форму
+`mesh_terms` / `keywords`. Документы без `pubmed_id` остаются без терминов.
+`/document_term` не используется.
 
 ______________________________________________________________________
 

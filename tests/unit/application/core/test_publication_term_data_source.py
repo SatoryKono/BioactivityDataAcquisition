@@ -955,3 +955,84 @@ class TestPublicationTermGetSourceMetadata:
         result = wrapper.get_source_metadata()
 
         assert result is None
+
+
+class _RecordingEnricher:
+    """Test enricher that records batches and attaches one MeSH heading."""
+
+    def __init__(self) -> None:
+        self.calls: list[list[dict[str, object]]] = []
+
+    async def enrich_many(self, records):
+        self.calls.append([dict(record) for record in records])
+        enriched = []
+        for record in records:
+            attached = dict(record)
+            attached["mesh_terms"] = [
+                {
+                    "mesh_heading": "Acetylene",
+                    "mesh_id": "D000114",
+                    "mesh_qualifier": None,
+                }
+            ]
+            enriched.append(attached)
+        return enriched
+
+
+@pytest.mark.unit
+class TestPublicationTermPubmedEnricherHook:
+    """Optional PubMed payload enricher is used only when extract is empty."""
+
+    @pytest.mark.asyncio
+    async def test_enricher_attaches_mesh_when_pubmed_id_present(self):
+        source = MockDataSource(
+            documents=[
+                {
+                    "publication_id": "CHEMBL1137491",
+                    "pubmed_id": 17827018,
+                    "title": "Live ChEMBL document without mesh_terms",
+                }
+            ]
+        )
+        enricher = _RecordingEnricher()
+        wrapper = PublicationTermDataSource(
+            data_source=source,
+            term_payload_enricher=enricher,
+        )
+
+        terms = await _collect_async(wrapper.fetch("publication_term"))
+
+        assert len(enricher.calls) == 1
+        assert enricher.calls[0][0]["pubmed_id"] == 17827018
+        assert len(terms) == 1
+        assert terms[0]["term"] == "Acetylene"
+        assert terms[0]["term_type"] == "MESH_HEADING"
+        assert terms[0]["mesh_id"] == "D000114"
+
+    @pytest.mark.asyncio
+    async def test_enricher_not_called_without_pubmed_id(self):
+        source = MockDataSource(documents=[SAMPLE_DOCUMENT_NO_TERMS])
+        enricher = _RecordingEnricher()
+        wrapper = PublicationTermDataSource(
+            data_source=source,
+            term_payload_enricher=enricher,
+        )
+
+        terms = await _collect_async(wrapper.fetch("publication_term"))
+
+        assert enricher.calls == []
+        assert terms == []
+
+    @pytest.mark.asyncio
+    async def test_existing_mesh_terms_skip_enricher(self):
+        source = MockDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
+        enricher = _RecordingEnricher()
+        wrapper = PublicationTermDataSource(
+            data_source=source,
+            term_payload_enricher=enricher,
+        )
+
+        terms = await _collect_async(wrapper.fetch("publication_term"))
+
+        assert enricher.calls == []
+        assert any(term["term_type"] == "MESH_HEADING" for term in terms)
