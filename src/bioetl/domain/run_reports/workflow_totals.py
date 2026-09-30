@@ -116,6 +116,32 @@ def _has_reconciliation(rows: Sequence[WorkflowExecutionRow]) -> bool:
     return any(row.reconciliation is not None for row in rows)
 
 
+def _optional_int(source: Mapping[str, object], name: str) -> int | None:
+    """Read an optional integer count from a mapping payload."""
+    value = source.get(name)
+    return None if value is None else _as_int(value)
+
+
+def _optional_text(value: object) -> str | None:
+    """Read an optional text value, dropping blanks."""
+    return None if value in (None, "") else str(value)
+
+
+def _first_present(source: Mapping[str, object], *names: str) -> object:
+    """Return the first present mapping value across candidate names."""
+    return next(
+        (source.get(name) for name in names if source.get(name) is not None), None
+    )
+
+
+def _first_attribute(source: object, *names: str) -> object:
+    """Return the first truthy attribute across candidate names."""
+    return next(
+        (getattr(source, name, None) for name in names if getattr(source, name, None)),
+        None,
+    )
+
+
 def _reconciliation_totals(rows: Sequence[WorkflowExecutionRow]) -> dict[str, object]:
     if not _has_reconciliation(rows):
         return {}

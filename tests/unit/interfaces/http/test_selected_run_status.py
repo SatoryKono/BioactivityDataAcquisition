@@ -1500,18 +1500,19 @@ def test_archive_report_source_empty_legacy_missing_and_containment(
 def test_scope_mismatch_and_selected_status_defensive_paths(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    from bioetl.interfaces.http import run_report_ops
     from bioetl.interfaces.http._selected_run_live import scope_matches
-    from bioetl.interfaces.http import selected_run_status as selected
+    from bioetl.interfaces.http._selected_run_report_assessment import (
+        _selected_pipeline,
+    )
 
     assert not scope_matches(
         {"run_type": "backfill", "workflow_id": "wf-a"},
         {"run_type": "incremental", "workflow": "wf-a"},
     )
-    monkeypatch.setattr(
-        selected.run_report_ops, "_safe_segment", lambda _value: "other"
-    )
+    monkeypatch.setattr(run_report_ops, "_safe_segment", lambda _value: "other")
     with pytest.raises(ValueError, match="invalid_run_id"):
-        selected._selected_pipeline(".*", "../bad", tmp_path)
+        _selected_pipeline(".*", "../bad", tmp_path)
     monkeypatch.undo()
 
     path = persist(tmp_path).json_path
@@ -1633,7 +1634,9 @@ def test_selection_presentation_retains_summary_mirror_fields():
 def test_chunked_artifact_hash_matches_single_read(tmp_path):
     import hashlib
 
-    from bioetl.interfaces.http.selected_run_status import _hash_artifact_chunked
+    from bioetl.interfaces.http._selected_run_artifact_probes import (
+        _hash_artifact_chunked,
+    )
 
     candidate = tmp_path / "artifact.bin"
     candidate.write_bytes(bytes(range(256)) * 3000)
@@ -1645,13 +1648,13 @@ def test_chunked_artifact_hash_matches_single_read(tmp_path):
 
 
 def test_chunked_artifact_hash_stops_after_deadline(tmp_path, monkeypatch):
-    from bioetl.interfaces.http import selected_run_status
+    from bioetl.interfaces.http import _selected_run_artifact_probes as probes
     from bioetl.interfaces.http._forensic_request_budget import (
         ForensicEndpointUnavailable,
     )
 
     candidate = tmp_path / "artifact.bin"
     candidate.write_bytes(b"0123456789" * 100)
-    monkeypatch.setattr(selected_run_status, "request_deadline_exceeded", lambda: True)
+    monkeypatch.setattr(probes, "request_deadline_exceeded", lambda: True)
     with pytest.raises(ForensicEndpointUnavailable, match="deadline_exceeded"):
-        selected_run_status._hash_artifact_chunked(candidate)
+        probes._hash_artifact_chunked(candidate)

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="2.016" timestamp="2026-09-29T18:11:30.821262+00:00" hostname="DESKTOP-AITNV0T"><testcase classname="" name="tests.unit.scripts.docs.passports.test_passport_projector" time="0.000"><error message="collection failure">ImportError while importing test module '/mnt/e/github/BioactivityDataAcquisition/tests/unit/scripts/docs/passports/test_passport_projector.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+tests/unit/scripts/docs/passports/test_passport_projector.py:18: in &lt;module&gt;
+    import jsonschema
+E   ModuleNotFoundError: No module named 'jsonschema'</error></testcase></testsuite></testsuites>

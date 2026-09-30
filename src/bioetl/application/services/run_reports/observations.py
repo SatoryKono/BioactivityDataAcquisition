@@ -11,17 +11,17 @@ from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatu
 from bioetl.domain.types.gold_contracts_rejects import GoldContractValidationError
 from bioetl.domain.value_objects.dq_result import DQResult
 
-_observations: ContextVar[dict[str, object] | None] = ContextVar(
+_observations: ContextVar[dict[str, dict[str, object]] | None] = ContextVar(
     "run_observations", default=None
 )
 
 
-def bind_run_observations() -> Token[dict[str, object] | None]:
+def bind_run_observations() -> Token[dict[str, dict[str, object]] | None]:
     """Start a fresh evidence scope before runner construction."""
     return _observations.set({})
 
 
-def reset_run_observations(token: Token[dict[str, object] | None]) -> None:
+def reset_run_observations(token: Token[dict[str, dict[str, object]] | None]) -> None:
     """Restore the caller scope even after cancellation or construction failure."""
     _observations.reset(token)
 
@@ -60,7 +60,7 @@ def record_run_observation(
         }
 
 
-def run_observations() -> dict[str, object]:
+def run_observations() -> dict[str, dict[str, object]]:
     """Detach report inputs from the mutable execution context."""
     return deepcopy(_observations.get() or {})
 

@@ -1,3 +1,19 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownParameterType=false
+# pyright: reportUnknownVariableType=false
+# pyright: reportAny=false
+# pyright: reportMissingParameterType=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Operator-approved recent-run column order and exact identity handoffs."""
 
 import json

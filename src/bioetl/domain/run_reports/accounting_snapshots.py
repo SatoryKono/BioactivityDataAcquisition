@@ -6,6 +6,10 @@ from __future__ import annotations
 from typing import Any, cast
 
 from bioetl.domain.run_reports._stage_bucket import _StageBucket
+from bioetl.domain.run_reports.accounting_projections import (
+    _prefer_conserving_projection,
+    _resolve_balance_status,
+)
 from bioetl.domain.run_reports.models import (
     BalanceStatus,
     LayerCounts,
@@ -111,7 +115,7 @@ class StageAccountingSnapshotsMixin:
         records_in = bucket.records_in or default_in
         records_out = bucket.records_out or default_out
         removed_total = removed_mapped or default_removed
-        records_in, records_out, removed_total = self._prefer_conserving_projection(
+        records_in, records_out, removed_total = _prefer_conserving_projection(
             records_in=records_in,
             records_out=records_out,
             removed_total=removed_total,
@@ -138,46 +142,6 @@ class StageAccountingSnapshotsMixin:
             tracking=tracking,
             unaccounted=unaccounted,
         )
-
-    @staticmethod
-    def _prefer_conserving_projection(
-        *,
-        records_in: int,
-        records_out: int,
-        removed_total: int,
-        default_in: int,
-        default_out: int,
-        default_removed: int,
-        removed_mapped: int,
-    ) -> tuple[int, int, int]:
-        """Prefer layer-aligned in/out when bucket values break conservation.
-
-        High-volume hooks may over-count ``records_out`` (e.g. gold batch
-        metrics). Layer totals from RunResult remain the coarse SoT for
-        funnel geometry; removal reason maps still come from the bucket.
-
-        Over-accounted removals (``removed_mapped`` above the layer budget)
-        MUST remain visible as FAILING — do not rewrite geometry to hide them.
-        """
-        if records_in == records_out + removed_total:
-            return records_in, records_out, removed_total
-        if removed_mapped > default_removed > 0:
-            return records_in, records_out, removed_total
-        layer_removed = self._layer_removed_budget(
-            removed_mapped=removed_mapped, default_removed=default_removed
-        )
-        if default_in > 0 and default_in == default_out + layer_removed:
-            return default_in, default_out, layer_removed
-        return records_in, records_out, removed_total
-
-    @staticmethod
-    def _layer_removed_budget(
-        *, removed_mapped: int, default_removed: int
-    ) -> int:
-        """Prefer explicitly mapped removals over the layer default."""
-        if removed_mapped > 0:
-            return removed_mapped
-        return default_removed
 
     @staticmethod
     def _stage_defaults(
@@ -267,13 +231,14 @@ class StageAccountingSnapshotsMixin:
         unaccounted: int,
         tracking: TrackingCoverage,
     ) -> BalanceStatus:
-        if records_in == records_out + removed_total:
-            return BalanceStatus.OK
-        if _is_unknown_balance(records_in, tracking):
-            return BalanceStatus.UNKNOWN
-        if _is_degraded_balance(unaccounted, tracking):
-            return BalanceStatus.DEGRADED
-        return BalanceStatus.FAILING
+        """Delegate balance resolution to the module projector."""
+        return _resolve_balance_status(
+            records_in=records_in,
+            records_out=records_out,
+            removed_total=removed_total,
+            unaccounted=unaccounted,
+            tracking=tracking,
+        )
 
     def overall_tracking_coverage(
         self, funnel: tuple[StageFunnelRow, ...]
@@ -304,16 +269,8 @@ class StageAccountingSnapshotsMixin:
         )
 
 
-def _is_unknown_balance(records_in: int, tracking: TrackingCoverage) -> bool:
-    return records_in == 0 and tracking is TrackingCoverage.NOT_TRACKED
-
-
 def _is_observed_write(stage: str, bucket: _StageBucket) -> bool:
     return stage in {"bronze", "silver", "gold"} and bucket.instrumented
-
-
-def _is_degraded_balance(unaccounted: int, tracking: TrackingCoverage) -> bool:
-    return unaccounted > 0 and tracking is TrackingCoverage.PARTIAL
 
 
 def _prefer_mapped_count(mapped: int | None, coarse: int) -> int:

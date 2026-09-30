@@ -156,9 +156,7 @@ class ProteinClassHierarchy:
             or path_level.name != level.name
             or path_level.desc != level.desc
         ):
-            raise ValueError(
-                "protein class hierarchy levels must match path entries"
-            )
+            raise ValueError("protein class hierarchy levels must match path entries")
 
     def _validate_levels_match_path(self) -> None:
         if self.path is None:

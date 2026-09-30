@@ -328,6 +328,9 @@ class _FsStore:
     def read_text(self, path: str) -> str:
         return Path(path).read_text(encoding="utf-8")
 
+    def read_identity_text(self, path: str) -> str:
+        return Path(path).read_text(encoding="utf-8")
+
     def is_file(self, path: str) -> bool:
         return Path(path).is_file()
 

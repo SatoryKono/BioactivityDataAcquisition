@@ -199,9 +199,7 @@ def _append_idempotency_evidence_present(
             layer_config=layer_config, evidence=evidence
         )
     if contract == "append_log":
-        return _append_log_evidence_present(
-            yaml_config=yaml_config, evidence=evidence
-        )
+        return _append_log_evidence_present(yaml_config=yaml_config, evidence=evidence)
     return False
 
 

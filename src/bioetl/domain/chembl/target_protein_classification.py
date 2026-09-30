@@ -68,7 +68,9 @@ def _resolve_target_field_ids(
     """Resolve target IDs matching an explicit target identifier filter."""
     requested = {str(value).strip() for value in filter_ids if str(value).strip()}
     return tuple(
-        target_id for target_id in sorted(target_component_ids) if target_id in requested
+        target_id
+        for target_id in sorted(target_component_ids)
+        if target_id in requested
     )
 
 

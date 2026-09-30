@@ -5,8 +5,10 @@ Refactored per ADR-005 to accept explicit dependencies instead of full pipeline.
 
 from __future__ import annotations
 
-from typing import NamedTuple
-
+from bioetl.application.core._quarantine_entries import (
+    DQQuarantineEntry,
+    FilteredQuarantineEntry,
+)
 from bioetl.application.core._quarantine_manager_support import (
     QuarantineManagerSupportMixin,
 )
@@ -15,26 +17,8 @@ from bioetl.application.observability.domain_event_emitter import (
 )
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.domain.ports import MetricsPort, QuarantinePort
-from bioetl.domain.types import BronzeRecord, ErrorType, JsonDict
 
 from .batch_metrics import BatchMetricsRecorderService
-
-
-class DQQuarantineEntry(NamedTuple):
-    """A record that failed data-quality checks."""
-
-    record: BronzeRecord
-    error_type: ErrorType
-    error_details: str
-    reason_code: str | None = None
-
-
-class FilteredQuarantineEntry(NamedTuple):
-    """A record excluded by Silver filters."""
-
-    record: BronzeRecord
-    reason: str
-    details: JsonDict | None = None
 
 
 class QuarantineRuntimeService(QuarantineManagerSupportMixin):

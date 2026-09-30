@@ -7,6 +7,14 @@
 # pyright: reportOptionalMemberAccess=false
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownParameterType=false
+# pyright: reportUnknownVariableType=false
+# pyright: reportAny=false
+# pyright: reportExplicitAny=false
+# pyright: reportMissingParameterType=false
+# pyright: reportUnusedParameter=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Shared helper utilities for Grafana dashboard integration tests."""
 

@@ -1,8 +1,11 @@
+# pyright: reportPrivateUsage=false
+# Sibling-module helpers in replay_readiness_checks are intra-package private by design.
 """Exact-replay readiness for one selected run, independent of Prometheus."""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import TypedDict
 
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness_checks import (
     _artifact_checks,
@@ -24,6 +27,23 @@ INSUFFICIENT = "INSUFFICIENT"
 UNSUPPORTED = "UNSUPPORTED"
 SELECT_RUN = "SELECT RUN"
 QUERY_ERROR = "QUERY ERROR"
+
+
+class ReplayReadinessProjection(TypedDict):
+    """Operator-facing replay-readiness projection for one selected run."""
+
+    run_id: str
+    pipeline: str
+    run_type: str
+    replay_mode: str
+    verdict: str
+    domain_verdict: str
+    checks: list[dict[str, str]]
+    blockers: list[str]
+    unknown_checks: list[str]
+    checked_at: str
+    rules_version: str
+    evidence_revision: str
 
 
 def _operator_verdict(
@@ -56,7 +76,7 @@ def project_selected_run_replay_readiness(
     inventory_present: bool = False,
     evidence_revision: str = "",
     checked_at: str = "",
-) -> dict[str, object]:
+) -> ReplayReadinessProjection:
     """Project operator readiness. Capability alone never yields READY."""
     checks = [
         *_identity_checks(identity),
@@ -110,7 +130,7 @@ def empty_replay_readiness(
     run_id: str,
     verdict: str,
     reason: str,
-) -> dict[str, object]:
+) -> ReplayReadinessProjection:
     """HTTP states that are not a domain READY."""
     if verdict not in {SELECT_RUN, QUERY_ERROR, INSUFFICIENT, BLOCKED, UNSUPPORTED}:
         verdict = INSUFFICIENT

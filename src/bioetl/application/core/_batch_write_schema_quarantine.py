@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.core._batch_write_events import emit_batch_failed
 from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,
     QuarantineRuntimeService,
@@ -33,8 +34,6 @@ async def quarantine_schema_violation(
     ingestion_ts: datetime,
     error: SchemaViolationError,
 ) -> None:
-    from bioetl.application.core._batch_write_support import emit_batch_failed
-
     writer.track_batch_failed(stage=layer, count=len(records))
     emit_batch_failed(
         emitter=domain_event_emitter,

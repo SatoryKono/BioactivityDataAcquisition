@@ -25,6 +25,7 @@ from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, RunID
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from bioetl.application.core._quarantine_entries import DQQuarantineEntry
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterProtocol,
@@ -120,7 +121,7 @@ async def persist_dq_quarantine_requests(
     ports: QuarantineRuntimeDependencies,
     *,
     requests: list[QuarantineWriteRequest],
-    records: Sequence[tuple[BronzeRecord, ErrorType, str]],
+    records: Sequence[DQQuarantineEntry | tuple[BronzeRecord, ErrorType, str]],
     batch_id: BatchID,
     run_id: RunID | None,
     ingestion_ts: datetime,

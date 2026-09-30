@@ -1,3 +1,18 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownParameterType=false
+# pyright: reportUnknownVariableType=false
+# pyright: reportAny=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """VIS-20260908 stream-3 layout contracts (#10249, #10250, #10254, #10255, #10256)."""
 
 from __future__ import annotations
@@ -119,7 +134,9 @@ def test_run_id_selector_and_recent_runs_do_not_label_uuid_as_count() -> None:
         for item in dashboard.get("templating", {}).get("list", [])
         if item.get("name") == "run_id"
     )
-    columns = ((run_id.get("query") or {}).get("infinityQuery") or {}).get("columns")
+    columns = ((run_id.get("query") or {}).get("infinityQuery") or {}).get(
+        "columns"
+    ) or []
     selectors = {(item.get("selector"), item.get("text")) for item in columns}
     assert ("text", "__text") in selectors
     assert ("value", "__value") in selectors
