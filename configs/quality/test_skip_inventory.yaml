@@ -201,9 +201,9 @@ entries:
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 2
+    reviewed_skip_calls: 1
     vcr_related: false
-    review_date: "2026-07-22"
+    review_date: "2026-09-30"
     rationale:
       PubMed/NCBI contract tests skip closed on ConnectError/timeouts or HTTP 429 via _request_or_skip; a received
       provider 5xx fails closed via pytest.fail (aligned with Crossref/OpenAlex, #11772).
@@ -213,10 +213,10 @@ entries:
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 2
+    reviewed_skip_calls: 1
     vcr_related: false
-    review_date: "2026-06-02"
-    rationale: UniProt live contract tests may skip on endpoint unavailability or transient 5xx failures.
+    review_date: "2026-09-30"
+    rationale: UniProt live contract tests skip closed only when the endpoint is unreachable or rate-limited (HTTP 429); a received HTTP 5xx fails closed via pytest.fail (#11772).
   - path: tests/integration/config/test_dq_config_loading.py
     suite: integration
     category: optional_local_fixture_absence
