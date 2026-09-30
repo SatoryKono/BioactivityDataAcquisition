@@ -50,7 +50,8 @@ def apply_overview_identity(payload: dict) -> None:
         "SELECTED RUN Â· Pipeline and full Run ID identify the saved run. "
         "Run Type and Started at (with saved UTC offset) characterize its execution. "
         "Manifest, schema and available source revision are in Inspect Additional Run Identity. "
-        "Missing saved values are Not recorded; request failures remain query errors."
+        "SELECT RUN means no selected run context. Missing saved values are Not recorded; "
+        "request failures remain QUERY ERROR."
     )
     identity["options"] = {
         "showHeader": True,

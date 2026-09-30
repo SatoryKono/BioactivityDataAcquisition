@@ -203,6 +203,11 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
             panel = panels.get(panel_id)
             if dashboard_name == "bioetl-control-plane-v1.json":
                 continue
+            if dashboard_name == "bioetl-provider-health-v2.json":
+                assert panel is None, (
+                    "Provider evidence replaces removed identity/records shells"
+                )
+                continue
             assert panel is not None, (
                 f"{dashboard_name} must retain lazy shell panel id={panel_id}"
             )
