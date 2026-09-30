@@ -23,6 +23,7 @@ from bioetl.application.core.runner_flow import (
     record_stage_started,
     resolve_execution_offset,
 )
+from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
@@ -79,9 +80,7 @@ class PipelineRunnerSupportMixin:
 
     async def _cleanup_after_run(self: _PipelineRunnerCleanupHostProtocol) -> None:
         try:
-            await cast(Any, self._postrun_service).cleanup(
-                self._tracer
-            )  # Any: mixin host protocol bridge
+            await as_mixin_host(self._postrun_service).cleanup(self._tracer)
         finally:
             self._close_metrics()
 
