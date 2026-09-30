@@ -2,7 +2,7 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.1 (консолидировано из веток `codex/develop-user-instructions-for-codex*`) | Основано на `docs/00-project/RULES.md`, `AGENT.md`, `CLAUDE.md`, `GEMINI.md` | Дата: 2026-04-06*
+*Версия: 1.2 (консолидировано из веток `codex/develop-user-instructions-for-codex*`) | Основано на `docs/00-project/RULES.md`, `guides/AGENT.md`; context-tier entry — `AGENTS.md` | Дата: 2026-09-30*
 
 ## 0) Canonical runtime entry
 
@@ -37,9 +37,11 @@ ______________________________________________________________________
 1. `docs/01-requirements/REQUIREMENTS.md` (формализованные требования),
 1. `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`,
 1. `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` — для write-capable задач,
-1. `docs/00-project/ai/agents/guides/AGENT.md`,
-1. `docs/00-project/ai/agents/guides/CLAUDE.md`,
-1. `docs/00-project/ai/agents/guides/GEMINI.md`,
+1. `AGENTS.md` — context-tier runtime entry (также §0),
+1. `docs/00-project/ai/agents/guides/AGENT.md` — canonical agent guide; per-tool
+   guides `CLAUDE.md` / `GEMINI.md` / `KIMI.md` — optional mirrors for their own
+   tool sessions, не обязательный Codex context (Gemini is not a project
+   runtime per `AGENTS.md`),
 1. `docs/00-project/ai/memory/agent-memory.md`,
 1. `docs/03-guides/dashboards/dashboard-extension-llm.md` — если задача затрагивает `grafana/dashboards/*.json`, dashboard links или legacy Loki/Tempo (removed 2026-07-23; do not use),
 1. `docs/00-project/ai/agents/agents/ORCHESTRATION.md` (публикуемое Codex docs mirror для `.codex/agents/ORCHESTRATION.md`, для сложных задач).

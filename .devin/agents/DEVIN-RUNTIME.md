@@ -124,7 +124,7 @@ to repository, commit, branch, worktree, task, and source references.
 | Agent spawning | `spawn_agent(agent_type, message)` | `run_subagent(title, task, profile, is_background)` |
 | Built-in profiles | `default`, `explorer`, `worker` | `subagent_explore`, `subagent_general` |
 | Custom profiles | Native agent roles | Custom subagent profiles in `.devin/agents/*/AGENT.md` |
-| Model assignment | Inherit parent (no provider-specific model labels) | Inherits parent model or explicit `model:` field |
+| Model assignment | Inherit parent (no provider-specific model labels) | Inherits parent model or explicit `model:` field. Read-only profiles use `model: parent`; write profiles (`py-config-bot`, `py-doc-bot`, `py-test-bot`) may pin `model: swe-1.6` — the sanctioned Devin default subagent model. Other pins are forbidden |
 | Execution modes | Sequential/parallel | Foreground/background with permissions |
 | Tool permissions | Role-based | Profile-based + session grants |
 

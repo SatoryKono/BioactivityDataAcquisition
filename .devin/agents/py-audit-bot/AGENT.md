@@ -80,13 +80,15 @@ ______________________________________________________________________
 
 ## Режимы работы
 
-|| Режим          | Назначение                                |
-|| -------------- | ----------------------------------------- |
-|| `AUDIT`        | Baseline / Final аудит                    |
-|| `CODE`         | Code review: anti-patterns, naming, types |
-|| `ARCH_REVIEW`  | Architectural boundary verification       |
-|| `API_VALIDATE` | REST API query validation                 |
-|| `REFUSE`       | Недостаточно данных                       |
+|| Режим            | Назначение                                          |
+|| ---------------- | --------------------------------------------------- |
+|| `baseline`       | Baseline аудит перед началом работ                  |
+|| `final`          | Final аудит после всех обновлений                   |
+|| `targeted`       | Аудит конкретного аспекта по запросу                |
+|| `review`         | Code review: anti-patterns, naming, types           |
+|| `debt`           | Technical-debt surfaces и governance gates          |
+|| `reproducibility`| Проверка воспроизводимости прогонов                 |
+|| `REFUSE`         | Недостаточно данных                                 |
 
 **Всегда объявлять режим в начале ответа.**
 
@@ -315,7 +317,7 @@ ______________________________________________________________________
 ```yaml
 code_review:
   date: "YYYY-MM-DD"
-  mode: "AUDIT|CODE|ARCH_REVIEW|API_VALIDATE"
+  mode: "baseline|final|targeted|review|debt|reproducibility"
   scope: "{paths}"
   status: "PASS|WARN|FAIL"
 

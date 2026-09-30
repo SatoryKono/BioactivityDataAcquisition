@@ -84,6 +84,8 @@ def main(argv: list[str] | None = None) -> int:
                     "--runtime-mirrors",
                     "--freshness",
                     "--modules",
+                    "--ai-surfaces",
+                    "--ai-surfaces",
                 ],
             )
         )
