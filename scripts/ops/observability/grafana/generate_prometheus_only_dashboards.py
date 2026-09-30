@@ -66,4 +66,3 @@ def render_notices(root: Path = ROOT, *, check: bool = False) -> bool:
             destination.mkdir(parents=True, exist_ok=True)
             target.write_text(serialized, encoding="utf-8")
     return ok
-
