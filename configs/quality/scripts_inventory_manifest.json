@@ -1,11 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-30T06:31:55.128965+00:00",
+  "generated_at": "2026-09-30T09:58:27.133356+00:00",
   "summary": {
     "total_scripts": 633,
     "status_counts": {
-      "active": 343,
-      "orphan": 1,
+      "active": 344,
       "supporting": 289
     },
     "reference_group_coverage": {
@@ -14,7 +13,7 @@
       "ci": 86,
       "docs": 261,
       "other": 48,
-      "scripts": 528,
+      "scripts": 529,
       "skills": 12,
       "tests": 444
     }
@@ -6117,13 +6116,13 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 310,
+          "line": 311,
           "source_group": "docs",
           "text": "python scripts/diagrams/check/check_class_method_render_integrity.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 463,
+          "line": 464,
           "source_group": "docs",
           "text": "1. Выполнен `python scripts/diagrams/check/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`."
         },
@@ -6192,19 +6191,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 448,
+          "line": 449,
           "source_group": "docs",
           "text": "1. **Проверить обязательные SVG-артефакты:** `python scripts/diagrams/check/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 449,
+          "line": 450,
           "source_group": "docs",
           "text": "Для дополнительной compatibility-проверки PNG используйте curated manifest: `python scripts/diagrams/check/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/png-compatibili"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 478,
+          "line": 479,
           "source_group": "docs",
           "text": "| check_diagram_artifacts.py     | `scripts/diagrams/` | DIAG-T010/T012 для обязательных SVG и DIAG-T011/T012 для optional PNG compatibility |"
         },
@@ -6243,13 +6242,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 451,
+          "line": 452,
           "source_group": "docs",
           "text": "1. **Прогнать quality-gates:** `python scripts/diagrams/check/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 480,
+          "line": 481,
           "source_group": "docs",
           "text": "| check_diagram_quality_gates.py | `scripts/diagrams/` | DIAG-T018..T023 (style/classDef/decomposition/legend/labels)                        |"
         },
@@ -6332,7 +6331,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 428,
+          "line": 429,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts/diagrams/check/check_diagram_visual_smoke.py `"
         }
@@ -6404,25 +6403,25 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 357,
+          "line": 358,
           "source_group": "docs",
           "text": "Скрипт `scripts/diagrams/check/check_svg_text_visibility.py` валидирует smoke-набор SVG на предмет"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 367,
+          "line": 368,
           "source_group": "docs",
           "text": "python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 368,
+          "line": 369,
           "source_group": "docs",
           "text": "python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --json"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 450,
+          "line": 451,
           "source_group": "docs",
           "text": "1. **Проверить видимость текста в SVG:** `python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         }
@@ -6621,7 +6620,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 474,
+          "line": 475,
           "source_group": "docs",
           "text": "| apply_elk_layout.py            | `scripts/diagrams/` | Добавление ELK init к flowchart с >20 нод                                           |"
         },
@@ -6717,7 +6716,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 475,
+          "line": 476,
           "source_group": "docs",
           "text": "| differentiate_linkstyle.py     | `scripts/diagrams/` | Семантическая стилизация рёбер                                                      |"
         },
@@ -6857,55 +6856,55 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 27,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 211,
+          "line": 212,
           "source_group": "docs",
           "text": "Реализован в `scripts/diagrams/fix/prune_orphan_nodes.py`. Нода считается orphan, если:"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 226,
+          "line": 227,
           "source_group": "docs",
           "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --check      # аудит"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 227,
+          "line": 228,
           "source_group": "docs",
           "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --fix         # удалить garbage orphans"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 228,
+          "line": 229,
           "source_group": "docs",
           "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --grandfather # exemption для всех текущих"
         },
         {
+          "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
+          "line": 235,
+          "source_group": "docs",
+          "text": "с разбором рёбер из `scripts/diagrams/fix/prune_orphan_nodes.py`."
+        },
+        {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 636,
+          "line": 637,
           "source_group": "docs",
           "text": "`scripts/diagrams/fix/prune_orphan_nodes.py` detects nodes defined in a diagram but not"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 644,
+          "line": 645,
           "source_group": "docs",
           "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 647,
+          "line": 648,
           "source_group": "docs",
           "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --check --json"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/README.md",
-          "line": 650,
-          "source_group": "docs",
-          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --fix"
         }
       ]
     },
@@ -6969,7 +6968,7 @@
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 201,
+          "line": 202,
           "source_group": "docs",
           "text": "Примечание по size-normalization (`scripts/diagrams/fix/uniform_diagram_sizes.py`):"
         },
@@ -7108,7 +7107,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 39,
+      "reference_count": 40,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -7148,15 +7147,15 @@
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 256,
+          "line": 234,
           "source_group": "docs",
-          "text": "**CI Rules (lint_diagrams.py):**"
+          "text": "Реализован в `scripts/diagrams/lint/lint_diagrams.py` (`check_undeclared_edge_nodes`)"
         },
         {
-          "path": "docs/02-architecture/diagrams/README.md",
-          "line": 561,
+          "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
+          "line": 275,
           "source_group": "docs",
-          "text": "uv run python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json \\"
+          "text": "**CI Rules (lint_diagrams.py):**"
         }
       ]
     },
@@ -7271,13 +7270,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 421,
+          "line": 422,
           "source_group": "docs",
           "text": "`scripts/diagrams/render.ps1`: wrapper запускает тот же Bash renderer через Git"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 427,
+          "line": 428,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1 --svg-only"
         },
@@ -7723,19 +7722,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 473,
+          "line": 474,
           "source_group": "docs",
           "text": "| run_diagram_checks.sh          | `scripts/diagrams/` | Единый запуск профилей проверок (`pr`/`nightly`/`quick`)                            |"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 491,
+          "line": 492,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile pr"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 510,
+          "line": 511,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile pr \\"
         },
@@ -7813,13 +7812,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 481,
+          "line": 482,
           "source_group": "docs",
           "text": "| run_diagram_nightly_suite.py   | `scripts/diagrams/` | DIAG-T024..T029 nightly heuristics (interactivity/chaos/growth/theme)               |"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 497,
+          "line": 498,
           "source_group": "docs",
           "text": "1. `nightly` — `pr` + DIAG-T024..T029 (`run_diagram_nightly_suite.py`)."
         },
@@ -7947,7 +7946,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 426,
+          "line": 427,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json"
         },
@@ -8096,7 +8095,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 48,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"generate-docs-export\": \"scripts.docs.build.generate_docs_export\","
         },
@@ -8123,7 +8122,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"build-site\": \"scripts.docs.build.mkdocs_build\","
         }
@@ -8189,7 +8188,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"check-docstrings\": \"scripts.docs.checks.check_docstrings\","
         },
@@ -8226,7 +8225,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"check-drift\": \"scripts.docs.checks.check_drift\","
         },
@@ -8340,7 +8339,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"generate-cleanup-inventory\": \"scripts.docs.checks.documentation_cleanup_inventory\","
         },
@@ -8379,7 +8378,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"check-kpi\": \"scripts.docs.checks.report_docs_kpi\","
         },
@@ -8428,7 +8427,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"verify\": \"scripts.docs.checks.verify\","
         },
@@ -8651,7 +8650,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 57,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"fix-links-auto\": \"scripts.docs.fixers.fix_links_auto\","
         }
@@ -8676,7 +8675,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 58,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"fix-links-explicit\": \"scripts.docs.fixers.fix_links_explicit\","
         }
@@ -8701,7 +8700,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 59,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"fix-link-warnings\": \"scripts.docs.fixers.link_warnings\","
         }
@@ -8726,7 +8725,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 61,
+          "line": 63,
           "source_group": "scripts",
           "text": "\"sync-repo-identity\": \"scripts.docs.fixers.repo_identity\","
         }
@@ -8751,7 +8750,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 60,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"audit-sentence\": \"scripts.docs.fixers.sentence_audit\","
         }
@@ -8764,10 +8763,17 @@
     {
       "path": "scripts/docs/generate_dashboard_panel_inventory.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "\"generate-dashboard-panel-inventory\": \"scripts.docs.generate_dashboard_panel_inventory\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/matrix/build_matrix_dicts.py",
@@ -8784,7 +8790,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 52,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"build-matrix-dicts\": \"scripts.docs.matrix.build_matrix_dicts\","
         },
@@ -8815,7 +8821,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 53,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"enrich-matrix-normalization-details\": \"scripts.docs.matrix.enrich_normalization_details\","
         },
@@ -8852,7 +8858,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 49,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"export-matrix-structural-contract\": \"scripts.docs.matrix.export_structural_contract\","
         },
@@ -8889,7 +8895,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 54,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"filter-matrix-rows\": \"scripts.docs.matrix.filter_rows\","
         },
@@ -8926,7 +8932,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"generate-field-matrix\": \"scripts.docs.matrix.generate_field_matrix\","
         },
@@ -8993,19 +8999,19 @@
         },
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 174,
+          "line": 173,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1074,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2246,
+          "line": 2235,
           "source_group": "docs",
           "text": "\"path\": \"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\","
         },
         {
           "path": "docs/filters/inventory-baseline.md",
-          "line": 124,
+          "line": 123,
           "source_group": "docs",
           "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1074 | Source-profile extraction policy |"
         }
@@ -9118,7 +9124,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 55,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"normalize-matrix-values\": \"scripts.docs.matrix.normalize_values\","
         },
@@ -9192,7 +9198,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 56,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"sync-matrix-structural-policy\": \"scripts.docs.matrix.sync_structural_policy\","
         },
@@ -9243,7 +9249,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 62,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"passports\": \"scripts.docs.passports.cli\","
         },
@@ -9426,7 +9432,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 64,
+          "line": 66,
           "source_group": "scripts",
           "text": "\"scripts.docs.passports.rename_underscore_to_hyphen\""
         },
@@ -10538,7 +10544,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import dispatch_cli, module_command"
         },
@@ -10659,7 +10665,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 267,
+      "reference_count": 269,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -11140,7 +11146,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/CODEX.md",
-          "line": 199,
+          "line": 201,
           "source_group": "docs",
           "text": "- PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1 tests\\architecture\\ -v`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`"
         },
@@ -11205,7 +11211,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/CODEX.md",
-          "line": 200,
+          "line": 202,
           "source_group": "docs",
           "text": "- WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh tests/architecture/ -v`, `bash scripts/engineering/dev/run_mypy.sh`"
         },
@@ -11337,7 +11343,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/CODEX.md",
-          "line": 199,
+          "line": 201,
           "source_group": "docs",
           "text": "- PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1 tests\\architecture\\ -v`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`"
         }
@@ -11385,7 +11391,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/CODEX.md",
-          "line": 200,
+          "line": 202,
           "source_group": "docs",
           "text": "- WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh tests/architecture/ -v`, `bash scripts/engineering/dev/run_mypy.sh`"
         },
@@ -13453,19 +13459,19 @@
       "references": [
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 175,
+          "line": 174,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/engineering/qa/config_surface_governance.py,2,8,Source-profile extraction policy,extraction_params are pr"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2257,
+          "line": 2246,
           "source_group": "docs",
           "text": "\"path\": \"scripts/engineering/qa/config_surface_governance.py\","
         },
         {
           "path": "docs/filters/inventory-baseline.md",
-          "line": 125,
+          "line": 124,
           "source_group": "docs",
           "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/engineering/qa/config_surface_governance.py` | 2 | 8 | Source-profile extraction policy |"
         },
@@ -16813,7 +16819,7 @@
       "references": [
         {
           "path": "tests/unit/scripts/qa/test_run_local_coverage_verify.py",
-          "line": 7,
+          "line": 9,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS, _command, main"
         }
@@ -17702,7 +17708,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/no-partial-tree-commits.yml",
@@ -17715,6 +17721,12 @@
           "line": 151,
           "source_group": "agents",
           "text": "`python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`."
+        },
+        {
+          "path": "tests/architecture/test_junie_runtime_ci_contract.py",
+          "line": 99,
+          "source_group": "tests",
+          "text": "assert \"check_no_partial_tree.py\" in guidelines"
         },
         {
           "path": "tests/unit/scripts/repo/test_check_no_partial_tree.py",
@@ -23243,7 +23255,7 @@
         "new-pipeline",
         "py-config-bot"
       ],
-      "reference_count": 75,
+      "reference_count": 77,
       "references": [
         {
           "path": ".codex/skills/new-pipeline/SKILL.md",

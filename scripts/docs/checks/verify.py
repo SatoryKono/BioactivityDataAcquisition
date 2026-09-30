@@ -85,7 +85,18 @@ def main(argv: list[str] | None = None) -> int:
                     "--freshness",
                     "--modules",
                     "--ai-surfaces",
-                    "--ai-surfaces",
+                ],
+            )
+        )
+        steps.append(
+            (
+                "generate-dashboard-panel-inventory",
+                [
+                    sys.executable,
+                    "-m",
+                    "scripts.docs",
+                    "generate-dashboard-panel-inventory",
+                    "--check",
                 ],
             )
         )

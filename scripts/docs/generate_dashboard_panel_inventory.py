@@ -63,10 +63,10 @@ def _inventory(dashboard: Path) -> str:
     return "\n".join(rows) + "\n"
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     stale: list[Path] = []
     for dashboard in sorted(DASHBOARDS.glob("*.json")):
         guide = GUIDES / f"{dashboard.stem}-panels.md"
