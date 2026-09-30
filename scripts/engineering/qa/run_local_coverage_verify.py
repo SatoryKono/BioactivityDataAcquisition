@@ -269,7 +269,9 @@ def main(argv: list[str] | None = None) -> int:
     env = os.environ.copy()
     env.update(
         {
-            "BIOETL_PYTEST_RUNTIME_PYTHON": sys.executable,
+            # MSYS bash resolves forward-slash drive paths; backslashes in
+            # sys.executable break `[[ -x "$BIN" ]]` and fall through to `uv run`.
+            "BIOETL_PYTEST_RUNTIME_PYTHON": Path(sys.executable).as_posix(),
             "BIOETL_AI_MEMORY_MODE": "off",
             "BIOETL_SKIP_PREFLIGHT": "1",
             "HYPOTHESIS_DATABASE": str(scratch / "hypothesis"),
