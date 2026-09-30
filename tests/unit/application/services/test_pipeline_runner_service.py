@@ -93,6 +93,25 @@ async def test_configured_report_root_is_used_for_every_outcome(
 
 
 @pytest.mark.asyncio
+async def test_empty_cached_bronze_returns_failed_result_with_observations(
+    service, mock_runner_factory
+):
+    mock_runner_factory.create.side_effect = RuntimeError(
+        "Cached Bronze execution requires at least one persisted batch file "
+        "for snapshot provenance"
+    )
+    result = await service.run("test_pipeline")
+    assert result.status == PipelineRunResult.FAILED
+    assert result.error_type == "RuntimeError"
+    assert result.error_message is not None
+    assert "Cached Bronze" in result.error_message
+    assert result.run_report_error is None
+    payload = json.loads(service.report_store.read_text(result.run_report_json_path))
+    assert payload["observations"]["Data Validation"]["reason"] == "gold_not_attempted"
+    assert payload["identity"]["status"] == "failed"
+
+
+@pytest.mark.asyncio
 async def test_dry_run_does_not_inherit_or_mutate_caller_observations(
     service, tmp_path
 ):

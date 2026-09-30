@@ -18,8 +18,14 @@ from bioetl.composition.runtime_builders._run_manifest_publication_support impor
     create_manifest_record,
     create_manifest_store,
 )
+from bioetl.composition.runtime_builders.input_snapshot_resolution import (
+    resolve_cached_bronze_input_snapshot_refs,
+)
 from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     validate_manifest_persistence_requirements,
+)
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
 )
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
@@ -153,11 +159,25 @@ def _publish_manifest_and_refs(
         ),
         metrics=inputs.observability.metrics,
     )
+    require_before_persist = _strict_cached_bronze_require(
+        ctx=ctx,
+        required_persistence_profile=(
+            manifest_context.reproducibility_context.required_persistence_profile
+        ),
+    )
+    if require_before_persist:
+        _require_cached_bronze_snapshots(
+            inputs=inputs, manifest_context=manifest_context
+        )
     manifest = create_manifest_record(
         manifest_store=manifest_store,
         manifest_create_request=manifest_create_request,
         ledger_service=ledger_service,
     )
+    if not require_before_persist:
+        _require_cached_bronze_snapshots(
+            inputs=inputs, manifest_context=manifest_context
+        )
     control_plane_refs = _create_control_plane_refs(
         manifest=manifest,
         provenance=provenance,
@@ -167,6 +187,30 @@ def _publish_manifest_and_refs(
         ),
     )
     return control_plane_refs, ledger_service
+
+
+def _strict_cached_bronze_require(
+    *,
+    ctx: PipelineRunContext,
+    required_persistence_profile: str,
+) -> bool:
+    return bool(getattr(ctx, "exact_replay", False)) or (
+        required_persistence_profile in STRICT_PERSISTENCE_PROFILES
+    )
+
+
+def _require_cached_bronze_snapshots(
+    *,
+    inputs: RunnerInputs,
+    manifest_context: ResolvedManifestPublicationContext,
+) -> None:
+    resolve_cached_bronze_input_snapshot_refs(
+        cached_bronze=inputs.cached_bronze,
+        settings=inputs.settings,
+        provider=manifest_context.provider,
+        entity=manifest_context.entity,
+        require=True,
+    )
 
 
 def _build_manifest_create_request(

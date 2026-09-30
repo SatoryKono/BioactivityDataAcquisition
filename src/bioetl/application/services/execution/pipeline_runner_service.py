@@ -42,8 +42,8 @@ from bioetl.application.services.execution._pipeline_runner_support import (
     build_pipeline_run_result,
     complete_pipeline_dry_run,
     constructor_failure_recorder,
-    create_execution_runner_audited,
     finalize_pipeline_run_report,
+    is_empty_cached_bronze_provenance_error,
 )
 from bioetl.application.services.execution._pipeline_runner_support import (
     missing_run_id_factory as _missing_run_id_factory,
@@ -207,10 +207,36 @@ class PipelineRunnerService:
         accounting_token = bind_stage_accounting(accounting)
         runner = None
         try:
-            runner = await create_execution_runner_audited(
-                lambda: _require_execution_runner(self.runner_factory.create(context)),
-                record_failure=record_constructor_failure,
-            )
+            try:
+                runner = _require_execution_runner(self.runner_factory.create(context))
+            except Exception as exc:
+                if is_empty_cached_bronze_provenance_error(exc):
+                    completed_at = self.clock.now()
+                    await _record_pipeline_audit_event(
+                        self.audit,
+                        event_name="PipelineRunCompleted",
+                        pipeline_name=pipeline_name,
+                        run_id=run_id,
+                        run_type=options.run_type,
+                        status="failed",
+                        timestamp=completed_at,
+                        error_type=type(exc).__name__,
+                    )
+                    return self._finalize_report(
+                        RunResult(
+                            status=PipelineRunResult.FAILED,
+                            pipeline_name=pipeline_name,
+                            run_id=str(run_id),
+                            run_type=options.run_type,
+                            started_at=started_at,
+                            completed_at=completed_at,
+                            error_type=type(exc).__name__,
+                            error_message=str(exc),
+                        ),
+                        options,
+                    )
+                await record_constructor_failure(exc)
+                raise
             return await self._execute_pipeline(
                 runner=runner,
                 run_logger=run_logger,

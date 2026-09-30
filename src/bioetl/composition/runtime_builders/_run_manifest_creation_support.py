@@ -91,16 +91,30 @@ def build_manifest_create_request(
         replay_capability=replay_capability,
         launch_context=launch_context,
     )
-    validate_required_runtime_persistence_profile(
-        request=request,
-        required_persistence_profile=(
-            reproducibility_context.required_persistence_profile
-        ),
-        strict_exact_replay_supported=(
-            reproducibility_context.strict_exact_replay_supported
-        ),
-    )
+    if not _defer_empty_cached_bronze_snapshot_require(inputs, source_refs):
+        validate_required_runtime_persistence_profile(
+            request=request,
+            required_persistence_profile=(
+                reproducibility_context.required_persistence_profile
+            ),
+            strict_exact_replay_supported=(
+                reproducibility_context.strict_exact_replay_supported
+            ),
+        )
     return request
+
+
+def _defer_empty_cached_bronze_snapshot_require(
+    inputs: object,
+    source_refs: tuple[object, ...],
+) -> bool:
+    """Skip pre-persist snapshot gates when cached Bronze batches are missing."""
+    cached_bronze = _read_attr(inputs, "cached_bronze", None)
+    if cached_bronze is None or not bool(_read_attr(cached_bronze, "enabled", False)):
+        return False
+    return not any(
+        getattr(source_ref, "input_snapshots", ()) for source_ref in source_refs
+    )
 
 
 def _launch_context_value(

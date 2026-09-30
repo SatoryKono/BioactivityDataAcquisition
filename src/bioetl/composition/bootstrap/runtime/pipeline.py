@@ -87,7 +87,6 @@ def bootstrap_pipeline_runner(
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] | None = None,
 ) -> PipelineRunner:
     """Build one ready-to-run pipeline runner from runtime context and registry."""
-    _fail_fast_empty_explicit_cached_bronze(ctx)
     apply_runtime_compatibility_patches()
     registry = prepare_runtime_registry(
         registry=registry, pipeline_name=ctx.pipeline_name

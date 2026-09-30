@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
+    build_cached_bronze_input_snapshot_refs,
     require_cached_bronze_input_snapshot_refs,
 )
 from bioetl.composition.control_plane_paths import (
@@ -34,6 +35,7 @@ def resolve_cached_bronze_input_snapshot_refs(
     settings: Settings,
     provider: str,
     entity: str,
+    require: bool = False,
 ) -> tuple[RunInputSnapshotRef, ...]:
     """Resolve immutable snapshots from one cached-Bronze runtime context."""
     if cached_bronze is None or not getattr(cached_bronze, "enabled", False):
@@ -45,7 +47,12 @@ def resolve_cached_bronze_input_snapshot_refs(
         if bronze_path is not None
         else Path(str(settings.bronze_path)) / provider / entity
     )
-    return require_cached_bronze_input_snapshot_refs(
+    loader = (
+        require_cached_bronze_input_snapshot_refs
+        if require
+        else build_cached_bronze_input_snapshot_refs
+    )
+    return loader(
         bronze_root=bronze_root,
         bronze_date=_coerce_optional_str(bronze_date),
     )
@@ -88,12 +95,17 @@ def resolve_pipeline_input_snapshot_refs(
     entity: str,
 ) -> tuple[RunInputSnapshotRef, ...]:
     """Resolve immutable snapshot evidence for one executable pipeline launch."""
+    cached_bronze_enabled = cached_bronze is not None and bool(
+        getattr(cached_bronze, "enabled", False)
+    )
     cached_bronze_refs = resolve_cached_bronze_input_snapshot_refs(
         cached_bronze=cached_bronze,
         settings=settings,
         provider=provider,
         entity=entity,
     )
+    if cached_bronze_enabled:
+        return cached_bronze_refs
     if cached_bronze_refs:
         return cached_bronze_refs
 
