@@ -98,6 +98,48 @@ class TestChemblPublicationTermBranch:
         mock_wrap_with_filter.assert_called_once()
         assert result is mock_filtered_adapter
 
+    @patch("bioetl.composition.providers.registration_bio._wrap_with_filter")
+    @patch("bioetl.composition.providers.registration_bio.PublicationTermDataSource")
+    @patch(
+        "bioetl.composition.providers.registration_bio."
+        "create_pubmed_publication_term_enricher"
+    )
+    @patch("bioetl.composition.providers.registration_bio._get_adapter_config")
+    def test_wraps_publication_term_adapter_with_pubmed_enricher(
+        self,
+        mock_get_adapter_config: MagicMock,
+        mock_create_enricher: MagicMock,
+        mock_publication_term_data_source: MagicMock,
+        mock_wrap_with_filter: MagicMock,
+    ) -> None:
+        support = MagicMock()
+        mock_get_adapter_config.return_value = MagicMock()
+        mock_base_adapter = MagicMock(name="base_adapter")
+        mock_wrapped_adapter = MagicMock(name="publication_term_wrapper")
+        mock_filtered_adapter = MagicMock(name="filtered")
+        mock_enricher = MagicMock(name="pubmed_enricher")
+        support.create_adapter.return_value = mock_base_adapter
+        mock_create_enricher.return_value = mock_enricher
+        mock_publication_term_data_source.return_value = mock_wrapped_adapter
+        mock_wrap_with_filter.return_value = mock_filtered_adapter
+
+        pipeline_config = MagicMock()
+        pipeline_config.entity_type = "publication_term"
+        pipeline_config.extraction_params = {}
+
+        result = _create_chembl_data_source(
+            settings=MagicMock(),
+            pipeline_config=pipeline_config,
+            logger=MagicMock(),
+            assembly_support=support,
+        )
+
+        mock_publication_term_data_source.assert_called_once_with(
+            mock_base_adapter,
+            term_payload_enricher=mock_enricher,
+        )
+        assert result is mock_filtered_adapter
+
 
 @pytest.mark.unit
 class TestChemblTargetProteinClassificationBranch:

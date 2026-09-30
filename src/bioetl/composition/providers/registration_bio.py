@@ -47,6 +47,9 @@ from bioetl.composition.providers._registration_contracts import (
 from bioetl.composition.providers._chembl_target_protein_classification_data_source import (
     TargetProteinClassificationSnapshotDataSource,
 )
+from bioetl.composition.providers.publication_term_pubmed_enricher import (
+    create_pubmed_publication_term_enricher,
+)
 from bioetl.composition.providers.registration_bio_uniprot import (
     _extract_uniprot_mapping_seed_ids,
     _resolve_uniprot_mapping_base_url,
@@ -125,7 +128,20 @@ def _create_chembl_data_source(
     # Wrap derived-entity pipelines with their record-shaping data sources.
     # publication_term is extracted from publication records (1:M relationship)
     if pipeline_config.entity_type == "publication_term":
-        base_adapter = PublicationTermDataSource(base_adapter)
+        enricher = create_pubmed_publication_term_enricher(
+            settings=settings,
+            logger=logger,
+            metrics=metrics,
+            assembly_support=support,
+            pipeline_config=pipeline_config,
+        )
+        if enricher is None:
+            base_adapter = PublicationTermDataSource(base_adapter)
+        else:
+            base_adapter = PublicationTermDataSource(
+                base_adapter,
+                term_payload_enricher=enricher,
+            )
     if pipeline_config.entity_type == "subcellular_fraction":
         base_adapter = SubcellularFractionDataSource(base_adapter)
     if pipeline_config.entity_type == "assay_parameters":

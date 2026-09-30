@@ -34,6 +34,8 @@ import pytest
 from bioetl.application.core.publication_term_runtime import (
     create_term_record,
     extract_terms_from_publication,
+    mesh_terms_from_pubmed_headings,
+    publication_pubmed_id,
 )
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -150,3 +152,65 @@ def test_create_term_record_normalizes_mesh_id_and_qualifier() -> None:
     )
     assert record["mesh_id"] == "D1"
     assert record["qualifier"] == "use"
+
+
+def test_publication_pubmed_id_accepts_positive_int_and_string() -> None:
+    assert publication_pubmed_id({"pubmed_id": 17827018}) == "17827018"
+    assert publication_pubmed_id({"pubmed_id": " 17827018 "}) == "17827018"
+    assert publication_pubmed_id({"pubmed_id": 0}) is None
+    assert publication_pubmed_id({"pubmed_id": ""}) is None
+    assert publication_pubmed_id({}) is None
+
+
+def test_mesh_terms_from_pubmed_headings_maps_descriptor_and_extra_qualifiers() -> None:
+    mesh_terms, keywords = mesh_terms_from_pubmed_headings(
+        [
+            {
+                "descriptor_name": "Acetylene",
+                "descriptor_ui": "D000114",
+                "qualifiers": [
+                    {"name": "pharmacology"},
+                    {"name": "chemistry"},
+                ],
+            },
+            {
+                "descriptor_name": "Humans",
+                "descriptor_ui": "D006801",
+                "qualifiers": [],
+            },
+            {"descriptor_ui": "D000000"},
+        ],
+        keywords=[" bioactivity ", "", 1],
+    )
+
+    assert mesh_terms == [
+        {
+            "mesh_heading": "Acetylene",
+            "mesh_id": "D000114",
+            "mesh_qualifier": "pharmacology",
+        },
+        {
+            "mesh_heading": None,
+            "mesh_id": "D000114",
+            "mesh_qualifier": "chemistry",
+        },
+        {
+            "mesh_heading": "Humans",
+            "mesh_id": "D006801",
+            "mesh_qualifier": None,
+        },
+    ]
+    assert keywords == ["bioactivity"]
+
+    terms = extract_terms_from_publication(
+        {"mesh_terms": mesh_terms, "keywords": keywords},
+        "CHEMBL1137491",
+    )
+    types_and_terms = [(term["term_type"], term["term"]) for term in terms]
+    assert types_and_terms == [
+        ("MESH_HEADING", "Acetylene"),
+        ("MESH_QUALIFIER", "pharmacology"),
+        ("MESH_QUALIFIER", "chemistry"),
+        ("MESH_HEADING", "Humans"),
+        ("KEYWORD", "bioactivity"),
+    ]

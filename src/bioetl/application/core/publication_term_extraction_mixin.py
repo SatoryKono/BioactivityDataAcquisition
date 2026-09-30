@@ -5,9 +5,10 @@ from __future__ import annotations
 from collections.abc import AsyncIterator, Awaitable, Callable
 from typing import TYPE_CHECKING, ClassVar, Protocol, cast
 
-from bioetl.application.core.derived_scan_budget import (
-    DEFAULT_SCAN_RECORDS,
-    bounded_source_records,
+from bioetl.application.core.derived_scan_budget import DEFAULT_SCAN_RECORDS
+from bioetl.application.core.publication_term_enrichment import (
+    PublicationTermPayloadEnricher,
+    yield_terms_from_publications,
 )
 from bioetl.application.core.publication_term_runtime import (
     compute_term_entity_id,
@@ -82,6 +83,7 @@ class PublicationTermExtractionHost(Protocol):
     SOURCE_ENTITY_TYPE: ClassVar[str]
     PUBLICATION_LIMIT_MULTIPLIER: ClassVar[int]
     _data_source: DataSourcePort
+    _term_payload_enricher: PublicationTermPayloadEnricher | None
 
     def _extract_terms_from_publication(
         self,
@@ -108,32 +110,21 @@ class PublicationTermExtractionMixin:
             await _close_publications(publications)
             return
 
-        term_count = 0
-        try:
-            scan_limit = min(
-                normalized_limit * self.PUBLICATION_LIMIT_MULTIPLIER
-                if normalized_limit is not None
-                else DEFAULT_SCAN_RECORDS,
-                DEFAULT_SCAN_RECORDS,
-            )
-            async for publication in bounded_source_records(
-                publications, max_records=scan_limit
-            ):
-                publication_id = publication.get("publication_id") or publication.get(
-                    "document_chembl_id"
-                )
-                if not publication_id:
-                    continue
-                terms = self._extract_terms_from_publication(
-                    publication, str(publication_id)
-                )
-                for term in terms:
-                    yield term
-                    term_count += 1
-                    if normalized_limit is not None and term_count >= normalized_limit:
-                        return
-        finally:
-            await _close_publications(publications)
+        scan_limit = min(
+            normalized_limit * self.PUBLICATION_LIMIT_MULTIPLIER
+            if normalized_limit is not None
+            else DEFAULT_SCAN_RECORDS,
+            DEFAULT_SCAN_RECORDS,
+        )
+        async for term in yield_terms_from_publications(
+            publications,
+            limit=normalized_limit,
+            scan_limit=scan_limit,
+            extract_terms=self._extract_terms_from_publication,
+            enricher=self._term_payload_enricher,
+            close_publications=_close_publications,
+        ):
+            yield term
 
     async def _fetch_publication_terms(
         self: PublicationTermExtractionHost,
