@@ -2494,6 +2494,11 @@ def apply_to_dashboard(
     )
 
     apply_run_explorer_columns(payload)
+    from scripts.ops.observability.grafana._stage_removal_columns import (
+        apply_stage_removal_columns,
+    )
+
+    apply_stage_removal_columns(payload)
     stamp_selector_columns(payload)
     _pack_incident_tail_rows(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"

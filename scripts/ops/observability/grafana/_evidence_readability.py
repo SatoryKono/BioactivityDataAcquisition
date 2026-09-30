@@ -640,7 +640,8 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
         "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; "
         "$issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; "
         "$map(presentation_domains, function($d) { $merge([$d, {"
-        "'status_display': $d.domain = 'Workflow' and $d.verdict = 'N/A' ? '—' : $d.verdict, "
+        "'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, "
+        "'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, "
         "'run_execution': $s.execution_state, 'run_verdict': $s.verdict, "
         "'saved_trust': $t, "
         "'run_reason': $r ? $r : ("
@@ -660,7 +661,7 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
                 run_reason="Reason",
                 saved_trust="Trust",
             )
-    return ["run_execution", "run_verdict", "saved_trust", "run_reason"]
+    return ["run_execution", "saved_trust", "run_reason"]
 
 
 def _apply_reason_columns(panel: dict, fields: list[str]) -> None:
@@ -700,13 +701,13 @@ def _apply_reason_columns(panel: dict, fields: list[str]) -> None:
 def _overview_selected_run_layout(p: dict[int, dict], summary: dict) -> None:
     _table(p[9002], {"Domain": 120, "Status": 115})
     # Three evidence columns need half the first-screen width at narrow viewports.
-    p[9002]["gridPos"].update(x=12, w=12)
+    p[9002]["gridPos"].update(x=0, w=12)
     if 214 in p:
         p[214]["gridPos"].update(x=16, w=8)
     if 215 in p:
         p[215]["gridPos"]["w"] = 12
         p[215]["options"]["cellHeight"] = "sm"
-    summary["gridPos"]["w"] = 12
+    summary["gridPos"].update(x=12, w=12)
     for rule in summary["fieldConfig"]["overrides"]:
         if rule["matcher"].get("options") in {
             "Evidence",
@@ -737,6 +738,26 @@ def _overview_selected_run_layout(p: dict[int, dict], summary: dict) -> None:
                 elif prop["id"] == _CELL:
                     prop["value"]["wrapText"] = False
         _override(panel, "Reason", "custom.inspect", True)
+    for panel in (summary, p[9002]):
+        _override(panel, "Reason", _WRAP, True)
+        _override(panel, "Reason", _CELL, {"type": "auto", "wrapText": True})
+    _override(summary, "Result", _CELL, {"type": "color-text", "wrapText": False})
+    _override(
+        summary,
+        "Result",
+        "mappings",
+        [
+            {
+                "type": "value",
+                "options": {
+                    "SUCCESS": {"text": "SUCCESS", "color": "green"},
+                    "FAILED": {"text": "FAILED", "color": "red"},
+                    "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
+                    "UNFINISHED": {"text": "UNFINISHED", "color": "orange"},
+                },
+            }
+        ],
+    )
     if 9602 in p:
         p[9602]["gridPos"]["y"] = summary["gridPos"]["y"] + 11
         _stack(p[9602])

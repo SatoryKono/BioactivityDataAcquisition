@@ -319,7 +319,7 @@ def _place_selected_run_window(panels: list[dict]) -> None:
     if isinstance(banner, dict):
         banner["gridPos"] = {"x": 0, "y": y, "w": 24, "h": 3}
         y += 3
-    for panel_id, x_pos in ((9603, 0), (9002, 12)):
+    for panel_id, x_pos in ((9603, 12), (9002, 0)):
         panel = by_id.get(panel_id)
         if isinstance(panel, dict):
             panel["gridPos"] = {"x": x_pos, "y": y, "w": 12, "h": 6}
@@ -364,7 +364,7 @@ def _lift_overview_identity(payload: dict) -> None:
         panel = by_id.get(panel_id)
         if isinstance(panel, dict):
             panel["gridPos"] = {
-                "x": 0 if panel_id == 9603 else 12,
+                "x": 12 if panel_id == 9603 else 0,
                 "y": 5,
                 "w": 12,
                 "h": 4,
@@ -400,7 +400,7 @@ def _retain_selected_run_overview(payload: dict) -> None:
         panel["options"]["content"] = (
             '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
             'font-size:16px;line-height:1.2;overflow-wrap:anywhere">'
-            "SELECTED RUN · ${pipeline:text} / ${run_type:text} / ${run_id}. "
+            "${pipeline:text} | ${run_id}<br>"
             "This page assesses that run only. "
             "Identity and processed records are on this screen. "
             "UNKNOWN means saved evidence is missing."
@@ -413,6 +413,9 @@ def _retain_selected_run_overview(payload: dict) -> None:
         )
     _place_selected_run_window(payload["panels"])
     _lift_overview_identity(payload)
+    from scripts.ops.observability.grafana._overview_identity import apply_overview_identity
+
+    apply_overview_identity(payload)
     domains = next(panel for panel in payload["panels"] if panel.get("id") == 9002)
     handoff = domains.get("fieldConfig", {}).get("defaults", {}).get("links") or []
     domains["links"] = [dict(link) for link in handoff]
