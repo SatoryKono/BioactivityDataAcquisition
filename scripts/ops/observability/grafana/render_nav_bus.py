@@ -2494,6 +2494,20 @@ def apply_to_dashboard(
     )
 
     apply_run_explorer_columns(payload)
+    if current_uid == "bioetl-provider-health-v2":
+        payload["panels"] = [
+            panel for panel in payload["panels"] if panel.get("id") not in {9402, 9403}
+        ]
+    from scripts.ops.observability.grafana._stage_removal_columns import (
+        apply_stage_removal_columns,
+    )
+
+    apply_stage_removal_columns(payload)
+<<<<<<< Updated upstream
+    stamp_selector_columns(payload)
+||||||| Stash base
+=======
+>>>>>>> Stashed changes
     _pack_incident_tail_rows(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")

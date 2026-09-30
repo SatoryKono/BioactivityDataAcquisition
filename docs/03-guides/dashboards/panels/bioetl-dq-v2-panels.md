@@ -14,6 +14,11 @@ Selected-run accounting includes input, accepted, Silver/Gold quarantine, contra
 
 ## Key Panels
 
+Inspect Selected Run Stages joins Quarantined, Excluded, Deduplicated and
+Filtered out counters from the exact saved report's layers by stage ID.
+Excluded means contract exclusions. Recorded zero remains zero; an absent
+counter remains UNKNOWN. These columns do not use current telemetry.
+
 ### Understand Evidence Scope
 - **Type:** Text
 - **Purpose:** State that this page is the selected Run ID assessment.

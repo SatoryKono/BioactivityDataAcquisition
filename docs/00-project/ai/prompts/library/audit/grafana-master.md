@@ -9,19 +9,19 @@ runtimes:
 - codex
 - any
 params:
-- SCOPE
-- GRAFANA_VERSION
+- SCOPE = grafana/dashboards
+- GRAFANA_VERSION = detect
 - DASHBOARD_PURPOSE
-- CRITICAL_PANELS
-- REFERENCE_SPEC
-- VIEWPORTS
-- THEMES
-- USER_ROLES
-- TIME_RANGE
-- VARIABLES
-- MONITORING
-- OUTPUT_DIR
-- LANGUAGE
+- CRITICAL_PANELS = derive-from-contracts
+- REFERENCE_SPEC  = repo-contracts-or-gap
+- VIEWPORTS = 1440x900,1920x1080
+- THEMES = actual-theme
+- USER_ROLES = operator
+- TIME_RANGE = record-actual
+- VARIABLES = record-actual
+- MONITORING = false
+- OUTPUT_DIR = reports/audit/grafana/<run_id>
+- LANGUAGE = ru 
 includes:
 - fragments/git-safety.md
 - fragments/debt-budget-ban.md

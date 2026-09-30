@@ -91,9 +91,11 @@ from bioetl.domain.registry.semantic_fields import (
     SemanticFieldRegistry,
 )
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
-from bioetl.domain.run_reports.accounting_snapshots import (
+from bioetl.domain.run_reports.accounting_projections import (
     _is_degraded_balance,
     _is_unknown_balance,
+)
+from bioetl.domain.run_reports.accounting_snapshots import (
     _prefer_mapped_count,
 )
 from bioetl.domain.run_reports.models import (

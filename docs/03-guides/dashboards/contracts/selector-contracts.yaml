@@ -15,6 +15,22 @@ normative_source:
 
     "
 version: 1
+catalog_availability:
+  endpoint: /ops/control-plane/filter-options
+  opt_in: allow_stale=1
+  strict_default: true
+  fresh_seconds: 30
+  maximum_snapshot_age_seconds: 120
+  retry_backoff_seconds: 5
+  maximum_entries: 32
+  maximum_concurrent_refreshes: 4
+  refresh: single_flight_per_exact_query
+  cold_start: bounded_wait_then_typed_503_or_504
+  stale_display: "[STALE catalog]"
+  metadata: [state, snapshot_id, observed_at, age_seconds, refresh_in_progress, last_refresh_error]
+  status_probe: status_only=1
+  error_semantics: never_replace_unavailable_with_empty_or_all
+  cancellation: retain_refresh_and_admission_until_actual_completion
 selector_taxonomy:
   scope:
     - pipeline

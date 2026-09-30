@@ -12,6 +12,7 @@ from bioetl.application.observability.control_plane_evidence.timing import (
 from bioetl.application.services.run_reports.query import ReportIndexEntry
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
 from bioetl.domain.ports import RunManifestPort, WorkflowManifestPort
+from bioetl.interfaces.http._selector_options_cache import SelectorOptionsCache
 
 SelectorCatalogSnapshot = tuple[tuple[RunManifest, ...], tuple[WorkflowManifest, ...]]
 SELECTOR_ENDPOINT_CONCURRENCY = 4
@@ -27,15 +28,16 @@ class SelectorCatalog:
     """
 
     def __init__(self) -> None:
+        self.options = SelectorOptionsCache()
         self._task: asyncio.Task[SelectorCatalogSnapshot] | None = None
         self._snapshot: SelectorCatalogSnapshot | None = None
         self._expires_at = 0.0
         self._report_tasks: dict[
             tuple[str, ...], asyncio.Task[list[ReportIndexEntry]]
         ] = {}
-        self._report_snapshot: (
-            tuple[tuple[str, ...], list[ReportIndexEntry], float] | None
-        ) = None
+        self._report_snapshots: dict[
+            tuple[str, ...], tuple[list[ReportIndexEntry], float]
+        ] = {}
 
     async def read_reports(
         self,
@@ -50,11 +52,10 @@ class SelectorCatalog:
         key = tuple(
             sorted(set(scopes.get("pipeline", ())) - {"", "All", "all", "$__all", ".*"})
         )
-        snapshot = self._report_snapshot
-        if snapshot is not None and snapshot[0] == key and monotonic() < snapshot[2]:
-            return snapshot[1]
+        snapshot = self._report_snapshots.get(key)
+        if snapshot is not None and monotonic() < snapshot[1]:
+            return snapshot[0]
         if key not in self._report_tasks:
-            self._report_snapshot = None
             task = asyncio.create_task(
                 asyncio.to_thread(_read_report_catalog, loader, {"pipeline": key})
             )
@@ -67,8 +68,9 @@ class SelectorCatalog:
     ) -> None:
         self._report_tasks.pop(key)
         if not task.cancelled() and task.exception() is None:
-            self._report_snapshot = (
-                key,
+            if key not in self._report_snapshots and len(self._report_snapshots) >= 32:
+                self._report_snapshots.pop(next(iter(self._report_snapshots)))
+            self._report_snapshots[key] = (
                 task.result(),
                 monotonic() + SELECTOR_CATALOG_TTL_SECONDS,
             )

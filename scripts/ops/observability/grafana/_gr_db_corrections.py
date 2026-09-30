@@ -966,15 +966,8 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
         "{'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) }))"
     )
     panel["targets"] = [t for t in panel["targets"] if t.get("refId") != "StageInput"]
-    outcome_expression = (
-        "$map(rows[parameter != '05 silver_skipped_records' and "
-        "parameter != '10 gold_skipped_records'], function($r) {"
-        "$merge([$r, {'percentage': $contains($string($r.percentage), '%') ? "
-        "$formatNumber($number($substringBefore($r.percentage, '%')), '0.0') & '%' : $r.percentage}])})"
-    )
-    panel["targets"][0].update(
-        parser="uql", uql='parse-json | jsonata "' + outcome_expression + '"'
-    )
+    panel["targets"][0]["parser"] = "backend"
+    panel["targets"][0].pop("uql", None)
     panel["targets"].append(
         {
             "refId": "StageInput",
@@ -989,6 +982,23 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
     )
     panel["transformations"] = [
         {"id": "joinByField", "options": {"byField": "parameter", "mode": "outer"}},
+        {
+            "id": "filterByValue",
+            "options": {
+                "type": "exclude",
+                "match": "any",
+                "filters": [
+                    {
+                        "fieldName": "parameter",
+                        "config": {"id": "equal", "options": {"value": value}},
+                    }
+                    for value in (
+                        "05 silver_skipped_records",
+                        "10 gold_skipped_records",
+                    )
+                ],
+            },
+        },
         {
             "id": "organize",
             "options": {

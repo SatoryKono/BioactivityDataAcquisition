@@ -74,7 +74,7 @@
           "value": "$__all"
         },
         "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}",
+        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
         "hide": 0,
         "includeAll": true,
         "label": "Pipeline",
@@ -94,7 +94,7 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}",
+            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
             "columns": [
               {
                 "selector": "text",
@@ -161,7 +161,7 @@
           "value": "-"
         },
         "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
         "description": "Run ID selector sourced from the local control-plane run-manifest catalog for the current pipeline/run_type scope. Grafana All values are normalized to an unbounded scope, so Run Type = All no longer empties the selector; Pipeline = All exposes aggregate exact-run handoff options from the catalog. This selector remains HTTP-backed and does not reintroduce run_id into Prometheus labels. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
         "includeAll": false,
@@ -188,7 +188,7 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}",
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
             "columns": [
               {
                 "selector": "text",
@@ -366,7 +366,7 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">SELECTED RUN · ${pipeline:text} / ${run_type:text} / ${run_id}. This page assesses that run only. Identity and processed records are on this screen. UNKNOWN means saved evidence is missing.</div>",
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">${pipeline:text} | ${run_id}<br>This page assesses that run only. Identity and processed records are on this screen. UNKNOWN means saved evidence is missing.</div>",
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence"
       },
@@ -506,7 +506,7 @@
       "type": "table",
       "title": "Review Selected Run Status",
       "gridPos": {
-        "x": 0,
+        "x": 12,
         "y": 5,
         "w": 12,
         "h": 6
@@ -610,6 +610,21 @@
                 "value": []
               },
               {
+                "id": "displayName",
+                "value": "Processing"
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
@@ -618,18 +633,26 @@
                       "SELECT RUN": {
                         "text": "—",
                         "color": "text"
+                      },
+                      "SUCCESS": {
+                        "text": "SUCCESS",
+                        "color": "green"
+                      },
+                      "FAILED": {
+                        "text": "FAILED",
+                        "color": "red"
+                      },
+                      "UNKNOWN": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      },
+                      "UNFINISHED": {
+                        "text": "UNFINISHED",
+                        "color": "orange"
                       }
                     }
                   }
                 ]
-              },
-              {
-                "id": "displayName",
-                "value": "Processing"
-              },
-              {
-                "id": "custom.width",
-                "value": 100
               }
             ]
           },
@@ -685,17 +708,6 @@
             },
             "properties": [
               {
-                "id": "custom.wrapText",
-                "value": false
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              },
-              {
                 "id": "displayName",
                 "value": "Reason"
               },
@@ -743,6 +755,17 @@
               {
                 "id": "custom.inspect",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
               }
             ]
           },
@@ -792,7 +815,6 @@
             "include": {
               "names": [
                 "run_execution",
-                "run_verdict",
                 "saved_trust",
                 "run_reason"
               ]
@@ -804,9 +826,8 @@
           "options": {
             "indexByName": {
               "run_execution": 0,
-              "run_verdict": 1,
-              "saved_trust": 2,
-              "run_reason": 3
+              "saved_trust": 1,
+              "run_reason": 2
             },
             "renameByName": {
               "domain": "Domain",
@@ -842,7 +863,7 @@
       "type": "table",
       "title": "Review Run Domains",
       "gridPos": {
-        "x": 12,
+        "x": 0,
         "y": 5,
         "w": 12,
         "h": 6
@@ -897,17 +918,6 @@
             },
             "properties": [
               {
-                "id": "custom.wrapText",
-                "value": false
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              },
-              {
                 "id": "displayName",
                 "value": "Reason"
               },
@@ -955,6 +965,17 @@
               {
                 "id": "custom.inspect",
                 "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
               }
             ]
           },
@@ -999,13 +1020,13 @@
           "source": "url",
           "parser": "uql",
           "format": "table",
-          "root_selector": "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': $d.domain = 'Workflow' and $d.verdict = 'N/A' ? '—' : $d.verdict, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))",
+          "root_selector": "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': $d.domain = 'Workflow' and $d.verdict = 'N/A' ? '—' : $d.verdict, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))\""
+          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))\""
         }
       ],
       "options": {
@@ -1094,197 +1115,30 @@
         "w": 12,
         "h": 7
       },
-      "description": "SELECTED RUN · Shows HTTP-backed identity for an exact Run ID. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live before treating the result as expected. Open Run Explorer for complete run evidence. Inspect value opens full identifiers as selectable plain text.",
+      "description": "SELECTED RUN · Pipeline and full Run ID identify the saved run. Run Type and Started at (with saved UTC offset) characterize its execution. Manifest, schema and available source revision are in Inspect Additional Run Identity. Missing saved values are Not recorded; request failures remain query errors.",
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "left",
+            "inspect": true,
+            "wrapText": true,
             "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": true
-          },
-          "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
-          "links": [
-            {
-              "title": "Check BioETL Ops HTTP health",
-              "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
-              "targetBlank": true
-            },
-            {
-              "title": "Open monitoring backend setup docs",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
-              "targetBlank": true
+              "type": "auto",
+              "wrapText": true
             }
-          ]
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byName",
-              "options": "parameter"
+              "options": "Parameter"
             },
             "properties": [
-              {
-                "id": "displayName",
-                "value": "Parameter"
-              },
               {
                 "id": "custom.width",
-                "value": 210
-              },
-              {
-                "id": "custom.align",
-                "value": "left"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "value"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Value"
-              },
-              {
-                "id": "custom.align",
-                "value": "left"
-              },
-              {
-                "id": "custom.inspect",
-                "value": true
-              },
-              {
-                "id": "links",
-                "value": []
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "raw_value"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "reason"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "deadline_exceeded": {
-                        "text": "QUERY ERROR — deadline exceeded",
-                        "color": "red"
-                      },
-                      "capacity_exhausted": {
-                        "text": "QUERY ERROR — capacity exhausted",
-                        "color": "red"
-                      },
-                      "catalog_unavailable": {
-                        "text": "QUERY ERROR — catalog unavailable",
-                        "color": "red"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Reason"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "deadline_exceeded": {
-                        "text": "QUERY ERROR — deadline exceeded",
-                        "color": "red"
-                      },
-                      "capacity_exhausted": {
-                        "text": "QUERY ERROR — capacity exhausted",
-                        "color": "red"
-                      },
-                      "catalog_unavailable": {
-                        "text": "QUERY ERROR — catalog unavailable",
-                        "color": "red"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Status"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "ERROR": {
-                        "text": "ERROR",
-                        "color": "red"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "status"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "ERROR": {
-                        "text": "ERROR",
-                        "color": "red"
-                      }
-                    }
-                  }
-                ]
+                "value": 125
               }
             ]
           }
@@ -1295,10 +1149,10 @@
           "format": "table",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "display_rows",
+          "root_selector": "($v := function($x){$exists($x) and $x != \"\" ? $string($x) : \"Not recorded in saved run evidence\"}; [{\"parameter\":\"Run ID\",\"value\":$v(run_id)},{\"parameter\":\"Pipeline\",\"value\":$v(pipeline)},{\"parameter\":\"Run Type\",\"value\":$v(run_type)},{\"parameter\":\"Started at\",\"value\":started_at ? $substring(started_at,0,10) & \" \" & $substring(started_at,11,5) & \" \" & ($substring(started_at,-1) = \"Z\" ? \"UTC\" : $substring(started_at,-6)) : \"Not recorded in saved run evidence\"}])",
           "source": "url",
           "type": "json",
-          "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&workflow=${workflow:csv}",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -1307,33 +1161,23 @@
       ],
       "options": {
         "showHeader": true,
+        "cellHeight": "sm",
         "footer": {
-          "show": true,
-          "enablePagination": true
-        },
-        "cellHeight": "sm"
+          "show": false,
+          "enablePagination": false
+        }
       },
       "transformations": [
         {
           "id": "organize",
           "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true,
-              "Value": true,
-              "raw_value": true
-            },
             "indexByName": {
               "parameter": 0,
               "value": 1
             },
             "renameByName": {
               "parameter": "Parameter",
-              "value": "Value",
-              "Value": "value",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
+              "value": "Value"
             }
           }
         }
@@ -1696,6 +1540,275 @@
               "Value #C": "Series C"
             }
           }
+        }
+      ]
+    },
+    {
+      "id": 9399,
+      "type": "row",
+      "title": "Inspect Additional Run Identity",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 9390,
+          "type": "table",
+          "title": "Inspect Full Run Identity",
+          "gridPos": {
+            "x": 0,
+            "y": 19,
+            "w": 24,
+            "h": 12
+          },
+          "description": "SELECTED RUN · Shows HTTP-backed identity for an exact Run ID. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live before treating the result as expected. Open Run Explorer for complete run evidence. Inspect value opens full identifiers as selectable plain text.",
+          "datasource": "BioETL Ops HTTP",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": true
+              },
+              "unit": "none",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
+              "links": [
+                {
+                  "title": "Check BioETL Ops HTTP health",
+                  "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
+                  "targetBlank": true
+                },
+                {
+                  "title": "Open monitoring backend setup docs",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+                  "targetBlank": true
+                }
+              ]
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "parameter"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Parameter"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 210
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "left"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "value"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Value"
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "left"
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  },
+                  {
+                    "id": "links",
+                    "value": []
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "raw_value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "display_rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": true,
+              "enablePagination": true
+            },
+            "cellHeight": "sm"
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "Value": true,
+                  "raw_value": true
+                },
+                "indexByName": {
+                  "parameter": 0,
+                  "value": 1
+                },
+                "renameByName": {
+                  "parameter": "Parameter",
+                  "value": "Value",
+                  "Value": "value",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
+                }
+              }
+            }
+          ]
         }
       ]
     }

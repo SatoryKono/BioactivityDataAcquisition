@@ -949,6 +949,8 @@ def stamp_selector_columns(payload: dict[str, object]) -> None:
         if not url.startswith("/ops/control-plane/filter-options?"):
             continue
         url = url.replace("response_shape=list", "response_shape=options")
+        if "allow_stale=" not in url:
+            url += "&allow_stale=1"
         infinity["url"] = url
         infinity["parser"] = "backend"
         infinity["root_selector"] = SELECTOR_ROWS
