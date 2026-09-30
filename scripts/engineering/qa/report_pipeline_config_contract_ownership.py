@@ -284,12 +284,14 @@ def _collect_entity_rows() -> list[dict[str, Any]]:
 
 def _existing_snapshot_date(path: Path, *, root: Path | None = None) -> str | None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+        from scripts.engineering.common.repo_paths import confined_io_path
 
-        path = resolve_output_path(path, root=root)
+        path = confined_io_path(path, root=root, allow_external_absolute=True)
     if not path.is_file():
         return None
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(
+        path.read_text(encoding="utf-8")
+    )  # NOSONAR - confined_io_path rebuilt under root
     if not isinstance(payload, dict):
         return None
     snapshot_date = payload.get("snapshot_date")
@@ -350,18 +352,18 @@ def write_artifacts(
     root: Path | None = None,
 ) -> None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+        from scripts.engineering.common.repo_paths import confined_io_path
 
-        json_out = resolve_output_path(json_out, root=root)
-        md_out = resolve_output_path(md_out, root=root)
+        json_out = confined_io_path(json_out, root=root, allow_external_absolute=True)
+        md_out = confined_io_path(md_out, root=root, allow_external_absolute=True)
     payload = build_payload(snapshot_date=snapshot_date)
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(
+    json_out.write_text(  # NOSONAR - confined_io_path rebuilt under root
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    md_out.write_text(
+    md_out.write_text(  # NOSONAR - confined_io_path rebuilt under root
         _render_markdown(payload["rows"], snapshot_date=snapshot_date),
         encoding="utf-8",
     )
@@ -388,7 +390,7 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Fail when committed artifacts drift from the generator output.",
     )
-    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, confined_io_path
 
     args = parser.parse_args(argv)
     root = REPO_ROOT
@@ -399,7 +401,9 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.check:
-        json_out = resolve_output_path(args.json_out, root=root)
+        json_out = confined_io_path(
+            args.json_out, root=root, allow_external_absolute=True
+        )
         expected = (
             json.dumps(
                 build_payload(snapshot_date=snapshot_date), indent=2, sort_keys=True

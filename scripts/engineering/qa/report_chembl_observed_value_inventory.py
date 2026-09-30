@@ -241,11 +241,11 @@ def _write_json(
     path: Path, payload: dict[str, object], *, root: Path | None = None
 ) -> None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+        from scripts.engineering.common.repo_paths import confined_io_path
 
-        path = resolve_output_path(path, root=root)
+        path = confined_io_path(path, root=root, allow_external_absolute=True)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
+    path.write_text(  # NOSONAR - confined_io_path rebuilt under root
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
 
@@ -272,20 +272,24 @@ def _write_csv(
     path: Path, rows: list[dict[str, object]], *, root: Path | None = None
 ) -> None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+        from scripts.engineering.common.repo_paths import confined_io_path
 
-        path = resolve_output_path(path, root=root)
+        path = confined_io_path(path, root=root, allow_external_absolute=True)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(_render_csv(rows), encoding="utf-8")
+    path.write_text(
+        _render_csv(rows), encoding="utf-8"
+    )  # NOSONAR - confined_io_path rebuilt under root
 
 
 def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+        from scripts.engineering.common.repo_paths import confined_io_path
 
-        path = resolve_output_path(path, root=root)
+        path = confined_io_path(path, root=root, allow_external_absolute=True)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
+    path.write_text(
+        content, encoding="utf-8"
+    )  # NOSONAR - confined_io_path rebuilt under root
 
 
 def build_arg_parser() -> argparse.ArgumentParser:

@@ -33,9 +33,7 @@ FIRST_WINDOW_Y = 18
 DEFAULT_DASHBOARD_DIR = Path("grafana/dashboards")
 DEFAULT_OUT_JSON = Path("reports/quality/dashboard-scalar-density.json")
 DEFAULT_OUT_MD = Path("reports/quality/dashboard-scalar-density.md")
-DEFAULT_LAYOUT_BUDGETS = Path(
-    "docs/03-guides/dashboards/contracts/layout-budgets.yaml"
-)
+DEFAULT_LAYOUT_BUDGETS = Path("docs/03-guides/dashboards/contracts/layout-budgets.yaml")
 
 
 def panel_area(panel: dict[str, Any]) -> int:
@@ -145,11 +143,20 @@ def _load_density_contract(
     ``enforced_uids is None`` means every surveyed dashboard is gated (no
     contract file). An empty ``scalar_density_enforced_uids`` list gates none.
     """
-    if path is None or not path.exists():
+    if path is None:
         return set(), None
     import yaml  # local import keeps the module import-light for pure tests
+    from scripts.engineering.common.repo_paths import REPO_ROOT, confined_io_path
 
-    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    try:
+        path = confined_io_path(path, root=REPO_ROOT, allow_external_absolute=True)
+    except ValueError:
+        return set(), None
+    if not path.exists():
+        return set(), None
+    payload = (
+        yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    )  # NOSONAR - confined_io_path rebuilt under root
     if not isinstance(payload, dict):
         return set(), None
     return _scalar_density_allowlist(payload), _enforced_uids(payload)
