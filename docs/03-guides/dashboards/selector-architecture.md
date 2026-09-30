@@ -50,6 +50,29 @@ Dashboard-to-dashboard navigation passes only the shared shell
 `workflow/pipeline/run_type` plus target-specific bounded vars; it does not rely
 on native Grafana semantic variable copying.
 
+## Selector catalog availability
+
+Generated HTTP variables opt into `allow_stale=1`. The availability policy is
+defined in `catalog_availability` in the machine-readable contract above.
+Ready options include the complete projection, including run labels, so serving
+them does not reread manifests, ledger entries, or report identities. Concurrent
+requests for the same query share one refresh. Scope, timezone and selection
+policy are isolated by the cache key.
+
+An eligible older snapshot is marked `[STALE catalog]` in option labels; values
+remain unchanged. This mark concerns the option catalog, not the run verdict.
+The JSON `catalog` object exposes snapshot identity, age, refresh state and the
+last refresh error. Adding `status_only=1` to the same query inspects this state
+without starting work. A cold or expired catalog still returns typed 503/504;
+it is never converted into `NO MATCHES` or `All`. Callers without the opt-in keep
+strict behavior. Startup prewarms the unscoped workflow options; other scopes
+warm on demand. Shutdown stops new refresh admission and bounds its wait while
+existing disk work drains.
+
+Deploy the backend before provisioning the generated dashboard changes. To
+roll back the opt-in, remove `allow_stale=1` in the canonical generator and
+regenerate the dashboards before rolling back the backend.
+
 ## Dashboard families
 
 Shipped portfolio is **exactly 7 dashboards** (`0..6`). Machine inventory:

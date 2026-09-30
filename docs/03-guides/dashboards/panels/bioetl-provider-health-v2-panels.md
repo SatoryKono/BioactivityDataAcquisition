@@ -34,17 +34,10 @@ diagnostics use it. Navigation without provider context resets Provider=All.
 - **Purpose:** Current provider severity for the selected scope.
 - **Data sources:** `bioetl_provider_current_status`
 
-### 4. Inspect Run Identity
-- **Type:** Table
-- **Purpose:** Show run ID, pipeline, run type, and timestamp.
-- **Data sources:** BioETL Ops HTTP control-plane identity endpoint
-  `/ops/control-plane/identity-table`; this is not a Prometheus panel.
+### 4–5. Run identity and processed records — removed
 
-### 5. Inspect Processed Records
-- **Type:** Table
-- **Purpose:** Show Bronze/Silver/Gold counts and denominator-explicit percentages; both numeric columns are right-aligned.
-- **Data sources:** BioETL Ops HTTP
-  `/ops/observability/processed-records`; this is not a Prometheus panel.
+These panels are no longer shown on Provider Health. Review Provider Check
+uses nine of 24 grid columns, leaving fifteen columns for the scope explanation.
 
 ### 6. Monitor Fleet Status
 - **Type:** Table
@@ -236,8 +229,6 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | ID | Title | Type |
 | --- | --- | --- |
 | 9400 | Understand Selected Run | text |
-| 9402 | Inspect Run Identity | table |
-| 9403 | Inspect Processed Records | table |
 | 9461 | Review Provider Check | stat |
 | 9460 | Review Provider Evidence | table |
 <!-- END SHIPPED PANEL INVENTORY -->

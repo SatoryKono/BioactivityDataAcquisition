@@ -971,9 +971,7 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
         "{'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) }))"
     )
     panel["targets"] = [t for t in panel["targets"] if t.get("refId") != "StageInput"]
-    # Preserve the shipped backend parser; apply row hiding in Grafana instead
-    # of silently restoring the old frontend UQL query during regeneration.
-    panel["targets"][0].update(parser="backend", root_selector="rows")
+    panel["targets"][0]["parser"] = "backend"
     panel["targets"][0].pop("uql", None)
     panel["targets"].append(
         {

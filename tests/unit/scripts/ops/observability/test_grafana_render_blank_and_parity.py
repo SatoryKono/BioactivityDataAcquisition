@@ -16,7 +16,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from scripts.engineering.qa import report_dashboard_inventory as inventory
 from scripts.ops.observability.grafana import rerender_grafana_screenshots as rerender
 
@@ -79,10 +78,11 @@ def test_compare_deployed_dashboards_detects_query_drift(tmp_path: Path) -> None
 
     def _mutate(node: object) -> bool:
         if isinstance(node, dict):
-            expr = node.get("expr")
-            if isinstance(expr, str) and expr:
-                node["expr"] = expr + " #drift"
-                return True
+            for key in ("expr", "query"):
+                value = node.get(key)
+                if isinstance(value, str) and value:
+                    node[key] = value + " #drift"
+                    return True
             for value in node.values():
                 if _mutate(value):
                     return True

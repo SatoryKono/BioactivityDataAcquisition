@@ -213,7 +213,6 @@ _OVERVIEW_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9603: (0, 5, 12, 7),
     9002: (12, 5, 12, 7),
     9300: (0, 12, 24, 7),
-    9301: (0, 18, 24, 8),
 }
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 2, 24, 3),
@@ -2494,6 +2493,16 @@ def apply_to_dashboard(
     )
 
     apply_run_explorer_columns(payload)
+    if current_uid == "bioetl-provider-health-v2":
+        payload["panels"] = [
+            panel for panel in payload["panels"] if panel.get("id") not in {9402, 9403}
+        ]
+    from scripts.ops.observability.grafana._stage_removal_columns import (
+        apply_stage_removal_columns,
+    )
+
+    apply_stage_removal_columns(payload)
+    stamp_selector_columns(payload)
     _pack_incident_tail_rows(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")

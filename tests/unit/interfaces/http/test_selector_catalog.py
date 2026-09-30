@@ -17,6 +17,34 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
+async def test_opt_in_reuses_projection_and_status_does_not_refresh(monkeypatch):
+    host = HealthServer()
+    host._send_payload_response = AsyncMock()
+    loader = AsyncMock(return_value={"items": [{"text": "assay", "value": "assay"}]})
+    monkeypatch.setattr(routing, "_filter_options_payload", loader)
+    query = {"dimension": "workflow", "response_shape": "options", "allow_stale": "1"}
+    await asyncio.gather(
+        *(
+            routing.handle_control_plane_filter_options(host, None, query)
+            for _ in range(20)
+        )
+    )
+    assert loader.await_count == 1
+    assert all(
+        call.args[1] == 200 for call in host._send_payload_response.call_args_list
+    )
+    await routing.handle_control_plane_filter_options(
+        host, None, {**query, "status_only": "1"}
+    )
+    assert host._send_payload_response.call_args.args[2]["catalog"]["state"] == "fresh"
+    assert loader.await_count == 1
+    await routing.handle_control_plane_filter_options(
+        host, None, {**query, "allow_stale": "0"}
+    )
+    assert loader.await_count == 2
+
+
+@pytest.mark.asyncio
 async def test_report_index_scan_is_shared_scoped_and_expires_without_caching_errors(
     monkeypatch,
 ):
@@ -30,6 +58,8 @@ async def test_report_index_scan_is_shared_scoped_and_expires_without_caching_er
     await catalog.read_reports({**scopes, "workflow": ("workflow_b",)}, loader)
     assert loader.call_count == 1
     await catalog.read_reports({"pipeline": ("chembl_assay",)}, loader)
+    assert loader.call_count == 2
+    await catalog.read_reports(scopes, loader)
     assert loader.call_count == 2
     clock[0] = 5.0
     loader.side_effect = OSError("unreadable report index")

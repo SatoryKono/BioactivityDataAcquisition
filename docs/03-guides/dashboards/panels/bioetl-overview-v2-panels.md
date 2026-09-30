@@ -12,6 +12,16 @@ multiple runs; use RunLedger for exact reconciliation.
 
 ## Key Panels
 
+Review Run Identity shows four saved fields without pagination: full Run ID,
+Pipeline, Run Type, and Started at with the saved UTC offset. Additional manifest,
+schema and source identifiers remain in Inspect Additional Run Identity.
+
+The scope banner shows `Pipeline | Run ID`, followed by a line break. Run Type
+remains available in the selector. For `cached_bronze_no_remote_probe`, Review
+Run Domains displays "Cached Bronze used; provider API was not called."
+The saved Provider verdict remains N/A because no remote check was performed;
+the table displays an em dash, as for Workflow, and wraps the reason text.
+
 ### Overall verdict
 
 The stat panel beside the selected-run scope banner repeats `run_verdict` from
@@ -151,11 +161,10 @@ uses the remaining 17 columns.
 - **Data sources:** BioETL Ops HTTP control-plane identity endpoint
   `/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
-### 23. Review Processed Records
-- **Type:** Table
-- **Purpose:** Show Bronze/Silver/Gold counts and denominator-explicit percentages; both numeric columns are right-aligned.
-- **Data sources:** BioETL Ops HTTP
-  `/ops/observability/processed-records`; this is not a Prometheus panel.
+### 23. Review Processed Records — removed
+
+Removed from Run Overview. Run Domains uses the wider left column; the compact
+Selected Run Status and Run Identity panels occupy the right column.
 
 ### 24. Inspect Alerts
 - **Type:** Row
@@ -230,6 +239,9 @@ Shipped in `bioetl-overview-v2.json`.
 ### 28. Review Selected Run Status
 
 Shipped in `bioetl-overview-v2.json`.
+The table sits to the right of Review Run Domains and shows Processing,
+Replay readiness, and a word-wrapped Reason. SUCCESS is green. Overall verdict
+is displayed in its dedicated stat panel rather than repeated in this table.
 
 ### 100. Inspect Full First Action — removed from shipped JSON
 
@@ -259,5 +271,4 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9603 | Review Selected Run Status | table |
 | 9002 | Review Run Domains | table |
 | 9300 | Review Run Identity | table |
-| 9301 | Review Processed Records | table |
 <!-- END SHIPPED PANEL INVENTORY -->

@@ -50,10 +50,15 @@ def test_overview_paired_tables_have_fixed_rows_and_inspectable_reasons():
     panels = {p["id"]: p for p in _panels(dashboard["panels"])}
     summary, domains = panels[9603], panels[9002]
     assert summary["gridPos"]["y"] == domains["gridPos"]["y"]
+    assert domains["gridPos"]["x"] == 0
+    assert summary["gridPos"]["x"] == 15
+    assert summary["gridPos"]["w"] == 9
+    assert summary["gridPos"]["h"] == 4
+    assert domains["gridPos"]["h"] == 11
+    assert 9301 not in panels
     for panel in (summary, domains):
         assert panel["options"]["cellHeight"] == "lg"
         assert panel["options"]["footer"]["enablePagination"] is False
-        assert panel["gridPos"]["h"] == 11
         custom = panel["fieldConfig"]["defaults"]["custom"]
         assert custom["inspect"] is True
         assert custom["wrapText"] is False
@@ -61,9 +66,11 @@ def test_overview_paired_tables_have_fixed_rows_and_inspectable_reasons():
         for rule in panel["fieldConfig"]["overrides"]:
             for prop in rule["properties"]:
                 if prop["id"] == "custom.wrapText":
-                    assert prop["value"] is False
+                    assert prop["value"] is (rule["matcher"]["options"] == "Reason")
                 if prop["id"] == "custom.cellOptions":
-                    assert prop["value"]["wrapText"] is False
+                    assert prop["value"]["wrapText"] is (
+                        rule["matcher"]["options"] == "Reason"
+                    )
     trust = next(
         o
         for o in summary["fieldConfig"]["overrides"]
@@ -113,11 +120,12 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
             for t in panel["transformations"]
             if t["id"] == "filterFieldsByName"
         )
-        assert (
-            "run_verdict"
-            if panel is summary and uid == "bioetl-overview-v2"
-            else "verdict"
-        ) in fields
+        if panel is summary and uid == "bioetl-overview-v2":
+            assert "run_verdict" not in fields
+        elif panel is not summary and uid == "bioetl-overview-v2":
+            assert "status_display" in fields
+        else:
+            assert "verdict" in fields
         assert (
             "run_reason"
             if panel is summary and uid == "bioetl-overview-v2"
@@ -130,7 +138,7 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
             if o["matcher"]["options"] == "Reason"
         )
         props = {p["id"]: p["value"] for p in reason["properties"]}
-        assert props["custom.cellOptions"]["wrapText"] is (uid != "bioetl-overview-v2")
+        assert props["custom.cellOptions"]["wrapText"] is True
         if uid == "bioetl-overview-v2":
             assert props["custom.inspect"] is True
             assert panel["options"]["cellHeight"] == "lg"

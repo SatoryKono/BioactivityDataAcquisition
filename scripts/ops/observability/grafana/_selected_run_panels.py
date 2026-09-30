@@ -697,9 +697,9 @@ def _bind_provider_variable_to_run(variable: dict) -> None:
 
 def _style_provider_check(panels: list[dict]) -> None:
     by_id = {panel["id"]: panel for panel in panels}
-    by_id[9400]["gridPos"].update(x=0, y=2, w=18, h=3)
+    by_id[9400]["gridPos"].update(x=0, y=2, w=15, h=3)
     review = by_id[9461]
-    review["gridPos"].update(x=18, y=2, w=6, h=3)
+    review["gridPos"].update(x=15, y=2, w=9, h=3)
     review["type"] = "stat"
     review["description"] = (
         "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. "
@@ -782,7 +782,8 @@ def _style_provider_check(panels: list[dict]) -> None:
         }
     ]
     for panel_id in (9402, 9403):
-        by_id[panel_id]["gridPos"]["y"] = 10
+        if panel_id in by_id:
+            by_id[panel_id]["gridPos"]["y"] = 10
 
 
 def prune_provider_health_panels(payload: dict[str, object]) -> None:
@@ -951,6 +952,8 @@ def stamp_selector_columns(payload: dict[str, object]) -> None:
         if not url.startswith("/ops/control-plane/filter-options?"):
             continue
         url = url.replace("response_shape=list", "response_shape=options")
+        if "allow_stale=" not in url:
+            url += "&allow_stale=1"
         infinity["url"] = url
         infinity["parser"] = "backend"
         infinity["root_selector"] = SELECTOR_ROWS
