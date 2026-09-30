@@ -449,7 +449,7 @@
         "y": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+      "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -926,7 +926,7 @@
     },
     {
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Five retention rows for this Run ID: policy, evidence floor, required evidence, snapshot evidence, and archive. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. Archive N/A means a referenced policy does not require archiving; it is not proof of an archive. Archive verified means local copies and restore evidence passed current hash and identity checks. Backend unavailable is QUERY ERROR.",
+      "description": "SELECTED RUN · Five retention rows for this Run ID: policy, evidence floor, required evidence, snapshot evidence, and archive. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. Archive N/A means a referenced policy does not require archiving; it is not proof of an archive. Archive verified means local copies and restore evidence passed current hash and identity checks.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1578,7 +1578,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Lineage closure, identity consistency, cycle freedom, and persistence profile for this Run ID. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · Lineage closure, identity consistency, cycle freedom, and persistence profile for this Run ID. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1842,7 +1842,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2068,7 +2068,7 @@
           "id": 9423,
           "type": "table",
           "title": "Review Exact Replay Checks",
-          "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass. Valid-empty check output stays VALID EMPTY. Request failure is QUERY ERROR. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass. Valid-empty check output stays VALID EMPTY. Request failure is QUERY ERROR.",
           "datasource": "BioETL Ops HTTP",
           "targets": [
             {
@@ -2173,7 +2173,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2412,7 +2412,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Full identifiers for this Run ID. Use Inspect to copy a hash or reference. A short cell is not a missing value. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · Full identifiers for this Run ID. Use Inspect to copy a hash or reference. A short cell is not a missing value.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3049,7 +3049,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Anchors missing for this Run ID. A missing anchor is not a pass. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · Anchors missing for this Run ID. A missing anchor is not a pass.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3624,7 +3624,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Anchor list behind Review Exact Replay Readiness: source configuration, DQ policy, input snapshots, replay blockers, lineage, artifacts, and ledger watermark. The verdict is the readiness stat, not this table. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · Anchor list behind Review Exact Replay Readiness: source configuration, DQ policy, input snapshots, replay blockers, lineage, artifacts, and ledger watermark. The verdict is the readiness stat, not this table.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4231,7 +4231,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4856,7 +4856,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Extra forensic anchors for this Run ID: hashes, artifacts, component runs, checkpoint files, and DQ reports. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · Extra forensic anchors for this Run ID: hashes, artifacts, component runs, checkpoint files, and DQ reports.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -5508,7 +5508,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Identity card for this Run ID: pipeline, run type, status, and saved identifiers. This is not the replay-readiness verdict. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · Identity card for this Run ID: pipeline, run type, status, and saved identifiers. This is not the replay-readiness verdict.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -5840,7 +5840,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Bronze, Silver, and Gold counts for this Run ID. Counts are not a quality verdict. Open Run Explorer for this same Run ID. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · Bronze, Silver, and Gold counts for this Run ID. Counts are not a quality verdict. Open Run Explorer for this same Run ID.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -6266,7 +6266,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Failure counts for this Run ID in the fixed categories api, dq, schema, storage, network, validation, and unknown. UNKNOWN is not zero failures. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · Failure counts for this Run ID in the fixed categories api, dq, schema, storage, network, validation, and unknown. UNKNOWN is not zero failures.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -6559,7 +6559,7 @@
         "y": 2
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Exact replay readiness of the selected Run ID from saved inputs. READY means required checks passed, not that a replay already ran and not permission to write current tables. BLOCKED is a proven gap. INSUFFICIENT means a required check could not be completed. UNSUPPORTED means this family cannot exact-replay. SELECT RUN and QUERY ERROR are request states. N/A is not zero. CURRENT Prometheus does not change this verdict. OK/WARN/CRIT color the replay readiness verdict, not live fleet health. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+      "description": "SELECTED RUN · Exact replay readiness of the selected Run ID from saved inputs. READY means required checks passed, not that a replay already ran and not permission to write current tables. BLOCKED is a proven gap. INSUFFICIENT means a required check could not be completed. UNSUPPORTED means this family cannot exact-replay. SELECT RUN and QUERY ERROR are request states. N/A is not zero. CURRENT Prometheus does not change this verdict. OK/WARN/CRIT color the replay readiness verdict, not live fleet health.",
       "options": {
         "reduceOptions": {
           "values": false,
@@ -6687,7 +6687,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Search persisted runs and choose one Run ID. This table does not score the Run ID already selected on this dashboard. No matching rows are VALID EMPTY. Backend unavailable is QUERY ERROR.",
+          "description": "SELECTED RUN · Search persisted runs and choose one Run ID. This table does not score the Run ID already selected on this dashboard.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm"
