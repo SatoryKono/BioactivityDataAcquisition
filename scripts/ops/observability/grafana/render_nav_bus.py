@@ -2503,11 +2503,7 @@ def apply_to_dashboard(
     )
 
     apply_stage_removal_columns(payload)
-<<<<<<< Updated upstream
     stamp_selector_columns(payload)
-||||||| Stash base
-=======
->>>>>>> Stashed changes
     _pack_incident_tail_rows(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")

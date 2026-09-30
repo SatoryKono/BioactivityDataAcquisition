@@ -366,7 +366,7 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">${pipeline:text} | ${run_id}<br>This page assesses that run only. Identity and processed records are on this screen. UNKNOWN means saved evidence is missing.</div>",
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">${pipeline:text} | ${run_id}<br>This page assesses that run only. Run identity and domain assessments are on this screen. UNKNOWN means saved evidence is missing.</div>",
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence"
       },
@@ -506,10 +506,10 @@
       "type": "table",
       "title": "Review Selected Run Status",
       "gridPos": {
-        "x": 12,
+        "x": 15,
         "y": 5,
-        "w": 12,
-        "h": 6
+        "w": 9,
+        "h": 4
       },
       "datasource": {
         "type": "datasource",
@@ -865,8 +865,8 @@
       "gridPos": {
         "x": 0,
         "y": 5,
-        "w": 12,
-        "h": 6
+        "w": 15,
+        "h": 11
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -1110,10 +1110,10 @@
       "type": "table",
       "title": "Review Run Identity",
       "gridPos": {
-        "x": 0,
-        "y": 11,
-        "w": 12,
-        "h": 7
+        "x": 15,
+        "y": 9,
+        "w": 9,
+        "h": 8
       },
       "description": "SELECTED RUN · Pipeline and full Run ID identify the saved run. Run Type and Started at (with saved UTC offset) characterize its execution. Manifest, schema and available source revision are in Inspect Additional Run Identity. Missing saved values are Not recorded; request failures remain query errors.",
       "datasource": "BioETL Ops HTTP",
@@ -1178,366 +1178,6 @@
             "renameByName": {
               "parameter": "Parameter",
               "value": "Value"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": 9301,
-      "type": "table",
-      "title": "Review Processed Records",
-      "gridPos": {
-        "x": 12,
-        "y": 11,
-        "w": 12,
-        "h": 7
-      },
-      "description": "SELECTED RUN · Shows HTTP-backed Bronze, Silver, and Gold record counts and outcomes. Zero is a recorded count. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live. Open Run Explorer for complete accounting. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
-      "datasource": "BioETL Ops HTTP",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": true
-          },
-          "decimals": 0,
-          "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs. UNKNOWN/QUERY ERROR if a selected run has no accounting.",
-          "links": [
-            {
-              "title": "Check BioETL Ops HTTP health",
-              "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
-              "targetBlank": true
-            },
-            {
-              "title": "Open monitoring backend setup docs",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
-              "targetBlank": true
-            }
-          ],
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "text"
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "parameter"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "01 bronze_records": {
-                        "text": "bronze [total]",
-                        "color": "#cd7f32"
-                      },
-                      "02 silver_valid_records": {
-                        "text": "silver [valid]",
-                        "color": "#c0c0c0"
-                      },
-                      "03 silver_filtered_out_records": {
-                        "text": "silver [filtered out]"
-                      },
-                      "04 silver_quarantined_records": {
-                        "text": "silver [quarantined]"
-                      },
-                      "05 silver_skipped_records": {
-                        "text": "silver [skipped]"
-                      },
-                      "06 silver_deduplicated_records": {
-                        "text": "silver [deduplicated]"
-                      },
-                      "07 gold_written_records": {
-                        "text": "gold [valid]",
-                        "color": "#d4af37"
-                      },
-                      "08 gold_excluded_by_contract_records": {
-                        "text": "gold [excluded]"
-                      },
-                      "09 gold_quarantined_records": {
-                        "text": "gold [quarantined]"
-                      },
-                      "10 gold_skipped_records": {
-                        "text": "gold [skipped]"
-                      },
-                      "11 gold_deduplicated_records": {
-                        "text": "gold [deduplicated]"
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                "id": "custom.align",
-                "value": "left"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text",
-                  "wrapText": true
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "value"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "count"
-              },
-              {
-                "id": "custom.width",
-                "value": 70
-              },
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "percentage"
-            },
-            "properties": [
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "row_status"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": ""
-              },
-              {
-                "id": "custom.width",
-                "value": 1
-              },
-              {
-                "id": "custom.align",
-                "value": "center"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text",
-                  "applyToRow": true
-                }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "silver_deficit": {
-                        "text": "",
-                        "color": "red"
-                      },
-                      "gold_deficit": {
-                        "text": "",
-                        "color": "red"
-                      },
-                      "": {
-                        "text": "",
-                        "color": "rgba(0,0,0,0)"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "count"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "count"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 70
-              },
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "No data": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      },
-                      "UNKNOWN": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      }
-                    }
-                  },
-                  {
-                    "type": "special",
-                    "options": {
-                      "match": "null",
-                      "result": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "format": "table",
-          "parser": "backend",
-          "refId": "A",
-          "root_selector": "rows",
-          "source": "url",
-          "type": "json",
-          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-          "url_options": {
-            "data": "",
-            "method": "GET"
-          }
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": false,
-            "displayName": "parameter"
-          }
-        ],
-        "footer": {
-          "show": true,
-          "enablePagination": true
-        },
-        "cellHeight": "sm"
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "row_status": true,
-              "percintage": true
-            },
-            "indexByName": {
-              "parameter": 0,
-              "value": 1,
-              "count": 1,
-              "percentage": 2,
-              "row_status": 3
-            },
-            "renameByName": {
-              "parameter": "parameter",
-              "value": "count",
-              "percentage": "percentage",
-              "row_status": "",
-              "Value": "count",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
             }
           }
         }
