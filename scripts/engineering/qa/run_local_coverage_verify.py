@@ -171,6 +171,7 @@ def _bash_safe_path(path: Path) -> str:
         return resolved.as_posix()
 
 
+<<<<<<< HEAD
 def _windows_bash() -> str:
     """Resolve a Windows Git-bash for shard runners.
 
@@ -206,12 +207,40 @@ def _windows_bash() -> str:
             and Path(candidate).is_file()
         ):
             return candidate
+||||||| 14c0612170dd
+=======
+def _bash_executable() -> str:
+    """Resolve a POSIX bash for shard commands.
+
+    On Windows, ``bash`` resolves to ``System32\\bash.exe`` (the WSL launcher)
+    before PATH is consulted; shards then run under WSL, where ``COVERAGE_FILE``
+    and junit paths never reach the Windows checkout. ``BIOETL_BASH`` overrides;
+    otherwise prefer a non-System32 bash on PATH and fall back to a stock Git
+    for Windows install.
+    """
+    override = os.environ.get("BIOETL_BASH")
+    if override:
+        return override
+    for candidate in (shutil.which("bash"), shutil.which("sh")):
+        if candidate and "system32" not in candidate.lower():
+            return candidate
+    program_files = os.environ.get("ProgramFiles", r"C:\Program Files")
+    git_bash = Path(program_files) / "Git" / "usr" / "bin" / "bash.exe"
+    if git_bash.is_file():
+        return str(git_bash)
+>>>>>>> master20260930-1
     return "bash"
 
 
 def _command(shard: Shard, junit: Path) -> list[str]:
     command = [
+<<<<<<< HEAD
         _windows_bash(),
+||||||| 14c0612170dd
+        "bash",
+=======
+        _bash_executable(),
+>>>>>>> master20260930-1
         "scripts/engineering/dev/run_pytest.sh",
         "--narrow",
         *shard.paths,
@@ -317,6 +346,23 @@ def main(argv: list[str] | None = None) -> int:
             "PYTHONPYCACHEPREFIX": str(scratch / "pycache"),
         }
     )
+    # When shards run through the WSL launcher only variables named in WSLENV
+    # cross the boundary; plain Windows env vars are dropped, which previously
+    # made every shard write a throwaway `.coverage` in the checkout root.
+    wslenv_entries = [
+        entry for entry in os.environ.get("WSLENV", "").split(":") if entry
+    ]
+    for entry in (
+        "COVERAGE_FILE",
+        "BIOETL_SKIP_PREFLIGHT",
+        "BIOETL_SKIP_SETUP_PLUGINS",
+        "BIOETL_AI_MEMORY_MODE",
+        "HYPOTHESIS_DATABASE/p",
+        "PYTHONPYCACHEPREFIX/p",
+    ):
+        if not any(e.split("/")[0] == entry.split("/")[0] for e in wslenv_entries):
+            wslenv_entries.append(entry)
+    env["WSLENV"] = ":".join(wslenv_entries)
     for shard in SHARDS:
         coverage_file = shards_dir / f".coverage.{shard.name}"
         junit = junit_dir / f"{shard.name}.xml"
