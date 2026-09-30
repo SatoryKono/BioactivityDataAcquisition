@@ -1,5 +1,5 @@
 {
-  "allowed_exception_count": 120,
+  "allowed_exception_count": 119,
   "allowed_exceptions": [
     {
       "kind": "import:pandera",
@@ -833,18 +833,11 @@
       "path": "src/bioetl/domain/schemas/validators.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
-    },
-    {
-      "kind": "attribute_call:resolve",
-      "line": 19,
-      "path": "src/bioetl/domain/serialization/__init__.py",
-      "reason": "Resolves the sibling serialization codec path at import time.",
-      "symbol": "<module>"
     }
   ],
   "domain_root": "src/bioetl/domain",
   "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",
-  "scanned_file_count": 628,
+  "scanned_file_count": 627,
   "schema_version": 1,
   "violation_count": 0,
   "violations": []

@@ -39,9 +39,9 @@ release acceptance, or the health of the complete repository suite.
 
 ## Freshness note
 
-Re-verified on 2026-09-14 against source HEAD
-`5c4243c9adad87f4a8eb4a6b0228e4b65841810e` plus the local test repairs:
-all three canonical source paths exist, and `git ls-files tests` contains 2436
+Re-verified on 2026-09-30 against source HEAD
+`60779c32172feec3fbfe232c63003329371df40b`:
+all three canonical source paths exist, and `git ls-files tests` contains 2955
 Python modules named `test_*.py`. The scoped campaign selected tracked test
 paths containing `dashboard` or `grafana`; its local JUnit receipt is
 `reports/local/nav-tests-20260914/final-tests.xml` (1199 passed, 11 skipped).

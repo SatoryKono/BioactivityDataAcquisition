@@ -48,15 +48,18 @@ FORBIDDEN_CALL_NAMES = {
 }
 FORBIDDEN_ATTRIBUTE_CALLS = {
     "connect": "database/network connection",
+    "exec_module": "filesystem module load bypassing the import graph",
     "exists": "filesystem existence probe",
     "glob": _REASON_FILESYSTEM_DISCOVERY,
     "iterdir": _REASON_FILESYSTEM_DISCOVERY,
     "mkdir": "filesystem mutation",
+    "module_from_spec": "filesystem module load bypassing the import graph",
     "open": "filesystem read/write",
     "read_bytes": "filesystem read",
     "read_text": "filesystem read",
     "resolve": "filesystem resolution",
     "rglob": _REASON_FILESYSTEM_DISCOVERY,
+    "spec_from_file_location": "filesystem module load bypassing the import graph",
     "stat": "filesystem metadata read",
     "unlink": "filesystem mutation",
     "write_bytes": "filesystem write",
@@ -65,6 +68,12 @@ FORBIDDEN_ATTRIBUTE_CALLS = {
 FORBIDDEN_QUALIFIED_CALLS = {
     "datetime.now": _REASON_WALL_CLOCK,
     "datetime.utcnow": _REASON_WALL_CLOCK,
+    "importlib.util.module_from_spec": (
+        "filesystem module load bypassing the import graph"
+    ),
+    "importlib.util.spec_from_file_location": (
+        "filesystem module load bypassing the import graph"
+    ),
     "os.getenv": "process environment read",
     "random.random": "randomness",
     "subprocess.run": "process execution",
@@ -114,14 +123,6 @@ ALLOWED_CALL_EXCEPTIONS = {
         "ReasonCatalog.default_outcome_for",
         "self.resolve",
     ): _REASON_CATALOG_RESOLVE,
-    # serialization package: resolves the sibling codec file path once at
-    # import so the #11241 package split can load the codec without a
-    # package-relative import cycle. No I/O is performed by resolve() itself.
-    (
-        "src/bioetl/domain/serialization/__init__.py",
-        "<module>",
-        "resolve",
-    ): "Resolves the sibling serialization codec path at import time.",
 }
 
 
