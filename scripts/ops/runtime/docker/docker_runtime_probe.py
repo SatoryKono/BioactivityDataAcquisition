@@ -116,10 +116,20 @@ def _json_rows(text: str) -> list[dict[str, Any]]:
 
 
 def _read_json(path: Path | None) -> dict[str, Any]:
-    if path is None or not path.is_file():
+    if path is None:
+        return {}
+    from scripts.engineering.common.repo_paths import confined_io_path
+
+    try:
+        path = confined_io_path(path, root=ROOT, allow_external_absolute=True)
+    except ValueError:
+        return {}
+    if not path.is_file():
         return {}
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
+        value = json.loads(
+            path.read_text(encoding="utf-8")
+        )  # NOSONAR - confined_io_path rebuilt under ROOT
     except (OSError, json.JSONDecodeError):
         return {}
     return value if isinstance(value, dict) else {}

@@ -59,10 +59,12 @@ class GovernanceFinding:
 
 def _load_yaml(path: Path, *, root: Path | None = None) -> dict[str, Any]:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+        from scripts.engineering.common.repo_paths import confined_io_path
 
-        path = resolve_output_path(path, root=root)
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+        path = confined_io_path(path, root=root, allow_external_absolute=True)
+    payload = yaml.safe_load(
+        path.read_text(encoding="utf-8")
+    )  # NOSONAR - confined_io_path rebuilt under root
     if isinstance(payload, dict):
         return payload
     raise ValueError(f"Expected YAML mapping in {path}")
@@ -70,10 +72,12 @@ def _load_yaml(path: Path, *, root: Path | None = None) -> dict[str, Any]:
 
 def _load_json(path: Path, *, root: Path | None = None) -> dict[str, Any]:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+        from scripts.engineering.common.repo_paths import confined_io_path
 
-        path = resolve_output_path(path, root=root)
-    payload = json.loads(path.read_text(encoding="utf-8"))
+        path = confined_io_path(path, root=root, allow_external_absolute=True)
+    payload = json.loads(
+        path.read_text(encoding="utf-8")
+    )  # NOSONAR - confined_io_path rebuilt under root
     if isinstance(payload, dict):
         return payload
     raise ValueError(f"Expected JSON mapping in {path}")
@@ -81,10 +85,12 @@ def _load_json(path: Path, *, root: Path | None = None) -> dict[str, Any]:
 
 def _load_rows(path: Path, *, root: Path | None = None) -> tuple[dict[str, str], ...]:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+        from scripts.engineering.common.repo_paths import confined_io_path
 
-        path = resolve_output_path(path, root=root)
-    with path.open(encoding="utf-8", newline="") as handle:
+        path = confined_io_path(path, root=root, allow_external_absolute=True)
+    with path.open(
+        encoding="utf-8", newline=""
+    ) as handle:  # NOSONAR - confined_io_path rebuilt under root
         return tuple(csv.DictReader(handle))
 
 

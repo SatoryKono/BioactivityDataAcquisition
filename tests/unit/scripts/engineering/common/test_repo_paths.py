@@ -19,8 +19,10 @@ import pytest
 from scripts.engineering.common.repo_paths import (
     REPO_ROOT,
     argparse_repo_path,
+    confined_io_path,
     ensure_path_within_root,
     ensure_repo_path,
+    rebuild_confined_path,
     resolve_cli_path,
 )
 
@@ -107,3 +109,28 @@ def test_ensure_safe_cli_argv_rejects_command_chaining_metacharacters() -> None:
 
     with pytest.raises(ValueError, match="shell metacharacters"):
         ensure_safe_cli_argv(["python", "-c", "print(1); rm -rf /"])
+
+
+def test_rebuild_confined_path_joins_relative_parts(tmp_path: Path) -> None:
+    target = tmp_path / "reports" / "quality" / "x.json"
+    target.parent.mkdir(parents=True)
+    target.write_text("{}", encoding="utf-8")
+    rebuilt = rebuild_confined_path(target, root=tmp_path)
+    assert rebuilt == target.resolve()
+    assert rebuilt.is_relative_to(tmp_path.resolve())
+
+
+def test_confined_io_path_rejects_escape(tmp_path: Path) -> None:
+    outside = tmp_path / "escape.txt"
+    outside.write_text("x", encoding="utf-8")
+    with pytest.raises(ValueError, match="refusing path outside"):
+        confined_io_path(outside, root=REPO_ROOT)
+
+
+def test_confined_io_path_allows_external_absolute_under_custom_root(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "out.json"
+    target.write_text("{}", encoding="utf-8")
+    resolved = confined_io_path(target, root=tmp_path, allow_external_absolute=True)
+    assert resolved == target.resolve()

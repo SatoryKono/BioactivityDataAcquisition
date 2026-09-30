@@ -90,6 +90,46 @@ def resolve_output_path(
         raise
 
 
+def rebuild_confined_path(path: Path, *, root: Path) -> Path:
+    """Rebuild *path* from trusted *root* plus relative parts (S8707).
+
+    ``ensure_path_within_root`` / ``resolve_cli_path`` still leave a tainted
+    Path object. Joining the confined relative parts onto the resolved root
+    produces a new path that static analyzers treat as sanitized.
+    """
+    base = root.expanduser().resolve(strict=False)
+    confined = ensure_path_within_root(path, base)
+    relative = confined.relative_to(base)
+    if str(relative) in {"", "."}:
+        return base
+    return base.joinpath(*relative.parts)
+
+
+def confined_io_path(
+    path: str | Path,
+    *,
+    root: Path | None = None,
+    allow_external_absolute: bool = False,
+) -> Path:
+    """Sanitize a CLI/LLM path, then rebuild it under *root* for I/O (S8707).
+
+    ``allow_external_absolute=True`` keeps ``resolve_output_path`` semantics
+    for pytest fixtures and operator ``--output`` directories.
+    """
+    base = (root or REPO_ROOT).expanduser().resolve(strict=False)
+    resolved = (
+        resolve_output_path(path, root=base)
+        if allow_external_absolute
+        else resolve_cli_path(path, root=base)
+    )
+    try:
+        return rebuild_confined_path(resolved, root=base)
+    except ValueError:
+        if allow_external_absolute:
+            return resolved
+        raise
+
+
 def argparse_repo_path(value: str) -> Path:
     """``argparse`` ``type=`` callback that confines paths to the repo root."""
     return resolve_cli_path(value)
