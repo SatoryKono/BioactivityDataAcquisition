@@ -6,6 +6,9 @@ from typing import TYPE_CHECKING
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.application.services.control_plane.ledger.service import RunLedgerService
+from bioetl.composition.runtime_builders._run_manifest_control_plane_refs import (
+    create_control_plane_refs_for_manifest,
+)
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (
     build_manifest_create_request,
     create_ledger_service,
@@ -27,7 +30,6 @@ from bioetl.composition.runtime_builders._runner_control_plane_policy import (
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
-from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.service import (
@@ -40,56 +42,9 @@ if TYPE_CHECKING:
         ManifestReproducibilityContext,
     )
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
-    from bioetl.domain.control_plane import RunManifest
     from bioetl.domain.context import PipelineRunContext
 
 RunManifestProvenanceBundle = _manifest_support.RunManifestProvenanceBundle
-
-
-def _create_control_plane_refs(
-    *,
-    manifest: RunManifest,
-    provenance: RunManifestProvenanceBundle,
-    contract_identity: _manifest_support.RunManifestContractIdentity,
-    required_persistence_profile: str,
-) -> _manifest_support.ManifestControlPlaneRefs:
-    """Build canonical control-plane refs from one persisted manifest record."""
-    input_snapshot_fingerprint = compute_input_snapshot_identity_fingerprint(
-        [
-            snapshot
-            for source_ref in getattr(manifest, "source_refs", ())
-            for snapshot in getattr(source_ref, "input_snapshots", ())
-        ]
-    )
-    return _manifest_support.create_control_plane_refs(
-        manifest_id=manifest.manifest_id,
-        execution_fingerprint=manifest.execution_fingerprint,
-        resolved_config_hash=provenance.resolved_config_hash,
-        effective_config_hash=provenance.effective_config_hash,
-        source_fingerprint=provenance.source_fingerprint,
-        dq_contract_compatibility_hash=provenance.dq_contract_compatibility_hash,
-        effective_config_artifact_id=provenance.effective_config_artifact_id,
-        replay_parentage=(
-            getattr(manifest, "replay_of_run_id", None),
-            getattr(manifest, "replay_of_manifest_id", None),
-        ),
-        input_snapshot_fingerprint=input_snapshot_fingerprint,
-        contract=(
-            contract_identity.contract_ref,
-            contract_identity.contract_version,
-            contract_identity.contract_schema_hash,
-        ),
-        policy=(
-            contract_identity.dq_policy_ref,
-            contract_identity.rule_bundle_version,
-        ),
-        normalization_profile=(
-            contract_identity.normalization_profile_ref,
-            contract_identity.normalization_profile_version,
-            contract_identity.normalization_profile_hash,
-        ),
-        required_persistence_profile=required_persistence_profile,
-    )
 
 
 def create_run_manifest(
@@ -178,7 +133,7 @@ def _publish_manifest_and_refs(
         _require_cached_bronze_snapshots(
             inputs=inputs, manifest_context=manifest_context
         )
-    control_plane_refs = _create_control_plane_refs(
+    control_plane_refs = create_control_plane_refs_for_manifest(
         manifest=manifest,
         provenance=provenance,
         contract_identity=manifest_context.contract_identity,
