@@ -24,7 +24,11 @@ from bioetl.application.services.run_reports.enrichment import (
     build_schema_versions,
     build_stage_timings,
 )
-from bioetl.application.services.run_reports.observations import run_observations
+from bioetl.application.services.run_reports.observations import (
+    ensure_terminal_data_validation_observation,
+    ensure_terminal_workflow_observation,
+    run_observations,
+)
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
@@ -163,6 +167,19 @@ def finalize_pipeline_run_report(
         options=options,
         duration=_result_duration_seconds(result),
     )
+    if not (options and options.dry_run):
+        ensure_terminal_data_validation_observation(
+            status=result.status.value,
+            records_gold=result.records_gold,
+            records_silver=result.records_silver,
+            records_bronze=result.records_bronze,
+        )
+        if options is not None:
+            ensure_terminal_workflow_observation(
+                workflow_run_id=options.workflow_run_id,
+                workflow_id=options.workflow_id,
+                workflow_step_id=options.workflow_step_id,
+            )
     try:
         package_version = _package_version()
         # Build a preliminary report to materialize reasons, then enrich.
@@ -310,6 +327,16 @@ def _require_execution_runner(runner: object) -> ExecutionMetricsRunnerPort:
     return runner
 
 
+_EMPTY_CACHED_BRONZE_PROVENANCE_MARKER = (
+    "Cached Bronze execution requires at least one persisted batch file"
+)
+
+
+def is_empty_cached_bronze_provenance_error(exc: BaseException) -> bool:
+    """Return whether constructor failure is empty cached-Bronze provenance."""
+    return _EMPTY_CACHED_BRONZE_PROVENANCE_MARKER in str(exc)
+
+
 def constructor_failure_recorder(
     *,
     audit: AuditPort,
@@ -344,6 +371,7 @@ def constructor_failure_recorder(
                 started_at=started_at,
                 completed_at=completed_at,
                 error_type=type(exc).__name__,
+                error_message=str(exc),
             ),
             options,
         )

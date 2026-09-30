@@ -112,6 +112,78 @@ def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_
     assert fake_factory.kwargs is None
 
 
+def test_build_pipeline_runner_persists_manifest_before_empty_cached_bronze_fail(
+    tmp_path: Path,
+) -> None:
+    """degraded_observable cached-Bronze fail must persist the run manifest first."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+    empty_bronze_root = tmp_path / "cached_bronze" / "chembl" / "activity"
+    empty_bronze_root.mkdir(parents=True)
+
+    context = _build_context(
+        limit=25,
+        exact_replay=False,
+        required_persistence_profile="degraded_observable",
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="Cached Bronze execution requires at least one persisted batch file for snapshot provenance",
+    ):
+        runner_builder.build_pipeline_runner(
+            context,
+            registry=fake_registry,
+            wiring=resolve_runner_builder_wiring(
+                legacy_overrides=LegacyRunnerBuilderOverrides(
+                    ensure_providers_loaded_fn=lambda: None,
+                    register_all_pipelines_fn=lambda registry=None: None,
+                    get_settings_fn=lambda: SimpleNamespace(
+                        data_dir=str(tmp_path),
+                        pipeline=SimpleNamespace(heartbeat_interval=30),
+                        test_mode=True,
+                    ),
+                    load_pipeline_config_fn=lambda _: SimpleNamespace(
+                        provider="chembl",
+                        entity_type="activity",
+                        version="2.0.0",
+                        maintenance=SimpleNamespace(
+                            auto_vacuum=False,
+                            vacuum_retention_days=7,
+                        ),
+                        input_filter=SimpleNamespace(),
+                        business_primary_keys=["activity_id"],
+                        technical_primary_key="entity_id",
+                        sink={
+                            "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                            "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                            "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                        },
+                    ),
+                    build_observability_bundle_fn=lambda **_: _namespace_observability(
+                        SimpleNamespace(info=lambda *_, **__: None),
+                    ),
+                    assemble_vacuum_settings_fn=lambda **_: "vacuum",
+                    assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                        run_type="incremental",
+                        limit=25,
+                        exact_replay=False,
+                    ),
+                    assemble_filter_config_fn=lambda **_: None,
+                    assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                        enabled=True,
+                        bronze_path=str(empty_bronze_root),
+                        bronze_date="2026-01-01",
+                    ),
+                )
+            ),
+        )
+
+    assert fake_factory.kwargs is None
+    persisted = list((tmp_path / "output" / "control" / "run_manifest").rglob("*.json"))
+    assert persisted, "empty cached-bronze fail must persist the run manifest first"
+
+
 def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_across_repeated_exact_replays(
     tmp_path: Path,
 ) -> None:

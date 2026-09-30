@@ -65,6 +65,64 @@ def run_observations() -> dict[str, dict[str, object]]:
     return deepcopy(_observations.get() or {})
 
 
+def ensure_terminal_data_validation_observation(
+    *,
+    status: str,
+    records_gold: int,
+    records_silver: int,
+    records_bronze: int,
+) -> None:
+    """Fill Data Validation when gold write never recorded a domain check."""
+    target = _observations.get()
+    if target is None or "Data Validation" in target:
+        return
+    facts: dict[str, object] = {
+        "gold_candidates": records_gold,
+        "silver_records": records_silver,
+        "bronze_records": records_bronze,
+    }
+    if status in {"success", "dry_run"} and records_gold == 0:
+        record_run_observation(
+            "Data Validation",
+            verdict="N/A",
+            reason="no_gold_candidates",
+            facts=facts,
+        )
+        return
+    if status in {"failed", "shutdown"}:
+        facts["status"] = status
+        record_run_observation(
+            "Data Validation",
+            verdict="INCOMPLETE",
+            reason="gold_not_attempted",
+            facts=facts,
+        )
+
+
+def ensure_terminal_workflow_observation(
+    *,
+    workflow_run_id: str | None,
+    workflow_id: str | None,
+    workflow_step_id: str | None,
+) -> None:
+    """Record a provisional Workflow check until parent finalize revises it."""
+    if not workflow_run_id:
+        return
+    target = _observations.get()
+    if target is None or "Workflow" in target:
+        return
+    record_run_observation(
+        "Workflow",
+        verdict="INCOMPLETE",
+        reason="workflow_parent_not_finalized",
+        facts={
+            "workflow_run_id": workflow_run_id,
+            "workflow_id": workflow_id,
+            "step_id": workflow_step_id,
+        },
+    )
+
+
 def record_dq_observation(result: DQResult) -> DQResult:
     """Persist the executed assessment and return it unchanged to its caller."""
     record_run_observation(

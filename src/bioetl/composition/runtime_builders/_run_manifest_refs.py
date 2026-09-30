@@ -86,11 +86,15 @@ def build_run_source_refs(
         provider=provider,
         entity=entity,
     )
-    require_input_snapshots(
-        exact_replay=bool(getattr(ctx, "exact_replay", False)),
-        required_persistence_profile=required_persistence_profile,
-        input_snapshots=input_snapshots,
+    cached_bronze_enabled = cached_bronze is not None and bool(
+        getattr(cached_bronze, "enabled", False)
     )
+    if not (cached_bronze_enabled and not input_snapshots):
+        require_input_snapshots(
+            exact_replay=bool(getattr(ctx, "exact_replay", False)),
+            required_persistence_profile=required_persistence_profile,
+            input_snapshots=input_snapshots,
+        )
     return (
         RunSourceRef(
             provider=provider,
