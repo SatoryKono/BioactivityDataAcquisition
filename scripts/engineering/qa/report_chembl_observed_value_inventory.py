@@ -240,13 +240,13 @@ def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
 def _write_json(
     path: Path, payload: dict[str, object], *, root: Path | None = None
 ) -> None:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import confined_io_path
+    from scripts.engineering.common.repo_paths import write_text_confined
 
-        path = confined_io_path(path, root=root, allow_external_absolute=True)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(  # NOSONAR - confined_io_path rebuilt under root
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    write_text_confined(
+        path,
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        root=root,
+        allow_external_absolute=True,
     )
 
 
@@ -271,25 +271,17 @@ def _render_csv(rows: list[dict[str, object]]) -> str:
 def _write_csv(
     path: Path, rows: list[dict[str, object]], *, root: Path | None = None
 ) -> None:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import confined_io_path
+    from scripts.engineering.common.repo_paths import write_text_confined
 
-        path = confined_io_path(path, root=root, allow_external_absolute=True)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        _render_csv(rows), encoding="utf-8"
-    )  # NOSONAR - confined_io_path rebuilt under root
+    write_text_confined(
+        path, _render_csv(rows), root=root, allow_external_absolute=True
+    )
 
 
 def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import confined_io_path
+    from scripts.engineering.common.repo_paths import write_text_confined
 
-        path = confined_io_path(path, root=root, allow_external_absolute=True)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        content, encoding="utf-8"
-    )  # NOSONAR - confined_io_path rebuilt under root
+    write_text_confined(path, content, root=root, allow_external_absolute=True)
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -333,16 +325,28 @@ def main(argv: list[str] | None = None) -> int:
     rendered_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
     if args.check:
+        from scripts.engineering.common.repo_paths import REPO_ROOT as _ROOT
+        from scripts.engineering.common.repo_paths import (
+            read_text_confined_or_none,
+        )
+
         current_json = (
-            args.json_out.read_text(encoding="utf-8") if args.json_out.exists() else ""
+            read_text_confined_or_none(
+                args.json_out, root=_ROOT, allow_external_absolute=True
+            )
+            or ""
         )
         current_md = (
-            args.markdown_out.read_text(encoding="utf-8")
-            if args.markdown_out.exists()
-            else ""
+            read_text_confined_or_none(
+                args.markdown_out, root=_ROOT, allow_external_absolute=True
+            )
+            or ""
         )
         current_csv = (
-            args.csv_out.read_text(encoding="utf-8") if args.csv_out.exists() else ""
+            read_text_confined_or_none(
+                args.csv_out, root=_ROOT, allow_external_absolute=True
+            )
+            or ""
         )
         rendered_csv = _render_csv(csv_rows)
 

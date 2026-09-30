@@ -785,15 +785,12 @@ def _collect_rows() -> list[dict[str, Any]]:
 
 
 def _existing_snapshot_date(path: Path, *, root: Path | None = None) -> str | None:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import confined_io_path
+    from scripts.engineering.common.repo_paths import read_text_confined_or_none
 
-        path = confined_io_path(path, root=root, allow_external_absolute=True)
-    if not path.exists():
+    content = read_text_confined_or_none(path, root=root, allow_external_absolute=True)
+    if content is None:
         return None
-    payload = json.loads(
-        path.read_text(encoding="utf-8")
-    )  # NOSONAR - confined_io_path rebuilt under root
+    payload = json.loads(content)
     if not isinstance(payload, dict):
         return None
     snapshot_date = payload.get("snapshot_date")
@@ -936,21 +933,21 @@ def _render_markdown(payload: dict[str, Any]) -> str:
 def write_artifacts(
     *, json_out: Path, md_out: Path, root: Path | None = None
 ) -> dict[str, Any]:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import confined_io_path
+    from scripts.engineering.common.repo_paths import write_text_confined
 
-        json_out = confined_io_path(json_out, root=root, allow_external_absolute=True)
-        md_out = confined_io_path(md_out, root=root, allow_external_absolute=True)
     payload = build_payload()
-    json_out.parent.mkdir(parents=True, exist_ok=True)
-    md_out.parent.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(  # NOSONAR - confined_io_path rebuilt under root
+    write_text_confined(
+        json_out,
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+        root=root,
+        allow_external_absolute=True,
     )
-    md_out.write_text(
-        _render_markdown(payload), encoding="utf-8"
-    )  # NOSONAR - confined_io_path rebuilt under root
+    write_text_confined(
+        md_out,
+        _render_markdown(payload),
+        root=root,
+        allow_external_absolute=True,
+    )
     return payload
 
 
@@ -984,18 +981,17 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     if args.check:
-        from scripts.engineering.common.repo_paths import confined_io_path
+        from scripts.engineering.common.repo_paths import read_text_confined
 
-        json_out = confined_io_path(
-            args.json_out, root=root, allow_external_absolute=True
-        )
         expected = (
             json.dumps(
                 build_payload(snapshot_date=snapshot_date), indent=2, sort_keys=True
             )
             + "\n"
         )
-        actual = json_out.read_text(encoding="utf-8")
+        actual = read_text_confined(
+            args.json_out, root=root, allow_external_absolute=True
+        )
         if actual != expected:
             print(
                 "[contract-coverage-matrix] artifact drift detected; regenerate with: "

@@ -339,21 +339,21 @@ def _render_markdown(payload: dict[str, Any]) -> str:
 
 
 def write_artifacts(*, json_out: Path, md_out: Path, root: Path | None = None) -> None:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import confined_io_path
+    from scripts.engineering.common.repo_paths import write_text_confined
 
-        json_out = confined_io_path(json_out, root=root, allow_external_absolute=True)
-        md_out = confined_io_path(md_out, root=root, allow_external_absolute=True)
     payload = build_payload()
-    json_out.parent.mkdir(parents=True, exist_ok=True)
-    md_out.parent.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(  # NOSONAR - confined_io_path rebuilt under root
+    write_text_confined(
+        json_out,
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+        root=root,
+        allow_external_absolute=True,
     )
-    md_out.write_text(
-        _render_markdown(payload), encoding="utf-8"
-    )  # NOSONAR - confined_io_path rebuilt under root
+    write_text_confined(
+        md_out,
+        _render_markdown(payload),
+        root=root,
+        allow_external_absolute=True,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -373,13 +373,12 @@ def main(argv: list[str] | None = None) -> int:
     root = REPO_ROOT
 
     if args.check:
-        from scripts.engineering.common.repo_paths import confined_io_path
+        from scripts.engineering.common.repo_paths import read_text_confined
 
-        json_out = confined_io_path(
+        expected = json.dumps(build_payload(), indent=2, sort_keys=True) + "\n"
+        actual = read_text_confined(
             args.json_out, root=root, allow_external_absolute=True
         )
-        expected = json.dumps(build_payload(), indent=2, sort_keys=True) + "\n"
-        actual = json_out.read_text(encoding="utf-8")
         if actual != expected:
             print(
                 "[port-adapter-factory-coverage] artifact drift detected; "

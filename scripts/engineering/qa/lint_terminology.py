@@ -349,16 +349,20 @@ def _read_file_content(filepath: Path) -> str | None:
         try:
             from scripts.engineering.common.repo_paths import (
                 REPO_ROOT,
-                confined_io_path,
+                read_text_confined,
             )
         except ModuleNotFoundError:
             # Script path execution (python scripts/.../lint_terminology.py) may
-            # not have the repo root on sys.path; fall back to direct read.
-            return filepath.read_text(encoding="utf-8")
+            # not have the repo root on sys.path; confine to cwd instead of
+            # reading an unbounded CLI path.
+            base = Path.cwd().resolve()
+            resolved = filepath.expanduser().resolve(strict=False)
+            if not resolved.is_relative_to(base):
+                return None
+            return resolved.read_text(encoding="utf-8")  # NOSONAR - cwd-confined
 
-        filepath = confined_io_path(filepath, root=REPO_ROOT)
-        return filepath.read_text(encoding="utf-8")  # NOSONAR - confined_io_path
-    except (OSError, UnicodeDecodeError) as exc:
+        return read_text_confined(filepath, root=REPO_ROOT)
+    except (OSError, UnicodeDecodeError, ValueError) as exc:
         print(f"Warning: Could not read {filepath}: {exc}", file=sys.stderr)
         return None
 

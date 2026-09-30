@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import IO
 
 
 def resolve_repo_root() -> Path:
@@ -128,6 +129,89 @@ def confined_io_path(
         if allow_external_absolute:
             return resolved
         raise
+
+
+def read_text_confined(
+    path: str | Path,
+    *,
+    root: Path | None = None,
+    encoding: str = "utf-8",
+    allow_external_absolute: bool = False,
+) -> str:
+    """Read UTF-8 text after confining *path* under *root* (S8707).
+
+    The filesystem sink stays inside this helper so tainted CLI/LLM paths
+    never reach ``Path.read_text`` at call sites.
+    """
+    resolved = confined_io_path(
+        path, root=root, allow_external_absolute=allow_external_absolute
+    )
+    return resolved.read_text(encoding=encoding)  # NOSONAR - confined path
+
+
+def read_text_confined_or_none(
+    path: str | Path,
+    *,
+    root: Path | None = None,
+    encoding: str = "utf-8",
+    allow_external_absolute: bool = False,
+) -> str | None:
+    """Like :func:`read_text_confined` but return ``None`` for missing files."""
+    resolved = confined_io_path(
+        path, root=root, allow_external_absolute=allow_external_absolute
+    )
+    if not resolved.is_file():  # NOSONAR - confined path
+        return None
+    return resolved.read_text(encoding=encoding)  # NOSONAR - confined path
+
+
+def write_text_confined(
+    path: str | Path,
+    data: str,
+    *,
+    root: Path | None = None,
+    encoding: str = "utf-8",
+    allow_external_absolute: bool = False,
+) -> Path:
+    """Write *data* to *path* after confining it under *root* (S8707).
+
+    Parent directories are created inside the helper. Returns the confined
+    (rebuilt) path for callers that need it in messages; it is a fresh path
+    joined under the resolved root, not the original CLI value.
+    """
+    resolved = confined_io_path(
+        path, root=root, allow_external_absolute=allow_external_absolute
+    )
+    resolved.parent.mkdir(parents=True, exist_ok=True)  # NOSONAR - confined path
+    resolved.write_text(data, encoding=encoding)  # NOSONAR - confined path
+    return resolved
+
+
+def open_confined(
+    path: str | Path,
+    mode: str = "r",
+    *,
+    root: Path | None = None,
+    encoding: str | None = None,
+    newline: str | None = None,
+    allow_external_absolute: bool = False,
+) -> IO[str] | IO[bytes]:
+    """Open *path* after confining it under *root* (S8707).
+
+    Write/append/create modes create parent directories inside the helper.
+    The file object is opened on the rebuilt confined path; tainted inputs
+    never reach ``Path.open`` at call sites.
+    """
+    resolved = confined_io_path(
+        path, root=root, allow_external_absolute=allow_external_absolute
+    )
+    if any(flag in mode for flag in ("w", "a", "x", "+")):
+        resolved.parent.mkdir(  # NOSONAR - confined path
+            parents=True, exist_ok=True
+        )
+    return resolved.open(  # NOSONAR - confined path
+        mode, encoding=encoding, newline=newline
+    )
 
 
 def argparse_repo_path(value: str) -> Path:
