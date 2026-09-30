@@ -25,11 +25,11 @@ Live GET `2026-09-17`: API `total_count` is **79**.
 
 | Bucket | Count | Meaning |
 | --- | --- | --- |
-| Tracked `.github/workflows/*.yml` | 50 | Canonical inventory on `main`; this page |
+| Tracked `.github/workflows/*.yml` | 51 | Canonical inventory on `main`; this page |
 | GitHub-hosted `dynamic/**` | 10 | Dependabot, CodeQL default, agent reviewers; not PR gates |
 | GitHub-only orphan temp/codex IDs | 16 | Files left `main`; `disabled_manually` after #10265 |
 | GitHub-only residual deleted files | 3 | Former tracked workflows; `disabled_manually`; not gates |
-| API `total_count` | 79 | 50 + 10 + 16 + 3 |
+| API `total_count` | 79 | 50 + 10 + 16 + 3 (snapshot before `no-partial-tree-commits.yml`) |
 
 GitHub live `state` in the tables below is the Actions UI/API value
 (`active` or `disabled_manually`) after the #10263 map. `deprecated` reusable
