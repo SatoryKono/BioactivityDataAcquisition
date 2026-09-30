@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.dashboard-audit-cycle
-version: 2.2.1
+version: 2.2.2
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -108,8 +108,8 @@ Questions are byte-equal to `DASHBOARD_REQUIREMENTS.md` §7. Ids are §7.1.
 | `bioetl-run-explorer-v1` | Which pipelines ran most recently, and where are their reports? | `3010` |
 | `bioetl-control-plane-v1` | Can the selected run be exactly replayed from saved inputs? | `9422` |
 | `bioetl-overview-v2` | What is the saved assessment of the selected Run ID? | `9603`, `9002` |
-| `bioetl-runtime` | What currently blocks runtime delivery? | `9401` |
-| `bioetl-provider-health-v2` | Which provider is degraded/failing, and why? | `9101` |
+| `bioetl-runtime` | What is the saved runtime assessment of the selected Run ID? | `9998` |
+| `bioetl-provider-health-v2` | Which provider is degraded/failing, and why? | `9461` |
 | `bioetl-dq-v2` | What is the DQ assessment of the selected Run ID? | `9406` |
 | `bioetl-incident-v1` | What is the highest-confidence active suspect? | `2010` |
 
@@ -231,8 +231,7 @@ screenshot. Monitoring start without approval. Orchestrator hard-stop.
 
 ## Related
 
-- `prompt.observability.dashboard-panel-audit`
-- `prompt.observability.bi-dashboard-acceptance`
-- `prompt.audit.cycle.dashboards`
-- `prompt.observability.dashboard-full-cycle`
+- `prompt.audit.cycle` with the `dashboards` overlay
+- `prompt.observability.sequential-run`
 - Closeout: `prompt.closeout.grok`
+- Skill: `.codex/skills/observability-dashboard/SKILL.md`

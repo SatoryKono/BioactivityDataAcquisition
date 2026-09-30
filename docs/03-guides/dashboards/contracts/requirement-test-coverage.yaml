@@ -4,7 +4,8 @@ canonical_module: tests/integration/test_dashboard_requirement_coverage.py
 gates_module: tests/integration/test_dashboard_requirement_gates.py
 note: >-
   Every DASH-* ID maps to named pytest nodeids (path::test_name), qa-check,
-  and/or prompt.observability.dashboard-manual-validation.
+  and/or prompt.observability.dashboard-audit-cycle.
+  Cycle contours include fit/reflow/render; live checks require MONITORING=true.
   Canonical 9204 named-ID surface is canonical_module.
   requirement-gates.yaml allowlists stay on gates_module.
   Live render host remains GitHub #8986.
@@ -27,7 +28,7 @@ requirements:
   - tests/unit/scripts/ops/observability/test_grafana_panel_containment.py::test_text_contrast_composites_alpha_and_preserves_unmeasured_gradients
   - tests/integration/test_dashboard_presentation_requirements.py::test_area_fills_are_confined_to_first_window
   - tests/integration/test_dashboard_presentation_requirements.py::test_area_fill_fails_closed_on_below_fold_background_stat
-  prompt: prompt.observability.dashboard-manual-validation
+  prompt: prompt.observability.dashboard-audit-cycle
 - id: DASH-COPY-001
   gate: pytest
   tests:
@@ -91,7 +92,7 @@ requirements:
   gate: pytest+manual
   tests:
   - tests/integration/test_dashboard_requirement_coverage.py::test_dash_first_001_operator_question_contract
-  prompt: prompt.observability.dashboard-manual-validation
+  prompt: prompt.observability.dashboard-audit-cycle
 - id: DASH-FIRST-002
   gate: pytest
   tests:
@@ -185,10 +186,10 @@ requirements:
   - tests/integration/test_dashboard_qa_check_gates.py::test_query_duplicates_check_passes_shipped_dashboards
 - id: DASH-REFLOW-001
   gate: manual
-  prompt: prompt.observability.dashboard-manual-validation
+  prompt: prompt.observability.dashboard-audit-cycle
 - id: DASH-RENDER-001
   gate: manual
-  prompt: prompt.observability.dashboard-manual-validation
+  prompt: prompt.observability.dashboard-audit-cycle
 - id: DASH-SCOPE-001
   gate: pytest
   tests:
@@ -209,7 +210,7 @@ requirements:
   gate: pytest+manual
   tests:
   - tests/integration/test_dashboard_geometry_and_purpose_contracts.py::test_first_window_verdict_cards_state_interpretation
-  prompt: prompt.observability.dashboard-manual-validation
+  prompt: prompt.observability.dashboard-audit-cycle
 - id: DASH-STATE-003
   gate: pytest
   tests:
@@ -231,7 +232,7 @@ requirements:
   tests:
   - tests/unit/scripts/ops/observability/test_grafana_panel_containment.py::test_text_contrast_composites_alpha_and_preserves_unmeasured_gradients
   - tests/integration/test_dashboard_presentation_requirements.py::test_authored_text_font_sizes_meet_body_floor
-  prompt: prompt.observability.dashboard-manual-validation
+  prompt: prompt.observability.dashboard-audit-cycle
 - id: DASH-VIZ-001
   gate: pytest
   tests:
