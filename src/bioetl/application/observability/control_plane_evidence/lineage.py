@@ -73,6 +73,9 @@ def _missing_fragment_checks(
     manifest: RunManifest,
 ) -> tuple[EvidenceCheckResult, ...]:
     required_profile, profile_valid = resolve_persistence_profile(manifest)
+    profile_check = _persistence_profile_check(manifest, (), validation_complete=False)
+    if profile_valid and required_profile == "degraded_observable":
+        return (profile_check,)
     lineage_required = not profile_valid or required_profile == "forensic_grade"
     return (
         EvidenceCheckResult(
@@ -94,7 +97,7 @@ def _missing_fragment_checks(
             "lineage_cycle_not_observable",
             "Cycle detection cannot run without persisted fragments.",
         ),
-        _persistence_profile_check(manifest, (), validation_complete=False),
+        profile_check,
     )
 
 
