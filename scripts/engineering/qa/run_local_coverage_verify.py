@@ -154,6 +154,22 @@ def _git(*args: str) -> str:
     return result.stdout.strip()
 
 
+def _bash_safe_path(path: Path) -> str:
+    """Render *path* for argv/env consumed through MSYS bash.
+
+    ``bash`` on Windows converts ``X:/abs`` argv and env values into relative
+    ``X︰`` subtrees under the CWD, which previously scattered mangled junit
+    and .coverage files across the repo root. Paths under ROOT are emitted
+    relative (no drive prefix, no conversion); out-of-tree paths keep their
+    POSIX spelling as a best-effort fallback.
+    """
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(ROOT).as_posix()
+    except ValueError:
+        return resolved.as_posix()
+
+
 def _command(shard: Shard, junit: Path) -> list[str]:
     command = [
         "bash",
@@ -167,7 +183,7 @@ def _command(shard: Shard, junit: Path) -> list[str]:
         "--timeout=300",
         "-p",
         "no:cacheprovider",
-        f"--junitxml={junit.as_posix()}",
+        f"--junitxml={_bash_safe_path(junit)}",
     ]
     if shard.parallel:
         command.extend(("-n", "2", "--dist=loadscope", "--max-worker-restart=0"))
@@ -265,7 +281,7 @@ def main(argv: list[str] | None = None) -> int:
         junit = junit_dir / f"{shard.name}.xml"
         log = logs_dir / f"{shard.name}.log"
         command = _command(shard, junit)
-        env["COVERAGE_FILE"] = coverage_file.as_posix()
+        env["COVERAGE_FILE"] = _bash_safe_path(coverage_file)
         print(f"[local-coverage] start {shard.name}", flush=True)
         started = time.monotonic()
         exit_code = _run_logged(command, log, env=env)
