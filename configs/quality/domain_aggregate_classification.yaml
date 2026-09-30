@@ -59,6 +59,7 @@ row_templates:
     rationale: "Not an aggregate root; module owns domain support types, policies, or contracts."
 non_aggregate_clusters:
   - { name: behavior, path: src/bioetl/domain/behavior, <<: *support_cluster }
+  - { name: chembl, path: src/bioetl/domain/chembl, <<: *support_cluster }
   - { name: composite, path: src/bioetl/domain/composite, <<: *support_cluster }
   - { name: config, path: src/bioetl/domain/config, <<: *support_cluster }
   - { name: contracts, path: src/bioetl/domain/contracts, <<: *support_cluster }
@@ -89,7 +90,13 @@ non_aggregate_clusters:
       path: src/bioetl/domain/run_reports,
       <<: *support_cluster,
     }
+  - { name: runtime, path: src/bioetl/domain/runtime, <<: *support_cluster }
   - { name: schemas, path: src/bioetl/domain/schemas, <<: *support_cluster }
+  - {
+      name: serialization,
+      path: src/bioetl/domain/serialization,
+      <<: *support_cluster,
+    }
   - {
       name: transformations,
       path: src/bioetl/domain/transformations,

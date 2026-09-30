@@ -12,10 +12,10 @@
     "conflict": 0
   },
   "surface_totals": {
-    "surfaces_total": 103,
+    "surfaces_total": 102,
     "by_category": {
       "consumer_alias": 25,
-      "observability": 11,
+      "observability": 10,
       "runtime_gate": 11,
       "silver_config": 10,
       "source_profile": 46
@@ -32,7 +32,7 @@
       "_silver_filters.should_include": 1,
       "apply_silver_filter": 6,
       "bioetl_silver_filter_reject_total_mismatch_15m": 2,
-      "bioetl_silver_filter_rejections_total": 9,
+      "bioetl_silver_filter_rejections_total": 8,
       "extraction_params": 8,
       "filters.extraction_params": 22,
       "filters.source_profile": 6,
@@ -1519,7 +1519,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/04-reference/cli.md",
       "occurrence_count": 3,
-      "first_line": 1030,
+      "first_line": 1038,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1596,7 +1596,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/04-reference/cli.md",
       "occurrence_count": 3,
-      "first_line": 1225,
+      "first_line": 1233,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1628,8 +1628,8 @@
       "surface": "legacy_silver_error_code",
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/application/core/_quarantine_metrics_support.py",
-      "occurrence_count": 4,
-      "first_line": 22,
+      "occurrence_count": 7,
+      "first_line": 23,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1650,8 +1650,8 @@
       "surface": "legacy_silver_error_code",
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/application/core/_quarantine_support.py",
-      "occurrence_count": 3,
-      "first_line": 10,
+      "occurrence_count": 4,
+      "first_line": 11,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1706,7 +1706,7 @@
       "symbol": "silver_filter_rejects",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 4,
-      "first_line": 942,
+      "first_line": 949,
       "role": "Operator summary alias for Silver rejects",
       "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
       "notes": ""
@@ -1803,20 +1803,9 @@
       "category": "observability",
       "surface": "silver_filter_metric",
       "symbol": "bioetl_silver_filter_rejections_total",
-      "path": "grafana/dashboards/bioetl-dq-v2.json",
-      "occurrence_count": 2,
-      "first_line": 2918,
-      "role": "Silver filter rejection metric",
-      "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
-      "notes": ""
-    },
-    {
-      "category": "observability",
-      "surface": "silver_filter_metric",
-      "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 3,
-      "first_line": 887,
+      "first_line": 894,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1882,7 +1871,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 2,
-      "first_line": 1055,
+      "first_line": 1062,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""

@@ -255,6 +255,12 @@ facades:
       <<: *domain_package,
     }
   - {
+      path: src/bioetl/domain/serialization/__init__.py,
+      module: bioetl.domain.serialization,
+      markers: [__getattr__],
+      <<: *domain_package,
+    }
+  - {
       path: src/bioetl/domain/value_objects/__init__.py,
       module: bioetl.domain.value_objects,
       markers: [__getattr__],

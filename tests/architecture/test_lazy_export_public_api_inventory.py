@@ -60,6 +60,7 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/domain/filtering/__init__.py": "public_package_facade",
     "src/bioetl/domain/normalization/profiles/__init__.py": ("public_package_facade"),
     "src/bioetl/domain/ports/__init__.py": "public_package_facade",
+    "src/bioetl/domain/serialization/__init__.py": "compatibility_facade",
     "src/bioetl/domain/types/__init__.py": "public_package_facade",
     "src/bioetl/domain/value_objects/__init__.py": "public_package_facade",
     "src/bioetl/infrastructure/adapters/http/health_monitor.py": (
