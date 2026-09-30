@@ -11,6 +11,7 @@ import pytest
 from bioetl.interfaces.http import (
     _health_server_observability_routing as observability_routing,
 )
+from bioetl.interfaces.http import _health_server_records_table as records_table_routing
 from bioetl.interfaces.http import _health_server_routing_support as routing_support
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
@@ -268,7 +269,7 @@ async def test_pipeline_run_report_returns_unresolved_and_missing_shells(
         },
     )
 
-    monkeypatch.setattr(observability_routing.asyncio, "to_thread", _inline_to_thread)
+    monkeypatch.setattr(records_table_routing.asyncio, "to_thread", _inline_to_thread)
     monkeypatch.setattr(
         observability_routing,
         "run_bounded_forensic_operation",
@@ -299,7 +300,7 @@ async def test_workflow_report_handles_found_and_missing_payloads(
 ) -> None:
     host = _ObservabilityHost()
     writer = _writer()
-    monkeypatch.setattr(observability_routing.asyncio, "to_thread", _inline_to_thread)
+    monkeypatch.setattr(records_table_routing.asyncio, "to_thread", _inline_to_thread)
     monkeypatch.setattr(
         observability_routing,
         "run_bounded_forensic_operation",
@@ -346,7 +347,7 @@ async def test_workflow_report_returns_schema_mismatch_explicitly(
 
     host = _ObservabilityHost()
     writer = _writer()
-    monkeypatch.setattr(observability_routing.asyncio, "to_thread", _inline_to_thread)
+    monkeypatch.setattr(records_table_routing.asyncio, "to_thread", _inline_to_thread)
     monkeypatch.setattr(
         observability_routing,
         "run_bounded_forensic_operation",
@@ -393,7 +394,7 @@ async def test_report_lists_bound_limits_and_reject_invalid_values(
     host = _ObservabilityHost()
     writer = _writer()
     calls: list[tuple[str, str | None, int]] = []
-    monkeypatch.setattr(observability_routing.asyncio, "to_thread", _inline_to_thread)
+    monkeypatch.setattr(records_table_routing.asyncio, "to_thread", _inline_to_thread)
 
     async def unexpected_bounded_operation(**_kwargs: object) -> object:
         raise AssertionError("report list endpoints must bypass the forensic limiter")
@@ -463,7 +464,7 @@ async def test_report_lists_bound_limits_and_reject_invalid_values(
     [
         (
             "/ops/observability/processed-records",
-            {"pipeline": "chembl_activity"},
+            {"pipeline": "chembl_activity", "run_id": "run-1"},
             "processed-records",
         ),
         (
@@ -494,6 +495,11 @@ async def test_observability_endpoints_return_bounded_failure_contract(
 
     monkeypatch.setattr(
         observability_routing,
+        "run_bounded_forensic_operation",
+        capacity_exhausted,
+    )
+    monkeypatch.setattr(
+        records_table_routing,
         "run_bounded_forensic_operation",
         capacity_exhausted,
     )
@@ -536,14 +542,14 @@ async def test_processed_records_prefers_exact_run_ledger(
         return {"contract": "processed_records_table_v1", "rows": [1]}
 
     host._run_ledger_port = _Ledger()
-    monkeypatch.setattr(observability_routing.asyncio, "to_thread", _inline_to_thread)
+    monkeypatch.setattr(records_table_routing.asyncio, "to_thread", _inline_to_thread)
     monkeypatch.setattr(
-        observability_routing,
+        records_table_routing,
         "run_bounded_forensic_operation",
         _run_operation_directly,
     )
     monkeypatch.setattr(
-        observability_routing,
+        records_table_routing,
         "build_processed_records_table_payload_from_ledger",
         build_from_ledger,
     )
@@ -597,19 +603,19 @@ async def test_processed_records_empty_ledger_does_not_query_prometheus(
         raise AssertionError("exact run_id with empty ledger must not query Prometheus")
 
     host._run_ledger_port = _EmptyLedger()
-    monkeypatch.setattr(observability_routing.asyncio, "to_thread", _inline_to_thread)
+    monkeypatch.setattr(records_table_routing.asyncio, "to_thread", _inline_to_thread)
     monkeypatch.setattr(
-        observability_routing,
+        records_table_routing,
         "run_bounded_forensic_operation",
         _run_operation_directly,
     )
     monkeypatch.setattr(
-        observability_routing,
+        records_table_routing,
         "build_processed_records_table_payload_from_ledger",
         build_from_ledger,
     )
     monkeypatch.setattr(
-        observability_routing,
+        records_table_routing,
         "build_processed_records_table_payload_from_prometheus",
         build_from_prometheus,
     )

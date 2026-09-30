@@ -172,7 +172,8 @@
         "properties": {
           "kind": { "type": "string" },
           "ref": { "type": "string" },
-          "hash": { "type": ["string", "null"] }
+          "hash": { "type": ["string", "null"] },
+          "sha256": { "type": ["string", "null"] }
         }
       }
     },
