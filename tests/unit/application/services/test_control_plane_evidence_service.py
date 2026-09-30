@@ -442,7 +442,90 @@ def test_lineage_missing_fragments_obeys_profile_contract(
 
     assert payload["status"] == expected_status
     assert profile_reason in _reasons(payload)
+    missing_fragment_reasons = {
+        "lineage_fragments_missing",
+        "lineage_identity_not_observable",
+        "lineage_cycle_not_observable",
+    }
+    if profile == "degraded_observable":
+        assert missing_fragment_reasons.isdisjoint(_reasons(payload))
+        return
     assert "lineage_fragments_missing" in _reasons(payload)
+
+
+def _degraded_launch_context() -> dict[str, object]:
+    return {
+        "required_persistence_profile": "degraded_observable",
+        "archive_policy": {
+            "required": False,
+            "policy_ref": "persistence-profile:degraded_observable",
+        },
+    }
+
+
+def test_trust_summary_degraded_observable_without_fragments_is_warning(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _ok_component(endpoint: str) -> dict[str, object]:
+        return {
+            "endpoint": endpoint,
+            "rows": [
+                {
+                    "check": "proof",
+                    "status": "OK",
+                    "reason": f"{endpoint}_ok",
+                    "detail": "bounded proof",
+                }
+            ],
+        }
+
+    monkeypatch.setattr(
+        ControlPlaneEvidenceService,
+        "manifest_validation",
+        lambda self, **_kwargs: _ok_component("manifest-validation"),
+    )
+    monkeypatch.setattr(
+        ControlPlaneEvidenceService,
+        "retention_compliance",
+        lambda self, **_kwargs: _ok_component("retention-compliance"),
+    )
+    manifest = _snapshot_manifest(launch_context=_degraded_launch_context())
+    service = ControlPlaneEvidenceService(lineage_store=_LineageStore(()))
+
+    payload = service.trust_summary(scope=_scope(manifest), now=_NOW)
+
+    assert payload["trust_status"] == "WARNING"
+    assert "lineage_fragments_missing" not in _reasons(payload)
+    assert "lineage_persistence_profile_degraded" in _reasons(payload)
+
+
+def test_trust_summary_replay_ready_without_fragments_is_incomplete() -> None:
+    manifest = _snapshot_manifest(
+        launch_context={
+            "required_persistence_profile": "replay_ready",
+            "archive_policy": {
+                "required": True,
+                "policy_ref": "persistence-profile:replay_ready",
+            },
+        }
+    )
+    service = ControlPlaneEvidenceService(lineage_store=_LineageStore(()))
+
+    payload = service.trust_summary(scope=_scope(manifest), now=_NOW)
+
+    assert payload["trust_status"] == "INCOMPLETE"
+    assert "lineage_fragments_missing" in _reasons(payload)
+
+
+def test_trust_summary_forensic_grade_without_fragments_is_error() -> None:
+    manifest = _snapshot_manifest(
+        launch_context={"required_persistence_profile": "forensic_grade"}
+    )
+    service = ControlPlaneEvidenceService(lineage_store=_LineageStore(()))
+
+    payload = service.trust_summary(scope=_scope(manifest), now=_NOW)
+
+    assert payload["trust_status"] == "ERROR"
 
 
 class _LifecyclePlanner:
