@@ -301,6 +301,23 @@ def main(argv: list[str] | None = None) -> int:
             "PYTHONPYCACHEPREFIX": str(scratch / "pycache"),
         }
     )
+    # When shards run through the WSL launcher only variables named in WSLENV
+    # cross the boundary; plain Windows env vars are dropped, which previously
+    # made every shard write a throwaway `.coverage` in the checkout root.
+    wslenv_entries = [
+        entry for entry in os.environ.get("WSLENV", "").split(":") if entry
+    ]
+    for entry in (
+        "COVERAGE_FILE",
+        "BIOETL_SKIP_PREFLIGHT",
+        "BIOETL_SKIP_SETUP_PLUGINS",
+        "BIOETL_AI_MEMORY_MODE",
+        "HYPOTHESIS_DATABASE/p",
+        "PYTHONPYCACHEPREFIX/p",
+    ):
+        if not any(e.split("/")[0] == entry.split("/")[0] for e in wslenv_entries):
+            wslenv_entries.append(entry)
+    env["WSLENV"] = ":".join(wslenv_entries)
     for shard in SHARDS:
         coverage_file = shards_dir / f".coverage.{shard.name}"
         junit = junit_dir / f"{shard.name}.xml"
