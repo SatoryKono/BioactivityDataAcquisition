@@ -196,14 +196,32 @@ async def handle_control_plane_filter_options(
     query: dict[str, str],
 ) -> None:
     """Handle control-plane-backed selector options for Grafana variables."""
-    try:
-        payload = await run_bounded_forensic_operation(
-            limiter=host._selector_endpoint_limiter,
-            operation_factory=lambda: _filter_options_payload(host, query),
-            timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
-            queue_timeout_seconds=SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
-            endpoint="/ops/control-plane/filter-options",
+    if _read_truthy_query_param(query, "status_only"):
+        await host._send_payload_response(
+            writer,
+            200,
+            {
+                "catalog": host._selector_catalog.options.status(query),
+            },
         )
+        return
+    try:
+        if _read_truthy_query_param(query, "allow_stale"):
+            payload = await host._selector_catalog.options.read(
+                query,
+                lambda: _filter_options_payload(host, query),
+                limiter=host._selector_endpoint_limiter,
+                timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
+                queue_timeout_seconds=SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
+            )
+        else:
+            payload = await run_bounded_forensic_operation(
+                limiter=host._selector_endpoint_limiter,
+                operation_factory=lambda: _filter_options_payload(host, query),
+                timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
+                queue_timeout_seconds=SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
+                endpoint="/ops/control-plane/filter-options",
+            )
     except ForensicEndpointUnavailable as exc:
         await host._send_payload_response(
             writer,
@@ -215,6 +233,22 @@ async def handle_control_plane_filter_options(
         )
         return
     await host._send_payload_response(writer, 200, payload)
+
+
+async def prewarm_selector_options(host: _HealthRoutingHost) -> None:
+    """Warm the unscoped entry point through the same bounded refresh path."""
+    query = {"dimension": "workflow", "response_shape": "options"}
+    try:
+        await host._selector_catalog.options.read(
+            query,
+            lambda: _filter_options_payload(host, query),
+            limiter=host._selector_endpoint_limiter,
+            timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
+            queue_timeout_seconds=SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
+        )
+    except ForensicEndpointUnavailable:
+        # Failure is retained in cache status; startup remains independent.
+        return
 
 
 async def _filter_options_payload(
@@ -272,12 +306,14 @@ async def _filter_options_payload(
             timezone=query.get("timezone") or "UTC",
         )
 
-    payload, report_entries = await asyncio.gather(
-        manifest_options(),
+    manifest_task = asyncio.create_task(manifest_options())
+    report_task = asyncio.create_task(
         host._selector_catalog.read_reports(scopes, load_report_selector_entries)
         if include_reports
         else asyncio.sleep(0, result=[]),
     )
+    await asyncio.gather(manifest_task, report_task, return_exceptions=True)
+    payload, report_entries = manifest_task.result(), report_task.result()
     if include_reports:
         payload = await asyncio.to_thread(
             supplement_report_options,

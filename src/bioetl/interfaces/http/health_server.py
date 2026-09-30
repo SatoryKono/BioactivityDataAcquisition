@@ -228,6 +228,7 @@ class HealthServer(
             SELECTOR_ENDPOINT_CONCURRENCY
         )
         self._selector_catalog = SelectorCatalog()
+        self._selector_prewarm_task: asyncio.Task[None] | None = None
         self._run_explorer_snapshot = RunExplorerSnapshotCache()
         self._run_explorer_refresh_task: asyncio.Task[None] | None = None
         self._start_time: float | None = None
@@ -256,6 +257,11 @@ class HealthServer(
 
     async def start(self) -> None:
         """Start the health server."""
+        from bioetl.interfaces.http._health_server_routing_support import (
+            prewarm_selector_options,
+        )
+
+        self._selector_catalog = SelectorCatalog()
         self._start_time = time.monotonic()
         try:
             self._server = await asyncio.start_server(
@@ -275,6 +281,9 @@ class HealthServer(
                 )
             raise
         if self._run_manifest_port is not None:
+            self._selector_prewarm_task = asyncio.create_task(
+                prewarm_selector_options(self), name="bioetl-selector-prewarm"
+            )
             self._run_explorer_refresh_task = asyncio.create_task(
                 run_periodic_run_explorer_snapshot(
                     self._run_explorer_snapshot,
@@ -304,6 +313,11 @@ class HealthServer(
 
     async def stop(self) -> None:
         """Stop the health server gracefully."""
+        await self._selector_catalog.options.close()
+        if self._selector_prewarm_task is not None:
+            self._selector_prewarm_task.cancel()
+            await asyncio.gather(self._selector_prewarm_task, return_exceptions=True)
+            self._selector_prewarm_task = None
         await stop_run_explorer_snapshot(self._run_explorer_refresh_task)
         self._run_explorer_refresh_task = None
         await stop_control_plane_metrics_refresh(

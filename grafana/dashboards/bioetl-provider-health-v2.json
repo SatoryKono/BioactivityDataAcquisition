@@ -73,7 +73,7 @@
           "value": "$__all"
         },
         "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}",
+        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
         "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Default selection is All pipelines until the operator narrows to a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series.",
         "hide": 0,
         "includeAll": true,
@@ -100,7 +100,7 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}",
+            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
             "columns": [
               {
                 "selector": "text",
@@ -166,7 +166,7 @@
           "value": "-"
         },
         "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
         "includeAll": false,
@@ -193,7 +193,7 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}",
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
             "columns": [
               {
                 "selector": "text",
@@ -1107,7 +1107,7 @@
         "h": 3
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. Valid-empty evidence stays VALID EMPTY. Select run context via dashboard variables. A failed request is QUERY ERROR; backend unavailable returns 504.",
+      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health.",
       "options": {
         "reduceOptions": {
           "calcs": [

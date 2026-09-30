@@ -540,12 +540,11 @@ def test_provider_health_selector_follows_selected_run() -> None:
         for item in dashboard["templating"]["list"]
         if item.get("name") == "provider"
     )
-    assert variable.get("includeAll") is True
-    assert variable.get("allValue") == ".*"
-    query = variable["query"]["query"]
-    assert "bioetl_workflow_pipeline_expected" in query
-    assert 'pipeline=~"$pipeline"' in query
-    assert "bioetl_provider_current_status" not in query
+    assert variable.get("includeAll") is False
+    query = variable["query"]["infinityQuery"]["url"]
+    assert query.startswith("/ops/observability/selected-run-status?")
+    assert "pipeline=${pipeline}" in query
+    assert "run_id=${run_id}" in query
 
 
 def test_http_selector_frames_declare_columns_for_empty_catalogs() -> None:
@@ -559,6 +558,7 @@ def test_http_selector_frames_declare_columns_for_empty_catalogs() -> None:
             if "/ops/control-plane/filter-options?" not in infinity.get("url", ""):
                 continue
             assert "response_shape=options" in infinity["url"], path.name
+            assert infinity["url"].count("allow_stale=1") == 1, path.name
             assert infinity["parser"] == "backend", path.name
             assert infinity["root_selector"] == SELECTOR_ROWS, path.name
             assert infinity["columns"] == [
