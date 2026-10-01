@@ -1,6 +1,6 @@
 # BioETL Architecture Diagrams Bundle
 
-- Generated: 2026-09-24T19:11:39+00:00
+- Generated: 2026-09-30T10:14:15+00:00
 - Diagram count: 89
 
 ## Table of Contents
@@ -125,7 +125,7 @@
 ![01-high-level-hexagonal](../architecture/svg/01-high-level-hexagonal.svg)
 
 ### Описание
-Диаграмма «High-Level Hexagonal Architecture» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the Ports & Adapters (Hexagonal) pattern across all layers.. Схема имеет плотность порядка 46 узлов и 29 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, External APIs, interfaces layer, composition layer, application layer, domain layer (pure, no I/O). Показательные узлы для быстрого чтения: ChEMBL, PubMed, UniProt, PubChem, CrossRef, OpenAlex. Примечание: Decomposed into 01a, 01b, 01c sub-diagrams.
+Диаграмма «High-Level Hexagonal Architecture» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the Ports & Adapters (Hexagonal) pattern across all layers.. Схема имеет плотность порядка 46 узлов и 34 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, External APIs, interfaces layer, composition layer, application layer, domain layer (pure, no I/O). Показательные узлы для быстрого чтения: ChEMBL, PubMed, UniProt, PubChem, CrossRef, OpenAlex. Примечание: Decomposed into 01a, 01b, 01c sub-diagrams.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -715,13 +715,13 @@
 ![13-port-protocol-contracts](../architecture/svg/13-port-protocol-contracts.svg)
 
 ### Описание
-Диаграмма «Port/Protocol Contracts (Full Map)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Domain ports mapped to their current application consumers and infrastructure adapters.. Схема имеет плотность порядка 48 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain ports (Protocols), Application consumers, Infrastructure adapters. Показательные узлы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, BronzeStoragePort / SilverStoragePort GoldStoragePort / MergedStoragePort, LockPort, CheckpointPort, CompositeCheckpointPort. Примечание: Decomposed into 13a, 13b, 13c, 13d, 13e, 13f sub-diagrams.
+Диаграмма «Port/Protocol Contracts (Full Map)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Domain ports mapped to their current application consumers and infrastructure adapters.. Схема имеет плотность порядка 70 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain ports (Protocols), Application consumers, Infrastructure adapters. Показательные узлы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, BronzeStoragePort / SilverStoragePort GoldStoragePort / MergedStoragePort, LockPort, CheckpointPort, CompositeCheckpointPort. Примечание: Decomposed into 13a, 13b, 13c, 13d, 13e, 13f, 13g, 13h, 13i sub-diagrams.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата: `2026-09-03`
-- Узлы (metadata): `48`
+- Узлы (metadata): `70`
 
 \newpage
 
@@ -848,12 +848,12 @@
 ![13g-port-contracts-data-sources](../architecture/svg/13g-port-contracts-data-sources.svg)
 
 ### Описание
-Диаграмма «Port Contracts: Data Sources» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers DataSourcePort and FilterableDataSourcePort implementations per provider.. Схема имеет плотность порядка 9 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, ChemblAdapter.
+Диаграмма «Port Contracts: Data Sources» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers DataSourcePort implementations per provider. FilterableDataSourcePort. Схема имеет плотность порядка 9 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, ChemblAdapter, PubMedAdapter, UniProtAdapter, CrossRefAdapter.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-07-31`
+- Дата: `2026-09-30`
 - Узлы (metadata): `9`
 
 \newpage
@@ -1267,7 +1267,7 @@
 ![27-composite-preflight-field-priority-and-normalization-compatibility-resolution](../architecture/svg/27-composite-preflight-field-priority-and-normalization-compatibility-resolution.svg)
 
 ### Описание
-Диаграмма «Composite Preflight Field Priority And Normalization Compatibility Resolution» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «System / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 7 узлов и 4 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности.
+Диаграмма «Composite Preflight Field Priority And Normalization Compatibility Resolution» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «System / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 7 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности.
 
 ### Метаданные
 - Тип: `sequenceDiagram`

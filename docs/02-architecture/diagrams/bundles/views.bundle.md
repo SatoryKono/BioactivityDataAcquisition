@@ -1,6 +1,6 @@
 # BioETL Views Diagrams Bundle
 
-- Generated: 2026-09-24T19:11:39+00:00
+- Generated: 2026-09-30T10:14:15+00:00
 - Diagram count: 165
 
 ## Table of Contents
@@ -55,7 +55,7 @@
 ![00-legend](../views/svg/00-legend.svg)
 
 ### Описание
-Диаграмма «00 Legend» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Legend. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: Shared legend for coded edge labels and link weights. Схема имеет плотность порядка 43 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: 📋 Legend, Link Types. Показательные узлы для быстрого чтения: Main data flow: solid, 4px, Dependency/DI: dashed, 2px, Observability: gray, 1px, Error/Quarantine: red dashed, 2px, Codes used in diagrams, K01 = Transform &amp; normalize.
+Диаграмма «00 Legend» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Legend. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: Shared legend for coded edge labels and link weights. Схема имеет плотность порядка 43 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Legend, Link Types. Показательные узлы для быстрого чтения: Main data flow: solid, 4px, Dependency/DI: dashed, 2px, Observability: gray, 1px, Error/Quarantine: red dashed, 2px, Codes used in diagrams, K01 = Transform &amp; normalize.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1157,7 +1157,7 @@
 ![13-port-protocol-contracts-full](../views/svg/13-port-protocol-contracts-full.svg)
 
 ### Описание
-Диаграмма «13 Port Protocol Contracts» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема (graph). Тип представления: Full. Родительская диаграмма: `13-port-protocol-contracts.mmd`. В комментариях исходника зафиксирован фокус диаграммы: Full reference diagram retained after decomposition.. Схема имеет плотность порядка 62 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain ports (Protocols), Application consumers, Infrastructure adapters. Показательные узлы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, BronzeStoragePort / SilverStoragePort GoldStoragePort / MergedStoragePort, LockPort, CheckpointPort, CompositeCheckpointPort.
+Диаграмма «13 Port Protocol Contracts» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема (graph). Тип представления: Full. Родительская диаграмма: `13-port-protocol-contracts.mmd`. В комментариях исходника зафиксирован фокус диаграммы: Full reference diagram retained after decomposition.. Схема имеет плотность порядка 70 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain ports (Protocols), Application consumers, Infrastructure adapters. Показательные узлы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, BronzeStoragePort / SilverStoragePort GoldStoragePort / MergedStoragePort, LockPort, CheckpointPort, CompositeCheckpointPort.
 
 ### Метаданные
 - Тип: `graph`

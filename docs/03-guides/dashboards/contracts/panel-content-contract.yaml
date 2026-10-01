@@ -170,34 +170,6 @@ dashboards:
         required_columns:
         - parameter
         - value
-      '9403':
-        title: Review Processed Records
-        role: accounting_table
-        tier: 2
-        scope: current
-        scope_class: current
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - TELEMETRY_ABSENT
-        - ERROR
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles:
-        - full_dark
-        required_columns:
-        - parameter
-        - value
-        - percentage
-        hidden_columns:
-        - row_status
       '9405':
         title: Review Identity Gaps
         role: evidence_table

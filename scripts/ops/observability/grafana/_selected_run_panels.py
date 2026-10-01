@@ -249,7 +249,7 @@ def _stamp_overview_derived_panels(panel: dict[str, object], uid: object) -> Non
             if transform["id"] == "filterFieldsByName":
                 transform["options"]["include"]["names"][1] = "run_verdict"
             if transform["id"] == "organize":
-                transform["options"]["indexByName"].pop("verdict")
+                transform["options"]["indexByName"].pop("verdict", None)
                 transform["options"]["indexByName"]["run_verdict"] = 1
                 transform["options"]["renameByName"]["run_verdict"] = "Status"
     if panel.get("id") == 215:

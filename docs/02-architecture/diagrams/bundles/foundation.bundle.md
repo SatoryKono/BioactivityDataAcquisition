@@ -1,6 +1,6 @@
 # BioETL Foundation Diagrams Bundle
 
-- Generated: 2026-09-24T19:11:39+00:00
+- Generated: 2026-09-26T15:13:19+00:00
 - Diagram count: 55
 
 ## Table of Contents
@@ -396,7 +396,7 @@
 ![12-local-deployment-architecture](../foundation/svg/12-local-deployment-architecture.svg)
 
 ### Описание
-Диаграмма «Local Deployment Architecture» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: local-only runtime, in-process locking, local filesystem outputs. Схема имеет плотность порядка 13 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Local Machine (Single Instance), CLI Execution, Local Pipeline Workers, In-Process Locking, Local filesystem (data/), Local Observability. Показательные узлы для быстрого чтения: 🌐 Provider APIs ChEMBL + PubChem + UniProt + PubMed, 🖥️ CLI / Manual run PipelineRunner, ⏰ Local scheduler (cron/systemd), 📦 Local pipelines chembl_* + pubchem_compound + uniprot_protein, MemoryLock in-process only no cross-process coordination, ("📁 bronze/ JSONL+zstd").
+Диаграмма «Local Deployment Architecture» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: local-only runtime, in-process locking, local filesystem outputs. Схема имеет плотность порядка 13 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Local Machine (Single Instance), CLI Execution, Local Pipeline Workers, In-Process Locking, Local filesystem (data/), Local Observability. Показательные узлы для быстрого чтения: Provider APIs ChEMBL + PubChem + UniProt + PubMed, CLI / Manual run PipelineRunner, Local scheduler (cron/systemd), Local pipelines chembl_* + pubchem_compound + uniprot_protein, MemoryLock in-process only no cross-process coordination, ("bronze/ JSONL+zstd").
 
 ### Метаданные
 - Тип: `flowchart`

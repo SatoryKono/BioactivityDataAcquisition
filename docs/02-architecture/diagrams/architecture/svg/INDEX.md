@@ -1,18 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-09-02T14:16:37+00:00_
-
-## High Level Hexagonal Simple
-
-![01-high-level-hexagonal-simple](./01-high-level-hexagonal-simple.svg)
-
----
-
-## High Level Hexagonal
-
-![01-high-level-hexagonal](./01-high-level-hexagonal.svg)
-
----
+_Generated: 2026-10-01T21:16:42+03:00_
 
 ## 01ahexagonal Overview
 
@@ -38,15 +26,21 @@ _Generated: 2026-09-02T14:16:37+00:00_
 
 ---
 
-## Layer Dependency Matrix
+## High Level Hexagonal
 
-![02-layer-dependency-matrix](./02-layer-dependency-matrix.svg)
+![01-high-level-hexagonal](./01-high-level-hexagonal.svg)
 
 ---
 
-## Medallion Data Flow
+## High Level Hexagonal Simple
 
-![03-medallion-data-flow](./03-medallion-data-flow.svg)
+![01-high-level-hexagonal-simple](./01-high-level-hexagonal-simple.svg)
+
+---
+
+## Layer Dependency Matrix
+
+![02-layer-dependency-matrix](./02-layer-dependency-matrix.svg)
 
 ---
 
@@ -56,15 +50,15 @@ _Generated: 2026-09-02T14:16:37+00:00_
 
 ---
 
-## Pipeline Execution Flow
+## Medallion Data Flow
 
-![04-pipeline-execution-flow](./04-pipeline-execution-flow.svg)
+![03-medallion-data-flow](./03-medallion-data-flow.svg)
 
 ---
 
-## Provider Adapter Hierarchy
+## Pipeline Execution Flow
 
-![05-provider-adapter-hierarchy](./05-provider-adapter-hierarchy.svg)
+![04-pipeline-execution-flow](./04-pipeline-execution-flow.svg)
 
 ---
 
@@ -80,9 +74,9 @@ _Generated: 2026-09-02T14:16:37+00:00_
 
 ---
 
-## Storage Layer
+## Provider Adapter Hierarchy
 
-![06-storage-layer](./06-storage-layer.svg)
+![05-provider-adapter-hierarchy](./05-provider-adapter-hierarchy.svg)
 
 ---
 
@@ -98,9 +92,9 @@ _Generated: 2026-09-02T14:16:37+00:00_
 
 ---
 
-## Dq System
+## Storage Layer
 
-![07-dq-system](./07-dq-system.svg)
+![06-storage-layer](./06-storage-layer.svg)
 
 ---
 
@@ -116,9 +110,9 @@ _Generated: 2026-09-02T14:16:37+00:00_
 
 ---
 
-## Composite Pipeline
+## Dq System
 
-![08-composite-pipeline](./08-composite-pipeline.svg)
+![07-dq-system](./07-dq-system.svg)
 
 ---
 
@@ -134,9 +128,9 @@ _Generated: 2026-09-02T14:16:37+00:00_
 
 ---
 
-## Observability Stack
+## Composite Pipeline
 
-![09-observability-stack](./09-observability-stack.svg)
+![08-composite-pipeline](./08-composite-pipeline.svg)
 
 ---
 
@@ -152,15 +146,15 @@ _Generated: 2026-09-02T14:16:37+00:00_
 
 ---
 
-## Resilience Patterns
+## Observability Stack
 
-![10-resilience-patterns](./10-resilience-patterns.svg)
+![09-observability-stack](./09-observability-stack.svg)
 
 ---
 
-## Configuration System
+## Resilience Patterns
 
-![11-configuration-system](./11-configuration-system.svg)
+![10-resilience-patterns](./10-resilience-patterns.svg)
 
 ---
 
@@ -176,9 +170,9 @@ _Generated: 2026-09-02T14:16:37+00:00_
 
 ---
 
-## Bootstrap Di Container
+## Configuration System
 
-![12-bootstrap-di-container](./12-bootstrap-di-container.svg)
+![11-configuration-system](./11-configuration-system.svg)
 
 ---
 
@@ -194,9 +188,9 @@ _Generated: 2026-09-02T14:16:37+00:00_
 
 ---
 
-## Port Protocol Contracts
+## Bootstrap Di Container
 
-![13-port-protocol-contracts](./13-port-protocol-contracts.svg)
+![12-bootstrap-di-container](./12-bootstrap-di-container.svg)
 
 ---
 
@@ -254,9 +248,9 @@ _Generated: 2026-09-02T14:16:37+00:00_
 
 ---
 
-## Cli Interface Layer
+## Port Protocol Contracts
 
-![14-cli-interface-layer](./14-cli-interface-layer.svg)
+![13-port-protocol-contracts](./13-port-protocol-contracts.svg)
 
 ---
 
@@ -272,15 +266,15 @@ _Generated: 2026-09-02T14:16:37+00:00_
 
 ---
 
-## Batch Executor Internals
+## Cli Interface Layer
 
-![15-batch-executor-internals](./15-batch-executor-internals.svg)
+![14-cli-interface-layer](./14-cli-interface-layer.svg)
 
 ---
 
-## Transformer Hierarchy
+## Batch Executor Internals
 
-![16-transformer-hierarchy](./16-transformer-hierarchy.svg)
+![15-batch-executor-internals](./15-batch-executor-internals.svg)
 
 ---
 
@@ -296,15 +290,15 @@ _Generated: 2026-09-02T14:16:37+00:00_
 
 ---
 
-## Security Pii Audit
+## Transformer Hierarchy
 
-![17-security-pii-audit](./17-security-pii-audit.svg)
+![16-transformer-hierarchy](./16-transformer-hierarchy.svg)
 
 ---
 
-## Lock Checkpoint Shutdown
+## Security Pii Audit
 
-![18-lock-checkpoint-shutdown](./18-lock-checkpoint-shutdown.svg)
+![17-security-pii-audit](./17-security-pii-audit.svg)
 
 ---
 
@@ -317,6 +311,12 @@ _Generated: 2026-09-02T14:16:37+00:00_
 ## 18bcheckpoint Shutdown
 
 ![18b-checkpoint-shutdown](./18b-checkpoint-shutdown.svg)
+
+---
+
+## Lock Checkpoint Shutdown
+
+![18-lock-checkpoint-shutdown](./18-lock-checkpoint-shutdown.svg)
 
 ---
 

@@ -1,0 +1,11 @@
+{
+  "cli_version": "0.8.2",
+  "signature": "Valid, CodeRabbit Inc.",
+  "sha256": "7bde89b7d4b6b9cbd342ff879330c62125a9fba7ec7d1c0673cac45b723c4d42",
+  "doctor_exit": 0,
+  "yaml_baseline_schema": "PASS",
+  "yaml_proposed_schema": "PASS",
+  "browser_triage": "BLOCKED_LOGIN",
+  "review": "NOT_RUN",
+  "env_files_modified": false
+}

@@ -1,0 +1,11 @@
+{"type":"review_context","reviewType":"uncommitted","currentBranch":"codex/coderabbit-setup","baseBranch":"main","baseCommit":"181588522846b696fb0016e149772850fa3dd757","workingDirectory":"C:/Users/Fedor/.codex/worktrees/coderabbit-setup/BioactivityDataAcquisition"}
+{"type":"status","phase":"connecting","status":"connecting_to_review_service"}
+{"type":"status","phase":"setup","status":"setting_up"}
+{"type":"status","phase":"setup","status":"preparing_sandbox"}
+{"type":"status","phase":"analyzing","status":"summarizing"}
+{"type":"status","phase":"analyzing","status":"tools_completed"}
+{"type":"status","phase":"analyzing","status":"reviewing"}
+{"type":"heartbeat","status":"reviewing"}
+{"type":"heartbeat","status":"reviewing"}
+{"type":"heartbeat","status":"reviewing"}
+{"type":"heartbeat","status":"reviewing"}

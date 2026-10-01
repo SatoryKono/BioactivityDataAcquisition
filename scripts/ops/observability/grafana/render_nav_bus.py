@@ -2540,6 +2540,18 @@ def apply_to_dashboard(
     apply_saved_evidence_readability(payload)
     _pack_incident_tail_rows(payload)
     retire_runtime_links(payload)
+    if current_uid == "bioetl-control-plane-v1":
+        pending = [payload]
+        while pending:
+            parent = pending.pop()
+            children = parent.get("panels", [])
+            removed = next((p for p in children if p.get("id") == 9403), None)
+            if removed:
+                children.remove(removed)
+                for panel in children:
+                    if panel["gridPos"]["y"] > removed["gridPos"]["y"]:
+                        panel["gridPos"]["y"] -= removed["gridPos"]["h"]
+            pending.extend(children)
     if current_uid == "bioetl-overview-v2":
         pending = list(payload["panels"])
         while pending:

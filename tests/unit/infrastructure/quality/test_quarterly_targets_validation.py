@@ -353,3 +353,63 @@ class TestValidateQuarterlyTargetsSection:
             errors=errors,
         )
         assert errors == []
+
+    def test_zero_floor_flat_continuation_passes(self) -> None:
+        """Flat continuation at the zero floor is compliant steady state."""
+        raw = {
+            "quarterly_targets": [
+                {
+                    "quarter": "2026-Q3",
+                    "max_total_exemptions": 0,
+                    "min_integral_score": 75.0,
+                    "group_budgets": {},
+                    "registry_budgets": {},
+                },
+                {
+                    "quarter": "2026-Q4",
+                    "max_total_exemptions": 0,
+                    "min_integral_score": 76.0,
+                    "group_budgets": {},
+                    "registry_budgets": {},
+                },
+            ]
+        }
+        errors: list[str] = []
+        _validate_quarterly_targets_section(
+            raw,
+            group_names=set(),
+            baseline_registry_names=set(),
+            errors=errors,
+        )
+        assert errors == []
+
+    def test_flat_above_zero_still_violation(self) -> None:
+        """Flat budgets above the zero floor still violate the ratchet."""
+        raw = {
+            "quarterly_targets": [
+                {
+                    "quarter": "2026-Q3",
+                    "max_total_exemptions": 5,
+                    "min_integral_score": 75.0,
+                    "group_budgets": {},
+                    "registry_budgets": {},
+                },
+                {
+                    "quarter": "2026-Q4",
+                    "max_total_exemptions": 5,
+                    "min_integral_score": 76.0,
+                    "group_budgets": {},
+                    "registry_budgets": {},
+                },
+            ]
+        }
+        errors: list[str] = []
+        _validate_quarterly_targets_section(
+            raw,
+            group_names=set(),
+            baseline_registry_names=set(),
+            errors=errors,
+        )
+        assert any(
+            "max_total_exemptions" in e and "strictly decrease" in e for e in errors
+        )

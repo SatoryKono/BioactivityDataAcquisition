@@ -650,6 +650,40 @@ class TestValidatePriorityRegistryBurndown:
         )
         assert any("burn-down violation" in e for e in errors)
 
+    def test_zero_floor_flat_continuation_passes(self) -> None:
+        """Flat continuation at the zero floor is compliant steady state."""
+        raw = {
+            "governance": {"burn_down_priorities": {"registries": ["reg_a"]}},
+            "quarterly_targets": [
+                {"quarter": "2026-Q3", "registry_budgets": {"reg_a": 0}},
+                {"quarter": "2026-Q4", "registry_budgets": {"reg_a": 0}},
+            ],
+        }
+        errors: list[str] = []
+        _validate_priority_registry_burndown(
+            raw,
+            baseline_registry_names={"reg_a"},
+            errors=errors,
+        )
+        assert errors == []
+
+    def test_flat_above_zero_still_violation(self) -> None:
+        """Flat budget above the zero floor still violates the ratchet."""
+        raw = {
+            "governance": {"burn_down_priorities": {"registries": ["reg_a"]}},
+            "quarterly_targets": [
+                {"quarter": "2026-Q3", "registry_budgets": {"reg_a": 3}},
+                {"quarter": "2026-Q4", "registry_budgets": {"reg_a": 3}},
+            ],
+        }
+        errors: list[str] = []
+        _validate_priority_registry_burndown(
+            raw,
+            baseline_registry_names={"reg_a"},
+            errors=errors,
+        )
+        assert any("burn-down violation" in e for e in errors)
+
     def test_missing_registry_in_quarter(self) -> None:
         """Registry budget missing in a quarter should add error."""
         raw = {

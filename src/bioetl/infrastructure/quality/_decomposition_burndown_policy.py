@@ -123,7 +123,11 @@ def _validate_single_registry_burndown(
                 f"quarterly_targets[{quarter}].registry_budgets missing '{registry_name}'"
             )
             continue
-        if previous is not None and current >= previous:
+        # Zero-floor steady state: flat continuation at zero is compliant;
+        # any increase or flat above zero still violates the burn-down ratchet.
+        if previous is not None and (
+            current > previous or (current == previous and previous != 0)
+        ):
             errors.append(
                 "quarterly_targets registry burn-down violation: "
                 f"'{registry_name}' budget must strictly decrease ({current} >= {previous})"

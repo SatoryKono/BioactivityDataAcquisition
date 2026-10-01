@@ -1021,6 +1021,21 @@ quarterly_targets:
     class_method_count: 0
     god_object: 0
     domain_complexity: 0
+- quarter: 2026-Q4
+  max_total_exemptions: 0
+  min_integral_score: 76
+  group_budgets:
+    size_metrics: 0
+    complexity_metrics: 0
+    structural_debt: 0
+  registry_budgets:
+    file_size_limits: 0
+    function_complexity: 0
+    function_length: 0
+    class_size: 0
+    class_method_count: 0
+    god_object: 0
+    domain_complexity: 0
 owner_decomposition_targets:
 - quarter: 2026-Q1
   allocations:
@@ -1037,12 +1052,19 @@ owner_decomposition_targets:
     '@bioetl-architecture': 0
     '@bioetl-platform': 0
     '@bioetl-data-model': 0
+- quarter: 2026-Q4
+  allocations:
+    '@bioetl-architecture': 0
+    '@bioetl-platform': 0
+    '@bioetl-data-model': 0
 expiry_decomposition_targets:
 - quarter: 2026-Q1
   max_entries_expiring_in_quarter: 29
 - quarter: 2026-Q2
   max_entries_expiring_in_quarter: 1
 - quarter: 2026-Q3
+  max_entries_expiring_in_quarter: 0
+- quarter: 2026-Q4
   max_entries_expiring_in_quarter: 0
 test_governance_debt_metrics:
   inventory_source: configs/quality/test_governance_audit.yaml

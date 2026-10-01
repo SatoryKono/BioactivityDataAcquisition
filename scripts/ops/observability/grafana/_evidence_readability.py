@@ -768,7 +768,7 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
     summary = next(
         panel
         for panel in p.values()
-        if panel.get("title") == "Review Selected Run Status"
+        if panel.get("id") == 9603
     )
     source = p[9002] if overview else p[9451]
     _bind_selected_run_envelope(summary, source)

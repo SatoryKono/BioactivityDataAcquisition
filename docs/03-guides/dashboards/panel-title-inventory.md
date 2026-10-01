@@ -36,7 +36,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 139 | Review Uncovered Replay Signals |
 | bioetl-control-plane-v1.json | 9412 | Inspect Run Details |
 | bioetl-control-plane-v1.json | 9402 | Review Run Summary |
-| bioetl-control-plane-v1.json | 9403 | Review Processed Records |
 | bioetl-control-plane-v1.json | 9417 | Review Bounded Failure Reasons |
 | bioetl-control-plane-v1.json | 9422 | Review Exact Replay Readiness |
 | bioetl-control-plane-v1.json | 9420 | Inspect Complete Run Discovery |

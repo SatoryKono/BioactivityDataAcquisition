@@ -913,12 +913,12 @@
             },
             "properties": [
               {
-                "id": "displayName",
-                "value": "Reason"
-              },
-              {
                 "id": "links",
                 "value": []
+              },
+              {
+                "id": "displayName",
+                "value": "Reason"
               },
               {
                 "id": "mappings",
@@ -952,6 +952,15 @@
                       },
                       "archive_evidence_not_recorded": {
                         "text": "No verified archive"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^(Workflow: )?workflow_parent_not_finalized$",
+                      "result": {
+                        "text": "Parent workflow completion has not been recorded"
                       }
                     }
                   },
@@ -1511,7 +1520,8 @@
               "type": "auto",
               "wrapText": false
             },
-            "inspect": true
+            "inspect": true,
+            "minWidth": 50
           }
         },
         "overrides": [
@@ -1719,10 +1729,6 @@
               {
                 "id": "displayName",
                 "value": "Stage"
-              },
-              {
-                "id": "custom.width",
-                "value": 65
               }
             ]
           },
@@ -1735,10 +1741,6 @@
               {
                 "id": "displayName",
                 "value": "In"
-              },
-              {
-                "id": "custom.width",
-                "value": 50
               }
             ]
           },
@@ -1751,10 +1753,6 @@
               {
                 "id": "displayName",
                 "value": "Out"
-              },
-              {
-                "id": "custom.width",
-                "value": 50
               }
             ]
           },
@@ -1767,10 +1765,6 @@
               {
                 "id": "displayName",
                 "value": "Status"
-              },
-              {
-                "id": "custom.width",
-                "value": 65
               }
             ]
           },
@@ -1783,10 +1777,6 @@
               {
                 "id": "displayName",
                 "value": "Evidence"
-              },
-              {
-                "id": "custom.width",
-                "value": 90
               }
             ]
           },
@@ -1799,10 +1789,6 @@
               {
                 "id": "displayName",
                 "value": "Quar."
-              },
-              {
-                "id": "custom.width",
-                "value": 60
               }
             ]
           },
@@ -1815,10 +1801,6 @@
               {
                 "id": "displayName",
                 "value": "Excluded"
-              },
-              {
-                "id": "custom.width",
-                "value": 85
               }
             ]
           },
@@ -1831,10 +1813,6 @@
               {
                 "id": "displayName",
                 "value": "Dedup."
-              },
-              {
-                "id": "custom.width",
-                "value": 65
               }
             ]
           },
@@ -1847,10 +1825,6 @@
               {
                 "id": "displayName",
                 "value": "Filtered"
-              },
-              {
-                "id": "custom.width",
-                "value": 65
               }
             ]
           },
@@ -1863,10 +1837,6 @@
               {
                 "id": "displayName",
                 "value": "Excl. %"
-              },
-              {
-                "id": "custom.width",
-                "value": 70
               }
             ]
           },
@@ -1879,10 +1849,6 @@
               {
                 "id": "displayName",
                 "value": "Saved %"
-              },
-              {
-                "id": "custom.width",
-                "value": 75
               }
             ]
           },

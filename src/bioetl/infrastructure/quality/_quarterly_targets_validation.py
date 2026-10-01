@@ -109,7 +109,10 @@ def _validate_quarterly_targets_section(
     for previous, current in pairwise(ordered_targets):
         prev_total = int(previous["max_total_exemptions"])
         curr_total = int(current["max_total_exemptions"])
-        if curr_total >= prev_total:
+        # Zero-floor steady state: flat continuation at zero is compliant
+        # (budgets cannot go below zero); any increase or flat above zero
+        # still violates the burn-down ratchet.
+        if curr_total > prev_total or (curr_total == prev_total and prev_total != 0):
             errors.append(
                 "quarterly_targets: max_total_exemptions must strictly decrease each quarter"
             )

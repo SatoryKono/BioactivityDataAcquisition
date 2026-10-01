@@ -258,6 +258,13 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
         "matcher": {"id": "byRegexp", "options": "^(excluded_pct|saved_pct|Excl[.] %|Saved %)( C)?$"},
         "properties": [{"id": "unit", "value": "percent"}, {"id": "decimals", "value": 1}],
     })
+    # Let Grafana distribute available panel width across visible columns.
+    stages["fieldConfig"]["defaults"].setdefault("custom", {}).pop("width", None)
+    stages["fieldConfig"]["defaults"]["custom"]["minWidth"] = 50
+    for override in stages["fieldConfig"]["overrides"]:
+        override["properties"] = [
+            prop for prop in override["properties"] if prop["id"] != "custom.width"
+        ]
     row["panels"] = [p for p in row["panels"] if p.get("id") != 9460]
     row["gridPos"]["y"] = y + 6
     quality = deepcopy(next(p for p in panels if p.get("id") == 9481))
