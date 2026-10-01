@@ -11,24 +11,26 @@ def _provider_evidence_columns(panel: dict) -> None:
         "check_performed": "Performed",
         "check_result": "Result",
         "reason": "Reason",
-        "observed_display": "Observed at",
+        "observed_display": "Since run completed",
         "report_label": "Evidence",
     }
     panel["targets"][0]["root_selector"] = (
         "($d := presentation_domains[domain = 'Provider'][0]; "
         "$cached := $d.reason = 'cached_bronze_no_remote_probe'; "
         "$saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; "
+        "$completed := summary[0].completed_at; "
+        "$age := $completed ? $floor(($millis() - $toMillis($completed)) / 1000) : null; "
         "[$map(provider_checks, function($p) { $merge([$p, {"
-        "'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : 'UNKNOWN'), "
+        "'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : "
+        "($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')), "
         "'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), "
         "'check_result': $cached ? '—' : "
         "($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), "
         "'reason': $cached ? 'Cached Bronze used; provider API was not called.' : "
         "($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : "
         "($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), "
-        "'observed_display': $cached ? '—' : ($p.observed_at ? "
-        "$substring($p.observed_at,0,10) & ' ' & $substring($p.observed_at,11,5) & ' ' & "
-        "($substring($p.observed_at,-1) = 'Z' ? 'UTC' : $substring($p.observed_at,-6)) : 'UNKNOWN'), "
+        "'observed_display': $age != null and $age >= 0 ? "
+        "$string($floor($age / 3600)) & ' h ' & $string($floor(($age % 3600) / 60)) & ' min ago' : 'Not recorded', "
         "'report_label': $saved or $cached ? 'Open report' : '—' }]) })])"
     )
     panel["targets"][0].update(
@@ -38,8 +40,10 @@ def _provider_evidence_columns(panel: dict) -> None:
     panel["description"] = (
         "SELECTED RUN · Saved provider evidence for this Run ID. Cached Bronze means "
         "the provider API was not called: Check performed is No and Check result is —. "
-        "UNKNOWN means the performed state or result is unknown. Observed at preserves "
-        "the saved timezone. Expand Provider HTTP details for recorded response time, "
+        "Provider check identifies saved preflight evidence, not the extraction transport. "
+        "UNKNOWN means the performed state or result is unknown. Since run completed "
+        "is elapsed wall time from the saved completion timestamp, updated on refresh. "
+        "Expand Provider HTTP details for recorded response time, "
         "HTTP status and endpoint; missing details are not invented. VALID EMPTY is an "
         "empty successful response. SELECT RUN requires context; QUERY ERROR is a failed request."
     )
@@ -63,7 +67,7 @@ def _provider_evidence_columns(panel: dict) -> None:
         "Data source": 105,
         "Performed": 90,
         "Result": 75,
-        "Observed at": 155,
+        "Since run completed": 155,
         "Evidence": 95,
     }
     panel["fieldConfig"]["overrides"] = [

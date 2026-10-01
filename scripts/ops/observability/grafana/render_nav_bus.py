@@ -253,6 +253,10 @@ NAV_DESCRIPTION = (
 
 
 def _url_for(target: dict[str, str], *, source_uid: str) -> str:
+    if target["uid"] == _RUN_EXPLORER_UID:
+        from scripts.ops.observability.grafana._run_explorer_columns import _RESET_FILTERS
+
+        return _RESET_FILTERS
     return build_handoff_url(target["uid"], source_uid=source_uid, template=True)
 
 
@@ -273,6 +277,11 @@ def nav_link_tooltip(*, source_uid: str, target: dict[str, str]) -> str:
     short = target["title"].split(". ", 1)[-1]
     base = f"{target['title']} ({short})"
     target_uid = target["uid"]
+    if target_uid == _RUN_EXPLORER_UID:
+        return (
+            f"{base}. Scope reset: workflow=All, pipeline=All, run type=All, "
+            "selected run cleared, Run ID search cleared; preserves time range."
+        )
     resets: list[str] = []
     preserved: list[str] = ["time range"]
     if target_uid == "bioetl-provider-health-v2":

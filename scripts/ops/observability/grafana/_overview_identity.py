@@ -29,9 +29,20 @@ def apply_overview_identity(payload: dict) -> None:
             '"Not recorded in saved run evidence"},'
             '{"parameter":"Total Run Duration","value":'
             '$start != null and $end != null and $end >= $start ? '
-            '$string($round(($end - $start) / 1000, 2)) & " s" : '
+            '($n := $floor(($end - $start) / 1000 + 0.5); '
+            '$parts := [$floor($n / 86400), $floor(($n % 86400) / 3600), '
+            '$floor(($n % 3600) / 60), $n % 60]; '
+            '$units := [" d", " h", " min", " s"]; '
+            '$n = 0 ? "0 s" : $join($map($parts, function($v, $i){'
+            '$v > 0 ? $string($v) & $units[$i]}), " ")) : '
             '"Not recorded in saved run evidence"}])'
         ),
+    )
+    # Use the same browser JSONata evaluator as the duration stat. The backend
+    # evaluator does not preserve these ISO timestamp conversions correctly.
+    target.update(
+        parser="uql",
+        uql='parse-json | jsonata "' + target["root_selector"].replace('"', '\\"') + '"',
     )
     identity["description"] = (
         "SELECTED RUN · Pipeline and full Run ID identify the saved run. "
