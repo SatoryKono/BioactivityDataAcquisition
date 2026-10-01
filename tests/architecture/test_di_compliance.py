@@ -193,10 +193,11 @@ def _composition_module_imports(composition_path: Path) -> dict[str, set[str]]:
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue
             if isinstance(node, ast.If) and (
-                isinstance(node.test, ast.Name)
-                and node.test.id == "TYPE_CHECKING"
-                or isinstance(node.test, ast.Attribute)
-                and node.test.attr == "TYPE_CHECKING"
+                (isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING")
+                or (
+                    isinstance(node.test, ast.Attribute)
+                    and node.test.attr == "TYPE_CHECKING"
+                )
             ):
                 pending.extend(node.orelse)
                 continue
@@ -257,11 +258,7 @@ def _simple_composition_cycles(module_imports: dict[str, set[str]]) -> list[str]
     return sorted(cycles)
 
 
-_ALLOWED_COMPOSITION_CYCLES: frozenset[str] = frozenset(
-    {
-        "bootstrap_logger <-> bootstrap_logger",
-    }
-)
+_ALLOWED_COMPOSITION_CYCLES: frozenset[str] = frozenset()
 
 
 @pytest.mark.parametrize(
@@ -329,31 +326,6 @@ def _matching_creation_descriptions(
         for pattern, desc in internal_creation_patterns
         if re.search(pattern, init_lines)
     ]
-
-
-def _composition_module_name(composition_path: Path, py_file: Path) -> str:
-    relative = py_file.relative_to(composition_path)
-    return str(relative).replace("/", ".").replace(".py", "")
-
-
-def _composition_file_imports(py_file: Path) -> set[str]:
-    imports: set[str] = set()
-    for line in py_file.read_text(encoding="utf-8").splitlines():
-        imports.update(_composition_import_targets(line))
-    return imports
-
-
-def _composition_import_targets(line: str) -> set[str]:
-    if "from bioetl.composition" not in line and "from .." not in line:
-        return set()
-    imports: set[str] = set()
-    absolute_match = re.search(r"from bioetl\.composition\.(\w+)", line)
-    if absolute_match:
-        imports.add(absolute_match.group(1))
-    relative_match = re.search(r"from \.\.?(\w+)", line)
-    if relative_match:
-        imports.add(relative_match.group(1))
-    return imports
 
 
 def _domain_infrastructure_import_violations(src_dir: Path) -> list[str]:

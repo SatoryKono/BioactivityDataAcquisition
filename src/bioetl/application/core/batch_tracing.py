@@ -15,6 +15,8 @@ from bioetl.application.core._batch_tracing_support import (
 )
 from bioetl.application.core.pipeline_span_lifecycle import (
     close_span as close_span,
+)
+from bioetl.application.core.pipeline_span_lifecycle import (
     close_span_with_shutdown,
 )
 from bioetl.domain.types import JsonDict
