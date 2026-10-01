@@ -72,6 +72,10 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
     if not args.skip_drift:
+        # check-drift scope (DOCS-PIPE-001 residual, #11858): check_providers and
+        # check_glossary exist in check_drift but stay explicitly out of the
+        # verify chain and out of docs.yml. Revisit only with a dedicated CI
+        # budget, never by silent inclusion.
         steps.append(
             (
                 "check-drift",
