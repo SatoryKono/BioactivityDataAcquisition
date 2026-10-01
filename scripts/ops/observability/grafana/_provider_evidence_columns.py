@@ -11,7 +11,7 @@ def _provider_evidence_columns(panel: dict) -> None:
         "check_performed": "Performed",
         "check_result": "Result",
         "reason": "Reason",
-        "observed_display": "Since run completed",
+        "observed_display": "Since completed",
         "report_label": "Evidence",
     }
     panel["targets"][0]["root_selector"] = (
@@ -41,7 +41,7 @@ def _provider_evidence_columns(panel: dict) -> None:
         "SELECTED RUN · Saved provider evidence for this Run ID. Cached Bronze means "
         "the provider API was not called: Check performed is No and Check result is —. "
         "Provider check identifies saved preflight evidence, not the extraction transport. "
-        "UNKNOWN means the performed state or result is unknown. Since run completed "
+        "UNKNOWN means the performed state or result is unknown. Since completed "
         "is elapsed wall time from the saved completion timestamp, updated on refresh. "
         "Expand Provider HTTP details for recorded response time, "
         "HTTP status and endpoint; missing details are not invented. VALID EMPTY is an "
@@ -67,7 +67,7 @@ def _provider_evidence_columns(panel: dict) -> None:
         "Data source": 105,
         "Performed": 90,
         "Result": 75,
-        "Since run completed": 155,
+        "Since completed": 155,
         "Evidence": 95,
     }
     panel["fieldConfig"]["overrides"] = [

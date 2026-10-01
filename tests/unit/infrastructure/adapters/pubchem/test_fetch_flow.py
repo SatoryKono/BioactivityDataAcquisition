@@ -34,8 +34,9 @@ Covers:
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import pubchempy as pcp
 import pytest
 
 from bioetl.infrastructure.adapters.pubchem.fetch_flow import PubChemFetchFlow
@@ -88,6 +89,68 @@ def fetch_flow(
 
 @pytest.mark.unit
 class TestFetchFlowExecute:
+    @pytest.mark.parametrize("status_code", [429, 502, 503, 504])
+    async def test_transient_sdk_http_error_is_retried(
+        self,
+        fetch_flow: PubChemFetchFlow,
+        mock_circuit_breaker: AsyncMock,
+        mock_rate_limiter: AsyncMock,
+        mock_record_request: MagicMock,
+        status_code: int,
+    ) -> None:
+        error = pcp.PubChemHTTPError(status_code, "Transient upstream failure", [])
+        mock_circuit_breaker.call.side_effect = [error, [{"cid": 2244}]]
+        with patch("asyncio.sleep", new_callable=AsyncMock) as sleep:
+            result = await fetch_flow.execute(
+                endpoint="/compound/smiles/JSON",
+                pubchem_callable=MagicMock(),
+                pubchem_args=("CC", "smiles"),
+            )
+        assert result == [{"cid": 2244}]
+        assert mock_circuit_breaker.call.await_count == 2
+        assert mock_rate_limiter.acquire.await_count == 2
+        sleep.assert_awaited_once()
+        assert (
+            mock_record_request.call_args_list[0].kwargs["status_code"] == status_code
+        )
+        assert mock_record_request.call_args_list[1].kwargs["result_count"] == 1
+
+    async def test_exhausted_sdk_http_error_is_not_silently_dropped(
+        self,
+        fetch_flow: PubChemFetchFlow,
+        mock_circuit_breaker: AsyncMock,
+        mock_record_request: MagicMock,
+    ) -> None:
+        error = pcp.PubChemHTTPError(502, "Bad Gateway", [])
+        mock_circuit_breaker.call.side_effect = error
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            with pytest.raises(pcp.PubChemHTTPError) as raised:
+                await fetch_flow.execute(
+                    endpoint="/compound/smiles/JSON",
+                    pubchem_callable=MagicMock(),
+                    pubchem_args=(),
+                )
+        assert raised.value is error
+        assert mock_circuit_breaker.call.await_count == 3
+        assert mock_record_request.call_count == 3
+
+    async def test_permanent_sdk_http_error_is_not_retried(
+        self,
+        fetch_flow: PubChemFetchFlow,
+        mock_circuit_breaker: AsyncMock,
+    ) -> None:
+        error = pcp.PubChemHTTPError(400, "Bad Request", [])
+        mock_circuit_breaker.call.side_effect = error
+        with patch("asyncio.sleep", new_callable=AsyncMock) as sleep:
+            with pytest.raises(pcp.PubChemHTTPError):
+                await fetch_flow.execute(
+                    endpoint="/compound/smiles/JSON",
+                    pubchem_callable=MagicMock(),
+                    pubchem_args=(),
+                )
+        mock_circuit_breaker.call.assert_awaited_once()
+        sleep.assert_not_awaited()
+
     async def test_happy_path(
         self,
         fetch_flow: PubChemFetchFlow,

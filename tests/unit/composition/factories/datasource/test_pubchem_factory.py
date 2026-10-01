@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -45,6 +46,7 @@ class TestCreatePubChemAdapter:
         with pytest.raises(ValueError, match="requires logger"):
             create_pubchem_adapter(logger=None)
 
+    @patch("bioetl.composition.factories.datasource.pubchem.load_source_config")
     @patch("bioetl.composition.factories.datasource.pubchem.ThreadPoolExecutor")
     @patch("bioetl.composition.factories.datasource.pubchem.PubChemAdapter")
     @patch("bioetl.composition.factories.datasource.pubchem.PubChemFetchStrategies")
@@ -60,7 +62,15 @@ class TestCreatePubChemAdapter:
         mock_fetch_strategies_cls: MagicMock,
         mock_pubchem_adapter_cls: MagicMock,
         mock_thread_pool_cls: MagicMock,
+        mock_load_source_config: MagicMock,
     ) -> None:
+        mock_load_source_config.return_value = SimpleNamespace(
+            rate_limit=SimpleNamespace(requests_per_second=5.0, burst=10),
+            circuit_breaker=SimpleNamespace(failure_threshold=5, recovery_timeout=300),
+            max_retries=5,
+            retry_base_delay=7.0,
+            retry_max_delay=21.0,
+        )
         helper_bundle = MagicMock()
         helper_bundle.metrics = MagicMock(name="metrics")
         helper_bundle.error_handler = MagicMock(name="error_handler")
@@ -91,6 +101,9 @@ class TestCreatePubChemAdapter:
         strategies_kwargs = mock_fetch_strategies_cls.call_args.kwargs
         assert strategies_kwargs["mapper"] is mapper
         assert strategies_kwargs["request_collector"] is helper_bundle.request_collector
+        assert strategies_kwargs["retry_config"].max_attempts == 5
+        assert strategies_kwargs["retry_config"].base_delay == 7.0
+        assert strategies_kwargs["retry_config"].max_delay == 21.0
         transport = strategies_kwargs["transport"]
         assert transport["logger"] is logger
         assert transport["rate_limiter"] is not None

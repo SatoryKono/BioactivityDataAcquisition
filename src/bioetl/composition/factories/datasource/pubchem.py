@@ -13,6 +13,7 @@ from bioetl.composition.factories.datasource.adapter_helpers import (
 )
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
+from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.common import SyncAdapterDependencyContext
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
@@ -72,6 +73,19 @@ def _resolve_circuit_breaker(provider: str) -> tuple[int, int]:
     )
 
 
+def _resolve_retry_config(provider: str) -> RetryConfig:
+    """Bind the SDK request retry budget to the canonical provider configuration."""
+    try:
+        source_config = load_source_config(provider)
+    except ValueError:
+        return RetryConfig()
+    return RetryConfig(
+        max_attempts=max(1, source_config.max_retries),
+        base_delay=source_config.retry_base_delay,
+        max_delay=source_config.retry_max_delay,
+    )
+
+
 def _create_executor_runner(
     thread_pool: ThreadPoolExecutor,
 ) -> Callable[..., Awaitable[object]]:
@@ -126,6 +140,7 @@ def _build_runtime_dependencies(
         },
         provider_name=PubChemAdapter.provider_name,
         request_collector=request_collector,
+        retry_config=_resolve_retry_config("pubchem"),
     )
     return PubChemRuntimeDependencies(
         error_handler=error_handler,

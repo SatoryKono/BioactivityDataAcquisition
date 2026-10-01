@@ -76,6 +76,9 @@ FILE_BY_UID = {
     "bioetl-run-explorer-v1": "bioetl-run-explorer-v1.json",
 }
 
+# Data Quality remains a supported detail destination through contextual links.
+_NAV_HIDDEN_UIDS = frozenset({"bioetl-dq-v2"})
+
 
 def _validate_action_route_uids() -> None:
     """Fail closed when an action target points outside the shipped portfolio."""
@@ -330,13 +333,15 @@ def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> st
 
 
 def render_html(*, current_uid: str) -> str:
-    """Render the full six-destination bus as reflowing flex rows."""
+    """Render primary destinations as reflowing flex rows."""
     parts: list[str] = [
         f'<div class="bioetl-nav" role="navigation" '
         f'aria-label="BioETL dashboards" '
         f'style="{CONTAINER_STYLE}">',
     ]
     for item in BUS:
+        if item["uid"] in _NAV_HIDDEN_UIDS:
+            continue
         parts.append(_chip_html(item, current_uid=current_uid, source_uid=current_uid))
     parts.append("</div>")
     return "".join(parts)
@@ -347,7 +352,7 @@ def render_links(*, current_uid: str) -> list[dict[str, Any]]:
         return []
     links: list[dict[str, Any]] = []
     for item in BUS:
-        if item["uid"] == current_uid:
+        if item["uid"] == current_uid or item["uid"] in _NAV_HIDDEN_UIDS:
             continue
         links.append(
             {

@@ -81,11 +81,11 @@ def test_row_aware_action_url_preserves_row_and_destination_context() -> None:
 @pytest.mark.parametrize(
     ("target", "expected_uid"),
     [
-        ("runtime", "bioetl-runtime"),
+        ("runtime", "bioetl-overview-v2"),
         ("control_plane", "bioetl-control-plane-v1"),
         ("data_quality", "bioetl-dq-v2"),
-        ("workflow", "bioetl-runtime"),
-        ("provider", "bioetl-provider-health-v2"),
+        ("workflow", "bioetl-overview-v2"),
+        ("provider", "bioetl-overview-v2"),
         ("dq", "bioetl-dq-v2"),
         ("verify_dq_reason_rules", None),
         ("future_target", None),
@@ -121,7 +121,7 @@ def test_nav_tooltips_describe_resets_and_escape_html_attributes() -> None:
     assert "pipeline context" in tooltip
     assert "&quot;Health&quot;" in rendered
     assert "&lt;scope&gt;" in rendered
-    runtime = next(item for item in nav_bus.BUS if item["uid"] == "bioetl-runtime")
+    runtime = next(item for item in nav_bus.BUS if item["uid"] == "bioetl-dq-v2")
     assert "stage=All" in nav_bus.nav_link_tooltip(
         source_uid="bioetl-overview-v2",
         target=runtime,
@@ -221,13 +221,15 @@ def test_trust_layout_preserves_scalar_area_and_detail_rows() -> None:
 def test_run_explorer_nav_chips_do_not_open_other_dashboards() -> None:
     html = nav_bus.render_html(current_uid="bioetl-run-explorer-v1")
     assert "/d/" not in html
-    assert html.count('aria-disabled="true"') == 7
-    assert html.count("pointer-events:none") == 7
+    assert html.count('aria-disabled="true"') == 4
+    assert html.count("pointer-events:none") == 4
     assert nav_bus.render_links(current_uid="bioetl-run-explorer-v1") == []
     overview = nav_bus.render_html(current_uid="bioetl-overview-v2")
-    assert overview.count('class="bioetl-nav-link"') == 6
+    assert overview.count('class="bioetl-nav-link"') == 3
     assert "/d/bioetl-run-explorer-v1/" in overview
-    assert len(nav_bus.render_links(current_uid="bioetl-overview-v2")) == 6
+    assert len(nav_bus.render_links(current_uid="bioetl-overview-v2")) == 3
+    assert "Data Quality" not in overview
+    assert "/d/bioetl-dq-v2/" not in overview
 
 
 def test_run_explorer_restores_scope_and_compacts_reviewed_table() -> None:
@@ -277,7 +279,7 @@ def test_apply_to_dashboard_expands_nav_and_reclaims_first_window(
     assert nav["gridPos"] == {"x": 0, "y": 0, "w": 24, "h": 2}
     assert slack["gridPos"]["h"] == 5
     assert first_window["gridPos"]["y"] + first_window["gridPos"]["h"] == 17
-    assert len(nav["links"]) == 6
+    assert len(nav["links"]) == 4
     assert "bioetl-panel-title" not in nav["options"]["content"]
     before_check = dashboard.read_bytes()
     assert nav_bus.apply_to_dashboard(

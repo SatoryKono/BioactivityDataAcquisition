@@ -60,6 +60,18 @@ Retired (do not reintroduce without architecture review): `bioetl-runtime` (Pipe
 Render/audit gates fail closed on blank screenshots and `renderedPanelCount=0` (#6686).
 Deployed Grafana JSON must match repo after stripping volatile `id` / `version` / `pluginVersion` fields (#6690).
 
+В Run Overview таблица `Inspect Selected Run Stages` расположена под
+`Review Provider Evidence`, вне сворачиваемого `Inspect Saved Run Evidence`.
+Пункт `Data Quality` убран из общей навигации; сама страница доступна через
+контекстные ссылки на результаты качества выбранного запуска.
+Справа `Review Data Quality` показывает число `excluded_by_contract` и его
+долю от Bronze records out: ниже soft limit — `OK`, начиная с soft limit —
+`WARN`, начиная с hard limit — `ERROR`. Пороги загружаются из объединённой
+конфигурации pipeline при генерации dashboard; исторические overrides запуска
+не восстанавливаются. Неполный tracking, неизвестный pipeline или некорректные
+счётчики дают `UNKNOWN`; полностью учтённый пустой запуск имеет долю 0%.
+Quarantined, filtered out и deduplicated — отдельные исходы, в эту долю не входят.
+
 Navigation bus panel (id=1000) HTML/links refresh:
 
 ```bash
