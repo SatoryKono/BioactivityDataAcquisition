@@ -203,6 +203,8 @@ def _collect_issues(lines: list[str]) -> list[OperatorIssue]:
 def check_file(path: Path) -> FileCheckResult:
     """Validate one Mermaid file for unsupported operators in target types."""
     safe_path = _resolve_repo_file_path(path)
+    if safe_path.resolved_path.suffix.lower() not in SUPPORTED_SUFFIXES:
+        raise ValueError(f"not a Mermaid source: {path}")
     lines = _read_validated_repo_text(safe_path).splitlines()
     diagram_type = detect_diagram_type(lines)
     if diagram_type not in TARGET_DIAGRAM_TYPES:
@@ -217,6 +219,8 @@ def check_file(path: Path) -> FileCheckResult:
 def fix_file(path: Path, *, dry_run: bool) -> int:
     """Rewrite a Mermaid file in-place and return replacement count."""
     safe_path = _resolve_repo_file_path(path)
+    if safe_path.resolved_path.suffix.lower() not in SUPPORTED_SUFFIXES:
+        raise ValueError(f"not a Mermaid source: {path}")
     lines = _read_validated_repo_text(safe_path).splitlines()
     if detect_diagram_type(lines) not in TARGET_DIAGRAM_TYPES:
         return 0

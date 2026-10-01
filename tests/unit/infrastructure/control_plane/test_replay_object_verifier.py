@@ -14,6 +14,9 @@ from bioetl.infrastructure.control_plane.replay_object_verifier import (
     ReplayObjectVerifier,
 )
 
+pytestmark = pytest.mark.unit
+
+
 
 def evidence(tmp_path):
     verifier = ReplayObjectVerifier(

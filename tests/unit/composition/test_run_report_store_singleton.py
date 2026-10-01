@@ -19,6 +19,11 @@ from __future__ import annotations
 from bioetl.composition import observability_runtime
 from bioetl.composition.observability_runtime import create_run_report_store
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
+
 
 def test_create_run_report_store_assembles_once() -> None:
     first = create_run_report_store()

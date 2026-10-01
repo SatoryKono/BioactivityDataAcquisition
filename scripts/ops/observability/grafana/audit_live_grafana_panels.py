@@ -257,21 +257,21 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
     # panels only; Loki coverage is optional via discovered specs when present.
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
-        panel_id=9402,
-        title="ID",
+        panel_id=9408,
+        title="Review Replay Evidence",
         source_kind="http",
         semantic_kind="http_table",
     ),
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
-        panel_id=9403,
-        title=PROCESSED_RECORDS_PANEL_TITLE,
+        panel_id=9423,
+        title="Review Exact Replay Checks",
         source_kind="http",
         semantic_kind="http_table",
     ),
     # bioetl-overview-v2#9301 (Processed Records) no longer exists on the
     # shipped Overview surface; the reviewed HTTP-table coverage now lives on
-    # control-plane/dq 9402/9403 specs below.
+    # Replay Readiness evidence/checks and Data Quality specs below.
     PanelAuditSpec(
         dashboard_uid="bioetl-dq-v2",
         panel_id=9402,
