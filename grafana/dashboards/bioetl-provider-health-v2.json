@@ -647,16 +647,16 @@
         "x": 0,
         "y": 5,
         "w": 24,
-        "h": 6
+        "h": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check for this Run ID. PRESENT means applicable saved evidence exists, not that the check passed. Run ID is always set on this dashboard. A report without a provider id is not OK. Valid-empty evidence stays VALID EMPTY. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · Saved provider evidence for this Run ID. Cached Bronze means the provider API was not called: Check performed is No and Check result is —. UNKNOWN means the performed state or result is unknown. Observed at preserves the saved timezone. Expand Provider HTTP details for recorded response time, HTTP status and endpoint; missing details are not invented. VALID EMPTY is an empty successful response. SELECT RUN requires context; QUERY ERROR is a failed request.",
       "options": {
         "showHeader": true,
-        "cellHeight": "lg",
+        "cellHeight": "sm",
         "footer": {
           "show": false,
-          "enablePagination": false
+          "enablePagination": true
         }
       },
       "fieldConfig": {
@@ -667,28 +667,13 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": false
+              "wrapText": true
             },
-            "inspect": true
+            "inspect": true,
+            "minWidth": 50
           }
         },
         "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Observed at"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "time:YYYY-MM-DD HH:mm"
-              },
-              {
-                "id": "custom.width",
-                "value": 170
-              }
-            ]
-          },
           {
             "matcher": {
               "id": "byName",
@@ -697,7 +682,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 85
+                "value": 95
               }
             ]
           },
@@ -709,7 +694,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 120
+                "value": 130
               }
             ]
           },
@@ -733,7 +718,19 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 105
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Observed at"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 205
               }
             ]
           },
@@ -745,40 +742,25 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 105
-              },
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "title": "Open report",
-                    "targetBlank": true,
-                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json"
-                  }
-                ]
+                "value": 115
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Reason"
+              "options": "Evidence"
             },
             "properties": [
               {
-                "id": "custom.wrapText",
-                "value": true
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              },
-              {
                 "id": "links",
-                "value": []
+                "value": [
+                  {
+                    "title": "Open report",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                    "targetBlank": true
+                  }
+                ]
               }
             ]
           }
@@ -789,18 +771,33 @@
           "refId": "A",
           "type": "json",
           "source": "url",
-          "parser": "uql",
+          "parser": "backend",
           "format": "table",
-          "root_selector": "($d := domains[domain = 'Provider'][0]; $display := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $map(provider_checks, function($p){ {'provider': $p.provider, 'data_source': $cached ? 'Cached Bronze' : 'UNKNOWN', 'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), 'check_result': $cached ? '—' : ($p.evidence = 'PRESENT' ? $p.check_result : 'UNKNOWN'), 'reason': $cached ? 'Cached Bronze used; provider API was not called.' : ($display.reason_display ? $display.reason_display : 'Provider check evidence is unavailable.'), 'observed_at': $cached ? '—' : ($p.observed_at ? $p.observed_at : 'UNKNOWN'), 'evidence': $cached or $p.evidence = 'PRESENT' ? 'Open report' : 'UNKNOWN'} }))",
+          "root_selector": "($d := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; $map(provider_checks, function($p) { $merge([$p, {'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : 'UNKNOWN'), 'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), 'check_result': $cached or $p.check_result = 'N/A' ? '—' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), 'reason': $cached ? 'Cached Bronze used; provider API was not called.' : ($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.'), 'observed_display': $cached ? '—' : ($p.observed_at ? $substring($p.observed_at,0,10) & ' ' & $substring($p.observed_at,11,5) & ' ' & ($substring($p.observed_at,-1) = 'Z' ? 'UTC' : $substring($p.observed_at,-6)) : '—'), 'report_label': $saved ? 'Open report' : '—' }]) }))",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
             "data": ""
-          },
-          "uql": "parse-json | jsonata \"($d := domains[domain = 'Provider'][0]; $display := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $map(provider_checks, function($p){ {'provider': $p.provider, 'data_source': $cached ? 'Cached Bronze' : 'UNKNOWN', 'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), 'check_result': $cached ? '—' : ($p.evidence = 'PRESENT' ? $p.check_result : 'UNKNOWN'), 'reason': $cached ? 'Cached Bronze used; provider API was not called.' : ($display.reason_display ? $display.reason_display : 'Provider check evidence is unavailable.'), 'observed_at': $cached ? '—' : ($p.observed_at ? $p.observed_at : 'UNKNOWN'), 'evidence': $cached or $p.evidence = 'PRESENT' ? 'Open report' : 'UNKNOWN'} }))\""
+          }
         }
       ],
       "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "provider",
+                "data_source",
+                "check_performed",
+                "check_result",
+                "reason",
+                "observed_display",
+                "report_label"
+              ]
+            }
+          }
+        },
         {
           "id": "organize",
           "options": {
@@ -810,8 +807,8 @@
               "check_performed": 2,
               "check_result": 3,
               "reason": 4,
-              "observed_at": 5,
-              "evidence": 6
+              "observed_display": 5,
+              "report_label": 6
             },
             "renameByName": {
               "provider": "Provider",
@@ -819,13 +816,112 @@
               "check_performed": "Check performed",
               "check_result": "Check result",
               "reason": "Reason",
-              "observed_at": "Observed at",
-              "evidence": "Evidence"
+              "observed_display": "Observed at",
+              "report_label": "Evidence"
             }
           }
         }
       ],
       "links": []
+    },
+    {
+      "id": 9471,
+      "title": "Inspect Provider HTTP Details",
+      "type": "row",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 9462,
+          "type": "table",
+          "title": "Inspect Provider HTTP Details",
+          "gridPos": {
+            "x": 0,
+            "y": 19,
+            "w": 24,
+            "h": 6
+          },
+          "datasource": "BioETL Ops HTTP",
+          "description": "SELECTED RUN · Optional recorded HTTP facts only. VALID EMPTY means no saved response time, HTTP status or checked endpoint. QUERY ERROR is a failed request.",
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false,
+              "enablePagination": true
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "—",
+              "unit": "none",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                },
+                "inspect": true,
+                "minWidth": 50
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "root_selector": "provider_checks[($exists(response_time_ms) and response_time_ms != null) or ($exists(http_status) and http_status != null) or ($exists(checked_endpoint) and checked_endpoint != null and checked_endpoint != '')]",
+              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "provider",
+                    "response_time_ms",
+                    "http_status",
+                    "checked_endpoint"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "indexByName": {
+                  "provider": 0,
+                  "response_time_ms": 1,
+                  "http_status": 2,
+                  "checked_endpoint": 3
+                },
+                "renameByName": {
+                  "provider": "Provider",
+                  "response_time_ms": "Response time, ms",
+                  "http_status": "HTTP status",
+                  "checked_endpoint": "Checked endpoint"
+                }
+              }
+            }
+          ],
+          "links": []
+        }
+      ]
     }
   ]
 }

@@ -22,7 +22,7 @@ def _provider_evidence_columns(panel: dict) -> None:
         "'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : 'UNKNOWN'), "
         "'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), "
         "'check_result': $cached or $p.check_result = 'N/A' ? '—' : "
-        "($p.check_result ? $p.check_result : 'UNKNOWN'), "
+        "($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), "
         "'reason': $cached ? 'Cached Bronze used; provider API was not called.' : "
         "($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.'), "
         "'observed_display': $cached ? '—' : ($p.observed_at ? "
@@ -103,7 +103,9 @@ def _provider_http_details(panel: dict) -> dict:
         "checked_endpoint": "Checked endpoint",
     }
     detail["targets"][0]["root_selector"] = (
-        "provider_checks[$exists(response_time_ms) or $exists(http_status) or $exists(checked_endpoint)]"
+        "provider_checks[($exists(response_time_ms) and response_time_ms != null) or "
+        "($exists(http_status) and http_status != null) or "
+        "($exists(checked_endpoint) and checked_endpoint != null and checked_endpoint != '')]"
     )
     detail["description"] = (
         "SELECTED RUN · Optional recorded HTTP facts only. VALID EMPTY means no saved "
