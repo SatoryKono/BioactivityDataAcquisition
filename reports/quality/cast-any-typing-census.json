@@ -17,35 +17,35 @@
     "ratchet_policy": "shrink_only"
   },
   "summary": {
-    "total_cast_any_count": 374,
-    "justified_count": 243,
-    "unjustified_count": 131,
+    "total_cast_any_count": 370,
+    "justified_count": 241,
+    "unjustified_count": 129,
     "by_category": {
       "pd3_host_attr_default": 131,
       "pd6_host_attr_default": 90,
-      "type_002_policy": 3,
-      "any_mixin_host": 3,
+      "type_002_policy": 2,
+      "any_mixin_host": 2,
       "any_host_attr": 16,
       "any_json": 0,
       "as_mixin_host_call": 0,
-      "unjustified": 131
+      "unjustified": 129
     },
     "by_layer": {
       "application": {
-        "total": 181,
-        "unjustified": 56
+        "total": 178,
+        "unjustified": 55
       },
       "composition": {
-        "total": 22,
-        "unjustified": 8
+        "total": 19,
+        "unjustified": 5
       },
       "domain": {
         "total": 12,
         "unjustified": 2
       },
       "infrastructure": {
-        "total": 156,
-        "unjustified": 64
+        "total": 158,
+        "unjustified": 66
       },
       "interfaces": {
         "total": 3,
@@ -54,10 +54,10 @@
     },
     "unjustified_by_subcategory": {
       "pd4_host_default_pending_protocol": 60,
-      "free_form_reason": 70,
+      "free_form_reason": 68,
       "no_reason_tag": 1
     },
-    "file_count": 117
+    "file_count": 115
   },
   "top_files": [
     {
@@ -175,12 +175,6 @@
       "justified": 0
     },
     {
-      "path": "src/bioetl/composition/services/versioning.py",
-      "total": 2,
-      "unjustified": 2,
-      "justified": 0
-    },
-    {
       "path": "src/bioetl/infrastructure/adapters/decorators/_circuit_breaker_snapshot.py",
       "total": 2,
       "unjustified": 2,
@@ -188,6 +182,12 @@
     },
     {
       "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/infrastructure/provenance/code_revision.py",
       "total": 2,
       "unjustified": 2,
       "justified": 0
@@ -325,10 +325,6 @@
       "count": 1
     },
     {
-      "reason": "dynamic provider class attribute",
-      "count": 1
-    },
-    {
       "reason": "export writer accepts Arrow table duck-type",
       "count": 1
     },
@@ -378,10 +374,6 @@
     },
     {
       "reason": "payload = dict(vars(ctx))",
-      "count": 1
-    },
-    {
-      "reason": "phased postrun methods are supplied by mixins",
       "count": 1
     },
     {
@@ -1082,7 +1074,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 47,
+      "line": 49,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1092,7 +1084,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 48,
+      "line": 50,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1102,7 +1094,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 49,
+      "line": 51,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1112,7 +1104,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 52,
+      "line": 54,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1122,7 +1114,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 53,
+      "line": 55,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1132,7 +1124,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 56,
+      "line": 58,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1142,7 +1134,7 @@
     },
     {
       "path": "src/bioetl/application/core/_quarantine_manager_support.py",
-      "line": 59,
+      "line": 61,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1262,23 +1254,13 @@
     },
     {
       "path": "src/bioetl/application/core/_runner_support.py",
-      "line": 52,
-      "layer": "application",
-      "category": "pd3_host_attr_default",
-      "justified": true,
-      "unjustified_subcategory": null,
-      "reason_tag": "host attr default (PD3)",
-      "snippet": "_postrun_service: PostrunService = cast(Any, None)  # Any: host attr default (PD3)"
-    },
-    {
-      "path": "src/bioetl/application/core/_runner_support.py",
       "line": 53,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD3)",
-      "snippet": "_tracer: TracingPort = cast(Any, None)  # Any: host attr default (PD3)"
+      "snippet": "_postrun_service: PostrunService = cast(Any, None)  # Any: host attr default (PD3)"
     },
     {
       "path": "src/bioetl/application/core/_runner_support.py",
@@ -1288,17 +1270,17 @@
       "justified": true,
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD3)",
-      "snippet": "_services: PipelineRunnerServicesProtocol = cast("
+      "snippet": "_tracer: TracingPort = cast(Any, None)  # Any: host attr default (PD3)"
     },
     {
       "path": "src/bioetl/application/core/_runner_support.py",
-      "line": 57,
+      "line": 55,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD3)",
-      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+      "snippet": "_services: PipelineRunnerServicesProtocol = cast("
     },
     {
       "path": "src/bioetl/application/core/_runner_support.py",
@@ -1308,17 +1290,17 @@
       "justified": true,
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD3)",
-      "snippet": "_executor: BatchExecutor = cast(Any, None)  # Any: host attr default (PD3)"
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
     },
     {
       "path": "src/bioetl/application/core/_runner_support.py",
-      "line": 66,
+      "line": 59,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD3)",
-      "snippet": "_postrun_service: PostrunService = cast(Any, None)  # Any: host attr default (PD3)"
+      "snippet": "_executor: BatchExecutor = cast(Any, None)  # Any: host attr default (PD3)"
     },
     {
       "path": "src/bioetl/application/core/_runner_support.py",
@@ -1328,7 +1310,7 @@
       "justified": true,
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD3)",
-      "snippet": "_tracer: TracingPort = cast(Any, None)  # Any: host attr default (PD3)"
+      "snippet": "_postrun_service: PostrunService = cast(Any, None)  # Any: host attr default (PD3)"
     },
     {
       "path": "src/bioetl/application/core/_runner_support.py",
@@ -1338,17 +1320,17 @@
       "justified": true,
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD3)",
-      "snippet": "_services: PipelineRunnerServicesProtocol = cast("
+      "snippet": "_tracer: TracingPort = cast(Any, None)  # Any: host attr default (PD3)"
     },
     {
       "path": "src/bioetl/application/core/_runner_support.py",
-      "line": 71,
+      "line": 69,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD3)",
-      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+      "snippet": "_services: PipelineRunnerServicesProtocol = cast("
     },
     {
       "path": "src/bioetl/application/core/_runner_support.py",
@@ -1358,21 +1340,21 @@
       "justified": true,
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD3)",
+      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)"
+    },
+    {
+      "path": "src/bioetl/application/core/_runner_support.py",
+      "line": 73,
+      "layer": "application",
+      "category": "pd3_host_attr_default",
+      "justified": true,
+      "unjustified_subcategory": null,
+      "reason_tag": "host attr default (PD3)",
       "snippet": "_executor: BatchExecutor = cast(Any, None)  # Any: host attr default (PD3)"
     },
     {
       "path": "src/bioetl/application/core/_runner_support.py",
-      "line": 82,
-      "layer": "application",
-      "category": "any_mixin_host",
-      "justified": true,
-      "unjustified_subcategory": null,
-      "reason_tag": "mixin host protocol bridge",
-      "snippet": "await cast(Any, self._postrun_service).cleanup("
-    },
-    {
-      "path": "src/bioetl/application/core/_runner_support.py",
-      "line": 144,
+      "line": 143,
       "layer": "application",
       "category": "any_mixin_host",
       "justified": true,
@@ -1509,16 +1491,6 @@
       "unjustified_subcategory": "pd4_host_default_pending_protocol",
       "reason_tag": "host default (PD4)",
       "snippet": "_FAILURE_POLICY: PostrunFailurePolicySpec = cast("
-    },
-    {
-      "path": "src/bioetl/application/core/postrun/service.py",
-      "line": 172,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "free_form_reason",
-      "reason_tag": "phased postrun methods are supplied by mixins",
-      "snippet": "host = cast(Any, self)  # Any: phased postrun methods are supplied by mixins"
     },
     {
       "path": "src/bioetl/application/core/preflight/service.py",
@@ -1722,7 +1694,7 @@
     },
     {
       "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
-      "line": 48,
+      "line": 49,
       "layer": "application",
       "category": "type_002_policy",
       "justified": true,
@@ -1732,17 +1704,7 @@
     },
     {
       "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
-      "line": 60,
-      "layer": "application",
-      "category": "type_002_policy",
-      "justified": true,
-      "unjustified_subcategory": null,
-      "reason_tag": "TYPE-002 MRO host",
-      "snippet": "super(cast(Any, owner_type), transformer).__init__(  # Any: TYPE-002 MRO host"
-    },
-    {
-      "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
-      "line": 62,
+      "line": 63,
       "layer": "application",
       "category": "type_002_policy",
       "justified": true,
@@ -2322,7 +2284,7 @@
     },
     {
       "path": "src/bioetl/composition/factories/storage/maintenance_mixin.py",
-      "line": 33,
+      "line": 36,
       "layer": "composition",
       "category": "any_host_attr",
       "justified": true,
@@ -2332,7 +2294,7 @@
     },
     {
       "path": "src/bioetl/composition/factories/storage/maintenance_mixin.py",
-      "line": 34,
+      "line": 37,
       "layer": "composition",
       "category": "any_host_attr",
       "justified": true,
@@ -2342,7 +2304,7 @@
     },
     {
       "path": "src/bioetl/composition/factories/storage/maintenance_mixin.py",
-      "line": 35,
+      "line": 38,
       "layer": "composition",
       "category": "any_host_attr",
       "justified": true,
@@ -2401,16 +2363,6 @@
       "snippet": "gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD6)"
     },
     {
-      "path": "src/bioetl/composition/providers/decorators.py",
-      "line": 73,
-      "layer": "composition",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "free_form_reason",
-      "reason_tag": "dynamic provider class attribute",
-      "snippet": "cast(Any, cls).__provider_name__ = name  # Any: dynamic provider class attribute"
-    },
-    {
       "path": "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py",
       "line": 64,
       "layer": "composition",
@@ -2439,26 +2391,6 @@
       "unjustified_subcategory": "free_form_reason",
       "reason_tag": "payload = dict(vars(ctx))",
       "snippet": "return cast(\"T\", replace(cast(Any, ctx), cached_bronze=resolved))  # Any:"
-    },
-    {
-      "path": "src/bioetl/composition/services/versioning.py",
-      "line": 270,
-      "layer": "composition",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "free_form_reason",
-      "reason_tag": "duck-type model_dump on config object",
-      "snippet": "host = cast(Any, config)  # Any: duck-type model_dump on config object"
-    },
-    {
-      "path": "src/bioetl/composition/services/versioning.py",
-      "line": 313,
-      "layer": "composition",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "free_form_reason",
-      "reason_tag": "duck-type version attr on config object",
-      "snippet": "host = cast(Any, config)  # Any: duck-type version attr on config object"
     },
     {
       "path": "src/bioetl/domain/behavior/normalization_service.py",
@@ -2542,7 +2474,7 @@
     },
     {
       "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
-      "line": 23,
+      "line": 27,
       "layer": "domain",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -2552,7 +2484,7 @@
     },
     {
       "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
-      "line": 24,
+      "line": 28,
       "layer": "domain",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -2562,7 +2494,7 @@
     },
     {
       "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
-      "line": 25,
+      "line": 29,
       "layer": "domain",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -2572,7 +2504,7 @@
     },
     {
       "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
-      "line": 26,
+      "line": 30,
       "layer": "domain",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -2732,7 +2664,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 49,
+      "line": 37,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2742,7 +2674,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 50,
+      "line": 38,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2752,7 +2684,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 51,
+      "line": 39,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2762,7 +2694,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 52,
+      "line": 40,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2772,7 +2704,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 53,
+      "line": 41,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2782,7 +2714,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 54,
+      "line": 42,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2792,7 +2724,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 57,
+      "line": 45,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2802,7 +2734,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 58,
+      "line": 46,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -3132,7 +3064,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/uniprot/feature_sequence_adapter_mixin.py",
-      "line": 176,
+      "line": 187,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -3142,7 +3074,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/uniprot/feature_sequence_adapter_mixin.py",
-      "line": 177,
+      "line": 188,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -3152,7 +3084,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/uniprot/feature_sequence_adapter_mixin.py",
-      "line": 178,
+      "line": 189,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -3289,6 +3221,26 @@
       "unjustified_subcategory": "free_form_reason",
       "reason_tag": "Windows STARTUPINFO duck-type",
       "snippet": "cast("
+    },
+    {
+      "path": "src/bioetl/infrastructure/provenance/code_revision.py",
+      "line": 270,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "duck-type model_dump on config object",
+      "snippet": "host = cast(Any, config)  # Any: duck-type model_dump on config object"
+    },
+    {
+      "path": "src/bioetl/infrastructure/provenance/code_revision.py",
+      "line": 313,
+      "layer": "infrastructure",
+      "category": "unjustified",
+      "justified": false,
+      "unjustified_subcategory": "free_form_reason",
+      "reason_tag": "duck-type version attr on config object",
+      "snippet": "host = cast(Any, config)  # Any: duck-type version attr on config object"
     },
     {
       "path": "src/bioetl/infrastructure/quality/exemptions_registry.py",

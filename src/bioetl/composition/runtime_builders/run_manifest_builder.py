@@ -4,8 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.application.services.control_plane.ledger.service import RunLedgerService
+from bioetl.composition.runtime_builders.run_manifest_support import (
+    ManifestControlPlaneRefs,
+    RunManifestContractIdentity,
+    RunManifestProvenanceBundle,
+    build_run_manifest_provenance_bundle as build_run_manifest_provenance_bundle,
+    resolve_run_context_values,
+)
 from bioetl.composition.runtime_builders._run_manifest_control_plane_refs import (
     create_control_plane_refs_for_manifest,
 )
@@ -23,6 +29,7 @@ from bioetl.composition.runtime_builders._run_manifest_publication_support impor
 )
 from bioetl.composition.runtime_builders.input_snapshot_resolution import (
     resolve_cached_bronze_input_snapshot_refs,
+    resolve_pipeline_input_snapshot_refs as resolve_pipeline_input_snapshot_refs,
 )
 from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     validate_manifest_persistence_requirements,
@@ -44,8 +51,6 @@ if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext
 
-RunManifestProvenanceBundle = _manifest_support.RunManifestProvenanceBundle
-
 
 def create_run_manifest(
     *,
@@ -54,10 +59,8 @@ def create_run_manifest(
     ledger_enabled: bool,
     provenance: RunManifestProvenanceBundle,
     publication_context: ResolvedManifestPublicationContext,
-) -> tuple[_manifest_support.ManifestControlPlaneRefs, RunLedgerService | None]:
-    run_type_value, execution_context_value = (
-        _manifest_support.resolve_run_context_values(ctx)
-    )
+) -> tuple[ManifestControlPlaneRefs, RunLedgerService | None]:
+    run_type_value, execution_context_value = resolve_run_context_values(ctx)
     validate_manifest_persistence_requirements(
         yaml_config=inputs.yaml_config,
         skip_gold=bool(getattr(ctx, "skip_gold", False)),
@@ -97,7 +100,7 @@ def _publish_manifest_and_refs(
     manifest_context: ResolvedManifestPublicationContext,
     manifest_create_request: RunManifestCreateSpec,
     provenance: RunManifestProvenanceBundle,
-) -> tuple[_manifest_support.ManifestControlPlaneRefs, RunLedgerService | None]:
+) -> tuple[ManifestControlPlaneRefs, RunLedgerService | None]:
     """Persist the manifest record and translate it into runner control-plane refs."""
     manifest_store = create_manifest_store(inputs)
     ledger_service = _maybe_create_ledger_service(
@@ -178,7 +181,7 @@ def _build_manifest_create_request(
     run_type_value: str,
     execution_context_value: str,
     provenance: RunManifestProvenanceBundle,
-    contract_identity: _manifest_support.RunManifestContractIdentity,
+    contract_identity: RunManifestContractIdentity,
     ledger_enabled: bool = True,
 ) -> RunManifestCreateSpec:
     request: RunManifestCreateSpec = build_manifest_create_request(

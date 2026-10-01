@@ -7,13 +7,6 @@ from dataclasses import dataclass
 from bioetl.composition.runtime_builders._run_context_values import (
     resolve_run_context_values,
 )
-from bioetl.composition.runtime_builders._run_manifest_context_updates import (
-    apply_manifest_updates_to_mutable_context,
-    build_dataclass_manifest_updates,
-    extract_optional_updates_from_refs,
-    iter_optional_control_plane_updates,
-    iter_optional_control_plane_updates_from_mapping,
-)
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     ManifestControlPlaneRefs,
     build_planned_artifacts,
@@ -43,17 +36,12 @@ __all__ = [
     "ManifestControlPlaneRefs",
     "RunManifestContractIdentity",
     "RunManifestProvenanceBundle",
-    "apply_manifest_updates_to_mutable_context",
-    "build_dataclass_manifest_updates",
     "build_launch_context_snapshot",
     "build_planned_artifacts",
     "build_run_manifest_provenance_bundle",
     "build_run_source_refs",
     "control_plane_root",
     "create_control_plane_refs",
-    "extract_optional_updates_from_refs",
-    "iter_optional_control_plane_updates",
-    "iter_optional_control_plane_updates_from_mapping",
     "resolve_contract_identity",
     "resolve_replay_capability",
     "resolve_replay_parentage",

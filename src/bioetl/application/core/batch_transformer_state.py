@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from bioetl.application.core.quarantine_manager import (
+from bioetl.application.core._quarantine_entries import (
     DQQuarantineEntry,
     FilteredQuarantineEntry,
 )
