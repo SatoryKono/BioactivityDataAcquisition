@@ -9,13 +9,13 @@ def apply_overall_verdict(payload: dict) -> None:
         return
     panels = payload["panels"]
     source = next(p for p in panels if p["id"] == 9603)
-    next(p for p in panels if p["id"] == 99)["gridPos"].update(w=17)
+    next(p for p in panels if p["id"] == 99)["gridPos"].update(w=source["gridPos"]["x"])
     panel = {
         "id": 9604,
         "type": "stat",
         "title": "Review Overall Verdict",
         "description": "Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
-        "gridPos": {"x": 17, "y": 2, "w": 7, "h": 3},
+        "gridPos": {"x": source["gridPos"]["x"], "y": 2, "w": source["gridPos"]["w"], "h": 3},
         "datasource": deepcopy(source["datasource"]),
         "targets": deepcopy(source["targets"]),
         "transformations": [

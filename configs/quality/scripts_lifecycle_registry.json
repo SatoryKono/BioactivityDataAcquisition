@@ -247,6 +247,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
+    "scripts/ai/mcp/mcp_code_interpreter_wrapper.sh": {
+      "decision": "mcp_compatibility_wrapper",
+      "next_step": "Retain as the MCP transport wrapper for Code Interpreter while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
+    },
     "scripts/ai/mcp/mcp_context7_wrapper.ps1": {
       "decision": "windows_compatibility_wrapper",
       "next_step": "Retain as the Windows-side companion for the canonical Context7 MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
@@ -276,6 +282,12 @@
       "next_step": "Retain as the Windows-side companion for the canonical Docker MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
+    },
+    "scripts/ai/mcp/mcp_docker_wrapper.sh": {
+      "decision": "mcp_compatibility_wrapper",
+      "next_step": "Retain as the MCP wrapper for Docker server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
     },
     "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1": {
       "decision": "windows_compatibility_wrapper",
@@ -498,6 +510,12 @@
       "next_step": "Retain as the shared diagram path resolver during the diagrams layout migration; keep it non-active unless diagram path discovery becomes a standalone command surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
+    },
+    "scripts/diagrams/diagram_paths.sh": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the shared shell path-helper library sourced by diagram shell tooling (run_diagram_checks.sh, validate_mermaid_syntax.sh); keep it supporting unless it becomes a standalone documented command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
     },
     "scripts/diagrams/render/pipeline_dataflow_ir.py": {
       "decision": "shared_helper_module",
@@ -793,11 +811,29 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
+    "scripts/engineering/dev/install_deps.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the auxiliary single-package installer dispatched via the dev router install-deps command; keep it supporting because it is not a standalone setup entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
+    },
+    "scripts/engineering/dev/metrics_mock_server.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the Prometheus mock server helper dispatched via the dev router mock-metrics command for local dashboard development; keep it supporting unless mock observability becomes a governed CI surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
+    },
     "scripts/engineering/dev/pretest_guardrails.ps1": {
       "decision": "windows_compatibility_wrapper",
       "next_step": "Retain as the native-Windows compatibility facade that delegates to the canonical pretest_guardrails.sh implementation; keep the shell implementation as the governed behavior source and remove this wrapper only when Windows test launchers no longer require it.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
+    },
+    "scripts/engineering/dev/quarantine_explorer_mock_server.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the quarantine explorer mock API helper dispatched via the dev router mock-quarantine command; keep it supporting unless mock quarantine APIs become a governed CI surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
     },
     "scripts/engineering/dev/zed_env_doctor.py": {
       "decision": "shared_helper_module",
@@ -1699,6 +1735,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
+    "scripts/schema/generation/generate_pipeline_schema.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the pipeline schema generator helper routed via the schema command surface; keep it supporting unless it becomes a documented public schema generation entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
+    },
     "scripts/schema/generation/generate_protein_class_l1_target_type_artifacts.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the deterministic protein-class L1 target-type artifact generator consumed by generated-artifact drift tests; promote to an active scripts.schema command only if it becomes a documented public schema generation surface.",
@@ -1708,6 +1750,12 @@
     "scripts/schema/generation/generate_typed_arrow_schema_sources.py": {
       "decision": "shared_helper_module",
       "next_step": "Canonical scripts.schema generate-typed-arrow surface; keep routed via python -m scripts.schema.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
+    },
+    "scripts/schema/validation/validate_unified_configs.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the unified config validation helper routed via the schema command surface; keep it supporting unless config validation becomes a standalone governed CI entrypoint.",
       "owner": "@bioetl-platform",
       "review_by": "2026-12-31"
     },
