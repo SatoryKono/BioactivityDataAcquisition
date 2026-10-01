@@ -57,6 +57,7 @@ def _make_run_id() -> RunID:
     return deterministic_run_uuid_from_callsite("test_gold_writer_metadata_mixin_boost")
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_concrete_writer_resolves_delta_version_without_loader_override(
     tmp_path: Path,
@@ -70,6 +71,7 @@ async def test_concrete_writer_resolves_delta_version_without_loader_override(
         assert await writer._get_delta_version(str(tmp_path / "gold")) == 7
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_concrete_writer_missing_delta_table_has_no_version(
     tmp_path: Path,
