@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.quality._dq_report_layer_flows import (
     generate_bronze_report,
@@ -14,18 +14,13 @@ from bioetl.application.services.quality._dq_report_layer_flows import (
 )
 from bioetl.application.services.quality.dq_report_models import (
     DQReportContext,
+    _DQReportGenerationHostProtocol,
 )
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
-        BronzeDQAnalyzerPort,
         BronzeDQConfigPort,
-        DQReportWriterPort,
-        GoldDQAnalyzerPort,
         GoldDQConfigPort,
-        LoggerPort,
-        MetricsPort,
-        SilverDQAnalyzerPort,
         SilverDQConfigPort,
     )
 
@@ -38,28 +33,13 @@ _DQLayerFlow = Callable[..., Awaitable[Path | None]]
 class DQReportGenerationMixin:
     """Mixin with layer-specific DQ report generation flows."""
 
-    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
-    _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
-    _bronze_analyzer: BronzeDQAnalyzerPort | None = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _silver_analyzer: SilverDQAnalyzerPort | None = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _gold_analyzer: GoldDQAnalyzerPort | None = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _report_writer: DQReportWriterPort | None = cast(
-        Any, None
-    )  # Any: host default (PD4)
-
     @staticmethod
     def _path_to_str(path: Path | None) -> str | None:
         """Convert path to string or None."""
         return str(path) if path else None
 
     def _emit_dq_report_skipped_metric(
-        self,
+        self: _DQReportGenerationHostProtocol,
         *,
         pipeline: str,
         stage: str,
@@ -79,7 +59,7 @@ class DQReportGenerationMixin:
         )
 
     def _emit_dq_report_generated_metric(
-        self,
+        self: _DQReportGenerationHostProtocol,
         *,
         pipeline: str,
         stage: str,
@@ -97,7 +77,7 @@ class DQReportGenerationMixin:
         )
 
     def _emit_dq_check_failure_metric(
-        self,
+        self: _DQReportGenerationHostProtocol,
         *,
         pipeline: str,
         stage: str,
@@ -119,7 +99,7 @@ class DQReportGenerationMixin:
         )
 
     def _dq_report_metric_emitters(
-        self,
+        self: _DQReportGenerationHostProtocol,
     ) -> tuple[
         _SkippedMetricEmitter,
         _GeneratedMetricEmitter,
@@ -147,7 +127,7 @@ class DQReportGenerationMixin:
         )
 
     async def _try_generate_bronze(
-        self,
+        self: _DQReportGenerationHostProtocol,
         context: DQReportContext,
         config: BronzeDQConfigPort | None,
         enabled: bool,
@@ -158,7 +138,7 @@ class DQReportGenerationMixin:
         return None
 
     async def _try_generate_silver(
-        self,
+        self: _DQReportGenerationHostProtocol,
         context: DQReportContext,
         config: SilverDQConfigPort | None,
         enabled: bool,
@@ -169,7 +149,7 @@ class DQReportGenerationMixin:
         return None
 
     async def _try_generate_gold(
-        self,
+        self: _DQReportGenerationHostProtocol,
         context: DQReportContext,
         config: GoldDQConfigPort | None,
         enabled: bool,
@@ -180,7 +160,7 @@ class DQReportGenerationMixin:
         return None
 
     async def _generate_bronze_report(
-        self,
+        self: _DQReportGenerationHostProtocol,
         context: DQReportContext,
         config: BronzeDQConfigPort,
     ) -> Path | None:
@@ -193,7 +173,7 @@ class DQReportGenerationMixin:
         )
 
     async def _generate_silver_report(
-        self,
+        self: _DQReportGenerationHostProtocol,
         context: DQReportContext,
         config: SilverDQConfigPort,
     ) -> Path | None:
@@ -206,7 +186,7 @@ class DQReportGenerationMixin:
         )
 
     async def _generate_gold_report(
-        self,
+        self: _DQReportGenerationHostProtocol,
         context: DQReportContext,
         config: GoldDQConfigPort,
     ) -> Path | None:
@@ -219,7 +199,7 @@ class DQReportGenerationMixin:
         )
 
     async def _generate_layer_report(
-        self,
+        self: _DQReportGenerationHostProtocol,
         *,
         context: DQReportContext,
         config: object,

@@ -2,13 +2,24 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Protocol, cast
 
 from bioetl.domain.exceptions import BioETLError, DataQualityError, StorageError
+from bioetl.domain.ports import (
+    BronzeDQAnalyzerPort,
+    BronzeDQConfigPort,
+    DQReportWriterPort,
+    GoldDQAnalyzerPort,
+    GoldDQConfigPort,
+    LoggerPort,
+    MetricsPort,
+    SilverDQAnalyzerPort,
+    SilverDQConfigPort,
+)
 from bioetl.domain.types import GoldBusinessRuleSpec, JsonDict, ScdConfig
 
 _DQ_REPORT_ERRORS = (
@@ -133,3 +144,55 @@ __all__ = [
     "DQReportContext",
     "DQReportResult",
 ]
+
+
+class _DQReportGenerationHostProtocol(Protocol):
+    """Internal report-generation host initialized by DQReportService."""
+
+    _logger: LoggerPort
+    _metrics: MetricsPort | None
+    _bronze_analyzer: BronzeDQAnalyzerPort | None
+    _silver_analyzer: SilverDQAnalyzerPort | None
+    _gold_analyzer: GoldDQAnalyzerPort | None
+    _report_writer: DQReportWriterPort | None
+
+    def _emit_dq_report_skipped_metric(
+        self, *, pipeline: str, stage: str, reason: str
+    ) -> None: ...
+
+    def _emit_dq_report_generated_metric(
+        self, *, pipeline: str, stage: str
+    ) -> None: ...
+
+    def _emit_dq_check_failure_metric(
+        self, *, pipeline: str, stage: str, check_type: str, severity: str
+    ) -> None: ...
+
+    def _dq_report_metric_emitters(
+        self,
+    ) -> tuple[
+        Callable[[str, str, str], None],
+        Callable[[str, str], None],
+        Callable[[str, str, str, str], None],
+    ]: ...
+
+    async def _generate_bronze_report(
+        self, context: DQReportContext, config: BronzeDQConfigPort
+    ) -> Path | None: ...
+
+    async def _generate_silver_report(
+        self, context: DQReportContext, config: SilverDQConfigPort
+    ) -> Path | None: ...
+
+    async def _generate_gold_report(
+        self, context: DQReportContext, config: GoldDQConfigPort
+    ) -> Path | None: ...
+
+    async def _generate_layer_report(
+        self,
+        *,
+        context: DQReportContext,
+        config: object,
+        analyzer: object | None,
+        flow: Callable[..., Awaitable[Path | None]],
+    ) -> Path | None: ...
