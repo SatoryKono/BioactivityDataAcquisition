@@ -67,7 +67,8 @@ Hash-only coverage refresh (`--allow-missing-coverage-xml`) hashes all
 `src/bioetl/**/*.py` and drops deleted inventory paths. It does not add rows
 for new modules until a coverage XML refresh. After `#10610` the committed
 inventory matches the live tree (`source_module_count=2492`) after the
-`src/bioetl/composition` shrink to 278 modules (`max_modules` held at 295).
+`src/bioetl/composition` count is 282 modules live per the architecture scorecard
+(`max_modules` held at 295, shrink-only; ARCH-011, #11859; verified 2026-10-01).
 `composition_runtime_builders` family inventory is 56 modules (measured=56);
 hotspot coverage floors stay at those live counts without raising debt budgets.
 
