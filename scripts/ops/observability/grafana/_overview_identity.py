@@ -6,7 +6,7 @@ def apply_overview_identity(payload: dict) -> None:
     panels = payload["panels"]
     panels[:] = [panel for panel in panels if panel.get("id") not in {9301, 9399, 9390}]
     by_id = {panel["id"]: panel for panel in panels}
-    by_id[9002]["gridPos"].update(x=0, y=5, w=15, h=11)
+    by_id[9002]["gridPos"].update(x=0, y=5, w=15, h=12)
     by_id[9603]["gridPos"].update(x=15, y=5, w=9, h=4)
     identity = next(p for p in panels if p.get("id") == 9300)
     identity["gridPos"].update(x=15, y=9, w=9, h=8)

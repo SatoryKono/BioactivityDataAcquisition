@@ -54,7 +54,9 @@ def test_overview_paired_tables_have_fixed_rows_and_inspectable_reasons():
     assert summary["gridPos"]["x"] == 15
     assert summary["gridPos"]["w"] == 9
     assert summary["gridPos"]["h"] == 4
-    assert domains["gridPos"]["h"] == 11
+    assert domains["gridPos"]["y"] + domains["gridPos"]["h"] == (
+        panels[9300]["gridPos"]["y"] + panels[9300]["gridPos"]["h"]
+    )
     assert 9301 not in panels
     for panel in (summary, domains):
         assert panel["options"]["cellHeight"] == "lg"
