@@ -12,6 +12,13 @@ def apply_replay_readiness_design(payload: dict) -> None:
     if card is None or row is None:
         return
     card.update(type="stat", title="Review Exact Replay Readiness")
+    card["description"] = (
+        "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. "
+        "OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. "
+        "UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is "
+        "selected; QUERY ERROR means backend unavailable or request failure. "
+        "UNKNOWN means no assessed value, never READY. Open replay checks for basis."
+    )
     card["options"] = {
         "reduceOptions": {
             "values": False,
@@ -35,14 +42,13 @@ def apply_replay_readiness_design(payload: dict) -> None:
         "UNSUPPORTED": "#555555",
         "SELECT RUN": "#555555",
         "QUERY ERROR": "red",
+        "UNKNOWN": "#555555",
+        "INCOMPLETE": "#555555",
     }
     card["fieldConfig"] = {
         "defaults": {
             "unit": "none",
-            "noValue": (
-                "SELECT RUN if no Run ID is selected. "
-                "QUERY ERROR if the request failed."
-            ),
+            "noValue": "UNKNOWN",
             "mappings": [
                 {
                     "type": "value",
