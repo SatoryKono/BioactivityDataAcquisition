@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-01T05:26:50.736145+00:00",
+  "generated_at": "2026-10-01T05:33:17.924031+00:00",
   "summary": {
     "total_scripts": 635,
     "status_counts": {
-      "active": 346,
-      "supporting": 289
+      "active": 338,
+      "supporting": 297
     },
     "reference_group_coverage": {
       "agents": 10,
@@ -3434,7 +3434,7 @@
     {
       "path": "scripts/ai/mcp/mcp_code_interpreter_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -3450,7 +3450,11 @@
           "source_group": "scripts",
           "text": "EXPECTED_CODE_INTERPRETER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the MCP transport wrapper for Code Interpreter while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint."
     },
     {
       "path": "scripts/ai/mcp/mcp_context7_wrapper.ps1",
@@ -3607,7 +3611,7 @@
     {
       "path": "scripts/ai/mcp/mcp_docker_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -3623,7 +3627,11 @@
           "source_group": "scripts",
           "text": "EXPECTED_DOCKER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_docker_wrapper.sh\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the MCP wrapper for Docker server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     {
       "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
@@ -6512,7 +6520,7 @@
     {
       "path": "scripts/diagrams/diagram_paths.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 4,
       "references": [
@@ -6540,7 +6548,11 @@
           "source_group": "scripts",
           "text": "source \"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)/diagram_paths.sh\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the shared shell path-helper library sourced by diagram shell tooling (run_diagram_checks.sh, validate_mermaid_syntax.sh); keep it supporting unless it becomes a standalone documented command."
     },
     {
       "path": "scripts/diagrams/fix/add_svg_text_fallback.py",
@@ -10935,7 +10947,7 @@
     {
       "path": "scripts/engineering/dev/install_deps.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -10951,12 +10963,16 @@
           "source_group": "scripts",
           "text": "\"install-deps\": \"install_deps.py\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the auxiliary single-package installer dispatched via the dev router install-deps command; keep it supporting because it is not a standalone setup entrypoint."
     },
     {
       "path": "scripts/engineering/dev/metrics_mock_server.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -10972,7 +10988,11 @@
           "source_group": "scripts",
           "text": "\"mock-metrics\": \"metrics_mock_server.py\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the Prometheus mock server helper dispatched via the dev router mock-metrics command for local dashboard development; keep it supporting unless mock observability becomes a governed CI surface."
     },
     {
       "path": "scripts/engineering/dev/pretest_guardrails.ps1",
@@ -11095,7 +11115,7 @@
     {
       "path": "scripts/engineering/dev/quarantine_explorer_mock_server.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -11117,7 +11137,11 @@
           "source_group": "scripts",
           "text": "\"mock-quarantine\": \"quarantine_explorer_mock_server.py\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the quarantine explorer mock API helper dispatched via the dev router mock-quarantine command; keep it supporting unless mock quarantine APIs become a governed CI surface."
     },
     {
       "path": "scripts/engineering/dev/run_mypy.ps1",
@@ -21120,7 +21144,7 @@
           "path": "docs/03-guides/dashboards/library-panels-inventory.md",
           "line": 18,
           "source_group": "docs",
-          "text": "| `nav_bus` | 1000 | text | Shared chrome; full bus `1. Trust`…`0. Run Explorer` via `scripts/ops/observability/grafana/render_nav_bus.py` |"
+          "text": "| `nav_bus` | 1000 | text | Shared chrome; full bus `1. Trust`…`Run Explorer` via `scripts/ops/observability/grafana/render_nav_bus.py` |"
         },
         {
           "path": "docs/03-guides/dashboards/navigation-contract.md",
@@ -23625,7 +23649,7 @@
     {
       "path": "scripts/schema/generation/generate_pipeline_schema.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -23641,7 +23665,11 @@
           "source_group": "scripts",
           "text": "\"generate-pipeline\": \"scripts.schema.generation.generate_pipeline_schema\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the pipeline schema generator helper routed via the schema command surface; keep it supporting unless it becomes a documented public schema generation entrypoint."
     },
     {
       "path": "scripts/schema/generation/generate_protein_class_l1_target_type_artifacts.py",
@@ -23969,7 +23997,7 @@
     {
       "path": "scripts/schema/validation/validate_unified_configs.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -23985,7 +24013,11 @@
           "source_group": "scripts",
           "text": "\"validate-unified-configs\": \"scripts.schema.validation.validate_unified_configs\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the unified config validation helper routed via the schema command surface; keep it supporting unless config validation becomes a standalone governed CI entrypoint."
     },
     {
       "path": "scripts/schema/validation/verify_schema_parity.py",

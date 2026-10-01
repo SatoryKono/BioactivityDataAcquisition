@@ -145,7 +145,7 @@ _REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
 
 _TOP_LEVEL_LINK_TITLE_RE = re.compile(
-    r"^([0-6]\. .+|Replay Readiness|Run Overview|Pipeline Diagnostics|Provider Health|Data Quality|Silver Reject Explorer|Explore (Logs|Traces)|Observability Checklist \(runbook\))$"
+    r"^([0-6]\. .+|Run Explorer|Replay Readiness|Run Overview|Pipeline Diagnostics|Provider Health|Data Quality|Silver Reject Explorer|Explore (Logs|Traces)|Observability Checklist \(runbook\))$"
 )
 
 _CANONICAL_GITHUB_BLOB_PREFIX = (
