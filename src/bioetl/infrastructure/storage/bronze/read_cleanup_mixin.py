@@ -43,7 +43,8 @@ class BronzeWriterReadCleanupMixin:
 
         # ARCH-CR2-01: keep blocking FS/decompress off the event loop.
         decompressed_data = await asyncio.to_thread(_read_and_decompress)
-        for line in decompressed_data.decode("utf-8").splitlines():
+        # JSONL boundaries are LF bytes; Unicode separators may occur in strings.
+        for line in decompressed_data.split(b"\n"):
             if line.strip():
                 yield orjson.loads(line)
 
