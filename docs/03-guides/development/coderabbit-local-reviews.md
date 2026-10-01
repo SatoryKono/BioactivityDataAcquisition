@@ -35,9 +35,14 @@ $base = (git rev-parse HEAD).Trim()
 ```
 
 Capture NDJSON and stderr in a task-specific evidence directory. Record the
-base SHA, HEAD, and diff before review. Require a successful completion event;
-an authentication error, skipped review, or missing completion is not zero
-issues. Do not add `--use-credits` without explicit spending authorization.
+base SHA, HEAD, and diff before review. Accept the review as completed successfully
+only when the CLI exits with code 0, a `complete` event with
+`status: "review_completed"` is present, and no error or interruption is reported.
+When the event provides `outcome` or `unreviewedFileCount`, require a successful
+outcome and `unreviewedFileCount: 0`. Completion does not mean zero issues:
+inspect the findings separately. An authentication error, skipped review, or
+missing completion is not zero issues.
+Do not add `--use-credits` without explicit spending authorization.
 Use `--include-untracked` only when new files belong to the intended review.
 The Codex plugin can invoke this CLI; Windows and WSL have separate auth state.
 
@@ -169,5 +174,8 @@ finding, the repair limit, disabled human-feedback handling, inactivity reset,
 and rule shutdown. Preserve source-bound evidence for every result.
 
 Disable the rule before reverting an incorrect repair commit with `git revert`.
-Confirm no new repair rounds start. Re-enable only after identifying the cause.
+Confirm no new repair rounds start. Check active Triage runs and wait for them
+to finish before running `git revert`; disabling the rule alone is not proof
+that an in-progress repair can no longer create commits.
+Re-enable only after identifying the cause.
 Increase rounds or enable human-feedback processing only after a successful pilot.

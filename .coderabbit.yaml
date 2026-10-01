@@ -149,8 +149,10 @@ reviews:
         - Backward compatibility and contract stability
         - Security best practices (no secrets, proper env handling)
         - Observability integration (metrics, structured logging, tracing)
-        - For src/bioetl Python changes, regenerate module-coverage source_tree_sha256
-          through report-module-coverage and run the applicable architecture hash guard
+        - For src/bioetl Python changes, run
+          python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml
+          and then run
+          python -m pytest tests/architecture/test_module_coverage_inventory_freshness.py::test_module_coverage_inventory_source_tree_hash_is_current
 
     - path: "tests/**/*.py"
       instructions: |
