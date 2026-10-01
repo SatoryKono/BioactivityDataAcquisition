@@ -152,15 +152,22 @@ def apply_provider_evidence_columns(payload: dict) -> None:
         panels = payload["panels"]
         panels[:] = [panel for panel in panels if panel.get("id") not in {9460, 9461}]
         evidence = _provider_check_panel(
-            9460, "Review Provider Evidence", {"x": 0, "y": 17, "w": 20, "h": 6},
-            ["provider", "check_result", "evidence", "observed_at"], limit=None,
+            9460,
+            "Review Provider Evidence",
+            {"x": 0, "y": 17, "w": 20, "h": 6},
+            ["provider", "check_result", "evidence", "observed_at"],
+            limit=None,
         )
         check = _provider_check_panel(
-            9461, "Review Provider Check", {"x": 20, "y": 17, "w": 4, "h": 6},
-            ["check_result", "evidence"], limit=1,
+            9461,
+            "Review Provider Check",
+            {"x": 20, "y": 17, "w": 4, "h": 6},
+            ["check_result", "evidence"],
+            limit=1,
         )
         _style_provider_check([evidence, check])
         _provider_evidence_columns(evidence)
+        evidence["gridPos"] = {"x": 0, "y": 17, "w": 20, "h": 6}
         check["gridPos"] = {"x": 20, "y": 17, "w": 4, "h": 6}
         for panel in panels:
             if panel.get("id") == 9450:
