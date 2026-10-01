@@ -15,7 +15,10 @@ def apply_overview_identity(payload: dict) -> None:
         url="/ops/observability/selected-run-status?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&workflow=${workflow:csv}",
         root_selector=(
             '($v := function($x){$exists($x) and $x != "" ? $string($x) : '
-            '"Not recorded in saved run evidence"}; ['
+            '"Not recorded in saved run evidence"}; '
+            '$s := summary[0]; '
+            '$start := $s.started_at ? $toMillis($s.started_at) : null; '
+            '$end := $s.completed_at ? $toMillis($s.completed_at) : null; ['
             '{"parameter":"Run ID","value":$v(run_id)},'
             '{"parameter":"Pipeline","value":$v(pipeline)},'
             '{"parameter":"Run Type","value":$v(run_type)},'
@@ -23,6 +26,10 @@ def apply_overview_identity(payload: dict) -> None:
             'started_at ? $substring(started_at,0,10) & " " & '
             '$substring(started_at,11,5) & " " & '
             '($substring(started_at,-1) = "Z" ? "UTC" : $substring(started_at,-6)) : '
+            '"Not recorded in saved run evidence"},'
+            '{"parameter":"Total Run Duration","value":'
+            '$start != null and $end != null and $end >= $start ? '
+            '$string($round(($end - $start) / 1000, 2)) & " s" : '
             '"Not recorded in saved run evidence"}])'
         ),
     )
