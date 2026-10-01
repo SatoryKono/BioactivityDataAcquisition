@@ -94,6 +94,49 @@ reviews:
 
   # Path-based review instructions
   path_instructions:
+    - path: "**"
+      instructions: |
+        Follow AGENTS.md and its canonical runtime precedence for BioETL.
+        Write review comments in Russian; preserve technical identifiers.
+        Never expose secrets or modify .env or .env.* without explicit per-task approval.
+        Never increase technical-debt budgets, exemptions, or thresholds.
+        Do not disable tests, checks, or security controls to make CI pass.
+        Distinguish failed checks from missing evidence and external CI blockers.
+        Report exact validation commands and results; never infer a passing check.
+        Keep fixes scoped to confirmed findings and directly affected tests.
+
+    - path: "configs/**"
+      instructions: |
+        Check consumers and current schemas before proposing configuration changes.
+        Preserve configuration precedence and local-only defaults.
+        Do not introduce Docker, Redis, or external orchestration requirements.
+        Preserve or reduce all technical-debt budgets and exemption limits.
+
+    - path: "reports/**"
+      instructions: |
+        Verify generated evidence against its canonical generator and exact source identity.
+        Do not hand-edit generated hashes or fabricate successful validation evidence.
+        For telemetry/test-governance/flaky/evidence/remote-main/dataflow rebind,
+        use refresh-ci-drift-families as required by AGENTS.md.
+        A partial or skipped run must remain explicitly incomplete.
+
+    - path: ".codex/**"
+      instructions: |
+        Treat this tree as the canonical Codex runtime source, with Junie as an equal peer.
+        Changes under agents/ or skills/ require the Codex-Junie mirror parity check.
+        Update affected documentation mirrors after the canonical runtime source.
+
+    - path: ".junie/**"
+      instructions: |
+        Treat this tree as the canonical Junie runtime source, with Codex as an equal peer.
+        Changes under agents/ or skills/ require the Codex-Junie mirror parity check.
+        Preserve machine-local history, state, and cache as untracked surfaces.
+
+    - path: ".devin/**"
+      instructions: |
+        Preserve Devin-specific agents and skills as canonical tracked Devin runtime sources.
+        Follow repository governance without replacing Devin behavior with Codex-only profiles.
+
     - path: "src/**/*.py"
       instructions: |
         Focus on correctness, error handling, typing, resource management, concurrency, and compatibility.
@@ -106,6 +149,8 @@ reviews:
         - Backward compatibility and contract stability
         - Security best practices (no secrets, proper env handling)
         - Observability integration (metrics, structured logging, tracing)
+        - For src/bioetl Python changes, regenerate module-coverage source_tree_sha256
+          through report-module-coverage and run the applicable architecture hash guard
 
     - path: "tests/**/*.py"
       instructions: |
