@@ -86,7 +86,7 @@ if args[0] == "desktop":
         raise SystemExit(0)
     if command == "status":
         if mode == "command_timeout":
-            time.sleep(20)
+            time.sleep(90)
         _out("status token=ghp_abcdefghijklmnop")
         raise SystemExit(5)
     if command == "logs":
@@ -99,7 +99,7 @@ if args[0] == "desktop":
         raise SystemExit(0)
     if command == "restart":
         if mode == "restart_timeout":
-            time.sleep(20)
+            time.sleep(90)
         if mode != "never_ready":
             state.write_text("ready\n", encoding="utf-8")
         raise SystemExit(0)
@@ -317,10 +317,11 @@ def test_diagnostic_subprocess_timeout_is_bounded(tmp_path: Path) -> None:
     result, payload, elapsed = _run(tmp_path, mode="command_timeout")
 
     assert result.returncode == 0, result.stderr
-    # Fake status sleeps 20s but is hard-killed at CommandTimeoutSeconds=1.
+    # Fake status sleeps 90s but is hard-killed at CommandTimeoutSeconds=1.
     # Full diagnostics under Windows process-spawn load routinely exceeds 6s;
-    # keep a bound well below the unkillable sleep wall-clock.
-    assert elapsed < 12
+    # keep a bound well below the unkillable sleep wall-clock and the
+    # subprocess.run timeout=50 ceiling.
+    assert elapsed < 45
     assert any(row["timed_out"] for row in payload["observations"])
     assert any(row["returncode"] == 124 for row in payload["observations"])
 
@@ -366,7 +367,10 @@ def test_last_resort_requires_switch_and_should_process_confirmation(
     )
 
     assert result.returncode != 0
-    assert 9 <= elapsed < 15
+    # Lower bound proves the full 10s readiness budget elapsed before
+    # last-resort abort; the ceiling tolerates Windows spawn/probe lag
+    # while staying below the subprocess.run timeout=50 ceiling.
+    assert 9 <= elapsed < 40
     assert payload["last_resort_requested"] is True
     assert payload["last_resort_token_valid"] is True
     assert "last_resort_requested" in payload["actions"]
@@ -421,7 +425,9 @@ def test_bounded_restart_failure_uses_supported_stop_start_fallback(
     result, payload, elapsed = _run(tmp_path, mode="restart_timeout")
 
     assert result.returncode == 0, result.stderr
-    assert elapsed < 10
+    # Bounded restart is killed at CommandTimeoutSeconds=1; the 30s ceiling
+    # stays well below the 90s fake sleep while tolerating spawn lag.
+    assert elapsed < 30
     assert payload["ok"] is True
     assert payload["actions"] == [
         "docker_desktop_restart",

@@ -5,7 +5,6 @@ from copy import deepcopy
 from pathlib import Path
 
 import pytest
-
 from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope
 
 pytestmark = pytest.mark.unit
@@ -14,15 +13,20 @@ _REPO_ROOT = Path(__file__).resolve().parents[5]
 _DASHBOARDS = _REPO_ROOT / "grafana" / "dashboards"
 
 
-@pytest.mark.parametrize("uid", ["bioetl-overview-v2", "bioetl-incident-v1"])
-def test_scope_is_idempotent_and_does_not_rewrite_saved_run(uid):
+@pytest.mark.parametrize(
+    ("uid", "saved_run_panel_id"),
+    [("bioetl-overview-v2", 9603), ("bioetl-incident-v1", 9450)],
+)
+def test_scope_is_idempotent_and_does_not_rewrite_saved_run(uid, saved_run_panel_id):
     payload = json.loads((_DASHBOARDS / f"{uid}.json").read_text(encoding="utf-8"))
-    saved = deepcopy(next(p for p in payload["panels"] if p["id"] == 9450))
+    saved = deepcopy(
+        next(p for p in payload["panels"] if p["id"] == saved_run_panel_id)
+    )
     apply_workflow_scope(payload)
     first = deepcopy(payload)
     apply_workflow_scope(payload)
     assert payload == first
-    assert next(p for p in payload["panels"] if p["id"] == 9450) == saved
+    assert next(p for p in payload["panels"] if p["id"] == saved_run_panel_id) == saved
     if uid == "bioetl-overview-v2":
         titles = {panel.get("title") for panel in payload["panels"]}
         assert "Monitor Scope Health" not in titles

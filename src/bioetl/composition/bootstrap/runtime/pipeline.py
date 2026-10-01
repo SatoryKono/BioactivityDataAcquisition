@@ -13,15 +13,19 @@ from bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases import (
     prepare_runtime_registry,
 )
 from bioetl.composition.registry_api import PipelineRegistry
-from bioetl.composition.runtime_builders.config_access import resolve_configs_root
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     require_cached_bronze_input_snapshot_refs,
 )
+from bioetl.composition.runtime_builders.config_access import resolve_configs_root
 from bioetl.composition.runtime_builders.runner_builder import (
     build_pipeline_runner as _build_pipeline_runner,
 )
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     RunnerBuilderWiring,
+)
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+    normalize_required_persistence_profile,
 )
 
 if TYPE_CHECKING:
@@ -47,6 +51,16 @@ def _coerce_optional_str(value: object | None) -> str | None:
 def _fail_fast_empty_explicit_cached_bronze(ctx: PipelineRunContext) -> None:
     cached_bronze = getattr(ctx, "cached_bronze", None)
     if cached_bronze is None or not getattr(cached_bronze, "enabled", False):
+        return
+    strict = bool(getattr(ctx, "exact_replay", False)) or (
+        normalize_required_persistence_profile(
+            getattr(ctx, "required_persistence_profile", None)
+        )
+        in STRICT_PERSISTENCE_PROFILES
+    )
+    # degraded_observable must persist the run manifest before failing so the
+    # audit trail lands; strict profiles fail closed without artifacts.
+    if not strict:
         return
     bronze_path = _coerce_optional_str(getattr(cached_bronze, "bronze_path", None))
     if bronze_path is None:
@@ -88,6 +102,7 @@ def bootstrap_pipeline_runner(
 ) -> PipelineRunner:
     """Build one ready-to-run pipeline runner from runtime context and registry."""
     apply_runtime_compatibility_patches()
+    _fail_fast_empty_explicit_cached_bronze(ctx)
     registry = prepare_runtime_registry(
         registry=registry, pipeline_name=ctx.pipeline_name
     )

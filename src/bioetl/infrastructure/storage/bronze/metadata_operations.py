@@ -103,7 +103,11 @@ def prepare_bronze_metadata_write(
         if request.source_metadata is None
         else _attach_live_snapshot_to_source_metadata(
             source_metadata=request.source_metadata,
-            snapshot=live_snapshot,
+            snapshot=(
+                None
+                if request.source_metadata.type == "cached_bronze"
+                else live_snapshot
+            ),
         )
     )
     completed_at = calculate_bronze_completed_at(request.ingestion_ts, request.duration)

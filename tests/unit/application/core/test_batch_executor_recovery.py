@@ -30,16 +30,16 @@
 from __future__ import annotations
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
-from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
+
+import pytest
 
 from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
-from bioetl.domain.context import PipelineContext
 from bioetl.domain.config import DQConfig
-from bioetl.domain.types import HealthStatus
-from bioetl.domain.types import RunType
+from bioetl.domain.context import PipelineContext
+from bioetl.domain.types import HealthStatus, RunType
+from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 from tests.unit.application.core.test_batch_executor_memory import (
     _create_batch_executor,
 )
@@ -173,10 +173,11 @@ class TestBatchExecutorRecoveryInvariants:
         with pytest.raises(RuntimeError, match="Simulated failure at record 550"):
             await executor_run1.execute(limit=None)
 
-        # Exception recovery now persists the exact processed offset at failure time.
+        # Exception recovery persists the confirmed-Bronze offset (#11221):
+        # buffered-but-uncommitted rows 500..549 must be re-fetched on resume.
         saved_state = await checkpoint_port.load("test")
         assert saved_state is not None
-        assert saved_state[1].get("records_processed") == 550
+        assert saved_state[1].get("records_processed") == 500
 
         # Run 2: Resume logic
         data_source.fail_at = None  # Remove failure for second run

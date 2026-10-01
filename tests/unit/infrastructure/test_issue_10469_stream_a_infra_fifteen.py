@@ -10,9 +10,9 @@ import pyarrow as pa
 import pytest
 
 from bioetl.domain.exceptions import BioETLError
-from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
 from bioetl.domain.models.metadata import InputSnapshotRef
 from bioetl.infrastructure.adapters.crossref._search_paginator import SearchPaginator
+from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
 from bioetl.infrastructure.adapters.decorators._data_source_delegation import (
     DataSourceFetchRequest,
 )
@@ -82,7 +82,7 @@ async def test_circuit_breaker_records_bioetl_error(
     )
     decorator = CircuitBreakerDataSourceDecorator(
         data_source=source,  # type: ignore[arg-type]
-        circuit_breaker=MagicMock(),
+        circuit_breaker=AsyncMock(),
         logger=MagicMock(),
     )
     recorded = MagicMock()

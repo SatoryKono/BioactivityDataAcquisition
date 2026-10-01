@@ -7,16 +7,19 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-from bioetl.composition.runtime_builders.input_snapshot_resolution import (
-    resolve_pipeline_input_snapshot_refs,
-)
 from bioetl.composition.runtime_builders._run_manifest_context_updates import (
     build_contract_identity_field_values,
     build_control_plane_identity_ref_values,
 )
+from bioetl.composition.runtime_builders.input_snapshot_resolution import (
+    resolve_cached_bronze_input_snapshot_refs,
+    resolve_pipeline_input_snapshot_refs,
+)
 from bioetl.domain.control_plane import RunSourceRef
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    STRICT_PERSISTENCE_PROFILES,
+    normalize_required_persistence_profile,
     require_input_snapshots,
 )
 
@@ -79,16 +82,32 @@ def build_run_source_refs(
     required_persistence_profile: object = DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
 ) -> tuple[RunSourceRef, ...]:
     """Build source references and enforce strict snapshot persistence."""
-    input_snapshots = resolve_pipeline_input_snapshot_refs(
-        ctx=ctx,
-        cached_bronze=cached_bronze,
-        settings=settings,
-        provider=provider,
-        entity=entity,
-    )
     cached_bronze_enabled = cached_bronze is not None and bool(
         getattr(cached_bronze, "enabled", False)
     )
+    strict_require = bool(getattr(ctx, "exact_replay", False)) or (
+        normalize_required_persistence_profile(required_persistence_profile)
+        in STRICT_PERSISTENCE_PROFILES
+    )
+    if cached_bronze_enabled:
+        # Strict runs fail here with the cached-bronze provenance message;
+        # degraded_observable defers to the post-persist manifest gate so the
+        # audit trail still lands (see _publish_manifest_and_refs).
+        input_snapshots = resolve_cached_bronze_input_snapshot_refs(
+            cached_bronze=cached_bronze,
+            settings=settings,
+            provider=provider,
+            entity=entity,
+            require=strict_require,
+        )
+    else:
+        input_snapshots = resolve_pipeline_input_snapshot_refs(
+            ctx=ctx,
+            cached_bronze=cached_bronze,
+            settings=settings,
+            provider=provider,
+            entity=entity,
+        )
     if not (cached_bronze_enabled and not input_snapshots):
         require_input_snapshots(
             exact_replay=bool(getattr(ctx, "exact_replay", False)),

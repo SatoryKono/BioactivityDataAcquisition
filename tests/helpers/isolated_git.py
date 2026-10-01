@@ -75,7 +75,9 @@ def run_isolated_git(
         *args,
     ]
     merged_env = isolated_git_env() if env is None else env
-    with tempfile.TemporaryDirectory(prefix="bioetl_git_") as temp_dir:
+    with tempfile.TemporaryDirectory(
+        prefix="bioetl_git_", ignore_cleanup_errors=True
+    ) as temp_dir:
         stdout_path = Path(temp_dir) / "stdout.txt"
         stderr_path = Path(temp_dir) / "stderr.txt"
         try:
