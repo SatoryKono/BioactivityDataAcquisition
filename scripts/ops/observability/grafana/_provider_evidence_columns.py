@@ -59,12 +59,12 @@ def _provider_evidence_columns(panel: dict) -> None:
     panel["options"]["cellHeight"] = "lg"
     panel["options"]["footer"] = {"show": False, "enablePagination": False}
     widths = {
-        "Provider": 95,
-        "Data source": 130,
-        "Check performed": 150,
-        "Check result": 110,
-        "Observed at": 175,
-        "Evidence": 115,
+        "Provider": 80,
+        "Data source": 112,
+        "Check performed": 140,
+        "Check result": 102,
+        "Observed at": 160,
+        "Evidence": 100,
     }
     panel["fieldConfig"]["overrides"] = [
         {

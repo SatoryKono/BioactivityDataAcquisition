@@ -682,7 +682,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 95
+                "value": 80
               }
             ]
           },
@@ -694,7 +694,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 130
+                "value": 112
               }
             ]
           },
@@ -706,7 +706,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 150
+                "value": 140
               }
             ]
           },
@@ -718,7 +718,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 102
               }
             ]
           },
@@ -730,7 +730,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 175
+                "value": 160
               }
             ]
           },
@@ -742,7 +742,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 115
+                "value": 100
               }
             ]
           },
