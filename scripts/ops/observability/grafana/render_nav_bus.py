@@ -105,7 +105,7 @@ _MINIMUM_FIRST_WINDOW_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-run-explorer-v1": {1: 2, 3010: 12},
     "bioetl-incident-v1": {2005: 4, 2010: 4},
     "bioetl-dq-v2": {9406: 5},
-    "bioetl-control-plane-v1": {9418: 7, 9416: 7},
+    "bioetl-control-plane-v1": {},
 }
 # Donors used when the provenance text rail is already at h=3. Values are the
 # minimum height after reclaiming one native-zoom nav row.
@@ -1357,7 +1357,7 @@ def _stamp_trust_override(override: dict[str, Any]) -> None:
             [{"type": "value", "options": {"0": {"text": "no"}}}],
         )
     if field == "Action":
-        _set_override_value(override, "noValue", "")
+        _set_override_value(override, "noValue", "No trust issues")
         _set_override_value(
             override,
             "links",
@@ -1719,6 +1719,8 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
 
 def _layout_control_plane_first_window(panels: list[object]) -> None:
     """Keep Trust density/readability while fitting the canonical h=4 nav."""
+    if any(p.get("id") == 9430 for p in panels if isinstance(p, dict)):
+        return
     _ensure_exact_replay_readiness_panel(panels)
     _stamp_exact_replay_panel(panels)
     root = _root_panels(panels)
@@ -2469,13 +2471,15 @@ def apply_to_dashboard(
         nav = next((p for p in panels if p.get("id") == 1000), None)
         if nav is None:
             raise SystemExit(f"{safe_path.name}: missing panel id=1000")
-        _stamp_nav_panel(nav, panels)
-        _restore_minimum_first_window_heights(panels, current_uid=current_uid)
-        _layout_uid_first_window(panels, current_uid=current_uid)
-        _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
-        _layout_uid_first_window(panels, current_uid=current_uid)
-        _normalize_collapsed_row_children(panels)
-        _layout_uid_detail_panels(panels, current_uid=current_uid)
+        compact_replay = current_uid == "bioetl-control-plane-v1" and any(p.get("id") == 9430 for p in panels)
+        if not compact_replay:
+            _stamp_nav_panel(nav, panels)
+            _restore_minimum_first_window_heights(panels, current_uid=current_uid)
+            _layout_uid_first_window(panels, current_uid=current_uid)
+            _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
+            _layout_uid_first_window(panels, current_uid=current_uid)
+            _normalize_collapsed_row_children(panels)
+            _layout_uid_detail_panels(panels, current_uid=current_uid)
         _attach_nav_bus(nav, current_uid=current_uid)
     stamp_selector_columns(payload)
     # Remove our generated row before other appenders calculate their tail y.
@@ -2505,6 +2509,11 @@ def apply_to_dashboard(
     )
 
     apply_run_explorer_columns(payload)
+    from scripts.ops.observability.grafana._provider_evidence_columns import (
+        apply_provider_evidence_columns,
+    )
+
+    apply_provider_evidence_columns(payload)
     if current_uid == "bioetl-provider-health-v2":
         payload["panels"] = [
             panel for panel in payload["panels"] if panel.get("id") not in {9402, 9403}
@@ -2539,6 +2548,13 @@ def apply_to_dashboard(
     from scripts.ops.observability.grafana._overview_identity import apply_saved_evidence_readability
     apply_saved_evidence_readability(payload)
     _pack_incident_tail_rows(payload)
+    if current_uid == "bioetl-control-plane-v1":
+        from scripts.ops.observability.grafana._replay_layout import apply_replay_layout
+        from scripts.ops.observability.grafana._replay_readiness_design import apply_replay_readiness_design, apply_trust_action_display
+
+        apply_replay_layout(payload)
+        apply_replay_readiness_design(payload)
+        apply_trust_action_display(payload)
     retire_runtime_links(payload)
     if current_uid == "bioetl-control-plane-v1":
         pending = [payload]
@@ -2559,6 +2575,10 @@ def apply_to_dashboard(
             panel = pending.pop()
             pending.extend(panel.get("panels", []))
             panel["title"] = panel.get("title", "").removeprefix("Review ")
+    if current_uid == "bioetl-control-plane-v1":
+        from scripts.ops.observability.grafana._replay_layout import apply_replay_layout
+
+        apply_replay_layout(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

@@ -35,7 +35,11 @@ from bioetl.infrastructure.control_plane._run_manifest_scope_index import (
 from bioetl.infrastructure.control_plane._run_manifest_scope_rebuild import (
     plan_latest_scope_index_rebuild,
 )
+from bioetl.infrastructure.control_plane.replay_object_verifier import (
+    ReplayObjectVerifier,
+)
 from bioetl.infrastructure.storage.atomic import atomic_write_text
+from bioetl.infrastructure.control_plane.replay_object_verifier import ReplayObjectVerifier
 from bioetl.infrastructure.storage.file_metadata_index import catalog_text_index
 
 __all__ = ["FileRunManifestStore", "RunManifestStoreCorruptionError"]
@@ -99,6 +103,13 @@ class FileRunManifestStore(RawRunManifestInspectionMixin, RunManifestPort):
 
     base_path: Path
     metrics: MetricsPort | None = None
+    replay_object_verifier: ReplayObjectVerifier | None = None
+
+    def verify_replay_objects(self, manifest: RunManifest) -> dict[str, bool]:
+        """Check saved objects against this manifest at read time."""
+        if self.replay_object_verifier is None:
+            return {}
+        return self.replay_object_verifier.verify(manifest)
 
     def assert_saved(self, manifest: RunManifest) -> None:
         """Fail closed if a just-saved manifest did not materialize on disk.

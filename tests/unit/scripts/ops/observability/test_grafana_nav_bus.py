@@ -199,9 +199,9 @@ def test_trust_layout_preserves_scalar_area_and_detail_rows() -> None:
     nav_bus._layout_control_plane_first_window(panels)
     nav_bus._normalize_collapsed_row_children(panels)
 
-    assert scope["gridPos"] == {"x": 0, "y": 3, "w": 12, "h": 3}
+    assert scope["gridPos"] == {"x": 0, "y": 3, "w": 15, "h": 3}
     readiness = next(panel for panel in panels if panel.get("id") == 9422)
-    assert readiness["gridPos"] == {"x": 12, "y": 3, "w": 12, "h": 3}
+    assert readiness["gridPos"] == {"x": 15, "y": 3, "w": 9, "h": 3}
     assert readiness["links"] == []
     assert readiness["fieldConfig"]["defaults"]["noValue"] == "—"
     assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 6

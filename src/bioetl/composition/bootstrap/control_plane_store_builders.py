@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders import control_plane_root
+from bioetl.infrastructure.control_plane.replay_object_verifier import ReplayObjectVerifier
 from bioetl.infrastructure.control_plane import (
     FileEffectiveConfigArtifactStore,
     FileHistoricalReplayClosureStore,
@@ -30,6 +31,11 @@ def create_run_manifest_store(
     return FileRunManifestStore(
         base_path=control_plane_root(settings, "run_manifest"),
         metrics=metrics,
+        replay_object_verifier=ReplayObjectVerifier(
+            config_root=control_plane_root(settings, "effective_config"),
+            lock_root=control_plane_root(settings, "dependency_locks"),
+            bronze_root=settings.bronze_path,
+        ),
     )
 
 

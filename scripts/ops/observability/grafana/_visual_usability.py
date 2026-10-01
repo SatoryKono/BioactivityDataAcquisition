@@ -140,6 +140,8 @@ def _trust(p: dict[int, dict]) -> None:
     for panel_id in (9405, 9406, 9407, 9408, 9409, 9402, 9403, 9417):
         if panel_id in p:
             _compact_trust_evidence_table(p, panel_id)
+    if 9430 in p:
+        return  # The focused replay layout owns its two diagnostic rows.
     _bands(
         p[905],
         [
@@ -152,7 +154,10 @@ def _trust(p: dict[int, dict]) -> None:
             [(139, 0, 24, 3)],
         ],
     )
-    _bands(p[9412], [[(9402, 0, 24, 8)], [(9403, 0, 24, 8)], [(9417, 0, 24, 7)]])
+    detail_bands = [[(9402, 0, 24, 8)], [(9417, 0, 24, 7)]]
+    if any(child.get("id") == 9403 for child in p[9412]["panels"]):
+        detail_bands.insert(1, [(9403, 0, 24, 8)])
+    _bands(p[9412], detail_bands)
 
 
 _ACTION_LABELS = {
