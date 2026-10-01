@@ -10,7 +10,7 @@ import pytest
 
 import bioetl.composition.factories.services as services_facade
 import bioetl.composition.factories.transformer_factory as transformer_factory
-import bioetl.composition.services.versioning as versioning
+import bioetl.infrastructure.provenance.code_revision as versioning
 from bioetl.composition.bootstrap.runtime.pipeline import (
     _fail_fast_empty_explicit_cached_bronze,
 )

@@ -42,6 +42,7 @@ from bioetl.domain.ports import (
     BronzeStoragePort,
     GoldStoragePort,
     SilverStoragePort,
+    SilverWriteRequest,
     StorageLifecyclePort,
     StorageMaintenancePort,
 )
@@ -218,11 +219,12 @@ class TestStorageBundleWriteSilver:
         )
 
         mock_silver_writer.write_silver.assert_called_once()
-        call_kwargs = mock_silver_writer.write_silver.call_args[1]
-        assert call_kwargs["table_name"] == "test_table"
-        assert call_kwargs["records"] == records
-        assert call_kwargs["primary_keys"] == ["id"]
-        assert call_kwargs["schema"] is schema
+        (request,) = mock_silver_writer.write_silver.call_args.args
+        assert isinstance(request, SilverWriteRequest)
+        assert request.table_name == "test_table"
+        assert request.records == records
+        assert request.primary_keys == ["id"]
+        assert request.schema is schema
 
     @pytest.mark.asyncio
     async def test_write_silver_default_mode(

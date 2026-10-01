@@ -83,6 +83,7 @@ class TestSilverWriterInit:
         writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
         assert writer.csv_exporter is None
 
+    @pytest.mark.require_silver_validator
     def test_runtime_helper_builds_defaults(self) -> None:
         """Runtime helper should resolve the standard SilverWriter defaults."""
         from bioetl.infrastructure.storage.silver.runtime_helpers import (

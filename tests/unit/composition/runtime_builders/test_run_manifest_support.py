@@ -56,6 +56,9 @@ from bioetl.composition.runtime_builders._run_manifest_creation_support import (
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
+from bioetl.composition.runtime_builders.input_snapshot_resolution import (
+    resolve_cached_bronze_input_snapshot_refs,
+)
 from bioetl.composition.runtime_builders.run_manifest_support import (
     RunManifestContractIdentity,
     build_planned_artifacts,
@@ -670,11 +673,11 @@ def test_cached_bronze_snapshot_refs_are_sorted_by_snapshot_identity(
 
 
 @pytest.mark.unit
-def test_build_run_source_refs_fails_closed_for_exact_replay_without_snapshots() -> (
+def test_resolve_cached_bronze_input_snapshot_refs_fails_closed_for_exact_replay_without_snapshots() -> (
     None
 ):
+    """Exact replay defers the cached-Bronze require to manifest publication."""
     settings = _make_settings()
-    ctx = _make_run_context(query=None, exact_replay=True)
     cached_bronze = SimpleNamespace(
         enabled=True,
         bronze_path="test-output/does-not-exist",
@@ -685,12 +688,12 @@ def test_build_run_source_refs_fails_closed_for_exact_replay_without_snapshots()
         RuntimeError,
         match="Cached Bronze execution requires at least one persisted batch file",
     ):
-        build_run_source_refs(
-            ctx=ctx,
+        resolve_cached_bronze_input_snapshot_refs(
             cached_bronze=cached_bronze,
             settings=settings,
             provider="chembl",
             entity="activity",
+            require=True,
         )
 
 

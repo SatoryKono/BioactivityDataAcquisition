@@ -152,7 +152,7 @@ def test_create_control_plane_refs_uses_named_contract_identity_fields() -> None
         immutable_uri="file:///immutable/snapshot-1.json",
     )
 
-    refs = run_manifest_builder._create_control_plane_refs(
+    refs = run_manifest_builder.create_control_plane_refs_for_manifest(
         manifest=SimpleNamespace(
             manifest_id="manifest-1",
             execution_fingerprint="fingerprint-1",

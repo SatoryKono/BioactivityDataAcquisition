@@ -18,17 +18,22 @@ def _provider_evidence_columns(panel: dict) -> None:
         "($d := presentation_domains[domain = 'Provider'][0]; "
         "$cached := $d.reason = 'cached_bronze_no_remote_probe'; "
         "$saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; "
-        "$map(provider_checks, function($p) { $merge([$p, {"
+        "[$map(provider_checks, function($p) { $merge([$p, {"
         "'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : 'UNKNOWN'), "
         "'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), "
-        "'check_result': $cached or $p.check_result = 'N/A' ? '—' : "
+        "'check_result': $cached ? '—' : "
         "($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), "
         "'reason': $cached ? 'Cached Bronze used; provider API was not called.' : "
-        "($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.'), "
+        "($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : "
+        "($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), "
         "'observed_display': $cached ? '—' : ($p.observed_at ? "
         "$substring($p.observed_at,0,10) & ' ' & $substring($p.observed_at,11,5) & ' ' & "
-        "($substring($p.observed_at,-1) = 'Z' ? 'UTC' : $substring($p.observed_at,-6)) : '—'), "
-        "'report_label': $saved ? 'Open report' : '—' }]) }))"
+        "($substring($p.observed_at,-1) = 'Z' ? 'UTC' : $substring($p.observed_at,-6)) : 'UNKNOWN'), "
+        "'report_label': $saved or $cached ? 'Open report' : '—' }]) })])"
+    )
+    panel["targets"][0].update(
+        parser="uql",
+        uql='parse-json | jsonata "' + panel["targets"][0]["root_selector"] + '"',
     )
     panel["description"] = (
         "SELECTED RUN · Saved provider evidence for this Run ID. Cached Bronze means "
@@ -51,13 +56,14 @@ def _provider_evidence_columns(panel: dict) -> None:
     defaults = panel["fieldConfig"]["defaults"]
     defaults["custom"]["cellOptions"]["wrapText"] = True
     defaults["custom"]["minWidth"] = 50
-    panel["options"]["cellHeight"] = "sm"
+    panel["options"]["cellHeight"] = "lg"
+    panel["options"]["footer"] = {"show": False, "enablePagination": False}
     widths = {
         "Provider": 95,
         "Data source": 130,
-        "Check performed": 125,
+        "Check performed": 150,
         "Check result": 110,
-        "Observed at": 205,
+        "Observed at": 175,
         "Evidence": 115,
     }
     panel["fieldConfig"]["overrides"] = [
@@ -106,6 +112,9 @@ def _provider_http_details(panel: dict) -> dict:
         "provider_checks[($exists(response_time_ms) and response_time_ms != null) or "
         "($exists(http_status) and http_status != null) or "
         "($exists(checked_endpoint) and checked_endpoint != null and checked_endpoint != '')]"
+    )
+    detail["targets"][0]["uql"] = (
+        'parse-json | jsonata "[' + detail["targets"][0]["root_selector"] + ']"'
     )
     detail["description"] = (
         "SELECTED RUN · Optional recorded HTTP facts only. VALID EMPTY means no saved "

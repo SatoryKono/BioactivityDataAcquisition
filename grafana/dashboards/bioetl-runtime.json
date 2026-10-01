@@ -426,7 +426,7 @@
         "x": 0,
         "y": 2
       },
-      "description": "SELECTED RUN · This page assesses the selected Run ID from saved HTTP evidence. Fleet status and time-range charts are on Incident Workspace. An empty Prometheus series is not this run's verdict.",
+      "description": "SELECTED RUN · This page assesses the selected Run ID from saved HTTP evidence. Fleet status and time-range charts are on Incident Workspace. An empty Prometheus series is not this run's verdict. Run ID is always selected on Trust, Overview, Pipeline Diagnostics, Provider Health, and Data Quality. Panels that do not assess that run are not on this dashboard.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Pipeline Scope",

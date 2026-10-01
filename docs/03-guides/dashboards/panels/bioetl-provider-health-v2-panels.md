@@ -30,8 +30,9 @@ with `—` for its result and timestamp; `Open report` opens the saved run repor
 `UNKNOWN` means the saved evidence cannot establish the value. A saved provider
 probe does not by itself prove that the run fetched its input from the remote API.
 Reasons wrap within the table. Observed timestamps retain their recorded timezone.
-Response time, HTTP status, and endpoint are not inferred when absent from the
-saved provider-check projection.
+Expand Inspect Provider HTTP Details to see recorded Response time, ms, HTTP
+status and Checked endpoint. Only saved non-null facts create detail rows;
+missing HTTP diagnostics are not inferred.
 
 ### 2. Understand Evidence Scope
 - **Type:** Text
@@ -242,4 +243,6 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9400 | Understand Selected Run | text |
 | 9461 | Review Provider Check | stat |
 | 9460 | Review Provider Evidence | table |
+| 9471 | Inspect Provider HTTP Details | row |
+| 9462 | Inspect Provider HTTP Details | table |
 <!-- END SHIPPED PANEL INVENTORY -->

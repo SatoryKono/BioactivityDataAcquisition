@@ -151,21 +151,27 @@ class TestStorageBundle:
             mode="merge",
         )
 
+        from bioetl.domain.ports import SilverWriteRequest
+
         mock_silver_writer.write_silver.assert_called_once_with(
-            table_name="test.table",
-            records=records,
-            primary_keys=["id"],
-            schema=schema,
-            mode="merge",
-            column_order=None,
-            partition_cols=None,
-            on_schema_mismatch="error",
-            bronze_refs=None,
-            key_nullability_rules=None,
-            run_id=None,
-            run_type=None,
-            source_batch_id=None,
-            ingestion_ts=None,
+            SilverWriteRequest(
+                table_name="test.table",
+                records=records,
+                primary_keys=["id"],
+                schema=schema,
+                mode="merge",
+                column_order=None,
+                partition_cols=None,
+                on_schema_mismatch="error",
+                bronze_refs=None,
+                key_nullability_rules=None,
+                run_id=None,
+                run_type=None,
+                source_batch_id=None,
+                ingestion_ts=None,
+                quarantined_count=None,
+                validation_errors=None,
+            )
         )
 
     async def test_storage_bundle__write_gold_delegates__d9b86e8f(

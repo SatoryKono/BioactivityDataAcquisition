@@ -40,8 +40,8 @@ def test_local_coverage_plan_has_all_required_producers() -> None:
 def test_local_coverage_commands_keep_shards_isolated() -> None:
     for shard in SHARDS:
         command = _command(shard, Path("junit.xml"))
-        assert command[:3] == [
-            "bash",
+        assert Path(command[0]).name.lower() in {"bash", "bash.exe"}
+        assert command[1:3] == [
             "scripts/engineering/dev/run_pytest.sh",
             "--narrow",
         ]
