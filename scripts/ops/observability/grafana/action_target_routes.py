@@ -73,8 +73,8 @@ INCIDENT_DOMAIN_ACTION_MAP: dict[str, ActionRoute] = {
         "kind": "dashboard",
     },
     "provider": {
-        "uid": "bioetl-provider-health-v2",
-        "title": "Open Provider Health",
+        "uid": "bioetl-overview-v2",
+        "title": "Open Provider Evidence",
         "kind": "dashboard",
     },
     "dq": {

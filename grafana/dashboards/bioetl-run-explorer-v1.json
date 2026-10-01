@@ -442,7 +442,7 @@
                 "value": [
                   {
                     "title": "Provider Health",
-                    "url": "/d/bioetl-provider-health-v2/4-provider-health?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}&var-provider=${__data.fields.Provider:percentencode}&var-pipeline_context=${__data.fields.Pipeline:percentencode}",
+                    "url": "/d/bioetl-overview-v2/2-overview?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}&var-provider=${__data.fields.Provider:percentencode}&var-pipeline_context=${__data.fields.Pipeline:percentencode}",
                     "includeVars": false,
                     "targetBlank": false
                   }

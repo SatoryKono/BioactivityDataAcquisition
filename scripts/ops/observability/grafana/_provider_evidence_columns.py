@@ -150,30 +150,33 @@ def apply_provider_evidence_columns(payload: dict) -> None:
         )
 
         panels = payload["panels"]
-        panels[:] = [panel for panel in panels if panel.get("id") not in {9460, 9461}]
+        panels[:] = [panel for panel in panels if panel.get("title") not in {"Review Provider Evidence", "Review Provider Check"}]
         evidence = _provider_check_panel(
             9460,
             "Review Provider Evidence",
-            {"x": 0, "y": 17, "w": 20, "h": 6},
+            {"x": 0, "y": 18, "w": 20, "h": 6},
             ["provider", "check_result", "evidence", "observed_at"],
             limit=None,
         )
         check = _provider_check_panel(
             9461,
             "Review Provider Check",
-            {"x": 20, "y": 17, "w": 4, "h": 6},
+            {"x": 20, "y": 18, "w": 4, "h": 6},
             ["check_result", "evidence"],
             limit=1,
         )
         _style_provider_check([evidence, check])
+        # Overview already owns stage panel 9460 inside saved evidence.
+        evidence["id"] = 9480
+        check["id"] = 9481
         _provider_evidence_columns(evidence)
-        evidence["gridPos"] = {"x": 0, "y": 17, "w": 20, "h": 6}
-        check["gridPos"] = {"x": 20, "y": 17, "w": 4, "h": 6}
+        evidence["gridPos"] = {"x": 0, "y": 18, "w": 20, "h": 6}
+        check["gridPos"] = {"x": 20, "y": 18, "w": 4, "h": 6}
         for panel in panels:
             if panel.get("id") == 9450:
-                panel["gridPos"]["y"] = 23
+                panel["gridPos"]["y"] = 24
                 for child in panel.get("panels", []):
-                    child["gridPos"]["y"] = 24
+                    child["gridPos"]["y"] = 25
         panels.extend([evidence, check])
         return
     if payload.get("uid") != "bioetl-provider-health-v2":

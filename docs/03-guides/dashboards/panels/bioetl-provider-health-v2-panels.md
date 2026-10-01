@@ -1,5 +1,10 @@
 # BioETL Provider Health v2 - Panels Documentation
 
+Provider Health was retired on 2026-10-01. Review Provider Evidence and Review
+Provider Check now appear together on Run Overview. The standalone dashboard,
+its Prometheus-only notice, and its navigation entry have been removed.
+The descriptions below document the former dashboard.
+
 **Dashboard file:** `grafana/dashboards/bioetl-provider-health-v2.json`
 
 ## Overview

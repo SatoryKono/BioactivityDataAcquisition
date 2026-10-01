@@ -2076,7 +2076,7 @@ tests:
       - expr: bioetl_incident_ranked_runtime
         eval_time: 1m
         exp_samples:
-          - labels: '{__name__="bioetl_incident_ranked_runtime",action="UNKNOWN",action_dashboard_uid="bioetl-overview-v2",action_scope="",domain="runtime",pipeline="unknown",signal="telemetry_gap"}'
+          - labels: '{__name__="bioetl_incident_ranked_runtime",action="UNKNOWN",action_dashboard_uid="bioetl-overview-v2",domain="runtime",pipeline="unknown",signal="telemetry_gap"}'
             value: 0
       - expr: bioetl_incident_ranked_provider
         eval_time: 1m
@@ -2102,7 +2102,7 @@ tests:
       - expr: bioetl_incident_ranked_runtime{reason="gold_write_missing"}
         eval_time: 2m
         exp_samples:
-          - labels: '{__name__="bioetl_incident_ranked_runtime",action="data_quality",action_dashboard_uid="bioetl-dq-v2",action_scope="",action_target="data_quality",domain="runtime",pipeline="chembl_assay",reason="gold_write_missing",run_type="backfill",severity="failing",signal="gold_write_missing"}'
+          - labels: '{__name__="bioetl_incident_ranked_runtime",action="data_quality",action_dashboard_uid="bioetl-dq-v2",action_target="data_quality",domain="runtime",pipeline="chembl_assay",reason="gold_write_missing",run_type="backfill",severity="failing",signal="gold_write_missing"}'
             value: 2
 
   - name: incident-ranking-excludes-inactive-zero-but-preserves-telemetry-gap

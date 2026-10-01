@@ -57,11 +57,6 @@ BUS: list[dict[str, str]] = [
         "path": "2-overview",
     },
     {
-        "uid": "bioetl-provider-health-v2",
-        "title": "Provider Health",
-        "path": "4-provider-health",
-    },
-    {
         "uid": "bioetl-dq-v2",
         "title": "Data Quality",
         "path": "5-data-quality",
@@ -76,7 +71,6 @@ BUS: list[dict[str, str]] = [
 FILE_BY_UID = {
     "bioetl-control-plane-v1": "bioetl-control-plane-v1.json",
     "bioetl-overview-v2": "bioetl-overview-v2.json",
-    "bioetl-provider-health-v2": "bioetl-provider-health-v2.json",
     "bioetl-dq-v2": "bioetl-dq-v2.json",
     "bioetl-incident-v1": "bioetl-incident-v1.json",
     "bioetl-run-explorer-v1": "bioetl-run-explorer-v1.json",
@@ -2381,6 +2375,15 @@ def apply_to_dashboard(
         safe_path.read_text(encoding="utf-8")  # NOSONAR - confined under DASH_DIR
     )
     if current_uid == "bioetl-overview-v2":
+        payload["panels"] = [
+            panel for panel in payload["panels"] if panel.get("id") not in {9480, 9481, 9460, 9461}
+        ]
+        for panel in payload["panels"]:
+            if panel.get("id") == 9450:
+                panel["gridPos"]["y"] = 17
+                for child in panel.get("panels", []):
+                    child["gridPos"]["y"] = 18
+    if current_uid == "bioetl-overview-v2":
         payload["description"] = (
             "SELECTED RUN. Run ID is always selected. The first screen shows the "
             "saved status and the domain verdicts for that run. Inspect Run Context "
@@ -2514,6 +2517,11 @@ def apply_to_dashboard(
     )
 
     apply_provider_evidence_columns(payload)
+    # Retired Provider Health handoffs now resolve to the saved evidence on Overview.
+    payload = json.loads(json.dumps(payload).replace(
+        "/d/bioetl-provider-health-v2/4-provider-health",
+        "/d/bioetl-overview-v2/2-overview",
+    ).replace("Open Provider Health", "Open Provider Evidence"))
     _pack_incident_tail_rows(payload)
     retire_runtime_links(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"

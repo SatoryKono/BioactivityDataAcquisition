@@ -223,7 +223,6 @@ def _stamp_status_links(
             for title, target in (
                 ("Open Control Plane", "bioetl-control-plane-v1"),
                 ("Open Data Quality", "bioetl-dq-v2"),
-                ("Open Provider Health", "bioetl-provider-health-v2"),
             )
         ]
     if panel.get("title") != SELECTED_RUN_STATUS_TITLE:

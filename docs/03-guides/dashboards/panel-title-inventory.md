@@ -156,12 +156,12 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9603 | Review Selected Run Status |
 | bioetl-overview-v2.json | 9002 | Review Run Domains |
 | bioetl-overview-v2.json | 9300 | Review Run Identity |
-| bioetl-overview-v2.json | 9301 | Review Processed Records |
-| bioetl-provider-health-v2.json | 1000 | Navigate Dashboards |
-| bioetl-provider-health-v2.json | 9400 | Understand Selected Run |
-| bioetl-provider-health-v2.json | 9402 | Inspect Run Identity |
-| bioetl-provider-health-v2.json | 9403 | Inspect Processed Records |
-| bioetl-provider-health-v2.json | 9461 | Review Provider Check |
-| bioetl-provider-health-v2.json | 9460 | Review Provider Evidence |
+| bioetl-overview-v2.json | 9450 | Inspect Saved Run Evidence |
+| bioetl-overview-v2.json | 9463 | Review Total Run Duration |
+| bioetl-overview-v2.json | 9460 | Inspect Selected Run Stages |
+| bioetl-overview-v2.json | 9451 | Inspect Selected Run Domains |
+| bioetl-overview-v2.json | 9452 | Inspect Selected Run Identity |
+| bioetl-overview-v2.json | 9480 | Review Provider Evidence |
+| bioetl-overview-v2.json | 9481 | Review Provider Check |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
 | bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 10) |

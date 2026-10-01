@@ -87,8 +87,8 @@ def test_runtime_blocker_action_target_is_allowlisted_and_complete() -> None:
     links = props.get("links", [])
     assert len(links) == 1
     assert "${__data.fields.action_dashboard_uid}" in links[0]["url"]
-    assert "${__data.fields.action_scope:raw}" in links[0]["url"]
-    assert "${__url_time_range}" in links[0]["url"]
+    assert "${__data.fields.action_scope}" in links[0]["url"]
+    assert "from=${__from}&to=${__to}" in links[0]["url"]
     assert '"action_scope"' in RULES_PATH.read_text(encoding="utf-8")
     assert props.get("custom.width", 0) <= 90
     assert set(RUNTIME_BLOCKER_ACTION_MAP.keys()) == expected
