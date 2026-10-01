@@ -3124,34 +3124,6 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id008
-      '9463':
-        title: Review Total Run Duration
-        role: indicator
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - OK
-        - WARN
-        - CRIT
-        - UNKNOWN
-        - INCOMPLETE
-        - ERROR
-        - VALID_EMPTY
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        - next_action
-        fixture_cases:
-        - ok
-        - warn
-        - crit
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id008
       '9480':
         title: Review Provider Evidence
         role: evidence_table

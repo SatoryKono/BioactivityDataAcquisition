@@ -87,7 +87,7 @@ def apply_saved_evidence_readability(payload: dict) -> None:
         return
     row = next(p for p in payload["panels"] if p.get("id") == 9450)
     row["panels"] = [p for p in row["panels"] if p.get("id") != 9451]
-    row["description"] = "Expand for saved run duration, stage rows, and full identity of the selected Run ID."
+    row["description"] = "Expand for saved stage rows and full identity of the selected Run ID."
     panels = {p["id"]: p for p in row["panels"]}
 
     def override(name, properties):

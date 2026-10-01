@@ -1144,7 +1144,7 @@
       "type": "row",
       "title": "Inspect Saved Run Evidence",
       "collapsed": true,
-      "description": "Expand for saved run duration, stage rows, and full identity of the selected Run ID.",
+      "description": "Expand for saved stage rows and full identity of the selected Run ID.",
       "gridPos": {
         "x": 0,
         "y": 23,
@@ -1153,72 +1153,12 @@
       },
       "panels": [
         {
-          "id": 9463,
-          "type": "stat",
-          "title": "Review Total Run Duration",
-          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN.",
-          "gridPos": {
-            "x": 0,
-            "y": 24,
-            "w": 24,
-            "h": 3
-          },
-          "datasource": "BioETL Ops HTTP",
-          "fieldConfig": {
-            "defaults": {
-              "unit": "s",
-              "decimals": 2,
-              "noValue": "Not recorded",
-              "color": {
-                "mode": "thresholds"
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "colorMode": "none",
-            "graphMode": "none",
-            "textMode": "value"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "type": "json",
-              "source": "url",
-              "parser": "uql",
-              "format": "table",
-              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-              "url_options": {
-                "method": "GET",
-                "data": ""
-              },
-              "uql": "parse-json | jsonata \"($s := summary[0]; $start := $s.started_at ? $toMillis($s.started_at) : null; $end := $s.completed_at ? $toMillis($s.completed_at) : null; [{'Run duration': $start != null and $end != null and $end >= $start ? ($end - $start) / 1000 : null}])\""
-            }
-          ]
-        },
-        {
           "id": 9460,
           "type": "table",
           "title": "Inspect Selected Run Stages",
           "gridPos": {
             "x": 0,
-            "y": 27,
+            "y": 24,
             "w": 24,
             "h": 8
           },
@@ -1518,7 +1458,7 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 35,
+            "y": 32,
             "w": 24,
             "h": 7
           },

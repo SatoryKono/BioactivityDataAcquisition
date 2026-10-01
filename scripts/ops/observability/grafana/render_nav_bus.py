@@ -2516,7 +2516,7 @@ def apply_to_dashboard(
             _append_saved_run_evidence_row,
         )
 
-        _append_saved_run_evidence_row(payload["panels"], include_duration=True)
+        _append_saved_run_evidence_row(payload["panels"], include_duration=False)
         apply_stage_removal_columns(payload)
     elif current_uid == "bioetl-runtime":
         payload["panels"] = [p for p in payload["panels"] if p.get("id") != 9450]

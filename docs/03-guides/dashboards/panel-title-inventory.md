@@ -157,7 +157,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9002 | Review Run Domains |
 | bioetl-overview-v2.json | 9300 | Review Run Identity |
 | bioetl-overview-v2.json | 9450 | Inspect Saved Run Evidence |
-| bioetl-overview-v2.json | 9463 | Review Total Run Duration |
 | bioetl-overview-v2.json | 9460 | Inspect Selected Run Stages |
 | bioetl-overview-v2.json | 9452 | Inspect Selected Run Identity |
 | bioetl-overview-v2.json | 9480 | Review Provider Evidence |
