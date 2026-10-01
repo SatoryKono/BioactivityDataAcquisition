@@ -48,6 +48,7 @@ def lifecycle_deps() -> tuple[MagicMock, MagicMock, MagicMock]:
     checkpoint = MagicMock()
     checkpoint.save_checkpoint_on_exception = AsyncMock()
     checkpoint.save_checkpoint_on_shutdown = AsyncMock()
+    checkpoint.save_checkpoint_now = AsyncMock()
     return progress, tracing, checkpoint
 
 
@@ -97,6 +98,9 @@ async def test_finalize_execution_success_sets_stats_and_ends_span(
     tracing.end_span.assert_called_once_with(lifecycle.root_span)
     checkpoint.save_checkpoint_on_shutdown.assert_not_awaited()
     checkpoint.save_checkpoint_on_exception.assert_not_awaited()
+    checkpoint.save_checkpoint_now.assert_awaited_once_with(
+        records_fetched=_Counters.records_bronze, resume_offset=2
+    )
 
 
 @pytest.mark.asyncio
