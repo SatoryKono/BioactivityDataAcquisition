@@ -8,7 +8,7 @@ def apply_overview_identity(payload: dict) -> None:
     panels = payload["panels"]
     panels[:] = [panel for panel in panels if panel.get("id") != 9301]
     by_id = {panel["id"]: panel for panel in panels}
-    by_id[9002]["gridPos"].update(x=0, y=5, w=15, h=11)
+    by_id[9002]["gridPos"].update(x=0, y=5, w=15, h=12)
     by_id[9603]["gridPos"].update(x=15, y=5, w=9, h=4)
     identity = next(p for p in panels if p.get("id") == 9300)
     identity["gridPos"].update(x=15, y=9, w=9, h=8)
@@ -47,10 +47,11 @@ def apply_overview_identity(payload: dict) -> None:
         ),
     )
     identity["description"] = (
-        "SELECTED RUN · Pipeline and full Run ID identify the saved run. "
+        "SELECTED RUN Â· Pipeline and full Run ID identify the saved run. "
         "Run Type and Started at (with saved UTC offset) characterize its execution. "
         "Manifest, schema and available source revision are in Inspect Additional Run Identity. "
-        "Missing saved values are Not recorded; request failures remain query errors."
+        "SELECT RUN means no selected run context. Missing saved values are Not recorded; "
+        "request failures remain QUERY ERROR."
     )
     identity["options"] = {
         "showHeader": True,

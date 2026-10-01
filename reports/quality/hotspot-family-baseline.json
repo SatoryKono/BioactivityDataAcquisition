@@ -17,10 +17,10 @@
         "src/bioetl/application/core/"
       ],
       "duplication_clusters": 0,
-      "files": 199,
-      "total_loc": 24559,
+      "files": 200,
+      "total_loc": 24774,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.387,
+      "helper_function_ratio": 0.388,
       "max_internal_fan_in": 6,
       "max_internal_fan_in_module": "bioetl.application.core.quarantine_manager",
       "bounded_growth_budgets": {
@@ -31,9 +31,9 @@
         "distribution": {
           "0": 19,
           "1": 104,
-          "2": 42,
-          "3": 16,
-          "4": 6,
+          "2": 43,
+          "3": 15,
+          "4": 7,
           "5": 11,
           "6": 1
         },
@@ -840,10 +840,11 @@
           },
           {
             "module": "bioetl.application.core.derived_scan_budget",
-            "fan_in": 3,
+            "fan_in": 4,
             "runtime_importers": [
               "bioetl.application.core.data_sources.assay_parameters",
               "bioetl.application.core.data_sources.subcellular_fraction",
+              "bioetl.application.core.publication_term_enrichment",
               "bioetl.application.core.publication_term_extraction_mixin"
             ]
           },
@@ -1311,6 +1312,13 @@
             "runtime_importers": []
           },
           {
+            "module": "bioetl.application.core.publication_term_enrichment",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.publication_term_extraction_mixin"
+            ]
+          },
+          {
             "module": "bioetl.application.core.publication_term_extraction_mixin",
             "fan_in": 2,
             "runtime_importers": [
@@ -1327,8 +1335,9 @@
           },
           {
             "module": "bioetl.application.core.publication_term_runtime",
-            "fan_in": 1,
+            "fan_in": 2,
             "runtime_importers": [
+              "bioetl.application.core.publication_term_enrichment",
               "bioetl.application.core.publication_term_extraction_mixin"
             ]
           },

@@ -2549,7 +2549,11 @@ def main(argv: list[str] | None = None) -> int:
         ok = current_ok and ok
         if not args.check:
             print(f"updated {filename} current={item['title']!r}")
-    return 0 if ok else 1
+    from scripts.ops.observability.grafana.generate_prometheus_only_dashboards import (
+        render_notices,
+    )
+
+    return 0 if render_notices(check=args.check) and ok else 1
 
 
 if __name__ == "__main__":

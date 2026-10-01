@@ -32,6 +32,10 @@ Dashboard UIDs and existing URL slugs remain stable. Display names are
 Replay Readiness, Run Overview and Data Quality. Row links use the full Run ID,
 pipeline, workflow and run type from that row. Provider Health additionally
 receives the recorded provider. Passport links target generated documentation.
+The Pipeline passport template fixes the canonical repository URL prefix. The
+hidden `pipeline_passport_path` is extracted from the bounded Ops API passport
+URL, whose pipeline filename is encoded by the server. Recombining the prefix
+and path preserves the existing destination without a raw arbitrary URL link.
 Missing reports have no report URL; they must not open another run's report.
 
 ## Evidence semantics

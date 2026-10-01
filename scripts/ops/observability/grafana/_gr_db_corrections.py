@@ -209,6 +209,11 @@ def _correct_stat_unknown_color(panel: dict[str, Any]) -> None:
                 "UNKNOWN",
                 "INCOMPLETE",
             }:
+                if mapping.get("type") == "special" and value.get("color") in {
+                    "gray",
+                    "#555555",
+                }:
+                    continue
                 value["color"] = "text"
 
 
