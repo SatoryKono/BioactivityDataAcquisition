@@ -483,6 +483,16 @@ def _dq(p: dict[int, dict]) -> None:
 
 
 def _incident(p: dict[int, dict]) -> None:
+    # The fleet evidence is below fold, so severity remains text-only.
+    fleet = p.get(9101)
+    if fleet is not None:
+        for field in fleet["fieldConfig"].get("overrides", []):
+            for prop in field.get("properties", []):
+                if (
+                    prop.get("id") == _CELL
+                    and prop.get("value", {}).get("type") == "color-background"
+                ):
+                    prop["value"]["type"] = "color-text"
     timeline = p[2006]
     timeline["targets"][0]["legendFormat"] = (
         "{{alertname}} · {{pipeline}} / {{entity}} {{provider}} · {{alertstate}}"

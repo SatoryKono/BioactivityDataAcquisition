@@ -128,6 +128,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "report_label",
         "workflow_passport_url",
         "pipeline_passport_url",
+        "pipeline_passport_path",
     ]
     names = [*_COLUMNS, *hidden]
     panel["targets"][0]["root_selector"] = (
@@ -135,6 +136,8 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         '? [{"pipeline": "VALID EMPTY"}] : items.($merge([$, '
         '{"workflow_id": workflow_passport_url != "" '
         '? "[" & workflow_id & "](" & workflow_passport_url & ")" : "N/A", '
+        '"pipeline_passport_path": $substringAfter(pipeline_passport_url, '
+        '"https://github.com/SatoryKono/BioactivityDataAcquisition/"), '
         '"overview_handoff": "Open", "diagnostics_handoff": "Open", '
         '"provider_handoff": "Open", "quality_handoff": "Open"}]))'
     )
@@ -174,7 +177,11 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         minWidth=50, wrapText=False, cellOptions={"type": "auto", "wrapText": False}
     )
     links = {
-        "Pipeline": ("Pipeline passport", "${__data.fields.pipeline_passport_url:raw}"),
+        "Pipeline": (
+            "Pipeline passport",
+            "https://github.com/SatoryKono/BioactivityDataAcquisition/"
+            "${__data.fields.pipeline_passport_path:raw}",
+        ),
         "Run ID": (
             "Report \u00b7 ${__data.fields.run_id}",
             "${__data.fields.report_url:raw}",

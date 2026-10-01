@@ -187,12 +187,12 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
             )
             if dashboard_name == "bioetl-control-plane-v1.json" and panel_id == 9422:
                 assert grid_pos.get("w") == 12
-                assert panel.get("fieldConfig", {}).get("defaults", {}).get(
-                    "noValue"
-                ) == (
-                    "SELECT RUN if no Run ID is selected. "
-                    "QUERY ERROR if the request failed."
+                assert (
+                    panel.get("fieldConfig", {}).get("defaults", {}).get("noValue")
+                    == "UNKNOWN"
                 )
+                assert "SELECT RUN" in panel["description"]
+                assert "QUERY ERROR" in panel["description"]
                 assert all(
                     "viewPanel=9422" not in str(link.get("url", ""))
                     for link in panel.get("links") or []
@@ -202,6 +202,11 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
         for panel_id in lazy_shell_ids:
             panel = panels.get(panel_id)
             if dashboard_name == "bioetl-control-plane-v1.json":
+                continue
+            if dashboard_name == "bioetl-provider-health-v2.json":
+                assert panel is None, (
+                    "Provider evidence replaces removed identity/records shells"
+                )
                 continue
             assert panel is not None, (
                 f"{dashboard_name} must retain lazy shell panel id={panel_id}"

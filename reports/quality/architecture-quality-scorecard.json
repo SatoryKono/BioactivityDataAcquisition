@@ -36,7 +36,7 @@
     },
     {
       "evidence_metrics": {
-        "composition_util": 0.9525,
+        "composition_util": 0.9559,
         "layer_violations": 0,
         "lazy_util": 0.0,
         "public_entrypoint_growth_count": 0,
@@ -115,7 +115,7 @@
     },
     {
       "evidence_metrics": {
-        "composition_util": 0.9525,
+        "composition_util": 0.9559,
         "expired_compat_count": 0,
         "hotspot_budget_warning_count": 0,
         "public_entrypoint_growth_count": 0,
@@ -168,8 +168,8 @@
   },
   "diagnostics": {
     "composition_module_cap": 295,
-    "composition_module_count": 281,
-    "composition_util": 0.9525,
+    "composition_module_count": 282,
+    "composition_util": 0.9559,
     "families_at_budget": [
       "composition_runtime_builders"
     ],
@@ -193,8 +193,8 @@
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
     "composition_module_cap": 295,
-    "composition_module_count": 281,
-    "composition_util": 0.9525,
+    "composition_module_count": 282,
+    "composition_util": 0.9559,
     "contract_blocking_issue_count": 0,
     "dashboarded_without_declaration_count": 0,
     "dashboarded_without_emission_count": 0,
@@ -273,7 +273,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "c2a5ed2c502c440740334ac61751f3bbf7056ac3222724ff70d953965688d869"
+      "source_tree_sha256": "3b044bf95833c8db702200bb5096f245a3f0f8dc3be20447b38d84756a79356d"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

@@ -271,4 +271,6 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9603 | Review Selected Run Status | table |
 | 9002 | Review Run Domains | table |
 | 9300 | Review Run Identity | table |
+| 9399 | Inspect Additional Run Identity | row |
+| 9390 | Inspect Full Run Identity | table |
 <!-- END SHIPPED PANEL INVENTORY -->
