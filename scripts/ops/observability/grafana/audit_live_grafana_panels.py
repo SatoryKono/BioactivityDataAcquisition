@@ -269,13 +269,9 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         source_kind="http",
         semantic_kind="http_table",
     ),
-    PanelAuditSpec(
-        dashboard_uid="bioetl-overview-v2",
-        panel_id=9301,
-        title=PROCESSED_RECORDS_PANEL_TITLE,
-        source_kind="http",
-        semantic_kind="http_table",
-    ),
+    # bioetl-overview-v2#9301 (Processed Records) no longer exists on the
+    # shipped Overview surface; the reviewed HTTP-table coverage now lives on
+    # control-plane/dq 9402/9403 specs below.
     PanelAuditSpec(
         dashboard_uid="bioetl-dq-v2",
         panel_id=9402,
@@ -291,28 +287,10 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         semantic_kind="http_table",
         target_ref_id="A",
     ),
-    PanelAuditSpec(
-        dashboard_uid="bioetl-control-plane-v1",
-        panel_id=892,
-        title="Track Checkpoint",
-        source_kind="prometheus",
-        semantic_kind="freshness",
-        target_ref_id="A",
-    ),
-    PanelAuditSpec(
-        dashboard_uid="bioetl-runtime",
-        panel_id=9403,
-        title=PROCESSED_RECORDS_PANEL_TITLE,
-        source_kind="http",
-        semantic_kind="http_table",
-    ),
-    PanelAuditSpec(
-        dashboard_uid="bioetl-provider-health-v2",
-        panel_id=9403,
-        title=PROCESSED_RECORDS_PANEL_TITLE,
-        source_kind="http",
-        semantic_kind="http_table",
-    ),
+    # bioetl-control-plane-v1#892 (Track Checkpoint) was removed from the Trust
+    # surface (94b2804ab095); no prometheus freshness reviewed spec remains.
+    # bioetl-runtime and bioetl-provider-health-v2 JSONs were removed from the
+    # shipped surface (4c348d96c436); their reviewed 9403 specs go with them.
     # bioetl-workflow-overview removed from shipping surface (epic #6647).
 )
 

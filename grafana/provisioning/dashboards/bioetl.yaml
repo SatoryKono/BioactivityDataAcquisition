@@ -1,17 +1,53 @@
+# Details folder UID bioetl-details must be nested under bioetl via the folder API.
 apiVersion: 1
-
 providers:
-  - name: 'BioETL'
-    orgId: 1
-    folder: 'BioETL'
-    folderUid: 'bioetl'
-    type: file
-    disableDeletion: false
-    updateIntervalSeconds: 30
-    allowUiUpdates: false
-    options:
-      # Абсолютный путь к папке с JSON-дашбордами.
-      # Замените на актуальный путь к grafana/dashboards/ в вашей системе.
-      # Пример Windows: C:/Users/<user>/projects/BioactivityDataAcquisition/grafana/dashboards
-      # Пример Linux:   /home/<user>/projects/BioactivityDataAcquisition/grafana/dashboards
-      path: /var/lib/grafana/dashboards
+- name: BioETL
+  orgId: 1
+  folder: BioETL
+  folderUid: bioetl
+  type: file
+  disableDeletion: true
+  updateIntervalSeconds: 30
+  allowUiUpdates: false
+  options:
+    path: /var/lib/grafana/dashboards/bioetl-run-explorer-v1.json
+- name: BioETL-bioetl-control-plane-v1
+  orgId: 1
+  folder: Details
+  folderUid: bioetl-details
+  type: file
+  disableDeletion: true
+  updateIntervalSeconds: 30
+  allowUiUpdates: false
+  options:
+    path: /var/lib/grafana/dashboards/bioetl-control-plane-v1.json
+- name: BioETL-bioetl-dq-v2
+  orgId: 1
+  folder: Details
+  folderUid: bioetl-details
+  type: file
+  disableDeletion: true
+  updateIntervalSeconds: 30
+  allowUiUpdates: false
+  options:
+    path: /var/lib/grafana/dashboards/bioetl-dq-v2.json
+- name: BioETL-bioetl-incident-v1
+  orgId: 1
+  folder: Details
+  folderUid: bioetl-details
+  type: file
+  disableDeletion: true
+  updateIntervalSeconds: 30
+  allowUiUpdates: false
+  options:
+    path: /var/lib/grafana/dashboards/bioetl-incident-v1.json
+- name: BioETL-bioetl-overview-v2
+  orgId: 1
+  folder: Details
+  folderUid: bioetl-details
+  type: file
+  disableDeletion: true
+  updateIntervalSeconds: 30
+  allowUiUpdates: false
+  options:
+    path: /var/lib/grafana/dashboards/bioetl-overview-v2.json

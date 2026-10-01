@@ -46,48 +46,29 @@ def _provider_paths(payload: object) -> list[str]:
     return paths
 
 
-def test_single_canonical_dashboard_provider_owns_shipped_json_directory() -> None:
-    """Exactly one file provider may target the shipped dashboards directory."""
-    assert _CANONICAL_PROVIDER_FILE.is_file(), (
-        "canonical dashboard provider grafana/provisioning/dashboards/bioetl.yaml "
-        "must exist"
-    )
-    assert not _REMOVED_DUPLICATE_PROVIDER_FILE.exists(), (
-        "duplicate provider grafana/provisioning/dashboards/dashboards.yml must not "
-        "be reintroduced; it double-loads /var/lib/grafana/dashboards"
-    )
-
-    payload = yaml.safe_load(_CANONICAL_PROVIDER_FILE.read_text(encoding="utf-8"))
-    assert isinstance(payload, dict)
-    providers = payload.get("providers")
-    assert isinstance(providers, list) and len(providers) == 1, (
-        "canonical provider file must declare exactly one provider"
-    )
-    provider = providers[0]
-    assert isinstance(provider, dict)
-    assert provider.get("name") == "BioETL"
-    assert provider.get("folder") == "BioETL"
-    assert provider.get("folderUid") == "bioetl"
-    assert provider.get("type") == "file"
-    assert provider.get("updateIntervalSeconds") == 30
-    assert provider.get("allowUiUpdates") is False
-    assert provider.get("options", {}).get("path") == "/var/lib/grafana/dashboards"
-
-    yaml_files = sorted(_PROVISIONING_DIR.glob("*.y*ml"))
-    assert yaml_files == [_CANONICAL_PROVIDER_FILE], (
-        "dashboard provisioning directory must contain only the canonical "
-        f"bioetl.yaml provider; found {[path.name for path in yaml_files]}"
-    )
-
-    all_paths: list[str] = []
-    for path in yaml_files:
-        all_paths.extend(
-            _provider_paths(yaml.safe_load(path.read_text(encoding="utf-8")))
-        )
-    assert all_paths == ["/var/lib/grafana/dashboards"]
-    assert len(all_paths) == len(set(all_paths)), (
-        "two providers must not target the same effective dashboard directory"
-    )
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-prometheus-only"])
+def test_each_dashboard_has_one_provider_and_preserves_folder_access(profile: str) -> None:
+    """Providers have disjoint files; only Run Explorer stays in BioETL."""
+    directory = Path("grafana/provisioning") / profile
+    files = sorted(directory.glob("*.y*ml"))
+    assert files == [directory / "bioetl.yaml"]
+    providers = yaml.safe_load(files[0].read_text(encoding="utf-8"))["providers"]
+    expected = {path.name for path in (Path("grafana") / profile).glob("*.json")}
+    paths = _provider_paths({"providers": providers})
+    assert len(paths) == len(set(paths)) == len(expected) == 5
+    assert {Path(path).name for path in paths} == expected
+    assert len({p["name"] for p in providers}) == 5
+    assert providers[0]["name"] == "BioETL"
+    for provider in providers:
+        path = provider["options"]["path"]
+        assert path.startswith(f"/var/lib/grafana/{profile}/")
+        explorer = path.endswith("/bioetl-run-explorer-v1.json")
+        assert provider["folderUid"] == ("bioetl" if explorer else "bioetl-details")
+        assert provider["folder"] == ("BioETL" if explorer else "Details")
+        assert provider["type"] == "file"
+        assert provider["updateIntervalSeconds"] == 30
+        assert provider["allowUiUpdates"] is False
+        assert provider["disableDeletion"] is True
 
 
 def _walk_objects(value: object) -> list[dict[str, Any]]:
@@ -102,22 +83,6 @@ def _walk_objects(value: object) -> list[dict[str, Any]]:
     return objects
 
 
-def test_prometheus_only_provider_targets_static_notice_directory() -> None:
-    payload = yaml.safe_load(
-        _PROMETHEUS_ONLY_PROVISIONING_FILE.read_text(encoding="utf-8")
-    )
-    assert isinstance(payload, dict)
-    providers = payload.get("providers")
-    assert isinstance(providers, list) and len(providers) == 1
-    provider = providers[0]
-    assert isinstance(provider, dict)
-    assert provider.get("name") == "BioETL"
-    assert provider.get("folderUid") == "bioetl"
-    assert provider.get("options", {}).get("path") == (
-        "/var/lib/grafana/dashboards-prometheus-only"
-    )
-
-
 def test_prometheus_only_profile_preserves_uids_without_query_targets() -> None:
     full_dashboards = {
         path.name: json.loads(path.read_text(encoding="utf-8"))
@@ -129,7 +94,7 @@ def test_prometheus_only_profile_preserves_uids_without_query_targets() -> None:
     }
 
     assert fallback_dashboards.keys() == full_dashboards.keys()
-    assert len(fallback_dashboards) == 6
+    assert len(fallback_dashboards) == 5
     for name, fallback in fallback_dashboards.items():
         full = full_dashboards[name]
         assert fallback["uid"] == full["uid"]

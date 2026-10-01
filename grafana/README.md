@@ -29,6 +29,22 @@
 ______________________________________________________________________
 
 
+## Dashboard folders
+
+Run Explorer is the entry point in **BioETL**. Run Overview, Replay Readiness,
+Data Quality and Incident Workspace are in **BioETL → Details**. Folder moves
+preserve dashboard UIDs, direct URLs and navigation links. No viewing permissions
+are removed; Details remains expandable in the dashboard browser.
+
+On a fresh Grafana database, create folder `bioetl` (title `BioETL`), then create
+`bioetl-details` (title `Details`, `parentUid: bioetl`) using `POST /api/folders`.
+Existing installations retain this hierarchy in the Grafana data volume.
+If provisioning created Details at the root first, use
+`POST /api/folders/bioetl-details/move` with `{"parentUid":"bioetl"}`.
+Both provisioning profiles assign each dashboard file to exactly one provider.
+`disableDeletion: true` prevents provider migration from deleting dashboards;
+retired dashboards must be removed explicitly after backup.
+
 ## Shipped dashboard surface (2026-07-28)
 
 **Five** dashboards under `grafana/dashboards/` (portfolio cap ≤7):
