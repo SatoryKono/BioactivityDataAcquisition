@@ -48,10 +48,10 @@ def build_notice(dashboard: dict[str, Any]) -> dict[str, Any]:
 
 
 def render_notices(root: Path = ROOT, *, check: bool = False) -> bool:
-    """Write or verify the seven notices without modifying the full profile."""
+    """Write or verify the six notices without modifying the full profile."""
     sources = sorted((root / "grafana/dashboards").glob("*.json"))
-    if len(sources) != 7:
-        raise ValueError("Expected exactly seven full dashboard sources")
+    if len(sources) != 6:
+        raise ValueError("Expected exactly six full dashboard sources")
     destination = root / "grafana/dashboards-prometheus-only"
     ok = True
     for source in sources:

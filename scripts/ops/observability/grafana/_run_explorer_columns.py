@@ -196,7 +196,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "Overview": ("Run Overview", "/d/bioetl-overview-v2/2-overview?" + _CONTEXT),
         "Saved Evidence": (
             "Saved Evidence",
-            "/d/bioetl-runtime/3-pipeline-diagnostics?" + _CONTEXT,
+            "/d/bioetl-overview-v2/2-overview?" + _CONTEXT,
         ),
         "Data Quality": ("Data Quality", "/d/bioetl-dq-v2/5-data-quality?" + _CONTEXT),
         "Replay Readiness": (

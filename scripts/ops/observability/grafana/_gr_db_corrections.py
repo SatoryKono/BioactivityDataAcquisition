@@ -309,7 +309,7 @@ def _correct_incident(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     status = panels.get(9401)
     if isinstance(status, dict):
         diagnostics_url = (
-            "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}"
+            "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}"
             "&${pipeline:queryparam}&${run_type:queryparam}"
             "&${run_id:queryparam}&${__url_time_range}"
         )
@@ -422,7 +422,7 @@ def _correct_provider(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if isinstance(answer, dict):
         runtime_link = {
             "title": OPEN_PIPELINE_DIAGNOSTICS_TITLE,
-            "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+            "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
             "targetBlank": False,
             "includeVars": False,
         }

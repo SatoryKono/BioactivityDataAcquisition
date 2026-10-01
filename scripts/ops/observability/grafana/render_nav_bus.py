@@ -57,11 +57,6 @@ BUS: list[dict[str, str]] = [
         "path": "2-overview",
     },
     {
-        "uid": "bioetl-runtime",
-        "title": "Pipeline Diagnostics",
-        "path": "3-pipeline-diagnostics",
-    },
-    {
         "uid": "bioetl-provider-health-v2",
         "title": "Provider Health",
         "path": "4-provider-health",
@@ -81,7 +76,6 @@ BUS: list[dict[str, str]] = [
 FILE_BY_UID = {
     "bioetl-control-plane-v1": "bioetl-control-plane-v1.json",
     "bioetl-overview-v2": "bioetl-overview-v2.json",
-    "bioetl-runtime": "bioetl-runtime.json",
     "bioetl-provider-health-v2": "bioetl-provider-health-v2.json",
     "bioetl-dq-v2": "bioetl-dq-v2.json",
     "bioetl-incident-v1": "bioetl-incident-v1.json",
@@ -228,7 +222,7 @@ _RECOVERY_ACTION_HTML = (
 )
 _RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (
-    "box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;"
+    "box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;"
     "border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
@@ -333,7 +327,7 @@ def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> st
 
 
 def render_html(*, current_uid: str) -> str:
-    """Render the full seven-destination bus as reflowing flex rows."""
+    """Render the full six-destination bus as reflowing flex rows."""
     parts: list[str] = [
         f'<div class="bioetl-nav" role="navigation" '
         f'aria-label="BioETL dashboards" '
@@ -2428,6 +2422,7 @@ def apply_to_dashboard(
     from scripts.ops.observability.grafana.dashboard_context_links import (
         normalize_dashboard_actions,
         finalize_dashboard_links,
+        retire_runtime_links,
     )
 
     if state_followup:
@@ -2520,6 +2515,7 @@ def apply_to_dashboard(
 
     apply_provider_evidence_columns(payload)
     _pack_incident_tail_rows(payload)
+    retire_runtime_links(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

@@ -19,7 +19,7 @@ DQ_REASON_RULES_RUNBOOK = (
     "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/"
     "docs/05-operations/runbooks/observability-checklist.md"
 )
-OPEN_PIPELINE_DIAGNOSTICS_TITLE = "Open Pipeline Diagnostics"
+OPEN_PIPELINE_DIAGNOSTICS_TITLE = "Open Run Overview"
 
 
 class ActionRoute(TypedDict):
@@ -32,7 +32,7 @@ class ActionRoute(TypedDict):
 
 RUNTIME_BLOCKER_ACTION_MAP: dict[str, ActionRoute] = {
     "runtime": {
-        "uid": "bioetl-runtime",
+        "uid": "bioetl-overview-v2",
         "title": OPEN_PIPELINE_DIAGNOSTICS_TITLE,
         "kind": "dashboard",
     },
@@ -47,7 +47,7 @@ RUNTIME_BLOCKER_ACTION_MAP: dict[str, ActionRoute] = {
         "kind": "dashboard",
     },
     "workflow": {
-        "uid": "bioetl-runtime",
+        "uid": "bioetl-overview-v2",
         "title": OPEN_PIPELINE_DIAGNOSTICS_TITLE,
         "kind": "dashboard",
     },
@@ -68,7 +68,7 @@ DQ_REASON_ACTION_MAP: dict[str, ActionRoute] = {
 
 INCIDENT_DOMAIN_ACTION_MAP: dict[str, ActionRoute] = {
     "runtime": {
-        "uid": "bioetl-runtime",
+        "uid": "bioetl-overview-v2",
         "title": OPEN_PIPELINE_DIAGNOSTICS_TITLE,
         "kind": "dashboard",
     },

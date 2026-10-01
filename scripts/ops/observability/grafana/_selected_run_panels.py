@@ -221,7 +221,6 @@ def _stamp_status_links(
                 "includeVars": False,
             }
             for title, target in (
-                ("Open Runtime", "bioetl-runtime"),
                 ("Open Control Plane", "bioetl-control-plane-v1"),
                 ("Open Data Quality", "bioetl-dq-v2"),
                 ("Open Provider Health", "bioetl-provider-health-v2"),
