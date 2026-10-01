@@ -539,6 +539,57 @@ def test_dq_9460_stage_columns_stable() -> None:
     assert "s" in units
 
 
+def test_9460_removal_columns_use_per_stage_removals() -> None:
+    """#11745-follow: removal columns pivot saved funnel removals per stage."""
+    for name in (
+        "bioetl-dq-v2",
+        "bioetl-overview-v2",
+        "bioetl-incident-v1",
+    ):
+        dashboard = load_dashboard(Path(f"grafana/dashboards/{name}.json"))
+        panel = next(
+            item for item in get_dashboard_panels(dashboard) if item.get("id") == 9460
+        )
+        targets = panel["targets"]
+        assert [target["refId"] for target in targets] == ["A", "B"]
+        removal_target = targets[1]
+        assert removal_target["url"].endswith("format=pipeline_run_report_json")
+        assert removal_target["parser"] == "uql"
+        assert "removals[outcome=" in removal_target["uql"]
+        assert "$s.tracking = 'full' ? 0" in removal_target["uql"]
+        transforms = panel["transformations"]
+        assert transforms[0]["id"] == "joinByField"
+        assert transforms[0]["options"] == {
+            "byField": "stage_id",
+            "mode": "outerTabular",
+        }
+        include = next(
+            item for item in transforms if item["id"] == "filterFieldsByName"
+        )
+        assert include["options"]["include"]["names"] == [
+            "stage_id",
+            "state",
+            "reason",
+            "records_in",
+            "records_out",
+            "quarantined",
+            "excluded",
+            "deduplicated",
+            "filtered_out",
+            "duration_seconds",
+            "source",
+        ]
+        organize = next(item for item in transforms if item["id"] == "organize")
+        assert organize["options"]["renameByName"] == {
+            "quarantined": "Quarantined",
+            "excluded": "Excluded",
+            "deduplicated": "Deduplicated",
+            "filtered_out": "Filtered out",
+        }
+        assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+        assert "per-stage saved funnel removals" in panel["description"]
+
+
 def test_dq_renderer_copy_matches_shipped() -> None:
     """Renderer constants and shipped bioetl-dq-v2.json must agree."""
     from scripts.ops.observability.grafana._evidence_readability import (

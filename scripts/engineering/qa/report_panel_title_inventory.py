@@ -23,9 +23,9 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 
 | KPI key | Canonical UID | Mirror panel(s) |
 |---|---|---|
-| `failed_runs_in_range` | `bioetl-overview-v2` | `bioetl-runtime#205` |
-| `worst_lag_stage` | `bioetl-overview-v2` | `bioetl-runtime#237` |
-| `worst_backlog_stage` | `bioetl-overview-v2` | `bioetl-runtime#238` |
+| `failed_runs_in_range` | `bioetl-overview-v2` | — (dashboard retired) |
+| `worst_lag_stage` | `bioetl-overview-v2` | — (dashboard retired) |
+| `worst_backlog_stage` | `bioetl-overview-v2` | — (dashboard retired) |
 
 | Dashboard | Panel ID | Title |
 | --- | ---: | --- |

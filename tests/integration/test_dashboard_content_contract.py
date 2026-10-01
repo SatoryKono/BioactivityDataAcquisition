@@ -78,11 +78,11 @@ def test_content_contract_fails_closed_when_shipped_panel_is_missing(
     assert isinstance(contract, dict)
     dashboards = contract["dashboards"]
     assert isinstance(dashboards, dict)
-    runtime = dashboards["bioetl-runtime"]
+    runtime = dashboards["bioetl-overview-v2"]
     assert isinstance(runtime, dict)
     panels = runtime["panels"]
     assert isinstance(panels, dict)
-    panels.pop("9998")
+    panels.pop("9603")
     contract_path = tmp_path / "panel-content-contract.yaml"
     _write_yaml(contract_path, contract)
 
@@ -91,7 +91,7 @@ def test_content_contract_fails_closed_when_shipped_panel_is_missing(
     )
 
     assert (
-        "panel-content-contract.yaml:bioetl-runtime:9998: missing shipped panel"
+        "panel-content-contract.yaml:bioetl-overview-v2:9603: missing shipped panel"
         in errors
     )
 

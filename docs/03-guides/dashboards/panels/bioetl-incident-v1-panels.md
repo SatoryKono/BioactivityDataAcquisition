@@ -129,6 +129,7 @@ Complete evidence is available in the collapsed detail group. The table reuses t
 | ID | Title | Purpose |
 | --- | --- | --- |
 | 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9460 | Inspect Selected Run Stages | Saved stage rows joined with Quarantined, Excluded, Deduplicated and Filtered out counters from the exact report's per-stage funnel removals; untracked stages stay UNKNOWN. |
 | 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 | 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 

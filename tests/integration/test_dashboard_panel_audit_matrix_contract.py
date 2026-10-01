@@ -27,7 +27,6 @@ def test_shipped_dashboard_panel_matrix_matches_baseline(tmp_path: Path) -> None
         "bioetl-overview-v2",
         "bioetl-provider-health-v2",
         "bioetl-run-explorer-v1",
-        "bioetl-runtime",
     }
     keys = [(row["dashboard_uid"], row["panel_id"]) for row in rows]
     assert len(keys) == len(set(keys))

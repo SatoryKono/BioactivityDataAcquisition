@@ -186,13 +186,13 @@ def _allowlist_ids(entries: list[object], dashboard_name: str) -> set[int]:
     return ids
 
 
-def test_seven_shipped_uids_match_requirement_gates() -> None:
-    """#9218: gates YAML and shipped JSON must name the same seven UIDs."""
+def test_six_shipped_uids_match_requirement_gates() -> None:
+    """#9218: gates YAML and shipped JSON must name the same six UIDs."""
     expected = _gates()["shipped_uids"]
     assert isinstance(expected, list)
     shipped = _shipped_by_uid()
     assert set(expected) == set(shipped)
-    assert len(shipped) == 7
+    assert len(shipped) == 6
 
 
 def test_grafana_is_optional_readonly_presentation_adapter() -> None:
@@ -250,7 +250,7 @@ def test_grafana_is_optional_readonly_presentation_adapter() -> None:
     )
 
 
-def test_ops_http_and_recording_rules_cover_all_seven_uids() -> None:
+def test_ops_http_and_recording_rules_cover_all_six_uids() -> None:
     """#9218 DASH-DATA-001: Ops HTTP allowlist + no invented bioetl_* series."""
     gates = _gates()
     prefixes = tuple(str(item) for item in gates["ops_http_path_prefixes"])

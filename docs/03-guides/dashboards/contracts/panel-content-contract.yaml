@@ -2733,7 +2733,7 @@ dashboards:
         - crit
         - telemetry_absent
         - backend_error
-        render_profiles: &id008
+        render_profiles: &id009
         - full_dark
         - full_light
         - zoom_200
@@ -3064,8 +3064,68 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
-      '9301':
-        title: Review Processed Records
+      '9450':
+        title: Inspect Saved Run Evidence
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: &id008
+        - full_dark
+        - full_light
+        - zoom_200
+      '9451':
+        title: Inspect Selected Run Domains
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id008
+      '9452':
+        title: Inspect Selected Run Identity
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id008
+      '9460':
+        title: Review Provider Evidence
         role: evidence_table
         tier: 3
         scope: time_range
@@ -3084,7 +3144,63 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id001
+        render_profiles: *id008
+      '9461':
+        title: Review Provider Check
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id008
+      '9463':
+        title: Review Total Run Duration
+        role: indicator
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id008
       '9603':
         title: Review Selected Run Status
         role: evidence_table
@@ -3133,7 +3249,7 @@ dashboards:
         - crit
         - telemetry_absent
         - backend_error
-        render_profiles: *id008
+        render_profiles: *id009
   bioetl-provider-health-v2:
     panels:
       '1000':
@@ -3151,44 +3267,8 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
-      '9400':
-        title: ''
-        role: guidance
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
-      '9402':
-        title: Inspect Run Identity
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
-      '9403':
-        title: Inspect Processed Records
+      '9462':
+        title: Inspect Provider HTTP Details
         role: forensic_table
         tier: 3
         scope: time_range
@@ -3197,28 +3277,6 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
-      '9460':
-        title: Review Provider Evidence
-        role: evidence_table
-        tier: 3
-        scope: time_range
-        scope_class: time_range
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -3230,33 +3288,20 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id008
-      '9461':
-        title: Review Provider Check
-        role: indicator
-        tier: 3
-        scope: time_range
-        scope_class: time_range
-        evidence_source: ops_http
-        empty_state_class: select_run
+      '9471':
+        title: Inspect Provider HTTP Details
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
-        - OK
-        - WARN
-        - CRIT
-        - UNKNOWN
-        - INCOMPLETE
-        - ERROR
-        - VALID_EMPTY
-        - TELEMETRY_ABSENT
+        - N/A
         required_copy:
-        - evidence_scope
-        - no_data
-        - next_action
+        - operator_guidance
         fixture_cases:
-        - ok
-        - warn
-        - crit
-        - telemetry_absent
-        - backend_error
+        - not_applicable
         render_profiles: *id008
   bioetl-run-explorer-v1:
     panels:

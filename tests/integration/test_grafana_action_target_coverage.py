@@ -18,7 +18,7 @@ from scripts.ops.observability.grafana.action_target_routes import (
 pytestmark = pytest.mark.integration
 
 RULES_PATH = pathlib.Path("grafana/prometheus-rules/bioetl_observability.yml")
-RUNTIME_DASH = pathlib.Path("grafana/dashboards/bioetl-runtime.json")
+RUNTIME_DASH = pathlib.Path("grafana/dashboards/bioetl-incident-v1.json")
 DQ_DASH = pathlib.Path("grafana/dashboards/bioetl-dq-v2.json")
 
 
@@ -26,8 +26,14 @@ def _load_dashboard(path: pathlib.Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _all_panels(panels):
+    for panel in panels:
+        yield panel
+        yield from _all_panels(panel.get("panels", []))
+
+
 def _panel(dashboard: dict, panel_id: int) -> dict:
-    for panel in dashboard.get("panels", []) or []:
+    for panel in _all_panels(dashboard.get("panels", [])):
         if panel.get("id") == panel_id:
             return panel
     raise AssertionError(f"panel {panel_id} not found")
@@ -93,40 +99,11 @@ def test_dq_reason_action_target_is_allowlisted_and_complete() -> None:
         "data_quality",
         "verify_dq_reason_rules",
     }
+    assert DQ_REASON_ACTION_MAP["data_quality"]["uid"] == "bioetl-dq-v2"
+    assert DQ_REASON_ACTION_MAP["verify_dq_reason_rules"]["kind"] == "runbook"
+    # CURRENT reason cards are no longer part of the saved-run DQ dashboard.
     dashboard = _load_dashboard(DQ_DASH)
-    panel = _panel(dashboard, 9102)
-    props = _action_target_override(panel)
-    mappings = props.get("mappings", [])
-    value_opts = {}
-    for m in mappings:
-        if m.get("type") == "value":
-            value_opts = m.get("options", {}) or {}
-    assert "data_quality" in value_opts
-    assert "verify_dq_reason_rules" in value_opts
-    assert any(
-        m.get("type") == "special" and m.get("options", {}).get("match") == "null"
-        for m in mappings
-    )
-    links = props.get("links", [])
-    assert len(links) == 3
-    assert links[0]["url"].endswith("&viewPanel=156")
-    assert links[1]["url"].endswith("&viewPanel=121")
-    assert links[2]["url"].endswith("/observability-checklist.md")
-    for link in links[:2]:
-        assert "${__data.fields.action_scope:raw}" in link["url"]
-        assert "${__url_time_range}" in link["url"]
-    assert "${__data.fields.action_dashboard_uid}" in links[0]["url"]
-    assert "${__data.fields.action_scope:raw}" in links[0]["url"]
-    assert "${__url_time_range}" in links[0]["url"]
-    # Runbook routes have no dashboard UID; retain the independent panel link.
-    assert any("observability-checklist.md" in link["url"] for link in panel["links"])
-    assert '"action_scope"' in RULES_PATH.read_text(encoding="utf-8")
-    # DQ panel now has allowlisted defaults.links per contract (single dashboard handoff)
-    assert panel.get("fieldConfig", {}).get("defaults", {}).get("links", []) != []
-    assert set(DQ_REASON_ACTION_MAP.keys()) == {
-        "data_quality",
-        "verify_dq_reason_rules",
-    }
+    assert all(p.get("id") != 9102 for p in _all_panels(dashboard["panels"]))
 
 
 def test_unknown_action_target_is_fail_closed() -> None:
@@ -137,9 +114,9 @@ def test_unknown_action_target_is_fail_closed() -> None:
     assert dashboard_uid_for_target("future_runtime_target_xyz") is None
     assert dashboard_uid_for_target("verify_dq_reason_rules") is None
 
-    for path in (RUNTIME_DASH, DQ_DASH):
+    for path in (RUNTIME_DASH,):
         dash = _load_dashboard(path)
-        pid = 9101 if "runtime" in path.name else 9102
+        pid = 9101
         panel = _panel(dash, pid)
         props = _action_target_override(panel)
         mappings = props.get("mappings", [])
@@ -167,7 +144,7 @@ def test_recorded_action_scope_is_destination_specific() -> None:
             if rule.get("record") not in records or not uid:
                 continue
             expected = "var-pipeline=$1"
-            if uid in {"bioetl-runtime", "bioetl-dq-v2"}:
+            if uid in {"bioetl-dq-v2"}:
                 expected += "&var-stage=$$__all"
             elif uid == "bioetl-provider-health-v2":
                 expected += "&var-provider=$$__all&var-pipeline_context=$1"

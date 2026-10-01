@@ -67,9 +67,9 @@ groups:
     labels:
       action_target: runtime
       action_reason: runtime_blockers_active
-      action_dashboard_uid: bioetl-runtime
+      action_dashboard_uid: bioetl-overview-v2
     expr: label_replace(((bioetl_workflow_scope_input_status{input="runtime"} == bool 2) * 50), "action_scope",
-      "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+      "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
   - record: bioetl_workflow_scope_action
     labels:
       action_target: control_plane
@@ -81,8 +81,8 @@ groups:
     labels:
       action_target: runtime
       action_reason: gold_lifecycle_blocking
-      action_dashboard_uid: bioetl-runtime
-    expr: label_replace(((bioetl_workflow_scope_input_status{input="gold"} == bool 2) * 35), "action_scope", "var-pipeline=$1&var-stage=$$__all",
+      action_dashboard_uid: bioetl-overview-v2
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="gold"} == bool 2) * 35), "action_scope", "var-pipeline=$1",
       "pipeline", "([A-Za-z0-9_]+)")
   - record: bioetl_workflow_scope_action
     labels:
@@ -102,8 +102,8 @@ groups:
     labels:
       action_target: workflow
       action_reason: workflow_scope_requires_review
-      action_dashboard_uid: bioetl-runtime
-    expr: label_replace(((bioetl_workflow_scope_input_status{input="workflow"} == bool 1) * 10), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+      action_dashboard_uid: bioetl-overview-v2
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="workflow"} == bool 1) * 10), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
   - record: bioetl_workflow_scope_action
     labels:
       action_target: workflow
@@ -125,9 +125,9 @@ groups:
     labels:
       action_target: runtime
       action_reason: runtime_evidence_missing
-      action_dashboard_uid: bioetl-runtime
+      action_dashboard_uid: bioetl-overview-v2
     expr: label_replace(((bioetl_workflow_scope_input_status{input="runtime"} == bool 3) * 15), "action_scope",
-      "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+      "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
   - record: bioetl_workflow_scope_action
     labels:
       action_target: control_plane
@@ -139,8 +139,8 @@ groups:
     labels:
       action_target: runtime
       action_reason: gold_evidence_missing
-      action_dashboard_uid: bioetl-runtime
-    expr: label_replace(((bioetl_workflow_scope_input_status{input="gold"} == bool 3) * 15), "action_scope", "var-pipeline=$1&var-stage=$$__all",
+      action_dashboard_uid: bioetl-overview-v2
+    expr: label_replace(((bioetl_workflow_scope_input_status{input="gold"} == bool 3) * 15), "action_scope", "var-pipeline=$1",
       "pipeline", "([A-Za-z0-9_]+)")
   - record: bioetl_workflow_scope_action
     labels:
@@ -160,8 +160,8 @@ groups:
     labels:
       action_target: workflow
       action_reason: workflow_evidence_missing
-      action_dashboard_uid: bioetl-runtime
-    expr: label_replace((((bioetl_workflow_scope_input_status{input="workflow"} == bool 3) unless on (workflow) bioetl_workflow_scope_publication_missing) * 15), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+      action_dashboard_uid: bioetl-overview-v2
+    expr: label_replace((((bioetl_workflow_scope_input_status{input="workflow"} == bool 3) unless on (workflow) bioetl_workflow_scope_publication_missing) * 15), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
 - name: bioetl.workflow_scope_standalone
   interval: 30s
   rules:
@@ -176,8 +176,8 @@ groups:
     labels:
       action_target: runtime
       action_reason: runtime_blockers_active
-      action_dashboard_uid: bioetl-runtime
-    expr: label_replace(label_replace((((bioetl_l0_input_status_selected{input="runtime"} == bool 2) * 50) and on (pipeline, run_type) bioetl_standalone_pipeline_universe), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)"), "workflow", "__standalone__", "pipeline", "(.+)")
+      action_dashboard_uid: bioetl-overview-v2
+    expr: label_replace(label_replace((((bioetl_l0_input_status_selected{input="runtime"} == bool 2) * 50) and on (pipeline, run_type) bioetl_standalone_pipeline_universe), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)"), "workflow", "__standalone__", "pipeline", "(.+)")
   - record: bioetl_workflow_scope_action
     labels:
       action_target: control_plane
@@ -188,8 +188,8 @@ groups:
     labels:
       action_target: runtime
       action_reason: gold_lifecycle_blocking
-      action_dashboard_uid: bioetl-runtime
-    expr: label_replace(label_replace((((bioetl_l0_input_status_selected{input="gold"} == bool 2) * 35) and on (pipeline, run_type) bioetl_standalone_pipeline_universe), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)"), "workflow", "__standalone__", "pipeline", "(.+)")
+      action_dashboard_uid: bioetl-overview-v2
+    expr: label_replace(label_replace((((bioetl_l0_input_status_selected{input="gold"} == bool 2) * 35) and on (pipeline, run_type) bioetl_standalone_pipeline_universe), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)"), "workflow", "__standalone__", "pipeline", "(.+)")
   - record: bioetl_workflow_scope_action
     labels:
       action_target: dq
@@ -206,8 +206,8 @@ groups:
     labels:
       action_target: runtime
       action_reason: runtime_evidence_missing
-      action_dashboard_uid: bioetl-runtime
-    expr: label_replace(label_replace((((bioetl_l0_input_status_selected{input="runtime"} == bool 3) * 15) and on (pipeline, run_type) bioetl_standalone_pipeline_universe), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)"), "workflow", "__standalone__", "pipeline", "(.+)")
+      action_dashboard_uid: bioetl-overview-v2
+    expr: label_replace(label_replace((((bioetl_l0_input_status_selected{input="runtime"} == bool 3) * 15) and on (pipeline, run_type) bioetl_standalone_pipeline_universe), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)"), "workflow", "__standalone__", "pipeline", "(.+)")
   - record: bioetl_workflow_scope_action
     labels:
       action_target: control_plane
@@ -218,8 +218,8 @@ groups:
     labels:
       action_target: runtime
       action_reason: gold_evidence_missing
-      action_dashboard_uid: bioetl-runtime
-    expr: label_replace(label_replace((((bioetl_l0_input_status_selected{input="gold"} == bool 3) * 15) and on (pipeline, run_type) bioetl_standalone_pipeline_universe), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)"), "workflow", "__standalone__", "pipeline", "(.+)")
+      action_dashboard_uid: bioetl-overview-v2
+    expr: label_replace(label_replace((((bioetl_l0_input_status_selected{input="gold"} == bool 3) * 15) and on (pipeline, run_type) bioetl_standalone_pipeline_universe), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)"), "workflow", "__standalone__", "pipeline", "(.+)")
   - record: bioetl_workflow_scope_action
     labels:
       action_target: dq

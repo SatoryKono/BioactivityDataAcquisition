@@ -39,25 +39,20 @@ DATASOURCE_ORDER = {
 
 MANDATORY_LINK_UIDS: dict[str, set[str]] = {
     "bioetl-overview-v2": {
-        "bioetl-runtime",
         "bioetl-dq-v2",
         "bioetl-control-plane-v1",
     },
-    "bioetl-runtime": {"bioetl-overview-v2", "bioetl-dq-v2", "bioetl-control-plane-v1"},
     "bioetl-provider-health-v2": {
         "bioetl-overview-v2",
-        "bioetl-runtime",
         "bioetl-control-plane-v1",
         "bioetl-dq-v2",
     },
     "bioetl-dq-v2": {
         "bioetl-overview-v2",
-        "bioetl-runtime",
         "bioetl-control-plane-v1",
     },
     "bioetl-control-plane-v1": {
         "bioetl-overview-v2",
-        "bioetl-runtime",
         "bioetl-dq-v2",
     },
 }

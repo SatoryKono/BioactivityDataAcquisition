@@ -319,9 +319,9 @@ groups:
         labels:
           action_target: runtime
           action_reason: runtime_blockers_active
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace(((bioetl_l0_input_status_selected{input="runtime"} == bool 2) * 50), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace(((bioetl_l0_input_status_selected{input="runtime"} == bool 2) * 50), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_l0_next_action_route
         labels:
           action_target: control_plane
@@ -333,9 +333,9 @@ groups:
         labels:
           action_target: runtime
           action_reason: gold_lifecycle_blocking
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace(((bioetl_l0_input_status_selected{input="gold"} == bool 2) * 35), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace(((bioetl_l0_input_status_selected{input="gold"} == bool 2) * 35), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_l0_next_action_route
         labels:
           action_target: dq
@@ -354,9 +354,9 @@ groups:
         labels:
           action_target: workflow
           action_reason: workflow_scope_requires_review
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace((((bioetl_l0_input_status_selected{input="workflow"} >= bool 1) * (bioetl_l0_input_status_selected{input="workflow"} < bool 3)) * 10), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace((((bioetl_l0_input_status_selected{input="workflow"} >= bool 1) * (bioetl_l0_input_status_selected{input="workflow"} < bool 3)) * 10), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_l0_next_action_route
         labels:
           action_target: monitor
@@ -368,9 +368,9 @@ groups:
         labels:
           action_target: runtime
           action_reason: runtime_evidence_missing
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace(((bioetl_l0_input_status_selected{input="runtime"} == bool 3) * 15), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace(((bioetl_l0_input_status_selected{input="runtime"} == bool 3) * 15), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_l0_next_action_route
         labels:
           action_target: control_plane
@@ -382,9 +382,9 @@ groups:
         labels:
           action_target: runtime
           action_reason: gold_evidence_missing
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace(((bioetl_l0_input_status_selected{input="gold"} == bool 3) * 15), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace(((bioetl_l0_input_status_selected{input="gold"} == bool 3) * 15), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_l0_next_action_route
         labels:
           action_target: dq
@@ -403,9 +403,9 @@ groups:
         labels:
           action_target: workflow
           action_reason: workflow_evidence_missing
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace(((bioetl_l0_input_status_selected{input="workflow"} == bool 3) * 15), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace(((bioetl_l0_input_status_selected{input="workflow"} == bool 3) * 15), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
 
       # Compact NO_ROUTE fallback for Overview First Action (#6574) — keeps
       # first-screen PromQL under the 200-char diet without multi-label_replace.
@@ -694,9 +694,9 @@ groups:
           reason: preflight_failed
           severity: failing
           action_target: runtime
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace((bioetl_runtime_pipeline_run_type_universe * on (pipeline) group_left() bioetl_runtime_alert_condition_pipeline_preflight_failed_15m), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace((bioetl_runtime_pipeline_run_type_universe * on (pipeline) group_left() bioetl_runtime_alert_condition_pipeline_preflight_failed_15m), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_runtime_current_blocker_reason
         labels:
           reason: infrastructure_failed
@@ -710,17 +710,17 @@ groups:
           reason: failed_run
           severity: failing
           action_target: runtime
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace((bioetl_runtime_alert_condition_pipeline_runs_failed_15m), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace((bioetl_runtime_alert_condition_pipeline_runs_failed_15m), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_runtime_current_blocker_reason
         labels:
           reason: stage_backlog
           severity: failing
           action_target: runtime
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace((bioetl_runtime_alert_condition_stage_backlog_active_15m), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace((bioetl_runtime_alert_condition_stage_backlog_active_15m), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_runtime_current_blocker_reason
         labels:
           reason: validation_backlog
@@ -734,9 +734,9 @@ groups:
           reason: stage_lag
           severity: failing
           action_target: runtime
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace((bioetl_runtime_alert_condition_stage_lag_high_15m), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace((bioetl_runtime_alert_condition_stage_lag_high_15m), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_runtime_current_blocker_reason
         labels:
           reason: gold_write_missing
@@ -750,25 +750,25 @@ groups:
           reason: no_terminal_run
           severity: degraded
           action_target: workflow
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace((bioetl_runtime_alert_condition_no_terminal_run_30m), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace((bioetl_runtime_alert_condition_no_terminal_run_30m), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_runtime_current_blocker_reason
         labels:
           reason: ingestion_throughput_degraded
           severity: degraded
           action_target: runtime
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace((bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace((bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_runtime_current_blocker_reason
         labels:
           reason: record_flow_invariant
           severity: degraded
           action_target: runtime
-          action_dashboard_uid: bioetl-runtime
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace((bioetl_runtime_alert_condition_record_flow_invariant_violated_15m), "action_scope", "var-pipeline=$1&var-stage=$$__all", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace((bioetl_runtime_alert_condition_record_flow_invariant_violated_15m), "action_scope", "var-pipeline=$1", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_runtime_current_blocker_reason_scoped
         expr: bioetl_runtime_current_blocker_reason
 
@@ -1297,12 +1297,12 @@ groups:
                 ),
                 "pipeline", "unknown", "pipeline", "^$"
               )
-              , "action_dashboard_uid", "bioetl-runtime", "", ""
+              , "action_dashboard_uid", "bioetl-overview-v2", "", ""
             ),
             "action_dashboard_uid", "bioetl-dq-v2", "action", "data_quality"
           )
         labels:
-          action_scope: var-stage=$__all
+          action_scope: ""
 
       - record: bioetl_incident_ranked_provider
         expr: |-
