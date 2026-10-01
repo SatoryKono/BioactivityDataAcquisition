@@ -142,19 +142,19 @@ class PrometheusMetrics(MetricsPort):
             value: Input value.
             labels: Canonical labels dict.
         """
-        resolved_labels = resolve_metric_labels(labels)
         histogram: _HistogramMetric = _require_registered_metric(
             name=name,
             registry=HISTOGRAMS,
             metric_kind="histogram",
         )
+        resolved_labels = resolve_metric_labels(
+            normalize_metric_dispatch_labels(name, labels or {})
+        )
         if _has_declared_labels(histogram) is False:
             _reject_unexpected_labels(name, resolved_labels)
             histogram.observe(value)
             return
-        histogram.labels(
-            **normalize_metric_dispatch_labels(name, resolved_labels)
-        ).observe(value)
+        histogram.labels(**resolved_labels).observe(value)
 
     @override
     def increment_counter(
@@ -170,20 +170,20 @@ class PrometheusMetrics(MetricsPort):
             value: Input value.
             labels: Canonical labels dict.
         """
-        resolved_labels = resolve_metric_labels(labels)
         name = _COUNTER_ALIASES.get(name, name)
         counter: _CounterMetric = _require_registered_metric(
             name=name,
             registry=COUNTERS,
             metric_kind="counter",
         )
+        resolved_labels = resolve_metric_labels(
+            normalize_metric_dispatch_labels(name, labels or {})
+        )
         if _has_declared_labels(counter) is False:
             _reject_unexpected_labels(name, resolved_labels)
             counter.inc(value)
             return
-        counter.labels(**normalize_metric_dispatch_labels(name, resolved_labels)).inc(
-            value
-        )
+        counter.labels(**resolved_labels).inc(value)
         if value > 0 and resolved_labels.get(
             "status"
         ) in _OBSERVED_COUNTER_OUTCOMES.get(name, ()):
@@ -205,19 +205,19 @@ class PrometheusMetrics(MetricsPort):
             value: Input value.
             labels: Canonical labels dict.
         """
-        resolved_labels = resolve_metric_labels(labels)
         gauge: _GaugeMetric = _require_registered_metric(
             name=name,
             registry=GAUGES,
             metric_kind="gauge",
         )
+        resolved_labels = resolve_metric_labels(
+            normalize_metric_dispatch_labels(name, labels or {})
+        )
         if _has_declared_labels(gauge) is False:
             _reject_unexpected_labels(name, resolved_labels)
             gauge.set(value)
             return
-        gauge.labels(**normalize_metric_dispatch_labels(name, resolved_labels)).set(
-            value
-        )
+        gauge.labels(**resolved_labels).set(value)
 
     @override
     def close(self) -> None:
