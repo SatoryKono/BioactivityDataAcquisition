@@ -66,7 +66,7 @@ On native Windows, invoke `python -m …` as
 
 - verify doc claim surfaces and cited runtime/code/config targets
 - verify runtime/mirror consistency when AI guidance or published examples changed
-- run `python -m scripts.docs check-links --links --specs --configs`
+- run `python -m scripts.docs check-links` (full suite; the `--links --specs --configs` subset is insufficient — DOCS-PIPE-006, #11858)
 - run `python -m scripts.docs check-drift --runtime-mirrors --freshness`
 - when markdown/docs changes add, remove, or retarget local links, or change
   `Owner:` / `Status:` / `Class:` headers, refresh the documentation cleanup

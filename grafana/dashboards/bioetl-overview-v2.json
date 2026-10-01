@@ -277,7 +277,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-current\" href=\"#bioetl-overview-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"Run Overview (Run Overview)\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-current\" href=\"#bioetl-overview-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"Run Overview (Run Overview)\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Run Overview / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -299,18 +299,6 @@
           "title": "Replay Readiness",
           "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "tooltip": "Replay Readiness (Replay Readiness). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "Data Quality",
-          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "tooltip": "Data Quality (Data Quality). Scope reset: stage=All; preserves time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -357,7 +345,7 @@
     {
       "id": 9604,
       "type": "stat",
-      "title": "Review Overall Verdict",
+      "title": "Overall Verdict",
       "description": "Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
       "gridPos": {
         "x": 15,
@@ -481,9 +469,247 @@
       }
     },
     {
+      "id": 9002,
+      "type": "table",
+      "title": "Run Domains",
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 15,
+        "h": 12
+      },
+      "datasource": "BioETL Ops HTTP",
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "unit": "none",
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "inspect": true,
+            "minWidth": 50,
+            "wrapText": false
+          },
+          "links": [
+            {
+              "title": "Open Control Plane",
+              "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            },
+            {
+              "title": "Open Data Quality",
+              "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Reason"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "execution_success": {
+                        "text": "Processing completed"
+                      },
+                      "standalone_pipeline": {
+                        "text": "Standalone pipeline"
+                      },
+                      "run_dq_threshold_evaluation": {
+                        "text": "Data quality checks"
+                      },
+                      "run_preflight_provider_observation": {
+                        "text": "Provider preflight check"
+                      },
+                      "run_gold_schema_validation": {
+                        "text": "Gold schema validation"
+                      },
+                      "run_observation_missing": {
+                        "text": "Result not recorded"
+                      },
+                      "no_gold_candidates": {
+                        "text": "No Gold candidates"
+                      },
+                      "Archive missing": {
+                        "text": "No verified archive"
+                      },
+                      "archive_evidence_not_recorded": {
+                        "text": "No verified archive"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^(Workflow: )?workflow_parent_not_finalized$",
+                      "result": {
+                        "text": "Parent workflow completion has not been recorded"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Domain"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              },
+              {
+                "id": "links",
+                "value": []
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 115
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open saved run report",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "uql",
+          "format": "table",
+          "root_selector": "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))\""
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "lg",
+        "footer": {
+          "show": false,
+          "enablePagination": false
+        }
+      },
+      "transformations": [
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 6
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "domain",
+                "status_display",
+                "reason_display"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "domain": 0,
+              "status_display": 1,
+              "reason_display": 2
+            },
+            "renameByName": {
+              "domain": "Domain",
+              "verdict": "Status",
+              "execution_state": "Result",
+              "evidence_completeness": "Evidence",
+              "rules_version": "Rules",
+              "status_display": "Status",
+              "reason_display": "Reason",
+              "saved_trust": "Trust"
+            }
+          }
+        }
+      ],
+      "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
+      "links": [
+        {
+          "title": "Open Control Plane",
+          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open Data Quality",
+          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        }
+      ]
+    },
+    {
       "id": 9603,
       "type": "table",
-      "title": "Review Selected Run Status",
+      "title": "Selected Run Status",
       "gridPos": {
         "x": 15,
         "y": 5,
@@ -728,6 +954,15 @@
                         "text": "No verified archive"
                       }
                     }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^(Workflow: )?workflow_parent_not_finalized$",
+                      "result": {
+                        "text": "Parent workflow completion has not been recorded"
+                      }
+                    }
                   }
                 ]
               },
@@ -838,232 +1073,9 @@
       ]
     },
     {
-      "id": 9002,
-      "type": "table",
-      "title": "Review Run Domains",
-      "gridPos": {
-        "x": 0,
-        "y": 5,
-        "w": 15,
-        "h": 12
-      },
-      "datasource": "BioETL Ops HTTP",
-      "fieldConfig": {
-        "defaults": {
-          "noValue": "UNKNOWN",
-          "unit": "none",
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto",
-              "wrapText": false
-            },
-            "inspect": true,
-            "minWidth": 50,
-            "wrapText": false
-          },
-          "links": [
-            {
-              "title": "Open Control Plane",
-              "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            },
-            {
-              "title": "Open Data Quality",
-              "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ]
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Reason"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Reason"
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "execution_success": {
-                        "text": "Processing completed"
-                      },
-                      "standalone_pipeline": {
-                        "text": "Standalone pipeline"
-                      },
-                      "run_dq_threshold_evaluation": {
-                        "text": "Data quality checks"
-                      },
-                      "run_preflight_provider_observation": {
-                        "text": "Provider preflight check"
-                      },
-                      "run_gold_schema_validation": {
-                        "text": "Gold schema validation"
-                      },
-                      "run_observation_missing": {
-                        "text": "Result not recorded"
-                      },
-                      "no_gold_candidates": {
-                        "text": "No Gold candidates"
-                      },
-                      "Archive missing": {
-                        "text": "No verified archive"
-                      },
-                      "archive_evidence_not_recorded": {
-                        "text": "No verified archive"
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                "id": "links",
-                "value": []
-              },
-              {
-                "id": "custom.inspect",
-                "value": true
-              },
-              {
-                "id": "custom.wrapText",
-                "value": true
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Domain"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 120
-              },
-              {
-                "id": "links",
-                "value": []
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Status"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 115
-              },
-              {
-                "id": "links",
-                "value": []
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "type": "json",
-          "source": "url",
-          "parser": "uql",
-          "format": "table",
-          "root_selector": "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))",
-          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-          "url_options": {
-            "method": "GET",
-            "data": ""
-          },
-          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))\""
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "cellHeight": "lg",
-        "footer": {
-          "show": false,
-          "enablePagination": false
-        }
-      },
-      "transformations": [
-        {
-          "id": "limit",
-          "options": {
-            "limitField": 6
-          }
-        },
-        {
-          "id": "filterFieldsByName",
-          "options": {
-            "include": {
-              "names": [
-                "domain",
-                "status_display",
-                "reason_display"
-              ]
-            }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "indexByName": {
-              "domain": 0,
-              "status_display": 1,
-              "reason_display": 2
-            },
-            "renameByName": {
-              "domain": "Domain",
-              "verdict": "Status",
-              "execution_state": "Result",
-              "evidence_completeness": "Evidence",
-              "rules_version": "Rules",
-              "status_display": "Status",
-              "reason_display": "Reason",
-              "saved_trust": "Trust"
-            }
-          }
-        }
-      ],
-      "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
-      "links": [
-        {
-          "title": "Open Control Plane",
-          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "Open Data Quality",
-          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        }
-      ]
-    },
-    {
       "id": 9300,
       "type": "table",
-      "title": "Review Run Identity",
+      "title": "Run Identity",
       "gridPos": {
         "x": 15,
         "y": 9,
@@ -1140,433 +1152,9 @@
       ]
     },
     {
-      "id": 9450,
-      "type": "row",
-      "title": "Inspect Saved Run Evidence",
-      "collapsed": true,
-      "description": "Expand for saved stage rows and full identity of the selected Run ID.",
-      "gridPos": {
-        "x": 0,
-        "y": 23,
-        "w": 24,
-        "h": 1
-      },
-      "panels": [
-        {
-          "id": 9460,
-          "type": "table",
-          "title": "Inspect Selected Run Stages",
-          "gridPos": {
-            "x": 0,
-            "y": 24,
-            "w": 24,
-            "h": 8
-          },
-          "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN.",
-          "options": {
-            "showHeader": true,
-            "cellHeight": "sm",
-            "footer": {
-              "show": false
-            }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "UNKNOWN",
-              "unit": "none",
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": false
-                },
-                "inspect": true
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "stage_id"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Stage"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "state"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Status"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "records_in"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Records in"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "records_out"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Records out"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "duration_seconds"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Duration"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "reason"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Reason"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "source"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Source"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "reason"
-                },
-                "properties": [
-                  {
-                    "id": "custom.wrapText",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "duration_seconds"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": "Not recorded"
-                  },
-                  {
-                    "id": "unit",
-                    "value": "s"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "records_in"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": ""
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "records_out"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": ""
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "source"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "report.funnel": {
-                            "text": "Open report"
-                          },
-                          "report.stage_timings": {
-                            "text": "Open report"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Open saved run report (JSON)",
-                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
-                        "targetBlank": true
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "type": "json",
-              "source": "url",
-              "parser": "backend",
-              "format": "table",
-              "root_selector": "stage_diagnostics",
-              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-              "url_options": {
-                "method": "GET",
-                "data": ""
-              }
-            },
-            {
-              "refId": "B",
-              "type": "json",
-              "source": "url",
-              "parser": "uql",
-              "format": "table",
-              "root_selector": "($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))",
-              "url": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
-              "url_options": {
-                "method": "GET",
-                "data": ""
-              },
-              "uql": "parse-json | jsonata \"($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))\""
-            }
-          ],
-          "transformations": [
-            {
-              "id": "joinByField",
-              "options": {
-                "byField": "stage_id",
-                "mode": "outerTabular"
-              }
-            },
-            {
-              "id": "limit",
-              "options": {
-                "limitField": 12
-              }
-            },
-            {
-              "id": "filterFieldsByName",
-              "options": {
-                "include": {
-                  "names": [
-                    "stage_id",
-                    "state",
-                    "reason",
-                    "records_in",
-                    "records_out",
-                    "quarantined",
-                    "excluded",
-                    "deduplicated",
-                    "filtered_out",
-                    "source"
-                  ]
-                }
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "indexByName": {
-                  "stage_id": 0,
-                  "state": 1,
-                  "reason": 2,
-                  "records_in": 3,
-                  "records_out": 4,
-                  "quarantined": 5,
-                  "excluded": 6,
-                  "deduplicated": 7,
-                  "filtered_out": 8,
-                  "source": 9
-                },
-                "renameByName": {
-                  "quarantined": "Quarantined",
-                  "excluded": "Excluded",
-                  "deduplicated": "Deduplicated",
-                  "filtered_out": "Filtered out"
-                }
-              }
-            }
-          ],
-          "links": []
-        },
-        {
-          "id": 9452,
-          "type": "table",
-          "title": "Inspect Selected Run Identity",
-          "gridPos": {
-            "x": 0,
-            "y": 32,
-            "w": 24,
-            "h": 7
-          },
-          "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Full Run ID can be copied through cell inspection. Inspect Source revision to view and copy the complete hash. Missing values are Not recorded; failed requests remain QUERY ERROR.",
-          "options": {
-            "showHeader": true,
-            "cellHeight": "sm",
-            "footer": {
-              "show": false,
-              "enablePagination": false
-            }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "UNKNOWN",
-              "unit": "none",
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
-                },
-                "inspect": true,
-                "minWidth": 50,
-                "wrapText": true
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Parameter"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 210
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value"
-                },
-                "properties": [
-                  {
-                    "id": "custom.inspect",
-                    "value": true
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^([a-fA-F0-9]{12})(?:[a-fA-F0-9]{28}|[a-fA-F0-9]{52})$",
-                          "result": {
-                            "text": "$1…"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "type": "json",
-              "source": "url",
-              "parser": "uql",
-              "format": "table",
-              "root_selector": "($s := summary[0]; $v := function($x){$exists($x) and $x != null and $x != \"\" ? $string($x) : \"Not recorded\"}; [{\"parameter\":\"Pipeline\",\"value\":$v($s.pipeline)},{\"parameter\":\"Run ID\",\"value\":$v($s.run_id)},{\"parameter\":\"Completed\",\"value\":$v($s.completed_at)},{\"parameter\":\"Assessment rules\",\"value\":$v($s.rules_version)},{\"parameter\":\"Source revision\",\"value\":$v($s.revision)},{\"parameter\":\"Evidence completeness\",\"value\":$v($s.evidence_completeness)}])",
-              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-              "url_options": {
-                "method": "GET",
-                "data": ""
-              },
-              "uql": "parse-json | jsonata \"($s := summary[0]; $v := function($x){$exists($x) and $x != null and $x != \\\"\\\" ? $string($x) : \\\"Not recorded\\\"}; [{\\\"parameter\\\":\\\"Pipeline\\\",\\\"value\\\":$v($s.pipeline)},{\\\"parameter\\\":\\\"Run ID\\\",\\\"value\\\":$v($s.run_id)},{\\\"parameter\\\":\\\"Completed\\\",\\\"value\\\":$v($s.completed_at)},{\\\"parameter\\\":\\\"Assessment rules\\\",\\\"value\\\":$v($s.rules_version)},{\\\"parameter\\\":\\\"Source revision\\\",\\\"value\\\":$v($s.revision)},{\\\"parameter\\\":\\\"Evidence completeness\\\",\\\"value\\\":$v($s.evidence_completeness)}])\""
-            }
-          ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "indexByName": {
-                  "parameter": 0,
-                  "value": 1
-                },
-                "renameByName": {
-                  "parameter": "Parameter",
-                  "value": "Value"
-                }
-              }
-            }
-          ],
-          "links": []
-        }
-      ]
-    },
-    {
       "id": 9480,
       "type": "table",
-      "title": "Review Provider Evidence",
+      "title": "Provider Evidence",
       "gridPos": {
         "x": 0,
         "y": 18,
@@ -1574,7 +1162,7 @@
         "h": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider evidence for this Run ID. Cached Bronze means the provider API was not called: Check performed is No and Check result is —. Provider check identifies saved preflight evidence, not the extraction transport. UNKNOWN means the performed state or result is unknown. Since run completed is elapsed wall time from the saved completion timestamp, updated on refresh. Expand Provider HTTP details for recorded response time, HTTP status and endpoint; missing details are not invented. VALID EMPTY is an empty successful response. SELECT RUN requires context; QUERY ERROR is a failed request.",
+      "description": "SELECTED RUN · Saved provider evidence for this Run ID. Cached Bronze means the provider API was not called: Check performed is No and Check result is —. Provider check identifies saved preflight evidence, not the extraction transport. UNKNOWN means the performed state or result is unknown. Since completed is elapsed wall time from the saved completion timestamp, updated on refresh. Expand Provider HTTP details for recorded response time, HTTP status and endpoint; missing details are not invented. VALID EMPTY is an empty successful response. SELECT RUN requires context; QUERY ERROR is a failed request.",
       "options": {
         "showHeader": true,
         "cellHeight": "lg",
@@ -1649,7 +1237,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Since run completed"
+              "options": "Since completed"
             },
             "properties": [
               {
@@ -1697,13 +1285,13 @@
           "source": "url",
           "parser": "uql",
           "format": "table",
-          "root_selector": "($d := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; $completed := summary[0].completed_at; $age := $completed ? $floor(($millis() - $toMillis($completed)) / 1000) : null; [$map(provider_checks, function($p) { $merge([$p, {'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : ($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')), 'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), 'check_result': $cached ? '—' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), 'reason': $cached ? 'Cached Bronze used; provider API was not called.' : ($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), 'observed_display': $age != null and $age >= 0 ? $string($floor($age / 3600)) & ' h ' & $string($floor(($age % 3600) / 60)) & ' min ago' : 'Not recorded', 'report_label': $saved or $cached ? 'Open report' : '—' }]) })])",
+          "root_selector": "($d := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; $completed := summary[0].completed_at; $age := $completed ? $floor(($millis() - $toMillis($completed)) / 1000) : null; $seconds := $age != null and $age>=0 ? $age : 0; $parts := [$floor($seconds/86400), $floor(($seconds%86400)/3600), $floor(($seconds%3600)/60)]; $units := [' d',' h',' min']; $elapsed := $join($map($parts,function($v,$i){$v>0 ? $string($v)&$units[$i]}),' '); [$map(provider_checks, function($p) { $merge([$p, {'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : ($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')), 'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), 'check_result': $cached ? '—' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), 'reason': $cached ? 'Cached Bronze used; provider API was not called.' : ($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), 'observed_display': $age != null and $age >= 0 ? ($age<60 ? 'Just now' : $elapsed & ' ago') : 'Not recorded', 'report_label': $saved or $cached ? 'Open report' : '—' }]) })])",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($d := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; $completed := summary[0].completed_at; $age := $completed ? $floor(($millis() - $toMillis($completed)) / 1000) : null; [$map(provider_checks, function($p) { $merge([$p, {'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : ($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')), 'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), 'check_result': $cached ? '—' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), 'reason': $cached ? 'Cached Bronze used; provider API was not called.' : ($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), 'observed_display': $age != null and $age >= 0 ? $string($floor($age / 3600)) & ' h ' & $string($floor(($age % 3600) / 60)) & ' min ago' : 'Not recorded', 'report_label': $saved or $cached ? 'Open report' : '—' }]) })])\""
+          "uql": "parse-json | jsonata \"($d := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; $completed := summary[0].completed_at; $age := $completed ? $floor(($millis() - $toMillis($completed)) / 1000) : null; $seconds := $age != null and $age>=0 ? $age : 0; $parts := [$floor($seconds/86400), $floor(($seconds%86400)/3600), $floor(($seconds%3600)/60)]; $units := [' d',' h',' min']; $elapsed := $join($map($parts,function($v,$i){$v>0 ? $string($v)&$units[$i]}),' '); [$map(provider_checks, function($p) { $merge([$p, {'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : ($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')), 'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), 'check_result': $cached ? '—' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), 'reason': $cached ? 'Cached Bronze used; provider API was not called.' : ($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), 'observed_display': $age != null and $age >= 0 ? ($age<60 ? 'Just now' : $elapsed & ' ago') : 'Not recorded', 'report_label': $saved or $cached ? 'Open report' : '—' }]) })])\""
         }
       ],
       "transformations": [
@@ -1741,7 +1329,7 @@
               "check_performed": "Performed",
               "check_result": "Result",
               "reason": "Reason",
-              "observed_display": "Since run completed",
+              "observed_display": "Since completed",
               "report_label": "Evidence"
             }
           }
@@ -1752,7 +1340,7 @@
     {
       "id": 9481,
       "type": "stat",
-      "title": "Review Provider Check",
+      "title": "Provider Check",
       "gridPos": {
         "x": 15,
         "y": 18,
@@ -1769,7 +1357,7 @@
           "fields": "/^check_result$/",
           "values": true
         },
-        "colorMode": "background",
+        "colorMode": "value",
         "graphMode": "none",
         "textMode": "value",
         "text": {
@@ -1893,6 +1481,837 @@
         }
       ],
       "links": []
+    },
+    {
+      "id": 9460,
+      "type": "table",
+      "title": "Inspect Selected Run Stages",
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 15,
+        "h": 6
+      },
+      "datasource": "BioETL Ops HTTP",
+      "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. Excluded % is excluded_by_contract / stage records in; Saved % is records out / stage records in. Empty or incomplete inputs are UNKNOWN.",
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "unit": "none",
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "inspect": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stage_id"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Stage"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "state"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "records_in"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Records in"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "records_out"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Records out"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "duration_seconds"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Duration"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reason"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Reason"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "source"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Source"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reason"
+            },
+            "properties": [
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "duration_seconds"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Not recorded"
+              },
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "records_in"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "records_out"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "source"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "report.funnel": {
+                        "text": "Open report"
+                      },
+                      "report.stage_timings": {
+                        "text": "Open report"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open saved run report (JSON)",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(state|Status)$"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open saved run report (JSON)",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(stage_id|Stage)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Stage"
+              },
+              {
+                "id": "custom.width",
+                "value": 65
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(records_in|Records in)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "In"
+              },
+              {
+                "id": "custom.width",
+                "value": 50
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(records_out|Records out)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Out"
+              },
+              {
+                "id": "custom.width",
+                "value": 50
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(state|Status)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              },
+              {
+                "id": "custom.width",
+                "value": 65
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(source|Source)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Evidence"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(quarantined|Quarantined)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Quar."
+              },
+              {
+                "id": "custom.width",
+                "value": 60
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(excluded|Excluded)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Excluded"
+              },
+              {
+                "id": "custom.width",
+                "value": 85
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(deduplicated|Deduplicated)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Dedup."
+              },
+              {
+                "id": "custom.width",
+                "value": 65
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(filtered_out|Filtered out)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Filtered"
+              },
+              {
+                "id": "custom.width",
+                "value": 65
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(excluded_pct)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Excl. %"
+              },
+              {
+                "id": "custom.width",
+                "value": 70
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(saved_pct)( [BC])?$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Saved %"
+              },
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(excluded_pct|saved_pct|Excl[.] %|Saved %)( C)?$"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "root_selector": "stage_diagnostics",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          }
+        },
+        {
+          "refId": "B",
+          "type": "json",
+          "source": "url",
+          "parser": "uql",
+          "format": "table",
+          "root_selector": "($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))",
+          "url": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "uql": "parse-json | jsonata \"($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))\""
+        },
+        {
+          "refId": "C",
+          "type": "json",
+          "source": "url",
+          "parser": "uql",
+          "format": "table",
+          "root_selector": "($ratio := function($s,$n){$s.tracking='full' and $type($s.records_in)='number' and $type($n)='number' ? ($s.records_in>0 and $n>=0 and $n<=$s.records_in ? 100*$n/$s.records_in : null) : null}; $map(funnel,function($s){($excluded := $s.tracking='full' and $type($s.removals)='array' ? $sum($append([0],$s.removals[outcome='excluded_by_contract'].count)) : null; {'stage_id':$s.stage_id,'excluded_pct':$ratio($s,$excluded),'saved_pct':$ratio($s,$s.records_out)})}))",
+          "url": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "uql": "parse-json | jsonata \"($ratio := function($s,$n){$s.tracking='full' and $type($s.records_in)='number' and $type($n)='number' ? ($s.records_in>0 and $n>=0 and $n<=$s.records_in ? 100*$n/$s.records_in : null) : null}; $map(funnel,function($s){($excluded := $s.tracking='full' and $type($s.removals)='array' ? $sum($append([0],$s.removals[outcome='excluded_by_contract'].count)) : null; {'stage_id':$s.stage_id,'excluded_pct':$ratio($s,$excluded),'saved_pct':$ratio($s,$s.records_out)})}))\""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "stage_id",
+            "mode": "outerTabular"
+          }
+        },
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "exclude",
+            "match": "any",
+            "filters": [
+              {
+                "fieldName": "stage_id",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "extract"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 12
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "stage_id",
+                "state",
+                "records_in",
+                "records_out",
+                "quarantined",
+                "excluded",
+                "deduplicated",
+                "filtered_out",
+                "excluded_pct",
+                "saved_pct"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "stage_id": 0,
+              "state": 1,
+              "reason": 2,
+              "records_in": 3,
+              "records_out": 4,
+              "quarantined": 5,
+              "excluded": 6,
+              "deduplicated": 7,
+              "filtered_out": 8,
+              "source": 9
+            },
+            "renameByName": {
+              "quarantined": "Quarantined",
+              "excluded": "Excluded",
+              "deduplicated": "Deduplicated",
+              "filtered_out": "Filtered out"
+            },
+            "excludeByName": {
+              "reason": true,
+              "source": true,
+              "Source": true,
+              "Evidence": true
+            }
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": 9482,
+      "type": "canvas",
+      "title": "Data Quality",
+      "gridPos": {
+        "x": 15,
+        "y": 23,
+        "w": 9,
+        "h": 6
+      },
+      "datasource": "BioETL Ops HTTP",
+      "description": "SELECTED RUN · Excluded-by-contract records summed across Bronze, Silver and Gold. Exclusion rate uses Bronze records out: below soft limit OK, at soft limit WARN, at hard limit ERROR. Limits come from pipeline configuration at dashboard generation, not historical run overrides. UNKNOWN means incomplete tracking or invalid counters; SELECT RUN requires a Run ID. Failed requests remain QUERY ERROR. Quarantined, filtered and deduplicated records are separate outcomes and are not included.",
+      "options": {
+        "inlineEditing": false,
+        "panZoom": false,
+        "zoomToContent": false,
+        "tooltip": {
+          "mode": "none"
+        },
+        "root": {
+          "name": "Quality assessment",
+          "type": "frame",
+          "elements": [
+            {
+              "name": "status",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 48,
+                "text": {
+                  "mode": "field",
+                  "field": "status",
+                  "fixed": ""
+                },
+                "color": {
+                  "field": "status",
+                  "fixed": "gray"
+                }
+              },
+              "constraint": {
+                "horizontal": "leftright",
+                "vertical": "center"
+              },
+              "placement": {
+                "left": 8,
+                "right": 8,
+                "top": 30,
+                "height": 60
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "detail",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 42,
+                "text": {
+                  "mode": "field",
+                  "field": "detail",
+                  "fixed": ""
+                },
+                "color": {
+                  "field": "status",
+                  "fixed": "gray"
+                }
+              },
+              "constraint": {
+                "horizontal": "leftright",
+                "vertical": "center"
+              },
+              "placement": {
+                "left": 8,
+                "right": 8,
+                "top": -30,
+                "height": 60
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "mappings": [
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "^OK.*",
+                "result": {
+                  "color": "green"
+                }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "^WARN.*",
+                "result": {
+                  "color": "orange"
+                }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "^ERROR.*",
+                "result": {
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "value",
+              "options": {
+                "UNKNOWN": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "gray"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "uql",
+          "format": "table",
+          "root_selector": "($limits := {\"chembl_activity\":[0.05,0.5],\"chembl_assay\":[0.05,0.5],\"chembl_assay_parameters\":[0.05,0.5],\"chembl_cell_line\":[0.05,0.5],\"chembl_compound_record\":[0.05,0.5],\"chembl_molecule\":[0.05,0.5],\"chembl_protein_class\":[0.05,0.5],\"chembl_publication\":[0.05,0.5],\"chembl_publication_similarity\":[0.05,0.5],\"chembl_publication_term\":[0.05,0.5],\"chembl_subcellular_fraction\":[0.05,0.5],\"chembl_target\":[0.05,0.5],\"chembl_target_component\":[0.05,0.5],\"chembl_target_protein_classification\":[0.05,0.5],\"chembl_tissue\":[0.05,0.5],\"composite_activity\":[0.05,0.5],\"composite_assay\":[0.05,0.5],\"composite_molecule\":[0.05,0.5],\"composite_publication\":[0.05,0.5],\"composite_target\":[0.05,0.5],\"crossref_publication\":[0.1,0.5],\"openalex_publication\":[0.08,0.5],\"pubchem_compound\":[0.08,0.5],\"pubmed_publication\":[0.05,0.15],\"semanticscholar_publication\":[0.15,0.4],\"uniprot_idmapping\":[0.3,0.8],\"uniprot_protein\":[0.03,0.1]}; $limit := $lookup($limits, identity.pipeline_name); $s := funnel[stage_id in ['bronze','silver','gold']]; $r := $s.removals[outcome='excluded_by_contract']; $base := $s[stage_id='bronze'].records_out; $known := $count($distinct($s.stage_id)) = 3 and $count($s) = 3 and $count($s[tracking='full' and $type(removals)='array']) = 3 and $count($r) = $count($r[$type(count)='number' ? count >= 0 and count=$floor(count) : false]) and ($type($base)='number' ? $base >= 0 and $base=$floor($base) : false) and $count($limit)=2; $n := $known ? $sum($append([0], $r.count)) : null; $known := $known and $n <= $base; $rate := $known ? ($base=0 ? 0 : $n/$base) : null; $status := $known ? ($rate >= $limit[1] ? 'ERROR' : $rate >= $limit[0] ? 'WARN' : 'OK') : 'UNKNOWN'; [{'status': $status, 'detail': ($known ? 'excluded ' & $string($round($rate*100,2)) & '%' : 'excluded UNKNOWN')}])",
+          "url": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "uql": "parse-json | jsonata \"($limits := {\\\"chembl_activity\\\":[0.05,0.5],\\\"chembl_assay\\\":[0.05,0.5],\\\"chembl_assay_parameters\\\":[0.05,0.5],\\\"chembl_cell_line\\\":[0.05,0.5],\\\"chembl_compound_record\\\":[0.05,0.5],\\\"chembl_molecule\\\":[0.05,0.5],\\\"chembl_protein_class\\\":[0.05,0.5],\\\"chembl_publication\\\":[0.05,0.5],\\\"chembl_publication_similarity\\\":[0.05,0.5],\\\"chembl_publication_term\\\":[0.05,0.5],\\\"chembl_subcellular_fraction\\\":[0.05,0.5],\\\"chembl_target\\\":[0.05,0.5],\\\"chembl_target_component\\\":[0.05,0.5],\\\"chembl_target_protein_classification\\\":[0.05,0.5],\\\"chembl_tissue\\\":[0.05,0.5],\\\"composite_activity\\\":[0.05,0.5],\\\"composite_assay\\\":[0.05,0.5],\\\"composite_molecule\\\":[0.05,0.5],\\\"composite_publication\\\":[0.05,0.5],\\\"composite_target\\\":[0.05,0.5],\\\"crossref_publication\\\":[0.1,0.5],\\\"openalex_publication\\\":[0.08,0.5],\\\"pubchem_compound\\\":[0.08,0.5],\\\"pubmed_publication\\\":[0.05,0.15],\\\"semanticscholar_publication\\\":[0.15,0.4],\\\"uniprot_idmapping\\\":[0.3,0.8],\\\"uniprot_protein\\\":[0.03,0.1]}; $limit := $lookup($limits, identity.pipeline_name); $s := funnel[stage_id in ['bronze','silver','gold']]; $r := $s.removals[outcome='excluded_by_contract']; $base := $s[stage_id='bronze'].records_out; $known := $count($distinct($s.stage_id)) = 3 and $count($s) = 3 and $count($s[tracking='full' and $type(removals)='array']) = 3 and $count($r) = $count($r[$type(count)='number' ? count >= 0 and count=$floor(count) : false]) and ($type($base)='number' ? $base >= 0 and $base=$floor($base) : false) and $count($limit)=2; $n := $known ? $sum($append([0], $r.count)) : null; $known := $known and $n <= $base; $rate := $known ? ($base=0 ? 0 : $n/$base) : null; $status := $known ? ($rate >= $limit[1] ? 'ERROR' : $rate >= $limit[0] ? 'WARN' : 'OK') : 'UNKNOWN'; [{'status': $status, 'detail': ($known ? 'excluded ' & $string($round($rate*100,2)) & '%' : 'excluded UNKNOWN')}])\""
+        }
+      ],
+      "transformations": [],
+      "links": []
+    },
+    {
+      "id": 9450,
+      "type": "row",
+      "title": "Inspect Saved Run Evidence",
+      "collapsed": true,
+      "description": "Expand for full saved identity of the selected Run ID. Stages are shown above.",
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 9452,
+          "type": "table",
+          "title": "Inspect Selected Run Identity",
+          "gridPos": {
+            "x": 0,
+            "y": 30,
+            "w": 24,
+            "h": 7
+          },
+          "datasource": "BioETL Ops HTTP",
+          "description": "SELECTED RUN · Full Run ID can be copied through cell inspection. Inspect Source revision to view and copy the complete hash. Missing values are Not recorded; failed requests remain QUERY ERROR.",
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false,
+              "enablePagination": false
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "unit": "none",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                },
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": true
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 210
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^([a-fA-F0-9]{12})(?:[a-fA-F0-9]{28}|[a-fA-F0-9]{52})$",
+                          "result": {
+                            "text": "$1…"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "type": "json",
+              "source": "url",
+              "parser": "uql",
+              "format": "table",
+              "root_selector": "($s := summary[0]; $v := function($x){$exists($x) and $x != null and $x != \"\" ? $string($x) : \"Not recorded\"}; [{\"parameter\":\"Pipeline\",\"value\":$v($s.pipeline)},{\"parameter\":\"Run ID\",\"value\":$v($s.run_id)},{\"parameter\":\"Completed\",\"value\":$v($s.completed_at)},{\"parameter\":\"Assessment rules\",\"value\":$v($s.rules_version)},{\"parameter\":\"Source revision\",\"value\":$v($s.revision)},{\"parameter\":\"Evidence completeness\",\"value\":$v($s.evidence_completeness)}])",
+              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              },
+              "uql": "parse-json | jsonata \"($s := summary[0]; $v := function($x){$exists($x) and $x != null and $x != \\\"\\\" ? $string($x) : \\\"Not recorded\\\"}; [{\\\"parameter\\\":\\\"Pipeline\\\",\\\"value\\\":$v($s.pipeline)},{\\\"parameter\\\":\\\"Run ID\\\",\\\"value\\\":$v($s.run_id)},{\\\"parameter\\\":\\\"Completed\\\",\\\"value\\\":$v($s.completed_at)},{\\\"parameter\\\":\\\"Assessment rules\\\",\\\"value\\\":$v($s.rules_version)},{\\\"parameter\\\":\\\"Source revision\\\",\\\"value\\\":$v($s.revision)},{\\\"parameter\\\":\\\"Evidence completeness\\\",\\\"value\\\":$v($s.evidence_completeness)}])\""
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "indexByName": {
+                  "parameter": 0,
+                  "value": 1
+                },
+                "renameByName": {
+                  "parameter": "Parameter",
+                  "value": "Value"
+                }
+              }
+            }
+          ],
+          "links": []
+        }
+      ]
     }
   ]
 }

@@ -1,6 +1,8 @@
 name: Docs KPI Weekly
-# KEEP-DISABLED (#10263): optional weekly KPI lane. Do not change KPI
-# thresholds to justify re-enable.
+# Optional-but-scheduled weekly KPI lane (DOCS-PIPE-003, #11858; supersedes the
+# stale KEEP-DISABLED note #10263): the schedule below is live and enforced by
+# tests/architecture/test_docs_kpi_workflow.py. Do not change KPI thresholds
+# to justify a re-enable debate — the lane runs as scheduled.
 
 permissions:
   contents: read

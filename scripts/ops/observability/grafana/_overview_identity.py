@@ -87,8 +87,60 @@ def apply_saved_evidence_readability(payload: dict) -> None:
         return
     row = next(p for p in payload["panels"] if p.get("id") == 9450)
     row["panels"] = [p for p in row["panels"] if p.get("id") != 9451]
-    row["description"] = "Expand for saved stage rows and full identity of the selected Run ID."
+    row["description"] = "Expand for full saved identity of the selected Run ID. Stages are shown above."
     panels = {p["id"]: p for p in row["panels"]}
+    overview = {p["id"]: p for p in payload["panels"]}
+    for pid in (9002, 9603):
+        for item in overview[pid]["fieldConfig"]["overrides"]:
+            if item["matcher"].get("options") == "Reason":
+                mappings = next(p["value"] for p in item["properties"] if p["id"] == "mappings")
+                mappings.append({
+                    "type": "regex",
+                    "options": {
+                        "pattern": "^(Workflow: )?workflow_parent_not_finalized$",
+                        "result": {"text": "Parent workflow completion has not been recorded"},
+                    },
+                })
+    for item in overview[9002]["fieldConfig"]["overrides"]:
+        if item["matcher"].get("options") == "Status":
+            for prop in item["properties"]:
+                if prop["id"] == "links":
+                    prop["value"] = [{
+                        "title": "Open saved run report",
+                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                        "targetBlank": True,
+                    }]
+    stages = panels[9460]
+    provider = next(p for p in payload["panels"] if p.get("id") == 9480)
+    stages["gridPos"]["w"] = provider["gridPos"]["w"]
+    # Filter after the outer join so artifact counters cannot restore extract.
+    stages["transformations"].insert(1, {
+        "id": "filterByValue",
+        "options": {
+            "type": "exclude", "match": "any",
+            "filters": [{"fieldName": "stage_id", "config": {"id": "equal", "options": {"value": "extract"}}}],
+        },
+    })
+    for transform in stages["transformations"]:
+        if transform["id"] == "filterFieldsByName":
+            names = transform["options"]["include"]["names"]
+            transform["options"]["include"]["names"] = [name for name in names if name not in {"reason", "source", "Source", "Evidence"}]
+        elif transform["id"] == "organize":
+            transform["options"].setdefault("excludeByName", {}).update(
+                reason=True, source=True, Source=True, Evidence=True,
+            )
+
+    report_links = next(
+        prop["value"]
+        for item in stages["fieldConfig"]["overrides"]
+        if item["matcher"].get("options") == "source"
+        for prop in item["properties"]
+        if prop["id"] == "links"
+    )
+    stages["fieldConfig"]["overrides"].append({
+        "matcher": {"id": "byRegexp", "options": "^(state|Status)$"},
+        "properties": [{"id": "links", "value": report_links}],
+    })
 
     def override(name, properties):
         return {"matcher": {"id": "byName", "options": name}, "properties": properties}
@@ -150,7 +202,123 @@ def apply_saved_evidence_readability(payload: dict) -> None:
         "SELECTED RUN · Full Run ID can be copied through cell inspection. Inspect Source revision to view and copy the complete hash. Missing values are Not recorded; failed requests remain QUERY ERROR."
     )
     identity["gridPos"]["h"] = 7
+    _place_stages_and_quality(payload, row, stages)
     y = row["gridPos"]["y"] + 1
     for panel in row["panels"]:
         panel["gridPos"]["y"] = y
         y += panel["gridPos"]["h"]
+
+
+def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
+    """Pair saved stages with a count-based exclusion assessment outside the row."""
+    from copy import deepcopy
+
+    panels = payload["panels"]
+    provider = next(p for p in panels if p.get("id") == 9480)
+    y = provider["gridPos"]["y"] + provider["gridPos"]["h"]
+    stages["gridPos"] = {"x": 0, "y": y, "w": 15, "h": 6}
+    stages["options"].update(cellHeight="sm", footer={"show": False})
+    percentages = (
+        "($ratio := function($s,$n){$s.tracking='full' and $type($s.records_in)='number' "
+        "and $type($n)='number' ? ($s.records_in>0 and $n>=0 and $n<=$s.records_in "
+        "? 100*$n/$s.records_in : null) : null}; "
+        "$map(funnel,function($s){($excluded := $s.tracking='full' and $type($s.removals)='array' "
+        "? $sum($append([0],$s.removals[outcome='excluded_by_contract'].count)) : null; "
+        "{'stage_id':$s.stage_id,'excluded_pct':$ratio($s,$excluded),"
+        "'saved_pct':$ratio($s,$s.records_out)})}))"
+    )
+    percentage_target = deepcopy(stages["targets"][1])
+    percentage_target.update(refId="C", root_selector=percentages, uql='parse-json | jsonata "' + percentages + '"')
+    stages["targets"].append(percentage_target)
+    for transform in stages["transformations"]:
+        if transform["id"] == "filterFieldsByName":
+            transform["options"]["include"]["names"].extend(["excluded_pct", "saved_pct"])
+    stages["description"] += " Excluded % is excluded_by_contract / stage records in; Saved % is records out / stage records in. Empty or incomplete inputs are UNKNOWN."
+    for field, label, width in (
+        ("stage_id|Stage", "Stage", 65),
+        ("records_in|Records in", "In", 50),
+        ("records_out|Records out", "Out", 50),
+        ("state|Status", "Status", 65),
+        ("source|Source", "Evidence", 90),
+        ("quarantined|Quarantined", "Quar.", 60),
+        ("excluded|Excluded", "Excluded", 85),
+        ("deduplicated|Deduplicated", "Dedup.", 65),
+        ("filtered_out|Filtered out", "Filtered", 65),
+        ("excluded_pct", "Excl. %", 70),
+        ("saved_pct", "Saved %", 75),
+    ):
+        stages["fieldConfig"]["overrides"].append({
+            "matcher": {"id": "byRegexp", "options": f"^({field})( [BC])?$"},
+            "properties": [
+                {"id": "displayName", "value": label},
+                {"id": "custom.width", "value": width},
+            ],
+        })
+    stages["fieldConfig"]["overrides"].append({
+        "matcher": {"id": "byRegexp", "options": "^(excluded_pct|saved_pct|Excl[.] %|Saved %)( C)?$"},
+        "properties": [{"id": "unit", "value": "percent"}, {"id": "decimals", "value": 1}],
+    })
+    row["panels"] = [p for p in row["panels"] if p.get("id") != 9460]
+    row["gridPos"]["y"] = y + 6
+    quality = deepcopy(next(p for p in panels if p.get("id") == 9481))
+    quality.update(
+        id=9482,
+        title="Review Data Quality",
+        gridPos={"x": 15, "y": y, "w": 9, "h": 6},
+        description=(
+            "SELECTED RUN · Excluded-by-contract records summed across Bronze, Silver and Gold. "
+            "Exclusion rate uses Bronze records out: below soft limit OK, at soft limit WARN, at hard limit ERROR. "
+            "Limits come from pipeline configuration at dashboard generation, not historical run overrides. "
+            "UNKNOWN means incomplete tracking or invalid counters; SELECT RUN requires a Run ID. "
+            "Failed requests remain QUERY ERROR. Quarantined, filtered and deduplicated records "
+            "are separate outcomes and are not included."
+        ),
+    )
+    from ._overview_quality import exclusion_quality_expression
+
+    expression = exclusion_quality_expression()
+    target = deepcopy(stages["targets"][1])
+    target.update(refId="A", root_selector=expression, uql='parse-json | jsonata "' + expression.replace('"', '\\"') + '"')
+    quality["targets"] = [target]
+    quality["transformations"] = []
+    quality["fieldConfig"] = {
+        "defaults": {
+            "noValue": "UNKNOWN",
+            "mappings": [
+                {"type": "regex", "options": {"pattern": "^OK.*", "result": {"color": "green"}}},
+                {"type": "regex", "options": {"pattern": "^WARN.*", "result": {"color": "orange"}}},
+                {"type": "regex", "options": {"pattern": "^ERROR.*", "result": {"color": "red"}}},
+                {"type": "value", "options": {"UNKNOWN": {"text": "UNKNOWN", "color": "gray"}}},
+            ],
+            "color": {"mode": "fixed", "fixedColor": "gray"},
+        },
+        "overrides": [],
+    }
+    # Native Stat titles ignore field colors. Canvas binds both lines to status.
+    quality["type"] = "canvas"
+    quality["options"] = {
+        "inlineEditing": False,
+        "panZoom": False,
+        "zoomToContent": False,
+        "tooltip": {"mode": "none"},
+        "root": {
+            "name": "Quality assessment", "type": "frame",
+            "elements": [
+                {
+                    "name": field, "type": "metric-value",
+                    "config": {
+                        "align": "center", "valign": "middle", "size": size,
+                        "text": {"mode": "field", "field": field, "fixed": ""},
+                        "color": {"field": "status", "fixed": "gray"},
+                    },
+                    "constraint": {"horizontal": "leftright", "vertical": "center"},
+                    "placement": {"left": 8, "right": 8, "top": offset, "height": 60},
+                    "background": {"color": {"fixed": "transparent"}},
+                }
+                for field, size, offset in (("status", 48, 30), ("detail", 42, -30))
+            ],
+        },
+    }
+    panels[:] = [p for p in panels if p.get("id") not in {9460, 9482}]
+    panels.extend([stages, quality])
+    panels.sort(key=lambda p: (p["gridPos"]["y"], p["gridPos"]["x"]))

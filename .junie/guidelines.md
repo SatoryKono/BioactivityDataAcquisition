@@ -178,6 +178,18 @@ Minimum expectation:
   agents **SHOULD** use `.junie/skills/observability-prometheus/` (equal-peer
   mirror of `.codex/skills/observability-prometheus/`).
 
+## OpenCode GitHub Repo Agent (Phase 1, subordinate surface)
+
+- `opencode.json`, `.opencode/agent/**`, `.opencode/command/**` — OpenCode
+  discovery surface only; workflows `opencode-pr-review.yml`, `opencode-triage.yml`
+  are `workflow_dispatch` stubs (#11012) and MUST NOT call
+  `anomalyco/opencode/github` (unpinned `releases/latest` + `curl | bash`).
+  Write paths (`/oc`, `agent-fix`) stay disabled; restore a review or triage
+  step only with a digest-pinned installer.
+- Subordinate to the canonical precedence above; BioETL guardrails (`.env`
+  untouched, no Docker/Redis, tech-debt budgets only down, root hygiene) apply.
+  Full contract: `AGENTS.md` § OpenCode GitHub Repo Agent.
+
 ## Related Files
 
 - `AGENTS.md` (repository-wide equal-peer entry point)

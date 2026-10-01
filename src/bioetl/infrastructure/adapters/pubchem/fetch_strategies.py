@@ -6,6 +6,7 @@ __all__ = ["PubChemFetchStrategies"]
 
 from typing import TYPE_CHECKING, cast
 
+from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.common.error_bundles import (
     build_common_network_error_bundle,
 )
@@ -56,6 +57,7 @@ class PubChemFetchStrategies(
         request_collector: APIRequestCollector | None = None,
         response_mapper: PubChemResponseMapper | None = None,
         fetch_flow: PubChemFetchFlow | None = None,
+        retry_config: RetryConfig | None = None,
         **legacy: object,
     ) -> None:
         """Initialize fetch strategies.
@@ -81,6 +83,8 @@ class PubChemFetchStrategies(
             run_in_executor=self._run_in_executor,
             record_request=self._record_request,
             normalize_results=self._normalize_results,
+            retry_config=retry_config or RetryConfig(),
+            logger=self._logger,
         )
 
     def _record_request(

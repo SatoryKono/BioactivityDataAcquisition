@@ -35,7 +35,7 @@ ______________________________________________________________________
 
 Реализует CLI для взаимодействия с пользователем. Использует библиотеку **Click** для определения команд.
 
-**Доступные top-level команды и support/compat модули в `commands/` (снимок синхронизирован на 2026-05-07):**
+**Доступные top-level команды и support/compat модули в `commands/` (снимок синхронизирован на 2026-10-01, ARCH-007 #11859):**
 
 | Команда         | Модуль             | Описание                                                                            |
 | --------------- | ------------------ | ----------------------------------------------------------------------------------- |
@@ -55,6 +55,11 @@ ______________________________________________________________________
 | `maintenance`   | `maintenance.py`   | Public CLI seam; canonical implementation lives in `domains/maintenance/command.py` |
 | `adr`           | `adr.py`           | Управление ADR (Architecture Decisions)                                             |
 | `debug`         | `debug.py`         | Диагностические утилиты                                                             |
+| `archive`       | `archive.py`       | Архивация таблиц в cold storage                                                     |
+| `cleanup`       | `cleanup.py`       | Очистка Bronze-слоя по retention-политике RULES.md                                  |
+| `report`        | `report.py`        | Inspection отчётов pipeline/workflow run-ов                                         |
+| `vacuum`        | `vacuum.py`        | Vacuum Delta-таблиц, возврат места в хранилище                                      |
+| `workflow`      | `workflow.py`      | Декларативные workflow-команды                                                      |
 
 **Вспомогательные реализации:**
 
@@ -97,6 +102,7 @@ HTTP endpoint families и владельцы данных:
 | `/ops/quarantine/` | Read-only inspection quarantine через injected quarantine port |
 | `/ops/control-plane/` | Manifest, ledger, checkpoint и replay diagnostics через control-plane ports |
 | `/ops/observability/` | Processed records и pipeline/workflow run reports; local report storage и observability collaborators |
+| `/ops/observability/selected-run-status` | Отдельный маршрут selected-run assessment (ADR-061): persisted deterministic assessment `selected-run-v1/v2` |
 
 Route dispatch задаёт `health_server_routing_mixin.py`; observability routes
 детализирует `_health_server_observability_routing.py`. Это локальный GET API,

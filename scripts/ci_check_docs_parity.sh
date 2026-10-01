@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# Compatibility wrapper
-# CI/CD Documentation Parity Check Script
-# This script runs the entity config parity check as part of CI/CD pipeline
+# Compatibility wrapper — RETIRED / NON-CI (DOCS-PIPE-010, #11858).
+# Not called from any workflow; the active CI gate is
+# `python -m scripts.data_quality check-entity-config-parity` in docs.yml.
+# Kept only so old local invocations still reach the canonical entry point.
 
 set -e
 

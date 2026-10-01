@@ -44,6 +44,25 @@ from tests.integration.test_dashboard_units_decimals import DASHBOARD_DATETIME_U
 
 pytestmark = pytest.mark.integration
 
+
+def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
+    """Collapsing saved identity must not hide stages or their quality assessment."""
+    import json
+
+    dashboard = json.loads(Path("grafana/dashboards/bioetl-overview-v2.json").read_text(encoding="utf-8"))
+    panels = {panel["id"]: panel for panel in dashboard["panels"]}
+    provider, stages, quality, row = (panels[i] for i in (9480, 9460, 9482, 9450))
+    assert stages["gridPos"]["y"] == provider["gridPos"]["y"] + provider["gridPos"]["h"]
+    assert quality["gridPos"] == {**stages["gridPos"], "x": 15, "w": 9}
+    assert row["gridPos"]["y"] == stages["gridPos"]["y"] + stages["gridPos"]["h"]
+    assert 9460 not in {panel["id"] for panel in row["panels"]}
+    assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    from scripts.ops.observability.grafana._overview_quality import exclusion_quality_expression
+
+    expression = exclusion_quality_expression()
+    assert quality["targets"][0]["root_selector"] == expression
+    assert quality["targets"][0]["uql"] == 'parse-json | jsonata "' + expression.replace('"', '\\"') + '"'
+
 DESIGN_SYSTEM = Path("docs/03-guides/dashboards/design-system.md")
 MONITORING_COMPOSE = Path("docker-compose.monitoring.yml")
 COPY_ROLE_ENFORCED_DASHBOARDS = frozenset({"bioetl-control-plane-v1.json"})
@@ -551,7 +570,7 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
             item for item in get_dashboard_panels(dashboard) if item.get("id") == 9460
         )
         targets = panel["targets"]
-        assert [target["refId"] for target in targets] == ["A", "B"]
+        assert [target["refId"] for target in targets] == (["A", "B", "C"] if name == "bioetl-overview-v2" else ["A", "B"])
         removal_target = targets[1]
         assert removal_target["url"].endswith("format=pipeline_run_report_json")
         assert removal_target["parser"] == "uql"
@@ -569,7 +588,7 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
         assert include["options"]["include"]["names"] == [
             "stage_id",
             "state",
-            "reason",
+            *([] if name == "bioetl-overview-v2" else ["reason"]),
             "records_in",
             "records_out",
             "quarantined",
@@ -577,7 +596,8 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
             "deduplicated",
             "filtered_out",
             *([] if name == "bioetl-overview-v2" else ["duration_seconds"]),
-            "source",
+            *([] if name == "bioetl-overview-v2" else ["source"]),
+            *(["excluded_pct", "saved_pct"] if name == "bioetl-overview-v2" else []),
         ]
         organize = next(item for item in transforms if item["id"] == "organize")
         assert organize["options"]["renameByName"] == {

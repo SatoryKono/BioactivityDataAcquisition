@@ -22,7 +22,7 @@
 }}%%
 %% @uniform width=208 height=72 max_title_len=21 max_desc_lines=2
 graph TB
-%% keep-orphan: CFG, EXCEPTIONS, OBSERVER, PROVIDERS, SCHEMAS, TYPES, VALIDATION
+%% keep-orphan: TYPES, EXCEPTIONS (ambient domain vocabulary: referenced by all layers, no single owner edge)
     subgraph External["External Systems"]
         subgraph ExternalAPIs["External APIs"]
             CHEMBL_API["ChEMBL<br/><br/>"]:::size-md
@@ -122,6 +122,14 @@ graph TB
     LOCKING -->|implements| PORTS
     AUDIT -->|implements| PORTS
     SECURITY -->|implements| PORTS
+    VALIDATION -->|implements| PORTS
+
+    %% Orphan closure (DIAG-01-HEX-ORPHANS, #11857): edges appended at the end
+    %% to keep linkStyle indices of the sections above stable.
+    BOOTSTRAP --> PROVIDERS
+    CORE --> OBSERVER
+    CORE --> CFG
+    CORE --> SCHEMAS
 
     classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
@@ -139,4 +147,4 @@ graph TB
 
     linkStyle default stroke:#666,stroke-width:1px,color:#666
     linkStyle 0,1,2,3 stroke-dasharray: 5 5
-    linkStyle 21,22,23,24,25,26,27,28 stroke:#dc2626,stroke-width:2px
+    linkStyle 21,22,23,24,25,26,27,28,29 stroke:#dc2626,stroke-width:2px

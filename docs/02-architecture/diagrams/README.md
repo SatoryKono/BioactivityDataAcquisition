@@ -59,7 +59,7 @@ Required checks for diagram cleanup:
 
 - `python -m scripts.diagrams lint`
 - `python -m scripts.diagrams check-artifacts`
-- `python -m scripts.docs check-links --links --specs --configs`
+- `python -m scripts.docs check-links`
 
 ______________________________________________________________________
 
@@ -99,13 +99,9 @@ Index: [state-machines/README.md](state-machines/README.md)
 These artifacts are intentionally outside primary nav but linked here for discoverability.
 
 - `architecture/svg/INDEX.md`
-- `architecture/png/INDEX.md`
 - `class-diagrams/svg/INDEX.md`
-- `class-diagrams/png/INDEX.md`
 - `foundation/svg/INDEX.md`
-- `foundation/png/INDEX.md`
 - `views/svg/INDEX.md`
-- `views/png/INDEX.md`
 - [bundles/architecture.bundle.md](bundles/architecture.bundle.md)
 - [bundles/class.bundle.md](bundles/class.bundle.md)
 - [descriptions/INDEX.md](descriptions/INDEX.md)

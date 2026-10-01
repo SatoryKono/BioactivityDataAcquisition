@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from copy import deepcopy
 
+from scripts.ops.observability.grafana.dashboard_context_links import build_handoff_url
+
 STATUS_URL = "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
 DESCRIPTION = (
     "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; "
@@ -203,20 +205,12 @@ def _preserve_existing_links(
     )
 
 
-def _stamp_status_links(
-    panel: dict[str, object], uid: object, panels: list[object]
-) -> None:
+def _stamp_status_links(panel: dict[str, object], uid: object) -> None:
     if uid == _OVERVIEW_UID and panel.get("id") == 9002:
         panel["fieldConfig"]["defaults"]["links"] = [
             {
                 "title": title,
-                "url": next(
-                    link["url"]
-                    for nav in panels
-                    if nav.get("id") == 1000
-                    for link in nav["links"]
-                    if f"/d/{target}/" in link["url"]
-                ),
+                "url": build_handoff_url(target, source_uid=_OVERVIEW_UID),
                 "targetBlank": False,
                 "includeVars": False,
             }
@@ -911,7 +905,7 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
             )
         _rewrite_selected_run_tables(panel, uid)
         _preserve_existing_links(panel, old_links, old_data_links)
-        _stamp_status_links(panel, uid, panels)
+        _stamp_status_links(panel, uid)
         _stamp_overview_derived_panels(panel, uid)
     prune_provider_health_panels(payload)
     panels = payload.get("panels", [])

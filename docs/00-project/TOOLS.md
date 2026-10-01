@@ -61,7 +61,7 @@ build / lock-frozen production paths may use different flags (`--frozen`,
 
 ```bash
 uv run python -m scripts.docs verify
-uv run python -m scripts.docs check-links --links --specs --configs
+uv run python -m scripts.docs check-links
 uv run python -m scripts.docs check-drift --ports --classes
 uv run python -m scripts.docs check-drift --runtime-mirrors --freshness
 uv run python -m scripts.docs check-docstrings --summary

@@ -315,17 +315,19 @@ python scripts/diagrams/check/check_class_method_render_integrity.py \
 
 ### 6.2. Регулярный контроль свежести
 
-`diagram-nightly.yml` ежедневно запускает lint и использует два порога:
+Accepted residual (DIAG-CI-NIGHTLY-DISABLED, #11857): `diagram-nightly.yml`
+KEEP-DISABLED (#11196, schedule удалён, `nightly-phase2` под `if: false`) —
+ежедневного lint-прогона и auto-issue `[DIAGRAM-FRESHNESS]` нет. Пороги ниже
+действуют в PR lint-области (`docs.yml`, только изменённые `.mmd`) и при
+ручном запуске; full-corpus render, visual-smoke gates DIAG-T018..T023 и
+STALE-блокировка в CI не исполняются, бюджеты под них не поднимать.
 
 - старше 90 дней — `STALE-002` warning для планового review;
-- старше 150 дней — `STALE-001` error, блокирующий scheduled job.
+- старше 150 дней — `STALE-001` error в области lint-проверки.
 
-При `STALE-001` workflow создаёт или обновляет одну открытую issue с точным
-заголовком `[DIAGRAM-FRESHNESS] Refresh diagrams older than 150 days`. Повторный
-запуск не создаёт дубликат. После устранения всех error-level нарушений workflow
-закрывает эту issue автоматически. Дату `%% @date`/`%% Updated:` разрешено
-обновлять только после сверки диаграммы с актуальными code/config/ADR surfaces;
-массовое изменение дат без проверки не считается исправлением freshness drift.
+Дату `%% @date`/`%% Updated:` разрешено обновлять только после сверки
+диаграммы с актуальными code/config/ADR surfaces; массовое изменение дат без
+проверки не считается исправлением freshness drift.
 
 ### 6.3. Управление orphan-нодами
 
@@ -368,6 +370,15 @@ python scripts/diagrams/fix/prune_orphan_nodes.py --grandfather   # Помети
 python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
 python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --json
 ```
+
+### 6.5. Сгенерированные 90-pkg срезы (non-goal drift-gate)
+
+Non-goal (DIAG-90PKG-NO-DRIFT-GATE, #11857): сгенерированные
+`class-diagrams/90-pkg-*.mmd` намеренно не имеют `generate_package_family_class_diagrams.py --check`
+в `docs.yml` — действует lightweight-профиль (тест
+`tests/architecture/test_docs_governance_workflow.py` фиксирует отсутствие
+`--check`). Дрейф 90-pkg срезов закрывается ручной регенерацией, а не CI-gate;
+добавление `--check` — только без расширения бюджетов.
 
 ______________________________________________________________________
 
