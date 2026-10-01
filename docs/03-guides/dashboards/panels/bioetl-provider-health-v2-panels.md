@@ -49,7 +49,9 @@ missing HTTP diagnostics are not inferred.
 ### 4–5. Run identity and processed records — removed
 
 These panels are no longer shown on Provider Health. Review Provider Check
-uses nine of 24 grid columns, leaving fifteen columns for the scope explanation.
+uses four of 24 grid columns beside the twenty-column Review Provider Evidence
+table. The separate scope explanation panel has been removed; scope remains in
+panel descriptions. Compact table headers use Performed and Result.
 
 ### 6. Monitor Fleet Status
 - **Type:** Table

@@ -318,12 +318,12 @@ def _correct_incident(uid: str, panels: dict[int, dict[str, Any]]) -> None:
             for link in status.get("links") or []
             if not (
                 isinstance(link, dict)
-                and link.get("title") == "Open Pipeline Diagnostics"
+                and link.get("title") == "Open Run Overview"
             )
         ]
         links.append(
             {
-                "title": "Open Pipeline Diagnostics",
+                "title": "Open Run Overview",
                 "url": diagnostics_url,
                 "includeVars": False,
                 "targetBlank": False,

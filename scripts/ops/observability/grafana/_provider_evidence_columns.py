@@ -8,8 +8,8 @@ def _provider_evidence_columns(panel: dict) -> None:
     fields = {
         "provider": "Provider",
         "data_source": "Data source",
-        "check_performed": "Check performed",
-        "check_result": "Check result",
+        "check_performed": "Performed",
+        "check_result": "Result",
         "reason": "Reason",
         "observed_display": "Observed at",
         "report_label": "Evidence",
@@ -59,12 +59,12 @@ def _provider_evidence_columns(panel: dict) -> None:
     panel["options"]["cellHeight"] = "lg"
     panel["options"]["footer"] = {"show": False, "enablePagination": False}
     widths = {
-        "Provider": 80,
-        "Data source": 112,
-        "Check performed": 140,
-        "Check result": 102,
-        "Observed at": 160,
-        "Evidence": 100,
+        "Provider": 75,
+        "Data source": 105,
+        "Performed": 90,
+        "Result": 75,
+        "Observed at": 155,
+        "Evidence": 95,
     }
     panel["fieldConfig"]["overrides"] = [
         {
@@ -143,10 +143,45 @@ def _provider_http_details(panel: dict) -> dict:
 
 
 def apply_provider_evidence_columns(payload: dict) -> None:
+    if payload.get("uid") == "bioetl-overview-v2":
+        from scripts.ops.observability.grafana._selected_run_panels import (
+            _provider_check_panel,
+            _style_provider_check,
+        )
+
+        panels = payload["panels"]
+        panels[:] = [panel for panel in panels if panel.get("id") not in {9460, 9461}]
+        evidence = _provider_check_panel(
+            9460, "Review Provider Evidence", {"x": 0, "y": 17, "w": 20, "h": 6},
+            ["provider", "check_result", "evidence", "observed_at"], limit=None,
+        )
+        check = _provider_check_panel(
+            9461, "Review Provider Check", {"x": 20, "y": 17, "w": 4, "h": 6},
+            ["check_result", "evidence"], limit=1,
+        )
+        _style_provider_check([evidence, check])
+        _provider_evidence_columns(evidence)
+        check["gridPos"] = {"x": 20, "y": 17, "w": 4, "h": 6}
+        for panel in panels:
+            if panel.get("id") == 9450:
+                panel["gridPos"]["y"] = 23
+                for child in panel.get("panels", []):
+                    child["gridPos"]["y"] = 24
+        panels.extend([evidence, check])
+        return
     if payload.get("uid") != "bioetl-provider-health-v2":
         return
     panels = payload["panels"]
-    panels[:] = [panel for panel in panels if panel.get("id") != 9471]
+    panels[:] = [panel for panel in panels if panel.get("id") not in {9400, 9471}]
     evidence = next(panel for panel in panels if panel["id"] == 9460)
     _provider_evidence_columns(evidence)
-    panels.append(_provider_http_details(evidence))
+    evidence["gridPos"] = {"x": 0, "y": 2, "w": 20, "h": 6}
+    check = next(panel for panel in panels if panel["id"] == 9461)
+    check["gridPos"] = {"x": 20, "y": 2, "w": 4, "h": 6}
+    details = _provider_http_details(evidence)
+    details["gridPos"]["y"] = 8
+    details["panels"][0]["gridPos"]["y"] = 9
+    panels.append(details)
+    panels[:] = [panel for panel in panels if panel.get("id") not in {9460, 9461}]
+    details["gridPos"]["y"] = 2
+    details["panels"][0]["gridPos"]["y"] = 3

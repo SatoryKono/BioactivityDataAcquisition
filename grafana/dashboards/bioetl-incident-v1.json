@@ -11343,7 +11343,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -11557,9 +11557,30 @@
                 "method": "GET",
                 "data": ""
               }
+            },
+            {
+              "refId": "B",
+              "type": "json",
+              "source": "url",
+              "parser": "uql",
+              "format": "table",
+              "root_selector": "($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))",
+              "url": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              },
+              "uql": "parse-json | jsonata \"($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))\""
             }
           ],
           "transformations": [
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "stage_id",
+                "mode": "outerTabular"
+              }
+            },
             {
               "id": "limit",
               "options": {
@@ -11576,6 +11597,10 @@
                     "reason",
                     "records_in",
                     "records_out",
+                    "quarantined",
+                    "excluded",
+                    "deduplicated",
+                    "filtered_out",
                     "duration_seconds",
                     "source"
                   ]
@@ -11591,8 +11616,18 @@
                   "reason": 2,
                   "records_in": 3,
                   "records_out": 4,
-                  "duration_seconds": 5,
-                  "source": 6
+                  "quarantined": 5,
+                  "excluded": 6,
+                  "deduplicated": 7,
+                  "filtered_out": 8,
+                  "duration_seconds": 9,
+                  "source": 10
+                },
+                "renameByName": {
+                  "quarantined": "Quarantined",
+                  "excluded": "Excluded",
+                  "deduplicated": "Deduplicated",
+                  "filtered_out": "Filtered out"
                 }
               }
             }

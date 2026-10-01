@@ -7,7 +7,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 The visual contract is one identical, theme-safe composition on all **seven**
 shipped dashboards. Numbered bus:
 
-`Run Explorer` · `1. Trust` · `2. Overview` · `3. Pipeline Diagnostics` ·
+`Run Explorer` · `1. Trust` · `2. Overview` ·
 `4. Provider Health` · `5. Data Quality` · `6. Incident Workspace`
 
 Run Explorer is the first destination for selecting a run. Dashboard titles
@@ -54,7 +54,7 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 
 ## Примеры URL (нормализованный формат)
 
-- Dashboard: `/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}`
+- Dashboard: `/d/bioetl-overview-v2/2-overview?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}`
 - Dashboard: `/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}`
 - Dashboard: `/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=unknown&var-run_type=All&${__url_time_range}`
 - Provider context mapping (fail-closed): `/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}`
@@ -72,7 +72,6 @@ L1-target dashboards MUST be discoverable from the selected-run answer on `bioet
 
 | Target UID | Source UID | Source panel id | Source panel title | First-screen row matcher |
 | --- | --- | ---: | --- | --- |
-| `bioetl-runtime` | `bioetl-overview-v2` | `9002` | `Review Run Domains` | `^Inspect Scope & Evidence$` |
 | `bioetl-control-plane-v1` | `bioetl-overview-v2` | `9002` | `Review Run Domains` | `^Inspect Scope & Evidence$` |
 | `bioetl-provider-health-v2` | `bioetl-overview-v2` | `9002` | `Review Run Domains` | `^Inspect Scope & Evidence$` |
 | `bioetl-dq-v2` | `bioetl-overview-v2` | `9002` | `Review Run Domains` | `^Inspect Scope & Evidence$` |

@@ -1,5 +1,13 @@
 ______________________________________________________________________
 
+> Portfolio update (2026-10-01): Pipeline Diagnostics (`bioetl-runtime`) is retired.
+> No panels were transferred as part of its removal. The active set is Run Explorer,
+> Replay Readiness, Run Overview, Provider Health, Data Quality, and Incident Workspace.
+> Use Run Overview for saved-run evidence, Data Quality for record counts, and
+> Incident Workspace for current/range telemetry. References to Pipeline Diagnostics
+> in older scenario descriptions below are historical and are not active routes.
+
+
 Version: 1.5.0
 Status: active
 Class: published
@@ -101,7 +109,6 @@ HTTP identity backend contract:
 | ------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
 | 1. Trust          | `bioetl-control-plane-v1`       | Replay/resume safety: manifest, ledger, checkpoint, telemetry confidence |
 | 2. Overview (Fleet)       | `bioetl-overview-v2`            | L0 answer-first Fleet: Status + Inputs evidence + Status/Domains handoff |
-| 3. Pipeline Diagnostics                | `bioetl-runtime`                | Blockers, latency, telemetry gap; workflow band merged in |
 | 4. Provider Health        | `bioetl-provider-health-v2`     | Population-first fleet severity + top causes |
 | 5. Data Quality           | `bioetl-dq-v2`                  | Now / Run / Range lanes; quarantine aggregates |
 | 6. Incident Workspace     | `bioetl-incident-v1`            | Domain-separated suspects + ALERTS timeline |
@@ -119,7 +126,6 @@ mention `6. Alerts & SLO` / Explore Logs / Explore Traces as removed surfaces.
 | --- | --- |
 | `bioetl-control-plane-v1` | Navigation bus `1. Trust` on every other board |
 | `bioetl-overview-v2` | Navigation bus `2. Overview` |
-| `bioetl-runtime` | Navigation bus `3. Pipeline Diagnostics` |
 | `bioetl-provider-health-v2` | Navigation bus `4. Provider Health` |
 | `bioetl-dq-v2` | Navigation bus `5. Data Quality` |
 | `bioetl-incident-v1` | Navigation bus `6. Incident Workspace` (or alert entry hop) |

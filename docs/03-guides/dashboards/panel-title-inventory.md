@@ -8,9 +8,9 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 
 | KPI key | Canonical UID | Mirror panel(s) |
 |---|---|---|
-| `failed_runs_in_range` | `bioetl-overview-v2` | `bioetl-runtime#205` |
-| `worst_lag_stage` | `bioetl-overview-v2` | `bioetl-runtime#237` |
-| `worst_backlog_stage` | `bioetl-overview-v2` | `bioetl-runtime#238` |
+| `failed_runs_in_range` | `bioetl-overview-v2` | — (dashboard retired) |
+| `worst_lag_stage` | `bioetl-overview-v2` | — (dashboard retired) |
+| `worst_backlog_stage` | `bioetl-overview-v2` | — (dashboard retired) |
 
 | Dashboard | Panel ID | Title |
 | --- | ---: | --- |
@@ -165,13 +165,3 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9460 | Review Provider Evidence |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
 | bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 10) |
-| bioetl-runtime.json | 1000 | Navigate Dashboards |
-| bioetl-runtime.json | 9400 | Understand Pipeline Scope |
-| bioetl-runtime.json | 9998 | Review Selected Run Status |
-| bioetl-runtime.json | 9402 | Inspect Pipeline Identity |
-| bioetl-runtime.json | 9403 | Inspect Processed Records |
-| bioetl-runtime.json | 9450 | Inspect Saved Run Evidence |
-| bioetl-runtime.json | 9460 | Inspect Selected Run Stages |
-| bioetl-runtime.json | 9451 | Inspect Selected Run Domains |
-| bioetl-runtime.json | 9452 | Inspect Selected Run Identity |
-| bioetl-runtime.json | 9463 | Review Total Run Duration |

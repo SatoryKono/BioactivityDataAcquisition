@@ -1,11 +1,16 @@
-"""Attach exact-run saved layer counters to Data Quality stage diagnostics."""
+"""Attach exact-run saved per-stage removal counters to stage diagnostics."""
 
 from copy import deepcopy
 
 
 def apply_stage_removal_columns(payload: dict) -> None:
     """Join saved report counters without substituting current telemetry."""
-    if payload.get("uid") not in {"bioetl-runtime", "bioetl-dq-v2", "bioetl-overview-v2"}:
+    if payload.get("uid") not in {
+        "bioetl-runtime",
+        "bioetl-dq-v2",
+        "bioetl-overview-v2",
+        "bioetl-incident-v1",
+    }:
         return
     pending = list(payload["panels"])
     while pending:
@@ -15,13 +20,14 @@ def apply_stage_removal_columns(payload: dict) -> None:
             continue
         fields = ["quarantined", "excluded", "deduplicated", "filtered_out"]
         projection = (
-            "($l := layers; $v := function($k){$x := $lookup($l,$k); "
-            "$type($x) = 'number' and $x >= 0 ? $x : null}; "
+            "($r := function($s,$o){$exists($s.removals[outcome=$o]) "
+            "? $sum($s.removals[outcome=$o].count) "
+            ": ($s.tracking = 'full' ? 0 : null)}; "
             "$map(funnel, function($s){ {'stage_id':$s.stage_id, "
-            "'quarantined':$v($s.stage_id & '_quarantined'), "
-            "'excluded':$v($s.stage_id & '_excluded_by_contract'), "
-            "'deduplicated':$v($s.stage_id & '_deduplicated'), "
-            "'filtered_out':$v($s.stage_id & '_filtered_out')} }))"
+            "'quarantined':$r($s,'quarantined'), "
+            "'excluded':$r($s,'excluded_by_contract'), "
+            "'deduplicated':$r($s,'deduplicated'), "
+            "'filtered_out':$r($s,'filtered_out')} }))"
         )
         target = deepcopy(panel["targets"][0])
         target.update(
@@ -69,7 +75,18 @@ def apply_stage_removal_columns(payload: dict) -> None:
                     deduplicated="Deduplicated",
                     filtered_out="Filtered out",
                 )
-        note = " Removal counters come from saved report layers; absent counters remain UNKNOWN."
-        if note not in panel["description"]:
-            panel["description"] += note
+        old_notes = (
+            " Removal counters come from saved report layers;"
+            " absent counters remain UNKNOWN.",
+        )
+        note = (
+            " Removal counters are per-stage saved funnel removals;"
+            " untracked stages stay UNKNOWN."
+        )
+        description = str(panel.get("description") or "")
+        for old in old_notes:
+            description = description.replace(old, "")
+        panel["description"] = (
+            description.rstrip() if note in description else description.rstrip() + note
+        )
         panel["fieldConfig"]["defaults"]["noValue"] = "UNKNOWN"

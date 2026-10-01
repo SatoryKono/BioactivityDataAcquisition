@@ -449,32 +449,14 @@
       ]
     },
     {
-      "id": 9400,
-      "type": "text",
-      "title": "",
-      "gridPos": {
-        "x": 0,
-        "y": 2,
-        "w": 15,
-        "h": 3
-      },
-      "description": "SELECTED RUN · Run ID is always set. Provider evidence is the saved check for this run. Fleet and current telemetry are not shown here.",
-      "options": {
-        "mode": "html",
-        "bioetlDisplayTitle": "Understand Selected Run",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">SELECTED RUN · Provider evidence is the saved check for this Run ID. Fleet and current telemetry are not shown here.</div>"
-      },
-      "links": []
-    },
-    {
       "id": 9461,
       "type": "stat",
       "title": "Review Provider Check",
       "gridPos": {
-        "x": 15,
+        "x": 20,
         "y": 2,
-        "w": 9,
-        "h": 3
+        "w": 4,
+        "h": 6
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. SELECT RUN means no Run ID is selected. VALID EMPTY means no saved provider check. QUERY ERROR means backend unavailable or request failure.",
@@ -633,9 +615,9 @@
       "title": "Review Provider Evidence",
       "gridPos": {
         "x": 0,
-        "y": 5,
-        "w": 24,
-        "h": 5
+        "y": 2,
+        "w": 20,
+        "h": 6
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Saved provider evidence for this Run ID. Cached Bronze means the provider API was not called: Check performed is No and Check result is —. UNKNOWN means the performed state or result is unknown. Observed at preserves the saved timezone. Expand Provider HTTP details for recorded response time, HTTP status and endpoint; missing details are not invented. VALID EMPTY is an empty successful response. SELECT RUN requires context; QUERY ERROR is a failed request.",
@@ -670,7 +652,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 75
               }
             ]
           },
@@ -682,31 +664,31 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 112
+                "value": 105
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Check performed"
+              "options": "Performed"
             },
             "properties": [
               {
                 "id": "custom.width",
-                "value": 140
+                "value": 90
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Check result"
+              "options": "Result"
             },
             "properties": [
               {
                 "id": "custom.width",
-                "value": 102
+                "value": 75
               }
             ]
           },
@@ -718,7 +700,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 160
+                "value": 155
               }
             ]
           },
@@ -730,7 +712,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 95
               }
             ]
           },
@@ -802,8 +784,8 @@
             "renameByName": {
               "provider": "Provider",
               "data_source": "Data source",
-              "check_performed": "Check performed",
-              "check_result": "Check result",
+              "check_performed": "Performed",
+              "check_result": "Result",
               "reason": "Reason",
               "observed_display": "Observed at",
               "report_label": "Evidence"
@@ -820,7 +802,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 18,
+        "y": 8,
         "w": 24,
         "h": 1
       },
@@ -831,7 +813,7 @@
           "title": "Inspect Provider HTTP Details",
           "gridPos": {
             "x": 0,
-            "y": 19,
+            "y": 9,
             "w": 24,
             "h": 6
           },
