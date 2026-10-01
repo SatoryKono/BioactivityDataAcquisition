@@ -23,6 +23,10 @@ from bioetl.composition.runtime_builders.runner_builder import (
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     RunnerBuilderWiring,
 )
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+    normalize_required_persistence_profile,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
@@ -47,6 +51,16 @@ def _coerce_optional_str(value: object | None) -> str | None:
 def _fail_fast_empty_explicit_cached_bronze(ctx: PipelineRunContext) -> None:
     cached_bronze = getattr(ctx, "cached_bronze", None)
     if cached_bronze is None or not getattr(cached_bronze, "enabled", False):
+        return
+    strict = bool(getattr(ctx, "exact_replay", False)) or (
+        normalize_required_persistence_profile(
+            getattr(ctx, "required_persistence_profile", None)
+        )
+        in STRICT_PERSISTENCE_PROFILES
+    )
+    # degraded_observable must persist the run manifest before failing so the
+    # audit trail lands; strict profiles fail closed without artifacts.
+    if not strict:
         return
     bronze_path = _coerce_optional_str(getattr(cached_bronze, "bronze_path", None))
     if bronze_path is None:
