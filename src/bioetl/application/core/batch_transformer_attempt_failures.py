@@ -5,13 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.base_transformer import FilteredOutError
-from bioetl.application.core.batch_transformer_attempt_success import empty_outcome
-from bioetl.application.core.batch_transformer_state import RecordTransformOutcome
-from bioetl.application.core.quarantine_manager import (
+from bioetl.application.core._quarantine_entries import (
     DQQuarantineEntry,
     FilteredQuarantineEntry,
 )
+from bioetl.application.core.base_transformer import FilteredOutError
+from bioetl.application.core.batch_transformer_attempt_success import empty_outcome
+from bioetl.application.core.batch_transformer_state import RecordTransformOutcome
 from bioetl.domain.run_reports.reason_catalog import compose_field_reason_code
 
 if TYPE_CHECKING:

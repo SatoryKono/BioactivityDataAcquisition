@@ -4,10 +4,10 @@ Linked issue: #10596 (AUD-006). Schema: `cast-any-typing-census-v1`.
 
 Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`, `Any: JSON`, `as_mixin_host(`.
 
-- total_cast_any_count: 374
-- justified_count: 243
-- unjustified_count: 131
-- file_count: 117
+- total_cast_any_count: 370
+- justified_count: 241
+- unjustified_count: 129
+- file_count: 115
 
 ## By category
 
@@ -15,21 +15,21 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | --- | ---: |
 | `pd3_host_attr_default` | 131 |
 | `pd6_host_attr_default` | 90 |
-| `type_002_policy` | 3 |
-| `any_mixin_host` | 3 |
+| `type_002_policy` | 2 |
+| `any_mixin_host` | 2 |
 | `any_host_attr` | 16 |
 | `any_json` | 0 |
 | `as_mixin_host_call` | 0 |
-| `unjustified` | 131 |
+| `unjustified` | 129 |
 
 ## By layer
 
 | Layer | Total | Unjustified |
 | --- | ---: | ---: |
-| `application` | 181 | 56 |
-| `composition` | 22 | 8 |
+| `application` | 178 | 55 |
+| `composition` | 19 | 5 |
 | `domain` | 12 | 2 |
-| `infrastructure` | 156 | 64 |
+| `infrastructure` | 158 | 66 |
 | `interfaces` | 3 | 1 |
 
 ## Unjustified by sub-bucket (triage only)
@@ -37,7 +37,7 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | Sub-bucket | Count |
 | --- | ---: |
 | `pd4_host_default_pending_protocol` | 60 |
-| `free_form_reason` | 70 |
+| `free_form_reason` | 68 |
 | `no_reason_tag` | 1 |
 
 ## Top files
@@ -63,9 +63,9 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | `src/bioetl/application/core/batch_writer_columns_mixin.py` | 2 | 0 | 2 |
 | `src/bioetl/application/services/ops/health_service.py` | 2 | 0 | 2 |
 | `src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py` | 2 | 0 | 2 |
-| `src/bioetl/composition/services/versioning.py` | 2 | 0 | 2 |
 | `src/bioetl/infrastructure/adapters/decorators/_circuit_breaker_snapshot.py` | 2 | 0 | 2 |
 | `src/bioetl/infrastructure/export/debug_export_ops.py` | 2 | 0 | 2 |
+| `src/bioetl/infrastructure/provenance/code_revision.py` | 2 | 0 | 2 |
 | `src/bioetl/infrastructure/storage/gold/writer_metrics.py` | 2 | 0 | 2 |
 | `src/bioetl/infrastructure/storage/lineage_persistence.py` | 2 | 0 | 2 |
 | `src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py` | 2 | 0 | 2 |
@@ -102,7 +102,6 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | `duck-typed async HTTP client context` | 1 |
 | `duck-typed async context manager` | 1 |
 | `duck-typed lineage fragment without CP import` | 1 |
-| `dynamic provider class attribute` | 1 |
 | `export writer accepts Arrow table duck-type` | 1 |
 | `factory schema Protocol→concrete` | 1 |
 | `heterogeneous factory config union` | 1 |
@@ -116,7 +115,6 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | `optional column-order service` | 1 |
 | `optional substance field` | 1 |
 | `payload = dict(vars(ctx))` | 1 |
-| `phased postrun methods are supplied by mixins` | 1 |
 | `pyarrow StructType lacks __iter__ in stubs` | 1 |
 | `pyarrow Table after isinstance gate` | 1 |
 | `pyarrow dataset duck-type` | 1 |
