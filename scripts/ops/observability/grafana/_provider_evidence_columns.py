@@ -154,14 +154,14 @@ def apply_provider_evidence_columns(payload: dict) -> None:
         evidence = _provider_check_panel(
             9460,
             "Review Provider Evidence",
-            {"x": 0, "y": 18, "w": 20, "h": 6},
+            {"x": 0, "y": 18, "w": 15, "h": 5},
             ["provider", "check_result", "evidence", "observed_at"],
             limit=None,
         )
         check = _provider_check_panel(
             9461,
             "Review Provider Check",
-            {"x": 20, "y": 18, "w": 4, "h": 6},
+            {"x": 15, "y": 18, "w": 9, "h": 5},
             ["check_result", "evidence"],
             limit=1,
         )
@@ -170,13 +170,13 @@ def apply_provider_evidence_columns(payload: dict) -> None:
         evidence["id"] = 9480
         check["id"] = 9481
         _provider_evidence_columns(evidence)
-        evidence["gridPos"] = {"x": 0, "y": 18, "w": 20, "h": 6}
-        check["gridPos"] = {"x": 20, "y": 18, "w": 4, "h": 6}
+        evidence["gridPos"] = {"x": 0, "y": 18, "w": 15, "h": 5}
+        check["gridPos"] = {"x": 15, "y": 18, "w": 9, "h": 5}
         for panel in panels:
             if panel.get("id") == 9450:
-                panel["gridPos"]["y"] = 24
+                panel["gridPos"]["y"] = 23
                 for child in panel.get("panels", []):
-                    child["gridPos"]["y"] = 25
+                    child["gridPos"]["y"] = 24
         panels.extend([evidence, check])
         return
     if payload.get("uid") != "bioetl-provider-health-v2":

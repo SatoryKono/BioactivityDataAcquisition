@@ -576,7 +576,7 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
             "excluded",
             "deduplicated",
             "filtered_out",
-            "duration_seconds",
+            *([] if name == "bioetl-overview-v2" else ["duration_seconds"]),
             "source",
         ]
         organize = next(item for item in transforms if item["id"] == "organize")

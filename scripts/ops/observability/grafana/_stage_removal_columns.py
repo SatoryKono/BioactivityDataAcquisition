@@ -62,6 +62,8 @@ def apply_stage_removal_columns(payload: dict) -> None:
             "duration_seconds",
             "source",
         ]
+        if payload.get("uid") == "bioetl-overview-v2":
+            order.remove("duration_seconds")
         for transform in panel["transformations"]:
             if transform["id"] == "filterFieldsByName":
                 transform["options"]["include"]["names"] = order
