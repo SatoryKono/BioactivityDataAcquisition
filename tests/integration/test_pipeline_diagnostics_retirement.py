@@ -3,10 +3,14 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.ops.observability.grafana.dashboard_context_links import (
     retire_runtime_links,
 )
 from scripts.ops.observability.grafana.render_nav_bus import BUS, FILE_BY_UID
+
+pytestmark = pytest.mark.integration
 
 
 def test_retired_dashboard_is_absent_from_both_profiles_and_navigation():

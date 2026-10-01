@@ -12,10 +12,10 @@ def apply_replay_layout(payload: dict) -> None:
 
     def place(panel_id: int, x: int, y: int, w: int, h: int) -> dict:
         panel = by_id[panel_id]
-        panel["gridPos"] = dict(x=x, y=y, w=w, h=h)
+        panel["gridPos"] = {"x": x, "y": y, "w": w, "h": h}
         return panel
 
-    checks = place(9423, 0, 5, 24, 10)
+    checks = place(9423, 0, 5, 24, 13)
     checks["options"].update(cellHeight="sm", sortBy=[{"displayName": "Result", "desc": False}])
     # Alphabetic order is fail, n/a, pass, unknown; explicit sorting puts unknown
     # immediately after fail while preserving every check and evidence reference.
@@ -25,7 +25,7 @@ def apply_replay_layout(payload: dict) -> None:
         'result=\'unknown\' ? 1 : result=\'pass\' ? 2 : 3)"'
     ))
     checks["options"].pop("sortBy", None)
-    evidence = place(9408, 0, 15, 24, 10)
+    evidence = place(9408, 0, 18, 24, 10)
     evidence["title"] = "Review Replay Evidence"
     evidence["description"] = (
         "SELECTED RUN · All identity anchors, missing first. Presence is not verification. "
@@ -57,22 +57,26 @@ def apply_replay_layout(payload: dict) -> None:
         {"title": "Find complete runs", "url": base + "/ops/control-plane/latest-complete-run?" + query + "&workflow=${workflow:percentencode}&error_as_row=1", "targetBlank": True},
     ]
     verdict = place(9422, 15, 2, 9, 3)
+    verdict["fieldConfig"]["overrides"] = []
+    verdict["options"].update(textMode="value", reduceOptions={"values": True, "calcs": ["lastNotNull"], "fields": "/^verdict$/"})
+    verdict["transformations"] = [{"id": "filterFieldsByName", "options": {"include": {"names": ["verdict"]}}}]
     note = " Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run."
     if note not in verdict["description"]:
         verdict["description"] += note
-    trust = place(9418, 0, 25, 24, 4)
+    trust = place(9418, 0, 28, 24, 4)
     trust["options"]["cellHeight"] = "sm"
+    trust["options"]["footer"] = {"show": False, "enablePagination": False}
 
     def row(panel_id: int, title: str, y: int, ids: tuple[int, ...]) -> dict:
         return {
             "id": panel_id, "type": "row", "title": title, "collapsed": True,
-            "gridPos": dict(x=0, y=y, w=24, h=1),
+            "gridPos": {"x": 0, "y": y, "w": 24, "h": 1},
             "panels": [place(child, 0, y + 1 + index * 9, 24, 9) for index, child in enumerate(ids)],
         }
 
     payload["panels"] = [
         place(1000, 0, 0, 24, 2), place(9400, 0, 2, 15, 3), verdict,
         checks, evidence, trust,
-        row(9430, "Inspect Manifest / Lineage / Retention", 29, (9414, 9415, 9416)),
-        row(9431, "Inspect Resume / Checkpoint", 30, (9413, 9406)),
+        row(9430, "Inspect Manifest / Lineage / Retention", 32, (9414, 9415, 9416)),
+        row(9431, "Inspect Resume / Checkpoint", 33, (9413, 9406)),
     ]

@@ -16,30 +16,17 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | --- | ---: | --- |
 | bioetl-control-plane-v1.json | 1000 | Navigate Dashboards |
 | bioetl-control-plane-v1.json | 9400 | Inspect Scope & Evidence |
-| bioetl-control-plane-v1.json | 9418 | Review Selected-Run Trust |
-| bioetl-control-plane-v1.json | 9416 | Review Retention Compliance |
-| bioetl-control-plane-v1.json | 9419 | Review Lineage Validation |
-| bioetl-control-plane-v1.json | 9415 | Review Lineage Validation |
-| bioetl-control-plane-v1.json | 902 | Inspect Checkpoint and Replay Checks |
-| bioetl-control-plane-v1.json | 9413 | Review Checkpoint Validation |
-| bioetl-control-plane-v1.json | 9423 | Review Exact Replay Checks |
-| bioetl-control-plane-v1.json | 901 | Inspect Manifest Validation |
-| bioetl-control-plane-v1.json | 9414 | Review Manifest Validation |
-| bioetl-control-plane-v1.json | 905 | Inspect Run Identity Evidence |
-| bioetl-control-plane-v1.json | 9407 | Inspect Identity Values |
-| bioetl-control-plane-v1.json | 9410 | Explain Missing Identity Data |
-| bioetl-control-plane-v1.json | 9411 | Explain Missing Record Counts |
-| bioetl-control-plane-v1.json | 9405 | Review Identity Gaps |
-| bioetl-control-plane-v1.json | 9408 | Review Required Replay Anchors |
-| bioetl-control-plane-v1.json | 9406 | Compare Checkpoint Anchors |
-| bioetl-control-plane-v1.json | 9409 | Review Additional Forensic Anchors |
-| bioetl-control-plane-v1.json | 139 | Review Uncovered Replay Signals |
-| bioetl-control-plane-v1.json | 9412 | Inspect Run Details |
-| bioetl-control-plane-v1.json | 9402 | Review Run Summary |
-| bioetl-control-plane-v1.json | 9417 | Review Bounded Failure Reasons |
 | bioetl-control-plane-v1.json | 9422 | Review Exact Replay Readiness |
-| bioetl-control-plane-v1.json | 9420 | Inspect Complete Run Discovery |
-| bioetl-control-plane-v1.json | 9421 | Inspect Latest Complete Run |
+| bioetl-control-plane-v1.json | 9423 | Review Exact Replay Checks |
+| bioetl-control-plane-v1.json | 9408 | Review Replay Evidence |
+| bioetl-control-plane-v1.json | 9418 | Review Selected-Run Trust |
+| bioetl-control-plane-v1.json | 9430 | Inspect Manifest / Lineage / Retention |
+| bioetl-control-plane-v1.json | 9414 | Review Manifest Validation |
+| bioetl-control-plane-v1.json | 9415 | Review Lineage Validation |
+| bioetl-control-plane-v1.json | 9416 | Review Retention Compliance |
+| bioetl-control-plane-v1.json | 9431 | Inspect Resume / Checkpoint |
+| bioetl-control-plane-v1.json | 9413 | Review Checkpoint Validation |
+| bioetl-control-plane-v1.json | 9406 | Compare Checkpoint Anchors |
 | bioetl-dq-v2.json | 1000 | Navigate Dashboards |
 | bioetl-dq-v2.json | 9400 | Understand Evidence Scope |
 | bioetl-dq-v2.json | 9406 | Review Selected Run Status |

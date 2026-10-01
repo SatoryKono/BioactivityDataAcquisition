@@ -41,7 +41,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_run_manifest_store_builder_uses_control_plane_root_and_metrics() -> None:
-    settings = SimpleNamespace(data_dir=Path("/tmp/bioetl"))
+    settings = SimpleNamespace(data_dir=Path("/tmp/bioetl"), bronze_path=Path("/tmp/bioetl/bronze"))
     metrics = MagicMock()
 
     with (
@@ -54,10 +54,13 @@ def test_run_manifest_store_builder_uses_control_plane_root_and_metrics() -> Non
     ):
         result = builders.create_run_manifest_store(settings=settings, metrics=metrics)
 
-    root_fn.assert_called_once_with(settings, "run_manifest")
+    assert root_fn.call_count == 3
+    verifier = store_cls.call_args.kwargs["replay_object_verifier"]
+    assert verifier.bronze_root == settings.bronze_path
     store_cls.assert_called_once_with(
         base_path=Path("/tmp/bioetl/control/run_manifest"),
         metrics=metrics,
+        replay_object_verifier=verifier,
     )
     assert result is store_cls.return_value
 

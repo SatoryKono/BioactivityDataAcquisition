@@ -88,7 +88,7 @@ def unavailable_status(
         "reasons_text": reason,
         "reasons_display": display_reason(reason),
         "reasons_count": None,
-        "trust_reasons_action": None,
+        "trust_reasons_action": "Not assessed",
         "evidence_observed_at": None,
     }
     return {

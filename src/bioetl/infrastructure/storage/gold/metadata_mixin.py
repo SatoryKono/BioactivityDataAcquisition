@@ -4,16 +4,12 @@
 from __future__ import annotations
 
 from datetime import datetime
-from types import ModuleType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.infrastructure.storage.gold.io_helpers import load_gold_writer_module
 from bioetl.infrastructure.storage.gold.metadata_audit import (
     _build_gold_audit_entry,
     _GoldAuditWriteRequest,
-)
-from bioetl.infrastructure.storage.gold.writer_protocols import (
-    _GoldWriterMetadataHost,
 )
 
 if TYPE_CHECKING:
@@ -21,8 +17,15 @@ if TYPE_CHECKING:
 
     from bioetl.domain.medallion import GoldWriteMode
     from bioetl.domain.models.metadata import GoldMetadata
+    from bioetl.domain.ports import (
+        AuditPort,
+        LineageStorePort,
+        MetadataCoordinatorPort,
+        MetricsPort,
+    )
     from bioetl.domain.types import GoldRecord, RunID, ScdConfig
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
+    from bioetl.infrastructure.storage.gold.writer_protocols import _GoldMetadataHost
 
 
 class GoldWriterMetadataMixin:
@@ -34,20 +37,24 @@ class GoldWriterMetadataMixin:
     calls during the Gold write lifecycle.
     """
 
-    def _load_gold_writer_module(self) -> ModuleType:
-        """Load ``gold_writer`` through the shared monkeypatch import path."""
-        return load_gold_writer_module()
+    _audit: AuditPort | None = None
+    _metadata_coordinator: MetadataCoordinatorPort | None = None
+    _lineage_store: LineageStorePort | None = None
+    _metrics: MetricsPort | None = None
+    _transform_version: str | None = None
+    _load_gold_writer_module = staticmethod(load_gold_writer_module)
 
     async def _log_gold_audit(
-        self: _GoldWriterMetadataHost,
+        self,
         table_name: str,
         records: list[GoldRecord],
         mode: GoldWriteMode,
         ingestion_ts: datetime | None,
         run_id: RunID | None,
     ) -> None:
+        host = cast("_GoldMetadataHost", cast(object, self))
         audit_entry = _build_gold_audit_entry(
-            self,
+            host,
             _GoldAuditWriteRequest(
                 table_name=table_name,
                 records=records,
@@ -61,23 +68,22 @@ class GoldWriterMetadataMixin:
         )
         await self._audit.log_write(audit_entry)
 
-    async def _get_delta_version(
-        self: _GoldWriterMetadataHost, table_path: str
-    ) -> int | None:
+    async def _get_delta_version(self, table_path: str) -> int | None:
         from bioetl.infrastructure.storage.gold.metadata_operations import (
             _extract_delta_table_version,
         )
 
-        module = self._load_gold_writer_module()
+        host = cast("_GoldMetadataHost", cast(object, self))
+        module = host._load_gold_writer_module()
 
         try:
-            dt = await self._run_in_executor(lambda: module.DeltaTable(table_path))
+            dt = await host._run_in_executor(lambda: module.DeltaTable(table_path))
             return _extract_delta_table_version(dt)
         except module.TableNotFoundError:
             return None
 
     async def _write_gold_metadata(
-        self: _GoldWriterMetadataHost,
+        self,
         table_path: str,
         table_name: str,
         records: list[GoldRecord],
@@ -97,10 +103,11 @@ class GoldWriterMetadataMixin:
 
         if not records:
             return
-        if isinstance(self._metadata_writer, NoOpMetadataWriter):
+        host = cast("_GoldMetadataHost", cast(object, self))
+        if isinstance(host._metadata_writer, NoOpMetadataWriter):
             return
         prepared = _prepare_gold_metadata_write(
-            self,
+            host,
             _GoldMetadataWriteRequest(
                 table_path=table_path,
                 table_name=table_name,
@@ -113,10 +120,10 @@ class GoldWriterMetadataMixin:
                 gold_schema=gold_schema,
             ),
         )
-        await _persist_gold_metadata_write(self, prepared)
+        await _persist_gold_metadata_write(host, prepared)
 
     async def _write_gold_metadata_file(
-        self: _GoldWriterMetadataHost,
+        self,
         *,
         table_path: str,
         metadata: GoldMetadata,
@@ -124,17 +131,18 @@ class GoldWriterMetadataMixin:
         provider_name: str,
         entity_name: str,
     ) -> None:
-        await self._metadata_writer.write_gold_metadata(
+        host = cast("_GoldMetadataHost", cast(object, self))
+        await host._metadata_writer.write_gold_metadata(
             table_path,
             metadata,
             table_name=table_name,
-            flat_structure=self._flat_structure,
+            flat_structure=host._flat_structure,
             provider=provider_name,
             entity=entity_name,
         )
 
     async def _write_gold_merged_metadata(
-        self: _GoldWriterMetadataHost,
+        self,
         table_path: str,
         table_name: str,
         records: list[GoldRecord],
@@ -149,10 +157,11 @@ class GoldWriterMetadataMixin:
             _persist_gold_metadata_write,
         )
 
-        if isinstance(self._metadata_writer, NoOpMetadataWriter):
+        host = cast("_GoldMetadataHost", cast(object, self))
+        if isinstance(host._metadata_writer, NoOpMetadataWriter):
             return
         prepared = _maybe_prepare_gold_merged_metadata_write(
-            self,
+            host,
             _GoldMergedMetadataWriteRequest(
                 table_path=table_path,
                 table_name=table_name,
@@ -164,7 +173,7 @@ class GoldWriterMetadataMixin:
         )
         if prepared is None:
             return
-        await _persist_gold_metadata_write(self, prepared)
+        await _persist_gold_metadata_write(host, prepared)
 
 
 __all__ = ["GoldWriterMetadataMixin"]

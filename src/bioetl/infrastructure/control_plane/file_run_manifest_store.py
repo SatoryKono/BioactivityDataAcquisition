@@ -35,6 +35,9 @@ from bioetl.infrastructure.control_plane._run_manifest_scope_index import (
 from bioetl.infrastructure.control_plane._run_manifest_scope_rebuild import (
     plan_latest_scope_index_rebuild,
 )
+from bioetl.infrastructure.control_plane.replay_object_verifier import (
+    ReplayObjectVerifier,
+)
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 from bioetl.infrastructure.control_plane.replay_object_verifier import ReplayObjectVerifier
 from bioetl.infrastructure.storage.file_metadata_index import catalog_text_index

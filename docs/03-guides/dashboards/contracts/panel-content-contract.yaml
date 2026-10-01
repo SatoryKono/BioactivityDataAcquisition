@@ -54,69 +54,6 @@ allowed_empty_state_classes:
 dashboards:
   bioetl-control-plane-v1:
     panels:
-      '139':
-        title: Review Uncovered Replay Signals
-        role: guidance
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: &id001
-        - full_dark
-        - full_light
-        - zoom_200
-      '901':
-        title: Inspect Manifest Validation
-        role: row_group
-        tier: 4
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
-      '902':
-        title: Inspect Checkpoint and Replay Checks
-        role: row_group
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
-      '905':
-        title: Inspect Run Identity Evidence
-        role: row_group
-        tier: 4
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
       '1000':
         title: ''
         role: navigation
@@ -131,7 +68,10 @@ dashboards:
         - navigation_context
         fixture_cases:
         - not_applicable
-        render_profiles: *id001
+        render_profiles: &id001
+        - full_dark
+        - full_light
+        - zoom_200
       '9400':
         title: ''
         role: guidance
@@ -146,50 +86,6 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id001
-      '9402':
-        title: Review Run Summary
-        role: identity_table
-        tier: 2
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - backend_error
-        render_profiles:
-        - full_dark
-        required_columns:
-        - parameter
-        - value
-      '9405':
-        title: Review Identity Gaps
-        role: evidence_table
-        tier: 3
-        scope: time_range
-        scope_class: time_range
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
         render_profiles: *id001
       '9406':
         title: Compare Checkpoint Anchors
@@ -212,29 +108,8 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
-      '9407':
-        title: Inspect Identity Values
-        role: forensic_table
-        tier: 3
-        scope: time_range
-        scope_class: time_range
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
       '9408':
-        title: Review Required Replay Anchors
+        title: Review Replay Evidence
         role: evidence_table
         tier: 3
         scope: time_range
@@ -253,72 +128,6 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id001
-      '9409':
-        title: Review Additional Forensic Anchors
-        role: evidence_table
-        tier: 3
-        scope: time_range
-        scope_class: time_range
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
-      '9410':
-        title: Explain Missing Identity Data
-        role: guidance
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
-      '9411':
-        title: Explain Missing Record Counts
-        role: guidance
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
-      '9412':
-        title: Inspect Run Details
-        role: row_group
-        tier: 4
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
         render_profiles: *id001
       '9413':
         title: Review Checkpoint Validation
@@ -404,27 +213,6 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
-      '9417':
-        title: Review Bounded Failure Reasons
-        role: evidence_table
-        tier: 3
-        scope: time_range
-        scope_class: time_range
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
       '9418':
         title: Review Selected-Run Trust
         role: evidence_table
@@ -446,60 +234,6 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
-      '9419':
-        title: Review Lineage Validation
-        role: row_group
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
-      '9420':
-        title: Inspect Complete Run Discovery
-        role: row_group
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: &id002
-        - full_dark
-        - full_light
-        - zoom_200
-      '9421':
-        title: Inspect Latest Complete Run
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id002
       '9422':
         title: Review Exact Replay Readiness
         role: verdict
@@ -548,6 +282,39 @@ dashboards:
         - backend_error
         render_profiles:
         - desktop_dark
+      '9430':
+        title: Inspect Manifest / Lineage / Retention
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: &id002
+        - full_dark
+        - full_light
+        - zoom_200
+      '9431':
+        title: Inspect Resume / Checkpoint
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id002
   bioetl-dq-v2:
     panels:
       '1000':

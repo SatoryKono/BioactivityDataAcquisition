@@ -416,14 +416,14 @@
       "description": "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is selected; QUERY ERROR means backend unavailable or request failure. UNKNOWN means no assessed value, never READY. Open replay checks for basis. Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run.",
       "options": {
         "reduceOptions": {
-          "values": false,
+          "values": true,
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "verdict"
+          "fields": "/^verdict$/"
         },
         "orientation": "horizontal",
-        "textMode": "value_and_name",
+        "textMode": "value",
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
@@ -488,20 +488,7 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "verdict"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "${__data.fields.explanation}"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "targets": [
         {
@@ -524,8 +511,7 @@
           "options": {
             "include": {
               "names": [
-                "verdict",
-                "explanation"
+                "verdict"
               ]
             }
           }
@@ -535,8 +521,7 @@
         {
           "title": "View replay checks",
           "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9423&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
+          "targetBlank": false
         }
       ]
     },
@@ -566,7 +551,7 @@
         "x": 0,
         "y": 5,
         "w": 24,
-        "h": 10
+        "h": 13
       },
       "options": {
         "showHeader": true,
@@ -709,7 +694,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 15,
+        "y": 18,
         "w": 24,
         "h": 10
       },
@@ -798,7 +783,7 @@
       "title": "Review Selected-Run Trust",
       "gridPos": {
         "x": 0,
-        "y": 25,
+        "y": 28,
         "w": 24,
         "h": 4
       },
@@ -956,8 +941,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
-                  "wrapText": true
+                  "type": "auto"
                 }
               }
             ]
@@ -1171,7 +1155,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Action"
+              "options": "trust_reasons_action"
             },
             "properties": [
               {
@@ -1188,6 +1172,26 @@
                     "targetBlank": false
                   }
                 ]
+              },
+              {
+                "id": "displayName",
+                "value": "Action"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trust_action_note"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Action"
+              },
+              {
+                "id": "links",
+                "value": []
               }
             ]
           }
@@ -1196,7 +1200,7 @@
       "options": {
         "footer": {
           "show": false,
-          "enablePagination": true
+          "enablePagination": false
         },
         "showHeader": true,
         "cellHeight": "sm"
@@ -1204,16 +1208,17 @@
       "targets": [
         {
           "format": "table",
-          "parser": "backend",
+          "parser": "uql",
           "refId": "A",
-          "root_selector": "presentation_trust",
+          "root_selector": "",
           "source": "url",
           "type": "json",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "data": "",
             "method": "GET"
-          }
+          },
+          "uql": "parse-json | jsonata \"presentation_trust.($base := $sift($, function($v,$k){$k != \\\"trust_reasons_action\\\"}); $merge([$base, reasons_count > 0 ? {\\\"trust_reasons_action\\\":\\\"View trust reasons\\\"} : {\\\"trust_action_note\\\": reasons_count = 0 ? \\\"No trust issues\\\" : \\\"Not assessed\\\"}]))\""
         }
       ],
       "transformations": [
@@ -1240,7 +1245,8 @@
                 "evidence_observed_at",
                 "reasons_count",
                 "evidence_freshness",
-                "trust_reasons_action"
+                "trust_reasons_action",
+                "trust_action_note"
               ]
             }
           }
@@ -1255,14 +1261,14 @@
               "evidence_observed_at": 3,
               "reasons_count": 2,
               "evidence_freshness": 5,
-              "trust_reasons_action": 4
+              "trust_reasons_action": 4,
+              "trust_action_note": 4
             },
             "renameByName": {
               "processing_status": "Processing result",
               "trust_status": "Saved trust verdict",
               "evidence_observed_at": "Assessed at",
-              "reasons_count": "Reason count",
-              "trust_reasons_action": "Action"
+              "reasons_count": "Reason count"
             },
             "excludeByName": {
               "reasons_display": true
@@ -1276,7 +1282,14 @@
           }
         }
       ],
-      "links": []
+      "links": [
+        {
+          "title": "Inspect all trust reasons",
+          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+          "includeVars": false,
+          "targetBlank": false
+        }
+      ]
     },
     {
       "id": 9430,
@@ -1285,7 +1298,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 29,
+        "y": 32,
         "w": 24,
         "h": 1
       },
@@ -1473,7 +1486,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 30,
+            "y": 33,
             "w": 24,
             "h": 9
           },
@@ -1722,7 +1735,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 39,
+            "y": 42,
             "w": 24,
             "h": 9
           },
@@ -2284,7 +2297,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 48,
+            "y": 51,
             "w": 24,
             "h": 9
           },
@@ -2411,7 +2424,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 30,
+        "y": 33,
         "w": 24,
         "h": 1
       },
@@ -2599,7 +2612,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 31,
+            "y": 34,
             "w": 24,
             "h": 9
           },
@@ -3189,7 +3202,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 40,
+            "y": 43,
             "w": 24,
             "h": 9
           },

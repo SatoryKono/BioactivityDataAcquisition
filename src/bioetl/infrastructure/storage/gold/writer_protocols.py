@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from datetime import datetime
 from types import ModuleType
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.domain.models.metadata import GoldMetadata
 from bioetl.domain.ports import (
-    AuditPort,
     LineageStorePort,
     LoggerPort,
     MetadataCoordinatorPort,
@@ -28,12 +26,42 @@ from bioetl.infrastructure.storage.gold.pipeline_helpers import (
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
 
+    from bioetl.domain.models.metadata import GoldMetadata
+
 __all__ = [
     "_GoldWriterHost",
-    "_GoldWriterMetadataHost",
     "_ResolvedSchema",
     "_SchemaBuilder",
 ]
+
+
+class _GoldMetadataHost(Protocol):
+    """Required metadata dependencies initialized by the concrete writer."""
+
+    logger: LoggerPort
+    _metadata_writer: MetadataWriterPort
+    _metadata_coordinator: MetadataCoordinatorPort | None
+    _lineage_store: LineageStorePort | None
+    _metrics: MetricsPort | None
+    _transform_version: str | None
+    _flat_structure: bool
+    _transform_steps: tuple[str, ...]
+
+    def _load_gold_writer_module(self) -> ModuleType: ...
+
+    async def _run_in_executor[ResultT](
+        self, func: Callable[..., ResultT], *args: object
+    ) -> ResultT: ...
+
+    async def _write_gold_metadata_file(
+        self,
+        *,
+        table_path: str,
+        metadata: GoldMetadata,
+        table_name: str,
+        provider_name: str,
+        entity_name: str,
+    ) -> None: ...
 
 
 class _SchemaBuilder(Protocol):
@@ -76,35 +104,3 @@ class _GoldWriterHost(Protocol):
     async def _post_write_gold(self, context: GoldWritePostwriteContext) -> None: ...
 
     async def _write_single_target(self, *, request: GoldWriteRequest) -> None: ...
-
-
-class _GoldWriterMetadataHost(Protocol):
-    """Internal host surface for ``GoldWriterMetadataMixin``. Not a cross-layer port."""
-
-    logger: LoggerPort
-    _audit: AuditPort | None
-    _metadata_coordinator: MetadataCoordinatorPort | None
-    _lineage_store: LineageStorePort | None
-    _metadata_writer: MetadataWriterPort
-    _metrics: MetricsPort | None
-    _flat_structure: bool
-    _transform_version: str | None
-    _transform_steps: tuple[str, ...]
-
-    def _load_gold_writer_module(self) -> ModuleType: ...
-
-    def _run_in_executor(
-        self,
-        func: Callable[..., object],
-        *args: object,
-    ) -> Awaitable[object]: ...
-
-    async def _write_gold_metadata_file(
-        self,
-        *,
-        table_path: str,
-        metadata: GoldMetadata,
-        table_name: str,
-        provider_name: str,
-        entity_name: str,
-    ) -> None: ...
