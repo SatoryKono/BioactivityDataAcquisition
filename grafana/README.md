@@ -387,7 +387,7 @@ ______________________________________________________________________
 │  - 4. Provider Health (bioetl-provider-health-v2)                │
 │  - 5. Data Quality (bioetl-dq-v2)                                │
 │  - 6. Incident Workspace (bioetl-incident-v1)                    │
-│  - 0. Run Explorer (bioetl-run-explorer-v1)                      │
+│  - Run Explorer (bioetl-run-explorer-v1)                      │
 │  - Retired: workflow-overview, alerts-slo, silver-reject-explorer│
 └──────────────────────────────────────────────────────────────────┘
 ```
@@ -430,7 +430,7 @@ grafana/
     ├── bioetl-provider-health-v2.json # 4. Provider Health (v2)
     ├── bioetl-dq-v2.json              # 5. Data Quality (v2)
     ├── bioetl-incident-v1.json        # 6. Incident Workspace
-    └── bioetl-run-explorer-v1.json    # 0. Run Explorer (Ops HTTP identity)
+    └── bioetl-run-explorer-v1.json    # Run Explorer (Ops HTTP identity)
 
 docker-compose.monitoring.yml          # Opt-in: Prometheus + Pushgateway + Grafana + renderer
 
@@ -1011,7 +1011,7 @@ variables не умеют безопасно auto-write sibling selectors без
 Dashboard-to-dashboard links поэтому явно передают общий shell
 `workflow/pipeline/run_type`, preserved identity `run_id` для primary targets
 и target-specific bounded vars через `var-*`, без `includeVars=true`.
-`1. Trust` and `0. Run Explorer` preserve exact-run handoff through the
+`1. Trust` and `Run Explorer` preserve exact-run handoff through the
 BioETL Ops HTTP endpoints without turning `run_id` into a Prometheus label.
 Для local-only pilot rollout repo also ships an optional unsigned panel plugin
 under `grafana/plugins/bioetl-selectorshell-panel`; it can call
@@ -2657,7 +2657,7 @@ Machine mapping: `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.
 | 4. Provider Health | `bioetl-provider-health-v2` | Prometheus + BioETL Ops HTTP | Provider latency, health, failure taxonomy |
 | 5. Data Quality | `bioetl-dq-v2` | Prometheus + BioETL Ops HTTP | DQ current/range, quarantine aggregates |
 | 6. Incident Workspace | `bioetl-incident-v1` | Prometheus | Multi-domain suspects + ALERTS support |
-| 0. Run Explorer | `bioetl-run-explorer-v1` | BioETL Ops HTTP | Exact-run identity (never Prom `run_id` labels) |
+| Run Explorer | `bioetl-run-explorer-v1` | BioETL Ops HTTP | Exact-run identity (never Prom `run_id` labels) |
 
 `Inspect Recent Runs` (`3010`) is a filesystem index, not Prometheus.
 `/health/ready` green does not prove the table should fill. Empty

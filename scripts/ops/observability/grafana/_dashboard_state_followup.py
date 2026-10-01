@@ -293,7 +293,7 @@ def _apply_run_explorer(
     content = panels[1]["options"]["content"]
     panels[1]["options"]["content"] = content.replace(
         ". Find Run ID: ${lookup_run_id}.", "."
-    ).replace("6-run-explorer", "0-run-explorer")
+    ).replace("6-run-explorer", "run-explorer")
     _relabel_run_variables(dashboard)
 
 

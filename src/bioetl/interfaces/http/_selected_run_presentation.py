@@ -22,7 +22,7 @@ def presentation_rows(
                 "verdict": _SELECT_RUN,
                 "reason": "Choose a run to inspect saved evidence",
                 "action": "Choose a run",
-                "action_path": "d/bioetl-run-explorer-v1/0-run-explorer?var-run_id=-",
+                "action_path": "d/bioetl-run-explorer-v1/run-explorer?var-run_id=-",
             }
         ]
     return [

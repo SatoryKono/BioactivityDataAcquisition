@@ -55,7 +55,7 @@ NUMBERED_DASHBOARDS = (
     "4. Provider Health",
     "5. Data Quality",
     "6. Incident Workspace",
-    "0. Run Explorer",
+    "Run Explorer",
 )
 STATUS_SCOPE_TOKENS = (
     "INCOMPLETE",

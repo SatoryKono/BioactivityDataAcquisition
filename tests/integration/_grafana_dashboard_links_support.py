@@ -171,7 +171,7 @@ _PRIMARY_DASHBOARD_UIDS = frozenset(
     }
 )
 
-# 0. Run Explorer intentionally ships without the shared id=1000 navigation
+# Run Explorer intentionally ships without the shared id=1000 navigation
 # bus (#11322-#11324): the dashboard is a forensic leaf, not a hub.
 _NAV_BUS_EXEMPT_UIDS = frozenset({"bioetl-run-explorer-v1"})
 
@@ -1431,7 +1431,7 @@ def _assert_silver_explorer_html_bus_forensic_boundary(
         None,
     )
     if panel is None:
-        # Nav-bus-exempt dashboards (0. Run Explorer) still must not leak
+        # Nav-bus-exempt dashboards (Run Explorer) still must not leak
         # residual Silver Reject handoffs through any other link surface.
         residual = [
             str(link.get("url", ""))
@@ -1453,11 +1453,11 @@ _EXPECTED_CURRENT_NAV_TITLE = {
     "bioetl-provider-health-v2": "Provider Health",
     "bioetl-dq-v2": "Data Quality",
     "bioetl-incident-v1": "6. Incident Workspace",
-    "bioetl-run-explorer-v1": "0. Run Explorer",
+    "bioetl-run-explorer-v1": "Run Explorer",
 }
 
 _BASE_VISUAL_NAV_TITLES = (
-    "0. Run Explorer",
+    "Run Explorer",
     "Replay Readiness",
     "Run Overview",
     "Pipeline Diagnostics",

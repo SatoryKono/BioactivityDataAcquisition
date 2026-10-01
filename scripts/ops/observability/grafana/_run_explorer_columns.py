@@ -58,10 +58,10 @@ _COLUMNS = {
 }
 _CONTEXT = "var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}"
 _SELECT_RUN_URL = (
-    "/d/bioetl-run-explorer-v1/0-run-explorer?" + _CONTEXT + "&var-lookup_run_id="
+    "/d/bioetl-run-explorer-v1/run-explorer?" + _CONTEXT + "&var-lookup_run_id="
 )
 _RESET_FILTERS = (
-    "/d/bioetl-run-explorer-v1/0-run-explorer"
+    "/d/bioetl-run-explorer-v1/run-explorer"
     "?var-workflow=.*&var-pipeline=.*&var-run_type=.*&var-run_id=-"
     "&var-lookup_run_id=&${__url_time_range}"
 )

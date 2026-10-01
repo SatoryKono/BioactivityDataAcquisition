@@ -43,8 +43,8 @@ CUSTOM_WIDTH = "custom.width"
 BUS: list[dict[str, str]] = [
     {
         "uid": "bioetl-run-explorer-v1",
-        "title": "0. Run Explorer",
-        "path": "0-run-explorer",
+        "title": "Run Explorer",
+        "path": "run-explorer",
     },
     {
         "uid": "bioetl-control-plane-v1",
@@ -1908,7 +1908,7 @@ def _attach_nav_bus(nav: dict[str, Any], *, current_uid: str) -> None:
     nav["links"] = render_links(current_uid=current_uid) + extra_links
     if current_uid == _RUN_EXPLORER_UID:
         nav["description"] = (
-            "Chips on 0. Run Explorer do not open other dashboards. "
+            "Chips on Run Explorer do not open other dashboards. "
             "Open Trust, Overview, Pipeline Diagnostics, Provider Health, "
             "and Data Quality from Inspect Recent Runs."
         )

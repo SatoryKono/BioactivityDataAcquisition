@@ -279,7 +279,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "0. Run Explorer",
+  "title": "Run Explorer",
   "uid": "bioetl-run-explorer-v1",
   "version": 2,
   "style": "dark",
@@ -297,7 +297,7 @@
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
         "mode": "html",
-        "content": "<div style=\"padding:0px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;width:100%;max-width:100%;box-sizing:border-box;overflow:visible\"><strong>Last 10 launches · newest first · independent of the time range</strong><br>Select a Run ID to view details. <a href=\"/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a></div>"
+        "content": "<div style=\"padding:0px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;width:100%;max-width:100%;box-sizing:border-box;overflow:visible\"><strong>Last 10 launches · newest first · independent of the time range</strong><br>Select a Run ID to view details. <a href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a></div>"
       },
       "description": "Browse the latest 10 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
       "links": [
@@ -442,7 +442,7 @@
                 "value": [
                   {
                     "title": "Select ${__data.fields.Run}",
-                    "url": "/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline}&var-run_type=${__data.fields.run_type}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
+                    "url": "/d/bioetl-run-explorer-v1/run-explorer?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline}&var-run_type=${__data.fields.run_type}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
                     "targetBlank": false,
                     "includeVars": false
                   }
@@ -1293,7 +1293,7 @@
       "links": [
         {
           "title": "Browse all pipelines",
-          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&${__url_time_range}",
+          "url": "/d/bioetl-run-explorer-v1/run-explorer?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },

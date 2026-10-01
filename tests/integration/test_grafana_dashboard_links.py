@@ -448,7 +448,7 @@ def test_dashboard_titles_match_home_dashboard_navigation_names() -> None:
         "bioetl-provider-health-v2": "Provider Health",
         "bioetl-dq-v2": "Data Quality",
         "bioetl-incident-v1": "6. Incident Workspace",
-        "bioetl-run-explorer-v1": "0. Run Explorer",
+        "bioetl-run-explorer-v1": "Run Explorer",
     }
 
     for dashboard_path in get_dashboard_files():

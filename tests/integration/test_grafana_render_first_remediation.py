@@ -291,7 +291,7 @@ def test_iteration_2_empty_distributions_use_no_data_capable_tables() -> None:
 
 def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
     canonical_titles = (
-        "0. Run Explorer",
+        "Run Explorer",
         "1. Trust",
         "2. Overview",
         "3. Pipeline Diagnostics",

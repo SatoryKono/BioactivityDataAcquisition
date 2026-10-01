@@ -52,7 +52,7 @@ def test_nav_bus_complete_without_truncation() -> None:
             "Provider Health",
             "Data Quality",
             "6. Incident Workspace",
-            "0. Run Explorer",
+            "Run Explorer",
         ):
             assert chip in content, f"{path.name} missing chip {chip}"
         assert "aria-current" in content

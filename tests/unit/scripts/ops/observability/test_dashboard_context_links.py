@@ -140,7 +140,7 @@ def test_action_normalization_preserves_rank_query_and_visible_column() -> None:
 @pytest.mark.parametrize(
     "uid, slug",
     [
-        ("bioetl-run-explorer-v1", "0-run-explorer"),
+        ("bioetl-run-explorer-v1", "run-explorer"),
         ("bioetl-control-plane-v1", "1-trust"),
         ("bioetl-overview-v2", "2-overview"),
         ("bioetl-runtime", "3-pipeline-diagnostics"),

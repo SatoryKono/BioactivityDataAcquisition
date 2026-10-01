@@ -26,7 +26,7 @@ SEVEN_UIDS: tuple[str, ...] = (
 )
 
 PATH_BY_UID: dict[str, str] = {
-    "bioetl-run-explorer-v1": "0-run-explorer",
+    "bioetl-run-explorer-v1": "run-explorer",
     "bioetl-control-plane-v1": "1-trust",
     "bioetl-overview-v2": "2-overview",
     "bioetl-runtime": "3-pipeline-diagnostics",
