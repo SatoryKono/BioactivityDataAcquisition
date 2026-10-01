@@ -39,12 +39,15 @@ from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
+from pathlib import Path
+
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import AuditEntry
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.gold.metadata_mixin import (
     GoldWriterMetadataMixin,
 )
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
     make_produced_artifact_fragment,
 )
@@ -52,6 +55,34 @@ from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
 
 def _make_run_id() -> RunID:
     return deterministic_run_uuid_from_callsite("test_gold_writer_metadata_mixin_boost")
+
+
+@pytest.mark.asyncio
+async def test_concrete_writer_resolves_delta_version_without_loader_override(
+    tmp_path: Path,
+) -> None:
+    """The real host supplies its loader; callers need no fixture-only wiring."""
+    writer = GoldWriter(tmp_path, MagicMock())
+    table = SimpleNamespace(version=lambda: 7)
+    with patch(
+        "bioetl.infrastructure.storage.gold_writer.DeltaTable", return_value=table
+    ):
+        assert await writer._get_delta_version(str(tmp_path / "gold")) == 7
+
+
+@pytest.mark.asyncio
+async def test_concrete_writer_missing_delta_table_has_no_version(
+    tmp_path: Path,
+) -> None:
+    """Missing tables preserve the optional version semantics on the real host."""
+    from deltalake.exceptions import TableNotFoundError
+
+    writer = GoldWriter(tmp_path, MagicMock())
+    with patch(
+        "bioetl.infrastructure.storage.gold_writer.DeltaTable",
+        side_effect=TableNotFoundError("missing"),
+    ):
+        assert await writer._get_delta_version(str(tmp_path / "gold")) is None
 
 
 def _make_record(
