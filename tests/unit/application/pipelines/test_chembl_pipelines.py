@@ -30,7 +30,6 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -47,8 +46,10 @@ from bioetl.application.pipelines.chembl import (
     TargetTransformer,
 )
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.exceptions.validation import ValidationError
 from bioetl.domain.ports.noop import NoOpMetrics
+from bioetl.domain.types import RunID, RunType
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
@@ -262,12 +263,14 @@ class TestChEMBLMoleculePipeline:
     async def test_b_l_molecule_pipeline__to_silver_missing_id__1f76351e(
         self, pipeline
     ):
-        """Test transformation returns None for missing ID."""
+        """Missing molecule id fails closed with the catalog reason code."""
         record = {"pref_name": "ASPIRIN"}
 
-        result = await pipeline.transform_bronze_to_silver(pipeline.context, record)
+        with pytest.raises(ValidationError) as exc_info:
+            await pipeline.transform_bronze_to_silver(pipeline.context, record)
 
-        assert result is None
+        assert exc_info.value.field == "molecule_id"
+        assert exc_info.value.reason_code == "missing_compound_identifier"
 
 
 @pytest.mark.unit
