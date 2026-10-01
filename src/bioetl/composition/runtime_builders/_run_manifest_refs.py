@@ -7,12 +7,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-from bioetl.composition.runtime_builders.input_snapshot_resolution import (
-    resolve_pipeline_input_snapshot_refs,
-)
 from bioetl.composition.runtime_builders._run_manifest_context_updates import (
     build_contract_identity_field_values,
     build_control_plane_identity_ref_values,
+)
+from bioetl.composition.runtime_builders.input_snapshot_resolution import (
+    resolve_cached_bronze_input_snapshot_refs,
+    resolve_pipeline_input_snapshot_refs,
 )
 from bioetl.domain.control_plane import RunSourceRef
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -79,22 +80,30 @@ def build_run_source_refs(
     required_persistence_profile: object = DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
 ) -> tuple[RunSourceRef, ...]:
     """Build source references and enforce strict snapshot persistence."""
-    input_snapshots = resolve_pipeline_input_snapshot_refs(
-        ctx=ctx,
-        cached_bronze=cached_bronze,
-        settings=settings,
-        provider=provider,
-        entity=entity,
-    )
     cached_bronze_enabled = cached_bronze is not None and bool(
         getattr(cached_bronze, "enabled", False)
     )
-    if not (cached_bronze_enabled and not input_snapshots):
-        require_input_snapshots(
-            exact_replay=bool(getattr(ctx, "exact_replay", False)),
-            required_persistence_profile=required_persistence_profile,
-            input_snapshots=input_snapshots,
+    if cached_bronze_enabled:
+        input_snapshots = resolve_cached_bronze_input_snapshot_refs(
+            cached_bronze=cached_bronze,
+            settings=settings,
+            provider=provider,
+            entity=entity,
+            require=True,
         )
+    else:
+        input_snapshots = resolve_pipeline_input_snapshot_refs(
+            ctx=ctx,
+            cached_bronze=cached_bronze,
+            settings=settings,
+            provider=provider,
+            entity=entity,
+        )
+    require_input_snapshots(
+        exact_replay=bool(getattr(ctx, "exact_replay", False)),
+        required_persistence_profile=required_persistence_profile,
+        input_snapshots=input_snapshots,
+    )
     return (
         RunSourceRef(
             provider=provider,

@@ -13,10 +13,10 @@ from bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases import (
     prepare_runtime_registry,
 )
 from bioetl.composition.registry_api import PipelineRegistry
-from bioetl.composition.runtime_builders.config_access import resolve_configs_root
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     require_cached_bronze_input_snapshot_refs,
 )
+from bioetl.composition.runtime_builders.config_access import resolve_configs_root
 from bioetl.composition.runtime_builders.runner_builder import (
     build_pipeline_runner as _build_pipeline_runner,
 )
@@ -88,6 +88,7 @@ def bootstrap_pipeline_runner(
 ) -> PipelineRunner:
     """Build one ready-to-run pipeline runner from runtime context and registry."""
     apply_runtime_compatibility_patches()
+    _fail_fast_empty_explicit_cached_bronze(ctx)
     registry = prepare_runtime_registry(
         registry=registry, pipeline_name=ctx.pipeline_name
     )
