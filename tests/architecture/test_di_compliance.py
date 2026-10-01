@@ -7,14 +7,14 @@
 # pyright: reportOptionalMemberAccess=false
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture tests: Dependency Injection compliance.
 
 REQ-ARCH-001: Application layer MUST NOT instantiate infrastructure.
 REQ-ARCH-001: Factory classes MUST be in composition layer only.
 REQ-ARCH-001: Dependencies MUST be injected through constructors.
 
-See CLAUDE.md Â§2.2 and Â§11 Anti-Patterns.
+See CLAUDE.md Ã‚Â§2.2 and Ã‚Â§11 Anti-Patterns.
 REQ-STACK-001: composition-root DI wiring.
 """
 
@@ -170,28 +170,91 @@ def _source_python_files(src: Path) -> list[Path]:
 
 
 def _composition_module_imports(composition_path: Path) -> dict[str, set[str]]:
-    module_imports: dict[str, set[str]] = {}
-    for py_file in composition_path.rglob("*.py"):
-        module_name = _composition_module_name(composition_path, py_file)
-        imports = _composition_file_imports(py_file)
-        if imports:
-            module_imports[module_name] = imports
-    return module_imports
+    """Direct import-time graph; omit deferred and TYPE_CHECKING imports.
+
+    Module identities use POSIX relative paths on every platform. This is a
+    structural import-time check, not a proof about dynamic plugin imports.
+    """
+    files = {
+        "bioetl.composition."
+        + p.relative_to(composition_path)
+        .with_suffix("")
+        .as_posix()
+        .replace("/", ".")
+        .removesuffix(".__init__"): p
+        for p in composition_path.rglob("*.py")
+    }
+    graph: dict[str, set[str]] = {name: set() for name in files}
+    for name, path in files.items():
+        package = name if path.name == "__init__.py" else name.rpartition(".")[0]
+        pending = list(ast.parse(path.read_text(encoding="utf-8")).body)
+        while pending:
+            node = pending.pop()
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            if isinstance(node, ast.If) and (
+                isinstance(node.test, ast.Name)
+                and node.test.id == "TYPE_CHECKING"
+                or isinstance(node.test, ast.Attribute)
+                and node.test.attr == "TYPE_CHECKING"
+            ):
+                pending.extend(node.orelse)
+                continue
+            if isinstance(node, ast.Import):
+                targets = {alias.name for alias in node.names}
+            elif isinstance(node, ast.ImportFrom):
+                base = node.module or ""
+                if node.level:
+                    prefix = package.split(".")[
+                        : len(package.split(".")) - node.level + 1
+                    ]
+                    base = ".".join([*prefix, *([base] if base else [])])
+                targets = {base, *(base + "." + alias.name for alias in node.names)}
+                if path.name == "__init__.py" and base == name:
+                    # `from . import child` loads child, not this package again.
+                    targets.discard(base)
+            else:
+                pending.extend(ast.iter_child_nodes(node))
+                continue
+            graph[name].update(target for target in targets if target in files)
+    return graph
 
 
 def _simple_composition_cycles(module_imports: dict[str, set[str]]) -> list[str]:
+    """Return cyclic strongly connected components, including self-loops."""
+    index: dict[str, int] = {}
+    low: dict[str, int] = {}
+    stack: list[str] = []
+    active: set[str] = set()
     cycles: list[str] = []
-    for module_a, imports_a in module_imports.items():
-        for module_b in imports_a:
-            if module_b not in module_imports:
+
+    def visit(node: str) -> None:
+        index[node] = low[node] = len(index)
+        stack.append(node)
+        active.add(node)
+        for target in sorted(module_imports.get(node, set())):
+            if target not in module_imports:
                 continue
-            if module_a not in module_imports.get(module_b, set()):
-                continue
-            cycle = f"{module_a} <-> {module_b}"
-            reverse_cycle = f"{module_b} <-> {module_a}"
-            if cycle not in cycles and reverse_cycle not in cycles:
-                cycles.append(cycle)
-    return cycles
+            if target not in index:
+                visit(target)
+                low[node] = min(low[node], low[target])
+            elif target in active:
+                low[node] = min(low[node], index[target])
+        if low[node] == index[node]:
+            component: list[str] = []
+            while True:
+                member = stack.pop()
+                active.remove(member)
+                component.append(member)
+                if member == node:
+                    break
+            if len(component) > 1 or node in module_imports.get(node, set()):
+                cycles.append(" <-> ".join(sorted(component)))
+
+    for node in sorted(module_imports):
+        if node not in index:
+            visit(node)
+    return sorted(cycles)
 
 
 _ALLOWED_COMPOSITION_CYCLES: frozenset[str] = frozenset(
@@ -199,6 +262,44 @@ _ALLOWED_COMPOSITION_CYCLES: frozenset[str] = frozenset(
         "bootstrap_logger <-> bootstrap_logger",
     }
 )
+
+
+@pytest.mark.parametrize(
+    ("graph", "expected"),
+    [
+        ({"a": {"b"}, "b": {"c"}, "c": {"a"}}, ["a <-> b <-> c"]),
+        ({"a": {"b"}, "b": {"c"}, "c": set()}, []),
+        ({"a": {"a"}}, ["a"]),
+        ({"a": {"b"}, "b": {"a"}, "c": set()}, ["a <-> b"]),
+    ],
+)
+def test_composition_cycle_components(
+    graph: dict[str, set[str]], expected: list[str]
+) -> None:
+    assert _simple_composition_cycles(graph) == expected
+
+
+def test_composition_graph_excludes_type_only_and_deferred_imports(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "a.py").write_text(
+        "from typing import TYPE_CHECKING\n"
+        "if TYPE_CHECKING:\n    from . import b\n"
+        "def later():\n    from . import c\n"
+        "from . import d\n",
+        encoding="utf-8",
+    )
+    for name in ("b", "c", "d"):
+        (tmp_path / f"{name}.py").write_text("", encoding="utf-8")
+    assert _composition_module_imports(tmp_path)["bioetl.composition.a"] == {
+        "bioetl.composition.d"
+    }
+
+
+def test_composition_package_child_import_is_not_a_self_loop(tmp_path: Path) -> None:
+    (tmp_path / "__init__.py").write_text("from . import child\n", encoding="utf-8")
+    (tmp_path / "child.py").write_text("", encoding="utf-8")
+    assert _simple_composition_cycles(_composition_module_imports(tmp_path)) == []
 
 
 def _class_init_segments(
@@ -333,7 +434,7 @@ class TestDICompliance:
         This test uses AST analysis to find actual instantiation calls,
         not class definitions or type hints.
 
-        See CLAUDE.md Â§2.2 Dependency Injection and Â§11 Anti-Patterns.
+        See CLAUDE.md Ã‚Â§2.2 Dependency Injection and Ã‚Â§11 Anti-Patterns.
         """
         violations = []
         for py_file, _content, tree in _iter_parsed_files(application_python_files):
@@ -354,7 +455,7 @@ class TestDICompliance:
             "Move instantiation to composition layer (factories/bootstrap).\n\n"
             "Violations found:\n"
             + "\n".join(f"  - {v}" for v in violations)
-            + "\n\nSee CLAUDE.md Â§2.2 and Â§11 for details."
+            + "\n\nSee CLAUDE.md Ã‚Â§2.2 and Ã‚Â§11 for details."
         )
 
     def test_factories_only_in_composition(self, src_dir: Path) -> None:
@@ -439,7 +540,7 @@ class TestCompositionRootIntegrity:
         rather than having inline instantiation of complex objects.
 
         Note: bootstrap_pipeline_runner() is now defined in composition/bootstrap/runtime/pipeline.py
-        as part of the CLI/runtime split (see CLAUDE.md Â§2.1).
+        as part of the CLI/runtime split (see CLAUDE.md Ã‚Â§2.1).
         """
         # bootstrap_pipeline_runner is now in composition/bootstrap/runtime/pipeline.py
         bootstrap_file = (
