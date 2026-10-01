@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import TYPE_CHECKING
-from uuid import UUID
 
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
@@ -13,8 +12,13 @@ from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
 from bioetl.composition.control_plane_paths import (
     control_plane_root,
 )
-from bioetl.domain.control_plane import RunInputSnapshotRef, RunManifest
-from bioetl.domain.types import RunID
+from bioetl.domain.control_plane import RunInputSnapshotRef
+from bioetl.application.services.control_plane.manifest import (
+    input_snapshot_resolution as snapshot_policy,
+)
+from bioetl.application.services.control_plane.manifest.input_snapshot_resolution import (
+    collect_manifest_input_snapshot_refs,
+)
 from bioetl.infrastructure.control_plane import FileRunManifestStore
 
 if TYPE_CHECKING:
@@ -58,17 +62,6 @@ def resolve_cached_bronze_input_snapshot_refs(
     )
 
 
-def collect_manifest_input_snapshot_refs(
-    manifest: RunManifest,
-) -> tuple[RunInputSnapshotRef, ...]:
-    """Flatten immutable snapshot refs across all manifest source refs."""
-    return tuple(
-        snapshot
-        for source_ref in manifest.source_refs
-        for snapshot in source_ref.input_snapshots
-    )
-
-
 def resolve_manifest_input_snapshot_refs(
     *,
     settings: Settings,
@@ -76,14 +69,13 @@ def resolve_manifest_input_snapshot_refs(
     run_id: str | None = None,
 ) -> tuple[RunInputSnapshotRef, ...]:
     """Resolve immutable snapshots from one persisted manifest."""
-    manifest = _load_manifest(
-        settings=settings,
+    return snapshot_policy.resolve_manifest_input_snapshot_refs(
+        store=FileRunManifestStore(
+            base_path=control_plane_root(settings, "run_manifest")
+        ),
         manifest_id=manifest_id,
         run_id=run_id,
     )
-    if manifest is None:
-        return ()
-    return collect_manifest_input_snapshot_refs(manifest)
 
 
 def resolve_pipeline_input_snapshot_refs(
@@ -104,42 +96,17 @@ def resolve_pipeline_input_snapshot_refs(
         provider=provider,
         entity=entity,
     )
-    if cached_bronze_enabled:
-        return cached_bronze_refs
-    if cached_bronze_refs:
-        return cached_bronze_refs
-
-    parent_manifest_refs = resolve_manifest_input_snapshot_refs(
-        settings=settings,
-        manifest_id=_coerce_optional_str(getattr(ctx, "replay_of_manifest_id", None)),
-        run_id=_coerce_optional_str(getattr(ctx, "replay_of_run_id", None)),
+    return snapshot_policy.resolve_pipeline_input_snapshot_refs(
+        cached_bronze_enabled=cached_bronze_enabled,
+        cached_bronze_refs=cached_bronze_refs,
+        load_parent_refs=lambda: resolve_manifest_input_snapshot_refs(
+            settings=settings,
+            manifest_id=_coerce_optional_str(
+                getattr(ctx, "replay_of_manifest_id", None)
+            ),
+            run_id=_coerce_optional_str(getattr(ctx, "replay_of_run_id", None)),
+        ),
     )
-    if parent_manifest_refs:
-        return parent_manifest_refs
-    return ()
-
-
-def _load_manifest(
-    *,
-    settings: Settings,
-    manifest_id: str | None,
-    run_id: str | None,
-) -> RunManifest | None:
-    store = FileRunManifestStore(
-        base_path=control_plane_root(settings, "run_manifest"),
-    )
-    if manifest_id:
-        manifest = store.get(manifest_id)
-        if manifest is not None:
-            return manifest
-        # Fall through to run_id lookup when the id key misses but a run_id is
-        # available. Read/corruption errors from the store still propagate.
-    if not run_id:
-        return None
-    try:
-        return store.get_by_run_id(RunID(UUID(run_id)))
-    except ValueError:
-        return None
 
 
 def _coerce_optional_str(value: object | None) -> str | None:
