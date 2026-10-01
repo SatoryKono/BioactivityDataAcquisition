@@ -9,6 +9,7 @@ def apply_provider_evidence_columns(payload: dict) -> None:
     panel = next(p for p in payload["panels"] if p["id"] == 9460)
     projection = (
         "($d := domains[domain = 'Provider'][0]; "
+        "$display := presentation_domains[domain = 'Provider'][0]; "
         "$cached := $d.reason = 'cached_bronze_no_remote_probe'; "
         "$map(provider_checks, function($p){ {"
         "'provider': $p.provider, "
@@ -16,7 +17,7 @@ def apply_provider_evidence_columns(payload: dict) -> None:
         "'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), "
         "'check_result': $cached ? '—' : ($p.evidence = 'PRESENT' ? $p.check_result : 'UNKNOWN'), "
         "'reason': $cached ? 'Cached Bronze used; provider API was not called.' : "
-        "($d.reason ? $d.reason : 'Provider check evidence is unavailable.'), "
+        "($display.reason_display ? $display.reason_display : 'Provider check evidence is unavailable.'), "
         "'observed_at': $cached ? '—' : ($p.observed_at ? $p.observed_at : 'UNKNOWN'), "
         "'evidence': $cached or $p.evidence = 'PRESENT' ? 'Open report' : 'UNKNOWN'"
         "} }))"

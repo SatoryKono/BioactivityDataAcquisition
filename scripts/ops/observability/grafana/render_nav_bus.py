@@ -2514,6 +2514,11 @@ def apply_to_dashboard(
     elif current_uid == "bioetl-runtime":
         payload["panels"] = [p for p in payload["panels"] if p.get("id") != 9450]
     stamp_selector_columns(payload)
+    from scripts.ops.observability.grafana._provider_evidence_columns import (
+        apply_provider_evidence_columns,
+    )
+
+    apply_provider_evidence_columns(payload)
     _pack_incident_tail_rows(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
