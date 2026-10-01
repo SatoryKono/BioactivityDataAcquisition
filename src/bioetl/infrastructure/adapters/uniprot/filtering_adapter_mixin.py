@@ -7,6 +7,7 @@ Contains FilterableDataSourcePort-compatible filtering methods.
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator, Callable
 
 from bioetl.domain.mixin_host import as_mixin_host
@@ -48,17 +49,40 @@ class UniProtFilteringAdapterMixin:
         filter_ids: list[str],
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch non-protein entities by per-ID query."""
+        """Fetch non-protein entities by per-ID query using concurrent batches."""
         fetched = 0
-        for accession_id in filter_ids:
+
+        async def fetch_one(
+            accession_id: str, current_limit: int | None
+        ) -> list[BronzeRecord]:
+            records = []
+            async for record in strategy(query=accession_id, limit=current_limit):
+                records.append(record)
+                if current_limit and len(records) >= current_limit:
+                    break
+            return records
+
+        batch_size = 10
+        for i in range(0, len(filter_ids), batch_size):
             if limit and fetched >= limit:
                 break
-            remaining = None if limit is None else limit - fetched
-            async for record in strategy(query=accession_id, limit=remaining):
-                yield record
-                fetched += 1
-                if limit and fetched >= limit:
+
+            batch = filter_ids[i : i + batch_size]
+            tasks = []
+
+            for acc in batch:
+                remaining = None if limit is None else limit - fetched
+                if limit and remaining is not None and remaining <= 0:
                     break
+                tasks.append(asyncio.create_task(fetch_one(acc, remaining)))
+
+            for task in tasks:
+                records = await task
+                for record in records:
+                    if limit and fetched >= limit:
+                        break
+                    yield record
+                    fetched += 1
 
     async def _fetch_proteins_batched(
         self,
