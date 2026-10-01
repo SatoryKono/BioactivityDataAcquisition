@@ -304,6 +304,22 @@ def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
     )
 
 
+_shared_run_report_store: RunReportStorePort | None = None
+
+
 def create_run_report_store() -> RunReportStorePort:
-    """Resolve a fresh report store for one explicit caller lifetime."""
-    return FileRunReportStoreAdapter()
+    """Return the composition-assembled shared report store (single assembly).
+
+    Assembled once here — the composition entrypoint — and shared by reference
+    with HTTP/CLI hosts through their ``store=`` seams instead of constructing
+    a new adapter per request (ARCH-008, #11859). ``FileRunReportStoreAdapter``
+    is stateless and its identity cache is already module-global, so sharing
+    is behavior-preserving. Callers that need an isolated store keep passing
+    their own instance explicitly.
+    """
+    global _shared_run_report_store
+    store = _shared_run_report_store
+    if store is None:
+        store = FileRunReportStoreAdapter()
+        _shared_run_report_store = store
+    return store
