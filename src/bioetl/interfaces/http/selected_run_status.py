@@ -170,6 +170,16 @@ def _readiness_fields(projection: Mapping[str, object]) -> dict[str, object]:
     }
     row["blockers"] = blocker_text
     row["unknown_checks"] = unknown_text
+    explanations = []
+    if blocker_text != "—":
+        explanations.append("Failed checks: " + blocker_text)
+    if unknown_text != "—":
+        explanations.append("Not verified: " + unknown_text)
+    row["explanation"] = "; ".join(explanations) or (
+        "Required replay checks passed"
+        if projection.get("verdict") == "READY"
+        else "Open replay checks for the assessment basis"
+    )
     checks = projection.get("checks")
     return {
         "replay_readiness": [row],

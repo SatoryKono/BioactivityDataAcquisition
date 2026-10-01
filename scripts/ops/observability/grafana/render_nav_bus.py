@@ -1357,7 +1357,7 @@ def _stamp_trust_override(override: dict[str, Any]) -> None:
             [{"type": "value", "options": {"0": {"text": "no"}}}],
         )
     if field == "Action":
-        _set_override_value(override, "noValue", "")
+        _set_override_value(override, "noValue", "No trust issues")
         _set_override_value(
             override,
             "links",
@@ -1719,6 +1719,8 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
 
 def _layout_control_plane_first_window(panels: list[object]) -> None:
     """Keep Trust density/readability while fitting the canonical h=4 nav."""
+    if any(p.get("id") == 9430 for p in panels if isinstance(p, dict)):
+        return
     _ensure_exact_replay_readiness_panel(panels)
     _stamp_exact_replay_panel(panels)
     root = _root_panels(panels)
@@ -2505,6 +2507,11 @@ def apply_to_dashboard(
     )
 
     apply_run_explorer_columns(payload)
+    from scripts.ops.observability.grafana._provider_evidence_columns import (
+        apply_provider_evidence_columns,
+    )
+
+    apply_provider_evidence_columns(payload)
     if current_uid == "bioetl-provider-health-v2":
         payload["panels"] = [
             panel for panel in payload["panels"] if panel.get("id") not in {9402, 9403}
@@ -2559,6 +2566,10 @@ def apply_to_dashboard(
             panel = pending.pop()
             pending.extend(panel.get("panels", []))
             panel["title"] = panel.get("title", "").removeprefix("Review ")
+    if current_uid == "bioetl-control-plane-v1":
+        from scripts.ops.observability.grafana._replay_layout import apply_replay_layout
+
+        apply_replay_layout(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

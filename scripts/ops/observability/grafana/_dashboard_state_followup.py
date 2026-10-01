@@ -366,7 +366,8 @@ def _apply_control_plane(
     dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
 ) -> None:
     _stamp_trust_table(panels[9418])
-    _restack_accounting_row(dashboard, panels[9403], panels[9402])
+    if 9403 in panels and 9402 in panels:
+        _restack_accounting_row(dashboard, panels[9403], panels[9402])
 
 
 def _apply_overview(

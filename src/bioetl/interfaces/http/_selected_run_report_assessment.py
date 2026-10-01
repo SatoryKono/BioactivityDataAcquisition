@@ -265,6 +265,11 @@ def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
         )
         if isinstance(flag, bool)
     }
+    verify_objects = getattr(port, "verify_replay_objects", None)
+    if callable(verify_objects):
+        verified = verify_objects(manifest)
+        if isinstance(verified, dict):
+            objects = verified
     return {
         "effective_config_hash": config_hash,
         "dependency_lock_hash": lock_hash,

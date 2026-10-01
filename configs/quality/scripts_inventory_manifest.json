@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-01T05:46:34.640405+00:00",
+  "generated_at": "2026-10-01T18:55:45.345055+00:00",
   "summary": {
-    "total_scripts": 636,
+    "total_scripts": 637,
     "status_counts": {
-      "active": 338,
+      "active": 339,
       "supporting": 298
     },
     "reference_group_coverage": {
@@ -13,7 +13,7 @@
       "ci": 86,
       "docs": 261,
       "other": 48,
-      "scripts": 532,
+      "scripts": 533,
       "skills": 12,
       "tests": 445
     }
@@ -1648,7 +1648,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 73,
+      "reference_count": 72,
       "references": [
         {
           "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
@@ -5559,7 +5559,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
@@ -5569,18 +5569,6 @@
         },
         {
           "path": "Makefile",
-          "line": 266,
-          "source_group": "build",
-          "text": "@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --validate"
-        },
-        {
-          "path": "makefile",
-          "line": 261,
-          "source_group": "build",
-          "text": "@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --emit-modules"
-        },
-        {
-          "path": "makefile",
           "line": 266,
           "source_group": "build",
           "text": "@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --validate"
@@ -5818,15 +5806,15 @@
       "references": [
         {
           "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 44,
+          "line": 23,
           "source_group": "docs",
-          "text": "run: bash scripts/ci_check_docs_parity.sh"
+          "text": "Legacy-примеры (`bash scripts/ci_check_docs_parity.sh`, отдельный GitLab-job)"
         },
         {
           "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 59,
+          "line": 24,
           "source_group": "docs",
-          "text": "- bash scripts/ci_check_docs_parity.sh"
+          "text": "удалены: скрипты `scripts/ci_check_docs_parity.sh` и `scripts/docs_parity_check.py`"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
@@ -5841,19 +5829,25 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 174,
+          "line": 177,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.data_quality"
         },
         {
           "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 73,
+          "line": 19,
           "source_group": "docs",
-          "text": "uv run python -m scripts.data_quality check-entity-config-parity"
+          "text": "uv run --frozen --no-build python -m scripts.data_quality"
+        },
+        {
+          "path": "docs/03-guides/docs-parity-gate.md",
+          "line": 33,
+          "source_group": "docs",
+          "text": "uv run --frozen --no-build python -m scripts.data_quality check-entity-config-parity"
         },
         {
           "path": "docs/filters/README.md",
@@ -5863,7 +5857,13 @@
         },
         {
           "path": "scripts/ci_check_docs_parity.sh",
-          "line": 12,
+          "line": 5,
+          "source_group": "scripts",
+          "text": "# `python -m scripts.data_quality check-entity-config-parity` in docs.yml."
+        },
+        {
+          "path": "scripts/ci_check_docs_parity.sh",
+          "line": 13,
           "source_group": "scripts",
           "text": "python3 -m scripts.data_quality check-entity-config-parity"
         },
@@ -5872,6 +5872,12 @@
           "line": 9,
           "source_group": "scripts",
           "text": "python3 -m scripts.data_quality check-entity-config-parity"
+        },
+        {
+          "path": "scripts/docs_parity_check.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "reports. The active CI gate is `python -m scripts.data_quality"
         }
       ],
       "owner": "@bioetl-dq",
@@ -5915,7 +5921,7 @@
       "references": [
         {
           "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 82,
+          "line": 43,
           "source_group": "docs",
           "text": "`scripts/data_quality/check_entity_config_parity.py` and is invoked through the"
         },
@@ -6085,7 +6091,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 83,
+          "line": 82,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows \\"
         },
@@ -6142,7 +6148,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 464,
+          "line": 475,
           "source_group": "docs",
           "text": "1. Выполнен `python scripts/diagrams/check/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`."
         },
@@ -6199,31 +6205,31 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 292,
+          "line": 296,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 412,
+          "line": 416,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 449,
+          "line": 460,
           "source_group": "docs",
           "text": "1. **Проверить обязательные SVG-артефакты:** `python scripts/diagrams/check/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 450,
+          "line": 461,
           "source_group": "docs",
           "text": "Для дополнительной compatibility-проверки PNG используйте curated manifest: `python scripts/diagrams/check/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/png-compatibili"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 479,
+          "line": 490,
           "source_group": "docs",
           "text": "| check_diagram_artifacts.py     | `scripts/diagrams/` | DIAG-T010/T012 для обязательных SVG и DIAG-T011/T012 для optional PNG compatibility |"
         },
@@ -6256,19 +6262,19 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 434,
+          "line": 438,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 452,
+          "line": 463,
           "source_group": "docs",
           "text": "1. **Прогнать quality-gates:** `python scripts/diagrams/check/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 481,
+          "line": 492,
           "source_group": "docs",
           "text": "| check_diagram_quality_gates.py | `scripts/diagrams/` | DIAG-T018..T023 (style/classDef/decomposition/legend/labels)                        |"
         },
@@ -6333,7 +6339,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 423,
+          "line": 427,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6345,13 +6351,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 467,
+          "line": 463,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts/diagrams/check/check_diagram_visual_smoke.py `"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 429,
+          "line": 440,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts/diagrams/check/check_diagram_visual_smoke.py `"
         }
@@ -6366,7 +6372,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 397,
+          "line": 393,
           "source_group": "docs",
           "text": "- post-check: `scripts/diagrams/check/check_pdf_image_bounds.py`"
         },
@@ -6411,37 +6417,37 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 295,
+          "line": 299,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 417,
+          "line": 421,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 358,
+          "line": 360,
           "source_group": "docs",
           "text": "Скрипт `scripts/diagrams/check/check_svg_text_visibility.py` валидирует smoke-набор SVG на предмет"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 368,
+          "line": 370,
           "source_group": "docs",
           "text": "python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 369,
+          "line": 371,
           "source_group": "docs",
           "text": "python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --json"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 451,
+          "line": 462,
           "source_group": "docs",
           "text": "1. **Проверить видимость текста в SVG:** `python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         }
@@ -6644,7 +6650,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 475,
+          "line": 486,
           "source_group": "docs",
           "text": "| apply_elk_layout.py            | `scripts/diagrams/` | Добавление ELK init к flowchart с >20 нод                                           |"
         },
@@ -6740,7 +6746,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 476,
+          "line": 487,
           "source_group": "docs",
           "text": "| differentiate_linkstyle.py     | `scripts/diagrams/` | Семантическая стилизация рёбер                                                      |"
         },
@@ -6787,8 +6793,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 7,
       "references": [
+        {
+          "path": "scripts/diagrams/README.md",
+          "line": 58,
+          "source_group": "scripts",
+          "text": "| `fix-operators`      | `fix_mermaid_operators.py`                      | Fix Mermaid operators            |"
+        },
+        {
+          "path": "scripts/diagrams/__main__.py",
+          "line": 83,
+          "source_group": "scripts",
+          "text": "\"fix-operators\": python_command(\"fix/fix_mermaid_operators.py\"),"
+        },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
           "line": 321,
@@ -6806,6 +6824,18 @@
           "line": 11,
           "source_group": "tests",
           "text": "\"\"\"Tests for scripts/diagrams/fix/fix_mermaid_operators.py.\"\"\""
+        },
+        {
+          "path": "tests/architecture/test_fix_mermaid_operators.py",
+          "line": 31,
+          "source_group": "tests",
+          "text": "repo_root / \"scripts\" / \"diagrams\" / \"fix\" / \"fix_mermaid_operators.py\""
+        },
+        {
+          "path": "tests/unit/repo_backed/tools/test_fix_mermaid_operators_security.py",
+          "line": 17,
+          "source_group": "tests",
+          "text": "module_path = repo_root / \"scripts/diagrams/fix_mermaid_operators.py\""
         }
       ]
     },
@@ -6851,7 +6881,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 429,
+          "line": 433,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
@@ -6914,19 +6944,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 637,
+          "line": 633,
           "source_group": "docs",
           "text": "`scripts/diagrams/fix/prune_orphan_nodes.py` detects nodes defined in a diagram but not"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 645,
+          "line": 641,
           "source_group": "docs",
           "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 648,
+          "line": 644,
           "source_group": "docs",
           "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --check --json"
         }
@@ -6998,19 +7028,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 584,
+          "line": 580,
           "source_group": "docs",
           "text": "Use `scripts/diagrams/fix/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 588,
+          "line": 584,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/fix/uniform_diagram_sizes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 591,
+          "line": 587,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/fix/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd"
         },
@@ -7041,45 +7071,6 @@
       ]
     },
     {
-      "path": "scripts/diagrams/fix_mermaid_operators.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 5,
-      "references": [
-        {
-          "path": "scripts/diagrams/README.md",
-          "line": 58,
-          "source_group": "scripts",
-          "text": "| `fix-operators`      | `fix_mermaid_operators.py`                      | Fix Mermaid operators            |"
-        },
-        {
-          "path": "scripts/diagrams/__main__.py",
-          "line": 83,
-          "source_group": "scripts",
-          "text": "\"fix-operators\": python_command(\"fix/fix_mermaid_operators.py\"),"
-        },
-        {
-          "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 321,
-          "source_group": "scripts",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix/fix_mermaid_operators.py\" \\"
-        },
-        {
-          "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 324,
-          "source_group": "scripts",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix/fix_mermaid_operators.py\" \\"
-        },
-        {
-          "path": "tests/unit/repo_backed/tools/test_fix_mermaid_operators_security.py",
-          "line": 17,
-          "source_group": "tests",
-          "text": "module_path = repo_root / \"scripts/diagrams/fix_mermaid_operators.py\""
-        }
-      ]
-    },
-    {
       "path": "scripts/diagrams/lint/enforce_diagram_quality_budget.py",
       "type": "py",
       "status": "active",
@@ -7094,7 +7085,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 540,
+          "line": 536,
           "source_group": "docs",
           "text": "`scripts/diagrams/lint/enforce_diagram_quality_budget.py`."
         },
@@ -7147,7 +7138,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 367,
+          "line": 371,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py \"${lint_targets[@]}\" --json > /tmp/diagram-lint.json"
         },
@@ -7192,7 +7183,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 370,
+          "line": 374,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -7219,7 +7210,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 353,
+          "line": 349,
           "source_group": "docs",
           "text": "- repo scripts now use `scripts/diagrams/mmdc_wrapper.sh` as the default `mmdc` entrypoint;"
         },
@@ -7270,37 +7261,37 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 443,
+          "line": 439,
           "source_group": "docs",
           "text": "Run the renderer through `scripts/diagrams/render.ps1` from PowerShell. The"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 459,
+          "line": 455,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 460,
+          "line": 456,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1 --svg-only"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 461,
+          "line": 457,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1 --filter \"01-*\""
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 422,
+          "line": 433,
           "source_group": "docs",
           "text": "`scripts/diagrams/render.ps1`: wrapper запускает тот же Bash renderer через Git"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 428,
+          "line": 439,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1 --svg-only"
         },
@@ -7356,22 +7347,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 13,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 180,
+          "line": 183,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_all_bundles.py --check"
         },
         {
           "path": "Makefile",
-          "line": 406,
-          "source_group": "build",
-          "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
-        },
-        {
-          "path": "makefile",
           "line": 406,
           "source_group": "build",
           "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
@@ -7405,6 +7390,12 @@
           "line": 145,
           "source_group": "scripts",
           "text": "- When bundle drift is corrected, prefer regenerating the narrow affected collection via `generate_all_bundles.py --collection <name>` instead of broad refresh of every derived artifact."
+        },
+        {
+          "path": "scripts/diagrams/__main__.py",
+          "line": 97,
+          "source_group": "scripts",
+          "text": "\"render/generate_all_bundles.py\", \"--collection\", \"architecture\""
         }
       ]
     },
@@ -7417,7 +7408,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 179,
+          "line": 182,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
@@ -7470,7 +7461,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -7486,9 +7477,15 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 209,
+          "line": 205,
           "source_group": "docs",
           "text": "- Supplemental generator: `scripts/diagrams/render/generate_package_family_class_diagrams.py`"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
+          "line": 377,
+          "source_group": "docs",
+          "text": "`class-diagrams/90-pkg-*.mmd` намеренно не имеют `generate_package_family_class_diagrams.py --check`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagrams-index.md",
@@ -7564,7 +7561,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 394,
+          "line": 390,
           "source_group": "docs",
           "text": "- `scripts/diagrams/render/generate_with_descriptions_docx.py`"
         },
@@ -7609,7 +7606,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 393,
+          "line": 389,
           "source_group": "docs",
           "text": "- `scripts/diagrams/render/generate_with_descriptions_pdf.py`"
         },
@@ -7724,7 +7721,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 21,
       "references": [
         {
           "path": "Makefile",
@@ -7734,31 +7731,31 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 576,
+          "line": 572,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile pr --enforce-budget"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 577,
+          "line": 573,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile nightly --enforce-budget"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 474,
+          "line": 485,
           "source_group": "docs",
           "text": "| run_diagram_checks.sh          | `scripts/diagrams/` | Единый запуск профилей проверок (`pr`/`nightly`/`quick`)                            |"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 492,
+          "line": 503,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile pr"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 511,
+          "line": 522,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile pr \\"
         },
@@ -7785,13 +7782,13 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 388,
+          "line": 384,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_docs_agent.sh"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 395,
+          "line": 391,
           "source_group": "docs",
           "text": "- unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`"
         },
@@ -7836,13 +7833,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 482,
+          "line": 493,
           "source_group": "docs",
           "text": "| run_diagram_nightly_suite.py   | `scripts/diagrams/` | DIAG-T024..T029 nightly heuristics (interactivity/chaos/growth/theme)               |"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 498,
+          "line": 509,
           "source_group": "docs",
           "text": "1. `nightly` — `pr` + DIAG-T024..T029 (`run_diagram_nightly_suite.py`)."
         },
@@ -7946,7 +7943,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 326,
+          "line": 330,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -7958,19 +7955,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 438,
+          "line": 434,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 456,
+          "line": 452,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 427,
+          "line": 438,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json"
         },
@@ -8052,7 +8049,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 214,
+      "reference_count": 215,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
@@ -8324,7 +8321,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 163,
+          "line": 166,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
@@ -8344,7 +8341,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 64,
           "source_group": "docs",
-          "text": "uv run python -m scripts.docs check-links --links --specs --configs"
+          "text": "uv run python -m scripts.docs check-links"
         }
       ]
     },
@@ -9563,19 +9560,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 76,
+          "line": 24,
           "source_group": "docs",
-          "text": "python3 scripts/docs_parity_check.py"
+          "text": "удалены: скрипты `scripts/ci_check_docs_parity.sh` и `scripts/docs_parity_check.py`"
         },
         {
           "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 96,
+          "line": 36,
           "source_group": "docs",
-          "text": "The broader governance report path is implemented by `scripts/docs_parity_check.py`,"
+          "text": "Retired local-only report (non-CI, не gate): `python3 scripts/docs_parity_check.py`"
+        },
+        {
+          "path": "docs/03-guides/docs-parity-gate.md",
+          "line": 58,
+          "source_group": "docs",
+          "text": "`scripts/docs_parity_check.py` (non-CI, local use only), which writes"
         },
         {
           "path": "scripts/documentation_governance_check.py",
@@ -9606,12 +9609,6 @@
           "line": 1,
           "source_group": "tests",
           "text": "\"\"\"Tests for docs_parity_check.py.\"\"\""
-        },
-        {
-          "path": "tests/unit/scripts/docs/test_docs_parity_check.py",
-          "line": 10,
-          "source_group": "tests",
-          "text": "from scripts.docs_parity_check import DocumentationParityChecker, ParityResult"
         }
       ]
     },
@@ -9720,7 +9717,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 19,
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
@@ -10689,7 +10686,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 269,
+      "reference_count": 268,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -11450,7 +11447,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 26,
+      "reference_count": 25,
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
@@ -12002,7 +11999,7 @@
       "references": [
         {
           "path": "pyproject.toml",
-          "line": 343,
+          "line": 341,
           "source_group": "build",
           "text": "# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory"
         },
@@ -12181,7 +12178,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 14,
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
@@ -12464,7 +12461,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 365,
+      "reference_count": 364,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -13456,7 +13453,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 52,
+          "line": 51,
           "source_group": "ci",
           "text": "- 'scripts/engineering/qa/check_xwalk_missing_backlog.py'"
         },
@@ -14180,13 +14177,13 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 186,
+          "line": 190,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 190,
+          "line": 194,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -16150,7 +16147,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
@@ -17401,7 +17398,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 85,
+      "reference_count": 82,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -17435,7 +17432,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 160,
+          "line": 163,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions"
         },
@@ -18359,7 +18356,7 @@
         },
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
-          "line": 111,
+          "line": 117,
           "source_group": "docs",
           "text": "публичные command-модули `interfaces/cli/commands/run.py`,"
         },
@@ -18642,7 +18639,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 69,
+      "reference_count": 68,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
@@ -19200,7 +19197,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 45,
+      "reference_count": 35,
       "references": [
         {
           "path": "Makefile",
@@ -19563,7 +19560,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 20,
       "references": [
         {
           "path": "Makefile",
@@ -19582,12 +19579,6 @@
           "line": 320,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
-        },
-        {
-          "path": "makefile",
-          "line": 350,
-          "source_group": "build",
-          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -19612,6 +19603,12 @@
           "line": 570,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
+        },
+        {
+          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
+          "line": 107,
+          "source_group": "scripts",
+          "text": "Candidate(\"scripts/ops/launchers/codex/setup_plugins.sh\", BOOTSTRAP_HELPER_ROLE),"
         }
       ]
     },
@@ -20110,7 +20107,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2434,
+          "line": 2446,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20135,13 +20132,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2480,
+          "line": 2492,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 544,
+          "line": 615,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -20153,7 +20150,7 @@
         },
         {
           "path": "tests/integration/test_grafana_evidence_readability.py",
-          "line": 219,
+          "line": 221,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import _stage_colors"
         }
@@ -20178,13 +20175,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2477,
+          "line": 2489,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 549,
+          "line": 620,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import ("
         },
@@ -20266,13 +20263,61 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_workflow_scope.py",
           "line": 416,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._overview_identity import apply_overview_identity"
+        },
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2544,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._overview_identity import apply_saved_evidence_readability"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/grafana/_overview_quality.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/_overview_identity.py",
+          "line": 284,
+          "source_group": "scripts",
+          "text": "from ._overview_quality import exclusion_quality_expression"
+        },
+        {
+          "path": "tests/integration/test_dashboard_operator_readability.py",
+          "line": 60,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana._overview_quality import exclusion_quality_expression"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/grafana/_provider_evidence_columns.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2508,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
+        },
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2534,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         }
       ]
     },
@@ -20296,11 +20341,17 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2491,
+          "line": 260,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._run_explorer_columns import _RESET_FILTERS"
+        },
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2503,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         }
@@ -20311,11 +20362,17 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 10,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_dashboard_state_followup.py",
           "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
+        },
+        {
+          "path": "scripts/ops/observability/grafana/_provider_evidence_columns.py",
+          "line": 155,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -20327,9 +20384,15 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1405,
+          "line": 1407,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import STATUS_URL"
+        },
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2525,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
         {
           "path": "tests/integration/_grafana_test_support.py",
@@ -20339,25 +20402,13 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 554,
+          "line": 625,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
         {
           "path": "tests/integration/test_grafana_config.py",
           "line": 19,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana._selected_run_panels import SELECTOR_ROWS"
-        },
-        {
-          "path": "tests/integration/test_grafana_overview_config.py",
-          "line": 18,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana._selected_run_panels import SELECTOR_ROWS"
-        },
-        {
-          "path": "tests/integration/test_grafana_selector_contract.py",
-          "line": 18,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import SELECTOR_ROWS"
         }
@@ -20376,7 +20427,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2500,
+          "line": 2517,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._stage_removal_columns import ("
         }
@@ -20397,7 +20448,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2472,
+          "line": 2484,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
@@ -20416,13 +20467,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2485,
+          "line": 2497,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope"
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_workflow_scope.py",
-          "line": 9,
+          "line": 8,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope"
         }
@@ -20459,7 +20510,7 @@
         },
         {
           "path": "tests/integration/test_grafana_action_target_coverage.py",
-          "line": 133,
+          "line": 110,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.action_target_routes import ("
         },
@@ -20639,7 +20690,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 186,
+          "line": 213,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh`."
         }
@@ -20785,8 +20836,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 10,
       "references": [
+        {
+          "path": "scripts/ops/observability/grafana/_selected_run_panels.py",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.dashboard_context_links import build_handoff_url"
+        },
         {
           "path": "scripts/ops/observability/grafana/action_target_routes.py",
           "line": 13,
@@ -20801,7 +20858,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2428,
+          "line": 2439,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
@@ -20818,20 +20875,14 @@
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import build_handoff_url"
         },
         {
+          "path": "tests/integration/test_pipeline_diagnostics_retirement.py",
+          "line": 6,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
+        },
+        {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
           "line": 7,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
-        },
-        {
-          "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
-          "line": 99,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
-        },
-        {
-          "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
-          "line": 158,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         }
@@ -20913,7 +20964,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2552,
+          "line": 2612,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.generate_prometheus_only_dashboards import ("
         },
@@ -20938,7 +20989,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 56,
+          "line": 83,
           "source_group": "other",
           "text": "`python scripts/ops/observability/grafana/generate_trust_validation_fixtures.py`"
         },
@@ -21124,7 +21175,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 188,
+          "line": 215,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`."
         }
@@ -21139,7 +21190,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",
@@ -21331,7 +21382,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 58,
+          "line": 85,
           "source_group": "other",
           "text": "`scripts/ops/observability/grafana/run_trust_fixture_closeup_matrix.ps1`."
         }
@@ -21381,7 +21432,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 172,
+          "line": 199,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`."
         },
@@ -21424,7 +21475,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 163,
+          "line": 190,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`."
         },
@@ -21492,7 +21543,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 61,
+          "line": 88,
           "source_group": "other",
           "text": "`python scripts/ops/observability/refresh_visual_json_baseline.py`."
         }
@@ -22227,7 +22278,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 93,
+      "reference_count": 91,
       "references": [
         {
           "path": "Makefile",
@@ -22336,7 +22387,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 2666,
+          "line": 2696,
           "source_group": "other",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         }
@@ -22401,7 +22452,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
@@ -22414,12 +22465,6 @@
           "line": 129,
           "source_group": "docs",
           "text": "- `scripts/ops/runtime/mcp/apply-shared-to-devin.py`"
-        },
-        {
-          "path": "makefile",
-          "line": 158,
-          "source_group": "build",
-          "text": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/ops/runtime/mcp/apply-shared-to-devin.py"
         },
         {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
@@ -22528,7 +22573,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -22567,16 +22612,16 @@
           "text": "@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh all"
         },
         {
-          "path": "makefile",
-          "line": 173,
-          "source_group": "build",
-          "text": "PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily"
+          "path": "scripts/ai/codex/helper/ensure-mcp.sh",
+          "line": 318,
+          "source_group": "scripts",
+          "text": "local health=\"${REPO_ROOT}/scripts/ops/runtime/mcp/health-shared.sh\""
         },
         {
-          "path": "makefile",
-          "line": 239,
-          "source_group": "build",
-          "text": "@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily"
+          "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
+          "line": 153,
+          "source_group": "scripts",
+          "text": "local health=\"${REPO_ROOT}/scripts/ops/runtime/mcp/health-shared.sh\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -22646,7 +22691,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 16,
       "references": [
         {
           "path": "Makefile",
@@ -22679,22 +22724,22 @@
           "text": "bounds `start-shared.sh`; callers must not wrap ensure with a smaller"
         },
         {
-          "path": "makefile",
-          "line": 172,
-          "source_group": "build",
-          "text": "XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily"
+          "path": "scripts/ai/codex/helper/ensure-mcp.sh",
+          "line": 317,
+          "source_group": "scripts",
+          "text": "local launcher=\"${REPO_ROOT}/scripts/ops/runtime/mcp/start-shared.sh\""
         },
         {
-          "path": "makefile",
-          "line": 238,
-          "source_group": "build",
-          "text": "@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily"
+          "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
+          "line": 152,
+          "source_group": "scripts",
+          "text": "local launcher=\"${REPO_ROOT}/scripts/ops/runtime/mcp/start-shared.sh\""
         },
         {
-          "path": "makefile",
-          "line": 243,
-          "source_group": "build",
-          "text": "@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily"
+          "path": "scripts/ops/runtime/mcp/OPERATOR.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "./scripts/ops/runtime/mcp/start-shared.sh"
         }
       ],
       "owner": "@bioetl-platform",
@@ -23352,7 +23397,7 @@
         "new-pipeline",
         "py-config-bot"
       ],
-      "reference_count": 77,
+      "reference_count": 76,
       "references": [
         {
           "path": ".codex/skills/new-pipeline/SKILL.md",
@@ -23590,7 +23635,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 33,
+          "line": 32,
           "source_group": "ci",
           "text": "- 'scripts/schema/analysis/generate_unified_schema_map.py'"
         },

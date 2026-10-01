@@ -26,14 +26,14 @@ def apply_replay_readiness_design(payload: dict) -> None:
             "fields": "verdict",
         },
         "orientation": "horizontal",
-        "textMode": "value",
+        "textMode": "value_and_name",
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
-        "text": {"valueSize": 22},
+        "text": {"valueSize": 22, "titleSize": 12},
     }
     card["transformations"] = [
-        {"id": "filterFieldsByName", "options": {"include": {"names": ["verdict"]}}}
+        {"id": "filterFieldsByName", "options": {"include": {"names": ["verdict", "explanation"]}}}
     ]
     colors = {
         "READY": "green",
@@ -64,7 +64,10 @@ def apply_replay_readiness_design(payload: dict) -> None:
                 "steps": [{"color": "#555555", "value": None}],
             },
         },
-        "overrides": [],
+        "overrides": [{
+            "matcher": {"id": "byName", "options": "verdict"},
+            "properties": [{"id": "displayName", "value": "${__data.fields.explanation}"}],
+        }],
     }
     card["links"] = [
         {
