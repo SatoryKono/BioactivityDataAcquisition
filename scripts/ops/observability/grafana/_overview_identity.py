@@ -1,5 +1,6 @@
 """Compact, persisted identity for the Overview first window."""
 
+
 def apply_overview_identity(payload: dict) -> None:
     """Keep only the compact exact-run identity on Overview."""
     panels = payload["panels"]

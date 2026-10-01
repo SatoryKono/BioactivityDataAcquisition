@@ -15,7 +15,12 @@ def apply_overall_verdict(payload: dict) -> None:
         "type": "stat",
         "title": "Review Overall Verdict",
         "description": "Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
-        "gridPos": {"x": source["gridPos"]["x"], "y": 2, "w": source["gridPos"]["w"], "h": 3},
+        "gridPos": {
+            "x": source["gridPos"]["x"],
+            "y": 2,
+            "w": source["gridPos"]["w"],
+            "h": 3,
+        },
         "datasource": deepcopy(source["datasource"]),
         "targets": deepcopy(source["targets"]),
         "transformations": [
