@@ -16,12 +16,12 @@ export interface WorkspaceRoute {
   title: string;
   subtitle: string;
   dominantLocalization: string;
-  decisionObjects: ReadonlyArray<KernelComponent>;
-  compatibilityUids: ReadonlyArray<string>;
-  primaryPanelIds: ReadonlyArray<number>;
+  decisionObjects: readonly KernelComponent[];
+  compatibilityUids: readonly string[];
+  primaryPanelIds: readonly number[];
 }
 
-export const WORKSPACE_ROUTES = routeContract.routes as ReadonlyArray<WorkspaceRoute>;
+export const WORKSPACE_ROUTES = routeContract.routes as readonly WorkspaceRoute[];
 
 export function routeBySlug(slug: RouteSlug): WorkspaceRoute {
   const route = WORKSPACE_ROUTES.find((candidate) => candidate.slug === slug);
