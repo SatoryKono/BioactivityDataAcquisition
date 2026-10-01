@@ -51,7 +51,7 @@ def test_normalize_dashboard_payload_strips_only_volatile_fields() -> None:
     payload = {
         "id": 99,
         "version": 7,
-        "uid": "bioetl-runtime",
+        "uid": "bioetl-overview-v2",
         "title": "Runtime",
         "panels": [
             {
@@ -65,7 +65,7 @@ def test_normalize_dashboard_payload_strips_only_volatile_fields() -> None:
     normalized = inventory._normalize_dashboard_payload(payload)
     assert "id" not in normalized
     assert "version" not in normalized
-    assert normalized["uid"] == "bioetl-runtime"
+    assert normalized["uid"] == "bioetl-overview-v2"
     assert normalized["panels"][0]["title"] == "Status"
     assert "pluginVersion" not in normalized["panels"][0]
     assert normalized["panels"][0]["targets"][0]["expr"] == "up"
@@ -73,7 +73,7 @@ def test_normalize_dashboard_payload_strips_only_volatile_fields() -> None:
 
 def test_compare_deployed_dashboards_detects_query_drift(tmp_path: Path) -> None:
     dashboards = Path("grafana/dashboards")
-    sample = next(dashboards.glob("bioetl-runtime.json"))
+    sample = next(dashboards.glob("bioetl-overview-v2.json"))
     payload = json.loads(sample.read_text(encoding="utf-8"))
 
     def _mutate(node: object) -> bool:
@@ -96,12 +96,12 @@ def test_compare_deployed_dashboards_detects_query_drift(tmp_path: Path) -> None
     assert _mutate(mutated)
     deployed_dir = tmp_path / "deployed"
     deployed_dir.mkdir()
-    (deployed_dir / "bioetl-runtime.json").write_text(
+    (deployed_dir / "bioetl-overview-v2.json").write_text(
         json.dumps(mutated),
         encoding="utf-8",
     )
     for path in dashboards.glob("*.json"):
-        if path.name == "bioetl-runtime.json":
+        if path.name == "bioetl-overview-v2.json":
             continue
         (deployed_dir / path.name).write_text(
             path.read_text(encoding="utf-8"),
@@ -114,5 +114,5 @@ def test_compare_deployed_dashboards_detects_query_drift(tmp_path: Path) -> None
         deployed_dir=deployed_dir,
     )
     assert errors
-    assert any("bioetl-runtime" in err for err in errors)
-    assert by_uid.get("bioetl-runtime")
+    assert any("bioetl-overview-v2" in err for err in errors)
+    assert by_uid.get("bioetl-overview-v2")

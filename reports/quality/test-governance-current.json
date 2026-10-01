@@ -981,26 +981,7 @@
     }
   },
   "assertless_total_candidates": 83,
-  "budget_violations": [
-    {
-      "actual": 2,
-      "budget": "duplicate_test_names_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_names"
-    },
-    {
-      "actual": 4,
-      "budget": "duplicate_test_name_occurrences_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_name_occurrences"
-    },
-    {
-      "actual": 6,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1145,43 +1126,16 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/infrastructure/quality/test_decomposition_validation.py:670",
-        "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:386"
-      ],
-      "name": "test_flat_above_zero_still_violation",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/infrastructure/quality/test_decomposition_validation.py:653",
-        "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:357"
-      ],
-      "name": "test_zero_floor_flat_continuation_passes",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 2,
-    "duplicate_occurrences": 4,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 2
+    "total_duplicate_names": 0
   },
-  "duplicate_test_name_occurrences": 4,
-  "duplicate_test_names": 2,
+  "duplicate_test_name_occurrences": 0,
+  "duplicate_test_names": 0,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1201,15 +1155,8 @@
     ]
   },
   "intentional_no_exception_contract": 83,
-  "markerless_examples": [
-    "tests/integration/test_pipeline_diagnostics_retirement.py:12",
-    "tests/integration/test_pipeline_diagnostics_retirement.py:23",
-    "tests/unit/composition/test_run_report_store_singleton.py:23",
-    "tests/unit/composition/test_run_report_store_singleton.py:30",
-    "tests/unit/composition/test_run_report_store_singleton.py:47",
-    "tests/unit/interfaces/http/test_selected_run_unfinished_evidence.py:43"
-  ],
-  "markerless_test_functions": 6,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2016,43 +1963,16 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/infrastructure/quality/test_decomposition_validation.py:670",
-          "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:386"
-        ],
-        "name": "test_flat_above_zero_still_violation",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/infrastructure/quality/test_decomposition_validation.py:653",
-          "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:357"
-        ],
-        "name": "test_zero_floor_flat_continuation_passes",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 2,
-      "duplicate_occurrences": 4,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 2
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 4,
-    "duplicate_test_names": 2,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2071,15 +1991,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/integration/test_pipeline_diagnostics_retirement.py:12",
-      "tests/integration/test_pipeline_diagnostics_retirement.py:23",
-      "tests/unit/composition/test_run_report_store_singleton.py:23",
-      "tests/unit/composition/test_run_report_store_singleton.py:30",
-      "tests/unit/composition/test_run_report_store_singleton.py:47",
-      "tests/unit/interfaces/http/test_selected_run_unfinished_evidence.py:43"
-    ],
-    "markerless_test_functions": 6,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2097,8 +2010,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2962,
-      "test_python_file_count": 3196,
+      "test_glob_file_count": 2965,
+      "test_python_file_count": 3199,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2138,48 +2051,24 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/infrastructure/quality/test_decomposition_validation.py:670",
-          "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:386"
-        ],
-        "name": "test_flat_above_zero_still_violation"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/infrastructure/quality/test_decomposition_validation.py:653",
-          "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:357"
-        ],
-        "name": "test_zero_floor_flat_continuation_passes"
-      }
-    ],
-    "total_test_files": 2962,
-    "total_test_functions": 29062,
+    "top_duplicate_test_names": [],
+    "total_test_files": 2965,
+    "total_test_functions": 29083,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "c4c8ac07cb853d7cbe61faa4e77ca98f07c301b1a8c1f96e7083a8d9c2592fb6",
+  "source_tree_sha256": "7971169ebcfbd1f31e8756e0db0c63168ecfb44c98eb15ed059e09bc02e46c3e",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 83,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 4,
-    "duplicate_test_names": 2,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "intentional_no_exception_contract": 83,
-    "markerless_examples": [
-      "tests/integration/test_pipeline_diagnostics_retirement.py:12",
-      "tests/integration/test_pipeline_diagnostics_retirement.py:23",
-      "tests/unit/composition/test_run_report_store_singleton.py:23",
-      "tests/unit/composition/test_run_report_store_singleton.py:30",
-      "tests/unit/composition/test_run_report_store_singleton.py:47",
-      "tests/unit/interfaces/http/test_selected_run_unfinished_evidence.py:43"
-    ],
-    "markerless_test_functions": 6,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2189,8 +2078,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2962,
-    "test_python_file_count": 3196,
+    "test_glob_file_count": 2965,
+    "test_python_file_count": 3199,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2230,26 +2119,9 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/infrastructure/quality/test_decomposition_validation.py:670",
-        "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:386"
-      ],
-      "name": "test_flat_above_zero_still_violation"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/infrastructure/quality/test_decomposition_validation.py:653",
-        "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:357"
-      ],
-      "name": "test_zero_floor_flat_continuation_passes"
-    }
-  ],
-  "total_test_files": 2962,
-  "total_test_functions": 29062,
+  "top_duplicate_test_names": [],
+  "total_test_files": 2965,
+  "total_test_functions": 29083,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

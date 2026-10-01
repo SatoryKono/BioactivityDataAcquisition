@@ -80,11 +80,11 @@ def test_urls_for_context_do_not_keep_a_foreign_uuid() -> None:
 
 
 def test_action_targets_use_allowlisted_dashboard_routes() -> None:
-    assert dashboard_uid_for_target("runtime") == "bioetl-runtime"
+    assert dashboard_uid_for_target("runtime") == "bioetl-overview-v2"
     assert dashboard_uid_for_target("data_quality") == "bioetl-dq-v2"
     assert dashboard_uid_for_target("verify_dq_reason_rules") is None
     assert dashboard_uid_for_target("unknown") is None
-    assert ACTION_DASHBOARD_UID_BY_TARGET["provider"] == "bioetl-provider-health-v2"
+    assert ACTION_DASHBOARD_UID_BY_TARGET["provider"] == "bioetl-overview-v2"
 
     url = row_aware_dashboard_url()
     assert "${__data.fields.action_dashboard_uid}" in url
@@ -143,7 +143,7 @@ def test_action_normalization_preserves_rank_query_and_visible_column() -> None:
         ("bioetl-run-explorer-v1", "run-explorer"),
         ("bioetl-control-plane-v1", "1-trust"),
         ("bioetl-overview-v2", "2-overview"),
-        ("bioetl-runtime", "3-pipeline-diagnostics"),
+
         ("bioetl-provider-health-v2", "4-provider-health"),
         ("bioetl-dq-v2", "5-data-quality"),
         ("bioetl-incident-v1", "6-incident-workspace"),

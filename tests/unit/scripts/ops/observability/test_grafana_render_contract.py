@@ -196,12 +196,12 @@ def _manifest(*, classification: str = "incomplete") -> dict[str, object]:
         },
         "terminal_state_validation": {
             "status": "ok",
-            "dashboards": {"bioetl-runtime": "ok"},
+            "dashboards": {"bioetl-overview-v2": "ok"},
         },
         "dashboards": [
             {
-                "uid": "bioetl-runtime",
-                "file": "bioetl-runtime.png",
+                "uid": "bioetl-overview-v2",
+                "file": "bioetl-overview-v2.png",
                 "renderStatus": "rendered",
                 "actualViewport": {"width": 1024, "height": 1900},
                 "actualTheme": "light",
@@ -225,7 +225,7 @@ def _manifest(*, classification: str = "incomplete") -> dict[str, object]:
 
 
 def _bind_provenance(tmp_path: Path, manifest: dict[str, object]) -> None:
-    source = rerender._dashboard_source_by_uid()["bioetl-runtime"]
+    source = rerender._dashboard_source_by_uid()["bioetl-overview-v2"]
     dashboards = manifest["dashboards"]
     assert isinstance(dashboards, list)
     dashboard = dashboards[0]
@@ -247,11 +247,11 @@ def _bind_provenance(tmp_path: Path, manifest: dict[str, object]) -> None:
                 "render-manifest--selected-subset--unit-capture.json"
             ),
             "file_count": 1,
-            "file_set": ["bioetl-runtime.png"],
+            "file_set": ["bioetl-overview-v2.png"],
             "source": {
                 "commit_sha": "a" * 40,
                 "working_tree_dirty": False,
-                "dashboards": {"bioetl-runtime": source},
+                "dashboards": {"bioetl-overview-v2": source},
             },
             "capture_context": {
                 "time_range": {
@@ -278,17 +278,17 @@ def _bind_provenance(tmp_path: Path, manifest: dict[str, object]) -> None:
 def test_source_binding_rejects_stale_or_misbound_json(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mutation: str
 ) -> None:
-    relative = Path("grafana/dashboards/bioetl-runtime.json")
+    relative = Path("grafana/dashboards/bioetl-overview-v2.json")
     source_file = tmp_path / relative
     source_file.parent.mkdir(parents=True)
-    source_file.write_text('{"uid":"bioetl-runtime","version":1}', encoding="utf-8")
+    source_file.write_text('{"uid":"bioetl-overview-v2","version":1}', encoding="utf-8")
     source = {
         "path": relative.as_posix(),
         "sha256": hashlib.sha256(source_file.read_bytes()).hexdigest(),
         "version": 1,
     }
     monkeypatch.setattr(preflight, "_REPO_ROOT", tmp_path)
-    assert preflight._dashboard_source_error("bioetl-runtime", source, source) is None
+    assert preflight._dashboard_source_error("bioetl-overview-v2", source, source) is None
     if mutation == "digest":
         source["sha256"] = "0" * 64
     elif mutation == "path":
@@ -296,9 +296,9 @@ def test_source_binding_rejects_stale_or_misbound_json(
     elif mutation == "missing":
         source_file.unlink()
     else:
-        source_file.write_text('{"uid":"bioetl-runtime","version":2}', encoding="utf-8")
+        source_file.write_text('{"uid":"bioetl-overview-v2","version":2}', encoding="utf-8")
     assert (
-        preflight._dashboard_source_error("bioetl-runtime", source, source) is not None
+        preflight._dashboard_source_error("bioetl-overview-v2", source, source) is not None
     )
 
 
@@ -329,8 +329,8 @@ def test_manifest_accepts_explicit_terminal_evidence_gaps(
 ) -> None:
     error = preflight._validate_manifest_render_contract(
         _manifest(classification=classification),
-        expected_uids=("bioetl-runtime",),
-        expected_panel_ids={"bioetl-runtime": (1,)},
+        expected_uids=("bioetl-overview-v2",),
+        expected_panel_ids={"bioetl-overview-v2": (1,)},
     )
 
     assert error is None
@@ -352,12 +352,12 @@ def test_manifest_accepts_and_validates_optional_fixture_state_provenance(
     assert isinstance(dashboards, list)
     dashboard = dashboards[0]
     assert isinstance(dashboard, dict)
-    indexed_dashboards = {"bioetl-runtime": dashboard}
-    (tmp_path / "bioetl-runtime.png").write_bytes(_png())
+    indexed_dashboards = {"bioetl-overview-v2": dashboard}
+    (tmp_path / "bioetl-overview-v2.png").write_bytes(_png())
     assert (
         preflight._validate_manifest_provenance(
             manifest,
-            expected_uids=("bioetl-runtime",),
+            expected_uids=("bioetl-overview-v2",),
             dashboards=indexed_dashboards,
             screenshot_dir=tmp_path,
         )
@@ -368,7 +368,7 @@ def test_manifest_accepts_and_validates_optional_fixture_state_provenance(
     assert (
         preflight._validate_manifest_provenance(
             manifest,
-            expected_uids=("bioetl-runtime",),
+            expected_uids=("bioetl-overview-v2",),
             dashboards=indexed_dashboards,
             screenshot_dir=tmp_path,
         )
@@ -379,7 +379,7 @@ def test_manifest_accepts_and_validates_optional_fixture_state_provenance(
     assert (
         preflight._validate_manifest_provenance(
             manifest,
-            expected_uids=("bioetl-runtime",),
+            expected_uids=("bioetl-overview-v2",),
             dashboards=indexed_dashboards,
             screenshot_dir=tmp_path,
         )
@@ -393,7 +393,7 @@ def test_manifest_accepts_and_validates_optional_fixture_state_provenance(
     assert (
         preflight._validate_manifest_provenance(
             manifest,
-            expected_uids=("bioetl-runtime",),
+            expected_uids=("bioetl-overview-v2",),
             dashboards=indexed_dashboards,
             screenshot_dir=tmp_path,
         )
@@ -407,8 +407,8 @@ def test_manifest_requires_expanded_rows_and_exact_panel_coverage() -> None:
 
     expansion_error = preflight._validate_manifest_render_contract(
         manifest,
-        expected_uids=("bioetl-runtime",),
-        expected_panel_ids={"bioetl-runtime": (1,)},
+        expected_uids=("bioetl-overview-v2",),
+        expected_panel_ids={"bioetl-overview-v2": (1,)},
     )
 
     assert expansion_error == "render manifest must prove expand_collapsed_rows=true"
@@ -416,8 +416,8 @@ def test_manifest_requires_expanded_rows_and_exact_panel_coverage() -> None:
     manifest["expand_collapsed_rows"] = True
     coverage_error = preflight._validate_manifest_render_contract(
         manifest,
-        expected_uids=("bioetl-runtime",),
-        expected_panel_ids={"bioetl-runtime": (1, 2)},
+        expected_uids=("bioetl-overview-v2",),
+        expected_panel_ids={"bioetl-overview-v2": (1, 2)},
     )
 
     assert coverage_error is not None
@@ -427,7 +427,7 @@ def test_manifest_requires_expanded_rows_and_exact_panel_coverage() -> None:
 def test_manifest_binds_panel_evidence_to_png_hash_and_dimensions(
     tmp_path: Path,
 ) -> None:
-    screenshot = tmp_path / "bioetl-runtime.png"
+    screenshot = tmp_path / "bioetl-overview-v2.png"
     screenshot.write_bytes(_png())
     manifest = _manifest(classification="healthy")
     dashboards = manifest["dashboards"]
@@ -445,8 +445,8 @@ def test_manifest_binds_panel_evidence_to_png_hash_and_dimensions(
 
     error = preflight._validate_manifest_render_contract(
         manifest,
-        expected_uids=("bioetl-runtime",),
-        expected_panel_ids={"bioetl-runtime": (1,)},
+        expected_uids=("bioetl-overview-v2",),
+        expected_panel_ids={"bioetl-overview-v2": (1,)},
         screenshot_dir=tmp_path,
     )
 
@@ -457,8 +457,8 @@ def test_manifest_binds_panel_evidence_to_png_hash_and_dimensions(
     evidence["sha256"] = "0" * 64
     hash_error = preflight._validate_manifest_render_contract(
         manifest,
-        expected_uids=("bioetl-runtime",),
-        expected_panel_ids={"bioetl-runtime": (1,)},
+        expected_uids=("bioetl-overview-v2",),
+        expected_panel_ids={"bioetl-overview-v2": (1,)},
         screenshot_dir=tmp_path,
     )
 
@@ -479,7 +479,7 @@ def test_immutable_manifest_rejects_occurrence_overwrite(
         width=1024,
         height=900,
         timeout_seconds=30,
-        selected_uids=("bioetl-runtime",),
+        selected_uids=("bioetl-overview-v2",),
         fallback="playwright",
         occurrence_id="same-occurrence",
     )
@@ -487,8 +487,8 @@ def test_immutable_manifest_rejects_occurrence_overwrite(
         rerender,
         "_dashboard_source_by_uid",
         lambda: {
-            "bioetl-runtime": {
-                "path": "grafana/dashboards/bioetl-runtime.json",
+            "bioetl-overview-v2": {
+                "path": "grafana/dashboards/bioetl-overview-v2.json",
                 "sha256": "b" * 64,
                 "version": 1,
             },
@@ -505,7 +505,7 @@ def test_immutable_manifest_rejects_occurrence_overwrite(
         lambda: {"commit_sha": "a" * 40, "working_tree_dirty": False},
     )
     payload: dict[str, object] = {
-        "dashboards": [{"uid": "bioetl-runtime", "file": "bioetl-runtime.png"}]
+        "dashboards": [{"uid": "bioetl-overview-v2", "file": "bioetl-overview-v2.png"}]
     }
 
     rerender._finalize_manifest(config, payload)
@@ -516,7 +516,7 @@ def test_immutable_manifest_rejects_occurrence_overwrite(
 def test_playwright_retry_gate_rejects_unbound_or_dimension_drifted_png(
     tmp_path: Path,
 ) -> None:
-    screenshot = tmp_path / "bioetl-runtime.png"
+    screenshot = tmp_path / "bioetl-overview-v2.png"
     screenshot.write_bytes(_png())
     config = rerender.RenderConfig(
         base_url="http://localhost:3000",
@@ -527,11 +527,11 @@ def test_playwright_retry_gate_rejects_unbound_or_dimension_drifted_png(
         width=1024,
         height=2200,
         timeout_seconds=30.0,
-        selected_uids=("bioetl-runtime",),
+        selected_uids=("bioetl-overview-v2",),
         fallback="playwright",
     )
     dashboard = {
-        "uid": "bioetl-runtime",
+        "uid": "bioetl-overview-v2",
         "file": screenshot.name,
         "renderStatus": "rendered",
         "renderedPanelCount": 1,
@@ -589,11 +589,11 @@ def test_render_contract_rejects_missing_typography_evidence() -> None:
 
     problem = preflight._validate_manifest_render_contract(
         manifest,
-        expected_uids=("bioetl-runtime",),
+        expected_uids=("bioetl-overview-v2",),
     )
 
     assert (
-        problem == "render manifest dashboard bioetl-runtime lacks typography evidence"
+        problem == "render manifest dashboard bioetl-overview-v2 lacks typography evidence"
     )
 
 
@@ -607,12 +607,12 @@ def test_render_contract_rejects_title_font_floor_drift() -> None:
 
     problem = preflight._validate_manifest_render_contract(
         manifest,
-        expected_uids=("bioetl-runtime",),
+        expected_uids=("bioetl-overview-v2",),
     )
 
     assert (
         problem
-        == "render manifest dashboard bioetl-runtime title typography floor drift"
+        == "render manifest dashboard bioetl-overview-v2 title typography floor drift"
     )
 
 
@@ -626,11 +626,11 @@ def test_render_contract_rejects_grafana_title_floor_drift() -> None:
 
     problem = preflight._validate_manifest_render_contract(
         manifest,
-        expected_uids=("bioetl-runtime",),
+        expected_uids=("bioetl-overview-v2",),
     )
 
     assert problem == (
-        "render manifest dashboard bioetl-runtime Grafana title typography floor drift"
+        "render manifest dashboard bioetl-overview-v2 Grafana title typography floor drift"
     )
 
 
@@ -638,7 +638,7 @@ def test_repeat_geometry_comparison_ignores_values_and_detects_layout_drift() ->
     baseline: dict[str, object] = {
         "dashboards": [
             {
-                "uid": "bioetl-runtime",
+                "uid": "bioetl-overview-v2",
                 "layoutGeometry": {
                     "panelGeometry": {"1": {"x": 0, "y": 0, "width": 100, "height": 40}}
                 },
@@ -651,7 +651,7 @@ def test_repeat_geometry_comparison_ignores_values_and_detects_layout_drift() ->
     repeat: dict[str, object] = {
         "dashboards": [
             {
-                "uid": "bioetl-runtime",
+                "uid": "bioetl-overview-v2",
                 "layoutGeometry": {
                     "panelGeometry": {"1": {"x": 0, "y": 0, "width": 100, "height": 40}}
                 },

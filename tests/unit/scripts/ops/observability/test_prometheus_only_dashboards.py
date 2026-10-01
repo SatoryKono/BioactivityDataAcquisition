@@ -32,10 +32,10 @@ def test_notice_inherits_identity_without_nested_datasources():
     assert "No retention, replay, identity, or run verdict" in serialized
 
 
-def test_seven_notices_are_idempotent_and_check_detects_drift(tmp_path):
+def test_five_notices_are_idempotent_and_check_detects_drift(tmp_path):
     source = tmp_path / "grafana/dashboards"
     source.mkdir(parents=True)
-    for number in range(7):
+    for number in range(5):
         (source / f"{number}.json").write_text(
             json.dumps({"uid": str(number), "title": str(number), "schemaVersion": 30}),
             encoding="utf-8",
@@ -51,6 +51,6 @@ def test_seven_notices_are_idempotent_and_check_detects_drift(tmp_path):
 
 
 def test_incomplete_source_portfolio_fails_before_writing(tmp_path):
-    with pytest.raises(ValueError, match="exactly seven"):
+    with pytest.raises(ValueError, match="exactly five"):
         render_notices(tmp_path)
     assert not (tmp_path / "grafana/dashboards-prometheus-only").exists()

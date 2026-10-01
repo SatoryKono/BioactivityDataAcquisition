@@ -23,7 +23,7 @@ def test_partial_render_preserves_success_and_failure(
     )
     records = [
         rerender.DashboardRecord(uid=uid, title=uid, url="/d/" + uid)
-        for uid in ("bioetl-runtime", "bioetl-dq-v2", "bioetl-overview-v2")
+        for uid in ("bioetl-overview-v2", "bioetl-dq-v2", "bioetl-overview-v2")
     ]
     monkeypatch.setattr(rerender, "_load_dashboards", lambda _: records)
     visited = []
@@ -55,7 +55,7 @@ def test_partial_render_preserves_success_and_failure(
 
 
 def test_explicit_occurrence_cannot_overwrite_evidence(tmp_path: Path) -> None:
-    image = tmp_path / "bioetl-runtime.png"
+    image = tmp_path / "bioetl-overview-v2.png"
     image.write_bytes(b"original evidence")
     result = rerender.main(
         [
@@ -120,16 +120,16 @@ def test_fixed_window_rejects_partial_relative_or_reversed_bounds(
 
 
 def test_source_digest_is_compared_to_actual_checkout() -> None:
-    source = rerender._dashboard_source_by_uid()["bioetl-runtime"]
-    assert preflight._dashboard_source_error("bioetl-runtime", source, source) is None
+    source = rerender._dashboard_source_by_uid()["bioetl-overview-v2"]
+    assert preflight._dashboard_source_error("bioetl-overview-v2", source, source) is None
     wrong = {**source, "sha256": "0" * 64}
     assert "does not match checkout" in preflight._dashboard_source_error(
-        "bioetl-runtime", wrong, wrong
+        "bioetl-overview-v2", wrong, wrong
     )
 
 
 def test_source_cannot_bind_another_dashboard() -> None:
-    source = rerender._dashboard_source_by_uid()["bioetl-overview-v2"]
+    source = rerender._dashboard_source_by_uid()["bioetl-dq-v2"]
     assert "source path drift" in preflight._dashboard_source_error(
-        "bioetl-runtime", source, source
+        "bioetl-overview-v2", source, source
     )

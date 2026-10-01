@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "5b978a33dd372318c2fffadb8ae7564030d03a9d639cb6714715b0eac09e0b0f",
-      "limit": "5b978a33dd372318c2fffadb8ae7564030d03a9d639cb6714715b0eac09e0b0f",
+      "current": "7a13b1bd58ed783e2c3c03d183387ac9715a1408d2c48b5be388614bf23cf9c9",
+      "limit": "7a13b1bd58ed783e2c3c03d183387ac9715a1408d2c48b5be388614bf23cf9c9",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2521,
-        "source_tree_sha256": "5b978a33dd372318c2fffadb8ae7564030d03a9d639cb6714715b0eac09e0b0f",
+        "source_tree_sha256": "7a13b1bd58ed783e2c3c03d183387ac9715a1408d2c48b5be388614bf23cf9c9",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2521,
-        "source_tree_sha256": "5b978a33dd372318c2fffadb8ae7564030d03a9d639cb6714715b0eac09e0b0f",
+        "source_tree_sha256": "7a13b1bd58ed783e2c3c03d183387ac9715a1408d2c48b5be388614bf23cf9c9",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -262,13 +262,13 @@
       "status": "pass"
     },
     {
-      "current": 3,
+      "current": 0,
       "limit": 0,
       "metric": "budget_violations",
       "name": "test_governance_budget_violations",
       "remediation": "Fix test governance budget violations before closeout.",
       "source_artifact": "reports/quality/test-governance-current.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -467,20 +467,18 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 1,
-    "pass": 45,
+    "fail": 0,
+    "pass": 46,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.47,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 1,
-    "failing_gates": [
-      "test_governance_budget_violations"
-    ],
+    "fail_count": 0,
+    "failing_gates": [],
     "gate_count": 46,
-    "pass_count": 45,
-    "release_gate_status": "failing",
+    "pass_count": 46,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }

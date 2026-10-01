@@ -16,7 +16,7 @@
       "max_internal_fan_in": 5,
       "helper_function_ratio": 0.388,
       "files": 200,
-      "total_loc": 24774,
+      "total_loc": 24773,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
@@ -41,18 +41,18 @@
     "application_services_control_plane": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 1,
-      "helper_function_ratio": 0.403,
-      "files": 129,
-      "total_loc": 15557,
+      "helper_function_ratio": 0.401,
+      "files": 130,
+      "total_loc": 15619,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
     "composition_runtime_builders": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.343,
+      "helper_function_ratio": 0.342,
       "files": 57,
-      "total_loc": 6764,
+      "total_loc": 6731,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }

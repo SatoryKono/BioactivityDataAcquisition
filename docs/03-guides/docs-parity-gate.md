@@ -20,10 +20,6 @@ via the docs job step `Run docs-config parity gate`.
           check-entity-config-parity
 ```
 
-Legacy-примеры (`bash scripts/ci_check_docs_parity.sh`, отдельный GitLab-job)
-удалены: скрипты `scripts/ci_check_docs_parity.sh` и `scripts/docs_parity_check.py`
-помечены retired/non-CI (см. ниже) и не вызываются из CI.
-
 ## Manual Execution
 
 To run the parity check manually:
@@ -32,10 +28,6 @@ To run the parity check manually:
 # Run the active config-to-spec parity gate
 uv run --frozen --no-build python -m scripts.data_quality check-entity-config-parity
 ```
-
-Retired local-only report (non-CI, не gate): `python3 scripts/docs_parity_check.py`
-пишет `docs/reports/docs-parity-report.json` для локального разбора. В CI не
-используется.
 
 ## Parity Check Script
 
@@ -53,10 +45,6 @@ The active config/spec gate is located at
 - **Parity Scoring**: Calculates a parity score (0-100%) based on coverage
 - **Detailed Reporting**: Provides clear output with specific issues found
 - **Exit Codes**: Returns appropriate exit codes for CI/CD integration
-
-The broader governance report path is implemented by the retired
-`scripts/docs_parity_check.py` (non-CI, local use only), which writes
-`docs/reports/docs-parity-report.json` for local consumption.
 
 ### Exit Codes
 

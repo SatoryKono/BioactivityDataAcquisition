@@ -260,7 +260,7 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         panel_id=9408,
         title="Review Replay Evidence",
         source_kind="http",
-        semantic_kind="http_table",
+        semantic_kind="http_endpoint",
     ),
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
