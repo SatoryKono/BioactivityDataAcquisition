@@ -9,3 +9,5 @@
 {"type":"heartbeat","status":"reviewing"}
 {"type":"heartbeat","status":"reviewing"}
 {"type":"heartbeat","status":"reviewing"}
+{"type":"heartbeat","status":"reviewing"}
+{"type":"complete","status":"review_completed","findings":0,"reviewedFiles":[".coderabbit.yaml","docs/03-guides/development/coderabbit-local-reviews.md"],"outcome":"completed","message":"Review completed"}

@@ -21,7 +21,7 @@ Maps issue #6543 required diagram themes to **existing** ADR-040-governed source
 | Mermaid sources | Canonical `.mmd` under `architecture/`, `foundation/`, `class-diagrams/`, `sequence/`, `state-machines/`, `providers/` |
 | Location | All under `docs/02-architecture/diagrams/` |
 | Lint / quality | `python -m scripts.diagrams lint` · `make render-diagrams` · CI diagram jobs |
-| Rendered baselines | Tracked `svg/` next to families; `png/` untracked by render-retention policy (see [render-retention.md](./governance/render-retention.md), DOC-GOV-02) |
+| Rendered baselines | Tracked `svg/` next to families; `png/` untracked by render-retention policy (see `governance/render-retention.md`, DOC-GOV-02) |
 | Registry / catalog | [README.md](./README.md#architecture-diagrams-52-core-49-52-added) |
 | Views | `views/*.mermaid` presentation slices (not SSOT replacements) |
 

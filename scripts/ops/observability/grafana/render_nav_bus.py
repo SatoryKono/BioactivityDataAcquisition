@@ -2553,6 +2553,7 @@ def apply_to_dashboard(
                         panel["gridPos"]["y"] -= removed["gridPos"]["h"]
             pending.extend(children)
     if current_uid == "bioetl-overview-v2":
+        payload["panels"] = [p for p in payload["panels"] if p.get("id") != 9450]
         pending = list(payload["panels"])
         while pending:
             panel = pending.pop()

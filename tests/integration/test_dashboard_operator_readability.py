@@ -51,11 +51,11 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
 
     dashboard = json.loads(Path("grafana/dashboards/bioetl-overview-v2.json").read_text(encoding="utf-8"))
     panels = {panel["id"]: panel for panel in dashboard["panels"]}
-    provider, stages, quality, row = (panels[i] for i in (9480, 9460, 9482, 9450))
+    provider, stages, quality = (panels[i] for i in (9480, 9460, 9482))
     assert stages["gridPos"]["y"] == provider["gridPos"]["y"] + provider["gridPos"]["h"]
     assert quality["gridPos"] == {**stages["gridPos"], "x": 15, "w": 9}
-    assert row["gridPos"]["y"] == stages["gridPos"]["y"] + stages["gridPos"]["h"]
-    assert 9460 not in {panel["id"] for panel in row["panels"]}
+    assert 9450 not in panels
+    assert 9452 not in {p["id"] for p in get_dashboard_panels(dashboard)}
     assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
     from scripts.ops.observability.grafana._overview_quality import exclusion_quality_expression
 

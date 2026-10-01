@@ -159,7 +159,5 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9481 | Provider Check |
 | bioetl-overview-v2.json | 9460 | Inspect Selected Run Stages |
 | bioetl-overview-v2.json | 9482 | Data Quality |
-| bioetl-overview-v2.json | 9450 | Inspect Saved Run Evidence |
-| bioetl-overview-v2.json | 9452 | Inspect Selected Run Identity |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
 | bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 10) |

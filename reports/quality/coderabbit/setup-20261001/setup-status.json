@@ -6,6 +6,26 @@
   "yaml_baseline_schema": "PASS",
   "yaml_proposed_schema": "PASS",
   "browser_triage": "BLOCKED_LOGIN",
-  "review": "NOT_RUN",
-  "env_files_modified": false
+  "review": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 0,
+    "reviewedFiles": [
+      ".coderabbit.yaml",
+      "docs/03-guides/development/coderabbit-local-reviews.md"
+    ],
+    "outcome": "completed",
+    "message": "Review completed"
+  },
+  "env_files_modified": false,
+  "commit": "aee0b6055c912775bf358a06fff5688e3a814cd9",
+  "branch": "codex/coderabbit-setup",
+  "docs_links": "PASS",
+  "docs_drift": "PASS",
+  "full_tree_gate": "PASS",
+  "memory_pre_task": "DEGRADED_MISSING_RAG_TIMELINE",
+  "memory_post_task_validation": "TIMED_OUT",
+  "pr": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/11860",
+  "ci": "BLOCKED_EXTERNAL_BILLING",
+  "triage_pilot": "NOT_ENABLED_LOGIN_AND_CI_BASELINE_REQUIRED"
 }

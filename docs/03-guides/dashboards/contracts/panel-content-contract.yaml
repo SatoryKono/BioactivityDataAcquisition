@@ -2705,7 +2705,7 @@ dashboards:
         - crit
         - telemetry_absent
         - backend_error
-        render_profiles: &id010
+        render_profiles: &id009
         - full_dark
         - full_light
         - zoom_200
@@ -3036,45 +3036,6 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
-      '9450':
-        title: Inspect Saved Run Evidence
-        role: row_group
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: &id008
-        - full_dark
-        - full_light
-        - zoom_200
-      '9452':
-        title: Inspect Selected Run Identity
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id008
       '9460':
         title: Inspect Selected Run Stages
         role: evidence_table
@@ -3095,7 +3056,10 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id008
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
       '9480':
         title: Provider Evidence
         role: evidence_table
@@ -3116,7 +3080,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: &id009
+        render_profiles: &id008
         - full_dark
         - full_light
         - zoom_200
@@ -3147,7 +3111,7 @@ dashboards:
         - crit
         - telemetry_absent
         - backend_error
-        render_profiles: *id009
+        render_profiles: *id008
       '9482':
         title: Data Quality
         role: indicator
@@ -3227,7 +3191,7 @@ dashboards:
         - crit
         - telemetry_absent
         - backend_error
-        render_profiles: *id010
+        render_profiles: *id009
   bioetl-run-explorer-v1:
     panels:
       '1':

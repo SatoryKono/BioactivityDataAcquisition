@@ -238,7 +238,6 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 139 | Review Uncovered Replay Signals | text |
 | 9412 | Inspect Run Details | row |
 | 9402 | Review Run Summary | table |
-| 9403 | Review Processed Records | table |
 | 9417 | Review Bounded Failure Reasons | table |
 | 9422 | Review Exact Replay Readiness | stat |
 | 9420 | Inspect Complete Run Discovery | row |
