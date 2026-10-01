@@ -960,7 +960,7 @@ def test_collect_metric_inventory_marks_thresholded_cardinality_metrics_reviewed
                 "    - metric: bioetl_hotspot_total",
                 '      owner: "@bioetl-observability"',
                 '      reason: "Reviewed bounded multi-emitter fanout"',
-                "      review_date: '2026-09-30'",
+                "      review_date: '2999-01-01'",
                 "      approved_max_series: 42",
             ]
         )
@@ -1129,7 +1129,7 @@ def test_collect_metric_inventory_marks_allowlisted_risky_labels_reviewed(
                 "    - metric: bioetl_reviewed_total",
                 '      owner: "@bioetl-observability"',
                 '      reason: "Reviewed bounded table label"',
-                "      review_date: '2026-09-30'",
+                "      review_date: '2999-01-01'",
             ]
         )
         + "\n",
@@ -1284,7 +1284,7 @@ def test_load_drift_allowlist_supports_metadata_entries_for_risky_labels(
                 "    - metric: bioetl_table_total",
                 '      owner: "@bioetl-observability"',
                 '      reason: "Reviewed table-scoped metric with bounded storage surface"',
-                "      review_date: '2026-09-30'",
+                "      review_date: '2999-01-01'",
             ]
         )
         + "\n",
@@ -1308,7 +1308,7 @@ def test_load_drift_allowlist_supports_metadata_entries_for_cardinality_reviews(
                 "    - metric: bioetl_hotspot_total",
                 '      owner: "@bioetl-observability"',
                 '      reason: "Static multi-emitter fanout is expected for this family"',
-                "      review_date: '2026-09-30'",
+                "      review_date: '2999-01-01'",
             ]
         )
         + "\n",
