@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from pathlib import Path
 from bioetl.application.services.control_plane.ledger.service import RunLedgerService
 from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec,
@@ -47,6 +48,9 @@ def create_manifest_record(
         ),
         _manifest_id_factory=lambda: create_runtime_occurrence_id("run_manifest"),
     ).create_manifest(manifest_create_request)
+    verifier = manifest_store.replay_object_verifier
+    if verifier is not None:
+        verifier.archive_lock(manifest.code_provenance.dependency_lock_hash, Path.cwd())
     if ledger_service is not None:
         ledger_service.manifest_id = manifest.manifest_id
         ledger_service.record_manifest_created(manifest)

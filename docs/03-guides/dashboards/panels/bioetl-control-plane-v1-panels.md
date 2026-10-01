@@ -13,7 +13,17 @@ The first-window answer `9422` is a saved exact-replay assessment. Its missing
 value is `UNKNOWN`, never `READY`. `SELECT RUN` means no Run ID is selected;
 `QUERY ERROR` means a failed request or unavailable backend. These states remain
 explicit in the description and value mappings. Open replay checks `9423` for
-the recorded basis; missing verification remains `INCOMPLETE`.
+the recorded basis; missing verification remains `INSUFFICIENT`.
+
+Replay object verification reads the saved effective configuration, archived
+dependency lock and every referenced Bronze snapshot, comparing their content
+with the manifest hashes. A stored hash or an old verification flag alone is
+not sufficient. New runs archive matching lock bytes during manifest publication.
+Reading historical runs never replaces missing evidence with current configuration
+or the current lockfile. Unsupported locations and unavailable objects remain
+unverified; a content mismatch blocks replay. The verdict card identifies failed
+and unverified checks. An empty Trust action for a saved run with no reasons is
+displayed as `No trust issues`; Trust remains separate from replay readiness.
 
 Diagnostic failure, incompatibility, replay, and lineage panels preserve empty
 Prometheus results as `No data`/`UNKNOWN`; they do not synthesize zero. A visible

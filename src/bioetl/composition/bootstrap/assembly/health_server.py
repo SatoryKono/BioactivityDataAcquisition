@@ -41,6 +41,7 @@ from bioetl.infrastructure.control_plane.file_run_ledger_store import (
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
 )
+from bioetl.infrastructure.control_plane.replay_object_verifier import ReplayObjectVerifier
 from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
     FileWorkflowManifestStore,
 )
@@ -120,6 +121,11 @@ def _create_control_plane_ports(
         manifest_port=FileRunManifestStore(
             base_path=output_root / "run_manifest",
             metrics=metrics,
+            replay_object_verifier=ReplayObjectVerifier(
+                config_root=output_root / "effective_config",
+                lock_root=output_root / "dependency_locks",
+                bronze_root=resolved_data_root / "output" / "bronze",
+            ),
         ),
         ledger_port=FileRunLedgerStore(
             base_path=output_root / "run_ledger",

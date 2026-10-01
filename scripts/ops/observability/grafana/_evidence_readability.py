@@ -270,11 +270,13 @@ def _trust(p: dict[int, dict]) -> None:
     )
     _trust_anchors(p)
     for pid in (9408, 9409, 9406):
-        _table(p[pid], {"Result": 125, "Status": 115, "Action": 160})
+        if pid in p:
+            _table(p[pid], {"Result": 125, "Status": 115, "Action": 160})
     # A missing cell is not an empty table: retain the per-row MISSING result
     # without repeating the panel-level no-rows explanation in each cell.
     _override(p[9406], "checkpoint_value_short", "noValue", "UNKNOWN")
-    _override(p[9409], "Action", _WIDTH, 190)
+    if 9409 in p:
+        _override(p[9409], "Action", _WIDTH, 190)
     for pid in (9413, 9414, 9415):
         _table(p[pid], {"check": 220, "status": 110})
         _override(p[pid], "reason", _HIDDEN, True)

@@ -6,24 +6,27 @@
 >
 > - Parallel runtime orchestration copy: runtime-specific orchestration registry
 > - Codex: `.codex/agents/ORCHESTRATION.md`
->   При расхождении приоритет у published mirror и runtime-реестров; этот файл сохраняется только как legacy alias.
+>   При расхождении приоритет у active runtime sources согласно `AGENTS.md`;
+>   published mirror служит только для навигации. Этот файл — legacy alias.
 >
 > **Historical note (2026-10-01):** архивное тело ниже удалено — оно описывало
 > раннюю 8-агентную модель (`pyCodeBot`/`pyDiagramBot`, `py-config-bot-1.py`) и
 > расходилось с действующими runtime-контрактами. Для текущего процесса
-> использовать только published mirror / runtime copies выше.
+> использовать active runtime sources выше.
 
 *Версия: 3.1 (Adapted) | Дата: 2026-02-24 | Под проект BioETL v6.0.0*
 
 ## Актуальный процесс
 
 Тело этого deprecated-зеркала вычищено до указателя (AUD-008, issue #11856).
-Не использовать как источник процесса. Читать строго в порядке:
+Не использовать как источник процесса. Канонические источники:
 
-1. `docs/00-project/ai/agents/agents/ORCHESTRATION.md` (published mirror),
-2. `.codex/agents/ORCHESTRATION.md` (Codex runtime copy),
-3. `.junie/agents/JUNIE-RUNTIME.md` + `.junie/guidelines.md` (Junie equal peer),
-4. `.devin/agents/DEVIN-RUNTIME.md` (Devin subordinate surface).
+1. `AGENTS.md` — порядок приоритетов для текущего runtime.
+2. `.codex/agents/ORCHESTRATION.md` для Codex;
+   `.junie/agents/JUNIE-RUNTIME.md` и `.junie/guidelines.md` для Junie;
+   `.devin/agents/DEVIN-RUNTIME.md` для Devin. Runtime sources — equal peers.
+3. `docs/00-project/ai/agents/agents/ORCHESTRATION.md` — навигационное зеркало,
+   которое не переопределяет runtime behavior.
 
 ## Env File Guardrail
 
