@@ -48,7 +48,9 @@ def _stable_manifest(*, provider: str, entity: str, fingerprint: str) -> dict:
             "effective_config_artifact_id": "cfg-artifact",
             "dq_contract_compatibility_hash": "dq-hash",
         },
-        "source_refs": [{"provider": provider, "entity": entity}],
+        "source_refs": [
+            {"provider": provider, "entity": entity, "input_snapshots": []}
+        ],
     }
 
 

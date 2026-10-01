@@ -36,30 +36,32 @@ from pathlib import Path
 from threading import get_ident
 
 import pytest
-from tests.conftest import _is_wsl
 
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import HealthStatus
-from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityScope
+from bioetl.interfaces.http import (
+    _health_server_checkpoint_freshness as checkpoint_freshness,
+)
 from bioetl.interfaces.http import (
     _health_server_observability_routing as observability_routing,
 )
 from bioetl.interfaces.http import (
     _health_server_quarantine_routing as quarantine_routing,
 )
-from bioetl.interfaces.http._forensic_request_budget import (
-    ForensicEndpointUnavailable,
-)
 from bioetl.interfaces.http import (
-    _health_server_checkpoint_freshness as checkpoint_freshness,
+    _health_server_records_table as records_table_routing,
 )
 from bioetl.interfaces.http import _health_server_routing_support as routing_support
 from bioetl.interfaces.http import health_server_routing_mixin as routing_mixin_module
+from bioetl.interfaces.http._forensic_request_budget import (
+    ForensicEndpointUnavailable,
+)
+from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityScope
 from bioetl.interfaces.http._selector_catalog import SelectorCatalog
 from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixin
 from bioetl.interfaces.http.health_server_routing_mixin import HealthServerRoutingMixin
 from bioetl.interfaces.http.types import HealthResponse
-
+from tests.conftest import _is_wsl
 
 pytestmark = pytest.mark.unit
 
@@ -1033,7 +1035,7 @@ async def test_processed_records_requires_run_id_before_backend(
         return {"contract": "processed_records_table_v1", "rows": [1]}
 
     monkeypatch.setattr(
-        observability_routing,
+        records_table_routing,
         "build_processed_records_table_payload_from_prometheus",
         unexpected_backend,
     )
@@ -1080,7 +1082,7 @@ async def test_processed_records_distinguishes_empty_and_backend_unavailable(
         return empty_payload
 
     monkeypatch.setattr(
-        observability_routing,
+        records_table_routing,
         "build_processed_records_table_payload_from_prometheus",
         empty,
     )
@@ -1099,7 +1101,7 @@ async def test_processed_records_distinguishes_empty_and_backend_unavailable(
         raise RuntimeError("Prometheus unavailable")
 
     monkeypatch.setattr(
-        observability_routing,
+        records_table_routing,
         "build_processed_records_table_payload_from_prometheus",
         unavailable,
     )
