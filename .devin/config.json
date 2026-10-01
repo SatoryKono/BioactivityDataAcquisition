@@ -2,8 +2,7 @@
   "version": 2,
   "permissions": {
     "ask": [
-      "Read(**/.env*)",
-      "Write(**/.env*)"
+      "Read(**/.env*)"
     ],
     "allow": [
       "Read(**/.env*)",

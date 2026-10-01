@@ -50,7 +50,7 @@ Non-goals (by design, see issues #11760):
   - No secret scan of generated pages/logs here: secret coverage of all
     tracked content (including docs/) is delegated to the repo security
     gates — gitleaks (`security.yml` gitleaks job, `.gitleaks.toml`) and
-    detect-secrets baseline (`tests/architecture/test_detect_secrets.py`).
+    detect-secrets baseline (`tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets`).
     Generated output (`site/`, `reports/`) is git-ignored build scratch.
 
 References:
