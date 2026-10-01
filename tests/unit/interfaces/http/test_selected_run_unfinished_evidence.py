@@ -18,6 +18,7 @@ def test_nonterminal_ledger_does_not_prove_running(monkeypatch, age_seconds):
     host = MagicMock()
     host._run_manifest_port.get_by_run_id.return_value = SimpleNamespace(
         pipeline_name="chembl_activity",
+        provider="chembl",
         manifest_id="m",
         workflow_name=None,
         run_type=SimpleNamespace(value="incremental"),
@@ -36,3 +37,27 @@ def test_nonterminal_ledger_does_not_prove_running(monkeypatch, age_seconds):
     assert result["verdict"] == "INCOMPLETE"
     assert result["reason"] == "terminal_event_missing"
     assert result["heartbeat_age_seconds"] == age_seconds
+    assert result["provider"] == "chembl"
+
+
+def test_missing_finalization_preserves_provider_without_inventing_check():
+    from bioetl.interfaces.http.selected_run_status import _merge_active_diagnostics
+
+    result = _merge_active_diagnostics(
+        {
+            "pipeline": "chembl_assay",
+            "provider": "chembl",
+            "verdict": "INCOMPLETE",
+            "reason": "finalization_missing",
+            "execution_state": "TERMINAL",
+        },
+        pipeline="chembl_assay",
+        run_id="00000000-0000-0000-0000-000000000001",
+    )
+    assert result["provider_checks"] == [{
+        "provider": "chembl",
+        "check_result": "INCOMPLETE",
+        "evidence": "finalization_missing",
+        "observed_at": None,
+    }]
+    assert result["replay_readiness_now"] == "INSUFFICIENT"

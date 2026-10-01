@@ -660,6 +660,7 @@ def test_active_and_unfinalized_run_do_not_expire(
     host = MagicMock()
     host._run_manifest_port.get_by_run_id.return_value = SimpleNamespace(
         pipeline_name="chembl_activity",
+        provider="chembl",
         manifest_id="m",
         workflow_name=None,
         run_type=SimpleNamespace(value="incremental"),
@@ -721,6 +722,7 @@ async def test_unfinalized_run_presentation_matches_ledger(
     host._send_payload_response = AsyncMock()
     host._run_manifest_port.get_by_run_id.return_value = SimpleNamespace(
         pipeline_name="chembl_activity",
+        provider="chembl",
         manifest_id="m",
         workflow_name=None,
         run_type=SimpleNamespace(value="incremental"),
@@ -1118,6 +1120,7 @@ async def test_active_workflow_in_all_scope_retains_exact_context(
     host._send_payload_response = AsyncMock()
     host._run_manifest_port.get_by_run_id.return_value = SimpleNamespace(
         pipeline_name="chembl_activity",
+        provider="chembl",
         manifest_id="m",
         workflow_name="workflow-a",
         run_type=SimpleNamespace(value="incremental"),

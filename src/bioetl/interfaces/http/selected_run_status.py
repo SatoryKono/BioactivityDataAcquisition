@@ -319,6 +319,12 @@ def _merge_active_diagnostics(
         str(active["reason"]),
     )
     merged.update(active)
+    # Provider identity is a manifest fact even when the check/report is missing.
+    provider = active.get("provider")
+    if isinstance(provider, str) and provider not in {"", "unknown", "UNKNOWN", "—"}:
+        for row in cast(list[dict[str, object]], merged["provider_checks"]):
+            row["provider"] = provider
+        merged["provider_options"] = [{"text": provider, "value": provider}]
     for row in cast(list[dict[str, object]], merged["domains"]):
         row.update(active)
         row["run_verdict"] = active["verdict"]

@@ -65,6 +65,7 @@ def active_run_diagnostics(
         "run_type": manifest.run_type.value,
         "workflow_id": manifest.workflow_name,
         "pipeline": manifest.pipeline_name,
+        "provider": manifest.provider,
         "run_id": run_id,
     }
 
