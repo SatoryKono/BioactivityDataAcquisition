@@ -10,6 +10,7 @@ import argparse
 from collections.abc import Mapping
 import json
 import os
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -183,8 +184,8 @@ def _run_pre_checks(strategy: Mapping[str, object]) -> bool:
         print(f"  Running: {cmd}")
         try:
             result = subprocess.run(
-                cmd,
-                shell=True,
+                shlex.split(cmd),
+                shell=False,
                 capture_output=True,
                 text=True,
                 timeout=60,
