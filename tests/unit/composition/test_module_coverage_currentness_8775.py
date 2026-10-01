@@ -33,14 +33,15 @@ from bioetl.composition.pipeline_runner_request import (
     _require_runtime,
     _require_settings,
 )
-from bioetl.composition import snapshot_serialization as _snapshot_mapping_support
 from bioetl.composition.snapshot_serialization import (
     normalize_snapshot,
     to_serializable_mapping,
 )
 from bioetl.domain.filtering import InputFilterConfig
+from bioetl.domain.serialization import (
+    snapshot_serialization as _snapshot_mapping_support,
+)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-
 
 pytestmark = pytest.mark.unit
 
