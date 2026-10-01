@@ -49,7 +49,7 @@ selector_taxonomy:
     - manifest_id
     - execution_fingerprint
   context_hidden:
-    # Verified 2026-08-05 against grafana/dashboards/*.json (7-board portfolio).
+    # Verified 2026-08-05 against grafana/dashboards/*.json (6-board portfolio).
     shipped:
       - pipeline_context
       - adapter
@@ -150,14 +150,12 @@ pipeline_universe_contract:
     "
   shared_selector_uids:
     - bioetl-overview-v2
-    - bioetl-runtime
     - bioetl-provider-health-v2
     - bioetl-dq-v2
     - bioetl-incident-v1
     - bioetl-run-explorer-v1
   shared_query_metrics:
     bioetl-overview-v2: bioetl_overview_pipeline_run_type_universe
-    bioetl-runtime: bioetl_runtime_pipeline_run_type_universe
     bioetl-provider-health-v2: bioetl_overview_pipeline_run_type_universe
     bioetl-dq-v2: bioetl_overview_pipeline_run_type_universe
     bioetl-incident-v1: bioetl_overview_pipeline_run_type_universe
@@ -197,7 +195,7 @@ pipeline_universe_contract:
       canonical-only scopes MUST be explainable by data-plane telemetry without a manifest
       artifact.
   closure_evidence:
-    required_dashboard_count: 7
+    required_dashboard_count: 6
     primary_pipeline_universe_count: 5
     adjunct_uids_not_in_2026_07_20_evidence:
       - bioetl-incident-v1
@@ -222,7 +220,6 @@ dashboard_families:
   pipeline_summary:
     uids:
       - bioetl-control-plane-v1
-      - bioetl-runtime
       - bioetl-dq-v2
     allowed_visible_selectors:
       - workflow
@@ -446,31 +443,6 @@ shipped_selector_registry:
       pipeline: control_plane_filter_options_api
       run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
-  bioetl-runtime:
-    family: pipeline_summary
-    visible_selectors:
-      - workflow
-      - pipeline
-      - run_type
-      - run_id
-      - stage
-    hidden_context_selectors:
-      - provider_for_pipeline
-      - provider_hint
-    hidden_detail_selectors: []
-    top_bar_order:
-      - workflow
-      - pipeline
-      - run_type
-      - run_id
-      - stage
-    query_source_families:
-      workflow: prometheus_workflow_runs_total
-      pipeline: control_plane_filter_options_api
-      run_type: prometheus_runtime_pipeline_run_type_universe
-      run_id: control_plane_filter_options_api
-      stage: prometheus_pipeline_stage_expected
-      provider_hint: prometheus_runtime_provider_hint_heuristic
   bioetl-provider-health-v2:
     family: provider_first
     visible_selectors:
@@ -582,14 +554,6 @@ ship_now_selector_contract_by_uid:
       - pipeline
       - run_type
       - run_id
-    time_range: grafana_builtin
-  bioetl-runtime:
-    visible_selectors:
-      - workflow
-      - pipeline
-      - run_type
-      - run_id
-      - stage
     time_range: grafana_builtin
   bioetl-provider-health-v2:
     visible_selectors:
@@ -801,7 +765,6 @@ execution_selector_future_contract:
     - selected_manifest_id
     - selected_started_at
   rollout_candidates:
-    - bioetl-runtime
     - bioetl-dq-v2
     - bioetl-control-plane-v1
     - bioetl-overview-v2
@@ -815,7 +778,6 @@ dual_scope_evaluation:
       - run_catalog_support
       - explicit_empty_intersection_no_data
     candidate_uids:
-      - bioetl-runtime
       - bioetl-dq-v2
       - bioetl-control-plane-v1
       - bioetl-overview-v2

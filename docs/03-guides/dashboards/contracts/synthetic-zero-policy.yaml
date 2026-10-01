@@ -25,14 +25,6 @@ first_screen_no_synthetic_zero:
       - Status
       - Compare Global Audit Write Outcomes
       - Compare Global Audit Query Outcomes
-  - dashboard: bioetl-runtime
-    panels:
-      - Status
-      - Track Records by Stage / Interval
-      - Track Global Shutdown Starts
-      - Track Global Shutdown Completions
-      - Track Failed Workflow Runs
-      - Track Failed Workflow Steps
   - dashboard: bioetl-provider-health-v2
     panels:
       - Monitor Healthy Checks

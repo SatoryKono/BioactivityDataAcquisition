@@ -31,21 +31,11 @@ dashboards:
     basis_tokens:
       - SELECTED RUN
       - QUERY ERROR
-  bioetl-runtime:
-    question: What is the saved runtime assessment of the selected Run ID?
-    answer_panel_ids:
-      - 9998
-    next_action_tokens:
-      - Open Run Explorer
-    basis_tokens:
-      - SELECTED RUN
-      - QUERY ERROR
   bioetl-provider-health-v2:
     question: Which provider is degraded/failing, and why?
     answer_panel_ids:
       - 9461
     next_action_tokens:
-      - Pipeline Diagnostics
     basis_tokens:
       - SELECTED RUN
       - QUERY ERROR
@@ -106,20 +96,6 @@ allowlists:
       rationale: >-
         First-window processed-record accounting for the selected Run ID on
         Provider Health, same HTTP table as Data Quality.
-      retire_when: 9403 leaves the first window or is retitled without Inspect
-    - dashboard: bioetl-runtime.json
-      id: 9402
-      owner: "@bioetl-observability"
-      rationale: >-
-        First-window identity for the selected Run ID on Pipeline Diagnostics.
-        Inspect names the HTTP evidence table, not a collapsed forensic row.
-      retire_when: 9402 leaves the first window or is retitled without Inspect
-    - dashboard: bioetl-runtime.json
-      id: 9403
-      owner: "@bioetl-observability"
-      rationale: >-
-        First-window processed-record accounting for the selected Run ID on
-        Pipeline Diagnostics, same HTTP table as Data Quality.
       retire_when: 9403 leaves the first window or is retitled without Inspect
     - dashboard: bioetl-dq-v2.json
       id: 9402

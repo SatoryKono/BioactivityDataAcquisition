@@ -56,24 +56,6 @@ entries:
     owner: "@bioetl-observability"
     freshness_slo: 60s
     reason: Nested provider domain track owned by 9002.
-  - dashboard: bioetl-runtime.json
-    id: 9401
-    disposition: keep
-    owner: "@bioetl-observability"
-    freshness_slo: 60s
-    reason: Runtime-owned CURRENT pipeline status; Overview 214 is the L0 rollup.
-  - dashboard: bioetl-runtime.json
-    id: 9101
-    disposition: keep
-    owner: "@bioetl-observability"
-    freshness_slo: 60s
-    reason: First-window CURRENT blocker table for this pipeline.
-  - dashboard: bioetl-runtime.json
-    id: 16
-    disposition: keep
-    owner: "@bioetl-observability"
-    freshness_slo: 60s
-    reason: Below-fold Monitor Active Blocker Count is a CURRENT 15m count chip supporting 9101, not a second summary table.
   - dashboard: bioetl-provider-health-v2.json
     id: 9401
     disposition: keep

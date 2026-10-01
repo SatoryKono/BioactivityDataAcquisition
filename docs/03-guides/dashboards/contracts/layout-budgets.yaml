@@ -65,13 +65,6 @@ first_screen_shell_panels:
       Native title omitted so h=4 Inspect Scope & Evidence body fits DASH-FIT-004.
       Display title stays in bioetlDisplayTitle.
     retire_when: the banner can keep a native title without overflowing at 200%
-  - dashboard: bioetl-runtime.json
-    id: 9400
-    owner: "@bioetl-observability"
-    rationale: >-
-      Native title omitted so Understand Pipeline Scope body fits DASH-FIT-004.
-      Display title stays in bioetlDisplayTitle.
-    retire_when: the banner can keep a native title without overflowing at 200%
   - dashboard: bioetl-dq-v2.json
     id: 9400
     owner: "@bioetl-observability"
@@ -107,14 +100,6 @@ first_screen_shell_panels:
       Native title omitted so h=3 Start Incident Triage body fits DASH-FIT-004.
       Display title stays in bioetlDisplayTitle.
     retire_when: the CTA can keep a native title without overflowing at 200%
-  - dashboard: bioetl-runtime.json
-    id: 9991
-    owner: "@bioetl-observability"
-    rationale: >-
-      Native title omitted so h=3 Start Pipeline Triage body fits DASH-FIT-004.
-      Display title stays in bioetlDisplayTitle.
-    retire_when: the CTA can keep a native title without overflowing at 200%
-
 min_height:
   root:
     table: 5
@@ -191,13 +176,6 @@ first_window_containment_types:
 # bioetl-provider-health-v2 9102/9103 moved under row 9106
 # (Inspect Fleet Non-OK and Causes). First-window reason replacement: 9107.
 first_window_summary_tables:
-  - dashboard: bioetl-runtime.json
-    id: 2460
-    bind: limit
-    max_rows: 3
-    owner: "@bioetl-observability"
-    rationale: Three stage snapshots, one aggregate row per stage.
-
   - dashboard: bioetl-overview-v2.json
     id: 9603
     max_rows: 1
@@ -220,21 +198,6 @@ first_window_summary_tables:
     bind: paginate
   - dashboard: bioetl-overview-v2.json
     id: 9301
-    max_rows: 5
-    owner: "@bioetl-observability"
-    bind: paginate
-  - dashboard: bioetl-runtime.json
-    id: 9998
-    max_rows: 1
-    owner: "@bioetl-observability"
-    bind: limit
-  - dashboard: bioetl-runtime.json
-    id: 9402
-    max_rows: 5
-    owner: "@bioetl-observability"
-    bind: paginate
-  - dashboard: bioetl-runtime.json
-    id: 9403
     max_rows: 5
     owner: "@bioetl-observability"
     bind: paginate
@@ -331,7 +294,6 @@ scalar_density_enforced_uids:
   - bioetl-overview-v2
   - bioetl-provider-health-v2
   - bioetl-run-explorer-v1
-  - bioetl-runtime
 
 answer_panels:
   bioetl-control-plane-v1.json:
@@ -342,9 +304,6 @@ answer_panels:
       title: Review Selected Run Status
     - id: 9002
       title: Review Run Domains
-  bioetl-runtime.json:
-    - id: 9998
-      title: Review Selected Run Status
   bioetl-provider-health-v2.json:
     - id: 9461
       title: Review Provider Check

@@ -39,7 +39,6 @@ baseline_2026_07_27_pre_diet:
 primary_uids:
   - bioetl-control-plane-v1
   - bioetl-overview-v2
-  - bioetl-runtime
   - bioetl-provider-health-v2
   - bioetl-dq-v2
 retired_uids: []

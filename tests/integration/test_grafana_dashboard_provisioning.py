@@ -129,7 +129,7 @@ def test_prometheus_only_profile_preserves_uids_without_query_targets() -> None:
     }
 
     assert fallback_dashboards.keys() == full_dashboards.keys()
-    assert len(fallback_dashboards) == 7
+    assert len(fallback_dashboards) == 6
     for name, fallback in fallback_dashboards.items():
         full = full_dashboards[name]
         assert fallback["uid"] == full["uid"]

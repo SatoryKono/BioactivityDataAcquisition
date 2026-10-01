@@ -1,4 +1,4 @@
-# Shipped 7-dashboard surface inventory (DRM residual; UIDs stable post-DUX).
+# Shipped 6-dashboard surface inventory (DRM residual; UIDs stable post-DUX).
 # Source of truth for panel counts is grafana/dashboards/*.json.
 
 dashboards:
@@ -71,50 +71,6 @@ dashboards:
       - run_id
       - provider_for_pipeline
       - run_type
-  - uid: bioetl-runtime
-    title: Pipeline Diagnostics
-    owner: "@bioetl-observability"
-    owner_route: docs/05-operations/runbooks/pipeline-failure-critical.md
-    family: primary
-    navigation_id: 3
-    data_sources:
-      - Prometheus
-      - Grafana
-      - BioETL Ops HTTP
-    panel_count: 10
-    key_panels:
-      - id: 9998
-        title: Review Selected Run Status
-        type: table
-        description: Saved execution assessment for the always-selected Run ID
-      - id: 9460
-        title: Inspect Selected Run Stages
-        type: table
-        description: Saved stage rows for the selected Run ID, before domain evidence
-      - id: 9402
-        title: Inspect Pipeline Identity
-        type: table
-        description: Saved identity for the selected Run ID
-      - id: 9403
-        title: Inspect Processed Records
-        type: table
-        description: Saved record counts for the selected Run ID
-      - id: 9451
-        title: Inspect Selected Run Domains
-        type: table
-        description: Saved domain verdicts for the selected Run ID
-      - id: 9452
-        title: Inspect Selected Run Identity
-        type: table
-        description: Saved identity summary for the selected Run ID
-    selector_variables:
-      - workflow
-      - pipeline
-      - provider_for_pipeline
-      - provider_hint
-      - run_id
-      - run_type
-      - stage
   - uid: bioetl-provider-health-v2
     title: Provider Health
     owner: "@bioetl-observability"

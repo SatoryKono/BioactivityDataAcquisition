@@ -56,7 +56,6 @@ def test_navigation_contract_uids_match_shipped_dashboards() -> None:
 def test_required_inbound_paths_match_overview_first_action_mirror() -> None:
     contract = _load_contract()
     target_uids = (
-        "bioetl-runtime",
         "bioetl-control-plane-v1",
         "bioetl-provider-health-v2",
         "bioetl-dq-v2",
