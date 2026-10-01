@@ -3,14 +3,17 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
 from datetime import datetime
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
+from bioetl.infrastructure.storage.gold.io_helpers import load_gold_writer_module
 from bioetl.infrastructure.storage.gold.metadata_audit import (
     _build_gold_audit_entry,
     _GoldAuditWriteRequest,
+)
+from bioetl.infrastructure.storage.gold.writer_protocols import (
+    _GoldWriterMetadataHost,
 )
 
 if TYPE_CHECKING:
@@ -18,14 +21,6 @@ if TYPE_CHECKING:
 
     from bioetl.domain.medallion import GoldWriteMode
     from bioetl.domain.models.metadata import GoldMetadata
-    from bioetl.domain.ports import (
-        AuditPort,
-        LineageStorePort,
-        LoggerPort,
-        MetadataCoordinatorPort,
-        MetadataWriterPort,
-        MetricsPort,
-    )
     from bioetl.domain.types import GoldRecord, RunID, ScdConfig
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
@@ -39,26 +34,12 @@ class GoldWriterMetadataMixin:
     calls during the Gold write lifecycle.
     """
 
-    logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
-    _audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)
-    _metadata_coordinator: MetadataCoordinatorPort | None = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _lineage_store: LineageStorePort | None = cast(Any, None)  # Any: host default (PD4)
-    _metadata_writer: MetadataWriterPort = cast(Any, None)  # Any: host default (PD4)
-    _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
-    _flat_structure: bool = cast(Any, None)  # Any: host default (PD4)
-    _transform_version: str | None = cast(Any, None)  # Any: host default (PD4)
-    _transform_steps: tuple[str, ...] = cast(Any, None)  # Any: host default (PD4)
-    _load_gold_writer_module: Callable[[], ModuleType] = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _run_in_executor: Callable[..., Awaitable[object]] = cast(
-        Any, None
-    )  # Any: host default (PD4)
+    def _load_gold_writer_module(self) -> ModuleType:
+        """Load ``gold_writer`` through the shared monkeypatch import path."""
+        return load_gold_writer_module()
 
     async def _log_gold_audit(
-        self,
+        self: _GoldWriterMetadataHost,
         table_name: str,
         records: list[GoldRecord],
         mode: GoldWriteMode,
@@ -80,7 +61,9 @@ class GoldWriterMetadataMixin:
         )
         await self._audit.log_write(audit_entry)
 
-    async def _get_delta_version(self, table_path: str) -> int | None:
+    async def _get_delta_version(
+        self: _GoldWriterMetadataHost, table_path: str
+    ) -> int | None:
         from bioetl.infrastructure.storage.gold.metadata_operations import (
             _extract_delta_table_version,
         )
@@ -94,7 +77,7 @@ class GoldWriterMetadataMixin:
             return None
 
     async def _write_gold_metadata(
-        self,
+        self: _GoldWriterMetadataHost,
         table_path: str,
         table_name: str,
         records: list[GoldRecord],
@@ -133,7 +116,7 @@ class GoldWriterMetadataMixin:
         await _persist_gold_metadata_write(self, prepared)
 
     async def _write_gold_metadata_file(
-        self,
+        self: _GoldWriterMetadataHost,
         *,
         table_path: str,
         metadata: GoldMetadata,
@@ -151,7 +134,7 @@ class GoldWriterMetadataMixin:
         )
 
     async def _write_gold_merged_metadata(
-        self,
+        self: _GoldWriterMetadataHost,
         table_path: str,
         table_name: str,
         records: list[GoldRecord],

@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.composite.join_planner import JoinPlannerService
 from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.application.composite.merger_output_mixin import MergeOutputWriterMixin
 from bioetl.domain.composite.result import MergeResult
@@ -19,14 +18,53 @@ if TYPE_CHECKING:
     from bioetl.application.composite.cross_validator import (
         EnrichmentCrossValidator,
     )
+    from bioetl.application.composite.join_planner import JoinPlannerService
     from bioetl.domain.composite import (
         DependencyConfig,
         EnricherConfig,
         MergeConfig,
     )
     from bioetl.domain.composite.cross_validation import CrossValidationStats
-    from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import LoggerPort
+
+
+class _MergeIOHost(Protocol):
+    """Internal host surface for ``MergeIOMixin``. Not a cross-layer port."""
+
+    _config: MergeConfig
+    _logger: LoggerPort
+    _cross_validator: EnrichmentCrossValidator | None
+    _join_planner: JoinPlannerService
+
+    def _count_fully_enriched(
+        self,
+        df: pl.DataFrame,
+        enrichers: Sequence[EnricherConfig],
+    ) -> int: ...
+
+    def _calculate_field_coverage(self, df: pl.DataFrame) -> dict[str, float]: ...
+
+    @staticmethod
+    def _extract_quarantine_payloads(df: pl.DataFrame) -> list[dict[str, object]]: ...
+
+    @staticmethod
+    def _drop_quarantined_rows(df: pl.DataFrame) -> pl.DataFrame: ...
+
+    async def _write_merged_silver(
+        self,
+        df: pl.DataFrame,
+        completed_at: datetime | None = None,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+    ) -> None: ...
+
+    async def _write_merged_gold(
+        self,
+        df: pl.DataFrame,
+        completed_at: datetime | None = None,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+    ) -> None: ...
 
 
 class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
@@ -37,20 +75,8 @@ class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
     without host-default shadowing (PD5 product zero hold).
     """
 
-    # -- Host-class attributes (set by MergeService.__init__) --
-    _config: MergeConfig = cast(Any, None)  # Any: host default (PD4)
-    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
-    _field_group_registry: FieldGroupRegistry | None = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _cross_validator: EnrichmentCrossValidator | None = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _gold_schema: Any | None = cast(Any, None)  # Any: host default (PD4)
-    _join_planner: JoinPlannerService = cast(Any, None)  # Any: host default (PD4)
-
     async def _apply_dependency_joins_if_needed(
-        self,
+        self: _MergeIOHost,
         merged_df: pl.DataFrame,
         dependency_dfs: dict[str, pl.DataFrame],
         dependencies: Sequence[DependencyConfig] | None,
@@ -80,7 +106,7 @@ class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
         return result
 
     def _run_cross_validation(
-        self,
+        self: _MergeIOHost,
         merged_df: pl.DataFrame,
         enrichers: Sequence[EnricherConfig],
         enricher_dfs: dict[str, pl.DataFrame],
@@ -132,7 +158,7 @@ class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
         return df.filter(~pl.col("_cv_quarantine"))
 
     async def _write_outputs(
-        self,
+        self: _MergeIOHost,
         df: pl.DataFrame,
         metadata_timestamp: datetime | None,
         run_id: str,
@@ -164,7 +190,7 @@ class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
         )
 
     def _build_merge_result(
-        self,
+        self: _MergeIOHost,
         merged_df: pl.DataFrame,
         enrichers: Sequence[EnricherConfig],
         records_merged: int,

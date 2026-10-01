@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "c5b796447ec43f4472c20501bc2ba1e118505578619e56b07e1d8a037966e30c",
-      "limit": "c5b796447ec43f4472c20501bc2ba1e118505578619e56b07e1d8a037966e30c",
+      "current": "5b978a33dd372318c2fffadb8ae7564030d03a9d639cb6714715b0eac09e0b0f",
+      "limit": "5b978a33dd372318c2fffadb8ae7564030d03a9d639cb6714715b0eac09e0b0f",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2521,
-        "source_tree_sha256": "c5b796447ec43f4472c20501bc2ba1e118505578619e56b07e1d8a037966e30c",
+        "source_tree_sha256": "5b978a33dd372318c2fffadb8ae7564030d03a9d639cb6714715b0eac09e0b0f",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2521,
-        "source_tree_sha256": "c5b796447ec43f4472c20501bc2ba1e118505578619e56b07e1d8a037966e30c",
+        "source_tree_sha256": "5b978a33dd372318c2fffadb8ae7564030d03a9d639cb6714715b0eac09e0b0f",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -262,13 +262,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 3,
       "limit": 0,
       "metric": "budget_violations",
       "name": "test_governance_budget_violations",
       "remediation": "Fix test governance budget violations before closeout.",
       "source_artifact": "reports/quality/test-governance-current.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "4144badfa92597a2bc5ba0157e8604aca4c7d8eed871708c2f169a797ca951bf",
+      "current": "4e8f3c43890259fb4726e4402606148c31f1452cb5837ff75220e1bf1d5ff6cf",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -467,18 +467,20 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 46,
+    "fail": 1,
+    "pass": 45,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.47,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 1,
+    "failing_gates": [
+      "test_governance_budget_violations"
+    ],
     "gate_count": 46,
-    "pass_count": 46,
-    "release_gate_status": "passing",
+    "pass_count": 45,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }
