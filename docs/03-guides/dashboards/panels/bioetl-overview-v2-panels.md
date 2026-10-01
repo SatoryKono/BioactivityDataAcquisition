@@ -13,8 +13,8 @@ multiple runs; use RunLedger for exact reconciliation.
 ## Key Panels
 
 Review Run Identity shows four saved fields without pagination: full Run ID,
-Pipeline, Run Type, and Started at with the saved UTC offset. Additional manifest,
-schema and source identifiers remain in Inspect Additional Run Identity.
+Pipeline, Run Type, and Started at with the saved UTC offset.
+The additional identity group and its full identity table are not shown on Overview.
 
 The scope banner shows `Pipeline | Run ID`, followed by a line break. Run Type
 remains available in the selector. For `cached_bronze_no_remote_probe`, Review
