@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
-from bioetl.application.composite.join_planner import JoinPlannerService
 from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.application.composite.merger_output_mixin import MergeOutputWriterMixin
 from bioetl.domain.composite.result import MergeResult
@@ -19,14 +18,13 @@ if TYPE_CHECKING:
     from bioetl.application.composite.cross_validator import (
         EnrichmentCrossValidator,
     )
+    from bioetl.application.composite.merger_collaborators import _MergeIOHost
     from bioetl.domain.composite import (
         DependencyConfig,
         EnricherConfig,
-        MergeConfig,
     )
     from bioetl.domain.composite.cross_validation import CrossValidationStats
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import LoggerPort
 
 
 class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
@@ -38,16 +36,9 @@ class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
     """
 
     # -- Host-class attributes (set by MergeService.__init__) --
-    _config: MergeConfig = cast(Any, None)  # Any: host default (PD4)
-    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
-    _field_group_registry: FieldGroupRegistry | None = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _cross_validator: EnrichmentCrossValidator | None = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _gold_schema: Any | None = cast(Any, None)  # Any: host default (PD4)
-    _join_planner: JoinPlannerService = cast(Any, None)  # Any: host default (PD4)
+    _field_group_registry: FieldGroupRegistry | None = None
+    _cross_validator: EnrichmentCrossValidator | None = None
+    _gold_schema: object | None = None
 
     async def _apply_dependency_joins_if_needed(
         self,
@@ -66,7 +57,8 @@ class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
         if not active_dependencies:
             return merged_df
 
-        result = await self._join_planner.apply_dependency_joins(
+        host = cast("_MergeIOHost", cast(object, self))
+        result = await host._join_planner.apply_dependency_joins(
             merged_df=merged_df,
             dependency_dfs=dependency_dfs,
             dependencies=active_dependencies,

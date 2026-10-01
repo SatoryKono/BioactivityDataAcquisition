@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from bioetl.application.composite.aggregator import EnricherAggregator
@@ -13,8 +13,18 @@ if TYPE_CHECKING:
     from bioetl.application.composite.conflict_resolver import ConflictResolverService
     from bioetl.application.composite.deduplication import EnricherDeduplicatorService
     from bioetl.application.composite.join_planner import JoinPlannerService
+    from bioetl.domain.composite import MergeConfig
+    from bioetl.domain.ports import LoggerPort
 
 __all__ = ["MergeCollaboratorGroup"]
+
+
+class _MergeIOHost(Protocol):
+    """Required host dependencies initialized by ``MergeService``."""
+
+    _config: MergeConfig
+    _logger: LoggerPort
+    _join_planner: JoinPlannerService
 
 
 @dataclass(frozen=True, slots=True)

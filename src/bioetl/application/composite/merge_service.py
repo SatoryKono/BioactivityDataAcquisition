@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.column_service import (
         ColumnPriorityOrderingPolicy,
     )
+    from bioetl.application.composite.merger_collaborators import _MergeIOHost
     from bioetl.domain.composite import (
         DependencyConfig,
         EnricherConfig,
@@ -139,6 +140,8 @@ class MergeService(
         self._coalesce_policy = collaborators.coalesce_policy
         self._conflict_resolver = collaborators.conflict_resolver
         self._join_planner = collaborators.join_planner
+        if TYPE_CHECKING:
+            _io_host: _MergeIOHost = self
 
     async def merge(
         self,
