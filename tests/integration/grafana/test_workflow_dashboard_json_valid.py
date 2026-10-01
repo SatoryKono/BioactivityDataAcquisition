@@ -20,7 +20,7 @@ import pytest
 pytestmark = pytest.mark.integration
 
 _RETIRED_WORKFLOW_DASHBOARD = Path("grafana/dashboards/bioetl-workflow-overview.json")
-_RUNTIME_DASHBOARD = Path("grafana/dashboards/bioetl-runtime.json")
+_INCIDENT_DASHBOARD = Path("grafana/dashboards/bioetl-incident-v1.json")
 
 
 def _iter_panels(panels: list[object]) -> list[dict[str, object]]:
@@ -39,18 +39,18 @@ def test_workflow_overview_dashboard_is_retired() -> None:
     """bioetl-workflow-overview was removed in grafana simplification #6570/#6576."""
     assert not _RETIRED_WORKFLOW_DASHBOARD.exists(), (
         "bioetl-workflow-overview.json must stay retired; workflow evidence lives "
-        "on bioetl-runtime (Pipeline Diagnostics) after epic #6570"
+        "on bioetl-incident-v1 (Incident Workspace) after epic #6570"
     )
 
 
-def test_runtime_workflow_band_uses_workflow_metrics() -> None:
-    """Merged workflow band on runtime must keep the core workflow PromQL surface."""
-    dashboard = json.loads(_RUNTIME_DASHBOARD.read_text(encoding="utf-8"))
+def test_incident_workflow_band_uses_workflow_metrics() -> None:
+    """Workflow band on incident workspace keeps the core workflow PromQL surface."""
+    dashboard = json.loads(_INCIDENT_DASHBOARD.read_text(encoding="utf-8"))
 
-    assert dashboard["uid"] == "bioetl-runtime"
+    assert dashboard["uid"] == "bioetl-incident-v1"
     panels = _iter_panels(list(dashboard.get("panels") or []))
     titles = {str(panel.get("title") or "") for panel in panels}
-    assert "Inspect Workflow Evidence" in titles
+    assert "Review Current Workflow Evidence" in titles
     assert "Track Failed Workflow Runs" in titles
     assert "Track Failed Workflow Steps" in titles
 
