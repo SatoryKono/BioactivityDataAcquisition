@@ -3023,7 +3023,7 @@ dashboards:
         - first_window_light
         - zoom_200
       '9002':
-        title: Review Run Domains
+        title: Run Domains
         role: evidence_table
         tier: 3
         scope: selected_run
@@ -3044,7 +3044,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '9300':
-        title: Review Run Identity
+        title: Run Identity
         role: evidence_table
         tier: 3
         scope: selected_run
@@ -3125,7 +3125,7 @@ dashboards:
         - backend_error
         render_profiles: *id008
       '9480':
-        title: Review Provider Evidence
+        title: Provider Evidence
         role: evidence_table
         tier: 3
         scope: time_range
@@ -3149,7 +3149,7 @@ dashboards:
         - full_light
         - zoom_200
       '9481':
-        title: Review Provider Check
+        title: Provider Check
         role: indicator
         tier: 3
         scope: time_range
@@ -3176,8 +3176,39 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id009
+      '9482':
+        title: Data Quality
+        role: indicator
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
       '9603':
-        title: Review Selected Run Status
+        title: Selected Run Status
         role: evidence_table
         tier: 3
         scope: selected_run
@@ -3198,7 +3229,7 @@ dashboards:
         - backend_error
         render_profiles: *id004
       '9604':
-        title: Review Overall Verdict
+        title: Overall Verdict
         role: indicator
         tier: 3
         scope: time_range

@@ -38,6 +38,6 @@ def exclusion_quality_expression() -> str:
         "$rate := $known ? ($base=0 ? 0 : $n/$base) : null; "
         "$status := $known ? ($rate >= $limit[1] ? 'ERROR' : "
         "$rate >= $limit[0] ? 'WARN' : 'OK') : 'UNKNOWN'; "
-        "[{'quality': $known ? $status & ' · ' & $string($n) & ' excluded (' & "
-        "$string($round($rate*100,2)) & '%)' : 'UNKNOWN'}])"
+        "[{'status': $status, 'detail': ($known ? 'excluded ' & $string($round($rate*100,2)) & '%' "
+        ": 'excluded UNKNOWN')}])"
     )

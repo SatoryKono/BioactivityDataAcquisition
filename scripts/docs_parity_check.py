@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Documentation Parity Check Script.
 
+RETIRED / NON-CI (DOCS-PIPE-010, #11858): kept for local-only broader parity
+reports. The active CI gate is `python -m scripts.data_quality
+check-entity-config-parity` (see docs/03-guides/docs-parity-gate.md).
+
 Validates that documentation stays in sync with code and configuration.
 Implements the parity gate requirements from the governance framework.
 

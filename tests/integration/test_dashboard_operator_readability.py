@@ -570,7 +570,7 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
             item for item in get_dashboard_panels(dashboard) if item.get("id") == 9460
         )
         targets = panel["targets"]
-        assert [target["refId"] for target in targets] == ["A", "B"]
+        assert [target["refId"] for target in targets] == (["A", "B", "C"] if name == "bioetl-overview-v2" else ["A", "B"])
         removal_target = targets[1]
         assert removal_target["url"].endswith("format=pipeline_run_report_json")
         assert removal_target["parser"] == "uql"
@@ -596,7 +596,8 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
             "deduplicated",
             "filtered_out",
             *([] if name == "bioetl-overview-v2" else ["duration_seconds"]),
-            "source",
+            *([] if name == "bioetl-overview-v2" else ["source"]),
+            *(["excluded_pct", "saved_pct"] if name == "bioetl-overview-v2" else []),
         ]
         organize = next(item for item in transforms if item["id"] == "organize")
         assert organize["options"]["renameByName"] == {

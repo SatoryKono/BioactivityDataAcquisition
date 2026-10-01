@@ -114,10 +114,10 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-overview-v2": {9002: 5},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 3, 12, 3),
-    9422: (12, 3, 12, 3),
-    9418: (0, 6, 12, 8),
-    9416: (12, 6, 12, 8),
+    9400: (0, 3, 15, 3),
+    9422: (15, 3, 9, 3),
+    9418: (0, 6, 15, 8),
+    9416: (15, 6, 9, 8),
 }
 _CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 14
 # Runtime already owns current readiness as 9401 Monitor Pipeline Status.
@@ -214,8 +214,8 @@ _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
     'font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch">'
-    "SELECTED RUN · Read exact replay readiness first, then the saved Trust verdict, "
-    "then retention. Blockers for that readiness are in <em>Review Exact Replay Checks</em>.</div>"
+    '${pipeline:text} | <code style="font:inherit;background:none;border:0;padding:0">${run_id}</code><br>'
+    "Blockers: <em>Review Exact Replay Checks</em>.</div>"
 )
 _RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (
@@ -2540,6 +2540,12 @@ def apply_to_dashboard(
     apply_saved_evidence_readability(payload)
     _pack_incident_tail_rows(payload)
     retire_runtime_links(payload)
+    if current_uid == "bioetl-overview-v2":
+        pending = list(payload["panels"])
+        while pending:
+            panel = pending.pop()
+            pending.extend(panel.get("panels", []))
+            panel["title"] = panel.get("title", "").removeprefix("Review ")
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

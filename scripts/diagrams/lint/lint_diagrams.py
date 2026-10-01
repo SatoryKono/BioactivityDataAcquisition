@@ -19,7 +19,7 @@ Usage:
 
     # Check specific paths (files and/or directories)
     python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams/
-    python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams/mermaid/01-high-level.mermaid
+    python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams/architecture/01-high-level-hexagonal.mmd
 
     # Output JSON format
     python scripts/diagrams/lint/lint_diagrams.py --json

@@ -1,6 +1,6 @@
 # Documentation Parity Gate
 
-*Status: Active | Version: 1.0.0 | Last Updated: 2026-04-24*
+*Status: Active | Version: 1.1.0 | Last Updated: 2026-10-01*
 
 ## Overview
 
@@ -11,58 +11,18 @@ The Documentation Parity Gate ensures that all active entity configurations have
 The active repository gate runs in [`.github/workflows/docs.yml`](../../.github/workflows/docs.yml)
 via the docs job step `Run docs-config parity gate`.
 
-### GitHub Actions Example
+### GitHub Actions Example (фактический docs.yml step)
 
 ```yaml
-name: Documentation Parity Check
-
-on:
-  push:
-    branches: [ main, dev ]
-  pull_request:
-    branches: [ main, dev ]
-
-jobs:
-  docs-parity-check:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyyaml
-
-    - name: Run documentation parity check
-      run: bash scripts/ci_check_docs_parity.sh
+      - name: Run docs-config parity gate
+        run: >-
+          uv run --frozen --no-build python -m scripts.data_quality
+          check-entity-config-parity
 ```
 
-### GitLab CI Example
-
-```yaml
-stages:
-  - test
-
-docs_parity_check:
-  stage: test
-  image: python:3.12
-
-  script:
-    - pip install pyyaml
-    - bash scripts/ci_check_docs_parity.sh
-
-  artifacts:
-    when: always
-    paths:
-      - parity_report.txt
-```
+Legacy-примеры (`bash scripts/ci_check_docs_parity.sh`, отдельный GitLab-job)
+удалены: скрипты `scripts/ci_check_docs_parity.sh` и `scripts/docs_parity_check.py`
+помечены retired/non-CI (см. ниже) и не вызываются из CI.
 
 ## Manual Execution
 
@@ -70,11 +30,12 @@ To run the parity check manually:
 
 ```bash
 # Run the active config-to-spec parity gate
-uv run python -m scripts.data_quality check-entity-config-parity
-
-# Generate the broader parity report JSON used by governance tooling
-python3 scripts/docs_parity_check.py
+uv run --frozen --no-build python -m scripts.data_quality check-entity-config-parity
 ```
+
+Retired local-only report (non-CI, не gate): `python3 scripts/docs_parity_check.py`
+пишет `docs/reports/docs-parity-report.json` для локального разбора. В CI не
+используется.
 
 ## Parity Check Script
 
@@ -93,8 +54,9 @@ The active config/spec gate is located at
 - **Detailed Reporting**: Provides clear output with specific issues found
 - **Exit Codes**: Returns appropriate exit codes for CI/CD integration
 
-The broader governance report path is implemented by `scripts/docs_parity_check.py`,
-which writes `docs/reports/docs-parity-report.json` for local or CI consumption.
+The broader governance report path is implemented by the retired
+`scripts/docs_parity_check.py` (non-CI, local use only), which writes
+`docs/reports/docs-parity-report.json` for local consumption.
 
 ### Exit Codes
 

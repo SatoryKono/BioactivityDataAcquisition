@@ -364,7 +364,7 @@
       "title": "",
       "gridPos": {
         "h": 3,
-        "w": 12,
+        "w": 15,
         "x": 0,
         "y": 2
       },
@@ -372,7 +372,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">SELECTED RUN · Read exact replay readiness first, then the saved Trust verdict, then retention. Blockers for that readiness are in <em>Review Exact Replay Checks</em>.</div>",
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">${pipeline:text} | <code style=\"font:inherit;background:none;border:0;padding:0\">${run_id}</code><br>Blockers: <em>Review Exact Replay Checks</em>.</div>",
         "dataLinks": [
           {
             "title": "Open Replay Safety Diagnostics",
@@ -408,7 +408,7 @@
       "title": "Review Selected-Run Trust",
       "gridPos": {
         "h": 9,
-        "w": 12,
+        "w": 15,
         "x": 0,
         "y": 5
       },
@@ -1409,8 +1409,8 @@
       },
       "gridPos": {
         "h": 9,
-        "w": 12,
-        "x": 12,
+        "w": 9,
+        "x": 15,
         "y": 5
       },
       "id": 9416,
@@ -6518,8 +6518,8 @@
       "title": "Review Exact Replay Readiness",
       "gridPos": {
         "h": 3,
-        "w": 12,
-        "x": 12,
+        "w": 9,
+        "x": 15,
         "y": 2
       },
       "datasource": "BioETL Ops HTTP",

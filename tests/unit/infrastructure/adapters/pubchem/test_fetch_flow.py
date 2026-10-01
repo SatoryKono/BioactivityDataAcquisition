@@ -35,11 +35,13 @@ from __future__ import annotations
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
+from urllib.error import HTTPError
 
 import pubchempy as pcp
 import pytest
 
 from bioetl.infrastructure.adapters.pubchem.fetch_flow import PubChemFetchFlow
+from bioetl.domain.resilience import RetryConfig
 
 
 @pytest.fixture
@@ -89,6 +91,59 @@ def fetch_flow(
 
 @pytest.mark.unit
 class TestFetchFlowExecute:
+    @pytest.mark.parametrize(
+        "retry_after,expected", [("12", 12.0), ("1000", 60.0), ("invalid", None)]
+    )
+    async def test_sdk_retry_after_is_honored_with_policy_cap(
+        self,
+        fetch_flow: PubChemFetchFlow,
+        mock_circuit_breaker: AsyncMock,
+        retry_after: str,
+        expected: float | None,
+    ) -> None:
+        error = pcp.PubChemHTTPError(429, "Too Many Requests", [])
+        error.__cause__ = HTTPError(
+            "https://pubchem.ncbi.nlm.nih.gov",
+            429,
+            "throttled",
+            {"Retry-After": retry_after},
+            None,
+        )
+        mock_circuit_breaker.call.side_effect = [error, [{"cid": 2244}]]
+        fetch_flow.logger = MagicMock()
+        with patch("asyncio.sleep", new_callable=AsyncMock) as sleep:
+            await fetch_flow.execute(
+                endpoint="/compound/smiles/JSON",
+                pubchem_callable=MagicMock(),
+                pubchem_args=(),
+            )
+        if expected is None:
+            expected = fetch_flow.retry_config.calculate_delay(
+                0, "/compound/smiles/JSON"
+            )
+        sleep.assert_awaited_once_with(expected)
+        assert fetch_flow.logger.warning.call_args.kwargs["status_code"] == 429
+
+    async def test_sdk_retry_budget_is_not_exceeded(
+        self,
+        fetch_flow: PubChemFetchFlow,
+        mock_circuit_breaker: AsyncMock,
+    ) -> None:
+        fetch_flow.retry_config = RetryConfig(
+            max_attempts=5, retry_budget_per_request=1
+        )
+        mock_circuit_breaker.call.side_effect = pcp.PubChemHTTPError(
+            502, "Bad Gateway", []
+        )
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            with pytest.raises(pcp.PubChemHTTPError):
+                await fetch_flow.execute(
+                    endpoint="/compound/smiles/JSON",
+                    pubchem_callable=MagicMock(),
+                    pubchem_args=(),
+                )
+        assert mock_circuit_breaker.call.await_count == 2
+
     @pytest.mark.parametrize("status_code", [429, 502, 503, 504])
     async def test_transient_sdk_http_error_is_retried(
         self,

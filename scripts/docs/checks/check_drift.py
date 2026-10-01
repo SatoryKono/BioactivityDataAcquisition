@@ -268,35 +268,9 @@ ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS: tuple[str, ...] = (
     *ROLE_PROFILE_MEMO_DOC_TOKENS,
     RUNTIME_POST_CHANGE_PATH,
 )
-ROLE_PROFILE_MEMO_DOC_BY_RUNTIME: dict[Path, tuple[str, ...]] = {
-    Path(GEMINI_PY_AUDIT_BOT_DOC_PATH): (
-        RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)
-    ),
-    Path(".gemini/agents/py-plan-bot.md"): (
-        RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)
-    ),
-    Path(GEMINI_PY_CONFIG_BOT_DOC_PATH): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(".gemini/agents/py-debug-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(".gemini/agents/py-doc-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(".gemini/agents/py-test-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(
-        ".gemini/agents/py-architecture-debt-bot.md"
-    ): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(
-        GEMINI_PY_REVIEW_ORCHESTRATOR_DOC_PATH
-    ): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(".gemini/agents/py-test-swarm.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(CODEX_PY_AUDIT_BOT_DOC_PATH): (
-        RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)
-    ),
-    Path(".codex/agents/py-plan-bot.md"): (
-        RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)
-    ),
-    Path(CODEX_PY_CONFIG_BOT_DOC_PATH): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(".codex/agents/py-debug-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(".codex/agents/py-doc-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(".codex/agents/py-test-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-}
+# ROLE_PROFILE_MEMO_DOC_BY_RUNTIME removed (DOCS-PIPE-008, #11858): the per-runtime
+# memo map (incl. .gemini/agents/*) was declared but never read; wiring Gemini
+# runtime claims is out of scope because Gemini is not a project runtime.
 ACTIVE_NON_CANONICAL_EVIDENCE_SUMMARIES = (
     Path("docs/reports/evidence/project-test-health/SUMMARY.md"),
 )

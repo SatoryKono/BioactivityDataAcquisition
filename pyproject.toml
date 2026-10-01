@@ -184,9 +184,7 @@ docs = [
     # Keep explicit because local strict builds import material.plugins.search.plugin,
     # which requires backrefs at runtime; making it direct avoids environment drift.
     "backrefs>=6.2",
-    "mkdocs-mermaid2-plugin>=1.1",
     "pymdown-extensions>=10.8",
-    "mkdocstrings[python]>=0.25",
 ]
 
 [tool.setuptools.packages.find]

@@ -128,6 +128,19 @@ PubChem publishes a dynamic request throttling page, but fixed numeric threshold
 
 ### 429 handling policy
 
+Запросы через `pubchempy` используют политику из
+`configs/providers/pubchem.yaml`: `client.max_retries` задаёт максимальное число
+попыток одного запроса, включая первую. Повторяемые HTTP-коды определяет общий
+`RetryConfig`, в том числе 429, 500, 502, 503 и 504. Перед каждой попыткой
+применяются rate limiter и circuit breaker; между попытками используется
+экспоненциальная задержка с детерминированным jitter.
+Если исходное HTTP-исключение SDK содержит `Retry-After`, заголовок разбирается
+общим HTTP-парсером и применяется с ограничением задержки из `RetryConfig`.
+
+Неудачные попытки записываются в телеметрию с исходным HTTP-кодом. Если бюджет
+попыток исчерпан или код не допускает повтор, ошибка передаётся вызывающему
+пайплайну. Неуспешный запрос не заменяется пустым успешным ответом.
+
 PubChem documents dynamic throttling conceptually, but the accessible official references do not expose a stable HTTP `429` / `Retry-After` contract. При throttle клиент SHOULD уменьшать concurrency и увеличивать backoff.
 
 ### Authentication model

@@ -15,7 +15,8 @@ print(Path(sys.argv[1]).resolve())
 PY
 )"
 
-DOCKER_IMAGE="${MMDC_DOCKER_IMAGE:-minlag/mermaid-cli:10.6.1}"
+# Pinned by tag + digest (DIAG-DOCKER-TAG-NO-DIGEST, #11857): keep 10.6.1 in both.
+DOCKER_IMAGE="${MMDC_DOCKER_IMAGE:-minlag/mermaid-cli:10.6.1@sha256:daa355dd82c08e698e4947fc95c2451b8ed551987a9a5f5dc51ecbcaca58fec5}"
 LOCAL_MMDC="/tmp/mermaid-cli-lite/node_modules/.bin/mmdc"
 FORCE_DOCKER="${MMDC_FORCE_DOCKER:-0}"
 HOST_PUPPETEER_CACHE_DIR="${PUPPETEER_CACHE_DIR:-${HOME:-}/.cache/puppeteer}"

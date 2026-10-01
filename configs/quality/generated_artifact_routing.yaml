@@ -221,6 +221,18 @@ routes:
       Dashboard panel title inventory mirrors shipped Grafana dashboard JSON
       for documentation and CI drift checks.
 
+  - id: dashboard-shipped-panel-inventory-blocks
+    generator: scripts/docs/generate_dashboard_panel_inventory.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/03-guides/dashboards/panels/
+    notes:
+      Shipped panel inventory blocks are injected between markers into
+      per-dashboard panel guides from Grafana dashboard JSON; drift is
+      enforced by `python -m scripts.docs generate-dashboard-panel-inventory --check`
+      in docs.yml (DOCS-PIPE-002, #11858).
+
   - id: dashboard-navigation-contract-generated-doc
     generator: scripts/ops/observability/grafana/render_nav_bus.py
     output_kind: curated_generated_docs
