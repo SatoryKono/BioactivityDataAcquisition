@@ -15,7 +15,7 @@ patterns by stable panel id ranges and titles across boards.
 
 | Logical panel | Typical id | Type | Ownership |
 | --- | ---: | --- | --- |
-| `nav_bus` | 1000 | text | Shared chrome; full bus `1. Trust`…`0. Run Explorer` via `scripts/ops/observability/grafana/render_nav_bus.py` |
+| `nav_bus` | 1000 | text | Shared chrome; full bus `1. Trust`…`Run Explorer` via `scripts/ops/observability/grafana/render_nav_bus.py` |
 | `provenance` | 9400 (Overview: 99) | text | Scope / provenance summary |
 | `status_strip` | 9401 (Overview: 214) | stat | Canonical current-status recording rule |
 | `first_action` / `next_best_actions` | board-specific | text/table | ≤4 CTAs; preserve time+vars |

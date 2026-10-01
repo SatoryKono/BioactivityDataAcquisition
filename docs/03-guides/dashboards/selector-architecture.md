@@ -140,7 +140,7 @@ Read-only triage board with the shared context shell plus visible `provider`
 
 Dashboard:
 
-- `0. Run Explorer` (`bioetl-run-explorer-v1`)
+- `Run Explorer` (`bioetl-run-explorer-v1`)
 
 Canonical hub for Ops HTTP `ID` / `Inspect Processed Records` KPIs under the
 shared context shell. No provider/stage business selectors on the top bar.
@@ -246,7 +246,7 @@ The current shipped selector model (7 dashboards only):
   (default All), time range
 - `6. Incident Workspace`: `workflow`, `pipeline`, `run_type`, `run_id`,
   `provider`, time range
-- `0. Run Explorer`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
+- `Run Explorer`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
 
 This contract is unified by the shared context shell, taxonomy, and family
 rules. It does not force every Status panel to consume every visible selector.

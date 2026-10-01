@@ -253,7 +253,7 @@ Normative rules:
 
 The shared shell is derived from `2. Overview` and applies to primary
 dashboards `0. Control Plane`, `2. Runtime`, `4. Provider Health`,
-`5. Data Quality`, `6. Incident Workspace`, and `0. Run Explorer`.
+`5. Data Quality`, `6. Incident Workspace`, and `Run Explorer`.
 
 | Panel | Canonical ID | Role | Data contract |
 | --- | ---:| --- | --- |
@@ -577,7 +577,7 @@ Implementation guardrails:
 Источник фиксированного словаря для `links[].title`: `docs/03-guides/dashboards/navigation-contract.md`.
 
 Правила:
-- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract: `0. Run Explorer`, `1. Trust`, `2. Overview`, `3. Pipeline Diagnostics`, `4. Provider Health`, `5. Data Quality`, `6. Incident Workspace` (bus only; **no** `Silver Reject Explorer` / `Explore Logs` / `Explore Traces`).
+- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract: `Run Explorer`, `1. Trust`, `2. Overview`, `3. Pipeline Diagnostics`, `4. Provider Health`, `5. Data Quality`, `6. Incident Workspace` (bus only; **no** `Silver Reject Explorer` / `Explore Logs` / `Explore Traces`).
 - Формулировки вида `Back to Overview`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`, `Next Recommended Drilldown`, and reintroduced adjunct titles, считаются legacy-лексикой и не допускаются в shipped top navigation.
 
 Every navigation panel renders the same ordered composition on all **seven**
@@ -754,7 +754,7 @@ not this inline rule.
 
 | Role | Visible form | HTML | Example |
 | --- | --- | --- | --- |
-| Dashboard | numbered title, bold | `<b>1. Trust</b>` | `1. Trust`, `0. Run Explorer` |
+| Dashboard | numbered title, bold | `<b>1. Trust</b>` | `1. Trust`, `Run Explorer` |
 | Panel | Title Case, italic, not bold | `<em>Review Selected-Run Trust</em>` | first-screen and rail references |
 | Status / scope | CAPS, not bold | plain `INCOMPLETE` | `OK`, `WARN`, `CRIT`, `UNKNOWN`, `INCOMPLETE`, `CURRENT`, `SELECTED RUN`, `TIME RANGE` |
 | Field / API token | monospace, `16px` | `<code style="font-size:16px">trust_status</code>` | `run_id`, `processing_status` |

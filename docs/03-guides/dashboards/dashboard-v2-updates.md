@@ -202,7 +202,7 @@ notes. Если prose ниже расходится с JSON, править ну
 - `bioetl-provider-health-v2` (4. Provider Health)
 - `bioetl-dq-v2` (5. Data Quality)
 - `bioetl-incident-v1` (6. Incident Workspace)
-- `bioetl-run-explorer-v1` (0. Run Explorer)
+- `bioetl-run-explorer-v1` (Run Explorer)
 
 **Retired (not shipped JSON):** `bioetl-workflow-overview`, `bioetl-alerts-slo`,
 `bioetl-silver-reject-explorer` — use Runtime workflow band, Overview Alert/SLO

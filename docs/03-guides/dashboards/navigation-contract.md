@@ -7,7 +7,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 The visual contract is one identical, theme-safe composition on all **seven**
 shipped dashboards. Numbered bus:
 
-`0. Run Explorer` · `1. Trust` · `2. Overview` · `3. Pipeline Diagnostics` ·
+`Run Explorer` · `1. Trust` · `2. Overview` · `3. Pipeline Diagnostics` ·
 `4. Provider Health` · `5. Data Quality` · `6. Incident Workspace`
 
 Run Explorer is the first destination for selecting a run. Dashboard titles

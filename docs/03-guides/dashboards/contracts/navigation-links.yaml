@@ -54,42 +54,42 @@ required_top_level_links_by_uid:
     - Provider Health
     - Data Quality
     - 6. Incident Workspace
-    - 0. Run Explorer
+    - Run Explorer
   bioetl-overview-v2:
     - Replay Readiness
     - Pipeline Diagnostics
     - Provider Health
     - Data Quality
     - 6. Incident Workspace
-    - 0. Run Explorer
+    - Run Explorer
   bioetl-runtime:
     - Replay Readiness
     - Run Overview
     - Provider Health
     - Data Quality
     - 6. Incident Workspace
-    - 0. Run Explorer
+    - Run Explorer
   bioetl-provider-health-v2:
     - Replay Readiness
     - Run Overview
     - Pipeline Diagnostics
     - Data Quality
     - 6. Incident Workspace
-    - 0. Run Explorer
+    - Run Explorer
   bioetl-dq-v2:
     - Replay Readiness
     - Run Overview
     - Pipeline Diagnostics
     - Provider Health
     - 6. Incident Workspace
-    - 0. Run Explorer
+    - Run Explorer
   bioetl-incident-v1:
     - Replay Readiness
     - Run Overview
     - Pipeline Diagnostics
     - Provider Health
     - Data Quality
-    - 0. Run Explorer
+    - Run Explorer
   bioetl-run-explorer-v1: []
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
@@ -527,7 +527,7 @@ visual_bus_titles_ordered:
   - Provider Health
   - Data Quality
   - 6. Incident Workspace
-  - 0. Run Explorer
+  - Run Explorer
 visual_bus_uids_ordered:
   - bioetl-control-plane-v1
   - bioetl-overview-v2

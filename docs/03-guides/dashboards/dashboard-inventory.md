@@ -38,7 +38,7 @@ policy.
 | `4. Provider Health` | `grafana/dashboards/bioetl-provider-health-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-provider-health-v2-panels.md](panels/bioetl-provider-health-v2-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v2`) |
 | `5. Data Quality` | `grafana/dashboards/bioetl-dq-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-dq-v2-panels.md](panels/bioetl-dq-v2-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v2`) |
 | `6. Incident Workspace` | `grafana/dashboards/bioetl-incident-v1.json` | adjunct | [dashboard-system-2.0-phase2-residual.md](dashboard-system-2.0-phase2-residual.md) | [bioetl-incident-v1-panels.md](panels/bioetl-incident-v1-panels.md) | Prometheus, BioETL Ops HTTP | versioned (`v1`) |
-| `0. Run Explorer` | `grafana/dashboards/bioetl-run-explorer-v1.json` | adjunct | [dashboard-system-2.0-phase2-residual.md](dashboard-system-2.0-phase2-residual.md) | [bioetl-run-explorer-v1-panels.md](panels/bioetl-run-explorer-v1-panels.md) | Prometheus, BioETL Ops HTTP | versioned (`v1`) |
+| `Run Explorer` | `grafana/dashboards/bioetl-run-explorer-v1.json` | adjunct | [dashboard-system-2.0-phase2-residual.md](dashboard-system-2.0-phase2-residual.md) | [bioetl-run-explorer-v1-panels.md](panels/bioetl-run-explorer-v1-panels.md) | Prometheus, BioETL Ops HTTP | versioned (`v1`) |
 
 > **Shipped surface = 7 dashboards** (portfolio cap; Phase-2 residual #6828). Machine inventory:
 > `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.
