@@ -2522,6 +2522,8 @@ def apply_to_dashboard(
         "/d/bioetl-provider-health-v2/4-provider-health",
         "/d/bioetl-overview-v2/2-overview",
     ).replace("Open Provider Health", "Open Provider Evidence"))
+    from scripts.ops.observability.grafana._overview_identity import apply_saved_evidence_readability
+    apply_saved_evidence_readability(payload)
     _pack_incident_tail_rows(payload)
     retire_runtime_links(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"

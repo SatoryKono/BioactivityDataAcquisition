@@ -3082,27 +3082,6 @@ dashboards:
         - full_dark
         - full_light
         - zoom_200
-      '9451':
-        title: Inspect Selected Run Domains
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id008
       '9452':
         title: Inspect Selected Run Identity
         role: forensic_table

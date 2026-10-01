@@ -25,7 +25,6 @@ def test_shipped_dashboard_panel_matrix_matches_baseline(tmp_path: Path) -> None
         "bioetl-dq-v2",
         "bioetl-incident-v1",
         "bioetl-overview-v2",
-        "bioetl-provider-health-v2",
         "bioetl-run-explorer-v1",
     }
     keys = [(row["dashboard_uid"], row["panel_id"]) for row in rows]

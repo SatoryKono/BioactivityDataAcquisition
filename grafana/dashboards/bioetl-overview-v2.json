@@ -474,7 +474,10 @@
         "textMode": "value",
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "center"
+        "justifyMode": "center",
+        "text": {
+          "valueSize": 48
+        }
       }
     },
     {
@@ -1140,7 +1143,7 @@
       "type": "row",
       "title": "Inspect Saved Run Evidence",
       "collapsed": true,
-      "description": "Expand for saved stage rows (Inspect Selected Run Stages), domain verdicts (Inspect Selected Run Domains), and full identity (Inspect Selected Run Identity) of the selected Run ID.",
+      "description": "Expand for saved run duration, stage rows, and full identity of the selected Run ID.",
       "gridPos": {
         "x": 0,
         "y": 23,
@@ -1214,7 +1217,7 @@
           "title": "Inspect Selected Run Stages",
           "gridPos": {
             "x": 0,
-            "y": 24,
+            "y": 27,
             "w": 24,
             "h": 8
           },
@@ -1509,124 +1512,23 @@
           "links": []
         },
         {
-          "id": 9451,
-          "type": "table",
-          "title": "Inspect Selected Run Domains",
-          "gridPos": {
-            "x": 0,
-            "y": 24,
-            "w": 24,
-            "h": 10
-          },
-          "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
-          "options": {
-            "showHeader": true,
-            "cellHeight": "lg",
-            "footer": {
-              "show": false,
-              "enablePagination": true
-            }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "UNKNOWN",
-              "unit": "none",
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
-                },
-                "inspect": true,
-                "minWidth": 50
-              }
-            },
-            "overrides": []
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "type": "json",
-              "source": "url",
-              "parser": "backend",
-              "format": "table",
-              "root_selector": "domains",
-              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-              "url_options": {
-                "method": "GET",
-                "data": ""
-              }
-            }
-          ],
-          "transformations": [
-            {
-              "id": "limit",
-              "options": {
-                "limitField": 6
-              }
-            },
-            {
-              "id": "filterFieldsByName",
-              "options": {
-                "include": {
-                  "names": [
-                    "domain",
-                    "verdict",
-                    "reason",
-                    "action",
-                    "evidence_ref"
-                  ]
-                }
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "indexByName": {
-                  "domain": 0,
-                  "verdict": 1,
-                  "reason": 2,
-                  "action": 3,
-                  "evidence_ref": 4
-                },
-                "renameByName": {
-                  "domain": "Domain",
-                  "verdict": "Status",
-                  "execution_state": "Result",
-                  "evidence_completeness": "Evidence",
-                  "rules_version": "Rules",
-                  "reason": "Reason",
-                  "action": "Action",
-                  "evidence_ref": "Evidence reference",
-                  "pipeline": "Pipeline",
-                  "run_id": "Run ID",
-                  "completed_at": "Completed",
-                  "revision": "Revision"
-                }
-              }
-            }
-          ],
-          "links": []
-        },
-        {
           "id": 9452,
           "type": "table",
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 24,
+            "y": 35,
             "w": 24,
-            "h": 8
+            "h": 7
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · Full Run ID can be copied through cell inspection. Inspect Source revision to view and copy the complete hash. Missing values are Not recorded; failed requests remain QUERY ERROR.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -1640,23 +1542,46 @@
                   "wrapText": true
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": true
               }
             },
             "overrides": [
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Completed"
+                  "options": "Parameter"
                 },
                 "properties": [
                   {
-                    "id": "unit",
-                    "value": "time:YYYY-MM-DD HH:mm"
+                    "id": "custom.width",
+                    "value": 210
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.inspect",
+                    "value": true
                   },
                   {
-                    "id": "custom.width",
-                    "value": 175
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^([a-fA-F0-9]{12})(?:[a-fA-F0-9]{28}|[a-fA-F0-9]{52})$",
+                          "result": {
+                            "text": "$1…"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               }
@@ -1667,73 +1592,28 @@
               "refId": "A",
               "type": "json",
               "source": "url",
-              "parser": "backend",
+              "parser": "uql",
               "format": "table",
-              "root_selector": "summary",
+              "root_selector": "($s := summary[0]; $v := function($x){$exists($x) and $x != null and $x != \"\" ? $string($x) : \"Not recorded\"}; [{\"parameter\":\"Pipeline\",\"value\":$v($s.pipeline)},{\"parameter\":\"Run ID\",\"value\":$v($s.run_id)},{\"parameter\":\"Completed\",\"value\":$v($s.completed_at)},{\"parameter\":\"Assessment rules\",\"value\":$v($s.rules_version)},{\"parameter\":\"Source revision\",\"value\":$v($s.revision)},{\"parameter\":\"Evidence completeness\",\"value\":$v($s.evidence_completeness)}])",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",
                 "data": ""
-              }
+              },
+              "uql": "parse-json | jsonata \"($s := summary[0]; $v := function($x){$exists($x) and $x != null and $x != \\\"\\\" ? $string($x) : \\\"Not recorded\\\"}; [{\\\"parameter\\\":\\\"Pipeline\\\",\\\"value\\\":$v($s.pipeline)},{\\\"parameter\\\":\\\"Run ID\\\",\\\"value\\\":$v($s.run_id)},{\\\"parameter\\\":\\\"Completed\\\",\\\"value\\\":$v($s.completed_at)},{\\\"parameter\\\":\\\"Assessment rules\\\",\\\"value\\\":$v($s.rules_version)},{\\\"parameter\\\":\\\"Source revision\\\",\\\"value\\\":$v($s.revision)},{\\\"parameter\\\":\\\"Evidence completeness\\\",\\\"value\\\":$v($s.evidence_completeness)}])\""
             }
           ],
           "transformations": [
             {
-              "id": "convertFieldType",
-              "options": {
-                "conversions": [
-                  {
-                    "targetField": "completed_at",
-                    "destinationType": "time"
-                  }
-                ]
-              }
-            },
-            {
-              "id": "limit",
-              "options": {
-                "limitField": 1
-              }
-            },
-            {
-              "id": "filterFieldsByName",
-              "options": {
-                "include": {
-                  "names": [
-                    "pipeline",
-                    "run_id",
-                    "completed_at",
-                    "rules_version",
-                    "revision",
-                    "evidence_completeness"
-                  ]
-                }
-              }
-            },
-            {
               "id": "organize",
               "options": {
                 "indexByName": {
-                  "pipeline": 0,
-                  "run_id": 1,
-                  "completed_at": 2,
-                  "rules_version": 3,
-                  "revision": 4,
-                  "evidence_completeness": 5
+                  "parameter": 0,
+                  "value": 1
                 },
                 "renameByName": {
-                  "domain": "Domain",
-                  "verdict": "Status",
-                  "execution_state": "Result",
-                  "evidence_completeness": "Evidence",
-                  "rules_version": "Rules",
-                  "reason": "Reason",
-                  "action": "Action",
-                  "evidence_ref": "Evidence reference",
-                  "pipeline": "Pipeline",
-                  "run_id": "Run ID",
-                  "completed_at": "Completed",
-                  "revision": "Revision"
+                  "parameter": "Parameter",
+                  "value": "Value"
                 }
               }
             }
@@ -1950,7 +1830,10 @@
         },
         "colorMode": "background",
         "graphMode": "none",
-        "textMode": "value"
+        "textMode": "value",
+        "text": {
+          "valueSize": 48
+        }
       },
       "fieldConfig": {
         "defaults": {

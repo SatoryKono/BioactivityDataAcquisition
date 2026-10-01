@@ -13,15 +13,16 @@
 >
 > Monitoring stack is **opt-in only** (`make docker-start-monitoring`).
 >
-> **Dashboards: 7 JSON** — primary `bioetl-control-plane-v1`, `bioetl-overview-v2`,
-> `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, plus
-> `bioetl-incident-v1` and `bioetl-run-explorer-v1` (Dashboard System 2.0 / #6800).
-> Retired: workflow/alerts merged into Runtime/Overview bands.
+> **Dashboards: 5 JSON** — primary `bioetl-control-plane-v1`, `bioetl-overview-v2`,
+> `bioetl-dq-v2`, plus `bioetl-incident-v1` and `bioetl-run-explorer-v1`
+> (Dashboard System 2.0 / #6800).
+> Retired: `bioetl-runtime`, `bioetl-provider-health-v2`; workflow/alerts merged
+> into the Overview bands.
 >
 > **Dashboard System 2.0 track:** `docs/03-guides/dashboards/operator-ux-v2.md`.
 >
 > **Optional Scenes shadow path:** `grafana/plugins/bioetl-scenes-app` provides
-> six read-only task routes under ADR-053. It is disabled by default; the seven
+> six read-only task routes under ADR-053. It is disabled by default; the five
 > JSON UIDs remain authoritative and are the tested rollback surface. See
 > `docs/03-guides/dashboards/scenes-dual-path.md`.
 
@@ -30,17 +31,15 @@ ______________________________________________________________________
 
 ## Shipped dashboard surface (2026-07-28)
 
-**Seven** dashboards under `grafana/dashboards/` (portfolio cap ≤7):
+**Five** dashboards under `grafana/dashboards/` (portfolio cap ≤7):
 
 0. `bioetl-control-plane-v1` — Trust / Control Plane Explorer
 1. `bioetl-overview-v2` — Overview / Fleet Command Center
-2. `bioetl-runtime` — Pipeline Diagnostics (includes retired Workflow band evidence)
-3. `bioetl-provider-health-v2` — Provider Health / Provider Explorer
-4. `bioetl-dq-v2` — Data Quality / Data Trust Explorer
-5. `bioetl-incident-v1` — Incident Workspace
-6. `bioetl-run-explorer-v1` — Run Explorer
+2. `bioetl-dq-v2` — Data Quality / Data Trust Explorer
+3. `bioetl-incident-v1` — Incident Workspace
+4. `bioetl-run-explorer-v1` — Run Explorer
 
-Retired (do not reintroduce without architecture review): Workflow Overview, Alerts & SLO, Silver Reject Explorer, Loki/Tempo Explore-only surfaces.
+Retired (do not reintroduce without architecture review): `bioetl-runtime` (Pipeline Diagnostics, incl. retired Workflow band evidence), `bioetl-provider-health-v2` (Provider Health / Provider Explorer), Workflow Overview, Alerts & SLO, Silver Reject Explorer, Loki/Tempo Explore-only surfaces.
 
 Render/audit gates fail closed on blank screenshots and `renderedPanelCount=0` (#6686).
 Deployed Grafana JSON must match repo after stripping volatile `id` / `version` / `pluginVersion` fields (#6690).
@@ -85,8 +84,8 @@ use the separate Metrics Coverage card for current scrape confidence.
 1. [Переменные фильтрации (Template Variables)](#6-%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80%D0%B0%D1%86%D0%B8%D0%B8-template-variables)
 1. [Архивная заметка: legacy v1 dashboard surfaces](#8-%D0%B0%D1%80%D1%85%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F-%D0%B7%D0%B0%D0%BC%D0%B5%D1%82%D0%BA%D0%B0-legacy-v1-dashboard-surfaces)
 1. [Дашборд: 2. Overview](#9-дашборд-2-overview)
-   13.1. [Дашборд: 2. Runtime](#131-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-2-runtime)
-1. [Дашборд: 4. Provider Health](#13-дашборд-4-provider-health)
+   13.1. [Дашборд: 2. Runtime (RETIRED)](#131-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-2-runtime)
+1. [Дашборд: 4. Provider Health (RETIRED)](#13-дашборд-4-provider-health)
 1. [Дашборд: 5. Data Quality](#11-дашборд-5-data-quality)
 1. [Дашборд: Silver Reject Explorer (REMOVED)](#12-дашборд-silver-reject-explorer)
 1. [Справочник PromQL-паттернов](#14-%D1%81%D0%BF%D1%80%D0%B0%D0%B2%D0%BE%D1%87%D0%BD%D0%B8%D0%BA-promql-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D0%BE%D0%B2)
@@ -108,8 +107,8 @@ use the separate Metrics Coverage card for current scrape confidence.
 
 ______________________________________________________________________
 
-> Примечание: shipped pack = **7 JSON** (Control Plane, Overview, Runtime,
-> Provider Health, Data Quality, Incident, Run Explorer). Workflow Overview,
+> Примечание: shipped pack = **5 JSON** (Control Plane, Overview,
+> Data Quality, Incident, Run Explorer). Runtime, Provider Health, Workflow Overview,
 > Alerts & SLO, Silver Reject Explorer, Loki/Tempo Explore-only surfaces
 > **removed** (see top-of-file callout and §8 / §12 archival notes).
 > Исторические v1 walkthroughs below are archival only — treat panel tables as
@@ -375,20 +374,19 @@ ______________________________________________________________________
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Provisioning (автоматическая загрузка)                    │    │
 │  │  - Datasources: Prometheus + BioETL Ops HTTP (:8000) │    │
-│  │  - Dashboards: 7 JSON files (bioetl.yaml)                │    │
+│  │  - Dashboards: 5 JSON files (bioetl.yaml)                │    │
 │  │  - Обновление каждые 30 секунд                            │    │
 │  │  - allowUiUpdates: false для production dashboard-as-code  │    │
 │  └──────────────────────────────────────────────────────────┘    │
 │                                                                   │
-│  Дашборды (shipped, bus 0..6):                                   │
+│  Дашборды (shipped):                                             │
 │  - 1. Trust / Control Plane (bioetl-control-plane-v1)            │
 │  - 2. Overview (bioetl-overview-v2)                              │
-│  - 3. Pipeline Diagnostics / Runtime (bioetl-runtime)            │
-│  - 4. Provider Health (bioetl-provider-health-v2)                │
-│  - 5. Data Quality (bioetl-dq-v2)                                │
-│  - 6. Incident Workspace (bioetl-incident-v1)                    │
-│  - Run Explorer (bioetl-run-explorer-v1)                      │
-│  - Retired: workflow-overview, alerts-slo, silver-reject-explorer│
+│  - 3. Data Quality (bioetl-dq-v2)                                │
+│  - 4. Incident Workspace (bioetl-incident-v1)                    │
+│  - Run Explorer (bioetl-run-explorer-v1)                         │
+│  - Retired: bioetl-runtime, bioetl-provider-health-v2,           │
+│    workflow-overview, alerts-slo, silver-reject-explorer         │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -426,10 +424,8 @@ grafana/
 └── dashboards/
     ├── bioetl-control-plane-v1.json   # 1. Trust / Control Plane
     ├── bioetl-overview-v2.json        # 2. Overview (+ collapsed Alert/SLO triage)
-    ├── bioetl-runtime.json            # 3. Pipeline Diagnostics (workflow band)
-    ├── bioetl-provider-health-v2.json # 4. Provider Health (v2)
-    ├── bioetl-dq-v2.json              # 5. Data Quality (v2)
-    ├── bioetl-incident-v1.json        # 6. Incident Workspace
+    ├── bioetl-dq-v2.json              # 3. Data Quality (v2)
+    ├── bioetl-incident-v1.json        # 4. Incident Workspace
     └── bioetl-run-explorer-v1.json    # Run Explorer (Ops HTTP identity)
 
 docker-compose.monitoring.yml          # Opt-in: Prometheus + Pushgateway + Grafana + renderer
@@ -670,7 +666,7 @@ Bootstrap materializes exactly one provider file in
 `/etc/grafana/provisioning/dashboards`. With validated Ops HTTP identity and a
 ready Infinity plugin it selects the full directory above. In default soft
 fallback it selects `/var/lib/grafana/dashboards-prometheus-only`, where the
-same seven stable UIDs contain static `Ops HTTP not provisioned` notices and no
+same five stable UIDs contain static `Ops HTTP not provisioned` notices and no
 query targets. The selected mode is recorded as `dashboard_profile=full` or
 `dashboard_profile=prometheus_only` in
 `/var/lib/grafana/bioetl-bootstrap-status.json`.
@@ -996,7 +992,7 @@ Primary dashboards `0..5` используют общий operator context shell
 `$pipeline_context`, `$adapter`) добавляются поверх shell. Переменные
 отображаются как выпадающие списки в верхней части дашборда.
 
-Navigation: all seven shipped dashboards render the same theme-safe bus `0..6`.
+Navigation: all five shipped dashboards render the same theme-safe bus.
 The current item is visibly disabled, links wrap at `1024px`, and no dashboard
 has an omission exception.
 
@@ -1028,7 +1024,7 @@ default.
 | `$run_type` | `0..6` | Same bounded universe as `$pipeline` for the dashboard role. | Multi-select Include All on query-backed boards; Run Explorer is single-select Include All. Overview default `All`; other boards default `backfill`. Never `unknown`. |
 | `$run_id` | `0..6` | BioETL Ops HTTP `/ops/control-plane/filter-options?dimension=run_id...&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Preserved HTTP identity context for `ID`/details panels; no Include All; default `-`; options start-time desc (`sort=0`); never a Prometheus label. |
 
-`$workflow` stays single-select with Include All across the seven shipped
+`$workflow` stays single-select with Include All across the five shipped
 dashboards, so one coherent workflow shell value is preserved during handoff
 while aggregate `All` scope remains available.
 
@@ -1052,7 +1048,7 @@ in `noValue`. Selector→request snapshots for 3010/3022/3023 live in
 `tests/fixtures/grafana/run_explorer/` (generated; no hosts or secrets).
 Live browser smoke is scheduled-only (ADR-010), not default CI.
 
-All seven shipped dashboards enforce one question/scope/evidence readability contract based
+All five shipped dashboards enforce one question/scope/evidence readability contract based
 on `5. Data Quality`: orange `4px` accent, `16px` body (12 pt equivalent),
 `18px` operator question (13.5 pt equivalent), `line-height:1.35`, normal
 wrapping, and a four-grid-row first-screen panel. Run Explorer preserves
@@ -1386,9 +1382,13 @@ ______________________________________________________________________
 Historical panel notes:
 `docs/03-guides/dashboards/panels/bioetl-silver-reject-explorer-panels.md`.
 
-## 13. Дашборд: 4. Provider Health
+## 13. Дашборд: 4. Provider Health (RETIRED)
 
-**Файл:** `grafana/dashboards/bioetl-provider-health-v2.json`
+> **RETIRED:** `grafana/dashboards/bioetl-provider-health-v2.json` удалён
+> (`4c348d96c436 fix(ci): delete retired Grafana dashboard JSON files`).
+> Раздел ниже — историческая справка, не shipped surface.
+
+**Файл:** `grafana/dashboards/bioetl-provider-health-v2.json` (удалён)
 **UID:** `bioetl-provider-health-v2`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
@@ -1438,9 +1438,13 @@ canonical provider triage; correlate via Runtime/Data Quality or runbook links.
 
 ______________________________________________________________________
 
-## 13.1. Дашборд: 2. Runtime
+## 13.1. Дашборд: 2. Runtime (RETIRED)
 
-**Файл:** `grafana/dashboards/bioetl-runtime.json`
+> **RETIRED:** `grafana/dashboards/bioetl-runtime.json` удалён
+> (`4c348d96c436 fix(ci): delete retired Grafana dashboard JSON files`).
+> Раздел ниже — историческая справка, не shipped surface.
+
+**Файл:** `grafana/dashboards/bioetl-runtime.json` (удалён)
 **UID:** `bioetl-runtime`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
@@ -2653,10 +2657,8 @@ Machine mapping: `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.
 | --- | --- | --- | --- |
 | 1. Trust | `bioetl-control-plane-v1` | Prometheus + BioETL Ops HTTP | Replay/resume trust, manifest/ledger/checkpoint |
 | 2. Overview | `bioetl-overview-v2` | Prometheus + BioETL Ops HTTP | L0 answer, L1 cards, collapsed Alert/SLO triage |
-| 3. Pipeline Diagnostics | `bioetl-runtime` | Prometheus + BioETL Ops HTTP | Blockers, latency, backlog, workflow band |
-| 4. Provider Health | `bioetl-provider-health-v2` | Prometheus + BioETL Ops HTTP | Provider latency, health, failure taxonomy |
-| 5. Data Quality | `bioetl-dq-v2` | Prometheus + BioETL Ops HTTP | DQ current/range, quarantine aggregates |
-| 6. Incident Workspace | `bioetl-incident-v1` | Prometheus | Multi-domain suspects + ALERTS support |
+| 3. Data Quality | `bioetl-dq-v2` | Prometheus + BioETL Ops HTTP | DQ current/range, quarantine aggregates |
+| 4. Incident Workspace | `bioetl-incident-v1` | Prometheus | Multi-domain suspects + ALERTS support |
 | Run Explorer | `bioetl-run-explorer-v1` | BioETL Ops HTTP | Exact-run identity (never Prom `run_id` labels) |
 
 `Inspect Recent Runs` (`3010`) is a filesystem index, not Prometheus.
@@ -2666,7 +2668,8 @@ means the container bind is wrong — from the checkout you are viewing run
 `python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`.
 Do not start `--stack main` from `/tmp/bioetl-issues*`.
 
-**Retired (not shipped):** `bioetl-workflow-overview`, `bioetl-alerts-slo`,
+**Retired (not shipped):** `bioetl-runtime`, `bioetl-provider-health-v2`,
+`bioetl-workflow-overview`, `bioetl-alerts-slo`,
 `bioetl-silver-reject-explorer`. Do not list them as active routing targets.
 
 ______________________________________________________________________

@@ -34,17 +34,17 @@ policy.
 | --- | --- | --- | --- | --- | --- | --- |
 | `1. Trust` | `grafana/dashboards/bioetl-control-plane-v1.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-control-plane-v1-panels.md](panels/bioetl-control-plane-v1-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v1`) |
 | `2. Overview` | `grafana/dashboards/bioetl-overview-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-overview-v2-panels.md](panels/bioetl-overview-v2-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v2`) |
-| `3. Pipeline Diagnostics` | `grafana/dashboards/bioetl-runtime.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-runtime-panels.md](panels/bioetl-runtime-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | stable unversioned |
-| `4. Provider Health` | `grafana/dashboards/bioetl-provider-health-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-provider-health-v2-panels.md](panels/bioetl-provider-health-v2-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v2`) |
-| `5. Data Quality` | `grafana/dashboards/bioetl-dq-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-dq-v2-panels.md](panels/bioetl-dq-v2-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v2`) |
-| `6. Incident Workspace` | `grafana/dashboards/bioetl-incident-v1.json` | adjunct | [dashboard-system-2.0-phase2-residual.md](dashboard-system-2.0-phase2-residual.md) | [bioetl-incident-v1-panels.md](panels/bioetl-incident-v1-panels.md) | Prometheus, BioETL Ops HTTP | versioned (`v1`) |
+| `3. Data Quality` | `grafana/dashboards/bioetl-dq-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-dq-v2-panels.md](panels/bioetl-dq-v2-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v2`) |
+| `4. Incident Workspace` | `grafana/dashboards/bioetl-incident-v1.json` | adjunct | [dashboard-system-2.0-phase2-residual.md](dashboard-system-2.0-phase2-residual.md) | [bioetl-incident-v1-panels.md](panels/bioetl-incident-v1-panels.md) | Prometheus, BioETL Ops HTTP | versioned (`v1`) |
 | `Run Explorer` | `grafana/dashboards/bioetl-run-explorer-v1.json` | adjunct | [dashboard-system-2.0-phase2-residual.md](dashboard-system-2.0-phase2-residual.md) | [bioetl-run-explorer-v1-panels.md](panels/bioetl-run-explorer-v1-panels.md) | Prometheus, BioETL Ops HTTP | versioned (`v1`) |
 
-> **Shipped surface = 7 dashboards** (portfolio cap; Phase-2 residual #6828). Machine inventory:
+> **Shipped surface = 5 dashboards** (portfolio cap; Phase-2 residual #6828). Machine inventory:
 > `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.
 
 > **Retired (not shipped JSON):**
 >
+> - `bioetl-runtime` (Pipeline Diagnostics, JSON deleted)
+> - `bioetl-provider-health-v2` (Provider Health, JSON deleted)
 > - `bioetl-workflow-overview` — merged into Pipeline Diagnostics workflow band
 > - `bioetl-alerts-slo` — folded into Overview Alert/SLO triage
 > - `bioetl-silver-reject-explorer` — removed 2026-07-23; use `bioetl quarantine inspect`
@@ -62,7 +62,6 @@ Current examples:
 
 - `bioetl-control-plane-v1`
 - `bioetl-overview-v2`
-- `bioetl-provider-health-v2`
 - `bioetl-dq-v2`
 
 ### Stable unversioned dashboards
@@ -72,7 +71,7 @@ currently single-line operational surface without parallel major revisions.
 
 Current examples:
 
-- `bioetl-runtime` (Pipeline Diagnostics)
+- _(none left; `bioetl-runtime` was the last unversioned example, retired)_
 
 ### Governance rule
 

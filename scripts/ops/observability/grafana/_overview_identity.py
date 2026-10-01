@@ -61,3 +61,78 @@ def apply_overview_identity(payload: dict) -> None:
             },
         }
     ]
+
+
+def apply_saved_evidence_readability(payload: dict) -> None:
+    """Present saved domains and full identity without redundant table columns."""
+    if payload.get("uid") != "bioetl-overview-v2":
+        return
+    row = next(p for p in payload["panels"] if p.get("id") == 9450)
+    row["panels"] = [p for p in row["panels"] if p.get("id") != 9451]
+    row["description"] = "Expand for saved run duration, stage rows, and full identity of the selected Run ID."
+    panels = {p["id"]: p for p in row["panels"]}
+
+    def override(name, properties):
+        return {"matcher": {"id": "byName", "options": name}, "properties": properties}
+
+    identity = panels[9452]
+    expression = (
+        '($s := summary[0]; $v := function($x){$exists($x) and $x != null and $x != "" ? $string($x) : "Not recorded"}; ['
+        '{"parameter":"Pipeline","value":$v($s.pipeline)},'
+        '{"parameter":"Run ID","value":$v($s.run_id)},'
+        '{"parameter":"Completed","value":$v($s.completed_at)},'
+        '{"parameter":"Assessment rules","value":$v($s.rules_version)},'
+        '{"parameter":"Source revision","value":$v($s.revision)},'
+        '{"parameter":"Evidence completeness","value":$v($s.evidence_completeness)}])'
+    )
+    identity["targets"][0].update(
+        parser="uql",
+        root_selector=expression,
+        uql='parse-json | jsonata "' + expression.replace('"', '\\"') + '"',
+    )
+    identity["transformations"] = [
+        {
+            "id": "organize",
+            "options": {
+                "indexByName": {"parameter": 0, "value": 1},
+                "renameByName": {"parameter": "Parameter", "value": "Value"},
+            },
+        }
+    ]
+    identity["options"].update(
+        cellHeight="sm", footer={"show": False, "enablePagination": False}
+    )
+    identity["fieldConfig"]["defaults"]["custom"].update(
+        inspect=True,
+        cellOptions={"type": "auto", "wrapText": True},
+        wrapText=True,
+    )
+    identity["fieldConfig"]["overrides"] = [
+        override("Parameter", [{"id": "custom.width", "value": 210}]),
+        override(
+            "Value",
+            [
+                {"id": "custom.inspect", "value": True},
+                {
+                    "id": "mappings",
+                    "value": [
+                        {
+                            "type": "regex",
+                            "options": {
+                                "pattern": "^([a-fA-F0-9]{12})(?:[a-fA-F0-9]{28}|[a-fA-F0-9]{52})$",
+                                "result": {"text": "$1…"},
+                            },
+                        }
+                    ],
+                },
+            ],
+        ),
+    ]
+    identity["description"] = (
+        "SELECTED RUN · Full Run ID can be copied through cell inspection. Inspect Source revision to view and copy the complete hash. Missing values are Not recorded; failed requests remain QUERY ERROR."
+    )
+    identity["gridPos"]["h"] = 7
+    y = row["gridPos"]["y"] + 1
+    for panel in row["panels"]:
+        panel["gridPos"]["y"] = y
+        y += panel["gridPos"]["h"]

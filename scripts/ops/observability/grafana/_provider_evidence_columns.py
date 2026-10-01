@@ -166,6 +166,9 @@ def apply_provider_evidence_columns(payload: dict) -> None:
             limit=1,
         )
         _style_provider_check([evidence, check])
+        verdict = next(panel for panel in panels if panel.get("id") == 9604)
+        value_size = verdict["options"].setdefault("text", {}).setdefault("valueSize", 48)
+        check["options"].setdefault("text", {})["valueSize"] = value_size
         # Overview already owns stage panel 9460 inside saved evidence.
         evidence["id"] = 9480
         check["id"] = 9481
