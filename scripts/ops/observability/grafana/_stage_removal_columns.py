@@ -5,7 +5,7 @@ from copy import deepcopy
 
 def apply_stage_removal_columns(payload: dict) -> None:
     """Join saved report counters without substituting current telemetry."""
-    if payload.get("uid") not in {"bioetl-runtime", "bioetl-dq-v2"}:
+    if payload.get("uid") not in {"bioetl-runtime", "bioetl-dq-v2", "bioetl-overview-v2"}:
         return
     pending = list(payload["panels"])
     while pending:

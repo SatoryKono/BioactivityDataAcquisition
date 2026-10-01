@@ -2502,6 +2502,17 @@ def apply_to_dashboard(
     )
 
     apply_stage_removal_columns(payload)
+    # Saved run evidence belongs to Overview; construct it from the canonical
+    # panel builders so standalone regeneration never depends on another JSON.
+    if current_uid == "bioetl-overview-v2":
+        from scripts.ops.observability.grafana._selected_run_panels import (
+            _append_saved_run_evidence_row,
+        )
+
+        _append_saved_run_evidence_row(payload["panels"], include_duration=True)
+        apply_stage_removal_columns(payload)
+    elif current_uid == "bioetl-runtime":
+        payload["panels"] = [p for p in payload["panels"] if p.get("id") != 9450]
     stamp_selector_columns(payload)
     _pack_incident_tail_rows(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
