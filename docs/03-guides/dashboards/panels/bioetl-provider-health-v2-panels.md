@@ -22,6 +22,17 @@ diagnostics use it. Navigation without provider context resets Provider=All.
 
 ## Key Panels
 
+### Review Provider Evidence
+
+The saved-run table shows Provider, Data source, Check performed, Check result,
+Reason, Observed at, and Evidence. Confirmed cached Bronze means `No` check,
+with `—` for its result and timestamp; `Open report` opens the saved run report.
+`UNKNOWN` means the saved evidence cannot establish the value. A saved provider
+probe does not by itself prove that the run fetched its input from the remote API.
+Reasons wrap within the table. Observed timestamps retain their recorded timezone.
+Response time, HTTP status, and endpoint are not inferred when absent from the
+saved provider-check projection.
+
 ### 2. Understand Evidence Scope
 - **Type:** Text
 - **Purpose:** Distinguish provider-global fleet evidence from the selected
