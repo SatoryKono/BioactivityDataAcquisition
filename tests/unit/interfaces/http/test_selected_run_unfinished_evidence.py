@@ -8,6 +8,8 @@ import pytest
 
 from bioetl.interfaces.http._selected_run_live import active_run_diagnostics
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.parametrize("age_seconds", [0, 60, 3600, 86400])
 def test_nonterminal_ledger_does_not_prove_running(monkeypatch, age_seconds):

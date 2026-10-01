@@ -83,6 +83,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.gold.runtime_helpers import (
         GoldWriterRuntimeServices,
     )
+    from bioetl.infrastructure.storage.gold.writer_protocols import _GoldMetadataHost
 
 __all__ = ["GoldWriteMode", "GoldWriter", "_normalize_scd_config"]
 
@@ -195,6 +196,8 @@ class GoldWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         self._contract_rollout_policy = services.contract_rollout_policy
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
+        if TYPE_CHECKING:
+            _metadata_host: _GoldMetadataHost = self
 
     async def write_gold(
         self,
