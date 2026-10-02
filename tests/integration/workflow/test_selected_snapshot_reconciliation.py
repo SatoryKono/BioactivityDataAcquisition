@@ -308,3 +308,78 @@ async def test_unconfirmed_post_commit_returns_destructive_ambiguity(storage):
     assert result.mutation_blocked_reason == "selected_snapshot_commit_ambiguous"
     assert result.selected_snapshots is None
     assert result.input_snapshots == req.selected_snapshots
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("matched", [False, True])
+async def test_analytical_tables_use_persisted_producer_entities_and_preserve_history(
+    storage, matched
+):
+    schema = pa.schema(
+        [(c.name, c.type) for c in SCHEMA if c.name != "_run_id"]
+        + [("entity_id", pa.string()), ("content_hash", pa.string())]
+    )
+
+    def analytical(id, fk, current=True):
+        return {
+            "id": id,
+            "fk": fk,
+            "entity_id": id,
+            "content_hash": f"hash-{id}",
+            "_is_current": current,
+            "_valid_to": "",
+        }
+
+    def persist(name, rows, mode="append"):
+        write_deltalake(
+            storage.gold_writer._resolve_table_path(name),
+            pa.Table.from_pylist(rows, schema=schema),
+            mode=mode,
+        )
+
+    untouched = [analytical("old", "absent"), analytical("historical", "absent", False)]
+    persist("test.source", untouched)
+    persist("test.reference", [])
+    await storage.capture_pipeline_snapshots("test_source", "")
+    await storage.capture_pipeline_snapshots("test_reference", "")
+    persist("test.source", [analytical("a", "x"), analytical("b", "y")])
+    if matched:
+        persist("test.reference", [analytical("x", "")])
+    pins = await storage.capture_pipeline_snapshots("test_source", "producer")
+    pins.update(await storage.capture_pipeline_snapshots("test_reference", "producer"))
+    assert set(pins["gold:test.source"]["owned_entities"]) == {"a", "b"}
+    req = ForeignKeyReconciliationRequest(
+        source_table="test.source",
+        reference_table="test.reference",
+        source_key="fk",
+        reference_key="id",
+        primary_keys=("id",),
+        source_layer="gold",
+        reference_layer="gold",
+        source_scope="current_run",
+        source_run_ids=("producer",),
+        workflow_run_id=WORKFLOW_ID,
+        reconciliation_mode="selected-snapshot",
+        selected_snapshots=pins,
+    )
+    result = await storage.reconcile_foreign_keys(req)
+    assert result.scanned_rows == 2 and result.orphan_rows_deleted == 2 - int(matched)
+    rows = (
+        DeltaTable(storage.gold_writer._resolve_table_path("test.source"))
+        .to_pyarrow_table()
+        .to_pylist()
+    )
+    assert [r for r in rows if r["id"] == "old"] == [untouched[0]]
+    assert [r for r in rows if r["id"] == "historical"] == [untouched[1]]
+    assert result.source_snapshot["physical_rows"] == 4
+    assert result.source_snapshot["current_rows"] == 1 + int(matched)
+
+
+@pytest.mark.asyncio
+async def test_table_identity_drift_blocks_even_when_version_matches(storage):
+    req = await request(storage)
+    pins = {key: dict(value) for key, value in req.selected_snapshots.items()}
+    pins["gold:test.source"]["table_id"] = "foreign-table"
+    with pytest.raises(ValueError, match="snapshot drift"):
+        await storage.reconcile_foreign_keys(replace(req, selected_snapshots=pins))
+    storage.quarantine.write_many.assert_not_awaited()

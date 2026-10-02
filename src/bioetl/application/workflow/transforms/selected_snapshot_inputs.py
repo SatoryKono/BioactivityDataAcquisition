@@ -28,6 +28,8 @@ def selected_snapshot_inputs(
                 ):
                     raise ValueError("invalid selected snapshot lineage")
             previous = snapshots.get(str(identity))
+            if previous and previous.get("table_id") != candidate.get("table_id"):
+                raise ValueError(f"selected table identity changed: {identity}")
             if previous and previous != candidate:
                 ancestors = candidate.get("ancestor_versions", [])
                 assert isinstance(ancestors, list)

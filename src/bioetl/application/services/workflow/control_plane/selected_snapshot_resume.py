@@ -34,6 +34,7 @@ def restore_selected_snapshot_outputs(
         if step.step_kind == "pipeline":
             payload = {
                 "run_id": details.get("child_run_id"),
+                "manifest_id": details.get("child_manifest_id"),
                 "selected_snapshots": details.get("selected_snapshots"),
             }
         else:

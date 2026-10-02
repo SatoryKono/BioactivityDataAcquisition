@@ -117,6 +117,12 @@ async def execute_pipeline_step(
             workflow_name=workflow_name,
             workflow_step_id=step.step_id,
         )
+        if step.run_options.reconciliation_mode == "selected-snapshot":
+            if snapshot_reader is None:
+                raise ValueError(
+                    "selected-snapshot requires a producer snapshot reader"
+                )
+            await snapshot_reader(step.pipeline_name, "")
         result = await pipeline_runner.run(
             step.pipeline_name,
             options=step_options,

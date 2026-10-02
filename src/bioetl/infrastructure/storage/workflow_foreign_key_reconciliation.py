@@ -13,7 +13,7 @@ documented facade that orchestrates this adapter through
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import Protocol, cast, runtime_checkable
 
 from deltalake.exceptions import DeltaError
@@ -89,6 +89,9 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
     quarantine_pipeline_name: str | None = None
     gold_writer: GoldReconciliationReaderProtocol | None = None
     artifact_sink: ReconcileDebugArtifactSinkProtocol | None = None
+    _producer_inputs: dict[str, dict[str, dict[str, object]]] = field(
+        default_factory=dict, init=False, repr=False
+    )
 
     async def capture_pipeline_snapshots(
         self, pipeline_name: str, run_id: str
@@ -98,7 +101,13 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             capture_pipeline_snapshots,
         )
 
-        return await capture_pipeline_snapshots(self, pipeline_name, run_id)
+        if not run_id:
+            inputs = await capture_pipeline_snapshots(self, pipeline_name, run_id)
+            self._producer_inputs[pipeline_name] = inputs
+            return inputs
+        return await capture_pipeline_snapshots(
+            self, pipeline_name, run_id, self._producer_inputs.pop(pipeline_name, None)
+        )
 
     async def reconcile_foreign_keys(
         self,

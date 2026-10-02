@@ -46,6 +46,9 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantin
     resolve_mutation_identity_keys,
     resolve_present_column,
 )
+from bioetl.infrastructure.storage.workflow_producer_ownership import (
+    selected_primary_keys,
+)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -141,7 +144,8 @@ async def delete_silver_orphan_rows(
     module = _load_deltalake_module()
     table_path = writer._resolve_table_path(request.source_table)
     primary_keys = tuple(
-        require_sql_identifier(key, "primary_keys") for key in request.primary_keys
+        require_sql_identifier(key, "primary_keys")
+        for key in selected_primary_keys(request)
     )
     identity_keys = tuple(
         require_sql_identifier(key, "identity_keys")
@@ -216,7 +220,8 @@ async def expire_gold_orphan_rows(
     )
 
     primary_keys = tuple(
-        require_sql_identifier(key, "primary_keys") for key in request.primary_keys
+        require_sql_identifier(key, "primary_keys")
+        for key in selected_primary_keys(request)
     )
     identity_keys = tuple(
         require_sql_identifier(key, "identity_keys")

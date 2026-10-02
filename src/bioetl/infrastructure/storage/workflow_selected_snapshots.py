@@ -40,32 +40,55 @@ def _path(host: SelectedSnapshotHost, layer: str, name: str) -> str:
     return str(cast(Callable[[str], str], resolver)(name))
 
 
-def _version(path: str) -> int:
-    return DeltaTable(path).version()
+def _snapshot_identity(path: str) -> tuple[int, str]:
+    table = DeltaTable(path)
+    return table.version(), str(table.metadata().id)
 
 
 async def capture_pipeline_snapshots(
-    host: SelectedSnapshotHost, pipeline_name: str, run_id: str
+    host: SelectedSnapshotHost,
+    pipeline_name: str,
+    run_id: str,
+    previous_snapshots: dict[str, dict[str, object]] | None = None,
 ) -> dict[str, dict[str, object]]:
     """Pin producer tables immediately after successful pipeline completion."""
     provider, separator, entity = pipeline_name.partition("_")
-    if not separator or not run_id:
+    if not separator:
         raise ValueError("selected-snapshot producer identity is missing")
     table_name = f"{provider}.{entity}"
     snapshots: dict[str, dict[str, object]] = {}
     for layer in ("silver", "gold"):
         path = _path(host, layer, table_name)
         try:
-            version = await asyncio.to_thread(_version, path)
+            version, table_id = await asyncio.to_thread(_snapshot_identity, path)
         except TableNotFoundError:
             continue
         snapshots[f"{layer}:{table_name}"] = {
             "version": version,
+            "table_id": table_id,
             "run_ids": [run_id],
             "producer_pipeline": pipeline_name,
             "ancestor_versions": [],
         }
-    if not snapshots:
+        from bioetl.infrastructure.storage.workflow_producer_ownership import (
+            capture_ownership,
+        )
+
+        identity = f"{layer}:{table_name}"
+        ownership = await capture_ownership(
+            path,
+            layer,
+            version,
+            before=not bool(run_id),
+            table_id=table_id,
+            previous=(
+                previous_snapshots.get(identity, {})
+                if previous_snapshots is not None
+                else None
+            ),
+        )
+        snapshots[identity].update(ownership)
+    if not snapshots and run_id:
         raise ValueError(f"producer persisted no Delta snapshots: {pipeline_name}")
     return snapshots
 
@@ -76,6 +99,8 @@ def _entry(
     entry = (request.selected_snapshots or {}).get(f"{layer}:{name}")
     if not entry or type(entry.get("version")) is not int:
         raise ValueError(f"missing pinned producer snapshot: {layer}:{name}")
+    if not isinstance(entry.get("table_id"), str) or not entry["table_id"]:
+        raise ValueError(f"missing pinned table identity: {layer}:{name}")
     run_ids = entry.get("run_ids")
     if (
         not isinstance(run_ids, list)
@@ -102,8 +127,8 @@ async def validate_snapshot_versions(
     ):
         entry = _entry(request, layer, name)
         path = _path(host, layer, name)
-        actual = await asyncio.to_thread(_version, path)
-        if actual != entry["version"]:
+        actual, table_id = await asyncio.to_thread(_snapshot_identity, path)
+        if actual != entry["version"] or table_id != entry["table_id"]:
             raise ValueError(f"selected snapshot drift: {layer}:{name}")
 
 
@@ -122,11 +147,16 @@ async def read_selected_rows(
     table = await asyncio.to_thread(
         lambda: DeltaTable(path, version=version).to_pyarrow_table()
     )
-    if not any(
+    has_run_identity = any(
         c in table.column_names for c in ("_run_id", "run_id", "workflow_run_id")
-    ):
-        raise ValueError(f"selected snapshot has no row run identity: {layer}:{name}")
+    )
     rows = filter_current_rows(table.to_pylist(), current_only=True, layer=layer)
+    if not has_run_identity:
+        from bioetl.infrastructure.storage.workflow_producer_ownership import (
+            filter_owned_entities,
+        )
+
+        return filter_owned_entities(rows, entry)
     scoped, disposition = filter_source_rows_to_current_run(
         rows,
         source_scope="current_run",

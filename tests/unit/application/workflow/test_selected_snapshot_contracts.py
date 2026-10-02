@@ -3,7 +3,7 @@
 from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, call
 
 import pytest
 import yaml
@@ -158,7 +158,9 @@ async def test_pipeline_captures_version_and_limits_before_completion():
         snapshot_reader=capture,
     )
     assert completed.status == "success"
-    capture.assert_awaited_once_with("chembl_assay", "producer")
+    capture.assert_has_awaits(
+        [call("chembl_assay", ""), call("chembl_assay", "producer")]
+    )
     assert completed.payload.selected_snapshots["gold:chembl.assay"]["limit"] == 1000
 
 

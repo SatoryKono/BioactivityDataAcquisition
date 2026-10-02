@@ -219,10 +219,14 @@ source rows with such components remain retained. Composite keys use the
 existing key normalization.
 
 After each successful pipeline, the workflow records Silver/Gold versions and
-producer IDs together with the effective limit and offset. Chained transforms
+producer IDs together with the effective limit and offset. For analytical tables
+that omit row-level run IDs, the producer records new/changed current entities
+by `entity_id` and `content_hash` across its pre/post snapshots. These persisted
+identities scope both reads and mutation predicates; previously unchanged rows
+remain outside that producer's mutation scope. Chained transforms
 consume the preceding transform's committed version, rather than selecting the
 latest table implicitly. An existing empty reference may expire/delete every
-selected source row. Missing or corrupt tables, missing row identities and
+selected source row. Missing or corrupt tables, missing row/producer identities and
 snapshot drift fail closed. Gold expires current SCD2 rows; historical rows and
 other producers remain unchanged. Silver performs an atomic scoped key deletion.
 Quarantine must complete before mutation. Source/reference versions are checked

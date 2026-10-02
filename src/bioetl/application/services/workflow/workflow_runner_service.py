@@ -237,14 +237,27 @@ class WorkflowRunnerService:
                 ),
             )
         if policy.disposition == "skip_completed":
+            completed = build_resume_skipped_step_result(
+                metrics=self.metrics,
+                workflow_name=workflow_name,
+                step=step,
+                context_labels=workflow_context_labels,
+            )
+            restored = state.step_outputs.get(step.step_id)
+            if isinstance(restored, Mapping):
+                run_id = restored.get("run_id")
+                child_manifest = restored.get("manifest_id")
+                completed = replace(
+                    completed,
+                    payload=restored,
+                    child_run_id=str(run_id) if run_id is not None else None,
+                    child_manifest_id=str(child_manifest)
+                    if child_manifest is not None
+                    else None,
+                )
             return ResolvedWorkflowStepTransitionRecord(
                 policy=policy,
-                result=build_resume_skipped_step_result(
-                    metrics=self.metrics,
-                    workflow_name=workflow_name,
-                    step=step,
-                    context_labels=workflow_context_labels,
-                ),
+                result=completed,
             )
         return ResolvedWorkflowStepTransitionRecord(
             policy=policy,
