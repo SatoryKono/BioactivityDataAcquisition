@@ -6,7 +6,6 @@ from __future__ import annotations
 import json
 from collections.abc import Sequence
 from datetime import datetime
-from typing import Any, cast
 
 import polars as pl
 
@@ -19,8 +18,9 @@ from bioetl.domain.ports import LoggerPort
 class MergeMetricsRecorderMixin:
     """Mixin for lineage enrichment and post-merge metric calculations."""
 
-    _config: MergeConfig = cast(Any, None)  # Any: host default (PD4)
-    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
+    def __init__(self, config: MergeConfig, logger: LoggerPort) -> None:
+        self._config = config
+        self._logger = logger
 
     def _add_lineage(
         self,

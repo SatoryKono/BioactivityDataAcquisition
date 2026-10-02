@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, ClassVar
 
 from bioetl.domain.exceptions import BioETLError
 
@@ -109,8 +109,8 @@ def apply_postrun_failure_policy_or_raise(
 class PostrunStrictValidationMixin:
     """Compatibility mixin for postrun collaborators exposing strict mode check."""
 
-    if TYPE_CHECKING:
-        _runtime: object = cast(Any, None)  # Any: host default (PD4)
+    def __init__(self, runtime: object) -> None:
+        self._runtime = runtime
 
     def _is_strict_validation_enabled(self) -> bool:
         """Compatibility wrapper around shared strict-mode evaluation."""
@@ -120,11 +120,11 @@ class PostrunStrictValidationMixin:
 class PostrunFailureHandlingMixin(PostrunStrictValidationMixin):
     """Shared allowlisted failure handling for postrun collaborators."""
 
-    if TYPE_CHECKING:
-        _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
-        _FAILURE_POLICY: PostrunFailurePolicySpec = cast(
-            Any, None
-        )  # Any: host default (PD4)
+    _FAILURE_POLICY: ClassVar[PostrunFailurePolicySpec]
+
+    def __init__(self, runtime: object, logger: LoggerPort) -> None:
+        super().__init__(runtime)
+        self._logger = logger
 
     def _handle_allowlisted_failure(
         self,

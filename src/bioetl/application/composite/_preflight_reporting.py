@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
-
 from bioetl.application.composite._preflight_types import (
     PreflightValidationResult,
     ProfileInfo,
@@ -17,7 +15,8 @@ from bioetl.domain.ports import LoggerPort
 class PreflightValidationReportingMixin:
     """Centralized logging/report formatting for preflight validation."""
 
-    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
+    def __init__(self, logger: LoggerPort) -> None:
+        self._logger = logger
 
     def _log_schema_loading_summary(
         self, source_fields: dict[str, SchemaFields]

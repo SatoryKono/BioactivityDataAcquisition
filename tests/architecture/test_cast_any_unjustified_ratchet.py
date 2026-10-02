@@ -66,3 +66,14 @@ def test_cast_any_budget_never_exceeds_recorded_baseline() -> None:
     baseline = budget["baseline"]
     assert int(budget["max_unjustified_count"]) <= int(baseline["unjustified_count"])
     assert int(baseline["unjustified_count"]) <= 142
+
+
+def test_pd4_host_defaults_remain_eliminated(live_census: dict[str, Any]) -> None:
+    """Required host dependencies must not be initialized with cast(Any, None)."""
+    assert _load_budget()["max_pd4_host_default_count"] == 0
+    assert (
+        live_census["summary"]["unjustified_by_subcategory"][
+            "pd4_host_default_pending_protocol"
+        ]
+        == 0
+    )

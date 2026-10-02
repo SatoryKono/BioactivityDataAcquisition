@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, GoldRecord
@@ -40,9 +40,8 @@ class BatchExecutorRuntimeStateMixin:
     """Expose legacy executor state attributes backed by one state object."""
 
     # Host sets this in BatchExecutor.__init__ (or test fixtures) before access.
-    _runtime_state: BatchExecutorRuntimeState = cast(
-        Any, None
-    )  # Any: host default (PD4)
+    def __init__(self, runtime_state: BatchExecutorRuntimeState) -> None:
+        self._runtime_state = runtime_state
 
     @property
     def records_fetched(self) -> int:

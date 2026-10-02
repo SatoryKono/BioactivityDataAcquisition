@@ -124,7 +124,7 @@ class BatchExecutor(BatchExecutorRuntimeStateMixin, _BatchExecutorDQMixin):  # p
         )
 
         self._memory = dependencies.memory_manager
-        self._runtime_state = dependencies.runtime_state_factory()
+        super().__init__(dependencies.runtime_state_factory())
 
         self._execution_run_service = dependencies.execution_run_service
         self._extraction_loop_service = dependencies.extraction_loop_service

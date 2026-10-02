@@ -108,9 +108,7 @@ class JoinPlannerService(JoinPlannerDelegationMixin):
         self._renamer = preparation.renamer
         self._conflict_resolver = preparation.conflict_resolver
         self._field_alias_resolver = field_alias_resolver
-        self._join_key_resolver = join_key_resolver
-        self._join_executor = join_executor
-        self._dependency_joiner = dependency_joiner
+        super().__init__(join_key_resolver, dependency_joiner, join_executor)
 
     async def apply_joins(
         self,

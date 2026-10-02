@@ -17,9 +17,6 @@ from bioetl.application.composite._preflight_field_priority import (
 from bioetl.application.composite._preflight_orchestration import (
     PreflightSchemaOrchestrationMixin,
 )
-from bioetl.application.composite._preflight_reporting import (
-    PreflightValidationReportingMixin,
-)
 from bioetl.application.composite._preflight_types import (
     FieldInfo,
     PreflightValidationError,
@@ -47,13 +44,12 @@ __all__ = [
 
 
 class CompositePreflightValidationService(
-    PreflightValidationReportingMixin,
     PreflightSchemaOrchestrationMixin,
 ):
     """Validates composite pipeline configuration before execution."""
 
     def __init__(self, logger: LoggerPort) -> None:
-        self._logger = logger
+        super().__init__(logger)
 
     def _add_pipeline_source_tokens(
         self,
