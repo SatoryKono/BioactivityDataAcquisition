@@ -133,6 +133,27 @@ class TargetProteinClassificationSnapshotDataSource(
             limit=limit,
         )
 
+    def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[JsonDict]:
+        """Filter canonical snapshot IDs using the ChEMBL no-fallback policy.
+
+        Like the HTTP ChEMBL adapter, this source resolves canonical identifiers
+        directly. Free-text alternatives must not widen the requested cohort.
+        """
+        _ = fallback_mapping
+        return self.fetch_filtered(
+            entity_type=entity_type,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            limit=limit,
+        )
+
     def fetch_multi_filtered(
         self,
         entity_type: str,

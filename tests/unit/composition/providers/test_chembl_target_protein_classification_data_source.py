@@ -47,7 +47,6 @@ from bioetl.domain.mapping.protein_class_target_type import (
 )
 from bioetl.domain.types import HealthStatus
 
-
 pytestmark = pytest.mark.unit
 
 
@@ -404,7 +403,7 @@ async def test_missing_snapshot_is_explicit_blocked_dependency(data_source):
 
     del data_source._delta_reader.tables["chembl.target_component"]
     with pytest.raises(
-        InvalidStateError, match="blocked_dependency.*chembl.target_component"
+        InvalidStateError, match=r"blocked_dependency.*chembl\.target_component"
     ) as exc:
         await data_source.__aenter__()
     assert exc.value.current_state == "blocked_dependency"
@@ -420,3 +419,47 @@ async def test_schema_valid_empty_snapshots_are_not_missing(data_source):
         row async for row in data_source.fetch("target_protein_classification")
     ] == []
     assert data_source._loaded
+
+
+def test_snapshot_source_satisfies_filterable_runtime_protocol(data_source):
+    from bioetl.domain.ports import FilterableDataSourcePort
+
+    assert isinstance(data_source, FilterableDataSourcePort)
+
+
+@pytest.mark.asyncio
+async def test_snapshot_source_works_through_composite_filter_wrapper(data_source):
+    from bioetl.application.core.data_sources.filtered import FilteredDataSource
+    from bioetl.domain.filtering import InputFilterConfig
+
+    wrapper = FilteredDataSource(
+        data_source=data_source,
+        filter_reader=None,
+        filter_config=InputFilterConfig(
+            enabled=True,
+            filter_field="target_id",
+            direct_filter_ids=("CHEMBL_T1",),
+        ),
+    )
+    async with wrapper:
+        rows = [
+            row
+            async for row in wrapper.fetch("target_protein_classification", limit=1000)
+        ]
+    assert [row["target_id"] for row in rows] == ["CHEMBL_T1"]
+
+
+@pytest.mark.asyncio
+async def test_snapshot_fallback_does_not_widen_canonical_id_filter(data_source):
+    rows = [
+        row
+        async for row in data_source.fetch_filtered_with_fallback(
+            "target_protein_classification",
+            filter_ids=["CHEMBL_T1"],
+            filter_field="target_id",
+            fallback_mapping={"CHEMBL_T1": "CHEMBL_T2"},
+            limit=1,
+        )
+    ]
+    assert len(rows) == 1
+    assert rows[0]["target_id"] == "CHEMBL_T1"
