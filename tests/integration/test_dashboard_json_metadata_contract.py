@@ -29,14 +29,15 @@ def test_all_dashboards_have_bioetl_tag():
 
 
 def test_dashboard_time_refresh_by_level():
-    """L0/L1 dashboards: 12h/30s, L2 forensic: 24h/1m."""
+    """Every shipped dashboard retains the shared 12-hour / 60-second defaults."""
     expectations = {
         "bioetl-overview-v2.json": ("now-12h", "60s"),
-        "bioetl-runtime.json": ("now-12h", "60s"),
+        "bioetl-incident-v1.json": ("now-12h", "60s"),
         "bioetl-control-plane-v1.json": ("now-12h", "60s"),
-        "bioetl-provider-health-v2.json": ("now-12h", "60s"),
+        "bioetl-run-explorer-v1.json": ("now-12h", "60s"),
         "bioetl-dq-v2.json": ("now-12h", "60s"),
     }
+    assert set(expectations) == {p.name for p in get_dashboard_files()}
     for dashboard_name, (expected_time, expected_refresh) in expectations.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         time_obj = dashboard.get("time")

@@ -38,3 +38,37 @@ def test_legacy_handoff_preserves_run_and_time_without_stage_scope():
         "&var-pipeline=p&var-run_type=backfill&var-run_id=exact-run"
         "&from=100&to=200",
     }
+
+
+@pytest.mark.parametrize("separator", ["&", "&amp;"])
+def test_provider_handoff_preserves_run_and_time_without_retired_scope(separator):
+    link = {
+        "title": "Open Provider Health",
+        "url": "/d/bioetl-provider-health-v2/4-provider-health?var-pipeline=chembl_assay"
+        + separator
+        + "var-run_id=exact-run"
+        + separator
+        + "${provider:queryparam}"
+        + separator
+        + "var-pipeline_context=chembl_assay"
+        + separator
+        + "var-adapter=http"
+        + separator
+        + "from=100"
+        + separator
+        + "to=200",
+    }
+    retire_runtime_links(link)
+    assert link == {
+        "title": "Open Provider Evidence",
+        "url": "/d/bioetl-overview-v2/2-overview?var-pipeline=chembl_assay"
+        + separator
+        + "var-run_id=exact-run"
+        + separator
+        + "from=100"
+        + separator
+        + "to=200",
+    }
+    original = dict(link)
+    retire_runtime_links(link)
+    assert link == original
