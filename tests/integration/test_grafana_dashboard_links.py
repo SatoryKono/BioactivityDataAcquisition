@@ -664,3 +664,31 @@ def test_navigation_dashboards_do_not_expose_removed_silver_reject_explorer() ->
         _assert_explicit_silver_explorer_policy(
             dashboard_name=dashboard_name, expected={}
         )
+
+
+@pytest.mark.parametrize("damage", [None, "pipeline", "search", "time", "foreign_run"])
+def test_catalog_reset_is_explicit_and_does_not_weaken_identity_handoff(damage):
+    url = (
+        "/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&var-pipeline=.*"
+        "&var-run_type=.*&var-run_id=-&var-lookup_run_id=&${__url_time_range}"
+    )
+    if damage == "pipeline":
+        url = url.replace("var-pipeline=.*", "var-pipeline=$pipeline")
+    elif damage == "search":
+        url = url.replace("var-lookup_run_id=", "var-lookup_run_id=old-run")
+    elif damage == "time":
+        url = url.replace("&${__url_time_range}", "")
+    elif damage == "foreign_run":
+        url = url.replace("var-run_id=-", "var-run_id=foreign-run")
+    link = {"title": "Run Explorer", "url": url, "includeVars": False}
+    kwargs = {
+        "dashboard_name": "bioetl-overview-v2.json",
+        "current_uid": "bioetl-overview-v2",
+        "link": link,
+        "dashboard_links": [link],
+    }
+    if damage is None:
+        _assert_cross_dashboard_link_policy(**kwargs)
+    else:
+        with pytest.raises(AssertionError):
+            _assert_cross_dashboard_link_policy(**kwargs)

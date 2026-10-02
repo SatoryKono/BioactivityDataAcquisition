@@ -170,6 +170,15 @@ forbidden_dashboard_link_vars_by_target_uid:
     - manifest_id
     - execution_fingerprint
 preserved_identity_handoff:
+  catalog_reset:
+    target_uid: bioetl-run-explorer-v1
+    required_values:
+      workflow: ".*"
+      pipeline: ".*"
+      run_type: ".*"
+      run_id: "-"
+      lookup_run_id: ""
+    semantics: Browse the full catalog; clear prior selection and search while retaining time.
   selector: run_id
   required_value: $run_id
   source_uids:

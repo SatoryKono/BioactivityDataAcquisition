@@ -31,7 +31,7 @@ _DASHBOARD_UID_RE = re.compile(r"^/d/([^\\/?]+)")
 
 _LINK_VAR_RE = re.compile(r"[?&]var-(\w+)=")
 
-_LINK_VAR_VALUE_RE = re.compile(r"[?&]var-(\w+)=([^&#]+)")
+_LINK_VAR_VALUE_RE = re.compile(r"[?&]var-(\w+)=([^&#]*)")
 
 _NAV_LINK_CONTRACT_PATH = Path(
     "docs/03-guides/dashboards/contracts/navigation-links.yaml"
@@ -672,8 +672,18 @@ def _assert_preserved_identity_handoff(
     assert selector == "run_id", "preserved identity selector must be run_id"
     assert required_value == "$run_id", "preserved run_id handoff value must be $run_id"
 
+    values = _extract_link_var_values(url)
+    reset = spec["catalog_reset"]
+    if target_uid == reset["target_uid"] and values.get("run_id") == "-":
+        assert values == reset["required_values"], (
+            f"{dashboard_name} catalog reset must clear all selectors and search: {url}"
+        )
+        _assert_required_time_tokens(
+            url, tokens=_DASHBOARD_TIME_HANDOFF_TOKENS, context="catalog reset"
+        )
+        return
+
     if current_uid in source_uids and target_uid in target_uids:
-        values = _extract_link_var_values(url)
         assert selector in passed_vars, (
             f"{dashboard_name} link to {target_uid} must preserve exact Run ID "
             f"with var-{selector}={required_value}: {url}"
@@ -773,11 +783,12 @@ def _assert_cross_dashboard_link_policy(
     if target_uid == "${__data.fields.action_dashboard_uid}":
         assert current_uid == "bioetl-incident-v1"
         assert link.get("title") == "Open domain diagnostics"
-        for resolved_uid, scope in {
-            "bioetl-runtime": "var-stage=%24__all",
-            "bioetl-dq-v2": "var-stage=%24__all",
-            "bioetl-provider-health-v2": "var-provider=chembl&var-pipeline_context=unknown",
-        }.items():
+        for resolved_uid, scope in (
+            ("bioetl-overview-v2", ""),
+            ("bioetl-overview-v2", "viewPanel=9480"),
+            ("bioetl-dq-v2", "var-stage=%24__all"),
+            ("bioetl-control-plane-v1", ""),
+        ):
             resolved_url = url.replace(
                 "${__data.fields.action_dashboard_uid}", resolved_uid
             ).replace("${__data.fields.action_scope}", scope)
