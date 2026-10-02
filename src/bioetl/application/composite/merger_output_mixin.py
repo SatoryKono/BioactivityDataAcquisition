@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, cast
 
+from bioetl.application.services.run_reports.observations import observe_gold_write
 from bioetl.domain.exceptions import DataQualityError
 
 if TYPE_CHECKING:
@@ -119,14 +120,17 @@ class MergeOutputWriterMixin:
                 f"table_name={table_name}"
             )
         records = df.to_dicts()
-        await host._storage.write_gold_merged(
-            table_name,
-            records,
-            completed_at=completed_at,
-            run_id=run_id,
-            sources_used=sources_used,
-            preserve_column_order=True,
-            schema=host._gold_schema,
+        await observe_gold_write(
+            host._storage.write_gold_merged(
+                table_name,
+                records,
+                completed_at=completed_at,
+                run_id=run_id,
+                sources_used=sources_used,
+                preserve_column_order=True,
+                schema=host._gold_schema,
+            ),
+            len(records),
         )
 
 
