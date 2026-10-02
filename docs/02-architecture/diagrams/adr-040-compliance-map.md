@@ -22,6 +22,7 @@ Maps issue #6543 required diagram themes to **existing** ADR-040-governed source
 | Location | All under `docs/02-architecture/diagrams/` |
 | Lint / quality | `python -m scripts.diagrams lint` · `make render-diagrams` · CI diagram jobs |
 | Rendered baselines | Tracked `svg/` next to families; `png/` untracked by render-retention policy (see `governance/render-retention.md`, DOC-GOV-02) |
+| Nightly full-corpus | Accepted residual (#11196): schedule removed, `nightly-phase2` and PR full-corpus render stay `if: false` (billing); PR lint/syntax, targeted render, and scheduled `architecture-docs-nightly` stay active |
 | Registry / catalog | [README.md](./README.md#architecture-diagrams-52-core-49-52-added) |
 | Views | `views/*.mermaid` presentation slices (not SSOT replacements) |
 
@@ -33,7 +34,7 @@ Maps issue #6543 required diagram themes to **existing** ADR-040-governed source
 | --- | --- | --- |
 | Five-layer / hexagonal overview | `architecture/01-high-level-hexagonal.mmd`, `architecture/01a-hexagonal-overview.mmd` | Also `foundation/01-high-level.mmd` |
 | Layer interaction | `foundation/05-layers-interaction.mmd` | |
-| Ports & adapters | `architecture/13-port-protocol-contracts.mmd`, `foundation/26-hexagonal-ports-adapters.mmd` (if present under foundation) | Split views `13a`–`13f` |
+| Ports & adapters | `architecture/13-port-protocol-contracts.mmd`, `foundation/26-hexagonal-ports-adapters.mmd` (if present under foundation) | Split views `13a`–`13i` |
 | Dependency matrix | `architecture/02-layer-dependency-matrix.mmd` | |
 
 ### 2. Medallion architecture

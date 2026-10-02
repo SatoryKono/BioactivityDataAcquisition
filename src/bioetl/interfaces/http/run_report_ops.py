@@ -12,6 +12,7 @@ from bioetl.application.services.run_reports.query import (
     list_workflow_reports,
 )
 from bioetl.composition.observability_runtime import create_run_report_store
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.types import JsonDict
 from bioetl.interfaces.http.report_root_config import (
     configured_report_root,
@@ -283,6 +284,7 @@ def list_pipeline_run_report_payloads(
     limit: int | None = 20,
     root: Path | None = None,
     selected_run_id: str | None = None,
+    store: RunReportStorePort | None = None,
 ) -> JsonDict:
     """List recent pipeline run reports (index only, not full bodies)."""
     base = _effective_root(root)
@@ -291,7 +293,7 @@ def list_pipeline_run_report_payloads(
         pipeline_name=owner,
         limit=limit,
         root=base,
-        store=create_run_report_store(),
+        store=store if store is not None else create_run_report_store(),
     )
     return _list_report_payload(
         kind="pipeline",
@@ -307,6 +309,7 @@ def list_workflow_run_report_payloads(
     workflow_name: str | None = None,
     limit: int = 20,
     root: Path | None = None,
+    store: RunReportStorePort | None = None,
 ) -> JsonDict:
     """List recent workflow run reports (index only)."""
     base = _effective_root(root)
@@ -315,7 +318,7 @@ def list_workflow_run_report_payloads(
         workflow_name=owner,
         limit=limit,
         root=base,
-        store=create_run_report_store(),
+        store=store if store is not None else create_run_report_store(),
     )
     return _list_report_payload(
         kind="workflow",

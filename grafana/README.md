@@ -17,7 +17,9 @@
 > `bioetl-dq-v2`, plus `bioetl-incident-v1` and `bioetl-run-explorer-v1`
 > (Dashboard System 2.0 / #6800).
 > Retired: `bioetl-runtime`, `bioetl-provider-health-v2`; workflow/alerts merged
-> into the Overview bands.
+> into the Overview bands. Deletion commits:
+> [runtime](https://github.com/SatoryKono/BioactivityDataAcquisition/commit/5b90ae56d9dafcf8de464c3039e1abdde993ed27),
+> [provider health](https://github.com/SatoryKono/BioactivityDataAcquisition/commit/cce4816fb21a4a23ba0ab9a7fccfba9907241af1).
 >
 > **Dashboard System 2.0 track:** `docs/03-guides/dashboards/operator-ux-v2.md`.
 >
@@ -2459,9 +2461,9 @@ record-level quarantine forensics use the CLI.
 ### Где legacy v1 dashboards?
 
 Legacy v1 dashboards сохранены только как archived comparison surface. Они не
-являются operator entrypoints; текущая эксплуатация использует семь shipped
+являются operator entrypoints; текущая эксплуатация использует пять shipped
 JSON surfaces: `bioetl-control-plane-v1`, `bioetl-overview-v2`,
-`bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`,
+`bioetl-dq-v2`,
 `bioetl-incident-v1` и `bioetl-run-explorer-v1`. Retired Workflow, Alerts/SLO
 и Silver Reject dashboards не входят в shipped inventory.
 

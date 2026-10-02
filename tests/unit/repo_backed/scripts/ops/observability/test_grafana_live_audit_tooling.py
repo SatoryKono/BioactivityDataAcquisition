@@ -92,13 +92,18 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
         for spec in audit_subject.REVIEWED_PANEL_SPECS
     }
 
-    assert covered[("bioetl-control-plane-v1", 9408)] == "Review Replay Evidence"
-    assert covered[("bioetl-control-plane-v1", 9423)] == "Review Exact Replay Checks"
+    assert ("bioetl-control-plane-v1", 892) not in covered
+    assert covered[("bioetl-control-plane-v1", 9422)] == "Review Exact Replay Readiness"
+    assert covered[("bioetl-control-plane-v1", 9418)] == "Review Selected-Run Trust"
     assert covered[("bioetl-dq-v2", 9402)] == "ID"
     assert covered[("bioetl-dq-v2", 9403)] == "Processed Records"
+    assert ("bioetl-silver-reject-explorer", 3) not in covered
+    assert ("bioetl-overview-v2", 9301) not in covered
+    assert ("bioetl-runtime", 9403) not in covered
+    assert ("bioetl-provider-health-v2", 9403) not in covered
+    assert ("bioetl-workflow-overview", 9403) not in covered
     for spec in audit_subject.REVIEWED_PANEL_SPECS:
-        assert audit_subject._find_panel(spec)
-
+        assert audit_subject._find_panel(spec)["id"] == spec.panel_id
 
 
 @pytest.mark.parametrize("value", ["NaN", "+Inf", "-Inf"])
@@ -1066,11 +1071,28 @@ def test_silver_reject_explorer_generic_links_do_not_receive_primary_run_context
 
 
 def test_runtime_log_hygiene_trend_panel_258_is_not_shipped() -> None:
-    """The retired runtime dashboard and its Loki trend are not shipped."""
+    """Loki log-hygiene trend panel id=258 was removed from bioetl-runtime."""
     assert not Path("grafana/dashboards/bioetl-runtime.json").exists()
-    assert all(
-        spec.dashboard_uid != "bioetl-runtime"
-        for spec in audit_subject.effective_panel_specs()
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-overview-v2.json").read_text(encoding="utf-8")
+    )
+
+    def walk_panels(panels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = []
+        for panel in panels:
+            result.append(panel)
+            nested = panel.get("panels")
+            if isinstance(nested, list):
+                result.extend(walk_panels(nested))
+        return result
+
+    panel = next(
+        (item for item in walk_panels(dashboard["panels"]) if item.get("id") == 258),
+        None,
+    )
+    assert panel is None, (
+        "Runtime Loki log-hygiene trend panel (id=258) must remain removed from "
+        "the shipped bioetl-runtime dashboard"
     )
 
 

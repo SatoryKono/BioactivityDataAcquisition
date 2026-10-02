@@ -55,11 +55,17 @@ def test_fix_file_rejects_parent_traversal_and_non_diagram_targets(
     _diagram_root(tmp_path)
 
     with pytest.raises(ValueError, match="parent traversal"):
-        module.fix_file(Path("docs/02-architecture/diagrams/../escape.mmd"), dry_run=False)
+        module.fix_file(
+            Path("docs/02-architecture/diagrams/../escape.mmd"), dry_run=False
+        )
+    with pytest.raises(ValueError, match="repository-relative"):
+        module.fix_file(tmp_path / "outside.mmd", dry_run=False)
     with pytest.raises(ValueError, match="outside"):
-        module.fix_file(tmp_path.parent / "outside.mmd", dry_run=False)
+        module.fix_file(Path("outside.mmd"), dry_run=False)
     with pytest.raises(ValueError, match="not a Mermaid"):
-        module.fix_file(Path("docs/02-architecture/diagrams/diagram.txt"), dry_run=False)
+        module.fix_file(
+            Path("docs/02-architecture/diagrams/diagram.txt"), dry_run=False
+        )
 
 
 def test_fix_file_rejects_symlink_escape(

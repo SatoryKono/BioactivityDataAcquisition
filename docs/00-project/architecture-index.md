@@ -58,7 +58,7 @@ Three architecture scanners count different populations. They are not interchang
 and a numeric gap is not a layer violation. Re-measure with the live commands before
 copying these integers forward.
 
-Snapshot: 2026-10-01, source commit `d50ecd5f35bd`.
+Snapshot: 2026-10-02, synchronized with main `8e9d32ad911e`.
 Composition contains **282** Python modules (`src/bioetl/composition/**/*.py`,
 including package initializers); its cap remains **295**, shrink-only.
 Grafana/ops Python under `scripts/ops/observability/grafana/` stays outside
@@ -67,7 +67,7 @@ RF-06 hotspot families (decision C / `#10447`).
 | Scanner | Artifact / command | What it counts |
 | --- | --- | --- |
 | Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for existing source modules. Hash-only refresh drops deleted paths but adds new modules only after coverage XML measurement. Check `source_module_count` against the live tree before claiming complete measurement. |
-| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer and group; excludes package-root modules without a layer tag. |
+| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Python modules scanned recursively beneath `src/bioetl`; import edges resolve to hexagonal layers and groups. Package roots can be scanned without contributing a classified layer edge. |
 | import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the package graph; excludes stubs and non-imported modules. Its count is not the coverage denominator. |
 
 Read current family files, LOC, fan-in and budget warnings from

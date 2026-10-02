@@ -34,6 +34,7 @@ import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
 from threading import get_ident
+from unittest.mock import Mock
 
 import pytest
 
@@ -143,6 +144,7 @@ class _RoutingHost(HealthServerRoutingMixin):
         self._run_ledger_port: object | None = object()
         self._workflow_manifest_port: object | None = object()
         self._metrics_exposition = _StaticMetricsExposition()
+        self._run_report_store = Mock(iterdir=Mock(return_value=[]))
         self._clock: object | None = _Clock()
         self._prometheus_base_url = "http://prometheus.test"
         self._forensic_endpoint_limiter = asyncio.Semaphore(4)

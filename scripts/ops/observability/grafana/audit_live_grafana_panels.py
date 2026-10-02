@@ -257,15 +257,15 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
     # panels only; Loki coverage is optional via discovered specs when present.
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
-        panel_id=9408,
-        title="Review Replay Evidence",
+        panel_id=9422,
+        title="Review Exact Replay Readiness",
         source_kind="http",
         semantic_kind="http_endpoint",
     ),
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
-        panel_id=9423,
-        title="Review Exact Replay Checks",
+        panel_id=9418,
+        title="Review Selected-Run Trust",
         source_kind="http",
         semantic_kind="http_table",
     ),

@@ -122,6 +122,7 @@ def build_health_server(
                 None,
             ),
             metrics_exposition=metrics_exposition,
+            run_report_store=getattr(deps, "run_report_store", None),
             runtime_source_id=_runtime_source_id_from_environment(),
         ),
     )

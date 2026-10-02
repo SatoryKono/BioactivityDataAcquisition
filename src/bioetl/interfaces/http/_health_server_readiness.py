@@ -8,7 +8,7 @@ from typing import Protocol
 from bioetl.application.observability.current_metrics_reconciliation import (
     current_metrics_reconciliation_check,
 )
-from bioetl.composition.observability_runtime import create_run_report_store
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.types import JsonDict
 from bioetl.interfaces.http.report_root_config import (
     enforce_report_root_marker,
@@ -22,6 +22,9 @@ class _MetricsExposition(Protocol):
 
 
 class _ReadinessHost(Protocol):
+    @property
+    def _run_report_store(self) -> RunReportStorePort: ...
+
     @property
     def _health_monitor(self) -> object | None: ...
 
@@ -67,5 +70,5 @@ def _current_metrics_check(host: _ReadinessHost) -> dict[str, object]:
     """Read durable run history without blocking other HTTP requests."""
     return current_metrics_reconciliation_check(
         exposition=host._metrics_exposition.build_exposition(),
-        store=create_run_report_store(),
+        store=host._run_report_store,
     )
