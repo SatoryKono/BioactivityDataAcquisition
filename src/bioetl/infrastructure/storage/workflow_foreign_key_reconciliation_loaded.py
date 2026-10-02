@@ -58,6 +58,21 @@ async def reconcile_loaded_rows(
     )
     retained_rows_count = len(retained_rows)
     orphan_rows_deleted = len(orphan_rows)
+    if request.require_closed_cohort:
+        if orphan_rows:
+            raise ValueError(
+                f"reference cohort is not closed: {len(orphan_rows)} unmatched source rows; mutation blocked"
+            )
+        host._record_metrics(
+            scanned=scanned_rows, retained=retained_rows_count, deleted=0
+        )
+        return _complete_without_orphans(
+            host,
+            request,
+            scanned_rows=scanned_rows,
+            retained_rows=retained_rows,
+            orphan_rows=[],
+        )
     if request.reference_completeness != "complete":
         return _complete_unproven_reference(
             host,

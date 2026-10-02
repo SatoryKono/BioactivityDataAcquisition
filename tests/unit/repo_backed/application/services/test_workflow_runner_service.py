@@ -607,7 +607,13 @@ async def test_workflow_runner_executes_chembl_baseline_in_dependency_order() ->
     metrics = _RecordingMetrics()
     pipeline_runner = _PipelineRunner()
     transform_service = _RecordingTransformService()
+
+    async def resolve_cohort(step, upstream):
+        assert step.reference_cohort.step_id in upstream
+        return step
+
     service = WorkflowRunnerService(
+        cohort_resolver=resolve_cohort,
         pipeline_runner=pipeline_runner,  # type: ignore[arg-type]
         transform_service=transform_service,  # type: ignore[arg-type]
         metrics=metrics,
@@ -706,7 +712,13 @@ async def test_workflow_runner_skips_chembl_baseline_reconciliation_after_failur
     metrics = _RecordingMetrics()
     pipeline_runner = _SelectiveFailingPipelineRunner("chembl_target")
     transform_service = _RecordingTransformService()
+
+    async def resolve_cohort(step, upstream):
+        assert step.reference_cohort.step_id in upstream
+        return step
+
     service = WorkflowRunnerService(
+        cohort_resolver=resolve_cohort,
         pipeline_runner=pipeline_runner,  # type: ignore[arg-type]
         transform_service=transform_service,  # type: ignore[arg-type]
         metrics=metrics,
