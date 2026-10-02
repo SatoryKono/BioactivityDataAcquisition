@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.exceptions import DataQualityError
 
@@ -26,11 +26,6 @@ class _MergeOutputHostProtocol(Protocol):
     _field_group_registry: FieldGroupRegistry | None
     _gold_schema: object | None
 
-    @staticmethod
-    def _path_to_table_name(path: str) -> str: ...
-
-    def _coerce_null_columns(self, df: pl.DataFrame) -> pl.DataFrame: ...
-
 
 class MergeOutputWriterMixin:
     """Mixin for persisting merged Silver/Gold outputs."""
@@ -46,21 +41,22 @@ class MergeOutputWriterMixin:
         return path
 
     def _coerce_null_columns(
-        self: _MergeOutputHostProtocol, df: pl.DataFrame
+        self, df: pl.DataFrame
     ) -> pl.DataFrame:
         """Coerce Null-typed columns to String for Delta Lake compatibility."""
+        host = cast("_MergeOutputHostProtocol", cast(object, self))
         import polars as pl
         import polars.selectors as cs
 
         # Extract columns only to log the names without looping over dataframe columns in Python
         null_cols = df.select(cs.by_dtype(pl.Null)).columns
         if null_cols:
-            self._logger.debug("Coercing null columns to String", columns=null_cols)
+            host._logger.debug("Coercing null columns to String", columns=null_cols)
             df = df.with_columns(cs.by_dtype(pl.Null).cast(pl.String))
         return df
 
     async def _write_merged_silver(
-        self: _MergeOutputHostProtocol,
+        self,
         df: pl.DataFrame,
         completed_at: datetime | None = None,
         run_id: str | None = None,
@@ -76,11 +72,12 @@ class MergeOutputWriterMixin:
             sources_used: Optional list of pipeline names that contributed to the merge,
                 attached to the write for provenance tracking.
         """
+        host = cast("_MergeOutputHostProtocol", cast(object, self))
         df = self._coerce_null_columns(df)
 
-        table_name = self._path_to_table_name(self._config.output_silver_path)
+        table_name = self._path_to_table_name(host._config.output_silver_path)
         records = df.to_dicts()
-        await self._storage.write_silver_merged(
+        await host._storage.write_silver_merged(
             table_name,
             records,
             completed_at=completed_at,
@@ -90,7 +87,7 @@ class MergeOutputWriterMixin:
         )
 
     async def _write_merged_gold(
-        self: _MergeOutputHostProtocol,
+        self,
         df: pl.DataFrame,
         completed_at: datetime | None = None,
         run_id: str | None = None,
@@ -105,10 +102,11 @@ class MergeOutputWriterMixin:
             sources_used: Optional list of pipeline names that contributed to the merge,
                 attached to the write for provenance tracking.
         """
-        if self._field_group_registry is not None:
-            trash_cols = self._field_group_registry.get_trash_columns(df.columns)
+        host = cast("_MergeOutputHostProtocol", cast(object, self))
+        if host._field_group_registry is not None:
+            trash_cols = host._field_group_registry.get_trash_columns(df.columns)
             if trash_cols:
-                self._logger.info(
+                host._logger.info(
                     "Filtering trash columns from Gold output",
                     trash_count=len(trash_cols),
                     trash_columns=trash_cols[:10],
@@ -116,21 +114,21 @@ class MergeOutputWriterMixin:
                 df = df.drop(trash_cols)
 
         df = self._coerce_null_columns(df)
-        table_name = self._path_to_table_name(self._config.output_gold_path)
-        if self._gold_schema is None:
+        table_name = self._path_to_table_name(host._config.output_gold_path)
+        if host._gold_schema is None:
             raise DataQualityError(
                 "Composite Gold write requires a registered strict schema: "
                 f"table_name={table_name}"
             )
         records = df.to_dicts()
-        await self._storage.write_gold_merged(
+        await host._storage.write_gold_merged(
             table_name,
             records,
             completed_at=completed_at,
             run_id=run_id,
             sources_used=sources_used,
             preserve_column_order=True,
-            schema=self._gold_schema,
+            schema=host._gold_schema,
         )
 
 
