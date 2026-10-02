@@ -17,6 +17,9 @@ from bioetl.domain.workflow.config import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize("fault", [None, "wrong_run", "count", "limit", "empty"])
 async def test_cohort_is_run_bound_and_never_silently_truncated(fault):

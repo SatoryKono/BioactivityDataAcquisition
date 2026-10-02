@@ -273,7 +273,7 @@ async def test_semanticscholar_retry_wait_is_bounded_and_cancellable(
     mock_logger: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """An excessive wait stops early; allowed backoff remains cancellable."""
+    """Wait budgets fail closed; cooldown and allowed retries are cancellable."""
     adapter = _build_semanticscholar_adapter(mock_logger)
     retry_config = RetryConfig(
         max_attempts=3,
@@ -300,6 +300,15 @@ async def test_semanticscholar_retry_wait_is_bounded_and_cancellable(
             assert "wait budget" in str(caught.value.last_error)
             assert caught.value.last_error.response.headers["Retry-After"] == "99999"
             assert caught.value.url.endswith("/paper/search")
+            sleep.side_effect = asyncio.CancelledError
+            with pytest.raises(asyncio.CancelledError):
+                _ = [r async for r in adapter.fetch("publication", query="test")]
+            # Admission on the existing client still honors the provider cooldown.
+            # Cancellation must occur before another transport request.
+            assert route.call_count == 1
+            sleep.assert_awaited_once()
+            assert 4.0 < sleep.await_args.args[0] <= 99999.0
+            sleep.reset_mock()
         # The original client retains the upstream cooldown. A fresh client
         # exercises cancellation of an allowed wait without clearing that state.
         adapter = _build_semanticscholar_adapter(mock_logger)

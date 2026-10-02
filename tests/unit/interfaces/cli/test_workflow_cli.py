@@ -480,17 +480,16 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
     )
 
 
-@pytest.mark.parametrize("bound_cohort", [False, True])
-def test_workflow_run_requires_bound_cohort_when_limit_follows_extracts(
+@pytest.mark.parametrize("bound_cohort", [True, False])
+def test_workflow_run_limits_require_bound_reference_cohorts(
     cli_runner: CliRunner,
     monkeypatch: Any,
     tmp_path: Path,
     bound_cohort: bool,
 ) -> None:
-    """Only explicitly bound cohorts permit limited FK reconciliation."""
+    """A linked cohort permits bounded runs; independent extracts fail closed."""
     import bioetl.interfaces.cli.commands.workflow as workflow_cmd
 
-    fake_service = _FakeWorkflowRunnerService()
     workflow = workflow_cmd.load_workflow_config("chembl_core")
     if not bound_cohort:
         workflow = replace(
@@ -502,7 +501,8 @@ def test_workflow_run_requires_bound_cohort_when_limit_follows_extracts(
                 for step in workflow.steps
             ),
         )
-    monkeypatch.setattr(workflow_cmd, "load_workflow_config", lambda name: workflow)
+    monkeypatch.setattr(workflow_cmd, "load_workflow_config", lambda _name: workflow)
+    fake_service = _FakeWorkflowRunnerService()
     cached_bronze_path = tmp_path / "bronze"
     cached_bronze_path.mkdir()
     monkeypatch.setattr(
