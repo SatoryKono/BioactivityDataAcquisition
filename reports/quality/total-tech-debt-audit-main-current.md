@@ -10,65 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `f2b99588cce6338d51bc71855c985ab58745b692c4d236338c664af8c6c26678`
-
-Evidence metadata refresh (2026-09-26): rebind after main suite-green merge. Current headline evidence:
-Debt-governance gates: **43 pass / 3 fail**;
-Architecture quality integral score: **9.68** (`excellent`);
-source_module_count: **2491**;
-fully_covered: **2483**;
-= 2491 == source_module_count.
-No budget growth. Linked issues: #11228 #11230.
-
-
-Evidence metadata refresh (2026-09-23): the canonical registry digest was
-recomputed after S2 transformer split, test-governance unique-name/marker
-repair, and module-coverage inventory rebind.
-Current headline evidence:
-Debt-governance gates: **45 pass / 0 fail**;
-Architecture quality integral score: **10.0** (`excellent`);
-Integral score `10.00`. architecture score `10.00`.
-source_module_count: **2479** with fully_covered: **2471**;
-partially_covered: **7**; no_executable_lines: **1**;
-uncovered: **0**; unmeasured: **0** (= 2479 == source_module_count).
-Contract coverage matrix schema: **contract-coverage-matrix-v3**.
-Constructor waivers (shrink-only inventory): **1** entries.
-Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.
-Layer violations: **0**.
-The historical audited commit above is retained; this metadata refresh does
-not constitute a new repository-wide architecture audit.
-
-Evidence metadata refresh (2026-09-19): the canonical registry digest was
-recomputed after hotspot fan-in closeout, assertless-triage reduction,
-ADR-matrix rebind, and module-coverage inventory rebind.
-Current headline evidence:
-Debt-governance gates: **45 pass / 0 fail**;
-Architecture quality integral score: **9.47** (`good_targeted_improvements`);
-source_module_count: **2497** with fully_covered: **2486**;
-partially_covered: **10**; no_executable_lines: **1**;
-uncovered: **0**; unmeasured: **0** (= 2497 == source_module_count).
-The historical audited commit above is retained; this metadata refresh does
-not constitute a new repository-wide architecture audit.
-
-Evidence metadata refresh (2026-09-16): the canonical registry digest was
-recomputed after selected-run merge coverage rebind
-(`source_module_count=2484`, fully_covered=1622, integral_score=9.36).
-The historical audited commit above is retained; this metadata refresh does
-not constitute a new repository-wide architecture audit.
-
-Evidence metadata refresh (2026-09-11): the canonical registry digest was
-recomputed after #10304 adopted the SHA-bound coverage-verify inventory for
-folded control-plane replay score-card modules (`source_module_count=2469`).
-The historical audited commit above is retained; this metadata refresh does
-not constitute a new repository-wide architecture audit.
-
-Evidence metadata refresh (2026-09-15): the canonical registry digest was
-recomputed after #10449/#10450/#10451 moved observability backend I/O into
-infrastructure and added the measured coverage-inventory rows
-(`source_module_count=2474`). Local archive verification later added one row;
-the architecture closeout removed one obsolete Protocol module, retaining 2474.
-The historical audited commit above is retained; this metadata refresh does
-not constitute a new repository-wide architecture audit.
+Evidence surface SHA-256: `a85261bccdf5f38acfcb3f8ed18c5450048e311675ae2e7e850a984bc7261983`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -76,51 +18,62 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "f2b99588cce6338d51bc71855c985ab58745b692c4d236338c664af8c6c26678",
+  "evidence_surface_sha256": "a85261bccdf5f38acfcb3f8ed18c5450048e311675ae2e7e850a984bc7261983",
   "metrics": {
-    "architecture_integral_score": 9.47,
-    "architecture_interpretation": "good_targeted_improvements",
+    "architecture_integral_score": 7.37,
+    "architecture_interpretation": "satisfactory_system_refactoring_required",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 46,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 46,
+    "debt_gate_fail_count": 1,
+    "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 2490,
     "layer_violation_count": 0,
-    "no_executable_lines_module_count": 4,
+    "no_executable_lines_module_count": 5,
     "partially_covered_module_count": 27,
-    "source_module_count": 2521,
+    "source_module_count": 2541,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 0
+    "unmeasured_module_count": 19
   },
   "schema_version": "technical-debt-audit-summary-v1"
 }
 -->
 
-Refresh reason: Reconcile the current evidence surface and semantic summary with the canonical generated artifacts while preserving the accepted audited commit. The generated debt-governance evidence records 46/46 passing gates. No budget growth.
+Refresh reason: Reconcile generated metadata while preserving the historical audited commit. Current gate results are recorded in the semantic summary; this is not full coverage acceptance. No budget growth.
 
-## Executive summary
+## Current metadata refresh — 2026-10-02 (#11859)
 
-1. Debt-governance gates: **43 pass / 3 fail** (46 debt-governance gates).
-1. Release status: **debt-governance gates passing**; no blocking gaps remain.
-1. Architecture quality integral score: **9.68** (`excellent`). Integral score `9.68`.
-1. Module inventory (from module-coverage-inventory.json only):
-   - source_module_count: **2491**
-   - fully_covered: **2483**
-   - partially_covered: **7**
-   - no_executable_lines: **1**
-   - uncovered: **0**
-   - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2491 == source_module_count
-1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
-1. Constructor waivers (shrink-only inventory): **1** entries.
-1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.
-1. Layer violations: **0**.
+Merged source: main `8f024f97cb10` plus the report-store injection changes.
+The following rollup is derived from the current committed artifact surface:
+
+Debt-governance gates: **45 pass / 1 fail**;
+Architecture quality integral score: **7.37** (`satisfactory_system_refactoring_required`);
+source_module_count: **2541**;
+fully_covered: **2490**;
+partially_covered: **27**;
+no_executable_lines: **5**;
+uncovered: **0**;
+unmeasured: **19**;
+= 2541 == source_module_count;
+Contract coverage matrix schema: **contract-coverage-matrix-v3**;
+Constructor waivers (shrink-only inventory): **1** entries;
+Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**;
+Layer violations: **0**.
+
+The inherited coverage inventory has 2541 rows, including 19 explicitly
+unmeasured modules. Its governed source scope has 2542 modules; the new
+`effective_config_runtime_identity.py` row is missing. The completeness
+guard and unmeasured-module debt gate fail. Hash refresh retains historical
+measurements; it is not new coverage acceptance. A complete 17-shard run
+is required. No release PASS or budget growth is claimed.
+
+The original audited SHA/date remain unchanged. The live unjustified cast
+ratchet remains 112 (historical baseline 131), with no added exemptions.
 
 ## Retained facade importer census
 
@@ -151,7 +104,7 @@ python -m scripts.engineering.qa check-exemptions
 
 - **REJECTED_POLICY:** any increase of tech-debt budgets / exemptions / hotspot caps
 
-Evidence metadata refresh (2026-09-29): workflow-evidence closeout and coverage inventory reconciliation. Current headline evidence:
+Historical metadata refresh (2026-09-29): workflow-evidence closeout and coverage inventory reconciliation. Historical headline evidence (not current):
 Debt-governance gates: **46 pass / 0 fail**;
 Architecture quality integral score: **9.89** (`excellent`);
 source_module_count: **2522**;
@@ -167,7 +120,7 @@ Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**;
 Layer violations: **0**.
 No budget growth.
 
-Evidence metadata refresh (2026-09-28): wave-2 test-governance paydown (duplicate names, assertion bypass, 39 markers, deterministic run IDs, zero-ref triage). Current headline evidence:
+Historical metadata refresh (2026-09-28): wave-2 test-governance paydown (duplicate names, assertion bypass, 39 markers, deterministic run IDs, zero-ref triage). Historical headline evidence (not current):
 Debt-governance gates: **45 pass / 1 fail**;
 Architecture quality integral score: **9.74** (`excellent`);
 source_module_count: **2491**;
@@ -183,7 +136,7 @@ Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**;
 Layer violations: **0**.
 Residual fail: hotspot_family_baseline_budget_warnings (3 modules ≥250 LOC pending split).
 
-Evidence metadata refresh (2026-09-28): hotspot wave-3 splits (artifact_recording, replay_readiness, batch_metrics facades + cohesive submodules; 143+181+31 focused tests green, ruff clean). Current headline evidence:
+Historical metadata refresh (2026-09-28): hotspot wave-3 splits (artifact_recording, replay_readiness, batch_metrics facades + cohesive submodules; 143+181+31 focused tests green, ruff clean). Historical headline evidence (not current):
 Debt-governance gates: **46 pass / 0 fail**;
 Architecture quality integral score: **9.89** (`excellent`);
 source_module_count: **2491**;
@@ -199,7 +152,7 @@ Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**;
 Layer violations: **0**.
 
 
-Evidence metadata refresh (2026-09-30): source and governance rebind for Grafana fixes; historical coverage measurements retained.
+Historical metadata refresh (2026-09-30): source and governance rebind for Grafana fixes; historical coverage measurements retained.
 Debt-governance gates: **46 pass / 0 fail**;
 Architecture quality integral score: **9.36** (`good_targeted_improvements`);
 source_module_count: **2521**;
@@ -213,3 +166,63 @@ Contract coverage matrix schema: **contract-coverage-matrix-v3**;
 Constructor waivers (shrink-only inventory): **1** entries;
 Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**;
 Layer violations: **0**.
+
+## Historical metadata snapshots (not current)
+
+Historical metadata refresh (2026-09-26): rebind after main suite-green merge. Historical headline evidence (not current):
+Debt-governance gates: **43 pass / 3 fail**;
+Architecture quality integral score: **9.68** (`excellent`);
+source_module_count: **2491**;
+fully_covered: **2483**;
+= 2491 == source_module_count.
+No budget growth. Linked issues: #11228 #11230.
+
+
+Historical metadata refresh (2026-09-23): the canonical registry digest was
+recomputed after S2 transformer split, test-governance unique-name/marker
+repair, and module-coverage inventory rebind.
+Historical headline evidence (not current):
+Debt-governance gates: **45 pass / 0 fail**;
+Architecture quality integral score: **10.0** (`excellent`);
+Integral score `10.00`. architecture score `10.00`.
+source_module_count: **2479** with fully_covered: **2471**;
+partially_covered: **7**; no_executable_lines: **1**;
+uncovered: **0**; unmeasured: **0** (= 2479 == source_module_count).
+Contract coverage matrix schema: **contract-coverage-matrix-v3**.
+Constructor waivers (shrink-only inventory): **1** entries.
+Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.
+Layer violations: **0**.
+The historical audited commit above is retained; this metadata refresh does
+not constitute a new repository-wide architecture audit.
+
+Historical metadata refresh (2026-09-19): the canonical registry digest was
+recomputed after hotspot fan-in closeout, assertless-triage reduction,
+ADR-matrix rebind, and module-coverage inventory rebind.
+Historical headline evidence (not current):
+Debt-governance gates: **45 pass / 0 fail**;
+Architecture quality integral score: **9.47** (`good_targeted_improvements`);
+source_module_count: **2497** with fully_covered: **2486**;
+partially_covered: **10**; no_executable_lines: **1**;
+uncovered: **0**; unmeasured: **0** (= 2497 == source_module_count).
+The historical audited commit above is retained; this metadata refresh does
+not constitute a new repository-wide architecture audit.
+
+Historical metadata refresh (2026-09-16): the canonical registry digest was
+recomputed after selected-run merge coverage rebind
+(`source_module_count=2484`, fully_covered=1622, integral_score=9.36).
+The historical audited commit above is retained; this metadata refresh does
+not constitute a new repository-wide architecture audit.
+
+Historical metadata refresh (2026-09-11): the canonical registry digest was
+recomputed after #10304 adopted the SHA-bound coverage-verify inventory for
+folded control-plane replay score-card modules (`source_module_count=2469`).
+The historical audited commit above is retained; this metadata refresh does
+not constitute a new repository-wide architecture audit.
+
+Historical metadata refresh (2026-09-15): the canonical registry digest was
+recomputed after #10449/#10450/#10451 moved observability backend I/O into
+infrastructure and added the measured coverage-inventory rows
+(`source_module_count=2474`). Local archive verification later added one row;
+the architecture closeout removed one obsolete Protocol module, retaining 2474.
+The historical audited commit above is retained; this metadata refresh does
+not constitute a new repository-wide architecture audit.

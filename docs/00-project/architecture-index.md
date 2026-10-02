@@ -66,9 +66,10 @@ without a separate ADR.
 Hash-only coverage refresh (`--allow-missing-coverage-xml`) hashes all
 `src/bioetl/**/*.py` and drops deleted inventory paths. It does not add rows
 for new modules until a coverage XML refresh. The committed inventory records
-2521 measured source rows; the full source tree currently contains 2539 files.
-The 18 missing measurement rows require a complete coverage-verify run;
-refreshing the digest preserves historical measurements and cannot fill them.
+2541 source rows, including 19 explicitly unmeasured modules; its governed
+source scope currently contains 2542 files. The missing row and unmeasured
+modules require a complete coverage-verify run. Refreshing the digest preserves
+historical measurements and cannot fill those evidence gaps.
 `src/bioetl/composition` count is 282 modules live per the architecture scorecard
 (`max_modules` held at 295, shrink-only; ARCH-011, #11859; verified 2026-10-02).
 `composition_runtime_builders` family inventory is 56 modules (measured=56);
@@ -76,8 +77,8 @@ hotspot coverage floors stay at those live counts without raising debt budgets.
 
 | Scanner | Artifact / command | What it counts |
 | --- | --- | --- |
-| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows in the reporter's governed source scope (currently 2521 rows). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; new modules are added only from a coverage XML refresh (`--refresh-nonregressing-from-coverage-xml` or the coverage-verify lane). |
-| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Python modules scanned recursively beneath `src/bioetl` (currently 2539). Import edges resolve to hexagonal layers and groups; package roots can be scanned without contributing a classified layer edge. |
+| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows in the reporter's governed source scope (currently 2541 rows, 19 unmeasured). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; new modules are added only from a coverage XML refresh (`--refresh-nonregressing-from-coverage-xml` or the coverage-verify lane). |
+| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Python modules scanned recursively beneath `src/bioetl` (currently 2540). Import edges resolve to hexagonal layers and groups; package roots can be scanned without contributing a classified layer edge. |
 | import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (2426 files in the 2026-09-23 review pass; Windows: `importlinter.cli.lint_imports(..., no_cache=True)` when `lint-imports.exe` is absent). Excludes stubs / non-imported modules |
 
 `families_at_budget` on the architecture scorecard is currently empty after

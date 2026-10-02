@@ -584,6 +584,7 @@ def test_get_observability_diagnostics_bundle_builds_bundle() -> None:
 
 
 def test_run_report_store_factory_returns_independent_port_instances() -> None:
+    """Independent bootstrap lifetimes must not share process-global state."""
     from bioetl.domain.ports import RunReportStorePort
 
     first = observability_api.create_run_report_store()
