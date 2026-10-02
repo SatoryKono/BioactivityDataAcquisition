@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+__all__ = ["_make_merge_metrics_mixin"]
+
 import json
 from collections.abc import Callable
 from dataclasses import replace
@@ -18,11 +20,13 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 from uuid import UUID
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
+from tests.helpers.merge_metrics import (
+    make_merge_metrics_mixin as _make_merge_metrics_mixin,
+)
 
 import pytest
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.application.services.control_plane.effective_config.service import (
     EffectiveConfigService,
 )
@@ -131,14 +135,6 @@ _PUBLISHED_PRODUCTION_FAMILIES = tuple(published_production_reproducibility_fami
 
 
 _InMemoryRunManifestStore = InMemoryRunManifestStore
-
-
-class _MergeMetricsMixinHarness(MergeMetricsRecorderMixin):
-    """Concrete harness exposing MergeMetricsRecorderMixin contract methods."""
-
-
-def _make_merge_metrics_mixin() -> MergeMetricsRecorderMixin:
-    return _MergeMetricsMixinHarness()
 
 
 def _make_manifest(

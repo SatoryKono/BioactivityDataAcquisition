@@ -515,6 +515,13 @@ def test_dependency_review_workflow_is_pr_scoped_and_sha_pinned() -> None:
     assert set(triggers) == {"pull_request"}
     assert "uv.lock" in pull_request["paths"]
     assert "pyproject.toml" in pull_request["paths"]
+    for manifest_pattern in (
+        "package.json",
+        "package-lock.json",
+        "**/package.json",
+        "**/package-lock.json",
+    ):
+        assert manifest_pattern in pull_request["paths"]
     assert f"actions/checkout@{checkout_sha}" in uses
     assert f"actions/dependency-review-action@{review_sha}" in uses
     review_step = next(
@@ -561,7 +568,24 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
     assert osv_uses
     assert all(uses.rsplit("@", 1)[-1] in osv_allowed for uses in osv_uses)
     assert osv_step.get("continue-on-error") is True
-    assert "--lockfile=uv.lock" in str(osv_step["with"]["scan-args"])
+    scan_args = str(osv_step["with"]["scan-args"])
+    assert "--lockfile=uv.lock" in scan_args
+    tracked_npm_locks = subprocess.check_output(
+        ["git", "ls-files", "**/package-lock.json", "package-lock.json"],
+        cwd=ROOT,
+        text=True,
+    ).splitlines()
+    assert tracked_npm_locks
+    scanned_npm_locks = {
+        line.strip().removeprefix("--lockfile=")
+        for line in scan_args.splitlines()
+        if line.strip().startswith("--lockfile=")
+        and line.strip().endswith("package-lock.json")
+    }
+    assert scanned_npm_locks == set(tracked_npm_locks)
+    assert "uv export --frozen" in pip_audit_run
+    assert "--all-extras" in pip_audit_run
+    assert "--no-emit-project" in pip_audit_run
     assert "--format=json" in str(osv_step["with"]["scan-args"])
     assert "--osv-json osv-results.json" in osv_gate
     assert "PYSEC-2026-3721" in pip_audit_run

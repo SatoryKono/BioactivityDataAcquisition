@@ -265,7 +265,7 @@ def test_documentation_cleanup_inventory_classifies_plans_and_reports() -> None:
     assert plans_entrypoint["lifecycle"] == "plans_governance_entrypoint"
     assert plans_entrypoint["recommended_action"] == "keep"
 
-    closeout = rows["reports/quality/tech-debt-issues-5847-5852-closeout.json"]
+    closeout = rows["reports/quality/audit-20261001-closeout.md"]
     assert closeout["lifecycle"] == "closeout_evidence"
     assert closeout["freshness"] == "retention-sensitive"
     assert closeout["recommended_action"] == "keep"

@@ -1,11 +1,10 @@
-# mypy: disable-error-code=attr-defined
 """Tracing, lock-validation, and error-tracking helpers for BatchWriter."""
 
 from __future__ import annotations
 
 import traceback
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.batch_tracing import close_span
 from bioetl.domain.locking import LockNotHeldError
@@ -14,33 +13,33 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from typing import Any as SpanType
 
+    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID
 
 _WRITE_SPAN_ERRORS = (Exception,)
 
 
+class _BatchWriterTracingHostProtocol(Protocol):
+    """Internal dependencies initialized by BatchWriter's constructor."""
+
+    _lock_validator: Callable[[], Awaitable[bool]] | None
+    _provider: str
+    _entity_type: str
+    _context: PipelineContext
+    _tracer: TracingPort | None
+    _error_classifier: ErrorClassifier
+    _batch_metrics: BatchMetricsRecorderService
+
+
 class BatchWriterTracingMixin:
     """Operational cross-cutting concerns for BatchWriter."""
 
-    _lock_validator: Any = cast(
-        Any, None
-    )  # Any: concrete host injects an optional async validator
-    _provider: str = ""
-    _entity_type: str = ""
-    _context: Any = cast(
-        Any, None
-    )  # Any: concrete BatchWriter supplies the host context
-    _tracer: Any = cast(
-        Any, None
-    )  # Any: tracing port returns an OTel-compatible runtime object
-    _error_classifier: Any = cast(
-        Any, None
-    )  # Any: concrete host supplies the classifier
-    _batch_metrics: Any = cast(
-        Any, None
-    )  # Any: concrete host supplies the metrics recorder
-
-    async def _validate_lock(self, operation: str) -> None:
+    async def _validate_lock(
+        self: _BatchWriterTracingHostProtocol, operation: str
+    ) -> None:
         """Validate lock ownership before write operation."""
         lock_validator = self._lock_validator
         if lock_validator is None:
@@ -56,7 +55,11 @@ class BatchWriterTracingMixin:
             raise LockNotHeldError(operation, f"lock:{table_name}")
 
     def _start_span(
-        self, name: str, layer: str, record_count: int, batch_id: BatchID | None = None
+        self: _BatchWriterTracingHostProtocol,
+        name: str,
+        layer: str,
+        record_count: int,
+        batch_id: BatchID | None = None,
     ) -> SpanType | None:
         """Start tracing span for write operation."""
         if not self._tracer:
@@ -75,12 +78,16 @@ class BatchWriterTracingMixin:
         span.__enter__()
         return span
 
-    def _end_span(self, span: SpanType | None, error: Exception | None = None) -> None:
+    def _end_span(
+        self: _BatchWriterTracingHostProtocol,
+        span: SpanType | None,
+        error: Exception | None = None,
+    ) -> None:
         """Close tracing span with optional exception metadata."""
         close_span(span, error)
 
     def log_and_track_write_error(
-        self,
+        self: _BatchWriterTracingHostProtocol,
         layer: str,
         error: Exception,
         batch_id: BatchID,

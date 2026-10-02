@@ -35,8 +35,7 @@ pytestmark = pytest.mark.unit
 
 
 def _orch_host(**overrides: Any) -> PreflightSchemaOrchestrationMixin:
-    host = PreflightSchemaOrchestrationMixin()
-    host._logger = MagicMock()  # type: ignore[attr-defined]
+    host = PreflightSchemaOrchestrationMixin(logger=MagicMock())
     for key, value in overrides.items():
         setattr(host, key, value)
     return host

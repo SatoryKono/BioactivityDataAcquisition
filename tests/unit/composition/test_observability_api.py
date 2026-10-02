@@ -115,11 +115,16 @@ def test_push_metrics_to_gateway_uses_metrics_service_push() -> None:
     metrics_service = mock.Mock()
     metrics_service.push_to_gateway.return_value = mock.Mock(success=True)
 
-    with mock.patch.object(
-        observability_api,
-        "get_metrics_service",
-        return_value=metrics_service,
-    ) as mock_get_service:
+    with (
+        mock.patch.object(
+            observability_api,
+            "get_metrics_service",
+            return_value=metrics_service,
+        ) as mock_get_service,
+        mock.patch.object(
+            observability_api, "refresh_control_plane_integrity_metrics"
+        ) as refresh,
+    ):
         result = observability_api.push_metrics_to_gateway(
             run_label="bioetl",
             pipeline_name="chembl_activity",
@@ -127,6 +132,7 @@ def test_push_metrics_to_gateway_uses_metrics_service_push() -> None:
         )
 
     assert result is True
+    refresh.assert_called_once()
     mock_get_service.assert_called_once_with()
     metrics_service.push_to_gateway.assert_called_once_with(
         gateway=mock.ANY,
@@ -222,10 +228,15 @@ def test_push_metrics_to_gateway_does_not_bootstrap_fallback_logger() -> None:
     metrics_service.logger = mock.sentinel.logger
     metrics_service.push_to_gateway.return_value = mock.Mock(success=True)
 
-    with mock.patch.object(
-        observability_api,
-        "get_metrics_service",
-        return_value=metrics_service,
+    with (
+        mock.patch.object(
+            observability_api,
+            "get_metrics_service",
+            return_value=metrics_service,
+        ),
+        mock.patch.object(
+            observability_api, "refresh_control_plane_integrity_metrics"
+        ) as refresh,
     ):
         result = observability_api.push_metrics_to_gateway(
             run_label="bioetl",
@@ -233,6 +244,7 @@ def test_push_metrics_to_gateway_does_not_bootstrap_fallback_logger() -> None:
         )
 
     assert result is True
+    refresh.assert_called_once()
     assert metrics_service.logger is mock.sentinel.logger
 
 
@@ -571,11 +583,12 @@ def test_get_observability_diagnostics_bundle_builds_bundle() -> None:
     mock_workflow.assert_called_once_with()
 
 
-def test_run_report_store_factory_returns_composition_shared_port() -> None:
+def test_run_report_store_factory_returns_independent_port_instances() -> None:
+    """Independent bootstrap lifetimes must not share process-global state."""
     from bioetl.domain.ports import RunReportStorePort
 
     first = observability_api.create_run_report_store()
     second = observability_api.create_run_report_store()
     assert isinstance(first, RunReportStorePort)
     assert isinstance(second, RunReportStorePort)
-    assert first is second
+    assert first is not second

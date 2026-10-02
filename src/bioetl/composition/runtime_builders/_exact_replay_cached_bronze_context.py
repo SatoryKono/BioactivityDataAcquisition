@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import is_dataclass, replace
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 from bioetl.composition.control_plane_paths import control_plane_root
@@ -61,16 +61,17 @@ def bind_cached_bronze_context[T](
     if current == cached_bronze:
         return ctx
     if is_dataclass(ctx):
-        return cast("T", replace(cast(Any, ctx), cached_bronze=cached_bronze))  # Any:
+        if isinstance(ctx, type):
+            raise TypeError("cached_bronze binding requires a dataclass instance")
+        return cast("T", replace(ctx, cached_bronze=cached_bronze))
     # Bind in place so callers retain the original context type and methods.
-    ctx_any = cast("Any", ctx)  # Any: mutable context host
     try:
-        object.__setattr__(ctx_any, "cached_bronze", cached_bronze)
+        object.__setattr__(ctx, "cached_bronze", cached_bronze)
         return ctx
     except (AttributeError, TypeError):
         pass
     try:
-        ctx_any.cached_bronze = cached_bronze
+        setattr(ctx, "cached_bronze", cached_bronze)  # noqa: B010 - generic dynamic host
         return ctx
     except (AttributeError, TypeError) as exc:
         raise TypeError(

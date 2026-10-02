@@ -72,3 +72,17 @@ def capture_run_completion(
             reason="completion_assessment_failed",
             facts={},
         )
+
+
+def archive_run_completion(
+    archive: Callable[[RunResult, RunOptions | None], None] | None,
+    result: RunResult,
+    options: RunOptions | None,
+) -> None:
+    """Archive completed evidence without replacing the pipeline outcome on failure."""
+    if archive is None:
+        return
+    try:
+        archive(result, options)
+    except (OSError, RuntimeError, TypeError, ValueError):
+        return

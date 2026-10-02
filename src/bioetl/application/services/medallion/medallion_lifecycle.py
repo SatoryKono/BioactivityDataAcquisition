@@ -15,7 +15,7 @@ All medallion layer operations are consolidated here:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.services.medallion.medallion_maintenance_mixin import (
     _MedallionMaintenanceMixin,
@@ -59,6 +59,44 @@ _LIFECYCLE_OPERATION_ERRORS = (
 )
 
 
+class _MedallionLifecycleHostProtocol(Protocol):
+    """Internal lifecycle host initialized by MedallionLifecycleService."""
+
+    storage: MedallionStorageProtocol
+    logger: LoggerPort
+
+    @staticmethod
+    def _emit_optimization_metric(
+        metrics: MetricsPort | None, pipeline_name: str, status: str
+    ) -> None: ...
+
+    @staticmethod
+    def _is_optimization_enabled(runtime: RuntimeConfig) -> bool: ...
+
+    def _log_clear_result(
+        self,
+        policy: MedallionPolicy,
+        silver_table: str,
+        gold_table: str,
+        result: ClearResult,
+    ) -> None: ...
+
+    async def _optimize_tables(
+        self, silver_table: str, gold_table: str, retention_hours: int, dry_run: bool
+    ) -> tuple[int, int]: ...
+
+    @staticmethod
+    def _retention_hours(retention_days: int) -> int: ...
+
+    async def clear(
+        self,
+        policy: MedallionPolicy,
+        silver_table: str,
+        gold_table: str,
+        dry_run: bool = False,
+    ) -> ClearResult: ...
+
+
 class _MedallionClearMixin:
     """Policy-driven clear operations for Silver/Gold layers.
 
@@ -67,11 +105,8 @@ class _MedallionClearMixin:
     is logged for observability and supports a dry-run mode.
     """
 
-    storage: MedallionStorageProtocol = cast(Any, None)  # Any: host default (PD4)
-    logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
-
     async def clear(
-        self,
+        self: _MedallionLifecycleHostProtocol,
         policy: MedallionPolicy,
         silver_table: str,
         gold_table: str,
@@ -114,7 +149,7 @@ class _MedallionClearMixin:
         return result
 
     def _log_clear_result(
-        self,
+        self: _MedallionLifecycleHostProtocol,
         policy: MedallionPolicy,
         silver_table: str,
         gold_table: str,
@@ -155,15 +190,12 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
     optimization (vacuum/compact) when configured.
     """
 
-    storage: MedallionStorageProtocol = cast(Any, None)  # Any: host default (PD4)
-    logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
-
     # =========================================================================
     # High-level pipeline lifecycle operations
     # =========================================================================
 
     async def prepare_for_run(
-        self,
+        self: _MedallionLifecycleHostProtocol,
         config: PipelineConfig,
         runtime: RuntimeConfig,
     ) -> PrepareResult:
@@ -207,7 +239,7 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
         return PrepareResult(clear_result=result, policy=policy)
 
     async def finalize_run(
-        self,
+        self: _MedallionLifecycleHostProtocol,
         config: PipelineConfig,
         runtime: RuntimeConfig,
         metrics: MetricsPort | None = None,
@@ -286,7 +318,7 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
         return retention_days * 24
 
     async def _optimize_tables(
-        self,
+        self: _MedallionLifecycleHostProtocol,
         silver_table: str,
         gold_table: str,
         retention_hours: int,

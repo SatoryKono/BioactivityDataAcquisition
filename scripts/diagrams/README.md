@@ -55,7 +55,7 @@ python -m scripts.diagrams <command> [args...]
 | `apply-elk`          | `apply_elk_layout.py`                           | Add or audit ELK init            |
 | `convert-provider-diagrams` | `fix/convert_provider_diagrams.py`       | Convert legacy provider metadata |
 | `differentiate-linkstyle` | `differentiate_linkstyle.py`                | Add semantic linkStyle groups    |
-| `fix-operators`      | `fix_mermaid_operators.py`                      | Fix Mermaid operators            |
+| `fix-operators`      | `fix/fix_mermaid_operators.py`                      | Fix Mermaid operators            |
 | `fix-svg-text`       | `add_svg_text_fallback.py`                      | Add SVG text fallback            |
 | `fix-svg-styles`     | `scripts/diagrams/fix/fix_svg_styles.py`         | Inject SVG styles                |
 | `fix-foreign-object` | `strip_svg_foreign_object.py`                   | Strip SVG foreignObject elements |
@@ -87,14 +87,14 @@ python -m scripts.diagrams <command> [args...]
 | Command               | When                                                                                                        | Trigger                                |
 | --------------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | `checks`              | When full diagram validation profile execution is needed from one entrypoint                                | Manual, CI wrappers                    |
-| `lint`                | After editing `.mmd`/`.mermaid` files; validates metadata, naming, staleness, palettes                      | Pre-commit hook + nightly CI           |
+| `lint`                | After editing `.mmd`/`.mermaid` files; validates metadata, naming, staleness, palettes                      | Pre-commit hook + PR CI           |
 | `lint-summarize`      | After `lint` produces a report; generates human-readable summary                                            | Manual, post-lint                      |
-| `lint-budget`         | After lint run; enforces quality budget thresholds                                                          | CI gate (nightly)                      |
-| `check-artifacts`     | After rendering diagrams; validates required SVG artifacts and, when requested, PNG compatibility artifacts | Nightly CI (post-render)               |
-| `check-quality-gates` | Before merge; implements DIAG-T018..T023 regression gates (edge markers, classdefs, node counts)            | CI gate (`docs.yml` + nightly) |
+| `lint-budget`         | After lint run; enforces quality budget thresholds                                                          | Local nightly profile (CI disabled)                      |
+| `check-artifacts`     | After rendering diagrams; validates required SVG artifacts and, when requested, PNG compatibility artifacts | Local post-render (nightly CI disabled)               |
+| `check-quality-gates` | Before merge; implements DIAG-T018..T023 regression gates (edge markers, classdefs, node counts)            | PR gate (`docs.yml`); local nightly profile |
 | `check-visual-smoke`  | After rendering; visual baseline comparison (DIAG-T026)                                                     | Nightly CI                             |
 | `check-svg-text`      | After rendering SVGs; validates text readability (DIAG-T014..T015)                                          | Nightly CI                             |
-| `check-class-methods` | After modifying class diagrams; validates method render integrity                                           | Manual or nightly                      |
+| `check-class-methods` | After modifying class diagrams; validates method render integrity                                           | Manual or local nightly profile                      |
 | `check-pdf-bounds`    | After generating PDF bundles; validates image bounds                                                        | Manual, post-render                    |
 | `check-padding`       | When diagrams have layout issues; analyzes padding problems                                                 | Manual, on-demand                      |
 | `apply-elk`           | When large flowchart diagrams need ELK init or routing normalization                                        | Manual codemod                         |
@@ -115,7 +115,7 @@ python -m scripts.diagrams <command> [args...]
 | `render-views`        | When the views Markdown bundle needs refresh                                                                | Manual, on-demand                      |
 | `render-desc-indexes` | When description indexes drift or card counts change                                                        | Manual, on-demand                      |
 | `generate-dataflows`  | After `chembl_activity` config, filters, transformer, or Silver/Gold contracts change                        | Docs CI drift gate                     |
-| `nightly`             | Full Phase 2 diagram validation (DIAG-T024..T029)                                                           | Scheduled nightly (2:20 UTC)           |
+| `nightly`             | Full Phase 2 diagram validation (DIAG-T024..T029)                                                           | Local nightly profile; scheduled workflow disabled (#11196)           |
 
 ## Other Files
 

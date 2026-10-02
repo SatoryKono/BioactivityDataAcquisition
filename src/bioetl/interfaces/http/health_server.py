@@ -8,13 +8,13 @@ from __future__ import annotations
 
 import asyncio
 import time
-from dataclasses import dataclass
 from typing import cast
 
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
 from bioetl.application.services.quality.quarantine_service import QuarantineService
+from bioetl.composition.observability_runtime import create_run_report_store
 from bioetl.domain.ports import (
     CheckpointPort,
     ClockPort,
@@ -23,6 +23,7 @@ from bioetl.domain.ports import (
     LoggerPort,
     RunLedgerPort,
     RunManifestPort,
+    RunReportStorePort,
     WorkflowManifestPort,
 )
 from bioetl.interfaces.http._forensic_request_budget import (
@@ -34,6 +35,9 @@ from bioetl.interfaces.http._health_server_control_plane_metrics_refresh import 
     refresh_control_plane_metrics,
     run_periodic_control_plane_metrics_refresh,
     stop_control_plane_metrics_refresh,
+)
+from bioetl.interfaces.http._health_server_observability_protocols import (
+    HealthServerControlPlaneDeps as HealthServerControlPlaneDeps,
 )
 from bioetl.interfaces.http._run_explorer_snapshot import (
     RunExplorerSnapshotCache,
@@ -52,38 +56,10 @@ from bioetl.interfaces.http.health_server_state_mixin import HealthServerStateMi
 from bioetl.interfaces.http.processed_records_table import (
     DEFAULT_PROMETHEUS_BASE_URL,
 )
-from bioetl.interfaces.http.types import HealthResponse
-
-# Pure liveness fallback when no exposition adapter is injected (unit tests).
-_DEFAULT_HEALTH_SCRAPE_UP_EXPOSITION = (
-    "# HELP bioetl_health_server_scrape_up Health server /metrics scrape "
-    "liveness (1=serving).\n"
-    "# TYPE bioetl_health_server_scrape_up gauge\n"
-    "bioetl_health_server_scrape_up 1\n"
+from bioetl.interfaces.http.types import (
+    HealthResponse,
+    _StaticHealthMetricsExposition,
 )
-
-
-class _StaticHealthMetricsExposition:
-    """Interfaces-local fallback exposition (no infrastructure import)."""
-
-    def build_exposition(self) -> str:
-        return _DEFAULT_HEALTH_SCRAPE_UP_EXPOSITION
-
-
-@dataclass(frozen=True, slots=True)
-class HealthServerControlPlaneDeps:
-    """Collaborator bag for optional health-server control-plane ports."""
-
-    health_monitor: HealthMonitorPort | None = None
-    quarantine_service: QuarantineService | None = None
-    checkpoint_port: CheckpointPort | None = None
-    run_manifest_port: RunManifestPort | None = None
-    run_ledger_port: RunLedgerPort | None = None
-    workflow_manifest_port: WorkflowManifestPort | None = None
-    control_plane_evidence_service: ControlPlaneEvidenceService | None = None
-    control_plane_integrity_refresher: ControlPlaneMetricsRefresher | None = None
-    metrics_exposition: HealthMetricsExpositionPort | None = None
-    runtime_source_id: str | None = None
 
 
 class HealthServer(
@@ -107,6 +83,7 @@ class HealthServer(
             "control_plane_integrity_refresher",
             "metrics_exposition",
             "runtime_source_id",
+            "run_report_store",
         }
     )
 
@@ -175,6 +152,9 @@ class HealthServer(
                     recognized.get("metrics_exposition"),
                 ),
                 runtime_source_id=cast(str | None, recognized.get("runtime_source_id")),
+                run_report_store=cast(
+                    RunReportStorePort | None, recognized.get("run_report_store")
+                ),
             )
         return control_plane or HealthServerControlPlaneDeps()
 
@@ -201,6 +181,12 @@ class HealthServer(
         self._quarantine_service = deps.quarantine_service
         self._checkpoint_port = deps.checkpoint_port
         self._run_manifest_port = deps.run_manifest_port
+        # Standalone callers retain one composition-owned adapter per host.
+        self._run_report_store = (
+            deps.run_report_store
+            if deps.run_report_store is not None
+            else create_run_report_store()
+        )
         self._run_ledger_port = deps.run_ledger_port
         self._workflow_manifest_port = deps.workflow_manifest_port
         self._control_plane_evidence_service = deps.control_plane_evidence_service

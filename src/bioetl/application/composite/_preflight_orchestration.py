@@ -3,8 +3,9 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
-
+from bioetl.application.composite._preflight_reporting import (
+    PreflightValidationReportingMixin,
+)
 from bioetl.application.composite._preflight_types import (
     ProfileInfo,
     SchemaFields,
@@ -20,14 +21,12 @@ from bioetl.application.composite.helpers.preflight_schema_registry import (
 )
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.normalization.profiles import resolve_normalization_profile
-from bioetl.domain.ports import LoggerPort
 
 
-class PreflightSchemaOrchestrationMixin:
+class PreflightSchemaOrchestrationMixin(PreflightValidationReportingMixin):
     """Schema discovery and dtype extraction helper methods."""
 
     _SCHEMA_REGISTRY: dict[str, type] | None = None
-    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
 
     def _parse_pipeline_identity(self, pipeline_name: str) -> tuple[str, str] | None:
         """Return ``(provider, entity)`` for ``provider_entity`` pipelines."""

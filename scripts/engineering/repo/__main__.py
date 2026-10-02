@@ -31,6 +31,7 @@ Commands:
 
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -46,7 +47,7 @@ from scripts.engineering.common.cli_dispatch import (
 COMMANDS = {
     "check-inventory": "check_scripts_inventory.py",
     "github-settings-review": "github_settings_review.py",
-    "sync-inventory": "sync_scripts_inventory.py",
+    "sync-inventory": "check_scripts_inventory.py",
     "sync-wrapper-caller-matrix": "generate_scripts_wrapper_caller_matrix.py",
     "check-catalog": "check_scripts_catalog.py",
     "check-versions": "check_version_consistency.py",
@@ -117,6 +118,23 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     cmd, rest = args[0], args[1:]
+
+    if cmd == "sync-inventory":
+        parser = argparse.ArgumentParser(
+            description="Sync or validate scripts inventory."
+        )
+        parser.add_argument(
+            "--manifest", default="configs/quality/scripts_inventory_manifest.json"
+        )
+        mode = parser.add_mutually_exclusive_group()
+        mode.add_argument("--write", action="store_true")
+        mode.add_argument("--check", action="store_true")
+        options = parser.parse_args(rest)
+        rest = [
+            "--check" if options.check else "--update",
+            "--manifest",
+            options.manifest,
+        ]
 
     if cmd in {"all", "check-all"}:
         return _run_check_all(rest)

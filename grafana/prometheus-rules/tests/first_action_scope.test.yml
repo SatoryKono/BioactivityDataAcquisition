@@ -2,6 +2,30 @@ rule_files:
   - ../bioetl_workflow_scope.yml
 evaluation_interval: 30s
 tests:
+  - name: Provider actions preserve workflow isolation and route to Overview evidence
+    interval: 1m
+    input_series:
+      - series: 'bioetl_overview_pipeline_run_type_universe{pipeline="uniprot_protein",run_type="incremental"}'
+        values: '1+0x5'
+      - series: 'bioetl_workflow_pipeline_expected{workflow="chembl_baseline",pipeline="chembl_assay",run_type="incremental"}'
+        values: '1+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="provider",pipeline="uniprot_protein",run_type="incremental"}'
+        values: '2+0x5'
+      - series: 'bioetl_l0_input_status_selected{input="provider",pipeline="chembl_assay",run_type="incremental"}'
+        values: '3+0x5'
+    promql_expr_test:
+      - expr: 'max by (workflow, pipeline, action_dashboard_uid, action_scope) (bioetl_first_action{action_target="provider"} > 0)'
+        eval_time: 3m
+        exp_samples:
+          - labels: '{workflow="__standalone__",pipeline="uniprot_protein",action_dashboard_uid="bioetl-overview-v2",action_scope="var-pipeline=uniprot_protein&viewPanel=9480"}'
+            value: 20
+          - labels: '{workflow="chembl_baseline",pipeline="chembl_assay",action_dashboard_uid="bioetl-overview-v2",action_scope="var-pipeline=chembl_assay&viewPanel=9480"}'
+            value: 15
+      - expr: 'count(bioetl_first_action{action_dashboard_uid="bioetl-provider-health-v2"}) or vector(0)'
+        eval_time: 3m
+        exp_samples:
+          - labels: '{}'
+            value: 0
   - name: Standalone pipeline missing Trust is VERIFY and ignores a neighbor workflow
     interval: 1m
     input_series:

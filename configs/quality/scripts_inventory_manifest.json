@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-01T18:55:45.345055+00:00",
+  "generated_at": "2026-10-02T11:36:40.834380+00:00",
   "summary": {
-    "total_scripts": 637,
+    "total_scripts": 635,
     "status_counts": {
-      "active": 339,
-      "supporting": 298
+      "active": 336,
+      "supporting": 299
     },
     "reference_group_coverage": {
       "agents": 10,
       "build": 17,
       "ci": 86,
-      "docs": 261,
+      "docs": 259,
       "other": 48,
-      "scripts": 533,
+      "scripts": 531,
       "skills": 12,
       "tests": 445
     }
@@ -3075,7 +3075,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 379,
+          "line": 374,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         },
@@ -3126,7 +3126,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 376,
+          "line": 371,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
@@ -5802,20 +5802,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 23,
-          "source_group": "docs",
-          "text": "Legacy-примеры (`bash scripts/ci_check_docs_parity.sh`, отдельный GitLab-job)"
-        },
-        {
-          "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 24,
-          "source_group": "docs",
-          "text": "удалены: скрипты `scripts/ci_check_docs_parity.sh` и `scripts/docs_parity_check.py`"
-        },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
           "line": 196,
@@ -5845,7 +5833,7 @@
         },
         {
           "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 33,
+          "line": 29,
           "source_group": "docs",
           "text": "uv run --frozen --no-build python -m scripts.data_quality check-entity-config-parity"
         },
@@ -5921,7 +5909,7 @@
       "references": [
         {
           "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 43,
+          "line": 35,
           "source_group": "docs",
           "text": "`scripts/data_quality/check_entity_config_parity.py` and is invoked through the"
         },
@@ -6668,13 +6656,13 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 43,
+          "line": 57,
           "source_group": "tests",
           "text": "module_path = REPO_ROOT / \"scripts\" / \"diagrams\" / \"fix\" / \"apply_elk_layout.py\""
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 148,
+          "line": 166,
           "source_group": "tests",
           "text": "\"apply_elk_layout.py\","
         },
@@ -6707,13 +6695,13 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 149,
+          "line": 167,
           "source_group": "tests",
           "text": "\"convert_provider_diagrams.py\","
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 157,
+          "line": 175,
           "source_group": "tests",
           "text": "assert not (REPO_ROOT / \"scripts\" / \"convert_provider_diagrams.py\").exists()"
         },
@@ -6764,7 +6752,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 150,
+          "line": 168,
           "source_group": "tests",
           "text": "\"differentiate_linkstyle.py\","
         },
@@ -6799,7 +6787,7 @@
           "path": "scripts/diagrams/README.md",
           "line": 58,
           "source_group": "scripts",
-          "text": "| `fix-operators`      | `fix_mermaid_operators.py`                      | Fix Mermaid operators            |"
+          "text": "| `fix-operators`      | `fix/fix_mermaid_operators.py`                      | Fix Mermaid operators            |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
@@ -6835,7 +6823,7 @@
           "path": "tests/unit/repo_backed/tools/test_fix_mermaid_operators_security.py",
           "line": 17,
           "source_group": "tests",
-          "text": "module_path = repo_root / \"scripts/diagrams/fix_mermaid_operators.py\""
+          "text": "module_path = repo_root / \"scripts/diagrams/fix/fix_mermaid_operators.py\""
         }
       ]
     },
@@ -6910,7 +6898,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 27,
+      "reference_count": 28,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -7240,7 +7228,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 104,
+          "line": 118,
           "source_group": "tests",
           "text": "wrapper_path = REPO_ROOT / \"scripts\" / \"diagrams\" / \"mmdc_wrapper.sh\""
         },
@@ -9560,26 +9548,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 6,
       "references": [
-        {
-          "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 24,
-          "source_group": "docs",
-          "text": "удалены: скрипты `scripts/ci_check_docs_parity.sh` и `scripts/docs_parity_check.py`"
-        },
-        {
-          "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 36,
-          "source_group": "docs",
-          "text": "Retired local-only report (non-CI, не gate): `python3 scripts/docs_parity_check.py`"
-        },
-        {
-          "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 58,
-          "source_group": "docs",
-          "text": "`scripts/docs_parity_check.py` (non-CI, local use only), which writes"
-        },
         {
           "path": "scripts/documentation_governance_check.py",
           "line": 90,
@@ -9609,6 +9579,12 @@
           "line": 1,
           "source_group": "tests",
           "text": "\"\"\"Tests for docs_parity_check.py.\"\"\""
+        },
+        {
+          "path": "tests/unit/scripts/docs/test_docs_parity_check.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.docs_parity_check import DocumentationParityChecker, ParityResult"
         }
       ]
     },
@@ -12854,13 +12830,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
-          "line": 177,
+          "line": 176,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
-          "line": 189,
+          "line": 188,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         }
@@ -16486,7 +16462,7 @@
         },
         {
           "path": "tests/architecture/test_arch_s4_s9_gates.py",
-          "line": 107,
+          "line": 106,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_source_tree_manifest import build_manifest"
         }
@@ -16848,8 +16824,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "tests/unit/repo_backed/scripts/engineering/dev/test_setup_env_wsl_branches.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.run_local_coverage_verify import _windows_bash"
+        },
         {
           "path": "tests/unit/scripts/qa/test_run_local_coverage_verify.py",
           "line": 9,
@@ -16970,7 +16952,7 @@
         },
         {
           "path": "scripts/engineering/qa/refresh_governance_artifacts.py",
-          "line": 554,
+          "line": 563,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
         },
@@ -17398,7 +17380,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 82,
+      "reference_count": 83,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -17642,7 +17624,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 92,
+          "line": 93,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.branch_cleanup import main as branch_cleanup_main"
         }
@@ -17679,7 +17661,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 55,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"check-cleanup-governance\": \"check_cleanup_governance.py\","
         },
@@ -17718,7 +17700,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 53,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"check-actions-runtime-policy\": \"check_github_actions_runtime_policy.py\","
         },
@@ -17778,7 +17760,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 56,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"check-reports-quality-ttl\": \"check_reports_quality_ttl.py\","
         },
@@ -17811,7 +17793,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"check-root-governance-docs\": \"check_root_governance_docs.py\","
         },
@@ -17838,7 +17820,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 58,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"check-root-review-registry\": \"check_root_hygiene_review_registry.py\","
         },
@@ -17901,7 +17883,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"check-catalog\": \"check_scripts_catalog.py\","
         }
@@ -17912,7 +17894,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 24,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -17979,7 +17961,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 52,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"check-versions\": \"check_version_consistency.py\","
         },
@@ -18030,7 +18012,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 64,
+          "line": 65,
           "source_group": "scripts",
           "text": "\"cleanup-branch-candidates\": \"cleanup_branch_candidates.sh\","
         },
@@ -18075,7 +18057,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 59,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"cleanup-root-local-clutter\": \"cleanup_root_local_clutter.py\","
         },
@@ -18112,7 +18094,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"sync-wrapper-caller-matrix\": \"generate_scripts_wrapper_caller_matrix.py\","
         },
@@ -18157,7 +18139,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"github-settings-review\": \"github_settings_review.py\","
         },
@@ -18212,7 +18194,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 60,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"preflight-cleanup\": \"preflight_cleanup.sh\","
         },
@@ -18239,7 +18221,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 63,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"publish-tdx-audit-issues\": \"publish_tdx_audit_issues.py\","
         }
@@ -18283,7 +18265,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 61,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"split-testing-roadmap\": \"split_testing_roadmap_issue.py\","
         },
@@ -18310,30 +18292,11 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 62,
+          "line": 63,
           "source_group": "scripts",
           "text": "\"sync-docs-issues\": \"sync_docs_issues.py\","
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/repo/sync_scripts_inventory.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/__main__.py",
-          "line": 49,
-          "source_group": "scripts",
-          "text": "\"sync-inventory\": \"sync_scripts_inventory.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "compatibility_wrapper",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as the router implementation for the canonical scripts.engineering.repo sync-inventory command while inventory refresh remains exposed through the module entrypoint; keep this file non-active unless direct script execution becomes a governed public surface."
     },
     {
       "path": "scripts/engineering/run.py",
@@ -18356,7 +18319,7 @@
         },
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
-          "line": 117,
+          "line": 123,
           "source_group": "docs",
           "text": "публичные command-модули `interfaces/cli/commands/run.py`,"
         },
@@ -20107,7 +20070,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2446,
+          "line": 2448,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20132,13 +20095,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2492,
+          "line": 2496,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 615,
+          "line": 625,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -20175,13 +20138,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2489,
+          "line": 2493,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 620,
+          "line": 630,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import ("
         },
@@ -20208,7 +20171,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_evidence_readability.py",
-          "line": 864,
+          "line": 862,
           "source_group": "scripts",
           "text": "from ._incident_explanations import explain_incident"
         }
@@ -20244,21 +20207,6 @@
       "next_step": "Keep as the internal discovery-panel transformation imported by render_nav_bus and its tests; this module has no CLI entrypoint."
     },
     {
-      "path": "scripts/ops/observability/grafana/_overall_verdict.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/observability/grafana/_run_explorer_columns.py",
-          "line": 10,
-          "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana._overall_verdict import apply_overall_verdict"
-        }
-      ]
-    },
-    {
       "path": "scripts/ops/observability/grafana/_overview_identity.py",
       "type": "py",
       "status": "active",
@@ -20273,7 +20221,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2544,
+          "line": 2548,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._overview_identity import apply_saved_evidence_readability"
         }
@@ -20294,45 +20242,86 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 60,
+          "line": 62,
           "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana._overview_quality import exclusion_quality_expression"
+          "text": "from scripts.ops.observability.grafana._overview_quality import ("
         }
       ]
     },
     {
       "path": "scripts/ops/observability/grafana/_provider_evidence_columns.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2508,
+          "line": 2512,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2534,
+          "line": 2521,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
+        },
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2538,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Keep the provider evidence column transformation internal to render_nav_bus. This import-only helper exposes no standalone CLI or deployment entrypoint."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/_replay_layout.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2552,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._replay_layout import apply_replay_layout"
+        },
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2579,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._replay_layout import apply_replay_layout"
+        }
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Keep this import-only replay layout transformation behind render_nav_bus; it does not expose a standalone CLI entrypoint."
     },
     {
       "path": "scripts/ops/observability/grafana/_replay_readiness_design.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_evidence_readability.py",
-          "line": 873,
+          "line": 871,
           "source_group": "scripts",
           "text": "from ._replay_readiness_design import apply_replay_readiness_design"
+        },
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2553,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._replay_readiness_design import apply_replay_readiness_design, apply_trust_action_display"
         }
       ]
     },
@@ -20351,7 +20340,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2503,
+          "line": 2507,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         }
@@ -20372,7 +20361,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/_provider_evidence_columns.py",
-          "line": 155,
+          "line": 246,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -20390,7 +20379,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2525,
+          "line": 2529,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -20402,7 +20391,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 625,
+          "line": 635,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -20419,21 +20408,6 @@
       "next_step": "Keep as an internal transformation invoked by render_nav_bus; no standalone command or active CLI entrypoint."
     },
     {
-      "path": "scripts/ops/observability/grafana/_stage_removal_columns.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2517,
-          "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana._stage_removal_columns import ("
-        }
-      ]
-    },
-    {
       "path": "scripts/ops/observability/grafana/_visual_usability.py",
       "type": "py",
       "status": "supporting",
@@ -20448,7 +20422,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2484,
+          "line": 2488,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
@@ -20467,7 +20441,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2497,
+          "line": 2501,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope"
         },
@@ -20690,7 +20664,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 213,
+          "line": 215,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh`."
         }
@@ -20858,7 +20832,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2439,
+          "line": 2441,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
@@ -20876,7 +20850,7 @@
         },
         {
           "path": "tests/integration/test_pipeline_diagnostics_retirement.py",
-          "line": 6,
+          "line": 8,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
@@ -20964,7 +20938,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2612,
+          "line": 2627,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.generate_prometheus_only_dashboards import ("
         },
@@ -20989,7 +20963,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 83,
+          "line": 85,
           "source_group": "other",
           "text": "`python scripts/ops/observability/grafana/generate_trust_validation_fixtures.py`"
         },
@@ -21175,7 +21149,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 215,
+          "line": 217,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`."
         }
@@ -21382,7 +21356,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 85,
+          "line": 87,
           "source_group": "other",
           "text": "`scripts/ops/observability/grafana/run_trust_fixture_closeup_matrix.ps1`."
         }
@@ -21432,7 +21406,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 199,
+          "line": 201,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`."
         },
@@ -21475,7 +21449,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 190,
+          "line": 192,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`."
         },
@@ -21543,7 +21517,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 88,
+          "line": 90,
           "source_group": "other",
           "text": "`python scripts/ops/observability/refresh_visual_json_baseline.py`."
         }
@@ -21734,19 +21708,19 @@
         },
         {
           "path": "docs/03-guides/development/coderabbit-local-reviews.md",
-          "line": 18,
+          "line": 59,
           "source_group": "docs",
           "text": "wsl -d Ubuntu --cd $repoWsl --exec bash scripts/ops/run-coderabbit-reviews.sh --preflight"
         },
         {
           "path": "docs/03-guides/development/coderabbit-local-reviews.md",
-          "line": 21,
+          "line": 62,
           "source_group": "docs",
           "text": "wsl -d Ubuntu --cd $repoWsl --exec bash scripts/ops/run-coderabbit-reviews.sh changes --uncommitted"
         },
         {
           "path": "docs/03-guides/development/coderabbit-local-reviews.md",
-          "line": 24,
+          "line": 65,
           "source_group": "docs",
           "text": "wsl -d Ubuntu --cd $repoWsl --exec bash scripts/ops/run-coderabbit-reviews.sh changes --base origin/main --dir src/bioetl/interfaces"
         },
@@ -22387,7 +22361,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 2696,
+          "line": 2698,
           "source_group": "other",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         }
@@ -22474,7 +22448,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 338,
+          "line": 333,
           "source_group": "tests",
           "text": "root / \"scripts/ops/runtime/mcp/apply-shared-to-devin.py\""
         }

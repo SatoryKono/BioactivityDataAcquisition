@@ -54,7 +54,7 @@ jobs:
           # Do not restore --ignore-vuln for that advisory.
           # Do not add osv-scanner.toml and do not dismiss Scorecard
           # Vulnerabilities (OpenSSF check #1294).
-          UV_CACHE_DIR=/tmp/.uv-cache uv export --no-hashes --no-emit-project --extra dev > /tmp/pip-audit-requirements.txt
+          UV_CACHE_DIR=/tmp/.uv-cache uv export --frozen --no-hashes --no-emit-project --all-extras > /tmp/pip-audit-requirements.txt
           UV_CACHE_DIR=/tmp/.uv-cache uv run --frozen --no-build pip-audit --strict \
             -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache
 
@@ -109,6 +109,13 @@ jobs:
         with:
           scan-args: |-
             --lockfile=uv.lock
+            --lockfile=package-lock.json
+            --lockfile=.github/actions/setup-mermaid/package-lock.json
+            --lockfile=.github/tooling/jscpd/package-lock.json
+            --lockfile=scripts/ai/gemini/npm-tooling/package-lock.json
+            --lockfile=grafana/plugins/bioetl-scenes-app/package-lock.json
+            --lockfile=grafana/plugins/bioetl-selectorshell-panel/package-lock.json
+            --lockfile=grafana/tooling/router-v7-bridge/package-lock.json
             --format=json
             --output-file=osv-results.json
 

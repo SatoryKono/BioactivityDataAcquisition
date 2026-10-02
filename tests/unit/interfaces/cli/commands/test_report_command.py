@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import click
 import pytest
@@ -21,6 +21,43 @@ from bioetl.interfaces.cli.commands.report import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_report_diff_shares_store_within_invocation_and_isolates_next_call() -> None:
+    stores = [MagicMock(), MagicMock()]
+    with (
+        patch(
+            "bioetl.interfaces.cli.commands.report.create_run_report_store",
+            side_effect=stores,
+        ) as factory,
+        patch(
+            "bioetl.interfaces.cli.commands.report.load_pipeline_report",
+            return_value={},
+        ) as loader,
+        patch(
+            "bioetl.interfaces.cli.commands.report.diff_pipeline_reports",
+            return_value={},
+        ),
+    ):
+        command = [
+            "diff",
+            "--pipeline",
+            "chembl_assay",
+            "--run-id-a",
+            "a",
+            "--run-id-b",
+            "b",
+        ]
+        runner = CliRunner()
+        assert runner.invoke(_as_command(report), command).exit_code == 0
+        assert runner.invoke(_as_command(report), command).exit_code == 0
+        assert factory.call_count == 2
+        assert [call.kwargs["store"] for call in loader.call_args_list] == [
+            stores[0],
+            stores[0],
+            stores[1],
+            stores[1],
+        ]
 
 
 def _as_command(command: object) -> click.Command:

@@ -141,7 +141,7 @@ jobs:
   security:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['security'] == 'required' }}
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/security.yml@f7c2614dd16824c700f4b5486c529ae97a3ea519
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/security.yml@47691d8c4acdf68f4ad8bafaeaa46473caf72394
     permissions:
       contents: read
 

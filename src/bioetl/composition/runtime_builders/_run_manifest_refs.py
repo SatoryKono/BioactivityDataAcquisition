@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from dataclasses import dataclass
-from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._run_manifest_context_updates import (
     build_contract_identity_field_values,
@@ -25,51 +23,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 
 if TYPE_CHECKING:
     from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
-    from bioetl.domain.control_plane import RunArtifactRef
     from bioetl.infrastructure.config.settings_api import Settings
-
-
-def control_plane_root(settings: Settings, leaf: str) -> Path:
-    """Typed forwarding wrapper for the control-plane root helper."""
-    # Import leaf helper via importlib so static fan-in analysis does not
-    # charge this facade against the path-helper module (ARCH-CONT-07).
-    from importlib import import_module
-
-    impl = cast(
-        Callable[..., Path],
-        import_module("bioetl.composition.control_plane_paths").control_plane_root,
-    )
-    return impl(settings, leaf)
-
-
-def build_planned_artifacts(
-    *,
-    settings: Settings,
-    provider: str,
-    entity: str,
-    run_id: str | None = None,
-    pipeline_name: str | None = None,
-    workflow_id: str = "standalone",
-    debug_export_root: str | None = None,
-) -> tuple[RunArtifactRef, ...]:
-    """Typed forwarding wrapper for planned-artifact materialization."""
-    from importlib import import_module
-
-    impl = cast(
-        Callable[..., tuple["RunArtifactRef", ...]],
-        import_module(
-            "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
-        ).build_planned_artifacts,
-    )
-    return impl(
-        settings=settings,
-        provider=provider,
-        entity=entity,
-        run_id=run_id,
-        pipeline_name=pipeline_name,
-        workflow_id=workflow_id,
-        debug_export_root=debug_export_root,
-    )
 
 
 def build_run_source_refs(
@@ -123,26 +77,6 @@ def build_run_source_refs(
             input_snapshots=input_snapshots,
         ),
     )
-
-
-def __getattr__(name: str) -> object:
-    """Lazily expose data-root mode helpers without static fan-in."""
-    if name in {
-        "DataRootMode",
-        "is_explicit_data_root_configured",
-        "resolve_data_root_mode",
-    }:
-        from importlib import import_module
-
-        return getattr(
-            import_module(
-                "bioetl.composition.runtime_builders.run_manifest_data_roots"
-            ),
-            name,
-        )
-    if name in {"control_plane_root", "build_planned_artifacts"}:
-        return globals()[name]
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 @dataclass(frozen=True, slots=True)

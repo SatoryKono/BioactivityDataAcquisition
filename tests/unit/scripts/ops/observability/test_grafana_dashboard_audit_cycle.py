@@ -390,25 +390,25 @@ def test_grafana_audit_preflight_accepts_explicit_terminal_evidence_gaps(
     classification: str,
 ) -> None:
     manifest = _terminal_render_manifest(
-        uid="bioetl-runtime", classification=classification
+        uid="bioetl-overview-v2", classification=classification
     )
 
     error = preflight_subject._validate_manifest_render_contract(
         manifest,
-        expected_uids=("bioetl-runtime",),
+        expected_uids=("bioetl-overview-v2",),
     )
 
     assert error is None
 
 
 def test_grafana_audit_preflight_requires_expanded_rows_and_exact_panel_ids() -> None:
-    manifest = _terminal_render_manifest(uid="bioetl-runtime")
+    manifest = _terminal_render_manifest(uid="bioetl-overview-v2")
     manifest["expand_collapsed_rows"] = False
 
     expansion_error = preflight_subject._validate_manifest_render_contract(
         manifest,
-        expected_uids=("bioetl-runtime",),
-        expected_panel_ids={"bioetl-runtime": (13,)},
+        expected_uids=("bioetl-overview-v2",),
+        expected_panel_ids={"bioetl-overview-v2": (13,)},
     )
 
     assert expansion_error == "render manifest must prove expand_collapsed_rows=true"
@@ -416,8 +416,8 @@ def test_grafana_audit_preflight_requires_expanded_rows_and_exact_panel_ids() ->
     manifest["expand_collapsed_rows"] = True
     coverage_error = preflight_subject._validate_manifest_render_contract(
         manifest,
-        expected_uids=("bioetl-runtime",),
-        expected_panel_ids={"bioetl-runtime": (13, 14)},
+        expected_uids=("bioetl-overview-v2",),
+        expected_panel_ids={"bioetl-overview-v2": (13, 14)},
     )
 
     assert coverage_error is not None
@@ -954,7 +954,7 @@ def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
     monkeypatch.setattr(
         cycle_subject,
         "_discover_filled_dashboard_uids",
-        lambda _config, *, app_base_url: ("bioetl-dq-v2", "bioetl-runtime"),
+        lambda _config, *, app_base_url: ("bioetl-dq-v2", "bioetl-overview-v2"),
     )
     monkeypatch.setattr(
         cycle_subject.rerender,

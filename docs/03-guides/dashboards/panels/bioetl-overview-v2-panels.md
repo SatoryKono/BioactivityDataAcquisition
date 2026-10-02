@@ -155,11 +155,11 @@ uses the remaining 17 columns.
 - **Purpose:** Explain diagnostics navigation and handoffs.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 22. Review Run Identity
+### 22. Run Identity
 - **Type:** Table
-- **Purpose:** Show run ID, pipeline, run type, and timestamp.
-- **Data sources:** BioETL Ops HTTP control-plane identity endpoint
-  `/ops/control-plane/identity-table`; this is not a Prometheus panel.
+- **Purpose:** Show identity for the selected run alongside its status evidence.
+- **Data sources:** BioETL Ops HTTP selected-run status endpoint
+  `/ops/observability/selected-run-status`; this is not a Prometheus panel.
 
 ### 23. Review Processed Records — removed
 
@@ -267,10 +267,12 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | ID | Title | Type |
 | --- | --- | --- |
 | 99 | Inspect Scope & Evidence | text |
-| 9604 | Review Overall Verdict | stat |
-| 9603 | Review Selected Run Status | table |
-| 9002 | Review Run Domains | table |
-| 9300 | Review Run Identity | table |
-| 9399 | Inspect Additional Run Identity | row |
-| 9390 | Inspect Full Run Identity | table |
+| 9604 | Overall Verdict | stat |
+| 9002 | Run Domains | table |
+| 9603 | Selected Run Status | table |
+| 9300 | Run Identity | table |
+| 9480 | Provider Evidence | table |
+| 9481 | Provider Check | stat |
+| 9460 | Inspect Selected Run Stages | table |
+| 9482 | Data Quality | canvas |
 <!-- END SHIPPED PANEL INVENTORY -->

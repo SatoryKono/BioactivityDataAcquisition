@@ -10,13 +10,13 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Integration tests for cross-scope marker contract - required titles by transition."""
 
-import json
 from pathlib import Path
 
 import pytest
 
 from tests.integration._grafana_test_support import (
     _collect_dashboard_links,
+    get_dashboard_panels,
     load_dashboard,
 )
 
@@ -28,39 +28,12 @@ def test_cross_scope_links_use_required_titles():
     # Define required title patterns for specific dashboard transitions
     # Based on dashboard-audit-checklist.md section 17.2
     required_transitions = {
-        # From Overview (epic #6570/#6647 naming).
-        ("bioetl-overview-v2", "bioetl-runtime"): [
-            "3. Pipeline Diagnostics",
-            "Open Runtime",
-            "Open Pipeline Diagnostics",
-            "Open 3. Pipeline Diagnostics",
-            "2. Runtime",
-        ],
         ("bioetl-overview-v2", "bioetl-control-plane-v1"): [
-            "1. Trust",
+            "Replay Readiness",
             "Open Control Plane",
             "Open Trust",
         ],
-        ("bioetl-overview-v2", "bioetl-dq-v2"): [
-            "5. Data Quality",
-            "Open Data Quality",
-        ],
-        ("bioetl-overview-v2", "bioetl-provider-health-v2"): [
-            "4. Provider Health",
-            "Open Provider Health",
-        ],
-        # From Runtime / Pipeline Diagnostics
-        ("bioetl-runtime", "bioetl-dq-v2"): [
-            "Open Data Quality",
-            "Inspect DQ",
-            "5. Data Quality",
-        ],
-        ("bioetl-runtime", "bioetl-provider-health-v2"): [
-            "Open Provider Health",
-            "Inspect Provider",
-            "4. Provider Health",
-        ],
-        # Workflow overview + Silver Reject Explorer retired.
+        ("bioetl-overview-v2", "bioetl-dq-v2"): ["Data Quality"],
     }
 
     for (source_uid, target_uid), allowed_titles in required_transitions.items():
@@ -103,66 +76,41 @@ def test_cross_scope_links_have_required_tooltip_tokens():
                 )
 
 
-def test_workflow_dashboard_provenance_banner_makes_scope_split_explicit() -> None:
-    """Retired workflow overview dashboard must not reappear in grafana/dashboards."""
-    workflow_overview = Path("grafana/dashboards/bioetl-workflow-overview.json")
-    runtime = Path("grafana/dashboards/bioetl-runtime.json")
-    assert not workflow_overview.exists(), (
-        "bioetl-workflow-overview.json was retired in grafana simplification "
-        "(#6570/#6647); workflow-band evidence lives on bioetl-runtime"
-    )
-    assert runtime.is_file(), "bioetl-runtime.json must host workflow-band evidence"
+def test_retired_dashboards_resolve_to_current_evidence_owners() -> None:
+    for name in (
+        "bioetl-workflow-overview",
+        "bioetl-runtime",
+        "bioetl-provider-health-v2",
+    ):
+        assert not (Path("grafana/dashboards") / f"{name}.json").exists()
+    incident = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    assert {9996, 9997} <= {p["id"] for p in get_dashboard_panels(incident)}
+    assert {9480, 9481} <= {p["id"] for p in get_dashboard_panels(overview)}
 
 
 def test_workflow_status_panel_repeats_selected_range_contract() -> None:
-    """Retired workflow overview contract is enforced via absence + runtime presence."""
-    workflow_overview = Path("grafana/dashboards/bioetl-workflow-overview.json")
-    runtime = Path("grafana/dashboards/bioetl-runtime.json")
-    assert not workflow_overview.exists()
-    assert runtime.is_file()
-    runtime_payload = json.loads(runtime.read_text(encoding="utf-8"))
-    assert isinstance(runtime_payload.get("panels"), list)
-    assert runtime_payload["panels"], (
-        "runtime dashboard must retain workflow-band panels"
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9996)
+    description = panel["description"]
+    assert "Workflow only, not a single Run ID" in description
+    assert "Pipeline does not filter this count" in description
+    assert "not current Workflow or Pipeline Health" in description
+    expression = panel["targets"][0]["expr"]
+    assert 'workflow=~"$workflow"' in expression
+    assert "[$__range]" in expression
+    assert "run_id" not in expression
 
 
-def test_provider_health_descriptions_separate_global_and_selected_scope() -> None:
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json").read_text(
-            encoding="utf-8"
+def test_provider_evidence_is_saved_run_scoped() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    for panel_id in (9480, 9481):
+        panel = panels[panel_id]
+        assert "SELECTED RUN" in panel["description"]
+        assert "UNKNOWN" in panel["description"]
+        assert panel["targets"][0]["url"].startswith(
+            "/ops/observability/selected-run-status?"
         )
-    )
-
-    def _walk(nodes: object) -> dict[object, dict[str, object]]:
-        found: dict[object, dict[str, object]] = {}
-        if not isinstance(nodes, list):
-            return found
-        for panel in nodes:
-            if not isinstance(panel, dict):
-                continue
-            pid = panel.get("id")
-            if pid is not None:
-                found[pid] = panel
-            found.update(_walk(panel.get("panels")))
-        return found
-
-    panels = _walk(dashboard.get("panels"))
-
-    status_description = str(panels[9401].get("description", ""))
-    assert "selected provider" in status_description
-    assert "Fleet panels" in status_description
-    assert "all providers" in status_description
-
-    provenance_content = str(panels[9400].get("options", {}).get("content", ""))
-    assert "GLOBAL" in provenance_content
-    assert "SELECTED PROVIDER" in provenance_content
-
-    for panel_id in (9101, 9102):
-        description = str(panels[panel_id].get("description", ""))
-        assert "GLOBAL" in description
-        assert "independent of the selected Provider" in description
-
-    top_causes_description = str(panels[9103].get("description", ""))
-    assert "GLOBAL" in top_causes_description
-    assert "independent of the selected Provider" in top_causes_description
+        assert "run_id=${run_id}" in panel["targets"][0]["url"]
+    assert "not live fleet health" in panels[9481]["description"]

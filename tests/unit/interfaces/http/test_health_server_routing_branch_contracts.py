@@ -31,6 +31,7 @@ class _ObservabilityHost:
         self._forensic_endpoint_limiter = asyncio.Semaphore(1)
         self._prometheus_base_url = "http://prometheus.test"
         self._run_ledger_port: object | None = None
+        self._run_report_store = object()
 
     @staticmethod
     def _read_required_param(query: dict[str, str], name: str) -> str:
@@ -410,12 +411,17 @@ async def test_report_lists_bound_limits_and_reject_invalid_values(
         pipeline_name: str | None,
         limit: int,
         selected_run_id: str | None = None,
+        store: object,
     ) -> dict[str, object]:
+        assert store is host._run_report_store
         del selected_run_id
         calls.append(("pipeline", pipeline_name, limit))
         return {"items": []}
 
-    def list_workflow(*, workflow_name: str | None, limit: int) -> dict[str, object]:
+    def list_workflow(
+        *, workflow_name: str | None, limit: int, store: object
+    ) -> dict[str, object]:
+        assert store is host._run_report_store
         calls.append(("workflow", workflow_name, limit))
         return {"items": []}
 

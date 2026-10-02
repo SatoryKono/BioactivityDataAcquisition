@@ -48,9 +48,6 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/composition/providers/__init__.py": "public_package_facade",
     "src/bioetl/composition/registry_api.py": "public_facade",
     "src/bioetl/composition/runtime_builders/__init__.py": "public_package_facade",
-    "src/bioetl/composition/runtime_builders/_run_manifest_refs.py": (
-        "compatibility_facade"
-    ),
     "src/bioetl/composition/runtime_builders/inputs_resolver.py": "public_facade",
     "src/bioetl/domain/__init__.py": "public_package_facade",
     "src/bioetl/domain/behavior/__init__.py": "public_package_facade",
@@ -60,7 +57,6 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/domain/filtering/__init__.py": "public_package_facade",
     "src/bioetl/domain/normalization/profiles/__init__.py": ("public_package_facade"),
     "src/bioetl/domain/ports/__init__.py": "public_package_facade",
-    "src/bioetl/domain/serialization/__init__.py": "compatibility_facade",
     "src/bioetl/domain/types/__init__.py": "public_package_facade",
     "src/bioetl/domain/value_objects/__init__.py": "public_package_facade",
     "src/bioetl/infrastructure/adapters/http/health_monitor.py": (

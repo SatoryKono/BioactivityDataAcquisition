@@ -18,7 +18,7 @@
       ],
       "duplication_clusters": 0,
       "files": 200,
-      "total_loc": 24774,
+      "total_loc": 24786,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.388,
       "max_internal_fan_in": 5,
@@ -2253,10 +2253,10 @@
         "src/bioetl/application/services/control_plane/"
       ],
       "duplication_clusters": 0,
-      "files": 129,
-      "total_loc": 15557,
+      "files": 130,
+      "total_loc": 15558,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.403,
+      "helper_function_ratio": 0.399,
       "max_internal_fan_in": 1,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
@@ -2265,7 +2265,7 @@
       },
       "internal_fan_in_census": {
         "distribution": {
-          "0": 22,
+          "0": 23,
           "1": 107
         },
         "modules": [
@@ -2813,6 +2813,11 @@
             ]
           },
           {
+            "module": "bioetl.application.services.control_plane.manifest.input_snapshot_resolution",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
             "module": "bioetl.application.services.control_plane.manifest.inspection_artifact_refs",
             "fan_in": 1,
             "runtime_importers": [
@@ -3255,10 +3260,10 @@
         "src/bioetl/composition/runtime_builders/"
       ],
       "duplication_clusters": 0,
-      "files": 57,
-      "total_loc": 6760,
+      "files": 55,
+      "total_loc": 6641,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.343,
+      "helper_function_ratio": 0.342,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.runner_inputs",
       "bounded_growth_budgets": {
@@ -3268,7 +3273,7 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 3,
-          "1": 28,
+          "1": 26,
           "2": 26
         },
         "modules": [
@@ -3388,13 +3393,6 @@
             ]
           },
           {
-            "module": "bioetl.composition.runtime_builders._run_manifest_control_plane_refs",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.runtime_builders.run_manifest_builder"
-            ]
-          },
-          {
             "module": "bioetl.composition.runtime_builders._run_manifest_creation_support",
             "fan_in": 1,
             "runtime_importers": [
@@ -3415,13 +3413,6 @@
             "runtime_importers": [
               "bioetl.composition.runtime_builders._run_manifest_context_updates",
               "bioetl.composition.runtime_builders.run_manifest_contract_identity"
-            ]
-          },
-          {
-            "module": "bioetl.composition.runtime_builders._run_manifest_planned_artifacts",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.runtime_builders._run_manifest_creation_support_helpers"
             ]
           },
           {
@@ -3653,7 +3644,7 @@
             "module": "bioetl.composition.runtime_builders.run_manifest_support",
             "fan_in": 2,
             "runtime_importers": [
-              "bioetl.composition.runtime_builders._run_manifest_control_plane_refs",
+              "bioetl.composition.runtime_builders._run_manifest_creation_support_helpers",
               "bioetl.composition.runtime_builders.run_manifest_builder"
             ]
           },

@@ -4,20 +4,16 @@ import { locationService } from '@grafana/runtime';
 import { Button, Stack, Text, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 
-import {
-  buildNextShellUpdate,
-  buildSelectorContextUrl,
-  hasExactRunSelection,
-  summarizeSyncState,
-} from '../sync';
-import {
-  defaultOptions,
-  SelectorContextPayload,
-  SelectorShellOptions,
-  VisibleSelectorState,
-} from '../types';
+import { buildNextShellUpdate, buildSelectorContextUrl, hasExactRunSelection, summarizeSyncState } from '../sync';
+import { defaultOptions, SelectorContextPayload, SelectorShellOptions, VisibleSelectorState } from '../types';
 
 interface Props extends PanelProps<SelectorShellOptions> {}
+
+interface SelectorContextResult {
+  url: string;
+  payload: SelectorContextPayload | null;
+  error: string;
+}
 
 function getStyles() {
   return {
@@ -44,9 +40,7 @@ function getStyles() {
 export const SimplePanel: React.FC<Props> = ({ options, replaceVariables }) => {
   const styles = useStyles2(getStyles);
   const mergedOptions = { ...defaultOptions, ...options };
-  const [payload, setPayload] = useState<SelectorContextPayload | null>(null);
-  const [error, setError] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<SelectorContextResult | null>(null);
   const appliedSignatureRef = useRef<string>('');
 
   const current = useMemo<VisibleSelectorState>(
@@ -59,18 +53,18 @@ export const SimplePanel: React.FC<Props> = ({ options, replaceVariables }) => {
     [replaceVariables]
   );
 
+  const url = buildSelectorContextUrl(mergedOptions.selectorContextPath, {
+    runId: current.runId,
+    workflow: current.workflow,
+    pipeline: current.pipeline,
+    runType: current.runType,
+  });
+  const isLoading = result?.url !== url;
+  const payload = isLoading ? null : (result?.payload ?? null);
+  const error = isLoading ? '' : (result?.error ?? '');
+
   useEffect(() => {
     const controller = new AbortController();
-    setIsLoading(true);
-    setError('');
-
-    const url = buildSelectorContextUrl(mergedOptions.selectorContextPath, {
-      runId: current.runId,
-      workflow: current.workflow,
-      pipeline: current.pipeline,
-      runType: current.runType,
-    });
-
     fetch(url, {
       credentials: 'same-origin',
       signal: controller.signal,
@@ -80,7 +74,10 @@ export const SimplePanel: React.FC<Props> = ({ options, replaceVariables }) => {
           throw new Error(`selector-context HTTP ${response.status}`);
         }
         const nextPayload = (await response.json()) as SelectorContextPayload;
-        setPayload(nextPayload);
+        if (controller.signal.aborted) {
+          return;
+        }
+        setResult({ url, payload: nextPayload, error: '' });
 
         const nextUpdate = buildNextShellUpdate(current, nextPayload, {
           applyRunId: hasExactRunSelection(current.runId),
@@ -88,10 +85,7 @@ export const SimplePanel: React.FC<Props> = ({ options, replaceVariables }) => {
         });
 
         // Exact-run path also requires autoApplyExactRunContext.
-        if (
-          nextPayload.resolved_via === 'selected_run_id' &&
-          !mergedOptions.autoApplyExactRunContext
-        ) {
+        if (nextPayload.resolved_via === 'selected_run_id' && !mergedOptions.autoApplyExactRunContext) {
           return;
         }
         if (nextUpdate == null) {
@@ -109,21 +103,11 @@ export const SimplePanel: React.FC<Props> = ({ options, replaceVariables }) => {
           return;
         }
         const message = reason instanceof Error ? reason.message : String(reason);
-        setError(message);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
+        setResult({ url, payload: null, error: message });
       });
 
     return () => controller.abort();
-  }, [
-    current,
-    mergedOptions.autoApplyExactRunContext,
-    mergedOptions.autoApplyLastRunDefaults,
-    mergedOptions.selectorContextPath,
-  ]);
+  }, [current, mergedOptions.autoApplyExactRunContext, mergedOptions.autoApplyLastRunDefaults, url]);
 
   const resolvedText = summarizeSyncState(current, payload);
 

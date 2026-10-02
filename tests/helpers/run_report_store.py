@@ -1,5 +1,6 @@
 """In-memory run-report storage double."""
 
+import hashlib
 from os.path import normpath
 from pathlib import Path
 
@@ -27,6 +28,9 @@ class MemoryReportStore:
         if path not in self.files:
             raise FileNotFoundError(path)
         return self.files[path]
+
+    def sha256(self, path: str) -> str:
+        return hashlib.sha256(self.read_text(path).encode("utf-8")).hexdigest()
 
     def is_file(self, path: str) -> bool:
         return path in self.files

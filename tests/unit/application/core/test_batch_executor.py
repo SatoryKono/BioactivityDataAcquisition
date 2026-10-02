@@ -515,9 +515,22 @@ class TestBatchExecutorExecute:
 
         await batch_executor.execute(limit=None)
 
-        # batch_size=10 → one flush at bronze=10; interval=5 ⇒ one confirmed checkpoint
-        assert mock_checkpoint_manager.save_checkpoint.call_count == 1
+        # One periodic save plus final evidence before active checkpoint cleanup.
+        assert mock_checkpoint_manager.save_checkpoint.call_count == 2
         mock_checkpoint_manager.save_checkpoint.assert_awaited_with(10)
+
+    @pytest.mark.parametrize("record_count", [0, 3])
+    async def test_short_success_persists_final_checkpoint(
+        self, batch_executor, mock_services, mock_checkpoint_manager, record_count
+    ):
+        async def mock_fetch(**kwargs):
+            for i in range(record_count):
+                yield {"id": str(i), "value": 10}
+
+        mock_services.data_source.fetch = mock_fetch
+        await batch_executor.execute(limit=1000)
+
+        mock_checkpoint_manager.save_checkpoint.assert_awaited_once_with(record_count)
 
     async def test_execute_handles_shutdown(
         self, batch_executor, mock_services, mock_checkpoint_manager, shutdown_signal

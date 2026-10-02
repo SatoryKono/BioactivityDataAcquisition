@@ -135,6 +135,7 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     def get_settings_fn() -> SimpleNamespace:
         return SimpleNamespace(
             data_dir=str(tmp_path),
+            bronze_path=tmp_path / "output" / "bronze",
             pipeline=SimpleNamespace(heartbeat_interval=30),
             test_mode=False,
         )

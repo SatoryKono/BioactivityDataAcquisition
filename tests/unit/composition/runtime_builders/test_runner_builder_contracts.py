@@ -193,7 +193,7 @@ def test_runner_builder_leaf_keeps_runtime_builder_stages_split() -> None:
     }.issubset(imported_modules)
     assert {
         "bioetl.composition.runtime_builders.run_manifest_data_roots",
-        "bioetl.composition.runtime_builders._run_manifest_planned_artifacts",
+        "bioetl.composition.runtime_builders.run_manifest_support",
         "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context",
     }.isdisjoint(imported_modules)
     assert "FileRunManifestStore" not in source

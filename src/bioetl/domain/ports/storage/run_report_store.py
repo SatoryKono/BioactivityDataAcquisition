@@ -23,6 +23,10 @@ class RunReportStorePort(Protocol):
         """Read UTF-8 text from ``path``."""
         ...
 
+    def sha256(self, path: str) -> str:
+        """Hash the exact persisted bytes of an artifact."""
+        ...
+
     def read_identity_text(self, path: str) -> str:
         """Read current identity/schema JSON without retaining full report bodies."""
         ...

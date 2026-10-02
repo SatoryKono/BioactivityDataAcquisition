@@ -132,11 +132,15 @@ def test_active_docs_sync_workflow_selector_and_cta_titles() -> None:
     assert "single-select with Include All across primary dashboards" in (
         variable_reference
     )
-    # bioetl-workflow-overview.json was retired (#6570/#6647); workflow-band
-    # evidence now ships on bioetl-runtime (see panel-title-inventory).
+    # Workflow evidence now lives in Incident Workspace; retired dashboards
+    # must stay absent from the generated inventory.
     assert "bioetl-workflow-overview.json" not in panel_inventory
-    assert "| bioetl-runtime.json |" in panel_inventory
-    assert "Track Failed Workflow Runs" in panel_inventory
+    assert "| bioetl-runtime.json |" not in panel_inventory
+    assert "| bioetl-run-explorer-v1.json |" in panel_inventory
+    assert "Inspect Recent Runs (last 10)" in panel_inventory
+    assert "| bioetl-incident-v1.json | 9996 | Track Failed Workflow Runs |" in (
+        panel_inventory
+    )
 
     for token in ("Next Diagnostic Surface", "Workflow Scope"):
         assert token not in panel_inventory
@@ -238,27 +242,6 @@ def test_panel_docs_match_shipped_dashboard_panel_titles() -> None:
             9402,
             9403,
         ),
-        (
-            "bioetl-overview-v2",
-            "Review Run Identity",
-            "Review Processed Records",
-            9300,
-            9301,
-        ),
-        (
-            "bioetl-provider-health-v2",
-            "Inspect Run Identity",
-            "Inspect Processed Records",
-            9402,
-            9403,
-        ),
-        (
-            "bioetl-runtime",
-            "Inspect Pipeline Identity",
-            "Inspect Processed Records",
-            9402,
-            9403,
-        ),
     ),
 )
 def test_http_identity_panel_docs_match_shipped_datasource_contract(
@@ -300,3 +283,33 @@ def test_http_identity_panel_docs_match_shipped_datasource_contract(
         "this is not a Prometheus panel",
     ):
         assert token in processed_section
+
+
+def test_overview_identity_docs_match_selected_run_status_contract() -> None:
+    dashboard_path = DASHBOARD_DIR / "bioetl-overview-v2.json"
+    panel = _dashboard_panel_by_id(dashboard_path, 9300)
+    doc_text = (PANEL_DOCS_DIR / "bioetl-overview-v2-panels.md").read_text(
+        encoding="utf-8"
+    )
+    section = _documented_panel_section(doc_text, "Run Identity")
+    assert panel["datasource"] == "BioETL Ops HTTP"
+    assert str(panel["targets"][0]["url"]).startswith(
+        "/ops/observability/selected-run-status"
+    )
+    for token in (
+        "BioETL Ops HTTP",
+        "/ops/observability/selected-run-status",
+        "this is not a Prometheus panel",
+    ):
+        assert token in section
+    panels = _iter_dashboard_panels(
+        json.loads(dashboard_path.read_text(encoding="utf-8"))["panels"]
+    )
+    assert 9301 not in {item["id"] for item in panels}
+
+
+@pytest.mark.parametrize(
+    "dashboard_name", ("bioetl-runtime", "bioetl-provider-health-v2")
+)
+def test_retired_dashboard_json_stays_absent(dashboard_name: str) -> None:
+    assert not (DASHBOARD_DIR / f"{dashboard_name}.json").exists()

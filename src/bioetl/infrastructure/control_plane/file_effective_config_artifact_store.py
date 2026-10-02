@@ -7,6 +7,9 @@ from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 
+from bioetl.domain.control_plane.effective_config_runtime_identity import (
+    normalize_persisted_runtime_overrides,
+)
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.atomic import AtomicWriteError, atomic_write_text
 
@@ -224,6 +227,12 @@ def _normalize_semantic_payload_for_conflict_check(
 
     normalized_semantic_artifact = dict(semantic_artifact)
     normalized[_SEMANTIC_ARTIFACT_KEY] = normalized_semantic_artifact
+
+    overrides = semantic_artifact.get("runtime_overrides")
+    if isinstance(overrides, dict):
+        normalized_semantic_artifact["runtime_overrides"] = (
+            normalize_persisted_runtime_overrides(overrides)
+        )
 
     source_refs = semantic_artifact.get("source_refs")
     if not isinstance(source_refs, list):

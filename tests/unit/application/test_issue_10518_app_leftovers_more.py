@@ -33,11 +33,11 @@ pytestmark = pytest.mark.unit
 
 
 class _PreflightHost(PreflightSchemaOrchestrationMixin):
-    _logger = MagicMock()
+    """Exercise preflight behavior with explicitly injected dependencies."""
 
 
 def test_preflight_identity_empty_entity_and_alias_skip() -> None:
-    host = _PreflightHost()
+    host = _PreflightHost(logger=MagicMock())
     assert host._parse_pipeline_identity("chembl_") is None
     assert host._parse_pipeline_identity("nounderscore") is None
     result: dict[str, str] = {}

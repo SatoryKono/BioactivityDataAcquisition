@@ -47,8 +47,7 @@ class PostrunDQReportService(PostrunFailureHandlingMixin):
         gold_dq_config: GoldDQConfigPort | None,
         warning_allowlist: tuple[type[BaseException], ...],
     ) -> None:
-        self._logger = logger
-        self._runtime = runtime
+        super().__init__(runtime, logger)
         self._dq_report_service = dq_report_service
         self._bronze_dq_config = bronze_dq_config
         self._silver_dq_config = silver_dq_config

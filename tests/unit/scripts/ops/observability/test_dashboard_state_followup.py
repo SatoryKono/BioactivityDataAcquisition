@@ -40,7 +40,7 @@ def test_full_evidence_tables_do_not_truncate_ranked_results():
             assert panels[full]["options"]["footer"]["enablePagination"]
 
 
-def test_trust_measures_only_reasons_for_multiline_row_height():
+def test_compact_trust_keeps_multiline_reasons_in_drilldown():
     dashboard = json.loads(
         (DASH / "bioetl-control-plane-v1.json").read_text(encoding="utf-8")
     )
@@ -53,5 +53,10 @@ def test_trust_measures_only_reasons_for_multiline_row_height():
             for p in o["properties"]
         )
     ]
-    assert wrapped == ["reasons_text"]
+    assert wrapped == []
+    assert any(
+        item["matcher"].get("options") == "trust_reasons_action"
+        and any(prop["id"] == "links" and prop["value"] for prop in item["properties"])
+        for item in panel["fieldConfig"]["overrides"]
+    )
     assert not panel["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"]

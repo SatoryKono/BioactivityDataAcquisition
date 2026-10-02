@@ -49,7 +49,9 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
     """Collapsing saved identity must not hide stages or their quality assessment."""
     import json
 
-    dashboard = json.loads(Path("grafana/dashboards/bioetl-overview-v2.json").read_text(encoding="utf-8"))
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-overview-v2.json").read_text(encoding="utf-8")
+    )
     panels = {panel["id"]: panel for panel in dashboard["panels"]}
     provider, stages, quality = (panels[i] for i in (9480, 9460, 9482))
     assert stages["gridPos"]["y"] == provider["gridPos"]["y"] + provider["gridPos"]["h"]
@@ -57,11 +59,17 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
     assert 9450 not in panels
     assert 9452 not in {p["id"] for p in get_dashboard_panels(dashboard)}
     assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
-    from scripts.ops.observability.grafana._overview_quality import exclusion_quality_expression
+    from scripts.ops.observability.grafana._overview_quality import (
+        exclusion_quality_expression,
+    )
 
     expression = exclusion_quality_expression()
     assert quality["targets"][0]["root_selector"] == expression
-    assert quality["targets"][0]["uql"] == 'parse-json | jsonata "' + expression.replace('"', '\\"') + '"'
+    assert (
+        quality["targets"][0]["uql"]
+        == 'parse-json | jsonata "' + expression.replace('"', '\\"') + '"'
+    )
+
 
 DESIGN_SYSTEM = Path("docs/03-guides/dashboards/design-system.md")
 MONITORING_COMPOSE = Path("docker-compose.monitoring.yml")
@@ -570,7 +578,9 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
             item for item in get_dashboard_panels(dashboard) if item.get("id") == 9460
         )
         targets = panel["targets"]
-        assert [target["refId"] for target in targets] == (["A", "B", "C"] if name == "bioetl-overview-v2" else ["A", "B"])
+        assert [target["refId"] for target in targets] == (
+            ["A", "B", "C"] if name == "bioetl-overview-v2" else ["A", "B"]
+        )
         removal_target = targets[1]
         assert removal_target["url"].endswith("format=pipeline_run_report_json")
         assert removal_target["parser"] == "uql"

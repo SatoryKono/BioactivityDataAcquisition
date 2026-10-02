@@ -4,17 +4,9 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Protocol
 
-from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.models.metadata import SilverMetadata
-from bioetl.domain.ports import (
-    AuditPort,
-    LineageStorePort,
-    LoggerPort,
-    MetadataCoordinatorPort,
-    MetricsPort,
-)
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.infrastructure.storage.silver.operations.metadata_dq_operations import (
@@ -29,6 +21,9 @@ from bioetl.infrastructure.storage.silver.operations.metadata_dq_operations impo
     should_skip_silver_metadata_write_operation,
     write_silver_metadata_file_operation,
 )
+from bioetl.infrastructure.storage.silver.operations.metadata_runtime_support import (
+    _SilverMetadataWriterProtocol,
+)
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -38,43 +33,47 @@ if TYPE_CHECKING:
 __all__ = ["_SilverMetadataContextFacade"]
 
 
+class _SilverMetadataContextHostProtocol(_SilverMetadataWriterProtocol, Protocol):
+    """Internal Silver host, including overridable compatibility hooks."""
+
+    async def _resolve_finalization_dq_metrics(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        quarantined_count: int | None = None,
+        validation_errors: Sequence[str] | None = None,
+    ) -> BatchDQMetrics: ...
+
+    async def _resolve_version_after(self, table_path: str) -> int | None: ...
+
+
 class _SilverMetadataContextFacade:
     """Context, DQ, and sidecar-persistence methods for metadata services."""
 
-    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
-    _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
-    _audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)
-    _metadata_writer: object | None = cast(Any, None)  # Any: host default (PD4)
-    _metadata_coordinator: MetadataCoordinatorPort | None = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _lineage_store: LineageStorePort | None = cast(Any, None)  # Any: host default (PD4)
-    _dq_calculator: DQMetricsCalculator | None = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _host: object | None = cast(Any, None)  # Any: host default (PD4)
-
     @property
-    def _flat_structure(self) -> bool:
+    def _flat_structure(self: _SilverMetadataContextHostProtocol) -> bool:
         """Resolve flat-structure metadata mode from the current host, if any."""
         return get_flat_structure(self)
 
     @property
-    def _transform_version(self) -> str | None:
+    def _transform_version(self: _SilverMetadataContextHostProtocol) -> str | None:
         """Resolve transform version from the current host, if any."""
         return get_transform_version(self)
 
     @property
-    def _transform_steps(self) -> tuple[str, ...]:
+    def _transform_steps(self: _SilverMetadataContextHostProtocol) -> tuple[str, ...]:
         """Resolve transform steps from the current host with a stable fallback."""
         return get_transform_steps(self)
 
-    def _resolve_manifest_id(self, *, records: list[BronzeRecord]) -> str | None:
+    def _resolve_manifest_id(
+        self: _SilverMetadataContextHostProtocol, *, records: list[BronzeRecord]
+    ) -> str | None:
         """Resolve control-plane manifest id from records, host, or coordinator."""
         return resolve_silver_manifest_id(self, records=records)
 
     async def _persist_silver_metadata(
-        self,
+        self: _SilverMetadataContextHostProtocol,
         *,
         metadata: SilverMetadata,
         table_name: str,
@@ -89,7 +88,7 @@ class _SilverMetadataContextFacade:
         )
 
     async def _resolve_finalization_dq_metrics(
-        self,
+        self: _SilverMetadataContextHostProtocol,
         *,
         table_name: str,
         records: list[BronzeRecord],
@@ -105,16 +104,20 @@ class _SilverMetadataContextFacade:
             validation_errors=validation_errors,
         )
 
-    async def _resolve_version_after(self, table_path: str) -> int | None:
+    async def _resolve_version_after(
+        self: _SilverMetadataContextHostProtocol, table_path: str
+    ) -> int | None:
         """Read Delta version via host helper when available."""
         return await resolve_version_after_operation(self, table_path)
 
-    async def _get_delta_version(self, table_path: str) -> int | None:
+    async def _get_delta_version(
+        self: _SilverMetadataContextHostProtocol, table_path: str
+    ) -> int | None:
         """Compatibility hook expected by canonical metadata helpers."""
         return await self._resolve_version_after(table_path)
 
     async def _compute_dq_metrics(
-        self,
+        self: _SilverMetadataContextHostProtocol,
         table_name: str,
         records: list[BronzeRecord],
         quarantined_count: int = 0,
@@ -129,7 +132,7 @@ class _SilverMetadataContextFacade:
         )
 
     async def compute_dq_metrics(
-        self,
+        self: _SilverMetadataContextHostProtocol,
         arrow_data: pa.Table,
         *,
         quarantined_count: int | None = None,
@@ -144,7 +147,7 @@ class _SilverMetadataContextFacade:
         )
 
     def _should_skip_silver_metadata_write(
-        self,
+        self: _SilverMetadataContextHostProtocol,
         *,
         records: list[BronzeRecord],
         table_path: str,
@@ -159,7 +162,7 @@ class _SilverMetadataContextFacade:
         )
 
     async def _write_silver_metadata_file(
-        self,
+        self: _SilverMetadataContextHostProtocol,
         *,
         table_path: str,
         metadata: SilverMetadata,

@@ -165,6 +165,50 @@ def test_write_workflow_run_report(tmp_path: Path) -> None:
     )
 
 
+@pytest.mark.parametrize("domain", ["Control Plane", "Workflow"])
+def test_late_assessment_rebinds_digest_and_preserves_revision(
+    tmp_path: Path, domain: str
+) -> None:
+    from bioetl.application.services.run_reports.artifact_digest import (
+        canonical_report_sha256,
+    )
+    from bioetl.application.services.run_reports.snapshots import publish_snapshot
+
+    store = FileRunReportStoreAdapter()
+    path = tmp_path / "pipeline-run-report.json"
+    report = {
+        "schema_version": "pipeline_run_report_v2",
+        "identity": {
+            "pipeline_name": "chembl_protein_class",
+            "run_id": "run1",
+            "status": "success",
+        },
+        "observations": {domain: {"verdict": "INCOMPLETE"}},
+        "artifacts": [{"kind": "pipeline_run_report_json", "ref": str(path)}],
+    }
+    original = publish_snapshot(report, path, store=store)
+    old_revision = (
+        tmp_path
+        / "status-revisions"
+        / (original["selected_run_snapshot"]["revision"] + ".json")
+    )
+    old_bytes = old_revision.read_bytes()
+    updated = {
+        key: value for key, value in original.items() if key != "selected_run_snapshot"
+    }
+    updated["observations"] = {domain: {"verdict": "OK"}}
+    updated["assessment_at"] = "2026-10-01T19:28:27+00:00"
+    published = publish_snapshot(updated, path, store=store)
+
+    assert published["artifacts"][0]["sha256"] == canonical_report_sha256(published)
+    assert published["artifacts"][0]["sha256"] != original["artifacts"][0]["sha256"]
+    assert old_revision.read_bytes() == old_bytes
+    assert (
+        published["selected_run_snapshot"]["revision"]
+        != (original["selected_run_snapshot"]["revision"])
+    )
+
+
 def test_publish_snapshot_rejects_workflow_report_schema(tmp_path: Path) -> None:
     from bioetl.application.services.run_reports.snapshots import publish_snapshot
 

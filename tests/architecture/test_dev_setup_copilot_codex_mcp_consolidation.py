@@ -274,7 +274,6 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
     scripts_payload = json.loads(
         (root / "scripts/ai/.mcp.json").read_text(encoding="utf-8")
     )
-    zed_payload = json.loads((root / ".zed/mcp.json").read_text(encoding="utf-8"))
     devin_settings = json.loads(
         (root / ".devin/config.json").read_text(encoding="utf-8")
     )
@@ -284,7 +283,6 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
 
     expected_servers = workspace_payload["mcpServers"]
     assert scripts_payload["mcpServers"] == expected_servers
-    assert zed_payload["mcpServers"] == expected_servers
     devin_servers = devin_payload["mcpServers"]
     assert set(devin_servers) == set(expected_servers)
     assert devin_payload == setup_mcp._render_devin_mcp_payload(root)
@@ -311,17 +309,14 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
         "read_config_from",
         "hooks",
     }
-    assert devin_settings["permissions"]["ask"] == [
-        "Read(**/.env*)",
-        "Write(**/.env*)",
-    ]
+    assert devin_settings["permissions"]["ask"] == ["Read(**/.env*)"]
+    assert "Write(**/.env*)" in devin_settings["permissions"]["deny"]
     assert devin_settings["read_config_from"]["agents_standard"] is True
 
     absolute_path = re.compile(r"^(?:/|[A-Za-z]:[\\/])")
     for payload in (
         workspace_payload,
         scripts_payload,
-        zed_payload,
         devin_settings,
         devin_payload,
     ):

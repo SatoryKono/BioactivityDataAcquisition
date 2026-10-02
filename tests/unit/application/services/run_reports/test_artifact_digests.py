@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 
 import pytest
@@ -52,6 +53,34 @@ def test_late_observation_rebinds_self_digest_and_preserves_old_revision(
     assert published["selected_run_snapshot"]["revision"] != previous["revision"]
     assert verify_snapshot(published["selected_run_snapshot"])
     assert store.read_text(previous_path.as_posix()) == retained
+
+
+def test_writer_hashes_selected_store_even_when_local_path_exists(
+    tmp_path: Path,
+) -> None:
+    from bioetl.application.services.run_reports.writer import _stored_sha256
+
+    path = tmp_path / "report.md"
+    path.write_bytes(b"unrelated local file")
+    store = MemoryReportStore()
+    store.write_text(str(path), "selected backend\r\n")
+    assert (
+        _stored_sha256(path, store)
+        == hashlib.sha256(b"selected backend\r\n").hexdigest()
+    )
+
+
+def test_file_store_digest_preserves_newline_bytes(tmp_path: Path) -> None:
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+
+    path = tmp_path / "report.md"
+    raw = b"first\r\nsecond\r\n"
+    path.write_bytes(raw)
+    assert (
+        FileRunReportStoreAdapter().sha256(str(path)) == hashlib.sha256(raw).hexdigest()
+    )
 
 
 def test_writer_records_canonical_json_and_markdown_digests(tmp_path: Path) -> None:

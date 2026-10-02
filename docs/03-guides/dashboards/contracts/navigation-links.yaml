@@ -256,7 +256,7 @@ required_panel_links_by_uid:
       target_uid: bioetl-run-explorer-v1
       link_titles:
         - Open Run Explorer
-  bioetl-provider-health-v2:
+  bioetl-provider-health-v2: []
   bioetl-incident-v1:
     - panel_id: 2010
       target_uid: "${__data.fields.action_dashboard_uid}"

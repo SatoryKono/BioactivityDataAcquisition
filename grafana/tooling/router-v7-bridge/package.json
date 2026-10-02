@@ -1,0 +1,41 @@
+{
+  "name": "@bioetl/grafana-router-v7-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs",
+      "default": "./index.mjs"
+    }
+  },
+  "scripts": {
+    "test": "node --test bridge.test.mjs",
+    "build": "esbuild index.mjs --bundle --platform=browser --outfile=dist/bridge.js",
+    "typecheck": "tsc --noEmit --strict --module NodeNext --moduleResolution NodeNext --target ES2022 --skipLibCheck typecheck.test.mts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "react-router-v7": "npm:react-router@7.18.4"
+  },
+  "peerDependencies": {
+    "react": ">=18 <20",
+    "react-dom": ">=18 <20",
+    "react-router-dom": "^5.3.4"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "jsdom": "26.1.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-router-dom": "5.3.4",
+    "typescript": "5.9.3",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@types/react-router-dom": "5.3.3"
+  },
+  "types": "./index.d.ts"
+}
