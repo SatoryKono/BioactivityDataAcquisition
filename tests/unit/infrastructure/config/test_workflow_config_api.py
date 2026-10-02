@@ -282,6 +282,7 @@ def test_chembl_baseline_workflow_config_declares_dependency_minimal_reconciliat
         "reference_key": "target_id",
         "primary_keys": ["assay_id"],
         "action": "delete_orphans",
+        "require_closed_cohort": True,
         "nulls_equal": False,
     }
 
@@ -301,6 +302,7 @@ def test_chembl_baseline_workflow_config_declares_dependency_minimal_reconciliat
         "reference_key": "publication_id",
         "primary_keys": ["assay_id"],
         "action": "delete_orphans",
+        "require_closed_cohort": True,
         "nulls_equal": False,
     }
 
@@ -319,6 +321,7 @@ def test_chembl_baseline_workflow_config_declares_dependency_minimal_reconciliat
         "reference_key": "target_id",
         "primary_keys": ["target_id"],
         "action": "delete_orphans",
+        "require_closed_cohort": True,
         "nulls_equal": False,
     }
 
@@ -339,6 +342,7 @@ def test_chembl_baseline_workflow_config_declares_dependency_minimal_reconciliat
         "reference_key": "publication_id",
         "primary_keys": ["publication_id"],
         "action": "delete_orphans",
+        "require_closed_cohort": True,
         "nulls_equal": False,
     }
 

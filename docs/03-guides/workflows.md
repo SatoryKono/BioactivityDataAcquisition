@@ -734,3 +734,22 @@ being labelled `gold_filter_exclusion`. The pipeline report
 `contract_summary.rejection_details` groups bounded counts by reason, rule,
 field and operator; it omits record values and exception text. Legacy reports
 retain their original reason codes. Rules are unchanged by this diagnostic fix.
+
+
+### Bounded ChEMBL reference cohorts
+
+`chembl_core` and `chembl_baseline` select reference IDs from the Gold output
+of their successful assay step. The `reference_cohort` binding identifies the
+producer step, table, source column, and target filter field. It is included in
+the workflow manifest so changing the binding changes the execution identity.
+The resolver reads only rows carrying that producer run ID, checks their count
+against the saved run result, and rejects a key set larger than the requested
+record limit. Empty or unavailable cohorts fail closed rather than launching an
+unfiltered reference extraction.
+
+For these workflows, `require_closed_cohort: true` verifies that every selected
+source row has a matching reference. Missing references fail the step without
+mutation. This proves closure of the selected cohort, not completeness of the
+entire provider database. It does not authorize deletion based on independently
+limited extracts. Existing destructive reconciliation still requires its
+reference-completeness evidence when closed-cohort verification is not selected.

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, replace
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -102,12 +102,21 @@ async def execute_pipeline_step(
     workflow_context_labels: Mapping[str, str],
     step_started_callback: Callable[..., None] | None,
     workflow_run_id: str | None,
+    cohort_resolver: Callable[
+        [WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]
+    ]
+    | None = None,
+    upstream_outputs: Mapping[str, object] | None = None,
 ) -> WorkflowStepExecutionResult:
     """Run one pipeline step and project step-level metrics."""
     if step_started_callback is not None:
         step_started_callback(step, fingerprint=None)
     started = monotonic()
     try:
+        if step.reference_cohort is not None:
+            if cohort_resolver is None:
+                raise ValueError("reference_cohort resolver unavailable")
+            step = await cohort_resolver(step, upstream_outputs or {})
         step_options = replace(
             run_options_from_config(step.run_options),
             workflow_id=workflow_name,

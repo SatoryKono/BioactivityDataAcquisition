@@ -24,6 +24,16 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, slots=True)
+class WorkflowReferenceCohort:
+    """Derive a reference extract from one successful upstream Gold run."""
+
+    step_id: str
+    table: str
+    column: str
+    filter_field: str
+
+
+@dataclass(frozen=True, slots=True)
 class WorkflowStepConfig:
     """Declarative pipeline step in a workflow DAG."""
 
@@ -33,6 +43,7 @@ class WorkflowStepConfig:
     run_options: WorkflowRunOptionsConfig = field(
         default_factory=WorkflowRunOptionsConfig
     )
+    reference_cohort: WorkflowReferenceCohort | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,6 +74,18 @@ class WorkflowConfig:
 
     def __post_init__(self) -> None:
         topologically_sorted_step_ids(cast("Sequence[_WorkflowStepLike]", self.steps))
+        for step in self.pipeline_steps:
+            if step.reference_cohort is not None:
+                cohort = step.reference_cohort
+                if cohort.step_id not in step.depends_on:
+                    raise ValueError(
+                        "reference_cohort requires a direct upstream dependency"
+                    )
+                source = self.get_step(cohort.step_id)
+                if not isinstance(source, WorkflowStepConfig):
+                    raise ValueError("reference_cohort requires a pipeline producer")
+                if source.pipeline_name != cohort.table.replace(".", "_", 1):
+                    raise ValueError("reference_cohort table must match its producer")
 
     @property
     def step_ids(self) -> tuple[str, ...]:
