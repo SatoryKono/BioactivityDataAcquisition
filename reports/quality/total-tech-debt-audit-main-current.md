@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `2dd4e80638760db026d8cccb93f9a4e4799af11805dfe180ce7d96327efecc1c`
+Evidence surface SHA-256: `95cfdf4410acb78b07426f001e3fcb20e0306a0b2dd12ab888b3b72f809c23c7`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "2dd4e80638760db026d8cccb93f9a4e4799af11805dfe180ce7d96327efecc1c",
+  "evidence_surface_sha256": "95cfdf4410acb78b07426f001e3fcb20e0306a0b2dd12ab888b3b72f809c23c7",
   "metrics": {
     "architecture_integral_score": 9.47,
     "architecture_interpretation": "good_targeted_improvements",
@@ -48,7 +48,7 @@ Refresh reason: Reconcile generated metadata while preserving the historical aud
 
 ## Current metadata refresh — 2026-10-02 (#11846)
 
-Source commit: `81e1e43485072922b624e7d1123da0594a293c5f`.
+Source commit: `8f024f97cb10d87d2d12b31f7a4282aac1cf895c`.
 Current generated metadata: 46/46 debt gates pass; architecture score `9.47`
 (`good_targeted_improvements`); debt-governance gates passing. These results
 do not establish full coverage acceptance or a release PASS.
@@ -58,12 +58,17 @@ commit and audit date remain unchanged. This metadata rebind is not a new
 repository-wide architecture audit or a fresh coverage measurement.
 
 The module inventory retains 2521 measured rows, while the live source tree
-contains 2541 Python modules: 20 modules have no inventory row. The
+contains 2542 Python modules: 21 modules have no inventory row. The
 `test_module_coverage_inventory_covers_every_source_module` guard fails.
 Its source-tree digest is
 refreshed without adopting a new coverage XML. Full 17-group coverage producer
 acceptance remains unverified under #11745 (still open); zero unmeasured and
 uncovered rows do not prove that acceptance. No overall release PASS is claimed.
+Commit `6b7e9cd8ff8f` added 20 of those paths without a new coverage XML.
+Nineteen of them are unmeasured (`coverage_xml_has_no_class_entry`) and fail
+`module_coverage_unmeasured_modules` (`max_count: 0`). This refresh keeps the
+last authoritative row set at the same `source_tree_sha256` and does not raise
+that ratchet.
 
 The live cast census is 353 total / 112 unjustified (previously 370 / 129).
 Hotspot observations after source_tree_sha256 fcbcdec5: runtime-builders LOC
