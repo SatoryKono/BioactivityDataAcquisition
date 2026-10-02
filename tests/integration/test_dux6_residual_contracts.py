@@ -68,8 +68,6 @@ def test_provenance_panels_share_readability_contract() -> None:
     specs = {
         "bioetl-control-plane-v1.json": 9400,
         "bioetl-overview-v2.json": 99,
-        "bioetl-runtime.json": 9400,
-        "bioetl-provider-health-v2.json": 9400,
         "bioetl-dq-v2.json": 9400,
         "bioetl-incident-v1.json": 9400,
         "bioetl-run-explorer-v1.json": 1,
@@ -100,8 +98,10 @@ def test_provenance_panels_share_readability_contract() -> None:
         if compact_banner:
             assert "font-size:16px" in content, filename
             assert "padding:4px 10px" in content or "padding:0 6px" in content, filename
-            assert "background:" not in content, filename
-            assert "background-color" not in content, filename
+            backgrounds = re.findall(r"background(?:-color)?:([^;\"]+)", content)
+            assert all(
+                value.strip() in {"none", "transparent"} for value in backgrounds
+            ), filename
         else:
             assert '<div style="font-size:18px;font-weight:700">' in content, filename
             assert all(token in content for token in required_css), filename
@@ -160,11 +160,17 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     assert "$exists(items)" in selector
     assert "$count(items) = 0" in selector
     assert '"pipeline": "VALID EMPTY"' in selector
-    assert selector.endswith(
-        ': items.($merge([$, {"overview_handoff": "Open", '
-        '"diagnostics_handoff": "Open", "provider_handoff": "Open", '
-        '"quality_handoff": "Open"}]))'
-    )
+    assert ": items.($merge([$, {" in selector
+    for field in ("overview", "diagnostics", "provider", "quality"):
+        assert f'"{field}_handoff": "Open"' in selector
+    assert '"run_label": run_id' in selector
+    assert '"workflow_id": workflow_id != "" ? workflow_id : "N/A"' in selector
+    for field in ("workflow", "pipeline"):
+        assert (
+            f'"{field}_passport_path": $substringAfter({field}_passport_url,'
+            in selector
+        )
+    assert selector.endswith("}]))")
     assert target.get("url") == (
         "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10"
         "&run_id=${run_id}&view=recent&workflow=${workflow}"
@@ -205,28 +211,30 @@ def test_pfill_11_dq_freshness_is_not_a_selected_run_panel() -> None:
 
 
 def test_pfill_10_provider_missing_series_has_reason_and_action() -> None:
-    data = json.loads(
-        (DASH / "bioetl-provider-health-v2.json").read_text(encoding="utf-8")
-    )
+    data = json.loads((DASH / "bioetl-overview-v2.json").read_text(encoding="utf-8"))
     panels = {panel.get("id"): panel for panel in _walk(data.get("panels"))}
     assert not {9401, 9101, 9104} & set(panels)
-    verdict = panels[9461]
-    evidence = panels[9460]
+    verdict = panels[9481]
+    evidence = panels[9480]
 
     description = str(verdict.get("description") or "").lower()
     assert "unknown" in description
     assert "not live fleet health" in description
     evidence_description = str(evidence.get("description") or "").lower()
     assert "unknown" in evidence_description or "valid empty" in evidence_description
-    link_titles = [
-        str(link.get("title") or "")
-        for link in verdict.get("links") or []
-        if isinstance(link, dict)
-    ]
-    assert any(
-        "pipeline diagnostics" in title.lower() or "run explorer" in title.lower()
-        for title in link_titles
+    report_links = next(
+        prop["value"]
+        for override in evidence["fieldConfig"]["overrides"]
+        if override["matcher"] == {"id": "byName", "options": "Evidence"}
+        for prop in override["properties"]
+        if prop["id"] == "links"
     )
+    assert len(report_links) == 1
+    assert (
+        "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}"
+        in report_links[0]["url"]
+    )
+    assert "run_id=${run_id:percentencode}" in report_links[0]["url"]
 
 
 def test_percent_scores_integer_precision() -> None:
@@ -242,7 +250,7 @@ def test_percent_scores_integer_precision() -> None:
 
 def test_primary_status_documents_unknown_class() -> None:
     for path, status_id in (
-        (DASH / "bioetl-runtime.json", 9998),
+        (DASH / "bioetl-incident-v1.json", 9401),
         (DASH / "bioetl-overview-v2.json", 9603),
     ):
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -252,7 +260,10 @@ def test_primary_status_documents_unknown_class() -> None:
             (status.get("fieldConfig") or {}).get("defaults", {}).get("noValue") or ""
         ).lower()
         assert "unknown" in desc or "unknown" in no_value
-        assert "evidence incomplete" in desc or "missing" in desc
+        if path.name == "bioetl-incident-v1.json":
+            assert "current" in desc and "run id does not filter" in desc
+        else:
+            assert "evidence incomplete" in desc or "missing" in desc
     dq = json.loads((DASH / "bioetl-dq-v2.json").read_text(encoding="utf-8"))
     selected = next(p for p in _walk(dq.get("panels")) if p.get("id") == 9406)
     assert selected["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"

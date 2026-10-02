@@ -636,18 +636,30 @@ def test_dq_renderer_copy_matches_shipped() -> None:
         ROW_9450_DESCRIPTION,
         STATUS_DESCRIPTION,
     )
-    from scripts.ops.observability.grafana.render_nav_bus import _DQ_SCOPE_HTML
+    from scripts.ops.observability.grafana.render_nav_bus import (
+        _DQ_SCOPE_HTML,
+        HTTP_EVIDENCE_STATES,
+    )
 
     panels = _dq_panels_by_id()
     assert panels[9400]["options"]["content"] == _DQ_SCOPE_HTML
     assert str(panels[9406].get("description") or "").startswith(STATUS_DESCRIPTION)
-    assert panels[9403]["description"] == _PROCESSED_RECORDS_DESCRIPTION
+    assert (
+        panels[9403]["description"]
+        == f"{_PROCESSED_RECORDS_DESCRIPTION} {HTTP_EVIDENCE_STATES}"
+    )
     assert (
         panels[9403]["fieldConfig"]["defaults"]["noValue"] == _PROCESSED_RECORDS_NOVALUE
     )
     assert panels[9450]["description"] == ROW_9450_DESCRIPTION
-    assert panels[9451]["description"] == _DQ_DOMAINS_DESCRIPTION
-    assert panels[9452]["description"] == _DQ_IDENTITY_DESCRIPTION
+    assert (
+        panels[9451]["description"]
+        == f"{_DQ_DOMAINS_DESCRIPTION} {HTTP_EVIDENCE_STATES}"
+    )
+    assert (
+        panels[9452]["description"]
+        == f"{_DQ_IDENTITY_DESCRIPTION} {HTTP_EVIDENCE_STATES}"
+    )
     assert _BRONZE_PERCENTAGE_DISPLAY == "percentage of Bronze"
     mappings: dict[str, Any] = {}
     for override in panels[9451].get("fieldConfig", {}).get("overrides", []):

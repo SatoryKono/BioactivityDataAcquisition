@@ -48,14 +48,13 @@ def test_nav_bus_complete_without_truncation() -> None:
         for chip in (
             "Replay Readiness",
             "Run Overview",
-            "Pipeline Diagnostics",
-            "Provider Health",
-            "Data Quality",
             "6. Incident Workspace",
             "Run Explorer",
         ):
             assert chip in content, f"{path.name} missing chip {chip}"
-        assert "aria-current" in content
+        for retired in ("Pipeline Diagnostics", "Provider Health", "Data Quality"):
+            assert retired not in content
+        assert ("aria-current" in content) == (data["uid"] != "bioetl-dq-v2")
 
 
 def test_no_raw_endpoints_or_valid_empty_tokens_in_text_bodies() -> None:

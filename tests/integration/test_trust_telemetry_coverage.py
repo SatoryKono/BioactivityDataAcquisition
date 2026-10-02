@@ -26,7 +26,7 @@ def test_gateway_persistence_file_is_on_a_named_volume() -> None:
 
 def test_promtool_scenarios_cover_the_shipped_panel_queries() -> None:
     dashboard = json.loads(
-        (ROOT / "grafana/dashboards/bioetl-control-plane-v1.json").read_text(
+        (ROOT / "grafana/dashboards/bioetl-incident-v1.json").read_text(
             encoding="utf-8"
         )
     )

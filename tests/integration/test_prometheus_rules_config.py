@@ -1279,14 +1279,16 @@ def test_overview_next_action_route_priority_scores_are_ordered() -> None:
     assert by_reason["workflow_scope_requires_review"] == 10
     assert by_reason["no_recent_activity_or_unknown_state"] == 5
 
-    # Gold lifecycle handoff stays on Runtime board (gold write missing is runtime-owned).
+    # Gold lifecycle saved evidence belongs to Run Overview after the five-dashboard cutover.
     gold_rule = next(
         rule
         for rule in route_rules
         if rule.get("labels", {}).get("action_reason") == "gold_lifecycle_blocking"
     )
     assert gold_rule.get("labels", {}).get("action_target") == "runtime"
-    assert gold_rule.get("labels", {}).get("action_dashboard_uid") == "bioetl-runtime"
+    assert (
+        gold_rule.get("labels", {}).get("action_dashboard_uid") == "bioetl-overview-v2"
+    )
 
     workflow_rule = next(
         rule
@@ -1295,7 +1297,7 @@ def test_overview_next_action_route_priority_scores_are_ordered() -> None:
         == "workflow_scope_requires_review"
     )
     assert workflow_rule.get("labels", {}).get("action_dashboard_uid") == (
-        "bioetl-runtime"
+        "bioetl-overview-v2"
     )
 
     provider_rule = next(
@@ -1304,8 +1306,9 @@ def test_overview_next_action_route_priority_scores_are_ordered() -> None:
         if rule.get("labels", {}).get("action_reason") == "provider_global_degradation"
     )
     assert provider_rule.get("labels", {}).get("action_dashboard_uid") == (
-        "bioetl-provider-health-v2"
+        "bioetl-overview-v2"
     )
+    assert "viewPanel=9480" in provider_rule["expr"]
     # Provider severity remains global (scalar max); pipeline context is URL-layer only.
     assert "scalar(" in str(provider_rule.get("expr", ""))
 

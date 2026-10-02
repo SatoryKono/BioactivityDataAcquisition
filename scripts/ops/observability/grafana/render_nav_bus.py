@@ -38,6 +38,11 @@ if __package__ in {None, ""}:
         sys.path.insert(0, root_str)
 DASH_DIR = ROOT / "grafana" / "dashboards"
 CUSTOM_WIDTH = "custom.width"
+HTTP_EVIDENCE_STATES = (
+    "VALID EMPTY means an empty successful response; it does not replace "
+    "UNKNOWN for missing required evidence. Backend failure renders as "
+    "QUERY ERROR and must not be interpreted as an empty successful response."
+)
 
 # Full portfolio bus (order is normative).
 BUS: list[dict[str, str]] = [
@@ -2554,6 +2559,11 @@ def apply_to_dashboard(
             "/d/bioetl-overview-v2/2-overview",
         )
         .replace("Open Provider Health", "Open Provider Evidence")
+        .replace(
+            "Handoff: Provider Health",
+            "Handoff: CURRENT provider signals in Pipeline fleet and range on this page; "
+            "saved Provider Evidence is in Run Overview.",
+        )
     )
     from scripts.ops.observability.grafana._overview_identity import (
         apply_saved_evidence_readability,
@@ -2707,6 +2717,14 @@ def apply_to_dashboard(
             panel.setdefault("fieldConfig", {}).setdefault("defaults", {}).setdefault(
                 "custom", {}
             ).setdefault("minWidth", 50)
+        if any(
+            target.get("url", "").startswith(("/ops/", "/health/"))
+            for target in panel.get("targets", [])
+        ):
+            http_states = HTTP_EVIDENCE_STATES
+            description = panel.get("description", "").rstrip()
+            if http_states not in description:
+                panel["description"] = f"{description} {http_states}".strip()
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

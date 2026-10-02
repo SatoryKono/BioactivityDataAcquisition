@@ -1893,7 +1893,7 @@
           "id": 2003,
           "type": "table",
           "title": "Inspect Provider Suspects",
-          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: Provider Health ",
+          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: CURRENT provider signals in Pipeline fleet and range on this page; saved Provider Evidence is in Run Overview. ",
           "gridPos": {
             "h": 4,
             "w": 24,
@@ -2552,7 +2552,7 @@
             "h": 5
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",
@@ -3803,7 +3803,7 @@
           "id": 9463,
           "type": "stat",
           "title": "Review Total Run Duration",
-          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN.",
+          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "gridPos": {
             "x": 0,
             "y": 67,
@@ -11362,7 +11362,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -11665,7 +11665,7 @@
             "h": 12
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Domain verdicts of this Run ID; this is not the page status. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · Domain verdicts of this Run ID; this is not the page status. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -11911,7 +11911,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Full identifiers of this Run ID; the short table is Inspect Run Identity on the first screen. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay.",
+          "description": "SELECTED RUN · Full identifiers of this Run ID; the short table is Inspect Run Identity on the first screen. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",

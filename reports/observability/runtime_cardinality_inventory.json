@@ -235,7 +235,6 @@
     "bioetl_dq_current_reason",
     "bioetl_dq_current_status",
     "bioetl_dq_dispositions_total",
-    "bioetl_dq_first_window_reason",
     "bioetl_dq_monitor_disabled_total",
     "bioetl_dq_monitor_enabled",
     "bioetl_dq_records_quarantined_total",
@@ -275,7 +274,6 @@
     "bioetl_infrastructure_validated",
     "bioetl_l0_input_status",
     "bioetl_l0_input_status_selected",
-    "bioetl_l0_next_action_no_route",
     "bioetl_l0_next_action_route",
     "bioetl_l0_status",
     "bioetl_l1_control_plane_current_status",
@@ -376,7 +374,6 @@
     "bioetl_runtime_provider_alert_count",
     "bioetl_runtime_required_rule_age_seconds",
     "bioetl_runtime_stage_evidence_detail",
-    "bioetl_runtime_stage_evidence_present_ratio",
     "bioetl_runtime_stage_progress_by_scope",
     "bioetl_runtime_status",
     "bioetl_runtime_trust_gap_active_10m",
@@ -1271,14 +1268,12 @@
     ],
     "bioetl_circuit_breaker_state": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/03-guides/running-pipelines.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
-      "grafana/README.md",
-      "grafana/dashboards/bioetl-provider-health-v2.json"
+      "grafana/README.md"
     ],
     "bioetl_circuit_breaker_success_total": [
       "docs/03-guides/metrics-monitoring.md",
@@ -1286,7 +1281,6 @@
       "grafana/README.md"
     ],
     "bioetl_circuit_breaker_trips_total": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1326,10 +1320,8 @@
       "grafana/README.md"
     ],
     "bioetl_control_plane_current_status_trusted": [
-      "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/README.md"
     ],
@@ -1454,7 +1446,6 @@
       "grafana/README.md"
     ],
     "bioetl_data_source_retry_exhausted_total": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
@@ -1463,7 +1454,6 @@
       "grafana/README.md"
     ],
     "bioetl_dq_anomaly_detected_total": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_dq_baseline_samples": [
@@ -1495,7 +1485,6 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_dq_current_reason": [
-      "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1503,10 +1492,8 @@
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_dq_current_status": [
-      "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/verdict-ontology.md",
       "docs/04-reference/observability/alerting-guide.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1517,9 +1504,6 @@
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md"
     ],
-    "bioetl_dq_first_window_reason": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json"
-    ],
     "bioetl_dq_monitor_disabled_total": [
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/05-operations/sli-slo-baseline.md"
@@ -1528,7 +1512,6 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_dq_records_quarantined_total": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/03-guides/publication-validation-guide.md",
       "docs/03-guides/running-pipelines.md",
@@ -1547,14 +1530,12 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_dq_soft_threshold_exceeded_total": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_dq_status": [
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_dq_validation_failures_total": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/03-guides/publication-validation-guide.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1563,13 +1544,11 @@
       "grafana/README.md"
     ],
     "bioetl_dq_validation_record_count": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
     "bioetl_dq_validation_score": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/03-guides/publication-validation-guide.md",
       "docs/04-reference/contracts/observability.md",
@@ -1623,7 +1602,6 @@
     ],
     "bioetl_health_check_degraded_total": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1637,7 +1615,6 @@
     ],
     "bioetl_health_check_failures_total": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1665,7 +1642,6 @@
     ],
     "bioetl_health_check_success_total": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1679,7 +1655,6 @@
       "grafana/README.md"
     ],
     "bioetl_http_request_errors_total": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
@@ -1718,69 +1693,49 @@
       "grafana/README.md"
     ],
     "bioetl_l0_input_status": [
-      "docs/03-guides/dashboards/design-system.md",
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_l0_input_status_selected": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/04-reference/observability/alerting-guide.md",
       "grafana/README.md"
     ],
-    "bioetl_l0_next_action_no_route": [
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md"
-    ],
     "bioetl_l0_next_action_route": [
-      "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/metrics-readiness-matrix.md",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md"
+      "docs/03-guides/dashboards/metrics-readiness-matrix.md"
     ],
     "bioetl_l0_status": [
-      "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/03-guides/dashboards/verdict-ontology.md",
       "docs/04-reference/observability/alerting-guide.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
     "bioetl_l1_control_plane_current_status": [
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
     "bioetl_l1_dq_status": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
     "bioetl_l1_gold_lifecycle_status": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
     "bioetl_l1_provider_global_status": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
     "bioetl_l1_runtime_blocker_status": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
     "bioetl_l1_workflow_global_status": [
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
@@ -1865,8 +1820,7 @@
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-incident-v1.json",
-      "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-provider-health-v2.json"
+      "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_phase_duration_seconds": [
       "docs/03-guides/metrics-monitoring.md",
@@ -1898,7 +1852,6 @@
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/alerting-guide.md",
@@ -1912,8 +1865,7 @@
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-incident-v1.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_policy_violations_total": [
       "docs/03-guides/metrics-monitoring.md",
@@ -1944,12 +1896,10 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_processed_records_gold_excluded_by_contract_current": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
     "bioetl_processed_records_gold_quarantined_current": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
@@ -1981,7 +1931,6 @@
     ],
     "bioetl_provider_current_cause": [
       "docs/03-guides/dashboards/dashboard-v2-updates.md",
-      "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
@@ -2001,24 +1950,19 @@
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/05-operations/runbooks/observability-checklist.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-incident-v1.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_provider_current_status_info": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/05-operations/runbooks/observability-checklist.md"
     ],
     "bioetl_provider_health_check_provider_universe_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/README.md"
     ],
     "bioetl_provider_health_observed_timestamp_seconds": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/05-operations/runbooks/observability-checklist.md"
     ],
     "bioetl_provider_health_status": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -2058,7 +2002,6 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_rate_limiter_tokens_available": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
@@ -2072,7 +2015,6 @@
       "grafana/README.md"
     ],
     "bioetl_record_flow_invariants_total": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md"
@@ -2131,6 +2073,7 @@
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_rt_stage_ratio": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_runtime_alert_condition_dq_critical_anomaly_30m": [
@@ -2210,7 +2153,6 @@
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_runtime_current_blocker_reason": [
-      "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/alerting-guide.md",
@@ -2226,7 +2168,6 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_runtime_current_status_trusted": [
-      "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
@@ -2249,8 +2190,7 @@
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-incident-v1.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_runtime_pipeline_run_type_universe_scoped": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
@@ -2267,9 +2207,6 @@
     "bioetl_runtime_stage_evidence_detail": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/dashboards/bioetl-incident-v1.json"
-    ],
-    "bioetl_runtime_stage_evidence_present_ratio": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json"
     ],
     "bioetl_runtime_stage_progress_by_scope": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
@@ -2312,12 +2249,10 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_silver_filter_reject_total_mismatch_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/alerting-guide.md",
       "grafana/README.md"
     ],
     "bioetl_silver_filter_rejections_total": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
@@ -2335,7 +2270,6 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_silver_reject_rate": [
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_silver_vacuum_files_removed": [
@@ -2348,7 +2282,6 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_silver_validation_failures_total": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/05-operations/01-monitoring-guide.md",
@@ -2373,7 +2306,6 @@
     ],
     "bioetl_stage_records_total": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
@@ -2439,9 +2371,7 @@
       "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-incident-v1.json",
       "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-provider-health-v2.json",
-      "grafana/dashboards/bioetl-run-explorer-v1.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "grafana/dashboards/bioetl-run-explorer-v1.json"
     ],
     "bioetl_workflow_pipeline_verdict_status": [
       "docs/03-guides/metrics-monitoring.md",
@@ -2505,14 +2435,11 @@
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_workflow_universe": [
-      "docs/03-guides/dashboards/variable-reference.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-control-plane-v1.json",
       "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-incident-v1.json",
-      "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-provider-health-v2.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "grafana/dashboards/bioetl-overview-v2.json"
     ]
   },
   "documented_only_metrics": [],

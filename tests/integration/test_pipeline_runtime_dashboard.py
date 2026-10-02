@@ -12,7 +12,7 @@
 
 The Pipeline Diagnostics fleet/CURRENT panels moved to bioetl-incident-v1
 (collapsed "Pipeline fleet and range" row); the selected-run evidence stayed on
-bioetl-runtime.
+Run Overview, Replay Readiness and Data Quality.
 """
 
 from __future__ import annotations
@@ -44,31 +44,11 @@ _QUERY_WINDOW_FUNC_RE = re.compile(
     r"\b(?:rate|increase|count_over_time|max_over_time|histogram_quantile)\b"
 )
 _ALLOWED_DASHBOARD_LINK_VARS = {
-    "bioetl-overview-v2": frozenset({"workflow", "pipeline", "run_type", "run_id"}),
-    "bioetl-dq-v2": frozenset({"workflow", "pipeline", "run_type", "run_id", "stage"}),
-    "bioetl-runtime": frozenset(
-        {"workflow", "pipeline", "run_type", "run_id", "stage"}
-    ),
-    "bioetl-provider-health-v2": frozenset(
-        {
-            "workflow",
-            "pipeline",
-            "run_type",
-            "run_id",
-            "provider",
-            "pipeline_context",
-            "adapter",
-        }
-    ),
-    "bioetl-control-plane-v1": frozenset(
-        {"workflow", "pipeline", "run_type", "run_id"}
-    ),
-    "bioetl-workflow-overview": frozenset(
-        {"workflow", "pipeline", "run_type", "run_id"}
-    ),
-    "bioetl-alerts-slo": frozenset({"workflow", "pipeline", "run_type"}),
-    "bioetl-incident-v1": frozenset({"workflow", "pipeline", "run_type", "run_id"}),
-    "bioetl-run-explorer-v1": frozenset({"workflow", "pipeline", "run_type", "run_id"}),
+    dashboard["uid"]: frozenset(
+        variable["name"] for variable in dashboard.get("templating", {}).get("list", [])
+    )
+    for path in Path("grafana/dashboards").glob("*.json")
+    for dashboard in [load_dashboard(path)]
 }
 
 
@@ -82,10 +62,7 @@ def _extract_dashboard_uid(url: str) -> str | None:
 
 
 def _extract_link_vars(url: str) -> set[str]:
-    vars = set(_LINK_VAR_RE.findall(url))
-    if "bioetl-provider-health-v2" in url:
-        vars.discard("stage")
-    return vars
+    return set(_LINK_VAR_RE.findall(url))
 
 
 def _runtime_data_panels() -> list[dict]:
@@ -119,6 +96,7 @@ def test_pipeline_runtime_has_required_variables() -> None:
         "run_id",
         "provider",
         "provider_for_pipeline",
+        "read_latency_quantile",
     }
 
 
@@ -330,12 +308,12 @@ def test_pipeline_runtime_links_are_target_scoped() -> None:
             )
             assert scope_token is not None, f"action link missing scope: {url}"
             for resolved_uid in (
-                "bioetl-runtime",
+                "bioetl-overview-v2",
                 "bioetl-control-plane-v1",
                 "bioetl-dq-v2",
             ):
                 scope = "var-pipeline=chembl_assay"
-                if resolved_uid != "bioetl-control-plane-v1":
+                if resolved_uid == "bioetl-dq-v2":
                     scope += "&var-stage=$__all"
                 resolved = url.replace(scope_token, scope)
                 assert (
