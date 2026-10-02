@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `004b64d20add4a6ad6f0d56ce08509db25dc069716be69846905684e0e7f4426`
+Evidence surface SHA-256: `2dd4e80638760db026d8cccb93f9a4e4799af11805dfe180ce7d96327efecc1c`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "004b64d20add4a6ad6f0d56ce08509db25dc069716be69846905684e0e7f4426",
+  "evidence_surface_sha256": "2dd4e80638760db026d8cccb93f9a4e4799af11805dfe180ce7d96327efecc1c",
   "metrics": {
     "architecture_integral_score": 9.47,
     "architecture_interpretation": "good_targeted_improvements",
@@ -48,10 +48,10 @@ Refresh reason: Reconcile generated metadata while preserving the historical aud
 
 ## Current metadata refresh — 2026-10-02 (#11846)
 
-Source commit: `1e50b76c1a06d32f9525d5358547775a8bec7b8b`.
-Current generated metadata: 46/46 debt gates pass; architecture proxy score
-9.47 (`good_targeted_improvements`). These results do not establish full coverage
-acceptance or a release PASS.
+Source commit: `81e1e43485072922b624e7d1123da0594a293c5f`.
+Current generated metadata: 46/46 debt gates pass; architecture score `9.47`
+(`good_targeted_improvements`); debt-governance gates passing. These results
+do not establish full coverage acceptance or a release PASS.
 The machine-readable semantic summary above is the sole current numerical
 rollup; dated refresh notes are historical snapshots. The original audited
 commit and audit date remain unchanged. This metadata rebind is not a new
@@ -66,9 +66,13 @@ acceptance remains unverified under #11745 (still open); zero unmeasured and
 uncovered rows do not prove that acceptance. No overall release PASS is claimed.
 
 The live cast census is 353 total / 112 unjustified (previously 370 / 129).
-Hotspot runtime-builders LOC is 6764 (previously 6760); files, oversized-file
-counts and fan-in are unchanged. Budget and exemption values are unchanged.
-Debt outcome: decreased for unjustified casts, flat for bounded hotspot debt.
+Hotspot observations after source_tree_sha256 fcbcdec5: runtime-builders LOC
+6764, application_core LOC 24787, control_plane LOC 15496 and
+helper_function_ratio 0.401. Files, oversized-file counts, fan-in caps, and
+exemption rows are unchanged. The unjustified cast(Any) ratchet
+max_unjustified_count is 112, lowered from the recorded baseline 131 to the
+confirmed census count. Debt outcome: decreased for unjustified casts, flat
+for bounded hotspot debt.
 
 ## Retained facade importer census
 

@@ -36,7 +36,7 @@ Current committed quality artifacts agree on the following architecture evidence
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
-| Architecture quality score | `9.89` (`excellent`) | `reports/quality/architecture-quality-scorecard.json` |
+| Architecture quality score | `9.47` (`good_targeted_improvements`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
 | Source modules in module coverage inventory | `2522` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
