@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-02T08:54:41.248017+00:00",
+  "generated_at": "2026-10-02T10:15:47.907577+00:00",
   "summary": {
     "total_scripts": 636,
     "status_counts": {
@@ -6656,13 +6656,13 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 43,
+          "line": 57,
           "source_group": "tests",
           "text": "module_path = REPO_ROOT / \"scripts\" / \"diagrams\" / \"fix\" / \"apply_elk_layout.py\""
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 148,
+          "line": 166,
           "source_group": "tests",
           "text": "\"apply_elk_layout.py\","
         },
@@ -6695,13 +6695,13 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 149,
+          "line": 167,
           "source_group": "tests",
           "text": "\"convert_provider_diagrams.py\","
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 157,
+          "line": 175,
           "source_group": "tests",
           "text": "assert not (REPO_ROOT / \"scripts\" / \"convert_provider_diagrams.py\").exists()"
         },
@@ -6752,7 +6752,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 150,
+          "line": 168,
           "source_group": "tests",
           "text": "\"differentiate_linkstyle.py\","
         },
@@ -6898,7 +6898,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 27,
+      "reference_count": 28,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -7228,7 +7228,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 104,
+          "line": 118,
           "source_group": "tests",
           "text": "wrapper_path = REPO_ROOT / \"scripts\" / \"diagrams\" / \"mmdc_wrapper.sh\""
         },
@@ -18615,7 +18615,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 67,
+      "reference_count": 68,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
@@ -20555,7 +20555,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
