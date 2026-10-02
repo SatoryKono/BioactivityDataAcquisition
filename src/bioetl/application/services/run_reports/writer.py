@@ -154,12 +154,12 @@ def _with_self_artifacts(
 
 
 def _with_kind_digest(
-    artifacts: tuple[dict[str, Any], ...],
+    artifacts: tuple[dict[str, object], ...],
     *,
     kind: str,
     sha256: str,
-) -> tuple[dict[str, Any], ...]:
-    items: list[dict[str, Any]] = []
+) -> tuple[dict[str, object], ...]:
+    items: list[dict[str, object]] = []
     for item in artifacts:
         if str(item.get("kind")) == kind:
             items.append({**item, "sha256": sha256})

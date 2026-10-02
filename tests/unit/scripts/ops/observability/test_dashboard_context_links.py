@@ -143,7 +143,6 @@ def test_action_normalization_preserves_rank_query_and_visible_column() -> None:
         ("bioetl-run-explorer-v1", "run-explorer"),
         ("bioetl-control-plane-v1", "1-trust"),
         ("bioetl-overview-v2", "2-overview"),
-
         ("bioetl-provider-health-v2", "4-provider-health"),
         ("bioetl-dq-v2", "5-data-quality"),
         ("bioetl-incident-v1", "6-incident-workspace"),

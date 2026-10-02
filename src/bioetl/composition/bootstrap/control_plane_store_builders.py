@@ -8,7 +8,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders import control_plane_root
-from bioetl.infrastructure.control_plane.replay_object_verifier import ReplayObjectVerifier
+from bioetl.infrastructure.control_plane.replay_object_verifier import (
+    ReplayObjectVerifier,
+)
 from bioetl.infrastructure.control_plane import (
     FileEffectiveConfigArtifactStore,
     FileHistoricalReplayClosureStore,

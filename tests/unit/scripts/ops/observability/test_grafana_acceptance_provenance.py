@@ -121,7 +121,9 @@ def test_fixed_window_rejects_partial_relative_or_reversed_bounds(
 
 def test_source_digest_is_compared_to_actual_checkout() -> None:
     source = rerender._dashboard_source_by_uid()["bioetl-overview-v2"]
-    assert preflight._dashboard_source_error("bioetl-overview-v2", source, source) is None
+    assert (
+        preflight._dashboard_source_error("bioetl-overview-v2", source, source) is None
+    )
     wrong = {**source, "sha256": "0" * 64}
     assert "does not match checkout" in preflight._dashboard_source_error(
         "bioetl-overview-v2", wrong, wrong

@@ -76,13 +76,7 @@ def mesh_terms_from_pubmed_headings(
             mesh_id = _as_nonempty_str(mapping.get("descriptor_ui"))
             if heading_name is None:
                 continue
-            qualifier_names: list[str] = []
-            raw_qualifiers = mapping.get("qualifiers")
-            if isinstance(raw_qualifiers, list):
-                for qualifier in raw_qualifiers:
-                    parsed = _qualifier_name(qualifier)
-                    if parsed is not None:
-                        qualifier_names.append(parsed)
+            qualifier_names = _qualifier_names(mapping.get("qualifiers"))
             mesh_terms.append(
                 {
                     "mesh_heading": heading_name,
@@ -98,14 +92,21 @@ def mesh_terms_from_pubmed_headings(
                         "mesh_qualifier": extra,
                     }
                 )
-    keyword_terms: list[str] = []
-    if isinstance(keywords, list):
-        for keyword in keywords:
-            if isinstance(keyword, str):
-                stripped = keyword.strip()
-                if stripped:
-                    keyword_terms.append(stripped)
-    return mesh_terms, keyword_terms
+    return mesh_terms, _keyword_terms(keywords)
+
+
+def _qualifier_names(qualifiers: object) -> list[str]:
+    """Preserve the order of nonempty qualifier names."""
+    if not isinstance(qualifiers, list):
+        return []
+    return [name for item in qualifiers if (name := _qualifier_name(item)) is not None]
+
+
+def _keyword_terms(keywords: object) -> list[str]:
+    """Keep only nonempty string keywords in source order."""
+    if not isinstance(keywords, list):
+        return []
+    return [term for item in keywords if (term := _as_nonempty_str(item)) is not None]
 
 
 def extract_terms_from_publication(

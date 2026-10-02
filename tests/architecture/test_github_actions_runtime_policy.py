@@ -516,7 +516,10 @@ def test_dependency_review_workflow_is_pr_scoped_and_sha_pinned() -> None:
     assert "uv.lock" in pull_request["paths"]
     assert "pyproject.toml" in pull_request["paths"]
     for manifest_pattern in (
-        "package.json", "package-lock.json", "**/package.json", "**/package-lock.json"
+        "package.json",
+        "package-lock.json",
+        "**/package.json",
+        "**/package-lock.json",
     ):
         assert manifest_pattern in pull_request["paths"]
     assert f"actions/checkout@{checkout_sha}" in uses
