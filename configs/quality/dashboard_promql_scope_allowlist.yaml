@@ -33,6 +33,6 @@ metrics_without_run_type_label:
   - bioetl_runtime_pipeline_run_type_universe
 pipeline_summary_dashboards:
   - bioetl-control-plane-v1.json
-  - bioetl-runtime.json
+  - bioetl-incident-v1.json
   - bioetl-dq-v2.json
   - bioetl-overview-v2.json

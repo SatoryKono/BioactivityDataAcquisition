@@ -19,14 +19,14 @@ tests:
     exp_samples: []
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
-      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~"uniprot_protein",run_type=~"incremental",risk_type=~"duplicate|overwrite"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
     exp_samples: []
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
-      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~"uniprot_protein",run_type=~"incremental",integrity_type=~"consistent|inconsistent"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -63,7 +63,7 @@ tests:
       value: 1
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
-      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~"uniprot_protein",run_type=~"incremental",risk_type=~"duplicate|overwrite"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -72,7 +72,7 @@ tests:
       value: 1
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
-      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~"uniprot_protein",run_type=~"incremental",integrity_type=~"consistent|inconsistent"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -132,7 +132,7 @@ tests:
       value: 0
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
-      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~"uniprot_protein",run_type=~"incremental",risk_type=~"duplicate|overwrite"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -141,7 +141,7 @@ tests:
       value: 0
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
-      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~"uniprot_protein",run_type=~"incremental",integrity_type=~"consistent|inconsistent"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -186,7 +186,7 @@ tests:
       value: 0
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
-      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~"uniprot_protein",run_type=~"incremental",risk_type=~"duplicate|overwrite"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -195,7 +195,7 @@ tests:
       value: 0
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
-      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~"uniprot_protein",run_type=~"incremental",integrity_type=~"consistent|inconsistent"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -240,7 +240,7 @@ tests:
       value: 1
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
-      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~"uniprot_protein",run_type=~"incremental",risk_type=~"duplicate|overwrite"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -249,7 +249,7 @@ tests:
       value: 0
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
-      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~"uniprot_protein",run_type=~"incremental",integrity_type=~"consistent|inconsistent"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -294,7 +294,7 @@ tests:
       value: 0
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
-      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~"uniprot_protein",run_type=~"incremental",risk_type=~"duplicate|overwrite"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -303,7 +303,7 @@ tests:
       value: 1
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
-      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~"uniprot_protein",run_type=~"incremental",integrity_type=~"consistent|inconsistent"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -348,7 +348,7 @@ tests:
       value: 0
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
-      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~"uniprot_protein",run_type=~"incremental",risk_type=~"duplicate|overwrite"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -357,7 +357,7 @@ tests:
       value: 0
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
-      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~"uniprot_protein",run_type=~"incremental",integrity_type=~"consistent|inconsistent"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -402,7 +402,7 @@ tests:
       value: 0
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type)
-      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])))
+      (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~"uniprot_protein",run_type=~"incremental",risk_type=~"duplicate|overwrite"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m
@@ -411,7 +411,7 @@ tests:
       value: 0
   - expr: max((bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type)
-      (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])))
+      (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~"uniprot_protein",run_type=~"incremental",integrity_type=~"consistent|inconsistent"}[5m])))
       == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~"uniprot_protein",run_type=~"incremental"}
       * 0))
     eval_time: 10m

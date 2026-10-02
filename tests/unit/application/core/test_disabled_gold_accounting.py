@@ -1,5 +1,7 @@
 """Skipping Gold is an operator decision, never an unreasoned contract reject."""
 
+import pytest
+
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -16,6 +18,9 @@ from bioetl.domain.run_reports.context import (
     reset_stage_accounting,
 )
 from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+
+
+pytestmark = pytest.mark.unit
 
 
 def test_disabled_gold_has_balanced_skipped_accounting():
