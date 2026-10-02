@@ -1,5 +1,6 @@
 import {
   dashboardUrl,
+  dashboardTimeRangeUrl,
   EMPTY_STATES,
   parseRouteContext,
   RouteContext,
@@ -36,6 +37,17 @@ describe('route context contract', () => {
     expect(url).toContain('/d/bioetl-runtime?');
     expect(url).toContain('var-run_id=run-42');
     expect(url).toContain('origin=operations-home');
+  });
+
+  it('keeps interpolated time range fields out of the fallback dashboard path', () => {
+    const href = dashboardTimeRangeUrl('bioetl-overview-v2').replace(
+      '${__url_time_range}', 'from=now-12h&to=now&timezone=browser'
+    );
+    const url = new URL(href, 'http://127.0.0.1:3001');
+    expect(url.pathname).toBe('/d/bioetl-overview-v2');
+    expect(url.searchParams.get('from')).toBe('now-12h');
+    expect(url.searchParams.get('to')).toBe('now');
+    expect(url.searchParams.get('timezone')).toBe('browser');
   });
 
   it('keeps the complete typed empty-state ontology', () => {

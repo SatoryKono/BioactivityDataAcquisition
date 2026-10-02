@@ -1,5 +1,5 @@
 import type { ForwardRefExoticComponent, ReactElement, ReactNode, RefAttributes } from 'react';
-import type { RouteProps } from 'react-router-dom';
+import type { RouteProps } from 'react-router-dom-v5';
 import type { LinkProps } from 'react-router-v7';
 
 export * from 'react-router-v7';
