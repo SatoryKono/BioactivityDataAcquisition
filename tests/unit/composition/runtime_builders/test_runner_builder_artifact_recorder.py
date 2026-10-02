@@ -59,6 +59,7 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                         Any,
                         lambda: SimpleNamespace(
                             data_dir=str(tmp_path),
+                            bronze_path=tmp_path / "output" / "bronze",
                             pipeline=SimpleNamespace(
                                 heartbeat_interval=30,
                                 control_plane=SimpleNamespace(
@@ -110,6 +111,7 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                         lambda _: _ensure_default_cached_bronze_fixture(
                             settings=SimpleNamespace(
                                 data_dir=str(tmp_path),
+                                bronze_path=tmp_path / "output" / "bronze",
                                 pipeline=SimpleNamespace(
                                     heartbeat_interval=30,
                                     control_plane=SimpleNamespace(

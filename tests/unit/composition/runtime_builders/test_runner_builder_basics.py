@@ -135,6 +135,7 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     def get_settings_fn() -> SimpleNamespace:
         return SimpleNamespace(
             data_dir=str(tmp_path),
+            bronze_path=tmp_path / "output" / "bronze",
             pipeline=SimpleNamespace(heartbeat_interval=30),
             test_mode=False,
         )
@@ -279,6 +280,7 @@ def test_build_pipeline_runner_creates_registry_when_not_provided(
         create_registry_fn=lambda: created_registry,
         settings=_build_settings(
             data_dir=str(tmp_path),
+            bronze_path=tmp_path / "output" / "bronze",
             heartbeat_interval=15,
             test_mode=True,
         ),
@@ -309,6 +311,7 @@ def test_build_pipeline_runner_registers_pipelines_into_created_registry(
         ),
         settings=_build_settings(
             data_dir=str(tmp_path),
+            bronze_path=tmp_path / "output" / "bronze",
             heartbeat_interval=15,
             test_mode=True,
         ),
