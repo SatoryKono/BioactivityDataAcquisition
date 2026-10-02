@@ -58,7 +58,7 @@ Three architecture scanners count different populations. They are not interchang
 and a numeric gap is not a layer violation. Re-measure with the live commands before
 copying these integers forward.
 
-Snapshot: 2026-10-02, synchronized with main `a03fae4bd0a78`.
+Snapshot: 2026-10-02, verified against source tree `3e5fbcba34bb`.
 Composition contains **280** Python modules (`src/bioetl/composition/**/*.py`,
 including package initializers); its cap remains **295**, shrink-only.
 Grafana/ops Python under `scripts/ops/observability/grafana/` stays outside

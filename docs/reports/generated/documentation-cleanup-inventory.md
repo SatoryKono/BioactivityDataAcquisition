@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3423 |
-| Tracked doc-like files | 3423 |
+| Doc-like files | 3424 |
+| Tracked doc-like files | 3424 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3423 |
+| tracked | 3424 |
 
 ## Lifecycle Counts
 
@@ -29,7 +29,7 @@
 | active_quality_baseline | 39 |
 | closeout_evidence | 55 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 26 |
+| docs_reports_curated_or_historical_report | 27 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 20 |
 | generated_skill_reference_mirror | 19 |
@@ -61,7 +61,7 @@
 | Archived | 276 |
 | Canonical | 74 |
 | Generated | 1056 |
-| Working | 1270 |
+| Working | 1271 |
 
 ## Surface Families
 
@@ -71,14 +71,14 @@
 | archive | 276 |
 | canonical | 74 |
 | generated | 1056 |
-| working | 1270 |
+| working | 1271 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 338 |
-| archive-after-migration | 830 |
+| archive-after-migration | 831 |
 | generate-automatically | 1056 |
 | keep | 1191 |
 | reconcile-with-github-state | 8 |
@@ -117,6 +117,7 @@
 | `docs/reports/dashboard-ux-checks/2026-09-23-vis-followups.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-09-23.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-09-25.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-10-02.md` | Working | 1 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | Working | 0 | archive-after-migration |
@@ -166,7 +167,6 @@
 | `reports/dashboards/thirty-cycles/cycle-10/issue-10-2.md` | Working | 0 | archive-after-migration |
 | `reports/dashboards/thirty-cycles/cycle-10/issue-10-3.md` | Working | 0 | archive-after-migration |
 | `reports/dashboards/thirty-cycles/cycle-10/issue-10-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-11/issue-11-1.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -320,6 +320,7 @@
 | `docs/reports/dashboard-ux-checks/2026-09-23-vis-followups.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-09-23.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-09-25.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-10-02.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -341,7 +342,6 @@
 | `docs/reports/evidence/project-legacy-compatibility-remediation/domain-application-legacy-seams/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/infrastructure-adapters-and-fallbacks/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/interfaces-cli-and-public-entrypoint-compat/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-legacy-compatibility-remediation/tests-docs-and-governance-anchors/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 

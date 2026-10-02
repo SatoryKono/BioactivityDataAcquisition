@@ -1,18 +1,18 @@
 {
   "summary": {
-    "scanned_modules": 2541,
+    "scanned_modules": 2539,
     "total_internal_imports": 8002,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 340,
     "violations": 0,
-    "source_fingerprint": "a3a056db122c70abe7c8a513e02744347406c889ea398758c2c9b752ca7ff384"
+    "source_fingerprint": "f7f66dc81b8da2beb12530cf3198b30ecf2363183dd8bd6a467a4e097a2f516a"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1581,
+      "imports": 1582,
       "allowed": true
     },
     {
@@ -30,13 +30,13 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 637,
+      "imports": 633,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 295,
+      "imports": 294,
       "allowed": true
     },
     {
@@ -60,13 +60,13 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1239,
+      "imports": 1238,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 70,
+      "imports": 72,
       "allowed": true
     },
     {
@@ -78,13 +78,13 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 85,
+      "imports": 84,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 443,
+      "imports": 447,
       "allowed": true
     }
   ],
@@ -170,13 +170,13 @@
       "imports": 34
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "domain.control_plane",
-      "imports": 32
-    },
-    {
       "source": "application.core",
       "target": "domain.ports",
+      "imports": 31
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "domain.control_plane",
       "imports": 31
     },
     {
@@ -315,13 +315,13 @@
       "imports": 17
     },
     {
-      "source": "interfaces.http",
-      "target": "domain.ports",
-      "imports": 17
-    },
-    {
       "source": "application.core",
       "target": "domain.exceptions",
+      "imports": 16
+    },
+    {
+      "source": "interfaces.http",
+      "target": "domain.ports",
       "imports": 16
     },
     {
