@@ -27,7 +27,7 @@
       "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
-    "scanned_test_count": 370,
+    "scanned_test_count": 371,
     "unreviewed_count": 0
   },
   "assertion_branch_reachability_percent": 100.0,
@@ -1197,7 +1197,7 @@
         "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
-      "scanned_test_count": 370,
+      "scanned_test_count": 371,
       "unreviewed_count": 0
     },
     "assertion_branch_reachability_percent": 100.0,
@@ -2053,12 +2053,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2967,
-    "total_test_functions": 29093,
+    "total_test_functions": 29094,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "4dfcbdafbff19e09bd05a94cba5cad1f70a42ceb9956d2df5a87247bf7927264",
+  "source_tree_sha256": "9755cbe90d081a3242c790c37209fd815b866db34f021378996186a5b6719c75",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 83,
@@ -2121,7 +2121,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2967,
-  "total_test_functions": 29093,
+  "total_test_functions": 29094,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

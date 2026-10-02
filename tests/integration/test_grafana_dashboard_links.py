@@ -127,9 +127,9 @@ def test_dashboards_do_not_ship_empty_options_data_links_arrays() -> None:
 def test_top_level_handoff_fails_closed_when_required_link_is_removed() -> None:
     """The real policy path must reject a removed required dashboard link."""
     link: dict[str, object] = {
-        "title": "Pipeline Diagnostics",
+        "title": "Replay Readiness",
         "url": (
-            "/d/bioetl-runtime?var-workflow=$workflow&var-pipeline=$pipeline"
+            "/d/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline"
             "&var-run_type=$run_type&var-run_id=$run_id&from=$__from&to=$__to"
         ),
         "includeVars": False,

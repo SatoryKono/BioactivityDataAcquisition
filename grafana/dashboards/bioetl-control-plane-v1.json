@@ -520,6 +520,7 @@
       "links": [
         {
           "title": "View replay checks",
+          "includeVars": false,
           "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9423&${__url_time_range}",
           "targetBlank": false
         }
