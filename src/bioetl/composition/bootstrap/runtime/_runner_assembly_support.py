@@ -21,6 +21,9 @@ from bioetl.application.composite.runtime_wiring_api import (
     MergeService as _MergeService,
 )
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
+from bioetl.composition.bootstrap.runtime.composite_reporter import (
+    create_composite_reporter,
+)
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
@@ -210,4 +213,11 @@ def create_composite_runner_service_from_inputs(
         runtime=normalized_inputs.runtime,
         deps=deps,
         run_id=effective_run_id,
+        reporter=create_composite_reporter(
+            pipeline_name=normalized_inputs.config.name,
+            manifest_id=normalized_inputs.manifest_id,
+            logger=normalized_inputs.logger,
+        )
+        if normalized_inputs.manifest_id
+        else None,
     )

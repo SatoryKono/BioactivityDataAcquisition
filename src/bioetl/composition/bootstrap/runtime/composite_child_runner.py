@@ -10,6 +10,7 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunOptions,
 )
+from bioetl.application.services.run_reports.composite import record_composite_child
 from bioetl.composition.bootstrap.runtime.runner import (
     bootstrap_pipeline_runner_service,
 )
@@ -68,6 +69,7 @@ class ReportedChildRunner:
             run_id=self.context.run_id,
             options=self.options,
         )
+        record_composite_child(result)
         if result.status == PipelineRunResult.SHUTDOWN:
             raise PipelineShutdownError(
                 f"Composite child {result.pipeline_name} shut down"
