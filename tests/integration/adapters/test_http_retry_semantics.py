@@ -17,7 +17,7 @@ import json
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, call
+from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID
 
 from httpx import HTTPStatusError, Request, Response
@@ -273,15 +273,16 @@ async def test_semanticscholar_retry_wait_is_bounded_and_cancellable(
     mock_logger: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """An explicit wait cap bounds retries, and cancellation stops the loop."""
+    """An excessive wait stops early; allowed backoff remains cancellable."""
     adapter = _build_semanticscholar_adapter(mock_logger)
-    adapter._http_client.retry_config = RetryConfig(
+    retry_config = RetryConfig(
         max_attempts=3,
         base_delay=1,
         max_delay=10,
         max_retry_after_seconds=4,
         jitter_range=(0.0, 0.0),
     )
+    adapter._http_client.retry_config = retry_config
     sleep = AsyncMock()
     monkeypatch.setattr(
         "bioetl.infrastructure.adapters.http.client_retry_mixin.asyncio.sleep", sleep
@@ -293,17 +294,23 @@ async def test_semanticscholar_retry_wait_is_bounded_and_cancellable(
         async with adapter._http_client:
             with pytest.raises(RetryExhaustedError) as caught:
                 _ = [r async for r in adapter.fetch("publication", query="test")]
-            assert caught.value.attempts == 3
-            assert route.call_count == 3
-            assert sleep.await_args_list == [call(4.0), call(4.0)]
+            assert caught.value.attempts == 1
+            assert route.call_count == 1
+            sleep.assert_not_awaited()
+            assert "wait budget" in str(caught.value.last_error)
             assert caught.value.last_error.response.headers["Retry-After"] == "99999"
             assert caught.value.url.endswith("/paper/search")
-            sleep.reset_mock()
-            sleep.side_effect = asyncio.CancelledError
+        # The original client retains the upstream cooldown. A fresh client
+        # exercises cancellation of an allowed wait without clearing that state.
+        adapter = _build_semanticscholar_adapter(mock_logger)
+        adapter._http_client.retry_config = retry_config
+        route.respond(429, headers={"Retry-After": "2"})
+        sleep.side_effect = asyncio.CancelledError
+        async with adapter._http_client:
             with pytest.raises(asyncio.CancelledError):
                 _ = [r async for r in adapter.fetch("publication", query="test")]
-            assert route.call_count == 4
-            sleep.assert_awaited_once_with(4.0)
+            assert route.call_count == 2
+            sleep.assert_awaited_once_with(2.0)
 
 
 @pytest.mark.integration
