@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-02T22:08:26.561580+00:00",
+  "generated_at": "2026-10-02T22:17:29.489720+00:00",
   "summary": {
     "total_scripts": 635,
     "status_counts": {
@@ -20125,7 +20125,7 @@
         },
         {
           "path": "tests/integration/test_grafana_evidence_readability.py",
-          "line": 201,
+          "line": 206,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import _stage_colors"
         }
@@ -21334,7 +21334,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 929,
+          "line": 931,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         },

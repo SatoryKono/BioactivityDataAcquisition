@@ -2307,6 +2307,7 @@
           "custom": {
             "align": "left",
             "minWidth": 50,
+            "inspect": true,
             "wrapText": true,
             "cellOptions": {
               "type": "auto",

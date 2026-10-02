@@ -481,6 +481,7 @@ def _apply_reconciliation_evidence(payload: dict) -> None:
                     "custom": {
                         "align": "left",
                         "minWidth": 50,
+                        "inspect": True,
                         "wrapText": True,
                         "cellOptions": {"type": "auto", "wrapText": True},
                     },
