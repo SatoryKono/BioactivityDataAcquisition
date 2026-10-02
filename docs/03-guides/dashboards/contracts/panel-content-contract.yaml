@@ -76,8 +76,8 @@ dashboards:
         title: ''
         role: guidance
         tier: 4
-        scope: global
-        scope_class: global
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
@@ -91,12 +91,13 @@ dashboards:
         title: Compare Checkpoint Anchors
         role: evidence_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -112,12 +113,13 @@ dashboards:
         title: Review Replay Evidence
         role: evidence_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -133,12 +135,13 @@ dashboards:
         title: Review Checkpoint Validation
         role: evidence_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -160,6 +163,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -175,12 +179,13 @@ dashboards:
         title: Review Lineage Validation
         role: evidence_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -196,12 +201,13 @@ dashboards:
         title: Review Retention Compliance
         role: evidence_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -223,6 +229,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -243,6 +250,14 @@ dashboards:
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
         - READY
         - BLOCKED
         - INSUFFICIENT
@@ -264,14 +279,15 @@ dashboards:
         title: Review Exact Replay Checks
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
-        - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -336,8 +352,8 @@ dashboards:
         title: ''
         role: guidance
         tier: 4
-        scope: global
-        scope_class: global
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
@@ -356,6 +372,7 @@ dashboards:
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
@@ -377,6 +394,7 @@ dashboards:
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
@@ -398,8 +416,8 @@ dashboards:
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
-        - UNKNOWN
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -442,6 +460,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -463,6 +482,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -484,6 +504,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -513,8 +534,10 @@ dashboards:
         - WARN
         - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -562,14 +585,19 @@ dashboards:
         title: Track Incompatibilities
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -585,14 +613,19 @@ dashboards:
         title: Inspect DQ Alert Conditions
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -608,14 +641,19 @@ dashboards:
         title: Inspect Control Plane Alerts
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -631,14 +669,19 @@ dashboards:
         title: Inspect Provider Alerts
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -690,9 +733,14 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -708,14 +756,19 @@ dashboards:
         title: Monitor Memory Pressure
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -731,14 +784,19 @@ dashboards:
         title: Track Load Failures
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -785,14 +843,19 @@ dashboards:
         title: Track Global Admin Failures
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -848,9 +911,9 @@ dashboards:
         - WARN
         - CRIT
         - UNKNOWN
-        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - INCOMPLETE
         - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
@@ -902,8 +965,12 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: event_empty
         state_model:
-        - VALID_EMPTY
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
         - ERROR
+        - VALID_EMPTY
         - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
@@ -926,8 +993,12 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
-        - VALID_EMPTY
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
         - ERROR
+        - VALID_EMPTY
         - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
@@ -1053,14 +1124,19 @@ dashboards:
         title: Track Replay Drift
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1076,14 +1152,19 @@ dashboards:
         title: Track Peak Replay Lag
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1099,14 +1180,19 @@ dashboards:
         title: Track Missing Lineage
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1122,14 +1208,19 @@ dashboards:
         title: Track Replay Blockers
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1145,11 +1236,14 @@ dashboards:
         title: Track Observed Manifest Write Increments
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
         - VALID_EMPTY
@@ -1167,14 +1261,19 @@ dashboards:
         title: Monitor Manifest (30m)
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1190,14 +1289,19 @@ dashboards:
         title: Monitor Ledger (30m)
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1213,11 +1317,14 @@ dashboards:
         title: Track Replay Drift by Type
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
         - VALID_EMPTY
@@ -1235,11 +1342,14 @@ dashboards:
         title: Track Replay Lag
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
         - VALID_EMPTY
@@ -1257,14 +1367,19 @@ dashboards:
         title: Monitor Global Read Failures (30m)
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1280,14 +1395,19 @@ dashboards:
         title: Track Lineage Failures
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1303,14 +1423,15 @@ dashboards:
         title: Review Missing Lineage by Layer
         role: forensic_table
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
-        - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1325,14 +1446,19 @@ dashboards:
         title: Monitor Failed Runs
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1348,11 +1474,14 @@ dashboards:
         title: Track Phase Duration
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
         - VALID_EMPTY
@@ -1370,11 +1499,14 @@ dashboards:
         title: Track Global Shutdown Starts
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
         - VALID_EMPTY
@@ -1392,11 +1524,14 @@ dashboards:
         title: Track Global Shutdown Completions
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
         - VALID_EMPTY
@@ -1414,14 +1549,19 @@ dashboards:
         title: Monitor Runtime Error Rate
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1437,14 +1577,19 @@ dashboards:
         title: Monitor Pipeline Alerts
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1460,14 +1605,19 @@ dashboards:
         title: Monitor No-Records Runs
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1483,14 +1633,19 @@ dashboards:
         title: Monitor Worst Stage Lag
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1506,11 +1661,14 @@ dashboards:
         title: Track Stage Backlog Trend
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
         - VALID_EMPTY
@@ -1528,11 +1686,14 @@ dashboards:
         title: Track Pipeline Duration
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
         - VALID_EMPTY
@@ -1550,11 +1711,14 @@ dashboards:
         title: Track Records by Stage / Interval
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
         - VALID_EMPTY
@@ -1572,14 +1736,15 @@ dashboards:
         title: Compare Records by Stage & Run Type
         role: forensic_table
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
-        - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1594,14 +1759,15 @@ dashboards:
         title: Inspect Active Runtime Blocker Detail
         role: forensic_table
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
-        - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1616,14 +1782,15 @@ dashboards:
         title: Inspect Stage Expectedness
         role: forensic_table
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
-        - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1638,14 +1805,15 @@ dashboards:
         title: Review Errors by Stage & Code
         role: forensic_table
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
-        - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1660,14 +1828,19 @@ dashboards:
         title: Inspect Global Provider Alert Conditions
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1688,9 +1861,14 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1711,9 +1889,14 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1729,14 +1912,19 @@ dashboards:
         title: Monitor Ledger
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1768,14 +1956,19 @@ dashboards:
         title: Monitor Telemetry
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1791,14 +1984,15 @@ dashboards:
         title: Review Observed Terminal Counters
         role: forensic_table
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
-        - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1843,12 +2037,13 @@ dashboards:
         title: Inspect Runtime Suspects
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: global
+        scope_class: global
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -1864,12 +2059,13 @@ dashboards:
         title: Inspect Provider Suspects
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: global
+        scope_class: global
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -1885,12 +2081,13 @@ dashboards:
         title: Inspect DQ Suspects
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: global
+        scope_class: global
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -1906,14 +2103,15 @@ dashboards:
         title: Monitor Global Alerts
         role: causes_table
         tier: 1
-        scope: current
-        scope_class: current
+        scope: global
+        scope_class: global
         evidence_source: prometheus
         empty_state_class: event_empty
         state_model:
         - VALID_EMPTY
         - UNKNOWN
         - ERROR
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -1930,14 +2128,17 @@ dashboards:
         title: Track Alert State History
         role: alert_timeline
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: global
+        scope_class: global
         evidence_source: prometheus
         empty_state_class: event_empty
         state_model:
-        - VALID_EMPTY
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
+        - VALID_EMPTY
         required_copy:
         - evidence_scope
         - no_data
@@ -1968,14 +2169,15 @@ dashboards:
         title: Inspect Ranked Suspects
         role: forensic_table
         tier: 1
-        scope: time_range
-        scope_class: time_range
+        scope: global
+        scope_class: global
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - UNKNOWN
         - ERROR
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -2043,6 +2245,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2063,9 +2266,10 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
-        - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -2085,9 +2289,10 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
-        - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -2150,14 +2355,19 @@ dashboards:
         title: Track Global Read Failures
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -2173,11 +2383,14 @@ dashboards:
         title: Compare Checkpoint Outcomes
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
         - VALID_EMPTY
@@ -2195,11 +2408,14 @@ dashboards:
         title: Compare Global Reads by Store
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
         - VALID_EMPTY
@@ -2222,6 +2438,9 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
         - ERROR
         - VALID_EMPTY
@@ -2239,8 +2458,8 @@ dashboards:
         title: Pipeline fleet and range, not this Run ID
         role: row_group
         tier: 4
-        scope: global
-        scope_class: global
+        scope: current
+        scope_class: current
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
@@ -2260,12 +2479,13 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - VALID_EMPTY
+        - UNKNOWN
+        - ERROR
+        - TELEMETRY_ABSENT
         - OK
         - WARN
         - CRIT
-        - UNKNOWN
-        - VALID_EMPTY
-        - ERROR
         required_copy:
         - state_mapping
         - evidence_scope
@@ -2282,14 +2502,18 @@ dashboards:
         title: Monitor Coverage
         role: forensic_table
         tier: 3
-        scope: global
-        scope_class: global
+        scope: current
+        scope_class: current
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
-        - VALID_EMPTY
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
+        - VALID_EMPTY
         - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
@@ -2312,6 +2536,12 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: unsupported
         state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - ERROR
+        - VALID_EMPTY
         - N/A
         required_copy:
         - operator_guidance
@@ -2389,6 +2619,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2410,6 +2641,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2431,6 +2663,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2485,9 +2718,14 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -2527,6 +2765,7 @@ dashboards:
         empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2558,14 +2797,19 @@ dashboards:
         title: Track Failed Workflow Runs
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -2581,14 +2825,19 @@ dashboards:
         title: Track Failed Workflow Steps
         role: indicator
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -2609,9 +2858,14 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - OK
+        - WARN
+        - CRIT
         - UNKNOWN
+        - INCOMPLETE
         - ERROR
         - VALID_EMPTY
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -2627,12 +2881,13 @@ dashboards:
         title: Monitor Global Alerts (Full)
         role: forensic_table
         tier: 3
-        scope: current
-        scope_class: current
+        scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2651,12 +2906,13 @@ dashboards:
         title: Inspect Global Suspects (Full)
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2672,12 +2928,13 @@ dashboards:
         title: Inspect Global Signal Measurements
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: global
+        scope_class: global
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2731,8 +2988,8 @@ dashboards:
         title: ''
         role: guidance
         tier: 4
-        scope: global
-        scope_class: global
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
@@ -2762,7 +3019,7 @@ dashboards:
         - first_window_light
         - zoom_200
       '9002':
-        title: Run Domains
+        title: Review Run Domains
         role: evidence_table
         tier: 3
         scope: selected_run
@@ -2771,6 +3028,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2783,8 +3041,8 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '9300':
-        title: Run Identity
-        role: evidence_table
+        title: Review Run Identity
+        role: identity_table
         tier: 3
         scope: selected_run
         scope_class: selected_run
@@ -2792,6 +3050,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2803,16 +3062,20 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
+        required_columns:
+        - Parameter
+        - Value
       '9460':
         title: Inspect Selected Run Stages
         role: evidence_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2828,15 +3091,16 @@ dashboards:
         - full_light
         - zoom_200
       '9480':
-        title: Provider Evidence
+        title: Review Provider Evidence
         role: evidence_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2852,11 +3116,11 @@ dashboards:
         - full_light
         - zoom_200
       '9481':
-        title: Provider Check
+        title: Review Provider Check
         role: indicator
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
@@ -2880,11 +3144,11 @@ dashboards:
         - backend_error
         render_profiles: *id008
       '9482':
-        title: Data Quality
+        title: Review Data Quality
         role: indicator
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
@@ -2911,7 +3175,7 @@ dashboards:
         - full_light
         - zoom_200
       '9603':
-        title: Selected Run Status
+        title: Review Selected Run Status
         role: evidence_table
         tier: 3
         scope: selected_run
@@ -2920,6 +3184,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2932,13 +3197,13 @@ dashboards:
         - backend_error
         render_profiles: *id004
       '9604':
-        title: Overall Verdict
+        title: Review Overall Verdict
         role: indicator
         tier: 3
-        scope: time_range
-        scope_class: time_range
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - OK
         - WARN
@@ -2965,8 +3230,8 @@ dashboards:
         title: ''
         role: guidance
         tier: 4
-        scope: selected_run
-        scope_class: selected_run
+        scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
@@ -2980,13 +3245,15 @@ dashboards:
         title: Inspect Recent Runs (last 10)
         role: forensic_table
         tier: 1
-        scope: selected_run
-        scope_class: selected_run
+        scope: global
+        scope_class: global
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data

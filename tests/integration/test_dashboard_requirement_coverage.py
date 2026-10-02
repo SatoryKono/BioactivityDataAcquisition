@@ -56,7 +56,7 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 _CONTROL_PLANE = Path("grafana/dashboards/bioetl-control-plane-v1.json")
-_RUNTIME = Path("grafana/dashboards/bioetl-runtime.json")
+_RUNTIME = Path("grafana/dashboards/bioetl-incident-v1.json")
 _OVERVIEW = Path("grafana/dashboards/bioetl-overview-v2.json")
 
 
@@ -219,7 +219,9 @@ def test_dash_first_002_fails_closed_on_uncollapsed_or_unallowlisted_inspect() -
             panel["collapsed"] = False
             break
     with pytest.raises(AssertionError, match="must ship collapsed"):
-        violations = forensic_first_window_violations("bioetl-runtime.json", dashboard)
+        violations = forensic_first_window_violations(
+            "bioetl-incident-v1.json", dashboard
+        )
         assert not violations, "\n".join(violations)
 
     overview = copy.deepcopy(load_dashboard(_OVERVIEW))
@@ -326,11 +328,11 @@ def test_dash_copy_001_data_panels_name_empty_state() -> None:
 
 def test_dash_copy_001_fails_closed_without_empty_state_copy() -> None:
     dashboard = copy.deepcopy(load_dashboard(_RUNTIME))
-    panel = _panel_by_id(dashboard, 9998)
+    panel = _panel_by_id(dashboard, 9401)
     panel["description"] = "Pipeline status."
     defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
     defaults["noValue"] = ""
-    violations = data_panel_empty_state_violations("bioetl-runtime.json", dashboard)
+    violations = data_panel_empty_state_violations("bioetl-incident-v1.json", dashboard)
     assert violations, "mutated runtime 9998 must fail DASH-COPY-001 empty-state copy"
 
 

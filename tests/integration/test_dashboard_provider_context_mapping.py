@@ -22,26 +22,24 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
-@pytest.mark.parametrize("source", ["bioetl-incident-v1", "bioetl-run-explorer-v1"])
+@pytest.mark.parametrize(
+    "source", ["bioetl-overview-v2", "bioetl-run-explorer-v1", "bioetl-incident-v1"]
+)
 def test_provider_context_mapping_preserves_source_values(source: str) -> None:
-    """Provider evidence handoffs retain exact run identity on Run Overview."""
-    dashboard = load_dashboard(Path(f"grafana/dashboards/{source}.json"))
+    """Current Provider Evidence handoffs retain exact identity and own no legacy vars."""
+    dashboard = load_dashboard(Path("grafana/dashboards") / (source + ".json"))
     links = [
         link
         for link in _collect_dashboard_links(dashboard)
-        if "provider" in str(link.get("title", "")).lower()
-        and str(link.get("url", "")).startswith("/d/")
+        if link.get("title") in {"Open Provider Evidence", "Provider Evidence"}
     ]
-    assert links, f"{source} must expose provider evidence navigation"
+    if source != "bioetl-incident-v1":
+        assert links
     for link in links:
         url = link["url"]
         assert url.startswith("/d/bioetl-overview-v2/")
+        assert "var-provider=" not in url and "var-pipeline_context=" not in url
+        assert "var-adapter=" not in url
         assert "${__url_time_range}" in url
-        if source == "bioetl-run-explorer-v1":
-            assert "var-pipeline=${__data.fields.Pipeline:percentencode}" in url
-            assert "var-run_id=${__data.fields.run_id:percentencode}" in url
-        else:
-            assert "${pipeline:queryparam}" in url
-            assert "${run_id:queryparam}" in url
-        for retired in ("var-provider=", "var-pipeline_context=", "var-adapter="):
-            assert retired not in url
+        assert "run_id" in url and "pipeline" in url
+    assert not Path("grafana/dashboards/bioetl-provider-health-v2.json").exists()

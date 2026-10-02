@@ -89,7 +89,7 @@ def test_recent_report_column_uses_the_row_http_link() -> None:
 
 
 def test_concrete_context_values_are_not_grafana_globs() -> None:
-    url = build_handoff_url("bioetl-runtime")
+    url = build_handoff_url("bioetl-incident-v1")
     assert "${run_type:queryparam}" in url
     assert "var-run_type=$run_type" not in url
 

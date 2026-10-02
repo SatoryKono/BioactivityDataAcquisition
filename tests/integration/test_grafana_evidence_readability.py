@@ -53,13 +53,13 @@ def test_overview_paired_tables_have_fixed_rows_and_inspectable_reasons():
     assert domains["gridPos"]["x"] == 0
     assert summary["gridPos"]["x"] == 15
     assert summary["gridPos"]["w"] == 9
-    assert summary["gridPos"]["h"] == 4
+    assert summary["gridPos"]["h"] == 5
     assert domains["gridPos"]["y"] + domains["gridPos"]["h"] == (
         panels[9300]["gridPos"]["y"] + panels[9300]["gridPos"]["h"]
     )
     assert 9301 not in panels
     for panel in (summary, domains):
-        assert panel["options"]["cellHeight"] == "lg"
+        assert panel["options"]["cellHeight"] == "sm"
         assert panel["options"]["footer"]["enablePagination"] is False
         custom = panel["fieldConfig"]["defaults"]["custom"]
         assert custom["inspect"] is True
@@ -78,24 +78,21 @@ def test_overview_paired_tables_have_fixed_rows_and_inspectable_reasons():
         for o in summary["fieldConfig"]["overrides"]
         if o["matcher"]["options"] == "Trust"
     )
-    assert {p["id"]: p["value"] for p in trust["properties"]}[
-        "displayName"
-    ] == "Replay readiness"
+    assert {p["id"]: p["value"] for p in trust["properties"]}["displayName"] == "Trust"
 
 
 def test_overview_paginates_tracks_without_limiting_evidence():
     dashboard = json.loads(
-        (ROOT / "grafana/dashboards/bioetl-overview-v2.json").read_text(
+        (ROOT / "grafana/dashboards/bioetl-incident-v1.json").read_text(
             encoding="utf-8"
         )
     )
     panels = {p["id"]: p for p in _panels(dashboard["panels"])}
-    for panel_id in (9018, 9019, 9020):
-        panel = panels[panel_id]
-        assert panel["options"]["perPage"] == 8
-        assert "pageSize" not in panel["options"]
-        assert panel["gridPos"]["w"] == 24
-        assert not any(t.get("id") == "limit" for t in panel.get("transformations", []))
+    # The unbounded workflow evidence table paginates without discarding rows.
+    panel = panels[9701]
+    assert panel["options"]["footer"]["enablePagination"] is True
+    assert not any(t.get("id") == "limit" for t in panel.get("transformations", []))
+    assert panel["fieldConfig"]["defaults"]["custom"]["inspect"] is True
 
 
 @pytest.mark.parametrize("uid", ["bioetl-overview-v2", "bioetl-dq-v2"])
@@ -114,7 +111,8 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
         assert "'run_verdict': $s.verdict" in target["root_selector"]
     assert "/selected-run-status?" in target["url"]
     assert "presentation_summary[0]" in target["root_selector"]
-    assert "presentation_trust[0].reasons_display" in target["root_selector"]
+    assert "presentation_trust[0]" in target["root_selector"]
+    assert "reasons_display" in target["root_selector"]
     views = (summary, panels[9002]) if uid == "bioetl-overview-v2" else (summary,)
     for panel in views:
         fields = next(
@@ -143,7 +141,7 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
         assert props["custom.cellOptions"]["wrapText"] is True
         if uid == "bioetl-overview-v2":
             assert props["custom.inspect"] is True
-            assert panel["options"]["cellHeight"] == "lg"
+            assert panel["options"]["cellHeight"] == "sm"
             assert panel["options"]["footer"]["enablePagination"] is False
         assert (
             props["mappings"][0]["options"]["Archive missing"]["text"]
@@ -153,22 +151,18 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
 
 def test_provider_first_window_preserves_full_fleet_with_pagination():
     dashboard = json.loads(
-        (ROOT / "grafana/dashboards/bioetl-provider-health-v2.json").read_text(
+        (ROOT / "grafana/dashboards/bioetl-overview-v2.json").read_text(
             encoding="utf-8"
         )
     )
     panels = {p["id"]: p for p in _panels(dashboard["panels"])}
-    for pid in (9101, 9107):
-        query = panels[pid]["targets"][0]["expr"]
-        assert query.startswith("max by (")
-        assert "topk(" not in query
-        assert "All observed provider" in panels[pid]["description"]
-        assert panels[pid]["options"]["footer"]["enablePagination"] is True
-        assert not any(t["id"] == "limit" for t in panels[pid]["transformations"])
-    organize = next(
-        t["options"] for t in panels[9107]["transformations"] if t["id"] == "organize"
-    )
-    assert organize["excludeByName"]["source_state"] is True
+    provider = panels[9480]
+    assert provider["gridPos"]["y"] >= 18
+    assert provider["options"]["footer"]["enablePagination"] is True
+    assert not any(t.get("id") == "limit" for t in provider["transformations"])
+    assert all("run_id=${run_id}" in t["url"] for t in provider["targets"])
+    assert all("expr" not in t for t in provider["targets"])
+    assert "not live fleet health" in panels[9481]["description"]
 
 
 def test_run_cell_inspection_and_links_use_full_identity():
@@ -183,36 +177,22 @@ def test_run_cell_inspection_and_links_use_full_identity():
         for t in panel["transformations"]
         if t["id"] == "filterFieldsByName"
     )
-    assert "run_id" in fields
-    assert "run_label" not in fields
-    override = next(
-        o
-        for o in panel["fieldConfig"]["overrides"]
-        if o["matcher"] == {"id": "byName", "options": "Run"}
-    )
-    links = next(
-        prop["value"] for prop in override["properties"] if prop["id"] == "links"
-    )
-    assert all(
-        "var-run_id=${__data.fields.Run:percentencode}" in link["url"] for link in links
-    )
-    assert all("${__value.raw}" not in link["url"] for link in links)
-    assert {prop["id"]: prop["value"] for prop in override["properties"]}[
-        "custom.inspect"
-    ] is True
-    organize = next(
-        t["options"] for t in panel["transformations"] if t["id"] == "organize"
-    )
-    assert organize["renameByName"]["run_id"] == "Run"
+    assert "run_id" in fields and "run_label" in fields
     rules = {
         o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}
         for o in panel["fieldConfig"]["overrides"]
     }
-    assert rules["Workflow"]["custom.hidden"] is False
-    for field in ("Pipeline", "Workflow", "Run"):
-        assert "custom.width" not in rules[field]
-    for field in ("Started", "Duration", "Processing", "Replay readiness", "Report"):
-        assert isinstance(rules[field]["custom.width"], int)
+    links = rules["Run ID"]["links"]
+    assert len(links) == 2
+    assert "var-run_id=${__data.fields.run_id:percentencode}" in links[0]["url"]
+    assert links[1]["url"] == "${__data.fields.report_url:raw}"
+    assert rules["Run ID"]["custom.inspect"] is True
+    for field in ("Overview", "Saved Evidence", "Data Quality", "Replay Readiness"):
+        assert all(
+            "var-run_id=${__data.fields.run_id:percentencode}" in link["url"]
+            for link in rules[field]["links"]
+        )
+    assert "viewPanel=9418" in rules["Saved Evidence"]["links"][0]["url"]
 
 
 @pytest.mark.parametrize("stage", ["bronze", "silver", "gold", "quarantined"])

@@ -31,19 +31,18 @@ def test_retention_does_not_repeat_hash_verification_for_header():
 
 
 def test_provider_status_uses_filtered_vectors_in_severity_order():
-    dashboard = _dashboard("bioetl-provider-health-v2")
-    apply_corrections(dashboard)
-    panel = next(item for item in dashboard["panels"] if item.get("id") == 9401)
-    assert panel["targets"][0]["legendFormat"] == "OK"
-    assert "count(bioetl_pstatus" in panel["targets"][0]["expr"]
-    assert "bool" not in panel["targets"][0]["expr"]
-    assert "vector(0)" not in panel["targets"][0]["expr"]
-    assert panel["fieldConfig"]["defaults"]["noValue"] == "TELEMETRY MISSING"
-    assert "UNKNOWN" in panel["description"]
-    fleet = next(item for item in dashboard["panels"] if item.get("id") == 9101)
-    assert fleet["title"].startswith("All providers")
-    assert all(
-        "Severity Matrix" not in link.get("title", "")
-        and "Top Causes" not in link.get("title", "")
-        for link in panel["options"].get("dataLinks", [])
+    """Saved provider check stays categorical and never fabricates a healthy fleet."""
+    dashboard = _dashboard("bioetl-overview-v2")
+    panel = next(
+        item for item in get_dashboard_panels(dashboard) if item.get("id") == 9481
     )
+    assert all("expr" not in target for target in panel["targets"])
+    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    description = panel["description"]
+    assert "not live fleet health" in description
+    assert "QUERY ERROR" in description
+    assert "VALID EMPTY" in description
+    assert "SELECT RUN" in description
+    blob = json.dumps(panel)
+    assert "vector(0)" not in blob
+    assert not (ROOT / "grafana/dashboards/bioetl-provider-health-v2.json").exists()

@@ -12,7 +12,8 @@ def apply_trust_action_display(payload: dict) -> None:
         '{"trust_action_note": reasons_count = 0 ? "No trust issues" : "Not assessed"}]))]'
     )
     trust["targets"][0].update(
-        parser="uql", root_selector="",
+        parser="uql",
+        root_selector="",
         uql='parse-json | jsonata "' + expression.replace('"', '\\"') + '"',
     )
     for transform in trust["transformations"]:
@@ -27,18 +28,28 @@ def apply_trust_action_display(payload: dict) -> None:
     overrides = trust["fieldConfig"]["overrides"]
     if any(item["matcher"].get("options") == "Action" for item in overrides):
         overrides[:] = [
-            item for item in overrides
+            item
+            for item in overrides
             if item["matcher"].get("options") != "trust_reasons_action"
         ]
     for item in overrides:
         if item["matcher"].get("options") == "Action":
             item["matcher"]["options"] = "trust_reasons_action"
             item["properties"].append({"id": "displayName", "value": "Action"})
-    overrides[:] = [item for item in overrides if item["matcher"].get("options") != "trust_action_note"]
-    overrides.append({
-        "matcher": {"id": "byName", "options": "trust_action_note"},
-        "properties": [{"id": "displayName", "value": "Action"}, {"id": "links", "value": []}],
-    })
+    overrides[:] = [
+        item
+        for item in overrides
+        if item["matcher"].get("options") != "trust_action_note"
+    ]
+    overrides.append(
+        {
+            "matcher": {"id": "byName", "options": "trust_action_note"},
+            "properties": [
+                {"id": "displayName", "value": "Action"},
+                {"id": "links", "value": []},
+            ],
+        }
+    )
 
 
 def apply_replay_readiness_design(payload: dict) -> None:
@@ -71,7 +82,10 @@ def apply_replay_readiness_design(payload: dict) -> None:
         "text": {"valueSize": 22, "titleSize": 12},
     }
     card["transformations"] = [
-        {"id": "filterFieldsByName", "options": {"include": {"names": ["verdict", "explanation"]}}}
+        {
+            "id": "filterFieldsByName",
+            "options": {"include": {"names": ["verdict", "explanation"]}},
+        }
     ]
     colors = {
         "READY": "green",
@@ -94,7 +108,14 @@ def apply_replay_readiness_design(payload: dict) -> None:
                         state: {"text": state, "color": color}
                         for state, color in colors.items()
                     },
-                }
+                },
+                {
+                    "type": "special",
+                    "options": {
+                        "match": "null",
+                        "result": {"text": "UNKNOWN", "color": "#555555"},
+                    },
+                },
             ],
             "color": {"mode": "thresholds"},
             "thresholds": {
@@ -102,10 +123,14 @@ def apply_replay_readiness_design(payload: dict) -> None:
                 "steps": [{"color": "#555555", "value": None}],
             },
         },
-        "overrides": [{
-            "matcher": {"id": "byName", "options": "verdict"},
-            "properties": [{"id": "displayName", "value": "${__data.fields.explanation}"}],
-        }],
+        "overrides": [
+            {
+                "matcher": {"id": "byName", "options": "verdict"},
+                "properties": [
+                    {"id": "displayName", "value": "${__data.fields.explanation}"}
+                ],
+            }
+        ],
     }
     card["links"] = [
         {

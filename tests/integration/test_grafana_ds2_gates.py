@@ -34,8 +34,6 @@ _DASHBOARDS = sorted(Path("grafana/dashboards").glob("bioetl-*.json"))
 _OPERATOR_UIDS = {
     "bioetl-control-plane-v1",
     "bioetl-overview-v2",
-    "bioetl-runtime",
-    "bioetl-provider-health-v2",
     "bioetl-dq-v2",
     "bioetl-incident-v1",
     "bioetl-run-explorer-v1",
@@ -55,7 +53,7 @@ def _continuous_lag_expr(expr: str) -> bool:
     return "bioetl_stage_lag_seconds" in text and "bool" not in text
 
 
-def test_incident_stage_lag_primary_panel_is_timeseries() -> None:
+def test_runtime_stage_lag_primary_panel_is_timeseries() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panels = {
         panel.get("id"): panel
@@ -71,6 +69,17 @@ def test_incident_stage_lag_primary_panel_is_timeseries() -> None:
         t.get("expr", "") for t in panel.get("targets") or [] if isinstance(t, dict)
     ]
     assert any("bioetl_stage_lag_seconds" in e for e in exprs)
+
+
+def test_overview_status_uses_only_l0_operator_terminology() -> None:
+    """Saved verdict never implies healthy fleet or permission to replay."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    status = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9604)
+    assert status["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert status["datasource"]["uid"] == "-- Dashboard --"
+    assert status["targets"][0]["panelId"] == 9002
+    assert "run_verdict" in str(status["transformations"])
+    assert all(p.get("id") != 214 for p in get_dashboard_panels(dashboard))
 
 
 def test_incident_pipeline_scope_status_matches_priority_enum() -> None:
@@ -224,27 +233,23 @@ def test_trust_primary_recovery_ssot_title_and_link() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     assert 906 not in panels
+    assert "Replay Checks" in panels[9400]["options"]["content"]
     verdict = panels[9422]
-    checks = panels[9423]
-    assert verdict["title"] == "Review Exact Replay Readiness"
-    assert checks["title"] == "Review Exact Replay Checks"
-    assert "UNKNOWN" in verdict["description"]
-    assert "INCOMPLETE" in verdict["description"]
-    assert verdict["targets"][0]["url"] == checks["targets"][0]["url"]
-    assert "run_id=${run_id}" in verdict["targets"][0]["url"]
-    links = verdict["links"]
-    assert any("viewPanel=9423" in link["url"] for link in links)
-    assert all("${run_id:queryparam}" in link["url"] for link in links)
+    mappings = verdict["fieldConfig"]["defaults"]["mappings"][0]["options"]
+    assert mappings["BLOCKED"]["color"] == "red"
+    assert mappings["UNKNOWN"]["color"] == "#555555"
+    assert mappings["INCOMPLETE"]["color"] == "#555555"
+    assert any("viewPanel=9423" in link["url"] for link in verdict["links"])
+    assert all(link["includeVars"] is False for link in verdict["links"])
+    assert panels[9423]["gridPos"]["y"] + panels[9423]["gridPos"]["h"] <= 18
 
 
 def test_operator_status_stats_map_null_unknown() -> None:
     """First-screen Status stats on operator UIDs must map null → UNKNOWN text."""
     required = {
         "bioetl-control-plane-v1",
-        "bioetl-runtime",
         "bioetl-dq-v2",
         "bioetl-incident-v1",
-        "bioetl-provider-health-v2",
         "bioetl-overview-v2",
     }
     for path in _DASHBOARDS:

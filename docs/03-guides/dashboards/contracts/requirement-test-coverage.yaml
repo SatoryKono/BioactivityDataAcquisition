@@ -179,7 +179,7 @@ requirements:
 - id: DASH-PORTFOLIO-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_requirement_gates.py::test_seven_shipped_uids_match_requirement_gates
+  - tests/integration/test_dashboard_requirement_gates.py::test_five_shipped_uids_match_requirement_gates
 - id: DASH-QUERY-001
   gate: qa-check
   tests:

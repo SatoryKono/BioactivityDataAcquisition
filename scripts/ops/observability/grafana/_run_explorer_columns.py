@@ -82,7 +82,7 @@ def apply_overall_verdict(payload: dict) -> None:
         "id": 9604,
         "type": "stat",
         "title": "Review Overall Verdict",
-        "description": "Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
+        "description": "SELECTED RUN · Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
         "gridPos": {
             "x": source["gridPos"]["x"],
             "y": 2,
@@ -190,6 +190,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     panel = panels[3010]
     panel["gridPos"].update(y=3, h=13)
     panel["description"] = (
+        "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. "
         "Last 10 launches, newest Started first, independent of the time range. "
         "Workflow and Pipeline open passports. Run ID opens the persisted Report; "
         "inspect its full UUID in the cell. Overview is processing status, not replay readiness. "
@@ -208,6 +209,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "report_url",
         "report_label",
         "workflow_passport_url",
+        "workflow_passport_path",
         "pipeline_passport_url",
         "pipeline_passport_path",
     ]
@@ -215,8 +217,9 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     panel["targets"][0]["root_selector"] = (
         'index_state = "valid_empty" and $exists(items) and $count(items) = 0 '
         '? [{"pipeline": "VALID EMPTY"}] : items.($merge([$, '
-        '{"workflow_id": workflow_passport_url != "" '
-        '? "[" & workflow_id & "](" & workflow_passport_url & ")" : "N/A", '
+        '{"workflow_id": workflow_id != "" ? workflow_id : "N/A", "run_label": run_id, '
+        '"workflow_passport_path": $substringAfter(workflow_passport_url, '
+        '"https://github.com/SatoryKono/BioactivityDataAcquisition/"), '
         '"pipeline_passport_path": $substringAfter(pipeline_passport_url, '
         '"https://github.com/SatoryKono/BioactivityDataAcquisition/"), '
         '"overview_handoff": "Open", "diagnostics_handoff": "Open", '
@@ -258,6 +261,11 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         minWidth=50, wrapText=False, cellOptions={"type": "auto", "wrapText": False}
     )
     links = {
+        "Workflow": (
+            "Workflow passport",
+            "https://github.com/SatoryKono/BioactivityDataAcquisition/"
+            "${__data.fields.workflow_passport_path:raw}",
+        ),
         "Pipeline": (
             "Pipeline passport",
             "https://github.com/SatoryKono/BioactivityDataAcquisition/"
@@ -268,16 +276,13 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             "${__data.fields.report_url:raw}",
         ),
         "Provider": (
-            "Provider Health",
-            "/d/bioetl-provider-health-v2/4-provider-health?"
-            + _CONTEXT
-            + "&var-provider=${__data.fields.Provider:percentencode}"
-            + "&var-pipeline_context=${__data.fields.Pipeline:percentencode}",
+            "Provider Evidence",
+            "/d/bioetl-overview-v2/2-overview?" + _CONTEXT + "&viewPanel=9480",
         ),
         "Overview": ("Run Overview", "/d/bioetl-overview-v2/2-overview?" + _CONTEXT),
         "Saved Evidence": (
             "Saved Evidence",
-            "/d/bioetl-overview-v2/2-overview?" + _CONTEXT,
+            "/d/bioetl-control-plane-v1/1-trust?" + _CONTEXT + "&viewPanel=9418",
         ),
         "Data Quality": ("Data Quality", "/d/bioetl-dq-v2/5-data-quality?" + _CONTEXT),
         "Replay Readiness": (
@@ -289,7 +294,10 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     for name, width, min_width in _COLUMNS.values():
         properties: list[dict[str, Any]] = [
             {"id": "custom.minWidth", "value": min_width},
-            {"id": "custom.inspect", "value": name in {"Workflow", "Pipeline"}},
+            {
+                "id": "custom.inspect",
+                "value": name in {"Workflow", "Pipeline", "Run ID"},
+            },
         ]
         if width is not None:
             properties.append({"id": "custom.width", "value": width})
@@ -354,7 +362,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             properties.append(
                 {
                     "id": "custom.cellOptions",
-                    "value": {"type": "markdown"},
+                    "value": {"type": "auto"},
                 }
             )
         if name == "Duration":

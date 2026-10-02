@@ -48,7 +48,6 @@ HIDDEN_CHIP_VARS = {
 }
 SUMMARY_PANELS = {
     "bioetl-overview-v2.json": 9603,
-    "bioetl-runtime.json": 9998,
     "bioetl-dq-v2.json": 9406,
     "bioetl-incident-v1.json": 2101,
 }
@@ -165,31 +164,29 @@ def test_query_panel_descriptions_carry_scope_badge() -> None:
 
 
 def test_first_window_coverage_set_range_and_refresh_copy() -> None:
-    required = (
-        "Effective refresh",
-        "60s",
-        "timezone",
-        "Run coverage",
-        "IN RANGE",
-        "OUT OF RANGE",
-    )
-    missing: list[str] = []
+    """Scope is explicit; retained exact-run evidence does not depend on chart range."""
     for path in get_dashboard_files():
         dashboard = _load(path)
         blob = _first_window_blob(dashboard)
-        for token in (
-            required[:3] if path.name == "bioetl-run-explorer-v1.json" else required
-        ):
-            if token not in blob:
-                missing.append(f"{path.name} missing {token}")
-        if path.name == "bioetl-run-explorer-v1.json":
-            assert "not this time range" in blob
-            assert "Open Report" in blob
-        elif "Set range to run" not in blob and "Open run in Run Explorer" not in blob:
-            missing.append(f"{path.name} missing run-range action copy")
-        assert dashboard.get("refresh") == "60s", path.name
-        assert dashboard.get("timezone") == "browser", path.name
-    assert not missing, "coverage/refresh header:\n" + "\n".join(missing)
+        assert dashboard["refresh"] == "60s", path.name
+        assert dashboard["timezone"] == "browser", path.name
+        if path.stem == "bioetl-run-explorer-v1":
+            assert "independent of the time range" in blob
+            assert "Last 10 launches" in blob
+        elif path.stem == "bioetl-incident-v1":
+            assert "CURRENT" in blob
+            assert "Run ID does not filter this card" in blob
+            assert "not verified causes" in blob
+        else:
+            assert "${run_id}" in blob or "SELECTED RUN" in blob
+            assert "UNKNOWN" in blob or "Unknown" in blob
+            assert "run_id" not in str(
+                [
+                    t.get("expr", "")
+                    for p in select_first_window_panels(_root_panels(dashboard))
+                    for t in p.get("targets", [])
+                ]
+            )
 
 
 def test_hidden_vars_have_read_only_chips() -> None:
@@ -242,7 +239,7 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
         blob = json.dumps(panel)
         if "viewPanel=3022" in blob:
             missing.append(f"{name}:{panel_id} targets retired D6 panel 3022")
-        if "Open run in Run Explorer" not in blob:
+        if "Open Run Explorer" not in blob and "Open run in Run Explorer" not in blob:
             missing.append(f"{name}:{panel_id} missing chart range handoff")
         no_value = str(
             ((panel.get("fieldConfig") or {}).get("defaults") or {}).get("noValue")
@@ -256,22 +253,21 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
 
 
 def test_provider_reason_and_causes_share_empty_state() -> None:
-    dashboard = _load(DASHBOARD_DIR / "bioetl-provider-health-v2.json")
-    row = next(item for item in _root_panels(dashboard) if item.get("id") == 9106)
-    assert row.get("type") == "row"
-    assert row.get("collapsed") is True
-    assert int(row["gridPos"]["y"]) + int(row["gridPos"]["h"]) >= FIRST_WINDOW_Y
-    nested_ids = {
-        item.get("id") for item in row.get("panels") or [] if isinstance(item, dict)
-    }
-    assert {9102, 9103} <= nested_ids
-    reason = next(
-        item for item in _iter_panels(_root_panels(dashboard)) if item.get("id") == 9107
-    )
-    assert int((reason.get("gridPos") or {}).get("y", 99)) < FIRST_WINDOW_Y
-    expr = str((reason.get("targets") or [{}])[0].get("expr") or "")
-    assert "bioetl_provider_current_status_info" in expr
+    """Live provider causes are global; saved Provider Evidence is exact-run HTTP."""
+    incident = _load(DASHBOARD_DIR / "bioetl-incident-v1.json")
+    causes = next(p for p in _iter_panels(incident["panels"]) if p["id"] == 2003)
+    assert "GLOBAL" in causes["description"] and "CURRENT" in causes["description"]
+    assert "VALID EMPTY" in causes["description"]
+    expr = causes["targets"][0]["expr"]
+    assert "bioetl_provider_current_cause" in expr
     assert "run_id" not in expr
+    overview = _load(DASHBOARD_DIR / "bioetl-overview-v2.json")
+    saved = next(p for p in overview["panels"] if p["id"] == 9480)
+    assert "run_id=${run_id}" in saved["targets"][0]["url"]
+    assert (
+        "No API check" in str(saved)
+        or "provider api was not called" in saved["description"].lower()
+    )
 
 
 def test_promql_targets_do_not_select_run_id_label() -> None:
@@ -298,19 +294,19 @@ def test_run_explorer_selects_rows_without_removed_detail_groups() -> None:
     override = next(
         o
         for o in browse["fieldConfig"]["overrides"]
-        if o["matcher"]["options"] == "Run"
+        if o["matcher"]["options"] == "Run ID"
     )
     link = next(p["value"][0] for p in override["properties"] if p["id"] == "links")
     assert link["targetBlank"] is False
     assert "viewPanel" not in link["url"]
     for token in (
-        "var-pipeline=${__data.fields.Pipeline}",
-        "var-run_type=${__data.fields.run_type}",
-        "var-run_id=${__data.fields.Run:percentencode}",
+        "var-pipeline=${__data.fields.Pipeline:percentencode}",
+        "var-run_type=${__data.fields.run_type:percentencode}",
+        "var-run_id=${__data.fields.run_id:percentencode}",
         "${__url_time_range}",
     ):
         assert token in link["url"]
     assert browse["options"]["footer"]["enablePagination"] is False
     assert browse["options"]["cellHeight"] == "sm"
     banner = next(p for p in roots if p["id"] == 1)
-    assert "<br>Pipeline:" in banner["options"]["content"]
+    assert "Reset filters" in banner["options"]["content"]

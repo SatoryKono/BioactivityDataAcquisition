@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Canonical Grafana context URLs for the six ADR-053 dashboard UIDs.
+"""Canonical Grafana context URLs for the five ADR-053 dashboard UIDs.
 
 Production twin of the navigation-links contract. Builds `/d/` handoffs that:
 
@@ -18,7 +18,6 @@ from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
 SEVEN_UIDS: tuple[str, ...] = (
     "bioetl-control-plane-v1",
     "bioetl-overview-v2",
-    "bioetl-provider-health-v2",
     "bioetl-dq-v2",
     "bioetl-incident-v1",
     "bioetl-run-explorer-v1",
@@ -28,7 +27,6 @@ PATH_BY_UID: dict[str, str] = {
     "bioetl-run-explorer-v1": "run-explorer",
     "bioetl-control-plane-v1": "1-trust",
     "bioetl-overview-v2": "2-overview",
-    "bioetl-provider-health-v2": "4-provider-health",
     "bioetl-dq-v2": "5-data-quality",
     "bioetl-incident-v1": "6-incident-workspace",
 }
@@ -71,7 +69,7 @@ def normalize_run_id(value: object) -> str:
 
 @dataclass(frozen=True, slots=True)
 class DashboardContext:
-    """One operator selection applied to all six UIDs."""
+    """One operator selection applied to all five UIDs."""
 
     workflow: str
     pipeline: str
@@ -108,6 +106,14 @@ def build_handoff_url(
             for k, v in (extras or {}).items()
             if k not in {"stage", "provider_hint"}
         }
+    if target_uid == "bioetl-provider-health-v2":
+        target_uid = "bioetl-overview-v2"
+        extras = {
+            k: v
+            for k, v in (extras or {}).items()
+            if k not in {"provider", "adapter", "pipeline_context", "stage"}
+        }
+        extras.setdefault("viewPanel", "9480")
     if target_uid not in PATH_BY_UID:
         raise ValueError(f"unknown dashboard uid: {target_uid}")
     if not template and context is None:
@@ -147,11 +153,13 @@ def build_handoff_url(
         resolved = "${provider_for_pipeline}" if provider == GRAFANA_ALL else provider
         extra_values.setdefault("provider", resolved)
         extra_values.setdefault("pipeline_context", pipeline_context)
-    return _assemble_url(target_uid, values=values, extras=extra_values)
+    return _assemble_url(target_uid, values=values, extras=extra_values).replace(
+        "&var-viewPanel=", "&viewPanel="
+    )
 
 
 def urls_for_context(context: DashboardContext) -> dict[str, str]:
-    """Build the six UID URLs from one trimmed context object."""
+    """Build the five UID URLs from one trimmed context object."""
     return {
         uid: build_handoff_url(uid, context=context, template=False)
         for uid in SEVEN_UIDS

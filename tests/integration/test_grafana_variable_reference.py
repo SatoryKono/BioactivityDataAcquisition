@@ -91,8 +91,7 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         "pipeline",
         "run_type",
         "run_id",
-        # Hidden helper feeding the 9002 'Open Provider Health' handoff
-        # (var-provider=${provider_for_pipeline:percentencode}).
+        # Hidden helper for selected-run provider evidence.
         "provider_for_pipeline",
     }
     assert overview["workflow"].get("includeAll") is True
@@ -110,7 +109,6 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
 
     for dashboard_name in (
         "bioetl-control-plane-v1.json",
-        "bioetl-runtime.json",
         "bioetl-dq-v2.json",
         "bioetl-incident-v1.json",
     ):
@@ -127,89 +125,22 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         assert run_id.get("sort") == 0
         assert run_id.get("current", {}).get("value") == "-"
 
-    provider = _variables("bioetl-provider-health-v2.json")
-    assert provider["workflow"].get("multi") is False
-    assert provider["workflow"].get("includeAll") is True
-    assert provider["workflow"].get("current", {}).get("value") == "$__all"
-    assert provider["pipeline"].get("multi") is False
-    assert provider["pipeline"].get("includeAll") is True
-    assert provider["pipeline"].get("current", {}).get("value") == "$__all"
-    assert provider["run_type"].get("includeAll") is True
-    assert provider["run_type"].get("current", {}).get("value") == "backfill"
-    assert provider["run_id"].get("multi") is False
-    assert provider["run_id"].get("includeAll") is False
-    assert provider["run_id"].get("current", {}).get("value") == "-"
-    assert provider["run_id"].get("sort") == 0
-    assert provider["provider"].get("multi") is False
-    assert provider["provider"].get("includeAll") is False
-    assert provider["provider"].get("current", {}).get("value") == "unknown"
-    provider_query = str(provider["provider"].get("definition") or "")
-    assert provider_query == (
-        "/ops/observability/selected-run-status?pipeline=${pipeline}"
-        "&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
-    )
-    assert provider["pipeline_context"].get("hide") == 2
-    assert provider["pipeline_context"].get("current", {}).get("value") == "unknown"
-
-    for stage_dashboard in ("bioetl-runtime.json", "bioetl-dq-v2.json"):
-        stage = _variables(stage_dashboard)["stage"]
-        assert stage.get("includeAll") is True
-        assert stage.get("current", {}).get("value") == "$__all"
-        assert stage.get("current", {}).get("text") == "All"
-
-    workflow_path = Path("grafana/dashboards/bioetl-workflow-overview.json")
-    if not workflow_path.exists():
-        pytest.skip(
-            "bioetl-workflow-overview.json retired in grafana simplification epic #6570/#6576"
-        )
-    workflow = _variables("bioetl-workflow-overview.json")
-    assert set(workflow) == {
-        "workflow",
-        "workflow_context",
-        "pipeline",
-        "run_type",
-        "run_id",
-        "status",
-        "pipeline_context",
-        "pipeline_context_exact",
-        "run_type_context",
-        "run_type_context_exact",
-        "provider_context",
-        "provider_context_exact",
-        "step_status",
-        "step_kind",
-    }
-    for name in ("workflow", "status", "step_status", "step_kind"):
-        assert workflow[name].get("includeAll") is True
-        assert workflow[name].get("current", {}).get("value") == "$__all"
-    assert workflow["workflow"].get("multi") is False
-    assert workflow["pipeline"].get("multi") is False
-    assert workflow["pipeline"].get("includeAll") is False
-    assert workflow["pipeline"].get("current", {}).get("value") == "unknown"
-    assert workflow["run_type"].get("includeAll") is True
-    assert workflow["run_type"].get("current", {}).get("value") == "$__all"
-    assert workflow["run_id"].get("multi") is False
-    assert workflow["run_id"].get("includeAll") is False
-    assert workflow["run_id"].get("current", {}).get("value") == "-"
-    assert workflow["workflow_context"].get("hide") == 2
-    assert workflow["workflow_context"].get("current", {}).get("value") == "All"
-    assert workflow["pipeline_context"].get("hide") == 2
-    assert workflow["pipeline_context"].get("current", {}).get("value") == "unknown"
-    assert workflow["pipeline_context_exact"].get("hide") == 2
+    provider = overview["provider_for_pipeline"]
+    assert provider["hide"] == 2
+    assert provider["skipUrlSync"] is True
     assert (
-        workflow["pipeline_context_exact"].get("current", {}).get("value") == "unknown"
+        'label_values(bioetl_workflow_pipeline_expected{pipeline=~"$pipeline"}, provider)'
+        in str(provider["query"])
     )
-    assert workflow["run_type_context"].get("hide") == 2
-    assert workflow["run_type_context"].get("current", {}).get("value") == "All"
-    assert workflow["run_type_context_exact"].get("hide") == 2
-    assert workflow["run_type_context_exact"].get("current", {}).get("value") == "All"
-    assert workflow["provider_context"].get("hide") == 2
-    assert workflow["provider_context"].get("current", {}).get("value") == "unknown"
-    assert workflow["provider_context_exact"].get("hide") == 2
-    assert (
-        workflow["provider_context_exact"].get("current", {}).get("value") == "unknown"
-    )
-    # Silver Reject Explorer variables removed with the dashboard (2026-07-23).
+    stage = _variables("bioetl-dq-v2.json")["stage"]
+    assert stage["includeAll"] is True
+    assert stage["current"]["value"] == "$__all"
+    for uid in (
+        "bioetl-runtime",
+        "bioetl-provider-health-v2",
+        "bioetl-workflow-overview",
+    ):
+        assert not Path(f"grafana/dashboards/{uid}.json").exists()
 
 
 def test_variable_reference_explains_role_specific_exceptions() -> None:

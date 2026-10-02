@@ -57,8 +57,6 @@ def test_canonical_context_trims_run_id_and_shares_uuid_across_seven_uids() -> N
     assert set(urls) == {
         "bioetl-control-plane-v1",
         "bioetl-overview-v2",
-        "bioetl-runtime",
-        "bioetl-provider-health-v2",
         "bioetl-dq-v2",
         "bioetl-incident-v1",
         "bioetl-run-explorer-v1",
@@ -146,22 +144,13 @@ def test_empty_state_classes_are_declared_and_visible_copy_differs() -> None:
 
 
 def test_provider_freshness_is_not_present_ok_on_missing_health_status() -> None:
-    dashboard = load_dashboard(DASHBOARD_DIR / "bioetl-provider-health-v2.json")
-    panel = next(
-        item for item in get_dashboard_panels(dashboard) if item.get("id") == 9104
-    )
-    expr = str((panel.get("targets") or [{}])[0].get("expr") or "")
-    assert "bioetl_provider_health_status" in expr
-    assert "test|synthetic" in expr
-    blob = f"{panel.get('title') or ''}\n{panel.get('description') or ''}"
-    assert "PRESENT" in blob
-    assert "PRESENT≠OK" in blob or "not a healthy" in blob.lower()
-    fleet = next(
-        item for item in get_dashboard_panels(dashboard) if item.get("id") == 9101
-    )
-    fleet_expr = str((fleet.get("targets") or [{}])[0].get("expr") or "")
-    assert "$provider" not in fleet_expr
-    assert "test|synthetic" in fleet_expr
+    dashboard = load_dashboard(DASHBOARD_DIR / "bioetl-overview-v2.json")
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9480)
+    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert "saved" in panel["description"].lower()
+    assert "provider API was not called" in panel["description"]
+    assert all("expr" not in t for t in panel["targets"])
+    assert all("run_id=${run_id}" in t["url"] for t in panel["targets"])
 
 
 def test_current_card_disposition_covers_first_window_current_panels() -> None:
@@ -197,9 +186,9 @@ def test_current_card_disposition_covers_first_window_current_panels() -> None:
         for item in entries
         if item.get("disposition") == "keep"
     }
-    assert ("bioetl-overview-v2.json", 214) in keep
-    assert ("bioetl-overview-v2.json", 215) in keep
-    fleet = next(panel for panel in overview["panels"] if panel.get("id") == 214)
+    assert ("bioetl-incident-v1.json", 9401) in keep
+    assert ("bioetl-overview-v2.json", 9604) in keep
+    fleet = next(panel for panel in overview["panels"] if panel.get("id") == 9604)
     assert int((fleet.get("gridPos") or {}).get("y") or 99) < FIRST_WINDOW_Y
 
 

@@ -413,7 +413,7 @@
         "h": 3
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is selected; QUERY ERROR means backend unavailable or request failure. UNKNOWN means no assessed value, never READY. Open replay checks for basis. Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is selected; QUERY ERROR means backend unavailable or request failure. UNKNOWN means no assessed value, never READY. Open replay checks for basis. Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "options": {
         "reduceOptions": {
           "values": true,
@@ -470,6 +470,16 @@
                 },
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
+                  "color": "#555555"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
                   "color": "#555555"
                 }
               }
@@ -530,7 +540,7 @@
       "id": 9423,
       "type": "table",
       "title": "Review Exact Replay Checks",
-      "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass. Valid-empty check output stays VALID EMPTY. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass. Valid-empty check output stays VALID EMPTY. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "datasource": "BioETL Ops HTTP",
       "targets": [
         {
@@ -591,7 +601,8 @@
             "cellOptions": {
               "type": "auto",
               "wrapText": true
-            }
+            },
+            "minWidth": 50
           }
         },
         "overrides": [
@@ -621,13 +632,14 @@
     },
     {
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · All identity anchors, missing first. Presence is not verification. Exact Replay Checks determines readiness. Inspect a value to copy it in full. No rows is not a pass; missing evidence is UNKNOWN and failed requests are QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · All identity anchors, missing first. Presence is not verification. VALID EMPTY means the successful response contains no anchors. Exact Replay Checks determines readiness. Inspect a value to copy it in full. No rows is not a pass; missing evidence is UNKNOWN and failed requests are QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
           "custom": {
             "inspect": true,
-            "wrapText": false
+            "wrapText": false,
+            "minWidth": 50
           }
         },
         "overrides": [
@@ -786,10 +798,10 @@
         "x": 0,
         "y": 28,
         "w": 24,
-        "h": 4
+        "h": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -804,7 +816,14 @@
           },
           "unit": "none",
           "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed.",
-          "links": []
+          "links": [
+            {
+              "title": "Open Run Explorer",
+              "url": "/d/bioetl-run-explorer-v1/run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "includeVars": false,
+              "targetBlank": false
+            }
+          ]
         },
         "overrides": [
           {
@@ -1299,14 +1318,14 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 32,
+        "y": 33,
         "w": 24,
         "h": 1
       },
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+          "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1487,7 +1506,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 33,
+            "y": 34,
             "w": 24,
             "h": 9
           },
@@ -1530,7 +1549,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Lineage closure, identity consistency, cycle freedom, and persistence profile for this Run ID. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK.",
+          "description": "SELECTED RUN · Lineage closure, identity consistency, cycle freedom, and persistence profile for this Run ID. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1736,7 +1755,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 42,
+            "y": 43,
             "w": 24,
             "h": 9
           },
@@ -1779,7 +1798,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Five retention rows for this Run ID: policy, evidence floor, required evidence, snapshot evidence, and archive. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. Archive N/A means a referenced policy does not require archiving; it is not proof of an archive. Archive verified means local copies and restore evidence passed current hash and identity checks.",
+          "description": "SELECTED RUN · Five retention rows for this Run ID: policy, evidence floor, required evidence, snapshot evidence, and archive. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. Archive N/A means a referenced policy does not require archiving; it is not proof of an archive. Archive verified means local copies and restore evidence passed current hash and identity checks. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1788,7 +1807,8 @@
                   "type": "auto",
                   "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               },
               "unit": "none",
               "noValue": "SELECT RUN if no Run ID is selected. QUERY ERROR if the request failed. HTTP 504 is a query error, not an empty result.",
@@ -2298,7 +2318,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 51,
+            "y": 52,
             "w": 24,
             "h": 9
           },
@@ -2425,14 +2445,14 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 33,
+        "y": 34,
         "w": 24,
         "h": 1
       },
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+          "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2613,7 +2633,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 34,
+            "y": 35,
             "w": 24,
             "h": 9
           },
@@ -2656,7 +2676,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3203,7 +3223,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 43,
+            "y": 44,
             "w": 24,
             "h": 9
           },

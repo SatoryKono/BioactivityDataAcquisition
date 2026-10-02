@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "SELECTED RUN. Run ID is always selected. The first screen shows the saved status and the domain verdicts for that run. Inspect Run Context holds identity and processed records. CURRENT fleet panels, First Action, and TIME RANGE history are not on Overview. run_id is HTTP context only and is never a Prometheus label.",
+  "description": "SELECTED RUN. Run ID is always selected. The first screen shows saved status, domain verdicts and full identity for that run. Provider evidence and stage accounting follow below the fold. CURRENT fleet panels, First Action, and TIME RANGE history are not on Overview. run_id is HTTP context only and is never a Prometheus label.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -280,7 +280,7 @@
         "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-current\" href=\"#bioetl-overview-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"Run Overview (Run Overview)\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Run Overview / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus: Run Explorer / Replay Readiness / Run Overview / Incident Workspace. Data Quality is a contextual detail destination. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
@@ -330,7 +330,7 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">${pipeline:text} | ${run_id}<br>This page assesses that run only. Run identity and domain assessments are on this screen. UNKNOWN means saved evidence is missing.</div>",
+        "content": "<div style=\"max-width:96ch;white-space:normal;padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">${pipeline:text} | ${run_id}<br>This page assesses that run only. Run identity and domain assessments are on this screen. UNKNOWN means saved evidence is missing.</div>",
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence"
       },
@@ -345,8 +345,8 @@
     {
       "id": 9604,
       "type": "stat",
-      "title": "Overall Verdict",
-      "description": "Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
+      "title": "Review Overall Verdict",
+      "description": "SELECTED RUN · Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
       "gridPos": {
         "x": 15,
         "y": 2,
@@ -471,12 +471,12 @@
     {
       "id": 9002,
       "type": "table",
-      "title": "Run Domains",
+      "title": "Review Run Domains",
       "gridPos": {
         "x": 0,
         "y": 5,
         "w": 15,
-        "h": 12
+        "h": 13
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -505,6 +505,13 @@
               "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
+            },
+            {
+              "title": "Open Provider Evidence",
+              "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9480&${__url_time_range}",
+              "includeVars": false,
+              "targetBlank": false,
+              "tooltip": "Saved Provider Evidence for the selected Run ID. CURRENT provider alert conditions remain in Incident Workspace and do not prove this saved verdict."
             }
           ]
         },
@@ -644,7 +651,7 @@
       ],
       "options": {
         "showHeader": true,
-        "cellHeight": "lg",
+        "cellHeight": "sm",
         "footer": {
           "show": false,
           "enablePagination": false
@@ -690,7 +697,7 @@
           }
         }
       ],
-      "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
+      "description": "SELECTED RUN · Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "links": [
         {
           "title": "Open Control Plane",
@@ -703,18 +710,25 @@
           "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
+        },
+        {
+          "title": "Open Provider Evidence",
+          "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9480&${__url_time_range}",
+          "includeVars": false,
+          "targetBlank": false,
+          "tooltip": "Saved Provider Evidence for the selected Run ID. CURRENT provider alert conditions remain in Incident Workspace and do not prove this saved verdict."
         }
       ]
     },
     {
       "id": 9603,
       "type": "table",
-      "title": "Selected Run Status",
+      "title": "Review Selected Run Status",
       "gridPos": {
         "x": 15,
         "y": 5,
         "w": 9,
-        "h": 4
+        "h": 5
       },
       "datasource": {
         "type": "datasource",
@@ -732,7 +746,8 @@
               "wrapText": false
             },
             "inspect": true,
-            "wrapText": false
+            "wrapText": false,
+            "minWidth": 50
           },
           "links": [
             {
@@ -783,10 +798,6 @@
               {
                 "id": "displayName",
                 "value": "Overall verdict"
-              },
-              {
-                "id": "custom.width",
-                "value": 115
               }
             ]
           },
@@ -817,10 +828,6 @@
               {
                 "id": "displayName",
                 "value": "Processing"
-              },
-              {
-                "id": "custom.width",
-                "value": 100
               },
               {
                 "id": "custom.cellOptions",
@@ -858,6 +865,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 80
               }
             ]
           },
@@ -913,12 +924,12 @@
             },
             "properties": [
               {
-                "id": "links",
-                "value": []
-              },
-              {
                 "id": "displayName",
                 "value": "Reason"
+              },
+              {
+                "id": "links",
+                "value": []
               },
               {
                 "id": "mappings",
@@ -963,15 +974,6 @@
                         "text": "Parent workflow completion has not been recorded"
                       }
                     }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^(Workflow: )?workflow_parent_not_finalized$",
-                      "result": {
-                        "text": "Parent workflow completion has not been recorded"
-                      }
-                    }
                   }
                 ]
               },
@@ -1000,11 +1002,11 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Replay readiness"
+                "value": "Trust"
               },
               {
                 "id": "custom.width",
-                "value": 150
+                "value": 80
               }
             ]
           }
@@ -1012,7 +1014,7 @@
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "lg",
+        "cellHeight": "sm",
         "footer": {
           "show": false,
           "enablePagination": false
@@ -1084,14 +1086,14 @@
     {
       "id": 9300,
       "type": "table",
-      "title": "Run Identity",
+      "title": "Review Run Identity",
       "gridPos": {
         "x": 15,
-        "y": 9,
+        "y": 10,
         "w": 9,
         "h": 8
       },
-      "description": "SELECTED RUN · Pipeline and full Run ID identify the saved run. Run Type and Started at (with saved UTC offset) characterize its execution. SELECT RUN means no selected run context. Missing saved values are Not recorded; request failures remain QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · Pipeline and full Run ID identify the saved run. Run Type and Started at (with saved UTC offset) characterize its execution. SELECT RUN means no selected run context. Missing saved values are Not recorded; request failures remain QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
         "defaults": {
@@ -1102,7 +1104,8 @@
             "cellOptions": {
               "type": "auto",
               "wrapText": true
-            }
+            },
+            "minWidth": 50
           }
         },
         "overrides": [
@@ -1146,6 +1149,12 @@
       },
       "transformations": [
         {
+          "id": "limit",
+          "options": {
+            "limitField": 5
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "indexByName": {
@@ -1163,7 +1172,7 @@
     {
       "id": 9480,
       "type": "table",
-      "title": "Provider Evidence",
+      "title": "Review Provider Evidence",
       "gridPos": {
         "x": 0,
         "y": 18,
@@ -1171,13 +1180,13 @@
         "h": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider evidence for this Run ID. Cached Bronze means the provider API was not called: Check performed is No and Check result is —. Provider check identifies saved preflight evidence, not the extraction transport. UNKNOWN means the performed state or result is unknown. Since completed is elapsed wall time from the saved completion timestamp, updated on refresh. Expand Provider HTTP details for recorded response time, HTTP status and endpoint; missing details are not invented. VALID EMPTY is an empty successful response. SELECT RUN requires context; QUERY ERROR is a failed request.",
+      "description": "SELECTED RUN · Saved provider evidence for this Run ID. Cached Bronze means the provider API was not called: Check performed is No and Check result is —. Provider check identifies saved preflight evidence, not the extraction transport. UNKNOWN means the performed state or result is unknown. Since completed is elapsed wall time from the saved completion timestamp, updated on refresh. Expand Provider HTTP details for recorded response time, HTTP status and endpoint; missing details are not invented. VALID EMPTY is an empty successful response. SELECT RUN requires context; QUERY ERROR is a failed request. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "options": {
         "showHeader": true,
-        "cellHeight": "lg",
+        "cellHeight": "sm",
         "footer": {
           "show": false,
-          "enablePagination": false
+          "enablePagination": true
         }
       },
       "fieldConfig": {
@@ -1349,7 +1358,7 @@
     {
       "id": 9481,
       "type": "stat",
-      "title": "Provider Check",
+      "title": "Review Provider Check",
       "gridPos": {
         "x": 15,
         "y": 18,
@@ -1357,7 +1366,7 @@
         "h": 5
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. SELECT RUN means no Run ID is selected. VALID EMPTY means no saved provider check. QUERY ERROR means backend unavailable or request failure.",
+      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. SELECT RUN means no Run ID is selected. VALID EMPTY means no saved provider check. QUERY ERROR means backend unavailable or request failure. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -1502,7 +1511,7 @@
         "h": 6
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. Excluded % is excluded_by_contract / stage records in; Saved % is records out / stage records in. Empty or incomplete inputs are UNKNOWN. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. Excluded % is excluded_by_contract / stage records in; Saved % is records out / stage records in. Empty or incomplete inputs are UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "options": {
         "showHeader": true,
         "cellHeight": "sm",
@@ -1999,7 +2008,7 @@
     {
       "id": 9482,
       "type": "canvas",
-      "title": "Data Quality",
+      "title": "Review Data Quality",
       "gridPos": {
         "x": 15,
         "y": 23,
@@ -2007,7 +2016,7 @@
         "h": 6
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Excluded-by-contract records summed across Bronze, Silver and Gold. Exclusion rate uses Bronze records out: below soft limit OK, at soft limit WARN, at hard limit ERROR. Limits come from pipeline configuration at dashboard generation, not historical run overrides. UNKNOWN means incomplete tracking or invalid counters; SELECT RUN requires a Run ID. Failed requests remain QUERY ERROR. Quarantined, filtered and deduplicated records are separate outcomes and are not included. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · Excluded-by-contract records summed across Bronze, Silver and Gold. Exclusion rate uses Bronze records out: below soft limit OK, at soft limit WARN, at hard limit ERROR. Limits come from pipeline configuration at dashboard generation, not historical run overrides. UNKNOWN means incomplete tracking or invalid counters; SELECT RUN requires a Run ID. Failed requests remain QUERY ERROR. Quarantined, filtered and deduplicated records are separate outcomes and are not included. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "options": {
         "inlineEditing": false,
         "panZoom": false,

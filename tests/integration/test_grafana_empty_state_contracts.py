@@ -17,7 +17,7 @@ pytestmark = pytest.mark.integration
     ("dashboard_file", "panel_title"),
     [
         (
-            "bioetl-control-plane-v1.json",
+            "bioetl-incident-v1.json",
             "Compare Checkpoint Outcomes",
         ),
     ],
@@ -52,14 +52,15 @@ def test_unfinished_run_never_inherits_the_success_color() -> None:
     panel = next(p for p in dashboard["panels"] if p["id"] == 3010)
     mappings = {}
     for override in panel["fieldConfig"]["overrides"]:
-        if str(override["matcher"].get("options", "")).casefold() != "processing":
+        if str(override["matcher"].get("options", "")).casefold() != "overview":
             continue
         for prop in override["properties"]:
             if prop["id"] == "mappings":
                 for mapping in prop["value"]:
                     if mapping["type"] == "value":
                         mappings.update(mapping["options"])
-    assert mappings["unfinished"]["color"] == "gray"
+    assert mappings["unfinished"]["text"] == "unfinished"
+    assert mappings["unfinished"]["color"] == "#FF9830"
     assert mappings["unfinished"]["color"] != mappings["success"]["color"]
 
 

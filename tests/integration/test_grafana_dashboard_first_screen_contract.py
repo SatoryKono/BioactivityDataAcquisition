@@ -126,7 +126,7 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
         "`bioetl_provider_current_status`",
         "`bioetl_dq_current_status`",
         "Selected-range count/rate/trend",
-        "Provider Health first screen uses current-status gauges only; range evidence is collapsed (epic #6572)",
+        "Provider Evidence uses the selected Run ID on Overview",
         "Layout grammar by dashboard role",
         "Visibility tiers and collapse policy",
         "L0 answer-first hub",
@@ -142,75 +142,23 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
 
 
 def test_primary_dashboards_expose_common_context_header_panels() -> None:
-    """Primary dashboards keep Status shell on first paint; Run context is lazy (#6573/DRM-R)."""
-    # Contract (not frozen pixels): context band follows the four-unit
-    # navigation surface required by the 19px/16px typography contract.
-    header_ids = (9400, 9401)
-    lazy_shell_ids = (9402, 9403)
-    dashboard_names = {
-        "bioetl-control-plane-v1.json",
-        "bioetl-runtime.json",
-        "bioetl-provider-health-v2.json",
-        "bioetl-dq-v2.json",
+    specs = {
+        "bioetl-control-plane-v1.json": (9400, 9422),
+        "bioetl-overview-v2.json": (99, 9604),
+        "bioetl-dq-v2.json": (9400,),
+        "bioetl-incident-v1.json": (9400, 9401),
     }
-
-    for dashboard_name in dashboard_names:
-        dashboard = load_dashboard(_DASHBOARD_DIR / dashboard_name)
-        panels = {
-            panel.get("id"): panel
-            for panel in get_dashboard_panels(dashboard)
-            if isinstance(panel.get("id"), int)
-        }
-        expected_header_ids = header_ids
-        if dashboard_name == "bioetl-provider-health-v2.json":
-            expected_header_ids = (9400,)
-        if dashboard_name == "bioetl-control-plane-v1.json":
-            expected_header_ids = (9400, 9422)
-            assert 9401 not in panels
-        if dashboard_name in {"bioetl-dq-v2.json", "bioetl-runtime.json"}:
-            expected_header_ids = (9400,)
-            assert 9401 not in panels
-        if dashboard_name == "bioetl-runtime.json":
-            expected_header_ids = (9400,)
-            assert 9401 not in panels
-        for panel_id in expected_header_ids:
-            panel = panels.get(panel_id)
-            assert panel is not None, (
-                f"{dashboard_name} must expose common panel id={panel_id}"
-            )
-            grid_pos = panel.get("gridPos", {})
-            assert grid_pos.get("y", 999) <= 4, (
-                f"{dashboard_name}:id={panel_id} must stay in compact context band (y<=4)"
-            )
-            assert grid_pos.get("h", 99) <= 4, (
-                f"{dashboard_name}:id={panel_id} context band height must stay compact"
-            )
-            if dashboard_name == "bioetl-control-plane-v1.json" and panel_id == 9422:
-                assert grid_pos.get("w") == 12
-                assert (
-                    panel.get("fieldConfig", {}).get("defaults", {}).get("noValue")
-                    == "UNKNOWN"
-                )
-                assert "SELECT RUN" in panel["description"]
-                assert "QUERY ERROR" in panel["description"]
-                assert all(
-                    "viewPanel=9422" not in str(link.get("url", ""))
-                    for link in panel.get("links") or []
-                    if isinstance(link, dict)
-                )
-        # ID + Processed Records remain available under collapsed Run context.
-        for panel_id in lazy_shell_ids:
-            panel = panels.get(panel_id)
-            if dashboard_name == "bioetl-control-plane-v1.json":
-                continue
-            if dashboard_name == "bioetl-provider-health-v2.json":
-                assert panel is None, (
-                    "Provider evidence replaces removed identity/records shells"
-                )
-                continue
-            assert panel is not None, (
-                f"{dashboard_name} must retain lazy shell panel id={panel_id}"
-            )
+    for filename, ids in specs.items():
+        dashboard = load_dashboard(_DASHBOARD_DIR / filename)
+        panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+        for pid in ids:
+            panel = panels[pid]
+            assert panel["gridPos"]["y"] == 2
+            assert panel["gridPos"]["h"] == 3
+        if filename == "bioetl-control-plane-v1.json":
+            assert panels[9422]["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+            assert "SELECT RUN" in panels[9422]["description"]
+            assert "QUERY ERROR" in panels[9422]["description"]
 
 
 def test_current_status_recording_rules_are_canonicalized() -> None:
@@ -249,119 +197,36 @@ def test_current_status_recording_rules_are_canonicalized() -> None:
 
 
 def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> None:
-    """L2 first screens must answer current state before range evidence."""
-    expectations = {
-        "bioetl-runtime.json": {},
-        "bioetl-provider-health-v2.json": {},
-    }
-
-    for dashboard_name, panel_expectations in expectations.items():
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-
-        def _operator_title(panel: dict) -> str:
-            title = str(panel.get("title") or "").strip()
-            if title:
-                return title
-            options = panel.get("options") or {}
-            return str(options.get("bioetlDisplayTitle") or "").strip()
-
-        panels = {
-            _operator_title(panel): panel
-            for panel in get_dashboard_panels(dashboard)
-            if _operator_title(panel)
-        }
-        for panel_title, expected_metric in panel_expectations.items():
-            panel = panels.get(panel_title)
-            assert panel is not None, (
-                f"{dashboard_name} must expose first-screen panel {panel_title!r}"
-            )
-            assert panel.get("gridPos", {}).get("y", 999) <= 12, (
-                f"{dashboard_name}:{panel_title} must be early first-path evidence (y<=12)"
-            )
-            expressions = [
-                target.get("expr", "")
-                for target in panel.get("targets", [])
-                if isinstance(target.get("expr"), str)
-            ]
-            assert any(expected_metric in expr for expr in expressions), (
-                f"{dashboard_name}:{panel_title} must consume {expected_metric}"
-            )
-            assert all("$__range" not in expr for expr in expressions), (
-                f"{dashboard_name}:{panel_title} must not use selected range for current status"
-            )
-
-    runtime_dashboard = load_dashboard(
-        Path("grafana/dashboards") / "bioetl-runtime.json"
-    )
-    runtime_panels = {
-        panel.get("id"): panel
-        for panel in get_dashboard_panels(runtime_dashboard)
-        if isinstance(panel.get("id"), int)
-    }
-    runtime_status = runtime_panels[9998]
-    assert runtime_status.get("title") == "Review Selected Run Status"
-    assert int((runtime_status.get("gridPos") or {}).get("y", 999)) <= 12
-    assert "run_id=${run_id}" in str(runtime_status.get("targets"))
-    assert 9401 not in runtime_panels
-    assert 9101 not in runtime_panels
-
-    dq_dashboard = load_dashboard(Path("grafana/dashboards") / "bioetl-dq-v2.json")
-    dq_panels = {
-        panel.get("id"): panel
-        for panel in get_dashboard_panels(dq_dashboard)
-        if isinstance(panel.get("id"), int)
-    }
-    dq_status = dq_panels[9406]
-    assert dq_status.get("title") == "Review Selected Run Status"
-    assert int((dq_status.get("gridPos") or {}).get("y", 999)) <= 12
-    assert "run_id=${run_id}" in str(dq_status.get("targets"))
-    assert 9401 not in dq_panels
-    assert 9101 not in dq_panels
-    assert 9102 not in dq_panels
-
-    provider_dashboard = load_dashboard(
-        Path("grafana/dashboards") / "bioetl-provider-health-v2.json"
-    )
-    assert all(
-        panel.get("id") != 9106 for panel in provider_dashboard.get("panels", [])
-    )
-    assert any(
-        panel.get("id") == 9460 for panel in provider_dashboard.get("panels", [])
-    )
+    incident = load_dashboard(_DASHBOARD_DIR / "bioetl-incident-v1.json")
+    current = next(p for p in get_dashboard_panels(incident) if p["id"] == 9401)
+    assert "bioetl_workflow_scope_priority_by_input" in current["targets"][0]["expr"]
+    assert "Run ID does not filter" in current["description"]
+    for filename, pid in (
+        ("bioetl-overview-v2.json", 9002),
+        ("bioetl-dq-v2.json", 9406),
+    ):
+        dashboard = load_dashboard(_DASHBOARD_DIR / filename)
+        panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == pid)
+        assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
+        assert all(
+            "selected-run-status?" in t["url"] and "run_id=${run_id}" in t["url"]
+            for t in panel["targets"]
+        )
+        assert all("expr" not in t for t in panel["targets"])
+    overview = load_dashboard(_DASHBOARD_DIR / "bioetl-overview-v2.json")
+    assert {9480, 9481}.issubset({p["id"] for p in overview["panels"]})
 
 
 def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
-    """Epic #6572: sole Status on Runtime/DQ first screen (no dual Status twin)."""
-    for dashboard_name, banned in (
-        ("bioetl-runtime.json", "Runtime Status"),
-        ("bioetl-dq-v2.json", "Monitor Current DQ Status"),
-    ):
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        titles = {
-            panel.get("title")
-            for panel in get_dashboard_panels(dashboard)
-            if panel.get("title")
-        }
-        assert banned not in titles, (
-            f"{dashboard_name} must not ship dual Status twin {banned!r}"
-        )
-        if dashboard_name == "bioetl-dq-v2.json":
-            assert any(
-                panel.get("id") == 9406 for panel in get_dashboard_panels(dashboard)
-            )
-            assert all(
-                panel.get("id") != 9401 for panel in get_dashboard_panels(dashboard)
-            )
-            continue
-        if dashboard_name == "bioetl-runtime.json":
-            assert any(
-                panel.get("id") == 9998 for panel in get_dashboard_panels(dashboard)
-            )
-            assert all(
-                panel.get("id") != 9401 for panel in get_dashboard_panels(dashboard)
-            )
-            continue
-        assert any(panel.get("id") == 9401 for panel in get_dashboard_panels(dashboard))
+    assert not (_DASHBOARD_DIR / "bioetl-runtime.json").exists()
+    dq = load_dashboard(_DASHBOARD_DIR / "bioetl-dq-v2.json")
+    panels = {p["id"]: p for p in get_dashboard_panels(dq)}
+    assert 9406 in panels and 9401 not in panels
+    assert "Monitor Current DQ Status" not in {p["title"] for p in panels.values()}
+    overview = load_dashboard(_DASHBOARD_DIR / "bioetl-overview-v2.json")
+    # The headline reuses the same assessment rather than another independent status query.
+    panels = {p["id"]: p for p in get_dashboard_panels(overview)}
+    assert panels[9604]["targets"] == panels[9603]["targets"]
 
 
 def test_overview_and_control_plane_first_screens_use_role_appropriate_queries() -> (
@@ -416,7 +281,7 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
         "bioetl-incident-v1.json": [
             "Review Runtime Blockers",
         ],
-        "bioetl-provider-health-v2.json": [],
+        "bioetl-overview-v2.json": [],
         "bioetl-dq-v2.json": [],
     }
 
@@ -465,9 +330,9 @@ def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
         assert panel is not None, (
             f"{dashboard_name} must expose required trust marker {panel_title!r}"
         )
-        assert panel.get("gridPos", {}).get("y", 999) <= 40, (
-            f"{dashboard_name}:{panel_title} must stay on the fleet row"
-        )
+        fleet_row = next(row for row in dashboard["panels"] if row.get("id") == 8808)
+        assert fleet_row["collapsed"] is True
+        assert panel["id"] in {p["id"] for p in get_dashboard_panels(fleet_row)}
         assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
             "UNKNOWN"
         )
@@ -537,134 +402,38 @@ def test_control_plane_exact_readiness_shares_selected_run_row() -> None:
 
 
 def test_provider_and_dq_range_evidence_panels_are_below_first_screen() -> None:
-    provider = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
-    dq = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    range_panels = {
-        "bioetl-provider-health-v2.json": (
-            provider,
-            [
-                "Monitor Healthy Checks (Selected Range)",
-                "Monitor Degraded Checks (Selected Range)",
-                "Track Provider Failure Rate (Selected Range)",
-                "Track Health Checks Total (Selected Range)",
-                "Track Failure and Degraded Trend by Provider",
-                "Track Provider Failure Share (Selected Range)",
-            ],
-        ),
-        "bioetl-dq-v2.json": (
-            dq,
-            [
-                "Track Range Evidence: Bronze -> Silver -> Gold",
-                "Range · Silver Filter Rejects",
-            ],
-        ),
-    }
-
-    for dashboard_name, (dashboard, panel_titles) in range_panels.items():
-        panels = {
-            panel.get("title"): panel
-            for panel in get_dashboard_panels(dashboard)
-            if panel.get("title")
-        }
-        root_titles = {
-            panel.get("title")
-            for panel in dashboard.get("panels", [])
-            if isinstance(panel, dict)
-        }
-        for panel_title in panel_titles:
-            panel = panels.get(panel_title)
-            if panel is None:
-                # Some selected-range titles were renamed/retired; skip absent.
-                continue
-            # Epic #6572: range packs may live under collapsed rows (not root first paint).
-            if panel_title not in root_titles:
-                parent_collapsed = any(
-                    isinstance(row, dict)
-                    and row.get("type") == "row"
-                    and row.get("collapsed") is True
-                    and any(
-                        isinstance(child, dict) and child.get("title") == panel_title
-                        for child in (row.get("panels") or [])
-                    )
-                    for row in dashboard.get("panels", [])
-                )
-                assert parent_collapsed or panel.get("gridPos", {}).get("y", 0) >= 18, (
-                    f"{dashboard_name}:{panel_title} must be collapsed or below first screen"
-                )
-            else:
-                assert panel.get("gridPos", {}).get("y", 0) >= 18, (
-                    f"{dashboard_name}:{panel_title} must sit below first-screen current state"
-                )
-            description = str(panel.get("description", "")).lower()
-            assert "selected-range" in f"{panel_title.lower()} {description}", (
-                f"{dashboard_name}:{panel_title} must identify selected-range semantics"
-            )
+    assert not (_DASHBOARD_DIR / "bioetl-provider-health-v2.json").exists()
+    incident = load_dashboard(_DASHBOARD_DIR / "bioetl-incident-v1.json")
+    row = next(p for p in incident["panels"] if p["id"] == 8808)
+    assert row["collapsed"] and row["gridPos"]["y"] >= FIRST_WINDOW_Y
+    ids = {p["id"] for p in get_dashboard_panels(row)}
+    assert {111, 205, 9101, 9102, 9996, 9997}.issubset(ids)
+    for filename in ("bioetl-overview-v2.json", "bioetl-dq-v2.json"):
+        dashboard = load_dashboard(_DASHBOARD_DIR / filename)
+        first = [
+            p
+            for p in dashboard["panels"]
+            if p["type"] != "row" and p["gridPos"]["y"] < FIRST_WINDOW_Y
+        ]
+        assert first
+        assert all("expr" not in t for p in first for t in p.get("targets", []))
 
 
 def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
-    """Text/CTA first-screen panels should expose machine-readable operator guidance."""
-    expectations = {
-        "bioetl-overview-v2.json": {
-            "Inspect Scope & Evidence": {
-                "tokens": ("selected run", "unknown"),
-                "max_y": 12,
-            },
-        },
-        "bioetl-dq-v2.json": {
-            "Understand Evidence Scope": {
-                "tokens": ("selected run", "time-range"),
-                "max_y": 4,
-            },
-        },
-        "bioetl-provider-health-v2.json": {
-            "Understand Selected Run": {
-                "tokens": ("selected run", "fleet"),
-                "max_y": 4,
-                "panel_id": 9400,
-            },
-        },
+    specs = {
+        "bioetl-control-plane-v1.json": (9400, "SELECTED RUN"),
+        "bioetl-overview-v2.json": (99, "SELECTED RUN"),
+        "bioetl-dq-v2.json": (9400, "SELECTED RUN"),
+        "bioetl-incident-v1.json": (9400, "CURRENT"),
     }
-
-    for dashboard_name, panel_expectations in expectations.items():
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-
-        def _operator_title(panel: dict) -> str:
-            title = str(panel.get("title") or "").strip()
-            if title:
-                return title
-            options = panel.get("options") or {}
-            return str(options.get("bioetlDisplayTitle") or "").strip()
-
-        panels_by_title = {
-            _operator_title(panel): panel
-            for panel in get_dashboard_panels(dashboard)
-            if _operator_title(panel)
-        }
-        panels_by_id = {
-            panel.get("id"): panel
-            for panel in get_dashboard_panels(dashboard)
-            if panel.get("id") is not None
-        }
-        for panel_title, spec in panel_expectations.items():
-            panel = (
-                panels_by_id.get(spec["panel_id"])
-                if spec.get("panel_id") is not None
-                else panels_by_title.get(panel_title)
-            )
-            assert panel is not None, (
-                f"{dashboard_name} missing first-screen guidance panel {panel_title!r}"
-            )
-            assert panel.get("gridPos", {}).get("y", 999) <= spec["max_y"], (
-                f"{dashboard_name}:{panel_title} must stay on the first screen"
-            )
-            description = str(panel.get("description", "")).lower()
-            assert description, (
-                f"{dashboard_name}:{panel_title} must define machine-readable description text"
-            )
-            for token in spec["tokens"]:
-                assert token in description, (
-                    f"{dashboard_name}:{panel_title} description must mention {token!r}"
-                )
+    for filename, (pid, badge) in specs.items():
+        dashboard = load_dashboard(_DASHBOARD_DIR / filename)
+        panel = next(p for p in dashboard["panels"] if p["id"] == pid)
+        assert badge in panel["description"]
+        content = panel["options"]["content"]
+        assert badge in content or (badge == "SELECTED RUN" and "${run_id}" in content)
+        assert panel["gridPos"]["y"] <= 4
+        assert "overflow:hidden" not in panel["options"]["content"]
 
 
 def test_navigation_bus_panels_document_handoff_policy() -> None:
@@ -726,31 +495,13 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
 
 
 def test_current_status_headlines_use_instant_queries() -> None:
-    """#8746: fail-closed headlines must not lastNotNull a dashboard range."""
-    expectations = {
-        # 9603 mirrors panel 9002 via the dashboard datasource and has no PromQL expr.
-        "bioetl-overview-v2.json": (),
-        "bioetl-control-plane-v1.json": (),
-        "bioetl-runtime.json": (),
-        "bioetl-provider-health-v2.json": (),
-    }
-    for dashboard_name, titles in expectations.items():
-        dashboard = load_dashboard(_DASHBOARD_DIR / dashboard_name)
-        panels = {
-            panel.get("title"): panel
-            for panel in get_dashboard_panels(dashboard)
-            if panel.get("title")
-        }
-        for title in titles:
-            panel = panels[title]
-            instants = [
-                target.get("instant")
-                for target in panel.get("targets", [])
-                if isinstance(target.get("expr"), str)
-            ]
-            assert instants and all(flag is True for flag in instants), (
-                f"{dashboard_name}:{title} must set targets[].instant=true"
-            )
+    dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-incident-v1.json")
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    for pid in (9401, 18940):
+        panel = panels[pid]
+        assert panel["targets"]
+        assert all(t.get("instant") is True for t in panel["targets"])
+        assert all("$__range" not in t["expr"] for t in panel["targets"])
 
 
 def test_run_explorer_shows_ten_rows_and_only_the_browse_surface() -> None:

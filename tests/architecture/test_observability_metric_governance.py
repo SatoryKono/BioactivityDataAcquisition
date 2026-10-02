@@ -251,7 +251,9 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert report["direct_alert_inputs"]
 
     http_targets = report["http_targets"]
-    assert len(http_targets) == 32  # Five retained dashboards after retirement.
+    assert (
+        len(http_targets) == 32
+    )  # Five dashboards; summaries reuse saved domain responses.
     assert any(
         target["dashboard_uid"] == "bioetl-control-plane-v1"
         and target["panel_id"] == 9418
@@ -262,7 +264,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
-        "promql": 105,  # Fleet queries are now owned by Incident Workspace.
+        "promql": 105,  # Retained fleet panels live in Incident Workspace.
         "http": 32,
         "loki": 0,
         "tempo": 0,

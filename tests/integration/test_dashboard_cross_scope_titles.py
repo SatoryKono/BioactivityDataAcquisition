@@ -31,9 +31,13 @@ def test_cross_scope_links_use_required_titles():
         ("bioetl-overview-v2", "bioetl-control-plane-v1"): [
             "Replay Readiness",
             "Open Control Plane",
-            "Open Trust",
         ],
-        ("bioetl-overview-v2", "bioetl-dq-v2"): ["Data Quality"],
+        ("bioetl-overview-v2", "bioetl-dq-v2"): ["Open Data Quality"],
+        ("bioetl-incident-v1", "bioetl-dq-v2"): [
+            "Open Data Quality",
+            "Inspect DQ",
+            "Open domain workspace",
+        ],
     }
 
     for (source_uid, target_uid), allowed_titles in required_transitions.items():
@@ -76,22 +80,36 @@ def test_cross_scope_links_have_required_tooltip_tokens():
                 )
 
 
-def test_retired_dashboards_resolve_to_current_evidence_owners() -> None:
-    for name in (
+def _panels(uid: str):
+
+    return {
+        p["id"]: p
+        for p in get_dashboard_panels(
+            load_dashboard(Path("grafana/dashboards") / f"{uid}.json")
+        )
+    }
+
+
+def test_workflow_dashboard_provenance_banner_makes_scope_split_explicit() -> None:
+    for uid in (
         "bioetl-workflow-overview",
         "bioetl-runtime",
         "bioetl-provider-health-v2",
     ):
-        assert not (Path("grafana/dashboards") / f"{name}.json").exists()
-    incident = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
-    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
-    assert {9996, 9997} <= {p["id"] for p in get_dashboard_panels(incident)}
-    assert {9480, 9481} <= {p["id"] for p in get_dashboard_panels(overview)}
+        assert not (Path("grafana/dashboards") / f"{uid}.json").exists()
+    incident = _panels("bioetl-incident-v1")
+    assert "CURRENT" in incident[9701]["description"]
+    assert "independent of Selected Run" in incident[9701]["description"]
 
 
 def test_workflow_status_panel_repeats_selected_range_contract() -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
-    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9996)
+    incident = _panels("bioetl-incident-v1")
+    for pid in (9996, 9997):
+        description = incident[pid]["description"]
+        assert description.startswith("TIME RANGE")
+        assert "selected range" in description
+        assert "TELEMETRY MISSING is not a zero" in description
+    panel = incident[9996]
     description = panel["description"]
     assert "Workflow only, not a single Run ID" in description
     assert "Pipeline does not filter this count" in description
@@ -102,15 +120,18 @@ def test_workflow_status_panel_repeats_selected_range_contract() -> None:
     assert "run_id" not in expression
 
 
-def test_provider_evidence_is_saved_run_scoped() -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
-    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
-    for panel_id in (9480, 9481):
-        panel = panels[panel_id]
-        assert "SELECTED RUN" in panel["description"]
-        assert "UNKNOWN" in panel["description"]
-        assert panel["targets"][0]["url"].startswith(
-            "/ops/observability/selected-run-status?"
-        )
-        assert "run_id=${run_id}" in panel["targets"][0]["url"]
-    assert "not live fleet health" in panels[9481]["description"]
+def test_provider_health_descriptions_separate_global_and_selected_scope() -> None:
+    saved = _panels("bioetl-overview-v2")
+    current = _panels("bioetl-incident-v1")
+    for pid in (9480, 9481):
+        description = saved[pid]["description"]
+        assert description.startswith("SELECTED RUN")
+        assert "saved" in description.lower()
+        assert "UNKNOWN" in description
+        url = saved[pid]["targets"][0]["url"]
+        assert url.startswith("/ops/observability/selected-run-status?")
+        assert "run_id=${run_id}" in url
+    assert "not live fleet health" in saved[9481]["description"]
+    assert current[2003]["description"].startswith("GLOBAL")
+    assert "pipeline and run selectors do not filter" in current[2003]["description"]
+    assert "VALID EMPTY is not TELEMETRY MISSING" in current[2003]["description"]

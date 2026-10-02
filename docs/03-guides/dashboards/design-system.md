@@ -40,27 +40,24 @@ Terminal-state vocabulary is role-aware:
 - `LOADING` — transient only. It MUST NOT remain in accepted render evidence.
 - A blank panel body is not a state and MUST fail reproducible capture.
 
-### 1.1 Canonical mapping: L0 vs diagnostic dashboards
+### 1.1 Canonical mapping: typed workflow and diagnostic states
 
-| Dashboard surface | Numeric range | Canonical status term | Visualization color |
+Approved five-dashboard cutover: numeric encodings belong to their metric families,
+not to a dashboard title. Never apply an older L0 encoding to typed workflow status.
+
+| Evidence | Value | Meaning | Color |
 | --- | --- | --- | --- |
-| **L0 operator dashboards** (`2. Overview`, `2. Runtime`, `4. Provider Health`, `5. Data Quality`) | `0` | `OK` | `green` |
-| **L0 operator dashboards** (`2. Overview`, `2. Runtime`, `4. Provider Health`, `5. Data Quality`) | `1` | `WARN` | `orange` |
-| **L0 operator dashboards** (`2. Overview`, `2. Runtime`, `4. Provider Health`, `5. Data Quality`) | `>=2` | `CRIT` | `red` |
-| **L0 operator dashboards** (`2. Overview`, `2. Runtime`, `4. Provider Health`, `5. Data Quality`) | `null` | `UNKNOWN` | `gray` |
-| **Evidence-aware trust gates** (`0. Control Plane`, `2. Runtime`) | `3` | `INCOMPLETE` | `gray` |
-| **Diagnostic dashboards only** (drilldown / deep-dive) | `<1` | `OK` *(alias `HEALTHY` optional)* | `green` |
-| **Diagnostic dashboards only** (drilldown / deep-dive) | `>=1 and <2` | `WARN` *(alias `DEGRADED` optional)* | `orange` |
-| **Diagnostic dashboards only** (drilldown / deep-dive) | `>=2` | `CRIT` *(alias `BROKEN` optional)* | `red` |
-| **Diagnostic dashboards only** (drilldown / deep-dive) | `null` / no data | `UNKNOWN` | `gray` |
+| Incident CURRENT workflow/domain priority | `0` | `OK` | `green` |
+| Incident CURRENT workflow/domain priority | `1` / null | `UNKNOWN` | `gray` |
+| Incident CURRENT workflow/domain priority | `2` | `WARN` | `orange` |
+| Incident CURRENT workflow/domain priority | `3` | `CRIT` | `red` |
+| Legacy diagnostic severity families | `0`, `1`, `>=2`, null | `OK`, `WARN`, `CRIT`, `UNKNOWN` | green, orange, red, gray |
+| Saved exact replay | `READY`, `INSUFFICIENT`, `BLOCKED` | Ready, insufficient evidence, blocked | green, orange, red |
+| Saved exact replay | `UNKNOWN`, `INCOMPLETE`, `UNSUPPORTED` | No authorization to replay | gray |
 
-Норматив:
-- В **L0 operator dashboards** MUST использоваться только термины `OK/WARN/CRIT/UNKNOWN`.
-- `0. Control Plane` and `2. Runtime` MAY additionally use `INCOMPLETE` when
-  required checkpoint/scrape/rule evidence is missing or stale. Numeric `3`
-  remains `UNKNOWN` on Overview/DQ surfaces that do not define this trust gate.
-- Термины `DEGRADED/BROKEN/HEALTHY` допускаются только в диагностических deep-dive поверхностях и MUST быть явно привязаны к этой таблице.
-- Если в диагностическом UI используются alias-термины, в description MUST присутствовать строка вида `Alias mapping: DEGRADED=WARN, BROKEN=CRIT`.
+Saved processing, Trust and replay readiness remain distinct. HTTP `QUERY ERROR`
+is a failed request; `SELECT RUN` is missing selection. Neither becomes `READY`.
+Diagnostic aliases require explicit `Alias mapping: DEGRADED=WARN, BROKEN=CRIT`.
 
 ## 2) Единые threshold ranges (обязательно)
 
@@ -195,178 +192,89 @@ colors never override this ordering.
 
 ## 4.1) First-screen responsibility and panel decision matrix (обязательно)
 
-Каждый shipped dashboard имеет ровно один основной операторский вопрос. Первый
-экран должен отвечать на этот вопрос через current-status сигналы, а не через
-выбранный Grafana range. Range evidence, raw counters и forensic details
-помещаются ниже первого экрана или в dedicated drilldown.
+The approved 2026-10-02 cutover ships five dashboards. The first screen answers
+its owner's question from the appropriate evidence scope. Saved assessments never
+borrow a CURRENT or TIME RANGE verdict. First-window height remains 18 grid units;
+all existing numeric layout, typography and coverage budgets remain unchanged.
 
-| Dashboard | First-screen responsibility | Current-status rules | Selected-range evidence | Drilldown / forensic surface |
-| --- | --- | --- | --- | --- |
-| `bioetl-overview-v2` | Что сейчас broken/degraded и куда идти дальше? | `bioetl_l0_status`, `bioetl_l0_next_action_route`, `bioetl_l0_input_status` | collapsed `L1 Historical Trends` and `Range Evidence` rows | linked L1 dashboards |
-| `bioetl-runtime` | Что прямо сейчас блокирует runtime execution? | `bioetl_runtime_current_status_trusted`, `bioetl_runtime_current_blocker_reason`, `bioetl_runtime_trust_gap_status_10m` | failed/no-record runs, stage lag/backlog trends, shutdown intervals | collapsed Detect/Localize/Escalate rows, Loki/Tempo handoff |
-| `bioetl-provider-health-v2` | Какой provider сейчас degraded/failing и почему? | `bioetl_provider_current_status`, `bioetl_provider_current_cause` | health-check counters, failure/degraded trends, latency/rate-limit history | provider detail panels and runbook links |
-| `bioetl-dq-v2` | Каково текущее DQ состояние и первое действие? | `bioetl_dq_current_status` (headline). `bioetl_dq_current_reason` ships in the collapsed `Selected Range · Impact & Freshness` row — not a first-screen peer badge | explicitly labelled CURRENT / SELECTED RUN / TIME RANGE evidence; freshness hours with SLA 24/72 | `bioetl-silver-reject-explorer`, collapsed DQ diagnostics including current reasons |
-| `bioetl-control-plane-v1` | Можно ли доверять control plane и безопасно replay/resume? | `bioetl_control_plane_current_status_trusted`, replay/checkpoint/manifest/telemetry evidence | manifest/ledger/checkpoint/audit histories | collapsed replay-safety diagnostics and runbooks |
-
-Decision matrix:
-
-| Panel class | Belongs on first screen? | Query contract | Naming contract |
+| Dashboard | First-screen responsibility | Data source | Lower evidence |
 | --- | --- | --- | --- |
-| Current status / current reason | Yes | Fixed current windows or recording rules; MUST NOT use `$__range` | `Monitor ...` or `Inspect ...` |
-| Next action / route | Yes | Low-cardinality route/action rules; preserve `UNKNOWN` when data is missing | `Next Action`, `First Action`, or `Inspect ...` |
-| Selected-range count/rate/trend | No; compact evidence may appear below first-screen answer bands | MUST use `$__range`, `$__interval`, or explicit range wording. L1 current recording rules may be trended over the selected dashboard window only when the description says selected-range evidence and not current verdict. | `Track ... in Range` or description says selected range |
-| Raw counter / histogram / latency evidence | No | Preserve no-data unless zero is semantically valid | `Track ...` |
-| Forensic row/table/details | No | May carry scoped IDs only in dedicated explorer surfaces | `Inspect ...` or `Investigate ...` |
+| `bioetl-run-explorer-v1` | Browse the last 10 launches and select a full Run ID | Ops HTTP disk-backed index, independent of dashboard time range | Row passports, Report, and exact-run handoffs |
+| `bioetl-overview-v2` | Saved overall/domain assessment, processing, Trust, and identity | One selected-run-status response, reused by summary and headline | Saved Provider Evidence, stages, and DQ canvas |
+| `bioetl-control-plane-v1` | Exact replay readiness and all checks for selected Run ID | Ops HTTP replay_readiness / replay_checks | All identity anchors, Trust reasons, manifest, lineage, retention and checkpoint |
+| `bioetl-dq-v2` | Saved DQ assessment and run identity | Ops HTTP selected-run-status / identity-table | Full-width saved stage/outcome accounting and saved validation |
+| `bioetl-incident-v1` | CURRENT scoped workflow verdict plus GLOBAL ranked suspects and alerts | Prometheus typed workflow and incident rules | Collapsed runtime, provider and control-plane fleet/range evidence |
+
+`bioetl-runtime` and `bioetl-provider-health-v2` are retired standalone UIDs.
+Provider Evidence uses the selected Run ID on Overview; live provider suspects
+stay on Incident. Loki/Tempo/Explore surfaces remain removed.
+
+| Panel class | Placement and query contract |
+| --- | --- |
+| CURRENT status / cause | Incident; fixed current rules, never `$__range` or a Run ID label |
+| Saved verdict / next action | Owner's first screen; preserve exact UUID and `UNKNOWN` |
+| Selected-range count/rate/trend | Collapsed Incident evidence; explicit TIME RANGE scope |
+| Raw counter / histogram / latency | Preserve absence separately from measured zero |
+| Forensic table | Below fold or collapsed; full values remain inspectable |
+
+Required metric families remain available on Incident, including
+`bioetl_runtime_current_status_trusted`, `bioetl_provider_current_status`, and
+`bioetl_dq_current_status`. These do not prove one saved run healthy.
 
 Normative rules:
-- Primary dashboards `0..5` SHOULD expose the shared operator context shell
-  before dashboard-specific evidence rows: `Inspect Scope & Evidence`,
-  `Status`, `ID`, and
-  `Processed Records`. These panels standardize context, identity, and
-  selected-range throughput evidence, but they do not override the
-  role-specific first-action/current-cause panels.
-- First-screen current-status panels MUST NOT use `$__range`.
-- Range panels MUST include selected-range wording in title or description.
-- Compact Overview evidence panels below the first screen MAY reuse L1 current
-  recording rules as selected-range trend evidence, but their descriptions MUST
-  say they do not determine `L0 Status` or `Next Action`.
-- Historical/range evidence MUST NOT be treated as a recovery verdict: zero
-  matching rows or missing samples do not prove current `OK` unless the panel is
-  explicitly a zero-valid event counter.
-- Top-level `gridPos` rectangles in a shipped dashboard MUST NOT overlap;
-  navigation, scope, first-action, current-status, range evidence, and expanded
-  rows must occupy explicit non-overlapping grid bands.
-- Top-level root layout MUST NOT leave unexplained empty row gaps between
-  adjacent bands; if a dashboard intentionally adds vertical breathing room, the
-  exception must be justified in the dashboard audit or docs mirror.
-- `or vector(0)` is allowed only for event-count panels where missing series
-  means zero events; status panels preserve `UNKNOWN`.
-- Deep details (`run_id`, `payload_hash`, record-level tables) MUST NOT appear
-  on first-screen status rows.
-- DQ values MUST identify their evidence scope as `CURRENT`, `SELECTED RUN`, or
-  `TIME RANGE` in a visible title/banner/value mapping. A selected-range value
-  must not be read as exact-run evidence.
-- DQ freshness uses hours end-to-end in the panel: query output, unit, title,
-  and thresholds. The explicit SLA is WARN at `24h`, CRIT at `72h`.
+
+- Root grid rectangles MUST NOT overlap or leave unexplained gaps.
+- Status/Trust/replay panels MUST NOT fabricate a zero with `or vector(0)`.
+- Range evidence MUST name its scope; a historical zero is not current recovery.
+- Exact Run ID and identity anchors use HTTP, never Prometheus labels.
+- DQ freshness thresholds remain WARN `24h`, CRIT `72h` for matching metric families.
+- Saved Provider Evidence preserves cached Bronze (`Performed=No`, `Result=—`),
+  UNKNOWN, valid empty and request failure without a live-health claim.
 
 ### 4.1.1 Shared operator context shell
 
-The shared shell is derived from `2. Overview` and applies to primary
-dashboards `0. Control Plane`, `2. Runtime`, `4. Provider Health`,
-`5. Data Quality`, `6. Incident Workspace`, and `Run Explorer`.
+Each owner shows scope and selection; panel IDs are local to that dashboard.
+Overview uses `99`, Replay Readiness/DQ/Incident use `9400`; Run Explorer uses `1`.
+Incident `9401` is CURRENT; Overview `9604` reuses saved domain response `9002`.
+DQ `9406` is saved assessment. There is no mandatory duplicate Status/ID/Records
+shell on every dashboard.
 
-| Panel | Canonical ID | Role | Data contract |
-| --- | ---:| --- | --- |
-| `Inspect Scope & Evidence` | `9400` | Question and evidence-scope banner | Visible text contains the primary dashboard question and short plain-language definitions of the evidence scopes used on the page. Selector values and datasource details stay in the panel tooltip/description. |
-| `Status` | `9401` | Compact dashboard verdict | Prometheus status for the dashboard role; no `$run_id` Prometheus filtering. Workflow band on `3. Pipeline Diagnostics` is selected-range evidence and must say so. |
-| `ID` | `9402` | Local control-plane identity | HTTP/Infinity `BioETL Ops HTTP` table from `/ops/control-plane/identity-table`; exact `run_id` is preserved HTTP identity context across primary dashboards. The two visible columns are `parameter` and `value`; rows cover run/manifest IDs, Provider.Entity version, contract schema, execution flags, replay capability/mode, checkpoint anchors, optional composite run, and identity health. |
-| `Processed Records` | `9403` | Current stage/outcome accounting evidence | HTTP/Infinity table from `/ops/observability/processed-records`, backed by compact `bioetl_processed_records_*` recording rules and canonical `bioetl_stage_records_total` outcomes. It shows Bronze, Silver outcome, and Gold outcome rows, including recorded zeros. Every `Inspect`/`Review Processed Records` table displays `parameter`, right-aligned `value`, and right-aligned canonical `percentage`. Internal `row_status` is hidden. `value` uses a space as the thousands separator and is left-padded to the displayed `bronze [total]` width. Bronze is `100%`; `silver [valid]` and `gold [valid]` use one decimal; secondary outcomes use up to three decimals with trailing zeroes trimmed. Silver and Gold percentages use Bronze total. Status, accounted subtotal, and delta rows stay out of the compact table. Missing accounting series are no-data/instrumentation gaps, not OK. |
-
-Normative rules:
-- `run_id` MUST NOT be added to Prometheus label filters.
-- Primary dashboard `run_id` option lists MUST be loaded through the local
-  control-plane selector catalog (`/ops/control-plane/filter-options`) using
-  the visible `workflow`, `pipeline`, and `run_type` shell context. Coherent
-  selector tuple resolution belongs to `/ops/control-plane/selector-context`,
-  not to Prometheus labels.
-- `Processed Records` MUST show bounded Bronze/Silver/Gold stage/outcome
-  accounting evidence. It intentionally omits reconciliation status, accounted
-  subtotal, and delta rows, and MUST NOT replace the dashboard role-specific
-  `Status` or `First Action` decision path.
-- Overview and Data Quality `Review Selected Run Status` show processing, aggregate trust, and
-  the saved explanation (`Processing`, `Trust`, `Reason`). It must not use the
-  first domain verdict as the aggregate. `Review Run Domains` also shows the
-  domain explanation. Missing archive evidence reads `No verified archive`
-  and remains `INCOMPLETE`; evidence completeness remains in the saved report.
-  Reason labels use readable English (for example, `Standalone pipeline`),
-  while the underlying reason codes remain unchanged.
-- Provider Health fleet tables query all observed providers without a top-k
-  cutoff. `Monitor Fleet Status` shows current status; `Inspect Health Evidence`
-  distinguishes status from observation availability. The duplicate source-state
-  column is hidden. Pagination preserves additional rows as the fleet grows;
-  absent telemetry never becomes a healthy provider.
-- `Processed Records` percentage evidence MUST stay denominator-explicit:
-  Bronze renders `100%`, and all Silver and Gold outcome rows divide by
-  `bronze [total]`. Zero-valued rows are omitted from the compact table, but
-  missing accounting series remain no-data, not zero. The payload `value` and
-  `percentage` fields are display-token strings formatted by the local HTTP
-  helper. Every `Inspect`/`Review Processed Records` table renders both numeric
-  evidence fields; `value` and `percentage` are right-aligned for scanning.
-- `Processed Records` MUST hide the internal `row_status` field. The payload
-  field name is canonical `percentage` only (no `percintage` alias). Accounting
-  deficits remain available through the dashboard-specific status and action
-  panels; missing accounting series do not count as zero.
-- `Processed Records` current reconciliation MUST NOT use `$__range`,
-  `or vector(0)`, or `run_id`/manifest/raw payload labels in Prometheus.
-  Exact-run HTTP reads MAY pass `$run_id` to resolve rows from RunLedger source
-  of truth; that selector must not become a Prometheus label.
-- Provider Health keeps `$provider` as the primary current-status selector even
-  though the shared shell also exposes `$pipeline` and `$run_type`.
-- Workflow keeps `$status`, `$step_status`, and `$step_kind` as workflow-local
-  evidence filters; `$pipeline`, `$run_type`, and `$run_id` are context/identity
-  aids unless a future rule defines truthful intersection semantics.
+- Run ID options use the local `/ops/control-plane/filter-options` catalog.
+  Coherent tuple defaults belong to `/ops/control-plane/selector-context`.
+- Overview `9300` shows five parameters: full UUID, Pipeline, Run Type, Started
+  with saved UTC offset, and total duration. Full values remain inspectable.
+- DQ `9403` owns saved accounting: parameter, count in, count out, percentage.
+  Silver filtered, quarantined and deduplicated outcomes are distinct; Gold
+  exclusion is distinct from quarantine. Missing denominators stay N/A.
+  Skipped rows are hidden; recorded zero outcomes remain measured zeros.
+- Overview `9603` separates processing (`Result`) and saved `Trust`. Trust is
+  not replay readiness. Missing archive stays `INCOMPLETE` / `No verified archive`.
+- All Replay Checks and provider evidence rows remain available through pagination.
+  Finite first-window projections must retain their declared complete row set.
 
 ## 4.2) Layout grammar by dashboard role (обязательно)
 
-Shipped dashboards do not share identical geometry, but they MUST share the
-same answer-first reading order.
-
-| Dashboard role | Shipped dashboards | Above-the-fold responsibility | Lower bands |
+| Role | Owner | Above fold | Lower bands |
 | --- | --- | --- | --- |
-| L0 answer-first hub | `bioetl-overview-v2` | current answer, next route, bounded mirrors | historical context, routing aids, collapsed-by-default diagnostics |
-| L1/L2 triage | `bioetl-runtime`, `bioetl-control-plane-v1`, `bioetl-provider-health-v2`, `bioetl-dq-v2` | current verdict, first action, causes, trust markers | selected-range evidence, collapsed-by-default diagnostics |
-| Selected-range operational evidence | `bioetl-runtime` workflow band (retired: `bioetl-workflow-overview`) | selected-range operational verdict and immediate fallout | lower evidence bands, optional collapsed-by-default diagnostics |
-| Forensic explorer | `bioetl-silver-reject-explorer` | scope semantics, no-data guidance, bounded summary | row-level browsing, record details, forensic tables |
-
-Normative rules:
-- Every shipped dashboard MUST answer its primary operator question before the
-  first evidence-heavy row.
-- Historical or selected-range evidence MUST NOT visually precede current-state
-  answer surfaces on L0/L1/L2 dashboards.
-- Forensic explorer surfaces are exempt from Prometheus-style symmetry, but
-  they still MUST keep scope semantics and first action above row-level detail.
+| L0 answer-first hub for saved assessment | Run Overview | Assessment, domains, identity | Saved provider, stages and quality |
+| Replay decision | Replay Readiness | Readiness and all checks | Identity / Trust / validation |
+| Saved DQ assessment | Data Quality | Assessment and identity | Full stage accounting and validation |
+| Current triage | Incident Workspace | CURRENT scope, GLOBAL suspects and alerts | Collapsed fleet/range diagnostics |
+| Forensic explorer / launch catalog | Run Explorer | Last 10 launches and row actions | Linked saved evidence |
 
 ## 4.3) Visibility tiers and collapse policy (обязательно)
 
-Every shipped dashboard should classify panels into one of four tiers.
-Answer surfaces stay visible; forensic/detail rows are collapsed by default and
-opened only after the summary identifies a relevant branch:
+- `Tier 1`: always-visible answer, scope and next action.
+- `Tier 2`: supporting identity or bounded assessment projection.
+- `Tier 3`: below-fold saved evidence or range evidence clearly marked by scope.
+- `Tier 4`: collapsed validation, forensic detail or fleet diagnostics.
 
-- `Tier 1`: always-visible answer surface
-- `Tier 2`: always-visible supporting current context
-- `Tier 3`: below-fold selected-range evidence
-- `Tier 4`: collapsible diagnostics, raw evidence, tracing-only detail, rare
-  forensic breakdowns
-
-Normative rules:
-- `Tier 1` MUST remain visible without extra clicks and MUST contain current
-  status / verdict, first action, or current causes needed for first-pass
-  triage.
-- `Tier 2` MAY add KPI context, trust markers, or bounded mirrors, but MUST
-  support `Tier 1` rather than compete with it.
-- `Tier 3` belongs below the answer bands unless the dashboard role is itself
-  selected-range evidence.
-- `Tier 4` SHOULD live below fold and be collapsed by default when it is
-  tracing-only, raw, verbose, or not required for first-pass operator triage.
-- The only copy of a critical signal MUST NOT live exclusively inside a
-  diagnostic row.
-- Overview keeps the deviation-first `Inputs` matrix visible and moves the six
-  repeated subsystem mirrors into collapsed `Diagnostics & Docs`.
-  `Alert/SLO Triage` remains the intentional expanded decision-row exception
-  immediately after the compact matrix so firing critical impact is visible;
-  `Status` and `First Action` retain the first route above it. Runtime
-  Detect/Localize/Escalate, Control Plane incident rows, Provider detail, DQ
-  forensic rows, Workflow Step Diagnostics, and the Silver trend/record rows
-  remain collapsed in the shipped layout.
-- Audit tooling MAY expand collapsed rows to materialize and review their full
-  content; that audit mode does not change the shipped progressive-disclosure
-  default.
-- Scalar information density (`DASH-DENSITY-002`, REQUIREMENTS §5.4): a collapsed
-  additional panel group MUST pack its scalar panels (`stat`/`gauge`/`bargauge`)
-  more densely than the first screen — `ρ_group > ρ_first` where
-  `ρ = values / (w×h)`. A large single-value stat buried in a drilldown (e.g. a
-  `24×6` card showing one `UNKNOWN`) is the sparse anti-pattern this forbids;
-  consolidate such counters into a compact table/bargauge or shrink the cards.
+A saved-run owner need not show a CURRENT verdict. Incident fleet evidence never
+claims that its Run ID selector filtered Prometheus. Manifest/lineage/retention
+and resume/checkpoint rows stay collapsed; root saved evidence may remain visible
+below fold. Tables preserve all evidence through pagination or a finite declared
+projection, with no clipping of required values or UUIDs. Full UUID inspection
+is valid above fold; raw record dumps and hashes belong in forensic detail.
 
 ## 4.4) Datasource trust semantics (обязательно)
 
@@ -577,11 +485,11 @@ Implementation guardrails:
 Источник фиксированного словаря для `links[].title`: `docs/03-guides/dashboards/navigation-contract.md`.
 
 Правила:
-- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract: `Run Explorer`, `1. Trust`, `2. Overview`, `3. Pipeline Diagnostics`, `4. Provider Health`, `5. Data Quality`, `6. Incident Workspace` (bus only; **no** `Silver Reject Explorer` / `Explore Logs` / `Explore Traces`).
+- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract: `Run Explorer`, `Replay Readiness`, `Run Overview`, `6. Incident Workspace` (visible bus; Data Quality is contextual; **no** `Silver Reject Explorer` / `Explore Logs` / `Explore Traces`).
 - Формулировки вида `Back to Overview`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`, `Next Recommended Drilldown`, and reintroduced adjunct titles, считаются legacy-лексикой и не допускаются в shipped top navigation.
 
-Every navigation panel renders the same ordered composition on all **seven**
-shipped dashboards: bus `0..6` only. It MUST use theme-safe contrast, a visible
+Navigation panel 1000 renders the same four-chip composition on Replay Readiness,
+Run Overview, Data Quality and Incident Workspace. Run Explorer uses row actions. It MUST use theme-safe contrast, a visible
 focus state, and wrapping responsive layout at `1024px`.
 
 ### 7.1) Link title style-guide: Back / Open / Investigate
@@ -612,31 +520,21 @@ focus state, and wrapping responsive layout at `1024px`.
 
 ### 7.3) Role-based runbook CTA policy (обязательно)
 
-Покрытие runbook CTA управляется ролью dashboard-а, а не blanket-правилом
-“каждая current/error/blocker/failed/skipped panel обязана вести в runbook”.
+Покрытие runbook CTA управляется ролью dashboard-а.
 
-Норматив:
-
-- `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`,
-  `bioetl-dq-v2` и `bioetl-silver-reject-explorer` считаются operator/forensic
-  surfaces. Их критичные панели SHOULD иметь actionable CTA; этот CTA MAY вести
-  в runbook, соседний dashboard, либо в оба target-а, если исключение явно
-  оправдано.
-- `bioetl-overview-v2` является dashboard-routing-first surface. Panel-level
-  CTA здесь MAY оставаться dashboard-only и по умолчанию не требует прямых
-  runbook links.
-- `bioetl-workflow-overview` является selected-range evidence surface
-  (**retired** as a standalone UID; evidence now lives in the Runtime workflow
-  band on `bioetl-runtime`). Four summary counters as selected-range evidence
-  do not require panel-level runbook links; shipped `First Action` remains the
-  only justified dashboard-handoff CTA exception for that role.
-- Если используется runbook link, URL MUST follow canonical GitHub blob pattern:
-  `https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/<name>.md`
-- Названия runbook links SHOULD оставаться domain-specific (`Open Runtime
-  Troubleshooting Runbook`, `Open Provider Incident Runbook`, `Open Quarantine
-  Management Runbook`), а не схлопываться до generic `Open Runbook`.
-- Одна panel MUST NOT смешивать конфликтующие runbook families, если такое
-  исключение не задокументировано и не прошло review.
+- `bioetl-overview-v2` является dashboard-routing-first surface: saved assessment
+  routes to Replay Readiness, Data Quality and local Provider Evidence.
+- `bioetl-incident-v1` owns selected-range workflow evidence and CURRENT triage.
+  Range workflow counters do not need individual runbook links; retained fleet
+  triage has four explicit local destinations.
+- Replay Readiness routes its verdict to exact replay checks; validation may use
+  the appropriate runbook. DQ routes to Run Explorer and saved evidence.
+- Provider Evidence is saved preflight history; live provider incident runbooks
+  belong on Incident. Run Explorer uses row passports, Report and exact-run links.
+- Runbook URLs MUST follow the canonical GitHub blob pattern:
+  `https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/<name>.md`.
+- Dynamic alert runbooks are restricted to tracked literal runbook stems in the
+  canonical query. Links preserve exact identity where applicable and time range.
 
 ## 7.1) L1 layout rule: answer-first above fold (обязательно)
 

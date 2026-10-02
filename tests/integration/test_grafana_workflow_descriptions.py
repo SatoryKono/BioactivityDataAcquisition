@@ -22,30 +22,13 @@ def _require_dashboard(name: str) -> Path:
 
 
 def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None:
-    runtime = load_dashboard(_require_dashboard("bioetl-runtime.json"))
-
-    description = str(runtime.get("description", "")).lower()
-    assert "selected run" in description
-    assert "incident workspace" in description
-    assert "pipeline flow dual layout" not in description
-    assert "blockers" not in description
-    assert "taxonomy" not in description
-
-    runtime_panels = index_panels_by_base_title(get_dashboard_panels(runtime))
-    identity = str(runtime_panels["Inspect Pipeline Identity"].get("description", ""))
-    assert "VALID EMPTY" in identity
-    assert "QUERY ERROR" in identity
-    assert "Run Explorer Inspect" not in identity
-    domains = str(runtime_panels["Inspect Selected Run Domains"].get("description", ""))
-    summary = str(
-        runtime_panels["Inspect Selected Run Identity"].get("description", "")
-    )
-    assert "Evidence reference" in domains
-    assert "domain verdict" in domains
-    assert "completeness of the saved report" in summary
-    assert domains != summary
-    row = next(panel for panel in runtime["panels"] if panel.get("id") == 9450)
-    assert "identity row" in str(row.get("description", ""))
+    assert not Path("grafana/dashboards/bioetl-runtime.json").exists()
+    overview = load_dashboard(_require_dashboard("bioetl-overview-v2.json"))
+    panels = {p["id"]: p for p in get_dashboard_panels(overview)}
+    assert "full Run ID" in panels[9300]["description"]
+    assert "SELECTED RUN" in panels[9002]["description"]
+    assert "INCOMPLETE" in panels[9603]["description"]
+    assert "does not authorize replay" in panels[9604]["description"]
 
     incident = load_dashboard(_require_dashboard("bioetl-incident-v1.json"))
     panels = index_panels_by_base_title(get_dashboard_panels(incident))

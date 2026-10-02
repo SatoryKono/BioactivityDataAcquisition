@@ -31,6 +31,7 @@ from tests.integration._dashboard_layout_budgets import (
 from tests.integration._grafana_test_support import (
     get_dashboard_files,
     load_dashboard,
+    get_dashboard_panels,
 )
 
 
@@ -142,20 +143,25 @@ def test_trust_9418_keeps_verdict_and_reason_count_visible() -> None:
     assert props["trust_status"]["displayName"] == "Saved trust verdict"
     assert props["reasons_count"]["custom.hidden"] is False
     assert panel_declared_row_cap(panel) == 1
-    assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
+    assert panel["gridPos"]["y"] >= FIRST_WINDOW_Y
+    readiness = next(p for p in dashboard["panels"] if p["id"] == 9422)
+    assert readiness["gridPos"]["y"] + readiness["gridPos"]["h"] <= FIRST_WINDOW_Y
 
 
 def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
-    """#10245: first-window retention rows stay UNKNOWN-first and unwrapped."""
+    """Retention disclosure keeps UNKNOWN-first, inspectable, unwrapped evidence."""
     dashboard_path = next(
         path
         for path in get_dashboard_files()
         if path.name == "bioetl-control-plane-v1.json"
     )
     dashboard = load_dashboard(dashboard_path)
-    panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9416)
+    panel = next(
+        item for item in get_dashboard_panels(dashboard) if item.get("id") == 9416
+    )
 
-    assert panel.get("gridPos") == {"h": 10, "w": 12, "x": 12, "y": 7}
+    assert panel["gridPos"]["w"] == 24
+    assert panel["gridPos"]["y"] >= FIRST_WINDOW_Y
     assert panel.get("options", {}).get("cellHeight") == "sm"
     assert panel.get("options", {}).get("sortBy") == [
         {"displayName": "Status", "desc": True}
@@ -243,7 +249,8 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
         assert override_properties[hidden]["custom.hidden"] is True
     y = int((panel.get("gridPos") or {})["y"])
     h = int((panel.get("gridPos") or {})["h"])
-    assert y + h <= 18
+    assert y >= FIRST_WINDOW_Y
+    assert h >= 9
 
 
 def test_first_window_forced_widths_fit_200pct_css_budget() -> None:
@@ -297,13 +304,14 @@ def test_row_cap_contracts_are_unique_and_owned() -> None:
 def test_first_window_scope_banners_name_current_range_and_selected_run() -> None:
     """#8923: first-window scope copy must not conflate CURRENT / RANGE / SELECTED RUN."""
     required = {
-        "bioetl-overview-v2.json": ("SELECTED RUN",),
-        "bioetl-runtime.json": ("SELECTED RUN",),
-        "bioetl-provider-health-v2.json": ("SELECTED RUN",),
+        "bioetl-overview-v2.json": ("assesses that run only",),
         "bioetl-dq-v2.json": ("CURRENT", "SELECTED RUN", "TIME RANGE"),
-        "bioetl-incident-v1.json": ("CURRENT", "SELECTED RUN"),
-        "bioetl-run-explorer-v1.json": ("BROWSE", "SELECTED RUN"),
-        "bioetl-control-plane-v1.json": ("SELECTED RUN",),
+        "bioetl-incident-v1.json": ("CURRENT", "Run ID does not filter"),
+        "bioetl-run-explorer-v1.json": (
+            "Last 10 launches",
+            "independent of the time range",
+        ),
+        "bioetl-control-plane-v1.json": ("${run_id}", "Replay Checks"),
     }
     by_name = {path.name: load_dashboard(path) for path in get_dashboard_files()}
     missing: list[str] = []
@@ -329,7 +337,7 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
         if panel.get("type") == "text"
     )
     assert "TIME RANGE = Domain Status" not in overview_blob
-    assert "SELECTED RUN" in overview_blob
+    assert "assesses that run only" in overview_blob
 
 
 def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:

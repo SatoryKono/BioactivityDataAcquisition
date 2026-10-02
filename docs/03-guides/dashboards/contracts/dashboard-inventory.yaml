@@ -50,15 +50,15 @@ dashboards:
     panel_count: 10
     key_panels:
       - id: 9603
-        title: Selected Run Status
+        title: Review Selected Run Status
         type: table
         description: Saved assessment of the selected Run ID
       - id: 9002
-        title: Run Domains
+        title: Review Run Domains
         type: table
         description: Saved domain status for the selected Run ID
       - id: 9300
-        title: Run Identity
+        title: Review Run Identity
         type: table
         description: HTTP identity for the selected Run ID
     selector_variables:
@@ -136,6 +136,7 @@ dashboards:
       - pipeline
       - run_type
       - run_id
+      - read_latency_quantile
       - provider_for_pipeline
       - provider
   - uid: bioetl-run-explorer-v1

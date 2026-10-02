@@ -636,18 +636,30 @@ def test_dq_renderer_copy_matches_shipped() -> None:
         ROW_9450_DESCRIPTION,
         STATUS_DESCRIPTION,
     )
-    from scripts.ops.observability.grafana.render_nav_bus import _DQ_SCOPE_HTML
+    from scripts.ops.observability.grafana.render_nav_bus import (
+        _DQ_SCOPE_HTML,
+        HTTP_EVIDENCE_STATES,
+    )
 
     panels = _dq_panels_by_id()
     assert panels[9400]["options"]["content"] == _DQ_SCOPE_HTML
     assert str(panels[9406].get("description") or "").startswith(STATUS_DESCRIPTION)
-    assert panels[9403]["description"] == _PROCESSED_RECORDS_DESCRIPTION
+    assert (
+        panels[9403]["description"]
+        == f"{_PROCESSED_RECORDS_DESCRIPTION} {HTTP_EVIDENCE_STATES}"
+    )
     assert (
         panels[9403]["fieldConfig"]["defaults"]["noValue"] == _PROCESSED_RECORDS_NOVALUE
     )
     assert panels[9450]["description"] == ROW_9450_DESCRIPTION
-    assert panels[9451]["description"] == _DQ_DOMAINS_DESCRIPTION
-    assert panels[9452]["description"] == _DQ_IDENTITY_DESCRIPTION
+    assert (
+        panels[9451]["description"]
+        == f"{_DQ_DOMAINS_DESCRIPTION} {HTTP_EVIDENCE_STATES}"
+    )
+    assert (
+        panels[9452]["description"]
+        == f"{_DQ_IDENTITY_DESCRIPTION} {HTTP_EVIDENCE_STATES}"
+    )
     assert _BRONZE_PERCENTAGE_DISPLAY == "percentage of Bronze"
     mappings: dict[str, Any] = {}
     for override in panels[9451].get("fieldConfig", {}).get("overrides", []):
@@ -678,8 +690,8 @@ def test_run_explorer_workflow_passport_is_conditional_in_one_column() -> None:
         item for item in get_dashboard_panels(dashboard) if item.get("id") == 3010
     )
     selector = panel["targets"][0]["root_selector"]
-    assert 'workflow_passport_url != ""' in selector
-    assert '"[" & workflow_id & "](" & workflow_passport_url & ")" : "N/A"' in selector
+    assert '"workflow_id": workflow_id != "" ? workflow_id : "N/A"' in selector
+    assert "workflow_passport_url" in selector
 
     organize = next(
         item for item in panel["transformations"] if item["id"] == "organize"
@@ -695,8 +707,10 @@ def test_run_explorer_workflow_passport_is_conditional_in_one_column() -> None:
         if item["matcher"] == {"id": "byName", "options": "Workflow"}
     )
     properties = {item["id"]: item["value"] for item in workflow_override["properties"]}
-    assert properties["custom.cellOptions"]["type"] == "markdown"
-    assert "links" not in properties
+    assert properties["custom.cellOptions"]["type"] == "auto"
+    assert properties["custom.inspect"] is True
+    assert len(properties["links"]) == 1
+    assert "workflow_passport_path" in properties["links"][0]["url"]
 
 
 def test_run_explorer_pipeline_passport_uses_a_fixed_allowed_origin() -> None:

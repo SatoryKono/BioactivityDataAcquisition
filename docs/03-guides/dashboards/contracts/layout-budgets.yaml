@@ -1,105 +1,57 @@
 version: 1
 source: grafana/dashboards/*.json
 mode: error
-note: >-
-  Distinct fold constants for the seven shipped dashboards. Do not unify
-  first_window_y with first_load_y_max. first_load_y_max MUST stay equal to
-  performance-budgets.yaml:first_screen_y_max.
-
-# Answer band / area-fill / visual fold (DASHBOARD_REQUIREMENTS.md §2).
+note: Distinct fold constants for the five shipped dashboards. Do not unify first_window_y with first_load_y_max.
+  first_load_y_max MUST stay equal to performance-budgets.yaml:first_screen_y_max.
 first_window_y: 18
-# A collapsed one-row header may occupy y=17..18; detail data starts at y=18.
-# This packs the grid after the measured 17-row answer band without a blank row.
-
-# PromQL/HTTP first-load selection window. Not the visual fold.
 first_load_y_max: 28
-
-# DASH-FIT-001 no-scroll ceiling for always-visible root non-row panels.
-# Calibrated 2026-08-14 against the repo 1366x768 first-viewport contract
-# (grafana README render matrix + Grafana grid GRID_CELL_HEIGHT=30,
-# GRID_CELL_VMARGIN=8 => stride 38px). Panel bottom px = 38*(y+h)-8.
-# Historical kiosk=tv calibration used ~88px chrome. Grafana 12 accepts
-# kiosk=1 (full); tv leaves navigation visible. Full kiosk retains filters:
-# two variable rows place the grid at 104px and require bottom <= 17 for
-# 1366x768. The DOM fold gate enforces the actual viewport independently
-# of this unchanged static ceiling. Equals FIRST_WINDOW_Y by design.
 viewport_rows: 18
-
-# Regression cap on always-visible first-window budget panels (current max = 8).
-# Count = root non-row panels with y < first_window_y, excluding navigation
-# (id 1000 or title Navigate*) and named empty-title text rails below.
-# Do not raise this cap. #8980.
 first_screen_max_panels: 8
-
-# Empty-title text rails that are not budget panels (next-step / divider).
-# Not an exemption from an over-budget layout: they are outside the count set.
 first_screen_shell_panels:
-  - dashboard: bioetl-overview-v2.json
-    id: 99
-    owner: "@bioetl-observability"
-    rationale: >-
-      Native title omitted so h=3 Inspect Scope & Evidence body fits DASH-FIT-004.
-      Display title stays in bioetlDisplayTitle.
-    retire_when: the banner can keep a native title without overflowing at 200%
-  - dashboard: bioetl-run-explorer-v1.json
-    id: 1
-    owner: "@bioetl-observability"
-    rationale: >-
-      Native title omitted so h=3 Understand Run Scope body fits DASH-FIT-004.
-      Display title stays in bioetlDisplayTitle.
-    retire_when: the banner can keep a native title without overflowing at 200%
-  - dashboard: bioetl-control-plane-v1.json
-    id: 906
-    owner: "@bioetl-observability"
-    rationale: >-
-      First-window next-step rail stays readable at h=3 full width when
-      navigation is h=4. Native Grafana header is omitted; copy stays inside
-      the HTML body at 16px. Display title stays in bioetlDisplayTitle.
-      Trust/Retention tables compact to h=4 so the CTA occupies y=11..13
-      and the KPI strip stays y=14 h=3 with no shared grid cells.
-    retire_when: the CTA can keep a native title without overflowing at 200%
-  - dashboard: bioetl-control-plane-v1.json
-    id: 9400
-    owner: "@bioetl-observability"
-    rationale: >-
-      Native title omitted so h=4 Inspect Scope & Evidence body fits DASH-FIT-004.
-      Display title stays in bioetlDisplayTitle.
-    retire_when: the banner can keep a native title without overflowing at 200%
-  - dashboard: bioetl-dq-v2.json
-    id: 9400
-    owner: "@bioetl-observability"
-    rationale: >-
-      Native title omitted so Understand Evidence Scope body fits DASH-FIT-004.
-      Display title stays in bioetlDisplayTitle.
-    retire_when: the banner can keep a native title without overflowing at 200%
-  - dashboard: bioetl-incident-v1.json
-    id: 9400
-    owner: "@bioetl-observability"
-    rationale: >-
-      Native title omitted so Understand Incident Scope body fits DASH-FIT-004.
-      Display title stays in bioetlDisplayTitle.
-    retire_when: the banner can keep a native title without overflowing at 200%
-  - dashboard: bioetl-provider-health-v2.json
-    id: 9400
-    owner: "@bioetl-observability"
-    rationale: >-
-      Native title omitted so Understand Evidence Scope body fits DASH-FIT-004.
-      Display title stays in bioetlDisplayTitle.
-    retire_when: the banner can keep a native title without overflowing at 200%
-  - dashboard: bioetl-provider-health-v2.json
-    id: 9002
-    owner: "@bioetl-observability"
-    rationale: >-
-      Native title omitted so h=2 Start Provider Triage fits DASH-FIT-004.
-      Growing h=3 would push Monitor Telemetry Presence (9104) past VIEWPORT_ROWS.
-    retire_when: the CTA can use h=3 without folding 9104 past row 18
-  - dashboard: bioetl-incident-v1.json
-    id: 2001
-    owner: "@bioetl-observability"
-    rationale: >-
-      Native title omitted so h=3 Start Incident Triage body fits DASH-FIT-004.
-      Display title stays in bioetlDisplayTitle.
-    retire_when: the CTA can keep a native title without overflowing at 200%
+- dashboard: bioetl-overview-v2.json
+  id: 99
+  owner: '@bioetl-observability'
+  rationale: Native title omitted so h=3 Inspect Scope & Evidence body fits DASH-FIT-004. Display title
+    stays in bioetlDisplayTitle.
+  retire_when: the banner can keep a native title without overflowing at 200%
+- dashboard: bioetl-run-explorer-v1.json
+  id: 1
+  owner: '@bioetl-observability'
+  rationale: Native title omitted so h=3 Understand Run Scope body fits DASH-FIT-004. Display title stays
+    in bioetlDisplayTitle.
+  retire_when: the banner can keep a native title without overflowing at 200%
+- dashboard: bioetl-control-plane-v1.json
+  id: 906
+  owner: '@bioetl-observability'
+  rationale: First-window next-step rail stays readable at h=3 full width when navigation is h=4. Native
+    Grafana header is omitted; copy stays inside the HTML body at 16px. Display title stays in bioetlDisplayTitle.
+    Trust/Retention tables compact to h=4 so the CTA occupies y=11..13 and the KPI strip stays y=14 h=3
+    with no shared grid cells.
+  retire_when: the CTA can keep a native title without overflowing at 200%
+- dashboard: bioetl-control-plane-v1.json
+  id: 9400
+  owner: '@bioetl-observability'
+  rationale: Native title omitted so h=4 Inspect Scope & Evidence body fits DASH-FIT-004. Display title
+    stays in bioetlDisplayTitle.
+  retire_when: the banner can keep a native title without overflowing at 200%
+- dashboard: bioetl-dq-v2.json
+  id: 9400
+  owner: '@bioetl-observability'
+  rationale: Native title omitted so Understand Evidence Scope body fits DASH-FIT-004. Display title stays
+    in bioetlDisplayTitle.
+  retire_when: the banner can keep a native title without overflowing at 200%
+- dashboard: bioetl-incident-v1.json
+  id: 9400
+  owner: '@bioetl-observability'
+  rationale: Native title omitted so Understand Incident Scope body fits DASH-FIT-004. Display title stays
+    in bioetlDisplayTitle.
+  retire_when: the banner can keep a native title without overflowing at 200%
+- dashboard: bioetl-incident-v1.json
+  id: 2001
+  owner: '@bioetl-observability'
+  rationale: Native title omitted so h=3 Start Incident Triage body fits DASH-FIT-004. Display title stays
+    in bioetlDisplayTitle.
+  retire_when: the CTA can keep a native title without overflowing at 200%
 min_height:
   root:
     table: 5
@@ -119,233 +71,158 @@ min_height:
     gauge: 3
     bargauge: 3
     text: 2
-
 canonical_action_verbs:
-  - Monitor
-  - Inspect
-  - Track
-  - Compare
-  - Review
-  - Investigate
-
-# Empty: DASH-COPY-003 is exclusive. Text/row/shell titles are exempt and
-# may still use Navigate/Understand/Start/Assess/Explain/Continue.
+- Monitor
+- Inspect
+- Track
+- Compare
+- Review
+- Investigate
 pending_action_verbs: []
-
 shell_titles:
-  - Status
-  - ID
-  - Processed Records
-
+- Status
+- ID
+- Processed Records
 banned_title_tokens:
-  - panel
-  - panel title
-  - new panel
-  - new dashboard
-  - stat
-  - graph
-  - table
-  - text
-  - untitled
-  - row
-  - row title
-
+- panel
+- panel title
+- new panel
+- new dashboard
+- stat
+- graph
+- table
+- text
+- untitled
+- row
+- row title
 data_panel_types:
-  - stat
-  - gauge
-  - bargauge
-  - table
-  - timeseries
-  - heatmap
-  - state-timeline
-
-# DASH-FIT-004: browser-rounding tolerance only. Not a layout exemption.
+- stat
+- gauge
+- bargauge
+- table
+- timeseries
+- heatmap
+- state-timeline
 panel_containment_tolerance_px: 2
-
-# First-window types that fail closed on internal scroll overflow.
-# Must cover every shipped first-window panel type. Adding a new type to
-# the first window without listing it here fails the no-scroll gate.
 first_window_containment_types:
-  - text
-  - stat
-  - table
-
-# DASH-FIT-005: every first-window table must declare a bounded first-screen
-# row cap. bind is how the JSON enforces it (topk / limit / filter).
-# DASH-SCOPE #9019 panel-id map (progressive, not delete-first):
-# bioetl-provider-health-v2 9102/9103 moved under row 9106
-# (Inspect Fleet Non-OK and Causes). First-window reason replacement: 9107.
+- text
+- stat
+- table
 first_window_summary_tables:
-  - dashboard: bioetl-overview-v2.json
-    id: 9603
-    max_rows: 1
-    owner: "@bioetl-observability"
-    bind: limit
-  - dashboard: bioetl-overview-v2.json
-    id: 215
-    max_rows: 2
-    owner: "@bioetl-observability"
-    bind: topk
-  - dashboard: bioetl-overview-v2.json
-    id: 9002
-    max_rows: 6
-    owner: "@bioetl-observability"
-    bind: limit
-  - dashboard: bioetl-overview-v2.json
-    id: 9300
-    max_rows: 5
-    owner: "@bioetl-observability"
-    bind: paginate
-  - dashboard: bioetl-overview-v2.json
-    id: 9301
-    max_rows: 5
-    owner: "@bioetl-observability"
-    bind: paginate
-  - dashboard: bioetl-provider-health-v2.json
-    id: 9461
-    max_rows: 1
-    owner: "@bioetl-observability"
-    bind: limit
-  - dashboard: bioetl-provider-health-v2.json
-    id: 9460
-    max_rows: 5
-    owner: "@bioetl-observability"
-    bind: paginate
-  - dashboard: bioetl-provider-health-v2.json
-    id: 9402
-    max_rows: 5
-    owner: "@bioetl-observability"
-    bind: paginate
-  - dashboard: bioetl-provider-health-v2.json
-    id: 9403
-    max_rows: 5
-    owner: "@bioetl-observability"
-    bind: paginate
-  - dashboard: bioetl-dq-v2.json
-    id: 9402
-    max_rows: 5
-    owner: "@bioetl-observability"
-    bind: paginate
-  - dashboard: bioetl-dq-v2.json
-    id: 9403
-    max_rows: 5
-    owner: "@bioetl-observability"
-    bind: paginate
-  - dashboard: bioetl-dq-v2.json
-    id: 9406
-    max_rows: 1
-    owner: "@bioetl-observability"
-    bind: limit
-  - dashboard: bioetl-provider-health-v2.json
-    id: 9101
-    max_rows: 3
-    owner: "@bioetl-observability"
-    bind: paginate
-  - dashboard: bioetl-provider-health-v2.json
-    id: 9107
-    max_rows: 3
-    owner: "@bioetl-observability"
-    bind: paginate
-  - dashboard: bioetl-incident-v1.json
-    id: 2010
-    max_rows: 5
-    owner: "@bioetl-observability"
-    bind: topk
-  - dashboard: bioetl-incident-v1.json
-    id: 2005
-    max_rows: 3
-    owner: "@bioetl-observability"
-    bind: limit
-  - dashboard: bioetl-run-explorer-v1.json
-    id: 3010
-    max_rows: 10
-    owner: "@bioetl-observability"
-    bind: limit
-  - dashboard: bioetl-control-plane-v1.json
-    id: 9422
-    max_rows: 1
-    owner: "@bioetl-observability"
-    bind: limit
-  - dashboard: bioetl-control-plane-v1.json
-    id: 9418
-    max_rows: 1
-    owner: "@bioetl-observability"
-    bind: limit
-  - dashboard: bioetl-control-plane-v1.json
-    id: 9416
-    max_rows: 5
-    owner: "@bioetl-observability"
-    bind: limit
-
-# DASH-DENSITY-002 scalar information density (values / w*h). Only scalar panels
-# count; timeseries/table/text/row are excluded (runtime-dependent value counts).
-# MUST equal report_dashboard_scalar_density.SCALAR_TYPES (locked by a test).
+- dashboard: bioetl-control-plane-v1.json
+  id: 9423
+  max_rows: 5
+  owner: '@bioetl-observability'
+  bind: paginate
+- dashboard: bioetl-overview-v2.json
+  id: 9603
+  max_rows: 1
+  owner: '@bioetl-observability'
+  bind: limit
+- dashboard: bioetl-overview-v2.json
+  id: 215
+  max_rows: 2
+  owner: '@bioetl-observability'
+  bind: topk
+- dashboard: bioetl-overview-v2.json
+  id: 9002
+  max_rows: 6
+  owner: '@bioetl-observability'
+  bind: limit
+- dashboard: bioetl-overview-v2.json
+  id: 9300
+  max_rows: 5
+  owner: '@bioetl-observability'
+  bind: limit
+- dashboard: bioetl-overview-v2.json
+  id: 9301
+  max_rows: 5
+  owner: '@bioetl-observability'
+  bind: paginate
+- dashboard: bioetl-dq-v2.json
+  id: 9402
+  max_rows: 5
+  owner: '@bioetl-observability'
+  bind: paginate
+- dashboard: bioetl-dq-v2.json
+  id: 9403
+  max_rows: 5
+  owner: '@bioetl-observability'
+  bind: paginate
+- dashboard: bioetl-dq-v2.json
+  id: 9406
+  max_rows: 1
+  owner: '@bioetl-observability'
+  bind: limit
+- dashboard: bioetl-incident-v1.json
+  id: 2010
+  max_rows: 5
+  owner: '@bioetl-observability'
+  bind: topk
+- dashboard: bioetl-incident-v1.json
+  id: 2005
+  max_rows: 3
+  owner: '@bioetl-observability'
+  bind: limit
+- dashboard: bioetl-run-explorer-v1.json
+  id: 3010
+  max_rows: 10
+  owner: '@bioetl-observability'
+  bind: limit
+- dashboard: bioetl-control-plane-v1.json
+  id: 9422
+  max_rows: 1
+  owner: '@bioetl-observability'
+  bind: limit
+- dashboard: bioetl-control-plane-v1.json
+  id: 9418
+  max_rows: 1
+  owner: '@bioetl-observability'
+  bind: limit
+- dashboard: bioetl-control-plane-v1.json
+  id: 9416
+  max_rows: 5
+  owner: '@bioetl-observability'
+  bind: limit
 scalar_density_types:
-  - stat
-  - gauge
-  - bargauge
-
-# UIDs where DASH-DENSITY-002 is ENFORCED. Enrolled 2026-08-14 after compacting
-# FAIL-group single-value cards (survey DENS-001..012).
+- stat
+- gauge
+- bargauge
 scalar_density_enforced_uids:
-  - bioetl-control-plane-v1
-  - bioetl-dq-v2
-  - bioetl-incident-v1
-  - bioetl-overview-v2
-  - bioetl-provider-health-v2
-  - bioetl-run-explorer-v1
-
+- bioetl-control-plane-v1
+- bioetl-dq-v2
+- bioetl-incident-v1
+- bioetl-overview-v2
+- bioetl-run-explorer-v1
 answer_panels:
   bioetl-control-plane-v1.json:
-    - id: 9422
-      title: Review Exact Replay Readiness
+  - id: 9422
+    title: Review Exact Replay Readiness
   bioetl-overview-v2.json:
-    - id: 9603
-      title: Review Selected Run Status
-    - id: 9002
-      title: Review Run Domains
-  bioetl-provider-health-v2.json:
-    - id: 9461
-      title: Review Provider Check
+  - id: 9603
+    title: Review Selected Run Status
+  - id: 9002
+    title: Review Run Domains
   bioetl-dq-v2.json:
-    - id: 9406
-      title: Review Selected Run Status
+  - id: 9406
+    title: Review Selected Run Status
   bioetl-incident-v1.json:
-    - id: 2010
-      title: Inspect Ranked Suspects
+  - id: 2010
+    title: Inspect Ranked Suspects
   bioetl-run-explorer-v1.json:
-    - id: 3010
-      title: Inspect Recent Runs (last 10)
-
-# Retired: the runtime/control-plane 9401 verdict cards were removed with the
-# selected-run redesign. No first-window verdict card currently gates trust.
+  - id: 3010
+    title: Inspect Recent Runs (last 10)
 trust_gate_panels: []
-
 allowlists:
-  # Retired with #8900: panel 9104 now ends at row 18 (y=15, h=3).
   straddle: []
-  # DASH-FIT-004: first-window internal overflow must not be excepted to
-  # preserve a failing layout. Keep empty.
   first_window_overflow: []
-  # DASH-ZERO-001 / DASH-STATE-001: first-window background stats may use
-  # a documented presence-probe zero (not a healthy-zero fallback).
-  # Retired: provider-health 9104 (presence probe) was removed with the
-  # selected-run redesign.
   synthetic_zero: []
-  # Horizontal scrolling is allowed only for named below-fold explorers.
   horizontal_scroll: []
-  # Panels that previously needed a below-floor exception now meet the root
-  # floors (incident 2010/2005 h=5, control-plane 9418/9416 h=9).
   min_height: []
-  # DASH-DENSITY-002 governed exceptions keyed by (dashboard, row id).
-  # Retired allowlist entries for rows removed in the selected-run redesign
-  # (provider-health 9106/91/9404, control-plane 903, overview 9009,
-  # runtime 252/254/9994). Only the incident fleet row remains excepted.
   scalar_density:
-    - dashboard: bioetl-incident-v1.json
-      id: 8808
-      owner: "@bioetl-observability"
-      rationale: >-
-        Collapsed Pipeline fleet and range row moved from Pipeline Diagnostics.
-        It is below-fold fleet evidence, not a first-screen scalar group.
-      retire_when: fleet signals are represented by first-window scalar cards on Incident
+  - dashboard: bioetl-incident-v1.json
+    id: 8808
+    owner: '@bioetl-observability'
+    rationale: Collapsed Pipeline fleet and range row moved from Pipeline Diagnostics. It is below-fold
+      fleet evidence, not a first-screen scalar group.
+    retire_when: fleet signals are represented by first-window scalar cards on Incident

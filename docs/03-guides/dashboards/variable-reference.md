@@ -13,108 +13,61 @@ ______________________________________________________________________
 
 # Grafana Dashboard Variable Reference
 
-Дата сверки: **2026-08-05**
-Источник истины: `grafana/dashboards/*.json`
+Дата сверки: **2026-10-02**. Five-dashboard cutover approved in ADR-053.
 
-Этот документ фиксирует канонический contract для dashboard variables на
-**shipped** дашбордах (7 JSON, bus `0..6`).
+Machine-readable selector SSOT: `docs/03-guides/dashboards/contracts/selector-contracts.yaml`.
 
-Machine-readable selector SSOT:
-`docs/03-guides/dashboards/contracts/selector-contracts.yaml`
+Primary operator dashboards expose the shared context shell: `$workflow`, `$pipeline`, `$run_type`, `$run_id`.
+`$workflow` is Single-select with Include All. It remains single-select with Include All across primary dashboards.
+`$pipeline` is single-select with Include All; native defaults browse All.
+`$run_id` is HTTP-backed control-plane identity context, never a Prometheus label.
+Exact-run handoffs retain workflow, pipeline, run type, Run ID and time; the global Run Explorer bus resets the selection.
 
-Human family guide: [selector-architecture.md](selector-architecture.md)
+$stage` belongs to Data Quality only. Live provider filtering belongs to Incident Workspace; saved Provider Evidence in Overview needs no provider/adapter selector.
 
-## Core rules
-
-- Все variables MUST иметь `description` в shipped JSON.
-- Primary operator dashboards expose the shared context shell:
-  `$workflow`, `$pipeline`, `$run_type`, `$run_id`.
-- Role-specific extensions: `$stage` (Runtime, DQ), `$provider` (Provider Health,
-  Incident), hidden `$pipeline_context` / `$adapter` (Provider Health),
-  hidden `$provider_hint` (Runtime).
-- `$workflow` is context/evidence unless a dashboard explicitly documents a
-  truthful current-status intersection.
-- `$workflow` is Single-select with Include All. It remains single-select with Include All across primary dashboards.
-- `$pipeline` is single-select; Overview and Run Explorer landing default is `All`; other boards
-  fail-close to `unknown`.
-- `$run_type` uses Include All. Overview and Run Explorer landing default is `All`. Other
-  primary boards default to `backfill`.
-- `$run_id` is HTTP-backed control-plane identity context for Ops HTTP `ID` /
-  Processed Records tables. It is preserved between primary dashboards and
-  MUST NOT become a Prometheus label.
-- `$stage` defaults to **All** (`$__all` UI marker) on Runtime and DQ.
-- PromQL-scoped `includeAll` variables use `allValue: ".*"` so All expands to a
-  match-all regex. The saved `current.value: "$__all"` remains the Grafana
-  All-selected marker; HTTP handoff URLs may still pass literal `var-*=$__all`,
-  and Ops HTTP treats both `$__all` and `.*` as all-scope tokens.
-- `$provider` defaults to `unknown` and is derived from pipeline/workflow when
-  set (see Provider Health / Incident JSON).
-
-## Common variables (shipped)
-
-| Variable | Dashboards | Datasource / query family | Selection | Default | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `$workflow` | all 7 shipped | Prometheus `label_values(bioetl_workflow_universe, workflow)` on query-backed boards; Run Explorer: Ops HTTP `filter-options?dimension=workflow` | Single + Include All | `All` / `$__all` | Shared shell context |
-| `$pipeline` | all 7 shipped | Universe per board (see `selector-contracts.yaml#pipeline_universe_contract`) | Single | Overview / Run Explorer: `All`; else `unknown` | Canonical pipeline scope |
-| `$run_type` | all 7 shipped | Same universe as `$pipeline` | Multi + Include All on query-backed boards; Run Explorer single + Include All | Overview / Run Explorer: `All`; else `backfill` | Never hand off `run_type=unknown` |
-| `$run_id` | all 7 shipped | BioETL Ops HTTP filter-options | Single, no Include All | `-` | Identity only; not PromQL |
-| `$stage` | `bioetl-runtime`, `bioetl-dq-v2` | Runtime expected-stage / DQ processed totals | Multi + Include All | `All` / `$__all` | Bounded stage filter |
-
-## Dashboard-specific variables (shipped)
-
-| Variable | Dashboard | Selection | Default | Notes |
+| Dashboard | Variable | Selection / visibility | Default | Description |
 | --- | --- | --- | --- | --- |
-| `$provider` | `bioetl-provider-health-v2`, `bioetl-incident-v1` | Single | `unknown` | Derived from pipeline/workflow when set |
-| `$pipeline_context` | `bioetl-provider-health-v2` | Hidden | `unknown` | Return-path only |
-| `$adapter` | `bioetl-provider-health-v2` | Hidden detail | dynamic | Detail-only breakdown |
-| `$provider_hint` | `bioetl-runtime` | Hidden | first pipeline segment | Provider-scoped alert panels only |
-
-## Dependency chains (shipped)
-
-- **Shared shell (all 7):** `workflow` / `pipeline` / `run_type` feed
-  `/ops/control-plane/filter-options` for `$run_id`; primary links preserve
-  `$run_id` as HTTP identity.
-- **`bioetl-runtime`:** `$run_type` depends on `$pipeline`; `$stage` depends on
-  pipeline scope; hidden `$provider_hint` from pipeline name.
-- **`bioetl-dq-v2`:** `$run_type` depends on `$pipeline`; `$stage` on pipeline +
-  run_type.
-- **`bioetl-provider-health-v2`:** `$provider` is primary business selector;
-  shell is secondary; hidden `$pipeline_context` + `$adapter`.
-- **`bioetl-incident-v1`:** shell + `$provider` for triage.
-- **`bioetl-run-explorer-v1`:** Ops HTTP catalog for `$workflow` / `$pipeline` /
-  `$run_type` / `$run_id`. Run ID **Select this run** writes `$run_id` from the
-  row. Canonical Ops HTTP ID/Processed hub.
-- **`bioetl-overview-v2` / `bioetl-control-plane-v1`:** shell only; aggregate
-  Status does not use `$run_id` as PromQL scope.
+| `bioetl-control-plane-v1` | `$workflow` | Single + Include All | `$__all` | Shared operator context: workflow evidence selector. This selector does not imply exact current-status intersection unless the dashboard explicitly documents that semantics. |
+| `bioetl-control-plane-v1` | `$pipeline` | Single + Include All | `$__all` | Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Default selection is All pipelines until the operator narrows to a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series. |
+| `bioetl-control-plane-v1` | `$run_type` | Multi + Include All | `backfill` | Core scope: run_type selector bounded by the active control-plane pipeline universe. Default All is intentional; missing run-type context must be represented as All, not unknown. Default run_type is backfill (SEL-P0 fallback); Include All remains available for aggregate diagnostics. |
+| `bioetl-control-plane-v1` | `$run_id` | Single | `-` | Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved. |
+| `bioetl-control-plane-v1` | `$read_latency_quantile` | Single | `0.95` | Select one control-plane global read-latency quantile. Default p95 keeps a single series per store/operation instead of overlaying p50/p95/p99. Track Global Read Latency shows last and max for the selected quantile. |
+| `bioetl-control-plane-v1` | `$provider_for_pipeline` | Hidden | `` | Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input. |
+| `bioetl-dq-v2` | `$workflow` | Single + Include All | `$__all` | Shared operator context: workflow evidence selector. This selector does not imply exact current-status intersection unless the dashboard explicitly documents that semantics. |
+| `bioetl-dq-v2` | `$pipeline` | Single + Include All | `$__all` | Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Default selection is All pipelines until the operator narrows to a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series. |
+| `bioetl-dq-v2` | `$run_type` | Multi + Include All | `backfill` | Core scope: run_type selector bounded by pipeline; fallback: All run types for selected pipeline. Default run_type is backfill (SEL-P0 fallback); Include All remains available for aggregate diagnostics. |
+| `bioetl-dq-v2` | `$run_id` | Single | `-` | Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved. |
+| `bioetl-dq-v2` | `$stage` | Multi + Include All | `$__all` | Core scope: stage selector (only where stage-level analysis exists); fallback: All stages for selected pipeline/run_type. Default selection is All stages.  |
+| `bioetl-dq-v2` | `$provider_for_pipeline` | Hidden | `` | Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input. |
+| `bioetl-incident-v1` | `$workflow` | Single + Include All | `$__all` | Optional workflow evidence context and workflow-dashboard handoff selector. Overview remains pipeline-summary-first: workflow does not yet drive exact intersection filtering for the current-status PromQL surfaces. |
+| `bioetl-incident-v1` | `$pipeline` | Single + Include All | `$__all` | Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Default selection is All pipelines until the operator narrows to a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series. |
+| `bioetl-incident-v1` | `$run_type` | Multi + Include All | `backfill` | Core scope: run_type selector bounded by pipeline; fallback: All run types for selected pipeline. Default run_type is backfill (SEL-P0 fallback); Include All remains available for aggregate diagnostics. |
+| `bioetl-incident-v1` | `$run_id` | Single | `-` | Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved. |
+| `bioetl-incident-v1` | `$provider` | Single | `unknown` | Provider scope: derived from Pipeline when set (first name segment, same heuristic as runtime $provider_hint), else from Workflow when set; fail-closed default is unknown when neither Pipeline nor Workflow is set. Operators may still open handoffs that pass an explicit provider value. |
+| `bioetl-incident-v1` | `$read_latency_quantile` | Visible | `0.95` | Quantile for global read latency; p95 default. |
+| `bioetl-incident-v1` | `$provider_for_pipeline` | Hidden | `` | Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input. |
+| `bioetl-overview-v2` | `$workflow` | Single + Include All | `$__all` | Optional workflow evidence context and workflow-dashboard handoff selector. Overview remains pipeline-summary-first: workflow does not yet drive exact intersection filtering for the current-status PromQL surfaces. |
+| `bioetl-overview-v2` | `$pipeline` | Single + Include All | `$__all` | Overview landing keeps Include All / default All so L0 fleet state renders. Option list comes from the control-plane catalog, not the Prometheus universe, so a concrete pipeline remains selectable when Prom is empty. |
+| `bioetl-overview-v2` | `$run_type` | Multi + Include All | `$__all` | Core scope: run_type selector bounded by pipeline; fallback: All run types for selected pipeline. |
+| `bioetl-overview-v2` | `$run_id` | Single | `-` | Run ID selector sourced from the local control-plane run-manifest catalog for the current pipeline/run_type scope. Grafana All values are normalized to an unbounded scope, so Run Type = All no longer empties the selector; Pipeline = All exposes aggregate exact-run handoff options from the catalog. This selector remains HTTP-backed and does not reintroduce run_id into Prometheus labels. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved. |
+| `bioetl-overview-v2` | `$provider_for_pipeline` | Hidden | `` | Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input. |
+| `bioetl-run-explorer-v1` | `$workflow` | Single + Include All | `$__all` | Browse scope from the local control-plane catalog. Default All includes every workflow. Filters the recent-launches table. |
+| `bioetl-run-explorer-v1` | `$pipeline` | Single + Include All | `$__all` | Browse scope from the local control-plane catalog. Default All includes every pipeline. Explicit URL selections take precedence. Select a table row to inspect its exact pipeline and Run ID. |
+| `bioetl-run-explorer-v1` | `$run_type` | Single + Include All | `$__all` | Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence. Select a table row to inspect its exact pipeline and Run ID. |
+| `bioetl-run-explorer-v1` | `$run_id` | Single | `-` | Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved. |
+| `bioetl-run-explorer-v1` | `$lookup_run_id` | Single | `` | Exact UUID within the current Workflow/Pipeline/Run Type, including launches older than the latest ten. Does not replace Selected Run until a matching row is found. Clear to browse recent launches. |
+| `bioetl-run-explorer-v1` | `$provider_for_pipeline` | Hidden | `` | Hidden selector: provider for a concrete Pipeline. Unused when Pipeline is All ($__all / .*). Table Provider handoff uses the row field. |
 
 ## Retired boards (do not reintroduce)
 
 | Retired UID | Replacement |
 | --- | --- |
-| `bioetl-workflow-overview` | Runtime workflow band |
-| `bioetl-alerts-slo` | Overview Alert/SLO row |
-| `bioetl-silver-reject-explorer` | CLI `bioetl quarantine inspect` + DQ reject panels |
+| `bioetl-runtime` | Incident Workspace fleet/workflow evidence |
+| `bioetl-provider-health-v2` | Run Overview selected Provider Evidence; Incident current provider metrics |
+| `bioetl-workflow-overview` | Incident workflow evidence |
+| `bioetl-alerts-slo` | Incident alerts |
+| `bioetl-silver-reject-explorer` | CLI quarantine inspect and saved DQ evidence |
 
-Historical selector names (`$status`, `$step_status`, `$step_kind`,
-`$workflow_context`, `$pipeline_context_exact`, `$quarantine_run_id`,
-`$payload_hash`, …) belonged to those retired boards and MUST NOT reappear on
-primary Prometheus dashboards.
+Historical `$pipeline_context`, `$adapter`, `$provider_hint`, `$status`, `$step_status`, `$step_kind`, `$workflow_context`, `$pipeline_context_exact`, `$quarantine_run_id` and `$payload_hash` are not current operator selectors.
 
-## Validation checklist
-
-- [ ] Every variable in `templating.list` has a non-empty `description`
-- [ ] Shared shell present on all 7 shipped dashboards
-- [ ] `$pipeline` / `$provider` fail-closed boards remain single-select
-- [ ] `$stage` defaults to All on Runtime + DQ
-- [ ] `$provider` defaults to unknown; derivation documented
-- [ ] No retired-board variables listed as currently shipped
-
-## Related references
-
-- [selector-architecture.md](selector-architecture.md)
-- [dashboard-inventory.md](dashboard-inventory.md)
-- [dashboard-v2-usage.md](dashboard-v2-usage.md)
-- [design-system.md](design-system.md)
-- `grafana/README.md`
-- `tests/integration/test_grafana_variable_reference.py`
-- `tests/integration/test_grafana_selector_contract.py`
+Related: [selector-architecture.md](selector-architecture.md), [navigation-contract.md](navigation-contract.md), [design-system.md](design-system.md).

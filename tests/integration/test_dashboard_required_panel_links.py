@@ -27,30 +27,16 @@ def test_overview_dashboard_required_panel_links():
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panels = {p.get("id"): p for p in get_dashboard_panels(dashboard)}
 
-    # Panel 214 (System Status) should have dataLinks to specific dashboards
-    panel_214 = panels.get(214)
-    assert panel_214 is not None, "Panel 214 (System Status) must exist"
-    data_links_214 = panel_214.get("options", {}).get("dataLinks", [])
-    # Workflow overview retired (#6570/#6647); workflow band lives on runtime.
-    required_links_214 = [
-        "Open Runtime",
+    # Live alert/first-action cards are no longer selected-run evidence.
+    assert 214 not in panels and 215 not in panels
+    links = panels[9002]["links"]
+    assert {link["title"] for link in links} == {
         "Open Control Plane",
         "Open Data Quality",
-        "Open Provider Health",
-    ]
-    for required_link in required_links_214:
-        assert any(required_link in link.get("title", "") for link in data_links_214), (
-            f"Panel 214 must have dataLink '{required_link}'"
-        )
-
-    # Panel 215 (First Action) should have dataLinks to specific dashboards
-    panel_215 = panels.get(215)
-    assert panel_215 is not None, "Panel 215 (First Action) must exist"
-    data_links_215 = panel_215.get("options", {}).get("dataLinks", [])
-    for required_link in required_links_214:  # Same as System Status
-        assert any(required_link in link.get("title", "") for link in data_links_215), (
-            f"Panel 215 must have dataLink '{required_link}'"
-        )
+        "Open Provider Evidence",
+    }
+    assert all("${run_id:queryparam}" in link["url"] for link in links)
+    assert all("${__url_time_range}" in link["url"] for link in links)
 
 
 def test_dq_dashboard_required_panel_links():
@@ -70,8 +56,12 @@ def test_workflow_overview_required_panel_links():
 
     workflow_overview = Path("grafana/dashboards/bioetl-workflow-overview.json")
     runtime = Path("grafana/dashboards/bioetl-runtime.json")
+    incident = Path("grafana/dashboards/bioetl-incident-v1.json")
     assert not workflow_overview.exists(), (
         "bioetl-workflow-overview.json was retired (#6570/#6647); "
         "workflow-band evidence lives on bioetl-runtime"
     )
-    assert runtime.is_file()
+    assert not runtime.exists()
+    assert incident.is_file()
+    panels = {p["id"]: p for p in get_dashboard_panels(load_dashboard(incident))}
+    assert {9996, 9997, 9701} <= set(panels)

@@ -81,6 +81,10 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
             if panel.get("type") == "row"
         ]
         observed[dashboard_path.name] = len(rows)
+        if expected_rows[dashboard_path.name] == 0:
+            assert len(get_dashboard_panels(dashboard)) == (
+                2 if dashboard_path.stem == "bioetl-run-explorer-v1" else 10
+            )
     assert observed == expected_rows
 
 

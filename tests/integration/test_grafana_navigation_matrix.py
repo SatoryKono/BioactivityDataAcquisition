@@ -20,7 +20,7 @@ from collections import deque
 import pytest
 import yaml
 from tests.integration._grafana_test_support import (
-    get_dashboard_navigation_links,
+    _collect_dashboard_links,
     get_dashboard_panels,
     load_dashboard,
 )
@@ -40,7 +40,7 @@ def _load_contract() -> dict[str, object]:
 def _navigation_routes(payload: dict) -> list[dict]:
     """Follow header routes or exact-run table actions on the entry page."""
     if payload.get("uid") != "bioetl-run-explorer-v1":
-        return get_dashboard_navigation_links(payload)
+        return _collect_dashboard_links(payload)
     tables = [p for p in get_dashboard_panels(payload) if p.get("id") == 3010]
     assert len(tables) == 1 and tables[0].get("type") == "table", (
         "Run Explorer must expose one run table id=3010"

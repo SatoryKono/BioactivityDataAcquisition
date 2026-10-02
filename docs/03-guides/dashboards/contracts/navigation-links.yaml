@@ -1,8 +1,7 @@
 normative_source:
   scope: link_vars_time_semantics
   authority: single_source_of_truth
-  narrative_minimal:
-    'This YAML is the only normative contract for dashboard link
+  narrative_minimal: 'This YAML is the only normative contract for dashboard link
     semantics,
 
     allowed/required/forbidden var-* handoff, and time handoff policy.
@@ -26,260 +25,246 @@ version: 1
 selection_serialization:
   formatter: queryparam
   mapped_scalar_parameter_formatter: percentencode
-  all_value: "$__all"
+  all_value: $__all
   multiple_values: repeated_var_parameters
   row_fields: concrete_row_values
   selected_run_range: retained_hidden_from_ms_to_ms
   unavailable_run_range: no_active_action
-  ranked_suspect_action:
+  ranked_suspect_action: null
   action_target_override:
     data_quality: bioetl-dq-v2
     source_uid: bioetl-incident-v1
     panel_id: 2010
     pipeline: row
-    run_id: "-"
-    reason: Current metric rows do not identify an exact run; do not carry a foreign UUID.
+    run_id: '-'
+    reason: Current metric rows do not identify an exact run; do not carry a foreign
+      UUID.
     target_uid_by_domain:
       runtime: bioetl-overview-v2
-      provider: bioetl-provider-health-v2
+      provider: bioetl-overview-v2
       dq: bioetl-dq-v2
     extra_vars_by_domain:
       runtime: []
-      provider: [provider, pipeline_context]
-      dq: [stage]
+      provider: []
+      dq:
+      - stage
 required_top_level_links_by_uid:
   bioetl-control-plane-v1:
-    - Run Overview
-    - 6. Incident Workspace
-    - Run Explorer
+  - Run Explorer
+  - Run Overview
+  - 6. Incident Workspace
   bioetl-overview-v2:
-    - Replay Readiness
-    - 6. Incident Workspace
-    - Run Explorer
+  - Run Explorer
+  - Replay Readiness
+  - 6. Incident Workspace
   bioetl-dq-v2:
-    - Replay Readiness
-    - Run Overview
-    - 6. Incident Workspace
-    - Run Explorer
+  - Run Explorer
+  - Replay Readiness
+  - Run Overview
+  - 6. Incident Workspace
   bioetl-incident-v1:
-    - Replay Readiness
-    - Run Overview
-    - Run Explorer
+  - Run Explorer
+  - Replay Readiness
+  - Run Overview
   bioetl-run-explorer-v1: []
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
-    - title: Replay Readiness
-      target_uid: bioetl-control-plane-v1
-      priority: secondary
-      semantics: scoped_control_plane_handoff
+  - title: Replay Readiness
+    target_uid: bioetl-control-plane-v1
+    priority: secondary
+    semantics: scoped_control_plane_handoff
 required_link_vars_by_target_uid:
   bioetl-overview-v2:
-    - workflow
-    - pipeline
-    - run_type
+  - workflow
+  - pipeline
+  - run_type
   bioetl-control-plane-v1:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
   bioetl-dq-v2:
-    - workflow
-    - pipeline
-    - run_type
-  bioetl-provider-health-v2:
-    - workflow
-    - pipeline
-    - run_type
-    - provider
-    - pipeline_context
+  - workflow
+  - pipeline
+  - run_type
   bioetl-incident-v1:
-    - workflow
-    - pipeline
-    - run_type
+  - workflow
+  - pipeline
+  - run_type
   bioetl-run-explorer-v1:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
 allowed_dashboard_link_vars:
   bioetl-overview-v2:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
   bioetl-dq-v2:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - stage
-  bioetl-provider-health-v2:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - provider
-    - pipeline_context
-    - adapter
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - stage
   bioetl-control-plane-v1:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
   bioetl-incident-v1:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - provider
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - provider
   bioetl-run-explorer-v1:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - lookup_run_id
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - lookup_run_id
 forbidden_dashboard_link_vars_by_target_uid:
   bioetl-overview-v2:
-    - quarantine_run_id
-    - payload_hash
-    - manifest_id
-    - execution_fingerprint
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
   bioetl-control-plane-v1:
-    - quarantine_run_id
-    - payload_hash
-    - manifest_id
-    - execution_fingerprint
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
   bioetl-dq-v2:
-    - quarantine_run_id
-    - payload_hash
-    - manifest_id
-    - execution_fingerprint
-  bioetl-provider-health-v2:
-    - quarantine_run_id
-    - payload_hash
-    - manifest_id
-    - execution_fingerprint
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
   bioetl-incident-v1:
-    - quarantine_run_id
-    - payload_hash
-    - manifest_id
-    - execution_fingerprint
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
   bioetl-run-explorer-v1:
-    - quarantine_run_id
-    - payload_hash
-    - manifest_id
-    - execution_fingerprint
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
 preserved_identity_handoff:
   catalog_reset:
     target_uid: bioetl-run-explorer-v1
     required_values:
-      workflow: ".*"
-      pipeline: ".*"
-      run_type: ".*"
-      run_id: "-"
-      lookup_run_id: ""
-    semantics: Browse the full catalog; clear prior selection and search while retaining time.
+      workflow: .*
+      pipeline: .*
+      run_type: .*
+      run_id: '-'
+      lookup_run_id: ''
+    semantics: Browse the full catalog; clear prior selection and search while retaining
+      time.
   selector: run_id
   required_value: $run_id
   source_uids:
-    - bioetl-control-plane-v1
-    - bioetl-dq-v2
-    - bioetl-overview-v2
-    - bioetl-provider-health-v2
-    - bioetl-incident-v1
-    - bioetl-run-explorer-v1
+  - bioetl-control-plane-v1
+  - bioetl-dq-v2
+  - bioetl-overview-v2
+  - bioetl-incident-v1
+  - bioetl-run-explorer-v1
   target_uids:
-    - bioetl-control-plane-v1
-    - bioetl-dq-v2
-    - bioetl-overview-v2
-    - bioetl-provider-health-v2
-    - bioetl-incident-v1
-    - bioetl-run-explorer-v1
+  - bioetl-control-plane-v1
+  - bioetl-dq-v2
+  - bioetl-overview-v2
+  - bioetl-incident-v1
+  - bioetl-run-explorer-v1
   excluded_source_uids: []
   excluded_target_uids: []
-  semantics:
-    Preserve exact primary Run ID when both source and target dashboards
-    expose the primary control-plane run_id selector. Alert dashboard does not preserve
-    primary run_id when it does not own the primary identity selector. Record-level
-    quarantine forensics use CLI bioetl quarantine inspect (Silver Reject Explorer
-    dashboard removed 2026-07-23).
+  semantics: Scoped evidence actions preserve the exact Run ID and time. Global Run
+    Explorer navigation explicitly clears selectors; row selection uses concrete row
+    identity.
 required_discoverable_inbound_paths:
   L1:
     bioetl-control-plane-v1:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 9002
-        source_panel_title: Run Domains
-        source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
+    - source_uid: bioetl-overview-v2
+      source_panel_id: 9002
+      source_panel_title: Review Run Domains
+      source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
   L2:
     bioetl-dq-v2:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 9002
-        source_panel_title: Run Domains
-        source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
+    - source_uid: bioetl-overview-v2
+      source_panel_id: 9002
+      source_panel_title: Review Run Domains
+      source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
 required_panel_links_by_uid:
   bioetl-overview-v2:
-    - panel_id: 9002
-      target_uid: bioetl-control-plane-v1
-      link_titles:
-        - Open Control Plane
-    - panel_id: 9002
-      target_uid: bioetl-dq-v2
-      link_titles:
-        - Open Data Quality
-    - panel_id: 9603
-      target_uid: bioetl-run-explorer-v1
-      link_titles:
-        - Open Run Explorer
+  - panel_id: 9002
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open Control Plane
+  - panel_id: 9002
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open Data Quality
+  - panel_id: 9002
+    target_uid: bioetl-overview-v2
+    link_titles:
+    - Open Provider Evidence
+  - panel_id: 9603
+    target_uid: bioetl-run-explorer-v1
+    link_titles:
+    - Open Run Explorer
   bioetl-dq-v2:
-    - panel_id: 9406
-      target_uid: bioetl-run-explorer-v1
-      link_titles:
-        - Open Run Explorer
+  - panel_id: 9406
+    target_uid: bioetl-run-explorer-v1
+    link_titles:
+    - Open Run Explorer
   bioetl-control-plane-v1:
-    - panel_id: 9422
-      target_uid: bioetl-control-plane-v1
-      link_titles:
-        - View replay checks
-      required_view_panel: 9423
+  - panel_id: 9422
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - View replay checks
+    required_view_panel: 9423
+  - panel_id: 9418
+    target_uid: bioetl-run-explorer-v1
+    link_titles:
+    - Open Run Explorer
   bioetl-incident-v1:
-    - panel_id: 2010
-      target_uid: ${__data.fields.action_dashboard_uid}
-      link_titles:
-        - Open domain diagnostics
-    - panel_id: 2003
-      target_uid: bioetl-overview-v2
-      link_titles:
-        - Open domain workspace
-    - panel_id: 2004
-      target_uid: bioetl-dq-v2
-      link_titles:
-        - Open domain workspace
-    - panel_id: 2101
-      target_uid: bioetl-run-explorer-v1
-      link_titles:
-        - Open Run Explorer
-    - panel_id: 9101
-      target_uid: bioetl-control-plane-v1
-      link_titles:
-        - Open Trust
+  - panel_id: 2010
+    target_uid: ${__data.fields.action_dashboard_uid}
+    link_titles:
+    - Open domain diagnostics
+  - panel_id: 2003
+    target_uid: bioetl-overview-v2
+    link_titles:
+    - Open domain workspace
+  - panel_id: 2004
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open domain workspace
+  - panel_id: 2101
+    target_uid: bioetl-run-explorer-v1
+    link_titles:
+    - Open Run Explorer
+  - panel_id: 9101
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open Trust
   bioetl-run-explorer-v1:
-    - panel_id: 3010
-      target_uid: bioetl-control-plane-v1
-      link_titles:
-        - Replay Readiness
+  - panel_id: 3010
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Replay Readiness
 default_time_refresh_policy:
   L0:
     dashboards:
-      - bioetl-overview-v2
+    - bioetl-overview-v2
     time_from: now-12h
     refresh: 60s
   L1:
     dashboards:
-      - bioetl-control-plane-v1
-      - bioetl-provider-health-v2
-      - bioetl-dq-v2
-      - bioetl-incident-v1
-      - bioetl-run-explorer-v1
+    - bioetl-control-plane-v1
+    - bioetl-dq-v2
+    - bioetl-incident-v1
+    - bioetl-run-explorer-v1
     time_from: now-12h
     refresh: 60s
   Alerts:
@@ -294,163 +279,143 @@ default_time_refresh_policy_exceptions: {}
 time_handoff_requirements:
   dashboard_links:
     required_tokens:
-      - ${__url_time_range}
+    - ${__url_time_range}
   explore_links:
     required_tokens:
-      - from=${__from}
-      - to=${__to}
+    - from=${__from}
+    - to=${__to}
 navigation_transition_contract:
   dashboard_levels:
     L0:
       dashboards:
-        - bioetl-overview-v2
+      - bioetl-overview-v2
       required_outbound:
-        - bioetl-control-plane-v1
-        - bioetl-run-explorer-v1
-        - bioetl-incident-v1
+      - bioetl-control-plane-v1
+      - bioetl-dq-v2
       required_inbound: []
     L1:
       dashboards:
-        - bioetl-control-plane-v1
-        - bioetl-incident-v1
-        - bioetl-run-explorer-v1
+      - bioetl-control-plane-v1
+      - bioetl-incident-v1
+      - bioetl-run-explorer-v1
       required_outbound:
-        - bioetl-overview-v2
+      - bioetl-overview-v2
       required_inbound:
-        - bioetl-overview-v2
+      - bioetl-overview-v2
     L2:
       dashboards:
-        - bioetl-dq-v2
+      - bioetl-dq-v2
       required_outbound:
-        - bioetl-overview-v2
-        - bioetl-control-plane-v1
+      - bioetl-overview-v2
+      - bioetl-control-plane-v1
       required_inbound:
-        - bioetl-run-explorer-v1
+      - bioetl-run-explorer-v1
   default_semantics_by_route_class:
     global_navigation:
       allowed_default_values:
-        - unknown
-        - All
+      - unknown
+      - All
     scoped_handoff:
       allowed_default_values: []
       inherit_scoped_values: true
     context_mapping:
       allowed_default_values:
-        - unknown
-        - All
+      - unknown
+      - All
       inherit_scoped_values: true
   route_class_by_transition:
     bioetl-control-plane-v1->bioetl-overview-v2: scoped_handoff
-    bioetl-control-plane-v1->bioetl-provider-health-v2: context_mapping
     bioetl-control-plane-v1->bioetl-dq-v2: scoped_handoff
     bioetl-overview-v2->bioetl-control-plane-v1: scoped_handoff
-    bioetl-overview-v2->bioetl-provider-health-v2: context_mapping
     bioetl-overview-v2->bioetl-dq-v2: scoped_handoff
-    bioetl-provider-health-v2->bioetl-control-plane-v1: context_mapping
-    bioetl-provider-health-v2->bioetl-overview-v2: context_mapping
-    bioetl-provider-health-v2->bioetl-dq-v2: context_mapping
     bioetl-dq-v2->bioetl-control-plane-v1: scoped_handoff
     bioetl-dq-v2->bioetl-overview-v2: scoped_handoff
-    bioetl-dq-v2->bioetl-provider-health-v2: context_mapping
   incident_critical_reciprocal_paths:
-    - - bioetl-control-plane-v1
-      - bioetl-overview-v2
+  - - bioetl-control-plane-v1
+    - bioetl-incident-v1
+  - - bioetl-overview-v2
+    - bioetl-incident-v1
   first_action_contract:
     bioetl-overview-v2:
       panel_id: 9002
-      panel_title: Run Domains
-      min_cta: 2
-      max_cta: 2
+      panel_title: Review Run Domains
+      min_cta: 3
+      max_cta: 3
       ctas:
-        - title: Open Control Plane
-          expected_target_uid: bioetl-control-plane-v1
-        - title: Open Data Quality
-          expected_target_uid: bioetl-dq-v2
+      - title: Open Control Plane
+        expected_target_uid: bioetl-control-plane-v1
+      - title: Open Data Quality
+        expected_target_uid: bioetl-dq-v2
+      - title: Open Provider Evidence
+        expected_target_uid: bioetl-overview-v2
       notes:
-        - Exact selected-run HTTP evidence; no current-status PromQL ranking.
-        - Replay Readiness and Data Quality preserve the selected Run ID.
-        - Provider evidence is owned by panels 9480 and 9481 on this page.
+      - Selected-run domain evidence is saved artifact evidence, never inferred from
+        current metrics.
+      - Provider evidence opens local panel 9480 with the exact selected Run ID.
     bioetl-incident-v1:
       panel_id: 9991
       panel_title: Start Pipeline Triage
       min_cta: 4
       max_cta: 4
       ctas:
-        - title: Review current status
-          expected_target_uid: bioetl-incident-v1
-        - title: Review range evidence
-          expected_target_uid: bioetl-incident-v1
-        - title: Inspect top blockers
-          expected_target_uid: bioetl-incident-v1
-        - title: Inspect active blocker
-          expected_target_uid: bioetl-incident-v1
+      - title: Review current status
+        expected_target_uid: bioetl-incident-v1
+      - title: Review range evidence
+        expected_target_uid: bioetl-incident-v1
+      - title: Inspect top blockers
+        expected_target_uid: bioetl-incident-v1
+      - title: Inspect active blocker
+        expected_target_uid: bioetl-incident-v1
   cross_scope_marker_contract:
     required_markers:
       context_mapping: Context mapping
-    required_titles_by_transition:
-      bioetl-control-plane-v1->bioetl-provider-health-v2: context_mapping
-      bioetl-provider-health-v2->bioetl-overview-v2: context_mapping
-      bioetl-provider-health-v2->bioetl-control-plane-v1: context_mapping
-      bioetl-provider-health-v2->bioetl-dq-v2: context_mapping
-      bioetl-overview-v2->bioetl-provider-health-v2: context_mapping
-      bioetl-dq-v2->bioetl-provider-health-v2: context_mapping
-  provider_context_mapping_contract:
-    source_dashboards:
-      bioetl-control-plane-v1:
-        provider_value: unknown
-        adapter_value: null
-      bioetl-overview-v2:
-        provider_value: unknown
-        adapter_value: unknown
-      bioetl-dq-v2:
-        provider_value: unknown
-        adapter_value: unknown
-    required_tooltip_tokens:
-      context_mapping:
-        - Context mapping
+    required_titles_by_transition: {}
   kpi_ownership:
     failed_runs_in_range:
-      canonical_uid: bioetl-overview-v2
+      canonical_uid: bioetl-incident-v1
       mirror_panels: []
     worst_lag_stage:
-      canonical_uid: bioetl-overview-v2
+      canonical_uid: bioetl-incident-v1
       mirror_panels: []
     worst_backlog_stage:
-      canonical_uid: bioetl-overview-v2
+      canonical_uid: bioetl-incident-v1
       mirror_panels: []
 visual_bus_titles_ordered:
-  - Replay Readiness
-  - Run Overview
-  - Provider Health
-  - Data Quality
-  - 6. Incident Workspace
-  - Run Explorer
+- Run Explorer
+- Replay Readiness
+- Run Overview
+- 6. Incident Workspace
 visual_bus_uids_ordered:
-  - bioetl-control-plane-v1
-  - bioetl-overview-v2
-  - bioetl-provider-health-v2
-  - bioetl-dq-v2
-  - bioetl-incident-v1
-  - bioetl-run-explorer-v1
-
+- bioetl-run-explorer-v1
+- bioetl-control-plane-v1
+- bioetl-overview-v2
+- bioetl-incident-v1
+global_explorer_reset:
+  target_uid: bioetl-run-explorer-v1
+  workflow: .*
+  pipeline: .*
+  run_type: .*
+  run_id: '-'
+  lookup_run_id: ''
+  time: ${__url_time_range}
 navigation_surfaces:
   header_bus:
     panel_id: 1000
     height: 2
     uids:
-      - bioetl-control-plane-v1
-      - bioetl-overview-v2
-      - bioetl-dq-v2
-      - bioetl-incident-v1
+    - bioetl-control-plane-v1
+    - bioetl-overview-v2
+    - bioetl-dq-v2
+    - bioetl-incident-v1
   selected_run_rows:
     uid: bioetl-run-explorer-v1
     panel_id: 3010
     fields:
       Overview: bioetl-overview-v2
-      Saved Evidence: bioetl-overview-v2
+      Saved Evidence: bioetl-control-plane-v1
       Data Quality: bioetl-dq-v2
       Replay Readiness: bioetl-control-plane-v1
     identity: row_run_id
     time: selected_dashboard_range
   contextual_destinations:
-    - bioetl-dq-v2
+  - bioetl-dq-v2

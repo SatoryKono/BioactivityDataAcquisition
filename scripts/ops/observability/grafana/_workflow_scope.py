@@ -170,7 +170,7 @@ def _evidence_row(payload: dict, source: dict) -> None:
     evidence["options"] = {
         "showHeader": True,
         "cellHeight": "sm",
-        "footer": {"show": False},
+        "footer": {"show": False, "enablePagination": True},
     }
     panels.append(
         {
@@ -413,7 +413,9 @@ def _retain_selected_run_overview(payload: dict) -> None:
         )
     _place_selected_run_window(payload["panels"])
     _lift_overview_identity(payload)
-    from scripts.ops.observability.grafana._overview_identity import apply_overview_identity
+    from scripts.ops.observability.grafana._overview_identity import (
+        apply_overview_identity,
+    )
 
     apply_overview_identity(payload)
     domains = next(panel for panel in payload["panels"] if panel.get("id") == 9002)
@@ -436,6 +438,18 @@ def apply_workflow_scope(payload: dict) -> None:
         _retain_selected_run_overview(payload)
         return
     for panel in panels:
+        if panel.get("id") == 9997:
+            # Step metrics carry bounded context labels, unlike workflow totals.
+            for target in panel.get("targets", []):
+                expr = target.get("expr", "")
+                if (
+                    "bioetl_workflow_step_events_total" in expr
+                    and "pipeline_context=" not in expr
+                ):
+                    target["expr"] = expr.replace(
+                        'step_kind="pipeline",',
+                        'step_kind="pipeline",pipeline_context=~"$pipeline",run_type_context=~"$run_type",',
+                    )
         if panel.get("type") == "text" and panel.get("id") in {99, 9400}:
             suffix = (
                 "GLOBAL tables below cover all pipelines; suspects are not verified causes. VALID EMPTY is an empty suspect list, not a healthy fleet."
