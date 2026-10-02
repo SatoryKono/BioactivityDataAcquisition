@@ -55,6 +55,8 @@ from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
 from bioetl.domain.config.dq import DQConfig
+from bioetl.domain.composite import MergeConfig
+from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.control_plane import (
     ReplayCapability,
     RunLedgerEntry,
@@ -88,7 +90,6 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapter
-from bioetl.domain.composite import ConflictResolution, MergeConfig, MergeStrategy
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
@@ -139,15 +140,13 @@ class _MergeMetricsMixinHarness(MergeMetricsRecorderMixin):
 
 
 def _make_merge_metrics_mixin() -> MergeMetricsRecorderMixin:
-    return _MergeMetricsMixinHarness(
-        config=MergeConfig(
-            strategy=MergeStrategy.LEFT_OUTER,
-            conflict_resolution=ConflictResolution.SEED_PRIORITY,
-            output_silver_path="silver/composite/publication",
-            output_gold_path="gold/publication_enriched",
-        ),
-        logger=NoOpLogger(),
+    config = MergeConfig(
+        strategy=MergeStrategy.LEFT_OUTER,
+        conflict_resolution=ConflictResolution.SEED_PRIORITY,
+        output_silver_path="silver/composite/reproducibility",
+        output_gold_path="gold/reproducibility",
     )
+    return _MergeMetricsMixinHarness(config=config, logger=MagicMock())
 
 
 def _make_manifest(

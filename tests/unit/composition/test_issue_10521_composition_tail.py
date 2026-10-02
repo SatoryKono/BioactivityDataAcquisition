@@ -159,45 +159,61 @@ def test_input_snapshot_resolution_branches(
     monkeypatch.setattr(
         snapshots, "resolve_cached_bronze_input_snapshot_refs", lambda **_k: ()
     )
+    run_lookups: list[object] = []
 
     class _Store:
         def __init__(self, **_k: object) -> None:
-            pass
+            return None
 
-        def get(self, manifest_id: str) -> object:
-            return manifest if manifest_id == "hit" else None
+        def get(self, manifest_id: str) -> object | None:
+            value = {"m": "parent", "hit": "loaded"}.get(manifest_id)
+            if value is None:
+                return None
+            return SimpleNamespace(
+                source_refs=(SimpleNamespace(input_snapshots=(value,)),)
+            )
 
-        def get_by_run_id(self, _run_id: object) -> object:
-            raise ValueError("corrupt manifest")
+        def get_by_run_id(self, run_id: object) -> object:
+            run_lookups.append(run_id)
+            raise ValueError("manifest decoder failed")
 
     monkeypatch.setattr(snapshots, "FileRunManifestStore", _Store)
     monkeypatch.setattr(snapshots, "control_plane_root", lambda *_a, **_k: tmp_path)
     refs = snapshots.resolve_pipeline_input_snapshot_refs(
-        ctx=SimpleNamespace(replay_of_manifest_id="hit", replay_of_run_id=None),
+        ctx=SimpleNamespace(replay_of_manifest_id="m", replay_of_run_id=None),  # type: ignore[arg-type]
         cached_bronze=None,
-        settings=object(),
+        settings=object(),  # type: ignore[arg-type]
         provider="chembl",
         entity="activity",
     )
-    assert refs == (1, 2)
+    assert refs == ("parent",)
+    assert snapshots.resolve_manifest_input_snapshot_refs(
+        settings=object(),
+        manifest_id="hit",  # type: ignore[arg-type]
+    ) == ("loaded",)
     assert (
         snapshots.resolve_manifest_input_snapshot_refs(
-            settings=object(), manifest_id="miss"
+            settings=object(),
+            manifest_id="miss",  # type: ignore[arg-type]
         )
         == ()
     )
     assert (
-        snapshots.resolve_manifest_input_snapshot_refs(
-            settings=object(), manifest_id="miss", run_id="not-a-uuid"
-        )
-        == ()
-    )
-    with pytest.raises(ValueError, match="corrupt manifest"):
         snapshots.resolve_manifest_input_snapshot_refs(
             settings=object(),
             manifest_id="miss",
+            run_id="not-a-uuid",  # type: ignore[arg-type]
+        )
+        == ()
+    )
+    assert run_lookups == []
+    with pytest.raises(ValueError, match="manifest decoder failed"):
+        snapshots.resolve_manifest_input_snapshot_refs(
+            settings=object(),  # type: ignore[arg-type]
+            manifest_id="miss",
             run_id="00000000-0000-0000-0000-000000000001",
         )
+    assert len(run_lookups) == 1
 
 
 def test_effective_config_serializer_optional_fields() -> None:
