@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `93cce47a9804443bd217d61c55feaab2aeee739d392f5286f399dfbb9df91d2d`
+Evidence surface SHA-256: `6cc03a7532de85804ffdc4b510749e7cca5651f78bc3e4ed6c28252072171f3c`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "93cce47a9804443bd217d61c55feaab2aeee739d392f5286f399dfbb9df91d2d",
+  "evidence_surface_sha256": "6cc03a7532de85804ffdc4b510749e7cca5651f78bc3e4ed6c28252072171f3c",
   "metrics": {
     "architecture_integral_score": 9.47,
     "architecture_interpretation": "good_targeted_improvements",
@@ -48,11 +48,13 @@ Refresh reason: Reconcile generated metadata while preserving the historical aud
 
 ## Current metadata refresh — 2026-10-02 (#11859)
 
-Merged source: main `614a14e8f936` plus the report-store injection changes.
+Merged source: main `8e9d32ad911ef9dc47bbf626292c1dbf3eb36820`.
+`#11864` changed `merger_metrics_mixin.py` after the report-store rebind.
+This refresh only moves `source_tree_sha256` to `e505c2f3`. It is not a new audit.
 The following rollup is derived from the current committed artifact surface:
 
-Debt-governance gates: **46 pass / 0 fail**;
-Architecture quality integral score: **9.47** (`good_targeted_improvements`);
+Debt-governance gates: **46 pass / 0 fail**; debt-governance gates passing.
+Architecture quality integral score: **9.47** (`good_targeted_improvements`); architecture score `9.47`.
 source_module_count: **2521**;
 fully_covered: **2490**;
 partially_covered: **27**;
