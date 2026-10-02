@@ -67,6 +67,7 @@ class TestHTTPClientRetryRefactoring:
         """Test that successful response stops retry loop."""
         retry_state = _RetryRequestState()
         response = MagicMock(spec=httpx.Response)
+        response.extensions = {}
         response.status_code = 200
 
         result = self.mixin._should_continue_retry(response, retry_state)
@@ -125,6 +126,7 @@ class TestHTTPClientRetryRefactoring:
 
         # Create a successful response
         response = MagicMock(spec=httpx.Response)
+        response.extensions = {}
         response.status_code = 200
 
         # Mock _attempt_request to return successful response on first try

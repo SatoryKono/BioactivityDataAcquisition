@@ -82,7 +82,8 @@ class CompositeRunReportService:
                 reason="completion_assessment_failed",
                 facts={},
             )
-        self._record_child_provider_evidence(children)
+        self._record_child_evidence(children, "Provider")
+        self._record_child_evidence(children, "Data Quality")
         if result is not None and (
             result.had_warnings or any(not child.is_success for child in children)
         ):
@@ -175,7 +176,7 @@ class CompositeRunReportService:
                 )
             )
 
-    def _record_child_provider_evidence(self, children: list[RunResult]) -> None:
+    def _record_child_evidence(self, children: list[RunResult], domain: str) -> None:
         verdicts: list[str] = []
         for child in children:
             try:
@@ -187,7 +188,7 @@ class CompositeRunReportService:
                 verdicts.append(
                     str(
                         report.get("observations", {})
-                        .get("Provider", {})
+                        .get(domain, {})
                         .get("verdict", "INCOMPLETE")
                     )
                 )
@@ -204,10 +205,17 @@ class CompositeRunReportService:
             "INCOMPLETE",
         )
         record_run_observation(
-            "Provider",
+            domain,
             verdict=verdict,
-            reason="composite_child_provider_evidence",
-            facts={"child_count": len(children), "verdicts": verdicts},
+            reason="composite_child_provider_evidence"
+            if domain == "Provider"
+            else "composite_child_dq_evidence",
+            facts={
+                "child_count": len(children),
+                "verdicts": verdicts,
+                "child_run_ids": [child.run_id for child in children],
+                "report_refs": [child.run_report_json_path for child in children],
+            },
         )
 
     async def execute(

@@ -283,6 +283,7 @@ class TestUnifiedHTTPClientRequestMethods:
     async def test_get_success(self, http_client, mock_circuit_breaker):
         """Test successful GET request."""
         mock_response = MagicMock(spec=httpx.Response)
+        mock_response.extensions = {}
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
         mock_circuit_breaker.call.return_value = mock_response
@@ -296,6 +297,7 @@ class TestUnifiedHTTPClientRequestMethods:
     async def test_get_with_params_and_headers(self, http_client, mock_circuit_breaker):
         """Test GET request with params and headers."""
         mock_response = MagicMock(spec=httpx.Response)
+        mock_response.extensions = {}
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
         mock_circuit_breaker.call.return_value = mock_response
@@ -313,6 +315,7 @@ class TestUnifiedHTTPClientRequestMethods:
     async def test_post_with_json(self, http_client, mock_circuit_breaker):
         """Test POST request with JSON body."""
         mock_response = MagicMock(spec=httpx.Response)
+        mock_response.extensions = {}
         mock_response.status_code = 201
         mock_response.raise_for_status = MagicMock()
         mock_circuit_breaker.call.return_value = mock_response
@@ -329,6 +332,7 @@ class TestUnifiedHTTPClientRequestMethods:
     async def test_head_request(self, http_client, mock_circuit_breaker):
         """Test HEAD request."""
         mock_response = MagicMock(spec=httpx.Response)
+        mock_response.extensions = {}
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
         mock_circuit_breaker.call.return_value = mock_response
@@ -397,10 +401,13 @@ class TestUnifiedHTTPClientRequestMethods:
     ):
         """Test retryable status code triggers retry."""
         mock_response_503 = MagicMock(spec=httpx.Response)
+        mock_response_503.extensions = {}
         mock_response_503.status_code = 503
         mock_response_503.headers = {}
 
         mock_response_200 = MagicMock(spec=httpx.Response)
+
+        mock_response_200.extensions = {}
         mock_response_200.status_code = 200
         mock_response_200.raise_for_status = MagicMock()
 
@@ -479,6 +486,8 @@ class TestUnifiedHTTPClientObservability:
         tracer, span = mock_tracer
 
         mock_response = MagicMock(spec=httpx.Response)
+
+        mock_response.extensions = {}
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
         mock_circuit_breaker.call.return_value = mock_response
@@ -509,6 +518,7 @@ class TestUnifiedHTTPClientObservability:
     ):
         """Test successful request records duration histogram."""
         mock_response = MagicMock(spec=httpx.Response)
+        mock_response.extensions = {}
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
         mock_circuit_breaker.call.return_value = mock_response
@@ -532,10 +542,13 @@ class TestUnifiedHTTPClientObservability:
     ):
         """Test retry increments retry counter."""
         mock_response_503 = MagicMock(spec=httpx.Response)
+        mock_response_503.extensions = {}
         mock_response_503.status_code = 503
         mock_response_503.headers = {}
 
         mock_response_200 = MagicMock(spec=httpx.Response)
+
+        mock_response_200.extensions = {}
         mock_response_200.status_code = 200
         mock_response_200.raise_for_status = MagicMock()
 

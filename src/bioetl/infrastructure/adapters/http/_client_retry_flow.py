@@ -13,6 +13,7 @@ from bioetl.infrastructure.adapters.decorators._retry_support import (
 from bioetl.infrastructure.adapters.http._client_retry_models import (
     _RequestAttemptOutcome,
 )
+from bioetl.infrastructure.adapters.http._client_retry_policy import _parse_retry_after
 from bioetl.infrastructure.adapters.http.client_retry_observability import (
     SpanLike,
     mark_span_error,
@@ -111,6 +112,23 @@ async def handle_response_attempt(
     allow_redirect_response: bool = False,
 ) -> httpx.Response | _RequestAttemptOutcome:
     """Process a completed HTTP response without changing retry semantics."""
+    retry_after = (
+        _parse_retry_after(response.headers.get("Retry-After", ""))
+        if retry_config.is_retryable_status(response.status_code)
+        else None
+    )
+    if (
+        retry_config.is_retryable_status(response.status_code)
+        and retry_after is not None
+        and retry_config.clamp_retry_after(retry_after) < retry_after
+    ):
+        # A delay cap is a wait budget, never permission to retry early.
+        error = httpx.HTTPStatusError(
+            "Provider Retry-After exceeds the configured wait budget",
+            request=response.request,
+            response=response,
+        )
+        return _RequestAttemptOutcome(False, response.status_code, 0, error)
     if should_retry_response(
         retry_config,
         can_retry,

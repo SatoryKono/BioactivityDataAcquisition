@@ -280,6 +280,8 @@ def _run_preflight(
         config.prometheus_base_url,
         "--app-base-url",
         app_base_url,
+        "--ops-http-base-url",
+        app_base_url,
         "--timeout-seconds",
         str(config.preflight_timeout_seconds),
         "--screenshot-dir",

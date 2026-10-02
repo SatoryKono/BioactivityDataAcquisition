@@ -52,7 +52,7 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
     dashboard = json.loads(
         Path("grafana/dashboards/bioetl-overview-v2.json").read_text(encoding="utf-8")
     )
-    panels = {panel["id"]: panel for panel in dashboard["panels"]}
+    panels = {panel["id"]: panel for panel in get_dashboard_panels(dashboard)}
     provider, stages, quality = (panels[i] for i in (9480, 9460, 9482))
     assert stages["gridPos"]["y"] == provider["gridPos"]["y"] + provider["gridPos"]["h"]
     assert quality["gridPos"] == {**stages["gridPos"], "x": 15, "w": 9}

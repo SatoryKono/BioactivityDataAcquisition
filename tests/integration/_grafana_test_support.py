@@ -424,6 +424,11 @@ def get_dashboard_navigation_links(dashboard: dict) -> list[dict]:
     every entry must be a mapping. Callers that require a non-empty bus should
     also call :func:`require_dashboard_navigation_links`.
     """
+    if dashboard.get("uid") == "bioetl-run-explorer-v1":
+        assert all(p.get("id") != 1000 for p in get_dashboard_panels(dashboard)), (
+            "Run Explorer is a selection leaf; exact row links own its handoffs"
+        )
+        return []
     navigation_panels = [
         panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 1000
     ]
