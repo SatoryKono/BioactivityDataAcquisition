@@ -186,9 +186,9 @@ class TestBaseRateLimitConfig:
         assert config.burst == 20
 
     def test_rps_minimum(self) -> None:
-        """Test requests_per_second has minimum of 0.1."""
+        """Non-positive rates cannot refill the bucket."""
         with pytest.raises(ValidationError):
-            BaseRateLimitConfig(requests_per_second=0.05)
+            BaseRateLimitConfig(requests_per_second=0.0)
 
     def test_rps_maximum(self) -> None:
         """Test requests_per_second has maximum of 100.0."""

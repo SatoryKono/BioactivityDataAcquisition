@@ -50413,7 +50413,13 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
+<<<<<<< HEAD
   "source_tree_sha256": "2ded428f3384dd12845fdea38e6a157340f54dc4265c35d939e75514271f803b",
+||||||| c8e3846ba7202
+  "source_tree_sha256": "8ba682e53981276def6b202cf55a844140dd8be1c6e45f22d50b966800e6c1fe",
+=======
+  "source_tree_sha256": "4d7d362a188f401df1577da1daa6a8613c4df46dc6a02a2cbb20a7edc441284d",
+>>>>>>> codex/pipeline-green-gates
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

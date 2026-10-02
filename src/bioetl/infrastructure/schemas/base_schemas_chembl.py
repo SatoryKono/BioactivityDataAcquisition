@@ -91,7 +91,7 @@ class BaseRateLimitValues(BaseModel):
 
     requests_per_second: float = Field(
         default=5.0,
-        ge=0.1,
+        gt=0.0,
         le=100.0,
         description="Maximum requests per second",
     )

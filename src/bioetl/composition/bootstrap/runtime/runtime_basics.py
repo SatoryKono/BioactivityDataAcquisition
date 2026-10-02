@@ -18,6 +18,9 @@ from bioetl.composition.bootstrap.composite_infrastructure_context import (
 from bioetl.composition.bootstrap.runtime._dependency_runner_support import (
     resolve_required_gold_pipelines,
 )
+from bioetl.composition.bootstrap.runtime.composite_child_runner import (
+    build_reported_child_runner,
+)
 from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (
     initialize_domain_enum_fields,
 )
@@ -33,7 +36,7 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-    from bioetl.application.composite.runtime_wiring_api import PipelineRunner
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort as PipelineRunner
     from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.composition.bootstrap.composite_infrastructure_context import (
         CompositeRuntimeStorageProtocol,
@@ -177,6 +180,9 @@ def build_runner_factories(
         run_options_cls=run_options_factory,
         build_context=build_context_fn,
         pipeline_runner_builder=pipeline_runner_builder,
+        reporting_runner_builder=lambda context, options: build_reported_child_runner(
+            context=context, options=options, runner_builder=pipeline_runner_builder
+        ),
         filter_extraction_service=filter_extraction_service,
         gold_required_pipelines=resolve_required_gold_pipelines(config),
         required_persistence_profile=getattr(

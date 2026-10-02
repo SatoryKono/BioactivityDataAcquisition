@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-    from bioetl.application.composite.runtime_wiring_api import PipelineRunner
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort as PipelineRunner
     from bioetl.domain.composite import DependencyConfig, EnricherConfig
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import LoggerPort
@@ -68,7 +68,12 @@ class RunnerFactoryBuilder[RunOptionsT]:
         filter_extraction_service: CompositeFilterExtractor,
         required_persistence_profile: str | None = None,
         gold_required_pipelines: frozenset[str] = frozenset(),
+        reporting_runner_builder: Callable[
+            [PipelineRunContext, _RunOptionsT], PipelineRunner
+        ]
+        | None = None,
     ) -> None:
+        self._reporting_runner_builder = reporting_runner_builder
         self._logger = logger
         self._gold_required_pipelines = gold_required_pipelines
         self._run_options_cls = run_options_cls
@@ -92,6 +97,8 @@ class RunnerFactoryBuilder[RunOptionsT]:
         )
         options = self._run_options_cls(**option_kwargs)
         ctx = self._build_context(pipeline_name, options)
+        if self._reporting_runner_builder is not None:
+            return self._reporting_runner_builder(ctx, options)
         return self._pipeline_runner_builder(ctx)
 
     def build_seed_factory(
