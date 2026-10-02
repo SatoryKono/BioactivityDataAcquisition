@@ -12,7 +12,6 @@ from bioetl.composition.runtime_builders._run_manifest_context_updates import (
     build_control_plane_identity_ref_values,
 )
 from bioetl.composition.runtime_builders.input_snapshot_resolution import (
-    resolve_cached_bronze_input_snapshot_refs,
     resolve_pipeline_input_snapshot_refs,
 )
 from bioetl.domain.control_plane import RunSourceRef
@@ -89,25 +88,16 @@ def build_run_source_refs(
         normalize_required_persistence_profile(required_persistence_profile)
         in STRICT_PERSISTENCE_PROFILES
     )
-    if cached_bronze_enabled:
-        # Strict runs fail here with the cached-bronze provenance message;
-        # degraded_observable defers to the post-persist manifest gate so the
-        # audit trail still lands (see _publish_manifest_and_refs).
-        input_snapshots = resolve_cached_bronze_input_snapshot_refs(
-            cached_bronze=cached_bronze,
-            settings=settings,
-            provider=provider,
-            entity=entity,
-            require=strict_require,
-        )
-    else:
-        input_snapshots = resolve_pipeline_input_snapshot_refs(
-            ctx=ctx,
-            cached_bronze=cached_bronze,
-            settings=settings,
-            provider=provider,
-            entity=entity,
-        )
+    # Strict cached runs fail before persistence. Degraded empty inputs retain
+    # the post-persist manifest gate so the audit trail is still written.
+    input_snapshots = resolve_pipeline_input_snapshot_refs(
+        ctx=ctx,
+        cached_bronze=cached_bronze,
+        settings=settings,
+        provider=provider,
+        entity=entity,
+        require_cached_bronze=strict_require,
+    )
     if not (cached_bronze_enabled and not input_snapshots):
         require_input_snapshots(
             exact_replay=bool(getattr(ctx, "exact_replay", False)),

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
+from uuid import UUID
 
 from bioetl.application.observability.replay_write_risk import (
     emit_replay_write_risk_metrics,
@@ -22,7 +23,11 @@ from bioetl.application.services.control_plane.manifest.validation import (
     validate_run_manifest_request,
 )
 from bioetl.application.services.run_reports.observations import record_run_observation
-from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
+from bioetl.domain.control_plane import (
+    RunCodeProvenance,
+    RunInputSnapshotRef,
+    RunManifest,
+)
 from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
     normalize_run_manifest_spec,
@@ -32,12 +37,55 @@ from bioetl.domain.ports import (
     MetricsPort,
     RunManifestPort,
 )
-from bioetl.domain.types import RunType
+from bioetl.domain.types import RunID, RunType
 
 __all__ = [
     "RunManifestCreateSpec",
     "RunManifestService",
+    "collect_manifest_input_snapshot_refs",
+    "resolve_input_snapshot_refs",
 ]
+
+
+def collect_manifest_input_snapshot_refs(
+    manifest: RunManifest,
+) -> tuple[RunInputSnapshotRef, ...]:
+    """Flatten persisted immutable input evidence in source order."""
+    return tuple(
+        snapshot
+        for source_ref in manifest.source_refs
+        for snapshot in source_ref.input_snapshots
+    )
+
+
+def resolve_input_snapshot_refs(
+    *,
+    manifest_port: RunManifestPort | None,
+    cached_bronze_enabled: bool = False,
+    cached_bronze_refs: tuple[RunInputSnapshotRef, ...] = (),
+    manifest_id: str | None = None,
+    run_id: str | None = None,
+) -> tuple[RunInputSnapshotRef, ...]:
+    """Select cached inputs or look up the replay parent through its port.
+
+    Enabled cached Bronze remains authoritative even when empty and needs no
+    manifest port. A manifest ID miss may fall back to Run ID. Corruption and
+    read errors propagate; only an invalid UUID is treated as absent evidence.
+    """
+    if cached_bronze_enabled or cached_bronze_refs:
+        return cached_bronze_refs
+    if manifest_port is None:
+        raise RuntimeError("Replay snapshot lookup requires a RunManifestPort")
+    manifest = manifest_port.get(manifest_id) if manifest_id else None
+    if manifest is None and run_id:
+        try:
+            parsed_run_id = RunID(UUID(run_id))
+        except ValueError:
+            return ()
+        manifest = manifest_port.get_by_run_id(parsed_run_id)
+    if manifest is None:
+        return ()
+    return collect_manifest_input_snapshot_refs(manifest)
 
 
 @runtime_checkable

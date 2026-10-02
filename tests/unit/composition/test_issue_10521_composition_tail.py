@@ -156,17 +156,19 @@ def test_input_snapshot_resolution_branches(
 ) -> None:
     manifest = SimpleNamespace(source_refs=(SimpleNamespace(input_snapshots=(1, 2)),))
     assert snapshots.collect_manifest_input_snapshot_refs(manifest) == (1, 2)  # type: ignore[arg-type]
-    orig_load = snapshots._load_manifest
     monkeypatch.setattr(
         snapshots, "resolve_cached_bronze_input_snapshot_refs", lambda **_k: ()
     )
+    store = MagicMock()
+    store.get.return_value = SimpleNamespace(
+        source_refs=(SimpleNamespace(input_snapshots=("parent",)),)
+    )
     monkeypatch.setattr(
         snapshots,
-        "_load_manifest",
-        lambda **_k: SimpleNamespace(
-            source_refs=(SimpleNamespace(input_snapshots=("parent",)),)
-        ),
+        "FileRunManifestStore",
+        lambda **_k: store,
     )
+    monkeypatch.setattr(snapshots, "control_plane_root", lambda *_a, **_k: tmp_path)
     refs = snapshots.resolve_pipeline_input_snapshot_refs(
         ctx=SimpleNamespace(replay_of_manifest_id="m", replay_of_run_id=None),  # type: ignore[arg-type]
         cached_bronze=None,
@@ -175,51 +177,43 @@ def test_input_snapshot_resolution_branches(
         entity="activity",
     )
     assert refs == ("parent",)
-    monkeypatch.setattr(snapshots, "_load_manifest", orig_load)
-
-    class _Store:
-        def __init__(self, **_k: object) -> None:
-            return None
-
-        def get(self, manifest_id: str) -> str | None:
-            return "loaded" if manifest_id == "hit" else None
-
-        def get_by_run_id(self, _run_id: object) -> object:
-            raise ValueError("bad uuid path")
-
-    monkeypatch.setattr(snapshots, "FileRunManifestStore", _Store)
-    monkeypatch.setattr(snapshots, "control_plane_root", lambda *_a, **_k: tmp_path)
-    assert (
-        snapshots._load_manifest(
-            settings=object(),  # type: ignore[arg-type]
-            manifest_id="hit",
-            run_id=None,
-        )
-        == "loaded"
-    )
-    assert (
-        snapshots._load_manifest(
-            settings=object(),  # type: ignore[arg-type]
-            manifest_id="miss",
-            run_id=None,
-        )
-        is None
-    )
-    assert (
-        snapshots._load_manifest(
-            settings=object(),  # type: ignore[arg-type]
-            manifest_id="miss",
-            run_id="not-a-uuid",
-        )
-        is None
-    )
+    store.get.return_value = None
+    store.get_by_run_id.side_effect = ValueError("bad uuid path")
     assert (
         snapshots.resolve_manifest_input_snapshot_refs(
             settings=object(),  # type: ignore[arg-type]
             manifest_id="miss",
+            run_id="not-a-uuid",
         )
         == ()
     )
+    store.get_by_run_id.assert_not_called()
+
+
+def test_enabled_empty_cached_bronze_does_not_prepare_manifest_store(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        snapshots, "resolve_cached_bronze_input_snapshot_refs", lambda **_kwargs: ()
+    )
+    path_builder = MagicMock(side_effect=AssertionError("manifest path prepared"))
+    store_builder = MagicMock(side_effect=AssertionError("manifest store constructed"))
+    monkeypatch.setattr(snapshots, "control_plane_root", path_builder)
+    monkeypatch.setattr(snapshots, "FileRunManifestStore", store_builder)
+    assert (
+        snapshots.resolve_pipeline_input_snapshot_refs(
+            ctx=MagicMock(
+                replay_of_manifest_id="parent", replay_of_run_id="not-a-uuid"
+            ),
+            cached_bronze=MagicMock(enabled=True),
+            settings=MagicMock(),
+            provider="chembl",
+            entity="assay",
+        )
+        == ()
+    )
+    path_builder.assert_not_called()
+    store_builder.assert_not_called()
 
 
 def test_effective_config_serializer_optional_fields() -> None:

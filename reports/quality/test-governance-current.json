@@ -342,21 +342,21 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "200",
+      "line": "206",
       "path": "tests/unit/infrastructure/factories/test_factories.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_completes"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "335",
+      "line": "337",
       "path": "tests/unit/infrastructure/factories/test_storage_adapter.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_storage_bundle_close__aclose__a7cd7e53"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "343",
+      "line": "345",
       "path": "tests/unit/infrastructure/factories/test_storage_adapter.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_storage_bundle_close__aclose_is_noop__ee03f62b"
@@ -981,7 +981,26 @@
     }
   },
   "assertless_total_candidates": 83,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 2,
+      "budget": "duplicate_test_names_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_names"
+    },
+    {
+      "actual": 4,
+      "budget": "duplicate_test_name_occurrences_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_name_occurrences"
+    },
+    {
+      "actual": 13,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1126,16 +1145,43 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [],
+  "duplicate_test_name_inventory": [
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/quality/test_decomposition_validation.py:670",
+        "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:386"
+      ],
+      "name": "test_flat_above_zero_still_violation",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/quality/test_decomposition_validation.py:653",
+        "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:357"
+      ],
+      "name": "test_zero_floor_flat_continuation_passes",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    }
+  ],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 0,
-    "duplicate_occurrences": 0,
+    "cross_file_groups": 2,
+    "duplicate_occurrences": 4,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 0
+    "total_duplicate_names": 2
   },
-  "duplicate_test_name_occurrences": 0,
-  "duplicate_test_names": 0,
+  "duplicate_test_name_occurrences": 4,
+  "duplicate_test_names": 2,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1155,8 +1201,22 @@
     ]
   },
   "intentional_no_exception_contract": 83,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/integration/test_dashboard_replay_layout.py:6",
+    "tests/unit/composition/test_run_report_store_singleton.py:23",
+    "tests/unit/composition/test_run_report_store_singleton.py:30",
+    "tests/unit/composition/test_run_report_store_singleton.py:47",
+    "tests/unit/infrastructure/control_plane/test_effective_config_path_identity.py:44",
+    "tests/unit/infrastructure/control_plane/test_effective_config_path_identity.py:60",
+    "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:68",
+    "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:96",
+    "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:107",
+    "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:119",
+    "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:125",
+    "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:135",
+    "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:140"
+  ],
+  "markerless_test_functions": 13,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1512,21 +1572,21 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "200",
+        "line": "206",
         "path": "tests/unit/infrastructure/factories/test_factories.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_completes"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "335",
+        "line": "337",
         "path": "tests/unit/infrastructure/factories/test_storage_adapter.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_storage_bundle_close__aclose__a7cd7e53"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "343",
+        "line": "345",
         "path": "tests/unit/infrastructure/factories/test_storage_adapter.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_storage_bundle_close__aclose_is_noop__ee03f62b"
@@ -1963,16 +2023,43 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [],
+    "duplicate_test_name_inventory": [
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/quality/test_decomposition_validation.py:670",
+          "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:386"
+        ],
+        "name": "test_flat_above_zero_still_violation",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/quality/test_decomposition_validation.py:653",
+          "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:357"
+        ],
+        "name": "test_zero_floor_flat_continuation_passes",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      }
+    ],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 0,
-      "duplicate_occurrences": 0,
+      "cross_file_groups": 2,
+      "duplicate_occurrences": 4,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 0
+      "total_duplicate_names": 2
     },
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 4,
+    "duplicate_test_names": 2,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -1991,8 +2078,22 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/integration/test_dashboard_replay_layout.py:6",
+      "tests/unit/composition/test_run_report_store_singleton.py:23",
+      "tests/unit/composition/test_run_report_store_singleton.py:30",
+      "tests/unit/composition/test_run_report_store_singleton.py:47",
+      "tests/unit/infrastructure/control_plane/test_effective_config_path_identity.py:44",
+      "tests/unit/infrastructure/control_plane/test_effective_config_path_identity.py:60",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:68",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:96",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:107",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:119",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:125",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:135",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:140"
+    ],
+    "markerless_test_functions": 13,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2010,8 +2111,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2960,
-      "test_python_file_count": 3194,
+      "test_glob_file_count": 2966,
+      "test_python_file_count": 3200,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2051,24 +2152,55 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [],
-    "total_test_files": 2960,
-    "total_test_functions": 29046,
+    "top_duplicate_test_names": [
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/infrastructure/quality/test_decomposition_validation.py:670",
+          "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:386"
+        ],
+        "name": "test_flat_above_zero_still_violation"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/infrastructure/quality/test_decomposition_validation.py:653",
+          "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:357"
+        ],
+        "name": "test_zero_floor_flat_continuation_passes"
+      }
+    ],
+    "total_test_files": 2966,
+    "total_test_functions": 29085,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "180f3affc8c503e96ee48a93a01bf79b6fff16799a165966b3a16ea5ea5b6450",
+  "source_tree_sha256": "fb84411f96da8c0801736d3d4416a513b9571b54c89f3c7fce3a2652f533b0d2",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 83,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 4,
+    "duplicate_test_names": 2,
     "intentional_no_exception_contract": 83,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/integration/test_dashboard_replay_layout.py:6",
+      "tests/unit/composition/test_run_report_store_singleton.py:23",
+      "tests/unit/composition/test_run_report_store_singleton.py:30",
+      "tests/unit/composition/test_run_report_store_singleton.py:47",
+      "tests/unit/infrastructure/control_plane/test_effective_config_path_identity.py:44",
+      "tests/unit/infrastructure/control_plane/test_effective_config_path_identity.py:60",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:68",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:96",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:107",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:119",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:125",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:135",
+      "tests/unit/infrastructure/control_plane/test_replay_object_verifier.py:140"
+    ],
+    "markerless_test_functions": 13,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2078,8 +2210,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2960,
-    "test_python_file_count": 3194,
+    "test_glob_file_count": 2966,
+    "test_python_file_count": 3200,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2119,9 +2251,26 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [],
-  "total_test_files": 2960,
-  "total_test_functions": 29046,
+  "top_duplicate_test_names": [
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/infrastructure/quality/test_decomposition_validation.py:670",
+        "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:386"
+      ],
+      "name": "test_flat_above_zero_still_violation"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/infrastructure/quality/test_decomposition_validation.py:653",
+        "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py:357"
+      ],
+      "name": "test_zero_floor_flat_continuation_passes"
+    }
+  ],
+  "total_test_files": 2966,
+  "total_test_functions": 29085,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
