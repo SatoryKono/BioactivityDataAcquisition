@@ -55,8 +55,8 @@ def _continuous_lag_expr(expr: str) -> bool:
     return "bioetl_stage_lag_seconds" in text and "bool" not in text
 
 
-def test_runtime_stage_lag_primary_panel_is_timeseries() -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+def test_incident_stage_lag_primary_panel_is_timeseries() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panels = {
         panel.get("id"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -96,9 +96,9 @@ def test_overview_status_uses_only_l0_operator_terminology() -> None:
     }
 
 
-def test_runtime_metrics_evidence_uses_standard_threshold_steps() -> None:
+def test_incident_metrics_evidence_uses_standard_threshold_steps() -> None:
     """Evidence chip follows shared severity thresholds; null mapping stays UNKNOWN."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     evidence = next(
         panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 9102
     )
