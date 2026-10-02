@@ -208,17 +208,13 @@ required_discoverable_inbound_paths:
     bioetl-control-plane-v1:
       - source_uid: bioetl-overview-v2
         source_panel_id: 9002
-        source_panel_title: Review Run Domains
+        source_panel_title: Run Domains
         source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
-    bioetl-provider-health-v2:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 9002
-        source_panel_title: Review Run Domains
-        source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
+  L2:
     bioetl-dq-v2:
       - source_uid: bioetl-overview-v2
         source_panel_id: 9002
-        source_panel_title: Review Run Domains
+        source_panel_title: Run Domains
         source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
 required_panel_links_by_uid:
   bioetl-overview-v2:
@@ -230,10 +226,6 @@ required_panel_links_by_uid:
       target_uid: bioetl-dq-v2
       link_titles:
         - Open Data Quality
-    - panel_id: 9002
-      target_uid: bioetl-provider-health-v2
-      link_titles:
-        - Open Provider Health
     - panel_id: 9603
       target_uid: bioetl-run-explorer-v1
       link_titles:
@@ -244,18 +236,18 @@ required_panel_links_by_uid:
       link_titles:
         - Open Run Explorer
   bioetl-control-plane-v1:
-    - panel_id: 9403
-      target_uid: bioetl-run-explorer-v1
+    - panel_id: 9422
+      target_uid: bioetl-control-plane-v1
       link_titles:
-        - Open Run Explorer
-  bioetl-provider-health-v2: []
+        - View replay checks
+      required_view_panel: 9423
   bioetl-incident-v1:
     - panel_id: 2010
-      target_uid: "${__data.fields.action_dashboard_uid}"
+      target_uid: ${__data.fields.action_dashboard_uid}
       link_titles:
         - Open domain diagnostics
     - panel_id: 2003
-      target_uid: bioetl-provider-health-v2
+      target_uid: bioetl-overview-v2
       link_titles:
         - Open domain workspace
     - panel_id: 2004
@@ -366,24 +358,18 @@ navigation_transition_contract:
   first_action_contract:
     bioetl-overview-v2:
       panel_id: 9002
-      panel_title: Review Run Domains
-      min_cta: 3
-      max_cta: 3
+      panel_title: Run Domains
+      min_cta: 2
+      max_cta: 2
       ctas:
         - title: Open Control Plane
           expected_target_uid: bioetl-control-plane-v1
         - title: Open Data Quality
           expected_target_uid: bioetl-dq-v2
-        - title: Open Provider Health
-          expected_target_uid: bioetl-provider-health-v2
       notes:
-        - 'Priority order: Runtime > Control Plane > Gold lifecycle > DQ > Provider > Workflow > Monitor'
-        - Query uses topk(4, …) with NO_ROUTE vector fallback when no matching series
-        - Column order Action → Priority → Why → Pipeline; short Action labels; panel dataLinks keep Open*
-          titles
-        - Priority badges RUNTIME/CP/GOLD/DQ/PROV/WF/MON/NR with column-only color-background; Action
-          sole color-text CTA
-        - Provider handoff fail-closes provider=unknown and preserves pipeline_context
+        - Exact selected-run HTTP evidence; no current-status PromQL ranking.
+        - Replay Readiness and Data Quality preserve the selected Run ID.
+        - Provider evidence is owned by panels 9480 and 9481 on this page.
     bioetl-incident-v1:
       panel_id: 9991
       panel_title: Start Pipeline Triage
