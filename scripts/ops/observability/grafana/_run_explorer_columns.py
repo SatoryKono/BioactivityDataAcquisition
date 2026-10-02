@@ -268,16 +268,13 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             "${__data.fields.report_url:raw}",
         ),
         "Provider": (
-            "Provider Health",
-            "/d/bioetl-provider-health-v2/4-provider-health?"
-            + _CONTEXT
-            + "&var-provider=${__data.fields.Provider:percentencode}"
-            + "&var-pipeline_context=${__data.fields.Pipeline:percentencode}",
+            "Provider Evidence",
+            "/d/bioetl-overview-v2/2-overview?" + _CONTEXT + "&viewPanel=9480",
         ),
         "Overview": ("Run Overview", "/d/bioetl-overview-v2/2-overview?" + _CONTEXT),
         "Saved Evidence": (
             "Saved Evidence",
-            "/d/bioetl-overview-v2/2-overview?" + _CONTEXT,
+            "/d/bioetl-control-plane-v1/1-trust?" + _CONTEXT + "&viewPanel=9408",
         ),
         "Data Quality": ("Data Quality", "/d/bioetl-dq-v2/5-data-quality?" + _CONTEXT),
         "Replay Readiness": (

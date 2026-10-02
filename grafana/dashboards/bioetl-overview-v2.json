@@ -280,7 +280,7 @@
         "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-current\" href=\"#bioetl-overview-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"Run Overview (Run Overview)\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Run Overview / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared navigation: Run Explorer / Replay Readiness / Run Overview / Incident Workspace. Data Quality is a contextual drilldown; saved provider evidence is owned by Run Overview. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
@@ -505,6 +505,12 @@
               "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
+            },
+            {
+              "title": "Open Provider Evidence",
+              "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}&viewPanel=9480",
+              "targetBlank": false,
+              "includeVars": false
             }
           ]
         },
@@ -701,6 +707,12 @@
         {
           "title": "Open Data Quality",
           "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open Provider Evidence",
+          "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}&viewPanel=9480",
           "targetBlank": false,
           "includeVars": false
         }

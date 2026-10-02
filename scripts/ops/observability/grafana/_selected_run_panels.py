@@ -217,8 +217,10 @@ def _stamp_status_links(panel: dict[str, object], uid: object) -> None:
             for title, target in (
                 ("Open Control Plane", "bioetl-control-plane-v1"),
                 ("Open Data Quality", "bioetl-dq-v2"),
+                ("Open Provider Evidence", "bioetl-overview-v2"),
             )
         ]
+        panel["fieldConfig"]["defaults"]["links"][-1]["url"] += "&viewPanel=9480"
     if panel.get("title") != SELECTED_RUN_STATUS_TITLE:
         return
     panel["fieldConfig"]["defaults"]["links"] = [

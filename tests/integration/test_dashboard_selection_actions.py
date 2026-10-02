@@ -23,6 +23,12 @@ def test_navigation_preserves_selector_url_values(path: Path) -> None:
     dashboard = json.loads(path.read_text(encoding="utf-8"))
     nav = next(p for p in panels(dashboard) if p["id"] == 1000)
     for link in nav["links"]:
+        if "var-lookup_run_id=" in link["url"]:
+            for key in ("workflow", "pipeline", "run_type"):
+                assert f"var-{key}=.*" in link["url"]
+            assert "var-run_id=-" in link["url"]
+            assert "${__url_time_range}" in link["url"]
+            continue
         assert "${run_type:queryparam}" in link["url"]
         assert "${workflow:queryparam}" in link["url"]
         assert "${__url_time_range}" in link["url"]

@@ -41,7 +41,7 @@ QUERY_TYPES = {
 }
 
 
-def test_canonical_context_trims_run_id_and_shares_uuid_across_seven_uids() -> None:
+def test_canonical_context_trims_run_id_and_shares_uuid_across_five_active_uids() -> None:
     with pytest.raises(RunIdError):
         normalize_run_id("%20%20")
     with pytest.raises(RunIdError):
@@ -57,8 +57,6 @@ def test_canonical_context_trims_run_id_and_shares_uuid_across_seven_uids() -> N
     assert set(urls) == {
         "bioetl-control-plane-v1",
         "bioetl-overview-v2",
-        "bioetl-runtime",
-        "bioetl-provider-health-v2",
         "bioetl-dq-v2",
         "bioetl-incident-v1",
         "bioetl-run-explorer-v1",
@@ -145,23 +143,16 @@ def test_empty_state_classes_are_declared_and_visible_copy_differs() -> None:
     assert event_copy != missing_copy
 
 
-def test_provider_freshness_is_not_present_ok_on_missing_health_status() -> None:
-    dashboard = load_dashboard(DASHBOARD_DIR / "bioetl-provider-health-v2.json")
-    panel = next(
-        item for item in get_dashboard_panels(dashboard) if item.get("id") == 9104
-    )
-    expr = str((panel.get("targets") or [{}])[0].get("expr") or "")
-    assert "bioetl_provider_health_status" in expr
-    assert "test|synthetic" in expr
-    blob = f"{panel.get('title') or ''}\n{panel.get('description') or ''}"
-    assert "PRESENT" in blob
-    assert "PRESENT≠OK" in blob or "not a healthy" in blob.lower()
-    fleet = next(
-        item for item in get_dashboard_panels(dashboard) if item.get("id") == 9101
-    )
-    fleet_expr = str((fleet.get("targets") or [{}])[0].get("expr") or "")
-    assert "$provider" not in fleet_expr
-    assert "test|synthetic" in fleet_expr
+def test_saved_provider_evidence_does_not_claim_current_health() -> None:
+    dashboard = load_dashboard(DASHBOARD_DIR / "bioetl-overview-v2.json")
+    panel = next(p for p in get_dashboard_panels(dashboard) if p.get("id") == 9480)
+    target = panel["targets"][0]
+    assert panel["datasource"] == "BioETL Ops HTTP"
+    assert "run_id=" in target["url"]
+    assert "UNKNOWN" in panel["description"]
+    assert "QUERY ERROR" in panel["description"]
+    assert "provider_checks" in str(target)
+    assert not (DASHBOARD_DIR / "bioetl-provider-health-v2.json").exists()
 
 
 def test_current_card_disposition_covers_first_window_current_panels() -> None:
@@ -177,7 +168,10 @@ def test_current_card_disposition_covers_first_window_current_panels() -> None:
         assert item.get("reason")
         if item.get("disposition") == "collapse":
             assert item.get("collapse_into")
-        dashboard = load_dashboard(DASHBOARD_DIR / str(item["dashboard"]))
+        path = DASHBOARD_DIR / str(item["dashboard"])
+        if item["disposition"] == "retire" and not path.exists():
+            continue
+        dashboard = load_dashboard(path)
         panel = next(
             (
                 candidate
@@ -186,6 +180,9 @@ def test_current_card_disposition_covers_first_window_current_panels() -> None:
             ),
             None,
         )
+        if item["disposition"] == "retire":
+            assert panel is None, "Retired card must remain absent"
+            continue
         if panel is None:
             missing_panels.append(f"{item['dashboard']}:{item['id']}")
     assert not missing_panels, "disposition panel missing:\n" + "\n".join(
@@ -197,9 +194,9 @@ def test_current_card_disposition_covers_first_window_current_panels() -> None:
         for item in entries
         if item.get("disposition") == "keep"
     }
-    assert ("bioetl-overview-v2.json", 214) in keep
-    assert ("bioetl-overview-v2.json", 215) in keep
-    fleet = next(panel for panel in overview["panels"] if panel.get("id") == 214)
+    assert ("bioetl-overview-v2.json", 9603) in keep
+    assert ("bioetl-overview-v2.json", 9002) in keep
+    fleet = next(panel for panel in overview["panels"] if panel.get("id") == 9603)
     assert int((fleet.get("gridPos") or {}).get("y") or 99) < FIRST_WINDOW_Y
 
 

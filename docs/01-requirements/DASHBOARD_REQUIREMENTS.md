@@ -12,7 +12,7 @@ ______________________________________________________________________
 
 ## 1. Authority and scope
 
-This document is the scoped normative contract for the seven shipped Grafana
+This document is the scoped normative contract for the five shipped Grafana
 dashboards in `grafana/dashboards/*.json`. It expands `RULES.md` §3.2.3 into
 testable presentation requirements without replacing `RULES.md`, accepted ADRs,
 or the dashboard JSON source of truth.
@@ -65,12 +65,12 @@ size option.
 | ID | Requirement |
 | --- | --- |
 | `DASH-ARCH-001` | Grafana MUST remain an optional, read-only presentation adapter. It MUST NOT become a write authority, control plane, or required local runtime dependency. |
-| `DASH-PORTFOLIO-001` | The seven provisioned JSON UIDs defined by ADR-053 MUST remain authoritative rollback fallbacks until an approved cutover. |
+| `DASH-PORTFOLIO-001` | The five shipped JSON UIDs after the accepted Runtime/Provider retirement MUST remain authoritative rollback fallbacks; ADR-053 describes the historical portfolio before this cutover. |
 | `DASH-DATA-001` | Dashboard queries MUST use shipped metrics, recording rules, Grafana, or BioETL Ops HTTP contracts. Invented series are forbidden. |
 | `DASH-DATA-002` | `run_id`, `manifest_id`, record identifiers, hashes, and filesystem paths MUST NOT be used as Prometheus labels or label filters. Exact-run identity belongs to Ops HTTP/control-plane evidence. |
 | `DASH-STATE-001` | Missing required evidence MUST remain `UNKNOWN`, `INCOMPLETE`, or an explicit error; it MUST NOT become a healthy zero. |
 | `DASH-STATE-004` | Present zero, absent telemetry, endpoint unavailable, and exact-run `processing_status` MUST remain distinct from `trust_status`. Terminal processing success MUST NOT be presented as lineage closure, retention compliance, or replay readiness. |
-| `DASH-STATE-005` | When soft Grafana bootstrap cannot provision validated BioETL Ops HTTP, it MUST select a static Prometheus-only dashboard profile under the same seven stable UIDs. That profile MUST contain no datasource/query targets, MUST state that Ops HTTP is not provisioned, and MUST state that no retention, replay, identity, or run verdict can be inferred. The full dashboard provider MAY be selected only after managed runtime identity and the Infinity dependency are ready; bootstrap status MUST expose the selected `dashboard_profile`. |
+| `DASH-STATE-005` | When soft Grafana bootstrap cannot provision validated BioETL Ops HTTP, it MUST select a static Prometheus-only dashboard profile under the same five stable UIDs. That profile MUST contain no datasource/query targets, MUST state that Ops HTTP is not provisioned, and MUST state that no retention, replay, identity, or run verdict can be inferred. The full dashboard provider MAY be selected only after managed runtime identity and the Infinity dependency are ready; bootstrap status MUST expose the selected `dashboard_profile`. |
 | `DASH-ZERO-001` | Synthetic zero is allowed only for documented zero-valid event counters. Status, cause, freshness, latency, and trust panels MUST preserve absence. |
 | `DASH-DATA-003` | Removed datasources MUST stay removed (ADR-010): no panel or target MUST reference a `loki`/`tempo` datasource or the `:8081` quarantine-explorer endpoint. |
 | `DASH-DATA-004` | Every panel/target datasource MUST be an allowlisted identity — the Prometheus object/string, `BioETL Ops HTTP`, or the built-in Grafana datasource. Unknown UIDs and `${DS_*}` export artifacts are forbidden. |
@@ -84,7 +84,7 @@ size option.
 | `DASH-FIRST-001` | Every dashboard MUST answer one operator question through `state × confidence × basis × next_action`. |
 | `DASH-FIRST-002` | Current status and first action MUST precede selected-range and forensic evidence. Forensic rows MUST ship collapsed. |
 | `DASH-STATE-002` | Operator states MUST use the canonical `OK/WARN/CRIT/UNKNOWN` palette; documented trust gates MAY add `INCOMPLETE`. Color MUST NOT be the only carrier of meaning. |
-| `DASH-NAV-001` | Every dashboard MUST expose the ordered `0..6` navigation bus, omit its self-link, preserve time, and pass only target-allowlisted variables. |
+| `DASH-NAV-001` | Primary workspaces MUST expose the active ordered navigation bus, omit their active self-link, preserve time, and pass only target-allowlisted variables. Run Explorer is a selection leaf with exact-row handoffs; Data Quality is reached contextually and displays its current workspace when opened. |
 | `DASH-SCOPE-001` | A data-bearing panel with `scope=selected_run` MUST use `evidence_source=ops_http`. Prometheus MUST NOT claim exact UUID scope (`DASH-DATA-002`). |
 | `DASH-SCOPE-002` | `bioetl-overview-v2` first window MUST show `Review Selected Run Status` (`9603`) and `Review Run Domains` (`9002`). Run ID is always set. CURRENT fleet panels are not on this page. |
 | `DASH-ACTION-001` | Critical operator panels MUST expose an actionable dashboard or runbook CTA without duplicate or conflicting handoffs. |
@@ -235,8 +235,6 @@ and are loaded by `tests/integration/_dashboard_layout_budgets.py`.
 | --- | --- |
 | `bioetl-control-plane-v1` | Can the selected run be exactly replayed from saved inputs? |
 | `bioetl-overview-v2` | What is the saved assessment of the selected Run ID? |
-| `bioetl-runtime` | What is the saved runtime assessment of the selected Run ID? |
-| `bioetl-provider-health-v2` | Which provider is degraded/failing, and why? |
 | `bioetl-dq-v2` | What is the DQ assessment of the selected Run ID? |
 | `bioetl-incident-v1` | What is the highest-confidence active suspect? |
 | `bioetl-run-explorer-v1` | Which pipelines ran most recently, and where are their reports? |
@@ -249,9 +247,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | UID | Answer panel (title / id) | Notes |
 | --- | --- | --- |
 | `bioetl-control-plane-v1` | `Review Exact Replay Readiness` (`9422`) | exact-run readiness from saved inputs; CURRENT `9401` is not this answer |
-| `bioetl-overview-v2` | `Review Selected Run Status` (`9603`) + `Review Run Domains` (`9002`) | Saved HTTP evidence for the selected Run ID. |
-| `bioetl-runtime` | `Review Selected Run Status` (`9998`) | saved HTTP evidence for the selected Run ID |
-| `bioetl-provider-health-v2` | `Review Provider Check` (`9461`) | saved HTTP evidence for the selected provider context |
+| `bioetl-overview-v2` | `Selected Run Status` (`9603`) + `Run Domains` (`9002`) | Saved HTTP evidence for the selected Run ID. |
 | `bioetl-dq-v2` | `Review Selected Run Status` (`9406`) | saved HTTP evidence for the selected Run ID |
 | `bioetl-incident-v1` | `Inspect Ranked Suspects` (`2010`) | highest-confidence suspect matrix |
 | `bioetl-run-explorer-v1` | `Inspect Recent Runs` (`3010`) | Browse/select the exact run via picker `3010` only. Identity and processed records are on destination dashboards, not this UID. |

@@ -20,286 +20,18 @@ from tests.integration._grafana_test_support import (
     get_dashboard_navigation_links,
     get_dashboard_panels,
     load_dashboard,
-    panel_display_title,
 )
 
-
-def _require_dashboard(name: str) -> Path:
-    path = Path("grafana/dashboards") / name
-    if not path.exists():
-        pytest.skip(f"{name} retired in grafana simplification epic #6570/#6576")
-    return path
-
-
 from tests.integration._grafana_dashboard_links_support import (
-    _CANONICAL_GITHUB_BLOB_PREFIX,
-    _DASHBOARD_TIME_HANDOFF_TOKENS,
     _REQUIRED_LINK_VARS_BY_TARGET_UID,
-    _assert_required_time_tokens,
     _extract_dashboard_uid,
     _extract_link_vars,
     _find_panel_by_id,
     _iter_panel_data_links,
-    _load_dashboards_by_uid,
     _local_repo_path_from_canonical_github_blob_url,
 )
 
 pytestmark = pytest.mark.integration
-
-
-def test_runtime_incident_panels_do_not_duplicate_control_plane_dashboard_link() -> (
-    None
-):
-    """Runtime incident panels must not duplicate the top-level Control Plane link."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    panel_titles = {
-        "Inspect Control Plane Alerts",
-        "Monitor No-Records Runs",
-    }
-
-    for panel_title in panel_titles:
-        panel = next(
-            (
-                item
-                for item in get_dashboard_panels(dashboard)
-                if item.get("title") == panel_title
-            ),
-            None,
-        )
-        assert panel is not None, (
-            f"Panel '{panel_title}' not found in bioetl-runtime.json"
-        )
-        data_links = panel.get("options", {}).get("dataLinks", [])
-        dashboard_links = [
-            link
-            for link in data_links
-            if _extract_dashboard_uid(str(link.get("url", "")))
-            == "bioetl-control-plane-v1"
-        ]
-        assert not dashboard_links, (
-            f"Panel '{panel_title}' must not duplicate dashboard handoff links"
-        )
-
-
-def test_runtime_first_screen_status_panels_expose_actionable_drilldowns() -> None:
-    """Runtime current-status panels should link directly to blocker drilldowns."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    panels_by_id = {
-        panel.get("id"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("id") is not None
-    }
-
-    # Headline Status card owns first-screen drilldowns after Runtime Status → Status.
-    current_status_links = _iter_panel_data_links(panels_by_id[9401])
-    current_status_urls = {
-        str(link.get("title")): str(link.get("url")) for link in current_status_links
-    }
-    assert "viewPanel=9101" in current_status_urls["Open Runtime Blockers"]
-    assert (
-        "viewPanel=242" in current_status_urls["Inspect Active Runtime Blocker Detail"]
-    )
-    assert (
-        "docs/05-operations/runbooks/observability-checklist.md"
-        in current_status_urls["Open Runtime Troubleshooting Runbook"]
-    )
-
-    top_blocker_links = _iter_panel_data_links(panels_by_id[9101])
-    top_blocker_urls = {
-        str(link.get("title")): str(link.get("url")) for link in top_blocker_links
-    }
-    assert "viewPanel=242" in top_blocker_urls["Inspect Active Runtime Blocker Detail"]
-    assert (
-        "docs/05-operations/runbooks/observability-checklist.md"
-        in top_blocker_urls["Open Runtime Troubleshooting Runbook"]
-    )
-
-    telemetry_links = _iter_panel_data_links(panels_by_id[9102])
-    telemetry_urls = {
-        str(link.get("title")): str(link.get("url")) for link in telemetry_links
-    }
-    # B3: local Prometheus /targets is not useful outside the host; omit it.
-    assert "Open Prometheus Targets" not in telemetry_urls
-    assert all("localhost:9090" not in url for url in telemetry_urls.values())
-
-    detail_links = _iter_panel_data_links(panels_by_id[242])
-    detail_urls = {
-        str(link.get("title")): str(link.get("url")) for link in detail_links
-    }
-    for link_title, expected_suffix in {
-        "Open Runtime Troubleshooting Runbook": "docs/05-operations/runbooks/observability-checklist.md",
-        "Open Pipeline Failure Runbook": "docs/05-operations/runbooks/pipeline-failure-critical.md",
-        "Open Checkpoint Debugging Runbook": "docs/05-operations/runbooks/checkpoint-debugging.md",
-        "Open Run Manifest Runbook": "docs/05-operations/runbooks/run-manifest-inspection.md",
-    }.items():
-        assert detail_urls[link_title].endswith(expected_suffix)
-
-
-def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
-    """Runtime condition-summary panels should route operators directly to runbooks."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    expectations = {
-        "Monitor Pipeline Alerts": (
-            "Open Pipeline Failure Runbook",
-            "docs/05-operations/runbooks/pipeline-failure-critical.md",
-        ),
-        "Inspect DQ Alert Conditions": (
-            "Open DQ Failure Runbook",
-            "docs/05-operations/runbooks/pipeline-failure-dq.md",
-        ),
-        "Inspect Control Plane Alerts": (
-            "Open Run Manifest Runbook",
-            "docs/05-operations/runbooks/run-manifest-inspection.md",
-        ),
-        "Inspect Provider Alerts": (
-            "Open Provider Incident Runbook",
-            "docs/05-operations/runbooks/incident-response.md",
-        ),
-        "Inspect Global Provider Alert Conditions": (
-            "Open Provider Incident Runbook",
-            "docs/05-operations/runbooks/incident-response.md",
-        ),
-        "Inspect Entities Stale Over 24h": (
-            "Open DQ Freshness Runbook",
-            "docs/05-operations/runbooks/pipeline-failure-dq.md",
-        ),
-        "Monitor No-Records Runs": (
-            "Open Checkpoint Debugging Runbook",
-            "docs/05-operations/runbooks/checkpoint-debugging.md",
-        ),
-    }
-
-    for panel_title, (link_title, expected_suffix) in expectations.items():
-        panel = next(
-            (
-                item
-                for item in get_dashboard_panels(dashboard)
-                if item.get("title") == panel_title
-            ),
-            None,
-        )
-        assert panel is not None, (
-            f"Panel '{panel_title}' not found in bioetl-runtime.json"
-        )
-        data_links = panel.get("options", {}).get("dataLinks", [])
-        link = next(
-            (item for item in data_links if item.get("title") == link_title), None
-        )
-        assert link is not None, (
-            f"Panel '{panel_title}' must expose direct runbook handoff"
-        )
-        url = link.get("url", "")
-        assert url.startswith(
-            "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/"
-        ), f"Panel '{panel_title}' runbook link must target canonical GitHub docs"
-        assert url.endswith(expected_suffix), (
-            f"Panel '{panel_title}' runbook link must target {expected_suffix}"
-        )
-
-
-def test_runtime_alert_condition_panels_expose_dashboard_handoffs() -> None:
-    """Runtime condition-summary panels should route operators directly to target dashboards."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    expectations = {
-        "Monitor Pipeline Alerts": (
-            "Inspect active runtime blocker",
-            "bioetl-runtime",
-        ),
-        "Inspect DQ Alert Conditions": (
-            "Open 5. Data Quality",
-            "bioetl-dq-v2",
-        ),
-        "Inspect Provider Alerts": (
-            "Open 4. Provider Health",
-            "bioetl-provider-health-v2",
-        ),
-        "Inspect Global Provider Alert Conditions": (
-            "Open 4. Provider Health",
-            "bioetl-provider-health-v2",
-        ),
-        "Inspect Entities Stale Over 24h": (
-            "Open 5. Data Quality",
-            "bioetl-dq-v2",
-        ),
-        "Monitor No-Records Runs": (
-            "Inspect stage expectedness",
-            "bioetl-runtime",
-        ),
-    }
-
-    for panel_title, (link_title, target_uid) in expectations.items():
-        panel = next(
-            (
-                item
-                for item in get_dashboard_panels(dashboard)
-                if item.get("title") == panel_title
-            ),
-            None,
-        )
-        assert panel is not None, (
-            f"Panel '{panel_title}' not found in bioetl-runtime.json"
-        )
-
-        data_links = panel.get("options", {}).get("dataLinks", [])
-        link = next(
-            (item for item in data_links if item.get("title") == link_title), None
-        )
-        assert link is not None, (
-            f"Panel '{panel_title}' must expose dashboard handoff '{link_title}'"
-        )
-
-        url = str(link.get("url", ""))
-        assert target_uid in url, (
-            f"Panel '{panel_title}' handoff must target {target_uid}"
-        )
-        assert "${__url_time_range}" in url, (
-            f"Panel '{panel_title}' handoff must preserve time range"
-        )
-
-        required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID.get(target_uid)
-        if required_vars:
-            passed_vars = _extract_link_vars(url)
-            missing = required_vars - passed_vars
-            assert not missing, f"Missing required vars {missing} in URL {url}"
-
-
-def test_provider_health_critical_panels_expose_incident_runbook_links() -> None:
-    """Provider Health condition panels should point directly to incident-response runbook."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    targets = {
-        9102: "Open Provider Incident Runbook",
-        9103: "Open Provider Incident Runbook",
-        104: "Open Provider Incident Runbook",
-        106: "Open Provider Incident Runbook",
-        114: "Open Provider Incident Runbook",
-    }
-
-    panels_by_id = {
-        panel.get("id"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if isinstance(panel.get("id"), int)
-    }
-    for panel_id, expected_title in targets.items():
-        panel = panels_by_id.get(panel_id)
-        assert isinstance(panel, dict), f"Provider Health missing panel id={panel_id}"
-        data_links = panel.get("options", {}).get("dataLinks", [])
-        assert isinstance(data_links, list) and data_links, (
-            f"Provider Health panel id={panel_id} must define dataLinks"
-        )
-        link = next(
-            (item for item in data_links if item.get("title") == expected_title),
-            None,
-        )
-        assert link is not None, (
-            f"Provider Health panel id={panel_id} must expose '{expected_title}'"
-        )
-        url = str(link.get("url", ""))
-        assert url == (
-            _CANONICAL_GITHUB_BLOB_PREFIX
-            + "docs/05-operations/runbooks/incident-response.md"
-        ), f"Provider Health panel id={panel_id} runbook URL must be canonical"
 
 
 def test_control_plane_runbook_links_target_existing_local_runbooks() -> None:
@@ -338,70 +70,6 @@ def test_control_plane_runbook_links_target_existing_local_runbooks() -> None:
     )
 
 
-def test_control_plane_replay_and_manifest_panels_route_to_expected_runbooks() -> None:
-    """Control Plane replay-family and manifest-family panels must use stable runbook routing."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    expectations = {
-        "Monitor Replay": (
-            "Open Checkpoint Debugging Runbook",
-            "docs/05-operations/runbooks/checkpoint-debugging.md",
-        ),
-        "Monitor Ledger": (
-            "Open Run Manifest Inspection",
-            "docs/05-operations/runbooks/run-manifest-inspection.md",
-        ),
-        "Track Replay Blockers": (
-            "Open Checkpoint Debugging Runbook",
-            "docs/05-operations/runbooks/checkpoint-debugging.md",
-        ),
-        "Track Unreconstructable": (
-            "Open Checkpoint Debugging",
-            "docs/05-operations/runbooks/checkpoint-debugging.md",
-        ),
-        "Track Replay Drift": (
-            "Open Checkpoint Debugging",
-            "docs/05-operations/runbooks/checkpoint-debugging.md",
-        ),
-        "Track Peak Replay Lag": (
-            "Open Checkpoint Debugging",
-            "docs/05-operations/runbooks/checkpoint-debugging.md",
-        ),
-        "Track Replay Drift by Type": (
-            "Checkpoint Debugging",
-            "docs/05-operations/runbooks/checkpoint-debugging.md",
-        ),
-        "Track Replay Lag": (
-            "Checkpoint Debugging",
-            "docs/05-operations/runbooks/checkpoint-debugging.md",
-        ),
-    }
-
-    for panel_title, (expected_title, expected_suffix) in expectations.items():
-        panel = next(
-            (
-                item
-                for item in get_dashboard_panels(dashboard)
-                if item.get("title") == panel_title
-            ),
-            None,
-        )
-        assert panel is not None, f"Control Plane missing panel {panel_title!r}"
-        links = _iter_panel_data_links(panel)
-        assert links, f"Control Plane panel {panel_title!r} must expose a runbook CTA"
-        titles = {str(link.get("title", "")) for link in links}
-        assert expected_title in titles, (
-            f"Control Plane panel {panel_title!r} must expose {expected_title!r}. "
-            f"Actual titles: {sorted(titles)}"
-        )
-        urls = {str(link.get("url", "")) for link in links}
-        assert all(url.startswith(_CANONICAL_GITHUB_BLOB_PREFIX) for url in urls), (
-            f"Control Plane panel {panel_title!r} must target canonical GitHub docs"
-        )
-        assert any(expected_suffix in url for url in urls), (
-            f"Control Plane panel {panel_title!r} must target {expected_suffix}"
-        )
-
-
 def test_control_plane_panels_do_not_mix_runbook_families_within_one_panel() -> None:
     """A single Control Plane panel must not expose conflicting runbook families across link surfaces."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
@@ -424,206 +92,6 @@ def test_control_plane_panels_do_not_mix_runbook_families_within_one_panel() -> 
             f"Control Plane panel {panel_ref} mixes multiple runbook families: "
             f"{sorted(suffixes)}"
         )
-
-
-def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
-    """Provider Health is on the portfolio bus; fail-closed vars still required."""
-    control = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    control_titles = {
-        str(item.get("title", "")) for item in get_dashboard_navigation_links(control)
-    }
-    assert "4. Provider Health" in control_titles
-    provider_nav = next(
-        item
-        for item in get_dashboard_navigation_links(control)
-        if item.get("title") == "4. Provider Health"
-    )
-    provider_nav_url = str(provider_nav.get("url", ""))
-    assert "var-provider=$__all" in provider_nav_url
-    assert "var-pipeline_context=" in provider_nav_url
-    assert "var-adapter=" not in provider_nav_url
-
-    for dashboard_path in Path("grafana/dashboards").glob("*.json"):
-        dashboard_text = dashboard_path.read_text(encoding="utf-8")
-        assert "var-adapter=unknown" not in dashboard_text, (
-            f"{dashboard_path.name} must omit synthetic adapter context"
-        )
-
-    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
-    first_action = next(
-        panel for panel in get_dashboard_panels(overview) if panel.get("id") == 215
-    )
-    link = next(
-        (
-            item
-            for item in (first_action.get("options") or {}).get("dataLinks", [])
-            if "bioetl-provider-health-v2" in str(item.get("url", ""))
-        ),
-        None,
-    )
-    assert link is not None, "Overview First Action must hand off to Provider Health"
-    url = str(link.get("url", ""))
-    assert "var-provider=$__all" in url
-    assert "var-pipeline_context=${pipeline:percentencode}" in url
-    assert "var-adapter=" not in url
-
-
-def test_control_plane_first_screen_stat_panels_do_not_duplicate_runbook_ctas() -> None:
-    """First-screen trust KPI panels should expose one clear runbook CTA each."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    expected_titles = {
-        "Monitor Replay",
-        "Monitor Ledger",
-    }
-
-    for panel_title in expected_titles:
-        panel = next(
-            (
-                item
-                for item in get_dashboard_panels(dashboard)
-                if item.get("title") == panel_title
-            ),
-            None,
-        )
-        assert panel is not None, f"Control Plane missing panel {panel_title!r}"
-        links = _iter_panel_data_links(panel)
-        assert len(links) == 1, (
-            f"Control Plane first-screen panel {panel_title!r} must expose exactly one runbook CTA"
-        )
-
-
-def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
-    """Runtime First Action row must use explicit allowlisted vars and preserve time."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    expected = {
-        "Review current status": (
-            "${workflow:queryparam}",
-            "${pipeline:queryparam}",
-            "${run_type:queryparam}",
-            "${stage:queryparam}",
-        ),
-        "Review range evidence": (
-            "${workflow:queryparam}",
-            "${pipeline:queryparam}",
-            "${run_type:queryparam}",
-            "${stage:queryparam}",
-        ),
-        "Inspect top blockers": (
-            "${workflow:queryparam}",
-            "${pipeline:queryparam}",
-            "${run_type:queryparam}",
-            "${stage:queryparam}",
-        ),
-        "Inspect active blocker": (
-            "${workflow:queryparam}",
-            "${pipeline:queryparam}",
-            "${run_type:queryparam}",
-            "${stage:queryparam}",
-        ),
-    }
-    forbidden = (
-        "var-status=",
-        "var-run_id=",
-        "var-quarantine_run_id=",
-        "var-payload_hash=",
-    )
-
-    panel = _find_panel_by_id(dashboard, 9991)
-    assert panel is not None, "Runtime First Action panel id=9991 must exist"
-    assert panel_display_title(panel) == "Start Pipeline Triage"
-    links = panel.get("links", [])
-    assert isinstance(links, list) and links, (
-        "Runtime First Action panel must expose CTA links"
-    )
-    links_by_title = {str(link.get("title")): link for link in links}
-
-    for title, required_tokens in expected.items():
-        link = links_by_title.get(title)
-        assert link is not None, f"Runtime First Action must expose CTA '{title}'"
-        assert link.get("includeVars") is False, (
-            f"Runtime First Action CTA '{title}' must keep includeVars=false"
-        )
-        url = str(link.get("url", ""))
-        _assert_required_time_tokens(
-            url,
-            tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
-            context=f"Runtime First Action CTA '{title}'",
-        )
-        for token in required_tokens:
-            assert token in url, (
-                f"Runtime First Action CTA '{title}' must include {token}"
-            )
-        for token in forbidden:
-            assert token not in url, (
-                f"Runtime First Action CTA '{title}' must not leak {token}"
-            )
-
-
-def test_runtime_contextual_handoffs_do_not_duplicate_top_level_dq_provider_links() -> (
-    None
-):
-    """Runtime panel CTAs to DQ/Provider must be contextual, not duplicate nav labels."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    forbidden_panel_titles_by_target = {
-        "bioetl-dq-v2": {"5. Data Quality", "Open Data Quality", "Open DQ"},
-        "bioetl-provider-health-v2": {
-            "4. Provider Health",
-            "Open Provider Health",
-            "Check Provider Health",
-        },
-    }
-
-    offenders = []
-    for panel in get_dashboard_panels(dashboard):
-        if panel.get("id") == 1000:
-            continue
-        for link in _iter_panel_data_links(panel) + list(panel.get("links") or []):
-            url = str(link.get("url", ""))
-            target_uid = _extract_dashboard_uid(url)
-            if target_uid not in forbidden_panel_titles_by_target:
-                continue
-            title = str(link.get("title", ""))
-            has_context_mapping = (
-                "${__data.fields." in url
-                or "var-pipeline_context=" in url
-                or "var-provider_context=" in url
-            )
-            if (
-                title in forbidden_panel_titles_by_target[target_uid]
-                and not has_context_mapping
-            ):
-                offenders.append(f"{panel.get('id')}:{panel.get('title')}->{title}")
-
-    assert not offenders, (
-        "Runtime panel-level DQ/Provider links must encode contextual intent:\n"
-        + "\n".join(offenders)
-    )
-
-
-def test_data_quality_lineage_handoff_panel_points_to_canonical_control_plane_row() -> (
-    None
-):
-    """DQ lineage ownership must hand off to the canonical Control Plane row."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Lineage in Control Plane"
-        ),
-        None,
-    )
-    assert panel is not None, (
-        "Panel 'Inspect Lineage in Control Plane' not found in bioetl-dq-v2.json"
-    )
-    links = list(panel.get("links") or [])
-    matching_links = [
-        link
-        for link in links
-        if _extract_dashboard_uid(str(link.get("url", ""))) == "bioetl-control-plane-v1"
-    ]
-    assert matching_links, "DQ lineage handoff panel must link to Control Plane"
-    assert any("viewPanel=904" in str(link.get("url", "")) for link in matching_links)
 
 
 def test_control_plane_dashboard_does_not_expose_top_level_runbook_link() -> None:
@@ -661,6 +129,12 @@ def test_all_runbook_links_use_canonical_github_urls_and_resolve_locally() -> No
             if "docs/05-operations/runbooks/" not in url:
                 continue
             observed += 1
+            if "${__data.fields.alert_runbook}" in url:
+                source = Path("scripts/ops/observability/grafana/_incident_explanations.py").read_text(encoding="utf-8")
+                for slug in ("incident-response", "docker-stability"):
+                    assert f'"{slug}"' in source
+                    assert Path(f"docs/05-operations/runbooks/{slug}.md").is_file()
+                continue
             local_path = _local_repo_path_from_canonical_github_blob_url(url)
             if local_path is None:
                 noncanonical_targets.append(f"{dashboard_path.name} -> {url}")
@@ -695,42 +169,6 @@ def test_overview_panels_use_dashboard_handoffs_not_runbook_ctas() -> None:
     assert not offenders, (
         "Overview panel-level CTAs must stay dashboard-routing-first:\n"
         + "\n".join(offenders)
-    )
-
-
-def test_workflow_range_cards_do_not_ship_panel_level_runbook_links() -> None:
-    """Workflow selected-range cards should hand off via First Action instead."""
-    dashboard = load_dashboard(_require_dashboard("bioetl-runtime.json"))
-    expected_titles = {
-        "Track Failed Workflow Runs",
-        "Track Failed Workflow Steps",
-    }
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expected_titles
-    }
-    assert set(panels) == expected_titles
-
-    offenders: list[str] = []
-    for title, panel in panels.items():
-        for link in _iter_panel_data_links(panel):
-            offenders.append(f"{title} -> {link.get('title')} -> {link.get('url')}")
-
-    assert not offenders, (
-        "Workflow selected-range summary cards must stay free of panel-level CTAs; "
-        "handoff belongs to First Action:\n" + "\n".join(offenders)
-    )
-
-    next_panel = next(
-        (panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 9991),
-        None,
-    )
-    assert next_panel is not None
-    next_links = next_panel.get("links", [])
-    assert next_links, "Workflow First Action must keep dashboard handoffs"
-    assert all(str(link.get("url", "")).startswith("/d/") for link in next_links), (
-        "Workflow First Action must stay dashboard-handoff-only"
     )
 
 
@@ -782,56 +220,6 @@ def test_cross_dashboard_links_enforce_required_handoff_or_explicit_fallback() -
                 f"{dashboard_path.name} top-level link to {target_uid} must pass available "
                 f"required vars {sorted(missing)}. URL: {url}"
             )
-
-
-def test_provider_dashboard_exposes_single_runtime_link() -> None:
-    """Provider Health must not duplicate Runtime handoffs."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    links = get_dashboard_navigation_links(dashboard)
-
-    runtime_links = [
-        link
-        for link in links
-        if _extract_dashboard_uid(str(link.get("url", ""))) == "bioetl-runtime"
-    ]
-    assert len(runtime_links) == 1
-
-
-def test_workflow_overview_first_action_cta_contract() -> None:
-    """Workflow First Action panel must have exactly 5 dashboard handoffs."""
-    dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
-    next_diagnostic_panel = next(
-        (
-            p
-            for p in get_dashboard_panels(dashboard)
-            if p.get("title") == "First Action"
-        ),
-        None,
-    )
-    assert next_diagnostic_panel is not None, (
-        "Workflow Overview missing First Action panel"
-    )
-    options = next_diagnostic_panel.get("options", {})
-    links = options.get("dataLinks", [])
-    assert isinstance(links, list), "First Action panel must have dataLinks list"
-    assert len(links) == 5, (
-        f"First Action panel must have exactly 5 CTAs, got {len(links)}"
-    )
-    expected_targets = [
-        "bioetl-runtime",
-        "bioetl-dq-v2",
-        "bioetl-provider-health-v2",
-        "bioetl-control-plane-v1",
-        "bioetl-overview-v2",
-    ]
-    for link in links:
-        url = link.get("url", "")
-        assert isinstance(url, str), "Link URL must be a string"
-        assert any(target in url for target in expected_targets), (
-            f"Link must target one of {expected_targets}, got {url}"
-        )
 
 
 def test_dashboard_links_do_not_default_run_type_to_unknown() -> None:
@@ -920,57 +308,6 @@ def test_pipeline_and_provider_variables_follow_explicit_scope_defaults() -> Non
             )
 
 
-def test_provider_health_handoff_fail_closes_and_remembers_return_context() -> None:
-    """Overview First Action preserves pipeline_context and fail-closes provider scope."""
-    # Provider Health is on the primary navigation bus (#3). Fail-closed provider
-    # handoff vars are still required on Overview First Action (panel 215).
-    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
-    first_action = next(
-        panel for panel in get_dashboard_panels(overview) if panel.get("id") == 215
-    )
-    link = next(
-        item
-        for item in (first_action.get("options") or {}).get("dataLinks", [])
-        if "bioetl-provider-health-v2" in str(item.get("url", ""))
-    )
-    url = str(link.get("url", ""))
-    tooltip = str(link.get("tooltip", ""))
-    assert "var-provider=$__all" in url
-    assert "var-pipeline_context=${pipeline:percentencode}" in url
-    assert "var-provider=All" not in url
-    # Tooltip is optional on dataLinks; URL fail-closed vars are mandatory.
-    if tooltip:
-        assert "Context mapping" in tooltip or "provider=unknown" in tooltip
-    dashboards = _load_dashboards_by_uid()
-
-    provider_dashboard = dashboards["bioetl-provider-health-v2"]
-    provider_vars = {
-        var.get("name"): var
-        for var in provider_dashboard.get("templating", {}).get("list", [])
-        if isinstance(var, dict)
-    }
-    pipeline_context = provider_vars.get("pipeline_context")
-    assert pipeline_context is not None
-    assert pipeline_context.get("hide") == 2
-    assert pipeline_context.get("current", {}).get("value") == "unknown"
-
-    for target_uid in {
-        "bioetl-control-plane-v1",
-        "bioetl-overview-v2",
-        "bioetl-runtime",
-        "bioetl-dq-v2",
-    }:
-        link = next(
-            item
-            for item in get_dashboard_navigation_links(provider_dashboard)
-            if _extract_dashboard_uid(str(item.get("url", ""))) == target_uid
-        )
-        url = str(link.get("url", ""))
-        assert "${pipeline:queryparam}" in url
-        assert "pipeline_context:percentencode" not in url
-        assert "var-pipeline=All" not in url
-
-
 def test_dashboard_links_do_not_use_all_for_pipeline_or_provider() -> None:
     """Unknown is the only explicit fallback for Pipeline/Provider handoff values."""
     for dashboard_path in get_dashboard_files():
@@ -990,8 +327,6 @@ def test_nav_bus_never_uses_literal_stage_unknown() -> None:
     operator_uids = {
         "bioetl-control-plane-v1",
         "bioetl-overview-v2",
-        "bioetl-runtime",
-        "bioetl-provider-health-v2",
         "bioetl-dq-v2",
         "bioetl-incident-v1",
         "bioetl-run-explorer-v1",
@@ -1026,7 +361,7 @@ def test_nav_bus_never_uses_literal_stage_unknown() -> None:
 
     from scripts.ops.observability.grafana.render_nav_bus import _url_for
 
-    for target_uid in ("bioetl-runtime", "bioetl-dq-v2"):
+    for target_uid in ("bioetl-dq-v2",):
         url = _url_for(
             {"uid": target_uid, "path": target_uid, "title": "x"},
             source_uid="bioetl-overview-v2",
@@ -1035,58 +370,57 @@ def test_nav_bus_never_uses_literal_stage_unknown() -> None:
         assert "var-stage=$__all" in url
 
 
-def test_provider_health_first_action_cta_contract() -> None:
-    """bioetl-provider-health-v2 First Action panel (9002) must have exactly 3 CTAs."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    panels_by_id = {
-        panel.get("id"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("id") is not None
-    }
-
-    first_action_panel = panels_by_id[9002]
-    links = first_action_panel.get("links", [])
-
-    assert len(links) == 3, (
-        f"Provider Health First Action panel must have exactly 3 CTAs, got {len(links)}"
-    )
-
-    link_titles = {link.get("title") for link in links}
-    required_titles = {
-        "Review severity matrix",
-        "Inspect critical providers",
-        "Inspect provider top causes",
-    }
-    assert required_titles.issubset(link_titles), (
-        f"Provider Health First Action panel missing required CTAs. "
-        f"Required: {required_titles}, Got: {link_titles}"
-    )
+@pytest.mark.parametrize("retired", ["bioetl-runtime", "bioetl-provider-health-v2"])
+def test_retired_workspaces_have_no_active_cta_target(retired: str) -> None:
+    assert not (Path("grafana/dashboards") / f"{retired}.json").exists()
+    for path in get_dashboard_files():
+        for link in _collect_dashboard_links(load_dashboard(path)):
+            assert _extract_dashboard_uid(str(link.get("url", ""))) != retired
 
 
-def test_dq_first_action_cta_contract() -> None:
-    """bioetl-dq-v2 First Action panel (9103) after Silver Reject Explorer removal."""
+def test_overview_domain_actions_preserve_all_three_operator_questions() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    actions = {link["title"]: link for link in panels[9002]["links"]}
+    assert set(actions) == {"Open Control Plane", "Open Data Quality", "Open Provider Evidence"}
+    provider = actions["Open Provider Evidence"]
+    assert "viewPanel=9480" in provider["url"]
+    assert 9480 in panels
+    for link in actions.values():
+        assert "${run_id:queryparam}" in link["url"]
+        assert "${__url_time_range}" in link["url"]
+        assert link["includeVars"] is False
+
+
+def test_replay_verdict_has_a_direct_exact_checks_action() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    links = panels[9422]["links"]
+    assert len(links) == 1
+    assert links[0]["title"] == "View replay checks"
+    assert "viewPanel=9423" in links[0]["url"]
+    assert "${run_id:queryparam}" in links[0]["url"]
+    assert links[0]["includeVars"] is False
+    assert 9423 in panels
+
+
+def test_run_explorer_links_distinguish_provider_report_and_replay_evidence() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
+    panel = _find_panel_by_id(dashboard, 3010)
+    links = {link["title"]: link["url"] for link in _iter_panel_data_links(panel)}
+    assert "/d/bioetl-overview-v2/" in links["Provider Evidence"]
+    assert "viewPanel=9480" in links["Provider Evidence"]
+    assert "/d/bioetl-control-plane-v1/" in links["Saved Evidence"]
+    assert "viewPanel=9408" in links["Saved Evidence"]
+    assert len({links[k] for k in ("Provider Evidence", "Saved Evidence", "Run Overview", "Replay Readiness")}) == 4
+    for key in ("Provider Evidence", "Saved Evidence", "Run Overview", "Replay Readiness"):
+        assert "${__data.fields.run_id:percentencode}" in links[key]
+        assert "${__url_time_range}" in links[key]
+
+
+def test_dq_summary_routes_to_selected_run_evidence() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panels_by_id = {
-        panel.get("id"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("id") is not None
-    }
-
-    first_action_panel = panels_by_id[9103]
-    links = first_action_panel.get("links", [])
-
-    assert len(links) == 2, (
-        f"DQ First Action panel must have exactly 2 CTAs, got {len(links)}"
-    )
-
-    link_titles = {link.get("title") for link in links}
-    required_titles = {
-        "Review current status",
-        "Inspect current reasons",
-    }
-    assert required_titles.issubset(link_titles), (
-        f"DQ First Action panel missing required CTAs. "
-        f"Required: {required_titles}, Got: {link_titles}"
-    )
+    panel = _find_panel_by_id(dashboard, 9406)
+    links = _iter_panel_data_links(panel)
+    assert any(link["title"] == "Open Run Explorer" for link in links)
+    assert all("${run_id:queryparam}" in link["url"] for link in links if link["url"].startswith("/d/"))

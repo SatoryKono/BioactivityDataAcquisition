@@ -267,7 +267,7 @@ def test_navigation_bus_uses_full_width_short_band() -> None:
         assert "font-size:16px" in content
         assert "display:flex" in content
         assert "flex-wrap:nowrap" in content
-        assert "width:14%" in content
+        assert "width:16.5%" in content
         assert "line-height:18px" in content
         assert "min-width:0" in content
         assert "overflow-wrap:anywhere" in content

@@ -246,8 +246,9 @@ _PRESERVE_SCOPE_TOOLTIP = "Preserves selected scope and time range."
 
 NAV_DESCRIPTION = (
     "Sanitizer-compatible navigation bus with native keyboard focus. "
-    "Shared link-only bus 0–6: Run Explorer / Trust / Overview / "
-    "Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. "
+    "Shared navigation: Run Explorer / Replay Readiness / Run Overview / "
+    "Incident Workspace. Data Quality is a contextual drilldown; saved provider "
+    "evidence is owned by Run Overview. "
     "Current workspace is a non-interactive chip (aria-disabled + data-current=page, "
     "underlined) so active state is not color-only. Handoffs open same-tab, "
     "preserve current time range, and document scope reset or context mapping "
@@ -342,7 +343,7 @@ def render_html(*, current_uid: str) -> str:
         f'style="{CONTAINER_STYLE}">',
     ]
     for item in BUS:
-        if item["uid"] in _NAV_HIDDEN_UIDS:
+        if item["uid"] in _NAV_HIDDEN_UIDS and item["uid"] != current_uid:
             continue
         parts.append(_chip_html(item, current_uid=current_uid, source_uid=current_uid))
     parts.append("</div>")
@@ -1894,6 +1895,7 @@ def _stamp_nav_panel(nav: dict[str, Any], panels: list[object]) -> None:
 
 
 def _attach_nav_bus(nav: dict[str, Any], *, current_uid: str) -> None:
+    nav["description"] = NAV_DESCRIPTION
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,
@@ -2586,6 +2588,8 @@ def apply_to_dashboard(
         from scripts.ops.observability.grafana._replay_layout import apply_replay_layout
 
         apply_replay_layout(payload)
+    # Late evidence appenders must obey the same retired-UID and selector policy.
+    finalize_dashboard_links(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

@@ -186,13 +186,13 @@ def _allowlist_ids(entries: list[object], dashboard_name: str) -> set[int]:
     return ids
 
 
-def test_six_shipped_uids_match_requirement_gates() -> None:
+def test_five_shipped_uids_match_requirement_gates() -> None:
     """#9218: gates YAML and shipped JSON must name the same six UIDs."""
     expected = _gates()["shipped_uids"]
     assert isinstance(expected, list)
     shipped = _shipped_by_uid()
     assert set(expected) == set(shipped)
-    assert len(shipped) == 6
+    assert len(shipped) == 5
 
 
 def test_grafana_is_optional_readonly_presentation_adapter() -> None:

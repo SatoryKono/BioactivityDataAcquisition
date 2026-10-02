@@ -112,6 +112,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
             "title": "View replay checks",
             "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9423&${__url_time_range}",
             "targetBlank": False,
+            "includeVars": False,
         }
     ]
     if row is None:

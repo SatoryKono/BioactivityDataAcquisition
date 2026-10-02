@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Canonical Grafana context URLs for the six ADR-053 dashboard UIDs.
+"""Canonical Grafana context URLs for the five shipped dashboard UIDs.
 
 Production twin of the navigation-links contract. Builds `/d/` handoffs that:
 
@@ -15,20 +15,24 @@ from dataclasses import dataclass, field
 import re
 from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
 
-SEVEN_UIDS: tuple[str, ...] = (
+ACTIVE_UIDS: tuple[str, ...] = (
     "bioetl-control-plane-v1",
     "bioetl-overview-v2",
-    "bioetl-provider-health-v2",
     "bioetl-dq-v2",
     "bioetl-incident-v1",
     "bioetl-run-explorer-v1",
 )
+# Compatibility import: the historical name now exposes the active portfolio.
+SEVEN_UIDS = ACTIVE_UIDS
+RETIRED_UID_REDIRECTS = {
+    "bioetl-runtime": "bioetl-overview-v2",
+    "bioetl-provider-health-v2": "bioetl-overview-v2",
+}
 
 PATH_BY_UID: dict[str, str] = {
     "bioetl-run-explorer-v1": "run-explorer",
     "bioetl-control-plane-v1": "1-trust",
     "bioetl-overview-v2": "2-overview",
-    "bioetl-provider-health-v2": "4-provider-health",
     "bioetl-dq-v2": "5-data-quality",
     "bioetl-incident-v1": "6-incident-workspace",
 }
@@ -71,7 +75,7 @@ def normalize_run_id(value: object) -> str:
 
 @dataclass(frozen=True, slots=True)
 class DashboardContext:
-    """One operator selection applied to all six UIDs."""
+    """One operator selection applied to the active portfolio."""
 
     workflow: str
     pipeline: str
@@ -101,12 +105,12 @@ def build_handoff_url(
     extras: dict[str, str] | None = None,
 ) -> str:
     """Return a `/d/{uid}/{path}` URL with canonical var order and time range."""
-    if target_uid == "bioetl-runtime":
-        target_uid = "bioetl-overview-v2"
+    if target_uid in RETIRED_UID_REDIRECTS:
+        target_uid = RETIRED_UID_REDIRECTS[target_uid]
         extras = {
-            k: v
-            for k, v in (extras or {}).items()
-            if k not in {"stage", "provider_hint"}
+            k: v for k, v in (extras or {}).items()
+            if k not in {"stage", "provider_hint", "provider", "pipeline_context", "adapter"}
+
         }
     if target_uid not in PATH_BY_UID:
         raise ValueError(f"unknown dashboard uid: {target_uid}")
@@ -151,10 +155,10 @@ def build_handoff_url(
 
 
 def urls_for_context(context: DashboardContext) -> dict[str, str]:
-    """Build the six UID URLs from one trimmed context object."""
+    """Build only active UID URLs from one trimmed context object."""
     return {
         uid: build_handoff_url(uid, context=context, template=False)
-        for uid in SEVEN_UIDS
+        for uid in ACTIVE_UIDS
     }
 
 
@@ -269,7 +273,7 @@ def _normalize_query_variable(name: str, value: str) -> str:
 def rewrite_dashboard_handoff_url(url: str) -> str:
     """Normalize a shipped `/d/` URL: require run_id + time, stable var order.
 
-    Template values (`$run_id`, `${__value.raw}`, …) are preserved. Concrete
+    Template values (`$run_id`, `${__value.raw}`, â€¦) are preserved. Concrete
     `run_id` query values are trimmed. Missing `var-run_id` is filled with
     `$run_id` so Grafana cannot silently keep a foreign UUID.
     """
@@ -278,9 +282,25 @@ def rewrite_dashboard_handoff_url(url: str) -> str:
         return url
     split = urlsplit(raw)
     path = split.path
+    path_parts = path.split("/")
+    retired_uid = path_parts[2] if len(path_parts) > 2 else ""
+    redirect_uid = RETIRED_UID_REDIRECTS.get(retired_uid)
+    if redirect_uid:
+        path = f"/d/{redirect_uid}/{PATH_BY_UID[redirect_uid]}"
+    overview_target = redirect_uid or retired_uid
     query_pairs = parse_qsl(split.query, keep_blank_values=True)
     state = _HandoffQuery(has_time_token=TIME_TOKEN in raw)
     for key, value in query_pairs:
+        if overview_target == "bioetl-overview-v2" and key in {
+            "var-stage", "var-provider_hint", "var-provider",
+            "var-pipeline_context", "var-adapter",
+            "${stage:queryparam}", "${provider:queryparam}",
+            "${provider_hint:queryparam}", "${pipeline_context:queryparam}",
+            "${adapter:queryparam}",
+        }:
+            continue
+        if redirect_uid and key == "viewPanel":
+            continue
         state.add(key, value)
     # Full-dashboard handoffs must carry run_id so Grafana cannot keep a foreign
     # UUID. Same-dashboard viewPanel deep-links keep authored vars (CURRENT
@@ -301,6 +321,7 @@ def preserves_time_window(url: str) -> bool:
 
 
 __all__ = [
+    "ACTIVE_UIDS",
     "CORE_VAR_ORDER",
     "PATH_BY_UID",
     "RUN_ID_GRAFANA_REGEX",
@@ -337,6 +358,8 @@ def _rewrite_links(value: object) -> None:
     elif isinstance(value, dict):
         for key, item in value.items():
             if isinstance(item, str) and key == "url" and item.startswith("/d/"):
+                if any(item.startswith(f"/d/{uid}/") for uid in (*RETIRED_UID_REDIRECTS, "bioetl-overview-v2")):
+                    item = rewrite_dashboard_handoff_url(item)
                 value[key] = serialize_selection_parameters(item)
             elif isinstance(item, str) and key == "content":
                 value[key] = re.sub(

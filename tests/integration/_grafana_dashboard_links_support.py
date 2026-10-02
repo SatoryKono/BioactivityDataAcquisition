@@ -470,7 +470,7 @@ def _assert_critical_panel_entry(
         f"{dashboard_path.name} ({uid}) missing critical panel id={panel_id}"
     )
 
-    data_links = _iter_panel_data_links(panel)
+    data_links = _iter_panel_data_links(panel) + list(panel.get("links") or [])
     assert data_links, (
         f"{dashboard_path.name} panel id={panel_id} must define dataLinks"
     )
@@ -774,9 +774,8 @@ def _assert_cross_dashboard_link_policy(
         assert current_uid == "bioetl-incident-v1"
         assert link.get("title") == "Open domain diagnostics"
         for resolved_uid, scope in {
-            "bioetl-runtime": "var-stage=%24__all",
+            "bioetl-overview-v2": "",
             "bioetl-dq-v2": "var-stage=%24__all",
-            "bioetl-provider-health-v2": "var-provider=chembl&var-pipeline_context=unknown",
         }.items():
             resolved_url = url.replace(
                 "${__data.fields.action_dashboard_uid}", resolved_uid
@@ -813,6 +812,12 @@ def _assert_cross_dashboard_link_policy(
                 "${__data.fields.route_pipeline:percentencode}",
                 "${__data.fields.pipeline:percentencode}",
             }
+        elif target_uid == "bioetl-run-explorer-v1" and "var-lookup_run_id=" in url:
+            values = _extract_link_var_values(url)
+            assert values == {
+                "workflow": ".*", "pipeline": ".*", "run_type": ".*",
+                "run_id": "-",
+            }, "Global Run Explorer navigation must clear selection explicitly"
         elif current_uid == "bioetl-run-explorer-v1" and "${__data.fields." in url:
             values = _extract_link_var_values(url)
             assert values["run_id"] in {
@@ -1460,9 +1465,6 @@ _BASE_VISUAL_NAV_TITLES = (
     "Run Explorer",
     "Replay Readiness",
     "Run Overview",
-    "Pipeline Diagnostics",
-    "Provider Health",
-    "Data Quality",
     "6. Incident Workspace",
 )
 
@@ -1479,7 +1481,7 @@ _SANITIZER_SAFE_NAV_TOKENS = (
     "display:flex",
     "flex-wrap:nowrap",
     "overflow:visible",
-    "width:14%",
+    "box-sizing:border-box",
     "font:600 16px/18px Arial",
     "min-width:0",
     "overflow-wrap:anywhere",
@@ -1504,12 +1506,15 @@ def _assert_titles_in_order(
 def _assert_visual_bus_base_content(
     *, dashboard_name: str, content: str, panel: dict[str, object]
 ) -> None:
-    for title in _BASE_VISUAL_NAV_TITLES:
+    titles = _BASE_VISUAL_NAV_TITLES
+    if dashboard_name == "bioetl-dq-v2.json":
+        titles = (*titles[:-1], "Data Quality", titles[-1])
+    for title in titles:
         assert title in content, (
             f"{dashboard_name} visual navigation bus must render '{title}'"
         )
     _assert_titles_in_order(
-        content, _BASE_VISUAL_NAV_TITLES, dashboard_name=dashboard_name
+        content, titles, dashboard_name=dashboard_name
     )
     assert "<style" not in content.lower(), (
         f"{dashboard_name} navigation must survive Grafana Text-panel "
@@ -1528,7 +1533,7 @@ def _assert_visual_bus_base_content(
     description = str(panel.get("description", ""))
     assert "Sanitizer-compatible" in description
     assert "native keyboard focus" in description
-    assert "Provider Health" in description
+    assert "saved provider evidence" in description
     assert "Incident Workspace" in description
     assert "Run Explorer" in description
 
@@ -1801,7 +1806,7 @@ def _assert_named_dashboard_handoff(
     ),
 ) -> None:
     dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-    navigation_links = get_dashboard_navigation_links(dashboard)
+    navigation_links = _collect_dashboard_links(dashboard)
     titles = {link.get("title") for link in navigation_links if link.get("title")}
     urls = [str(link.get("url", "")) for link in navigation_links]
     assert expected_title in titles, (

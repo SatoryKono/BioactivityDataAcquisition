@@ -57,13 +57,12 @@ def test_required_inbound_paths_match_overview_first_action_mirror() -> None:
     contract = _load_contract()
     target_uids = (
         "bioetl-control-plane-v1",
-        "bioetl-provider-health-v2",
         "bioetl-dq-v2",
     )
     route = {
         "source_uid": "bioetl-overview-v2",
         "source_panel_id": 9002,
-        "source_panel_title": "Review Run Domains",
+        "source_panel_title": "Run Domains",
         "source_status_row_panel_title_matcher": "^Inspect Scope & Evidence$",
     }
     assert contract["required_discoverable_inbound_paths"] == {
@@ -74,7 +73,7 @@ def test_required_inbound_paths_match_overview_first_action_mirror() -> None:
     for target_uid in target_uids:
         expected_row = (
             f"| `{target_uid}` | `bioetl-overview-v2` | `9002` | "
-            "`Review Run Domains` | `^Inspect Scope & Evidence$` |"
+            "`Run Domains` | `^Inspect Scope & Evidence$` |"
         )
         assert expected_row in narrative
 

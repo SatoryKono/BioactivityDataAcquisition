@@ -441,8 +441,8 @@
                 "id": "links",
                 "value": [
                   {
-                    "title": "Provider Health",
-                    "url": "/d/bioetl-overview-v2/2-overview?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}",
+                    "title": "Provider Evidence",
+                    "url": "/d/bioetl-overview-v2/2-overview?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}&viewPanel=9480",
                     "includeVars": false,
                     "targetBlank": false
                   }
@@ -693,7 +693,7 @@
                 "value": [
                   {
                     "title": "Saved Evidence",
-                    "url": "/d/bioetl-overview-v2/2-overview?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}&viewPanel=9408",
                     "includeVars": false,
                     "targetBlank": false
                   }
