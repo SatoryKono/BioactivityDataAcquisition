@@ -246,8 +246,16 @@ _SKIP_TYPES = {
 
 def detect_diagram_type(lines: list[str]) -> str:
     """Return canonical diagram type string or 'skip'/'unknown'."""
+    in_directive = False
     for ln in lines:
         s = ln.strip().lower()
+        if s.startswith("%%{"):
+            in_directive = "}%%" not in s
+            continue
+        if in_directive:
+            if "}%%" in s:
+                in_directive = False
+            continue
         if not s or s.startswith("%%"):
             continue
         first_word = s.split()[0]

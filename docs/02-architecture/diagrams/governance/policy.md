@@ -30,7 +30,7 @@ ______________________________________________________________________
 1. Исторический policy (контекст): `docs/02-architecture/diagrams/governance/00-diagramming-policy.md`.
 1. Канонические исходники диаграмм: `docs/02-architecture/diagrams/**/*.mmd`.
 1. Decomposed views: `docs/02-architecture/diagrams/views/*.mermaid`.
-1. Рендер-артефакты: `svg/png` под sibling-каталогами `diagrams/**/svg` и `diagrams/**/png` считаются поддерживаемыми documentation outputs и регенерируются через `render.sh` после изменения источников.
+1. Рендер-артефакты: sibling `diagrams/**/svg` — tracked publication outputs; `diagrams/**/png` — untracked compatibility/export outputs. Оба регенерируются через `render.sh` после изменения источников согласно [render-retention.md](render-retention.md).
 
 ## 3. Форматы и именование
 
@@ -145,3 +145,18 @@ bash scripts/diagrams/validate_mermaid_syntax.sh
 1. Любое изменение архитектурных модулей или порт-контрактов требует обновления релевантных диаграмм.
 1. Изменение диаграммы без изменения кода допускается только для устранения рассинхрона или улучшения читаемости.
 1. Сначала документируем фактическую реализацию, затем желаемую (если есть расхождение).
+
+## 10. Принятые ограничения CI (#11857)
+
+- Full-corpus render и nightly DIAG-T018..T029 остаются отключены по #11196.
+  `diagram-nightly.yml` не имеет schedule; `nightly-phase2` и full-corpus job
+  в `docs.yml` используют `if: false`. Эти lanes не являются доказательством
+  успешной проверки. Для PR действуют scoped lint, source/SVG drift и
+  targeted visual-smoke; полный профиль запускается локально при необходимости.
+- Generated `class-diagrams/90-pkg-*.mmd` не имеют обязательного `--check`
+  в lightweight docs CI. Это supplemental inventory/render surface; при
+  изменении соответствующих пакетов владелец регенерирует срезы вручную.
+  Это ограничение не распространяется на обязательные source/SVG drift gates.
+- Подробные команды и границы профилей: [DIAGRAM-WORKFLOW-GUIDE.md](DIAGRAM-WORKFLOW-GUIDE.md).
+  Владельцем пересмотра ограничений является diagram governance; бюджеты долга
+  и обязательные PR-проверки не ослабляются.

@@ -6,6 +6,8 @@ from uuid import UUID
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from bioetl.domain.normalization.json import stable_json_hash
 from bioetl.infrastructure.control_plane.file_effective_config_artifact_store import (
     FileEffectiveConfigArtifactStore,
