@@ -98,6 +98,13 @@ def _build_reconcile_payload(
         "reference_completeness": request.reference_completeness,
         "unproven_unmatched_rows": getattr(r, "unproven_unmatched_rows", 0),
     }
+    if request.reconciliation_mode == "selected-snapshot":
+        payload.update(
+            reconciliation_mode=request.reconciliation_mode,
+            selected_snapshots=getattr(r, "selected_snapshots", None),
+            input_snapshots=getattr(r, "input_snapshots", None),
+            reference_scope="current_run",
+        )
     blocked_reason = getattr(r, "mutation_blocked_reason", None)
     if blocked_reason:
         payload["mutation_blocked_reason"] = blocked_reason
@@ -181,6 +188,11 @@ def build_reconcile_foreign_keys_executor(
         )
         if artifact_refs:
             payload["artifact_refs"] = list(artifact_refs)
+        if (
+            payload.get("mutation_blocked_reason")
+            == "selected_snapshot_commit_ambiguous"
+        ):
+            raise RuntimeError("selected snapshot commit is ambiguous; repair required")
         return payload
 
     return _executor
@@ -216,6 +228,15 @@ def _build_request(
             reference_table=reference_table,
         )
     )
+    from bioetl.application.workflow.transforms.selected_snapshot_inputs import (
+        selected_snapshot_inputs,
+    )
+
+    snapshots = (
+        selected_snapshot_inputs(upstream_outputs or {})
+        if config.get("reconciliation_mode") == "selected-snapshot"
+        else {}
+    )
     return ForeignKeyReconciliationRequest(
         source_table=source_table,
         reference_table=reference_table,
@@ -238,6 +259,10 @@ def _build_request(
         debug_export_enabled=debug_export_enabled,
         debug_export_dir=debug_export_dir,
         source_scope=_source_scope(config),
+        reconciliation_mode=str(
+            config.get("reconciliation_mode", "complete-reference")
+        ),
+        selected_snapshots=snapshots or None,
         source_run_ids=source_run_ids,
         reference_completeness=completeness,
         reference_identity=identity,

@@ -69,7 +69,18 @@ def _measured_current(
     if row.status.lower() not in _SUCCESS or details.get("dry_run"):
         return None
     if details.get("source_scope") != "all_current":
-        return None
+        if details.get("reconciliation_mode") != "selected-snapshot":
+            return None
+        snapshots = details.get("selected_snapshots")
+        measured = details.get("source_snapshot")
+        identity = f"gold:{details.get('source_table')}"
+        if not isinstance(snapshots, Mapping) or not isinstance(measured, Mapping):
+            return None
+        selected = snapshots.get(identity)
+        if not isinstance(selected, Mapping) or selected.get("version") != measured.get(
+            "version"
+        ):
+            return None
     if details.get("mutation_mode") not in {"gold_scd2_expiry", "no_op"}:
         return None
     return _snapshot_current(details)

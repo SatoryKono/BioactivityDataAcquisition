@@ -176,6 +176,7 @@ def build_reconciliation_result(
         mutation_blocked_reason=mutation_blocked_reason,
         unproven_unmatched_rows=unproven_unmatched_rows,
         reference_completeness=request.reference_completeness,
+        reconciliation_mode=request.reconciliation_mode,
     )
 
 

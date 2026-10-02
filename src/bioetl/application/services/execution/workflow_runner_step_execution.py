@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, replace
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -102,6 +102,8 @@ async def execute_pipeline_step(
     workflow_context_labels: Mapping[str, str],
     step_started_callback: Callable[..., None] | None,
     workflow_run_id: str | None,
+    snapshot_reader: Callable[[str, str], Awaitable[dict[str, dict[str, object]]]]
+    | None = None,
 ) -> WorkflowStepExecutionResult:
     """Run one pipeline step and project step-level metrics."""
     if step_started_callback is not None:
@@ -119,6 +121,19 @@ async def execute_pipeline_step(
             step.pipeline_name,
             options=step_options,
         )
+        if (
+            result.is_success
+            and step.run_options.reconciliation_mode == "selected-snapshot"
+        ):
+            if snapshot_reader is None:
+                raise ValueError(
+                    "selected-snapshot requires a producer snapshot reader"
+                )
+            snapshots = await snapshot_reader(step.pipeline_name, result.run_id)
+            for snapshot in snapshots.values():
+                snapshot["limit"] = step.run_options.limit
+                snapshot["start_offset"] = step.run_options.start_offset
+            result = replace(result, selected_snapshots=snapshots)
     except _WORKFLOW_STEP_FAILURES as exc:
         record_step_metrics(
             metrics=metrics,

@@ -26,6 +26,7 @@ _WORKFLOW_RUN_OPTIONS_OVERRIDE_FIELDS = (
     "run_type",
     "start_offset",
     "limit",
+    "reconciliation_mode",
     "input_csv",
     "filter_column",
     "filter_field",
@@ -95,6 +96,7 @@ def build_workflow_run_options_override_from_mapping(
         run_type=_optional_str(override_values, "run_type"),
         start_offset=_optional_int(override_values, "start_offset"),
         limit=_optional_int(override_values, "limit"),
+        reconciliation_mode=_optional_str(override_values, "reconciliation_mode"),
         input_csv=_optional_str(override_values, "input_csv"),
         filter_column=_optional_str(override_values, "filter_column"),
         filter_field=_optional_str(override_values, "filter_field"),
@@ -169,6 +171,9 @@ def apply_cli_override_config(
         defaults=config.defaults.merged_with(override),
         steps=tuple(updated_steps),
     )
+    from bioetl.domain.workflow._delete_orphans_scope import apply_reconciliation_mode
+
+    updated = apply_reconciliation_mode(updated, override.reconciliation_mode)
     reject_delete_orphans_after_limited_extracts(updated)
     return updated
 

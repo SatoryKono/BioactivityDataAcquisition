@@ -53,6 +53,9 @@ class WorkflowRunOptionsSchema(BaseModel):
     resume: bool | None = None
     start_offset: int | None = None
     limit: int | None = None
+    reconciliation_mode: Literal["complete-reference", "selected-snapshot"] | None = (
+        None
+    )
     dry_run: bool | None = None
     input_csv: str | None = None
     filter_column: str | None = None
@@ -93,6 +96,7 @@ class WorkflowRunOptionsSchema(BaseModel):
             resume=self.resume,
             start_offset=self.start_offset,
             limit=self.limit,
+            reconciliation_mode=self.reconciliation_mode,
             dry_run=self.dry_run,
             input_csv=self.input_csv,
             filter_column=self.filter_column,
@@ -235,6 +239,10 @@ class WorkflowReconcileForeignKeysConfigSchema(BaseModel):
     reference_keys: list[str] | None = None
     primary_keys: list[str] = Field(..., min_length=1)
     action: Literal["delete_orphans"]
+    reconciliation_mode: Literal["complete-reference", "selected-snapshot"] = (
+        "complete-reference"
+    )
+    source_scope: Literal["all_current", "current_run"] = "all_current"
     nulls_equal: bool = False
 
     @model_validator(mode="after")
@@ -295,9 +303,12 @@ class WorkflowReconcileForeignKeysConfigSchema(BaseModel):
 
     def to_config_dict(self) -> JsonDict:
         """Return normalized config with explicit layer defaults for fingerprinting."""
-        return {
-            key: value for key, value in self.model_dump().items() if value is not None
-        }
+        values = self.model_dump()
+        if self.reconciliation_mode == "complete-reference":
+            values.pop("reconciliation_mode")
+        if self.source_scope == "all_current":
+            values.pop("source_scope")
+        return {key: value for key, value in values.items() if value is not None}
 
 
 class WorkflowTransformStepSchema(BaseModel):
@@ -375,6 +386,11 @@ class WorkflowConfigSchema(BaseModel):
             domain = self.to_domain()
         except ValueError as exc:
             raise ValueError(str(exc)) from exc
+        from bioetl.domain.workflow._delete_orphans_scope import (
+            apply_reconciliation_mode,
+        )
+
+        domain = apply_reconciliation_mode(domain)
         reject_delete_orphans_after_limited_extracts(domain)
         return self
 
@@ -387,11 +403,17 @@ class WorkflowConfigSchema(BaseModel):
             else step.to_domain()
             for step in self.steps
         )
-        return WorkflowConfig(
-            name=self.name,
-            version=self.version,
-            defaults=defaults,
-            steps=steps,
+        from bioetl.domain.workflow._delete_orphans_scope import (
+            apply_reconciliation_mode,
+        )
+
+        return apply_reconciliation_mode(
+            WorkflowConfig(
+                name=self.name,
+                version=self.version,
+                defaults=defaults,
+                steps=steps,
+            )
         )
 
 

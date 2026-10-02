@@ -55,6 +55,14 @@ FOREIGN_KEY_ORPHAN_PIPELINE_DEFAULT = "workflow_transforms"
 
 
 @dataclass(frozen=True, slots=True)
+class GoldExpiryCommit:
+    """Commit clock and optimistic source version bound to one reconciliation."""
+
+    timestamp: str
+    expected_version: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class ReconciliationMutationSummary:
     """Compact mutation/quarantine summary for one FK reconciliation pass."""
 
@@ -95,6 +103,13 @@ async def apply_reconciliation_mutation(
             request,
             orphan_rows=orphan_rows,
         )
+
+    if request.reconciliation_mode == "selected-snapshot":
+        from bioetl.infrastructure.storage.workflow_selected_snapshots import (
+            validate_snapshot_versions,
+        )
+
+        await validate_snapshot_versions(host, request)
 
     if request.effective_mutation_layer == "gold":
         await expire_gold_orphan_rows(host, request, orphan_rows=orphan_rows)
@@ -150,6 +165,7 @@ async def delete_silver_orphan_rows(
         table_path,
         key_rows,
         merge_condition,
+        request.source_snapshot_version,
     )
 
 
@@ -158,9 +174,12 @@ def _delete_silver_orphan_rows_once(
     table_path: str,
     key_rows: list[dict[str, object]],
     merge_condition: str,
+    expected_version: int | None = None,
 ) -> object:
     """Execute one atomic Silver orphan-key deletion transaction."""
     delta_table = module.DeltaTable(table_path)
+    if expected_version is not None and delta_table.version() != expected_version:
+        raise ValueError("selected snapshot drift before Silver commit")
     source = pa.Table.from_pylist(key_rows)
     source_reader = pa.RecordBatchReader.from_batches(
         source.schema,
@@ -246,7 +265,7 @@ async def expire_gold_orphan_rows(
             merge_condition,
             valid_to_col,
             current_flag_col,
-            ts_iso,
+            GoldExpiryCommit(ts_iso, request.source_snapshot_version),
         )
 
     await _run_gold_write_with_retry(
@@ -279,10 +298,12 @@ def _expire_gold_orphan_rows_once(
     merge_condition: str,
     valid_to_col: str,
     current_flag_col: str,
-    ts_iso: str,
+    commit: GoldExpiryCommit,
 ) -> object:
     """Execute one retryable Gold SCD2 orphan-expiry merge attempt."""
     dt = module.DeltaTable(table_path)
+    if commit.expected_version is not None and dt.version() != commit.expected_version:
+        raise ValueError("selected snapshot drift before Gold commit")
     source = pa.Table.from_pylist(key_rows)
     source_reader = pa.RecordBatchReader.from_batches(
         source.schema, source.to_batches()
@@ -296,7 +317,7 @@ def _expire_gold_orphan_rows_once(
         )
         .when_matched_update(
             updates={
-                valid_to_col: f"'{ts_iso}'",
+                valid_to_col: f"'{commit.timestamp}'",
                 current_flag_col: "false",
             }
         )

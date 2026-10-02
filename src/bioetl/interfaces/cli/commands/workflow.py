@@ -93,6 +93,12 @@ def workflow() -> None:
     help="Override pipeline start_offset for workflow pipeline steps",
 )
 @typed_click_option(
+    "--reconciliation-mode",
+    type=click.Choice(["complete-reference", "selected-snapshot"]),
+    default=None,
+    help="Opt in to reconciliation against selected bounded snapshots; default complete-reference.",
+)
+@typed_click_option(
     "--limit",
     type=int,
     help="Override pipeline record limit for workflow pipeline steps",

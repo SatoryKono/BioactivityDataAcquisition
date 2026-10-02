@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
-from typing import Protocol, runtime_checkable
+from typing import Protocol, cast, runtime_checkable
 
 from deltalake.exceptions import DeltaError
 
@@ -90,6 +90,16 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
     gold_writer: GoldReconciliationReaderProtocol | None = None
     artifact_sink: ReconcileDebugArtifactSinkProtocol | None = None
 
+    async def capture_pipeline_snapshots(
+        self, pipeline_name: str, run_id: str
+    ) -> dict[str, dict[str, object]]:
+        """Pin persisted producer versions before later workflow steps execute."""
+        from bioetl.infrastructure.storage.workflow_selected_snapshots import (
+            capture_pipeline_snapshots,
+        )
+
+        return await capture_pipeline_snapshots(self, pipeline_name, run_id)
+
     async def reconcile_foreign_keys(
         self,
         request: ForeignKeyReconciliationRequest,
@@ -99,6 +109,9 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                 "SilverForeignKeyReconciliationAdapter supports only delete_orphans"
             )
         log_reconciliation_started(self, request)
+
+        if request.reconciliation_mode == "selected-snapshot":
+            return await self._reconcile_selected_snapshots(request)
 
         source_rows = await read_source_rows(self, request)
         if source_rows is None:
@@ -181,6 +194,27 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                     error_type=type(exc).__name__,
                 )
         return result
+
+    async def _reconcile_selected_snapshots(
+        self, request: ForeignKeyReconciliationRequest
+    ) -> ForeignKeyReconciliationResult:
+        """Use fixed producer versions and preserve the mutation lineage."""
+        from bioetl.infrastructure.storage.workflow_selected_snapshots import (
+            read_selected_rows,
+            selected_result,
+            validate_snapshot_versions,
+        )
+
+        await validate_snapshot_versions(self, request)
+        source_rows = await read_selected_rows(self, request, reference=False)
+        reference_rows = await read_selected_rows(self, request, reference=True)
+        key = f"{request.source_layer}:{request.source_table}"
+        pinned = (request.selected_snapshots or {})[key]
+        request = replace(request, source_snapshot_version=cast(int, pinned["version"]))
+        result = await self._reconcile_loaded_rows(
+            request, source_rows=source_rows, reference_rows=reference_rows
+        )
+        return await selected_result(self, request, result)
 
     def _record_metrics(self, *, scanned: int, retained: int, deleted: int) -> None:
         record_reconciliation_metrics(
