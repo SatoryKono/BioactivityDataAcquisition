@@ -300,14 +300,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "307",
+      "line": "308",
       "path": "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_record_retry_budget_exhausted_silent_without_logger"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "418",
+      "line": "419",
       "path": "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_log_retry_silent_without_logger"
@@ -1470,14 +1470,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "307",
+        "line": "308",
         "path": "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_record_retry_budget_exhausted_silent_without_logger"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "418",
+        "line": "419",
         "path": "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_log_retry_silent_without_logger"
@@ -2058,7 +2058,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "036f9730ef5d1771071a0a7771b9e505e097f543309ec5ede4c644199e5faf46",
+  "source_tree_sha256": "cc3061ba9f36562765843e8b572b7cfe221c6e0c743cb1420b9714b42d3804bd",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 83,

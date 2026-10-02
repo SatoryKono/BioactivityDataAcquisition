@@ -2,7 +2,7 @@
 
 # `chembl_activity` Pipeline Dataflow Passport
 
-Generated: **2026-09-11**
+Generated: **2026-10-02**
 Generator: **1.0.0**  
 IR schema: **1.0.0**  
 Effective config SHA256: `55381d8cf6325f61a3b111816879352c735069482fb0ea57e059d358794ab65c`<br>
@@ -139,7 +139,7 @@ Machine-readable companions: [IR JSON](pipeline-dataflow-ir.json) and [field CSV
 | `assay_type` | enum | false | error | `{"allowed":["B","F","A","T","P","U"]}` |
 | `data_validity_comment` | enum | true | error | `{"allowed":["Potential missing data","Potential author error","Manually validated","Potential transcription error","Outside typical range","Non standard unit for type","Author confirmed error"]}` |
 | `standard_units` | enum | true | error | `{"allowed":["nM","µM","mM","pM","M","%","ug.mL-1","mg.kg-1"]}` |
-| `units` | pattern | true | error | `{"pattern":"^(?:[A-Za-zµ%][A-Za-z0-9µ%._-]*\|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$"}` |
+| `units` | pattern | true | error | `{"pattern":"^[A-Za-zµ%][A-Za-z0-9µ%._-]*(?:[ /][A-Za-zµ%][A-Za-z0-9µ%._-]*)*$"}` |
 | `qudt_units` | pattern | true | error | `{"pattern":"^(?:https?://[^\\s]+\|[A-Za-zµ%][A-Za-z0-9µ%._/-]*\|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$"}` |
 | `uo_units` | pattern | true | error | `{"pattern":"^(?:UO_[0-9]{7}\|[A-Za-zµ%][A-Za-z0-9µ%._-]*)$"}` |
 | `bao_endpoint_iri` | pattern | true | error | `{"pattern":"^https?://[^\\s]+$"}` |

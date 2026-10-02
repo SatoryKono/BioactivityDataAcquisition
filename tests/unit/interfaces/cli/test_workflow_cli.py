@@ -63,9 +63,8 @@ pytestmark = pytest.mark.unit
 def _limit_safe_multi_pipeline_workflow() -> WorkflowConfig:
     """Workflow that stays valid when CLI --limit is applied to every extract.
 
-    Production chembl_core keeps delete_orphans downstream of assay/target
-    extracts; stamping --limit onto those steps is rejected by
-    reject_delete_orphans_after_limited_extracts (#8989).
+    This fixture tests CLI option forwarding without FK reconciliation.
+    Production chembl_core separately verifies an explicitly bound cohort.
     """
     return WorkflowConfig(
         name="chembl_core",

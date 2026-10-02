@@ -43,13 +43,14 @@ import pytest
 
 from bioetl.domain.ports import CircuitBreakerPort
 from bioetl.domain.ports.noop import NoOpTracing
-from bioetl.domain.types import CircuitBreakerState
 from bioetl.domain.exceptions import (
     CircuitBreakerOpenError,
     RecoverableError,
     RetryExhaustedError,
 )
 from bioetl.domain.resilience import RetryConfig
+from bioetl.domain.types import CircuitBreakerState
+from bioetl.infrastructure.adapters.http import request_timing
 from bioetl.infrastructure.adapters.http.client_retry_mixin import HTTPClientRetryMixin
 
 
@@ -536,6 +537,7 @@ async def test_request_with_retry_honors_retry_after_in_full_flow(
     default_config: RetryConfig,
     mock_logger: MagicMock,
     mock_tracing: tuple[MagicMock, MagicMock, MagicMock],
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """503 + Retry-After should sleep for the header value before retrying."""
     tracing, _, span = mock_tracing
@@ -552,20 +554,19 @@ async def test_request_with_retry_honors_retry_after_in_full_flow(
     ]
     client.circuit_breaker.call.side_effect = _passthrough_circuit_breaker_call
 
-    clock = [0.0]
+    clock = {"now": 0.0}
 
     async def advance_clock(delay: float) -> None:
-        clock[0] += delay
+        clock["now"] += delay
 
-    with (
-        patch(
-            "bioetl.infrastructure.adapters.http.request_timing.time",
-            SimpleNamespace(monotonic=lambda: clock[0]),
-        ),
-        patch(
-            "asyncio.sleep", new_callable=AsyncMock, side_effect=advance_clock
-        ) as mock_sleep,
-    ):
+    # Sleeping must advance the same clock used by client-scoped cooldown.
+    # Replace the module reference, leaving asyncio's real loop clock intact.
+    monkeypatch.setattr(
+        request_timing, "time", SimpleNamespace(monotonic=lambda: clock["now"])
+    )
+    with patch(
+        "asyncio.sleep", new_callable=AsyncMock, side_effect=advance_clock
+    ) as mock_sleep:
         response = await client._request_with_retry(
             "GET",
             "https://api.example.com/data",
