@@ -51,9 +51,12 @@ def _node_eval(program: str) -> str:
 def test_navigation_matches_canonical_links_and_retains_focus_and_geometry_guards() -> None:
     output = _node_eval(r"""
 const fs = require('fs');
-const {navigationValidationFromDom: validate} = require(process.argv[1]);
+const {navigationValidationFromDom: validate, dashboardEntryFromPayload} = require(process.argv[1]);
 const source = JSON.parse(fs.readFileSync('grafana/dashboards/bioetl-overview-v2.json', 'utf8'));
-const html = source.panels.find(panel => panel.id === 1000).options.content;
+const entry = dashboardEntryFromPayload(source);
+const html = entry.navigationHtml;
+if (!entry.navigationExpected || html !== source.panels.find(panel => panel.id === 1000).options.content)
+  throw new Error('Canonical navigation HTML was lost in dashboard projection');
 const rect = {left:0,right:1000,top:0,bottom:100,height:100};
 let focusVisible = true;
 let panelRect = rect;
@@ -105,6 +108,34 @@ console.log(JSON.stringify({good,missing,extra,foreign,wrongTitle,invisibleFocus
     assert result["invisibleFocus"]["focusIndicatorVisible"] is False
     assert result["overflow"]["status"] == "error"
     assert result["overflow"]["linksInsidePanel"] is False
+
+
+def test_navigation_projection_preserves_raw_source_options_and_absence() -> None:
+    output = _node_eval(r"""
+const fs = require('fs');
+const {dashboardEntryFromPayload: project} = require(process.argv[1]);
+const source = JSON.parse(fs.readFileSync('grafana/dashboards/bioetl-overview-v2.json','utf8'));
+const overview = project(source);
+const nested = project({uid:'nested', panels:[{id:1,type:'row',panels:source.panels.filter(p=>p.id===1000)}]});
+const absent = project({uid:'without-navigation',panels:source.panels.filter(p=>p.id!==1000)});
+let duplicateRejected = false;
+try {project({uid:'duplicate',panels:[source.panels.find(p=>p.id===1000),source.panels.find(p=>p.id===1000)]});}
+catch {duplicateRejected = true;}
+console.log(JSON.stringify({overviewExpected:overview.navigationExpected,
+  sourceOptionsPreserved:overview.navigationHtml===source.panels.find(p=>p.id===1000).options.content,
+  sourceLinks:(overview.navigationHtml.match(/<a\b/g)||[]).length,
+  nestedOptionsPreserved:nested.navigationHtml===overview.navigationHtml,
+  absentExpected:absent.navigationExpected, absentHtml:absent.navigationHtml,duplicateRejected}));
+""")
+    assert json.loads(output) == {
+        "overviewExpected": True,
+        "sourceOptionsPreserved": True,
+        "sourceLinks": 4,
+        "nestedOptionsPreserved": True,
+        "absentExpected": False,
+        "absentHtml": "",
+        "duplicateRejected": True,
+    }
 
 
 def test_navigation_absence_is_applicable_only_when_canonical_model_omits_it() -> None:

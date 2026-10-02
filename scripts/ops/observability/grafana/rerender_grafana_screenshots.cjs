@@ -798,6 +798,14 @@ async function createBrowserContext(browser, nativeContext = null) {
   };
 }
 
+function canonicalNavigationPanels(panels) {
+  return panels.flatMap(panel => {
+    if (!panel || typeof panel !== "object") return [];
+    const nested = Array.isArray(panel.panels) ? canonicalNavigationPanels(panel.panels) : [];
+    return panel.id === 1000 ? [panel, ...nested] : nested;
+  });
+}
+
 function dashboardEntryFromPayload(payload) {
   const uid = typeof payload.uid === "string" ? payload.uid : "";
   const title = typeof payload.title === "string" ? payload.title : uid;
@@ -809,6 +817,10 @@ function dashboardEntryFromPayload(payload) {
   }
   const slug = grafanaSlugify(title) || uid;
   const panels = Array.isArray(payload.panels) ? payload.panels : [];
+  const navigationPanels = canonicalNavigationPanels(panels);
+  if (navigationPanels.length > 1) {
+    throw new Error(`${uid} has duplicate canonical navigation panels id=1000`);
+  }
   const allRequiredPanels = requiredNonRowPanels(
     panels,
     CONFIG.expandCollapsedRows,
@@ -839,8 +851,8 @@ function dashboardEntryFromPayload(payload) {
     url: `/d/${uid}/${slug}`,
     file: `${uid}.png`,
     requiredPanels,
-    navigationHtml: allRequiredPanels.find(panel => panel.id === 1000)?.options?.content || "",
-    navigationExpected: allRequiredPanels.some(panel => panel.id === 1000),
+    navigationHtml: navigationPanels[0]?.options?.content || "",
+    navigationExpected: navigationPanels.length === 1,
     firstWindowPanels: selectContainmentPanels(panels, CONFIG.navigationOnly).map(summarizeFirstWindowPanel),
     requiredTerminalPanelIds:
       uid === "bioetl-silver-reject-explorer" ? [13] : [],
@@ -2697,6 +2709,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  dashboardEntryFromPayload,
   closeCaptureBrowser,
   mergeTerminalObservations,
   mergeTypographyObservations,
