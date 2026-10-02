@@ -23,7 +23,7 @@ async def test_slow_reconciliation_allows_other_requests_to_progress(monkeypatch
         readiness, "report_root_readiness_check", lambda: {"status": "healthy"}
     )
     monkeypatch.setattr(readiness, "enforce_report_root_marker", lambda: True)
-    monkeypatch.setattr(readiness, "create_run_report_store", Mock())
+    host._run_report_store = Mock()
 
     def slow_check(**_kwargs):
         entered.set()

@@ -92,16 +92,18 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
         for spec in audit_subject.REVIEWED_PANEL_SPECS
     }
 
-    assert covered[("bioetl-control-plane-v1", 892)] == "Track Checkpoint"
-    assert covered[("bioetl-control-plane-v1", 9402)] == "ID"
-    assert covered[("bioetl-control-plane-v1", 9403)] == "Processed Records"
+    assert ("bioetl-control-plane-v1", 892) not in covered
+    assert covered[("bioetl-control-plane-v1", 9422)] == "Review Exact Replay Readiness"
+    assert covered[("bioetl-control-plane-v1", 9418)] == "Review Selected-Run Trust"
     assert covered[("bioetl-dq-v2", 9402)] == "ID"
     assert covered[("bioetl-dq-v2", 9403)] == "Processed Records"
     assert ("bioetl-silver-reject-explorer", 3) not in covered
-    assert covered[("bioetl-overview-v2", 9301)] == "Processed Records"
-    assert covered[("bioetl-runtime", 9403)] == "Processed Records"
-    assert covered[("bioetl-provider-health-v2", 9403)] == "Processed Records"
+    assert ("bioetl-overview-v2", 9301) not in covered
+    assert ("bioetl-runtime", 9403) not in covered
+    assert ("bioetl-provider-health-v2", 9403) not in covered
     assert ("bioetl-workflow-overview", 9403) not in covered
+    for spec in audit_subject.REVIEWED_PANEL_SPECS:
+        assert audit_subject._find_panel(spec)["id"] == spec.panel_id
 
 
 @pytest.mark.parametrize("value", ["NaN", "+Inf", "-Inf"])
@@ -1070,8 +1072,9 @@ def test_silver_reject_explorer_generic_links_do_not_receive_primary_run_context
 
 def test_runtime_log_hygiene_trend_panel_258_is_not_shipped() -> None:
     """Loki log-hygiene trend panel id=258 was removed from bioetl-runtime."""
+    assert not Path("grafana/dashboards/bioetl-runtime.json").exists()
     dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-runtime.json").read_text(encoding="utf-8")
+        Path("grafana/dashboards/bioetl-overview-v2.json").read_text(encoding="utf-8")
     )
 
     def walk_panels(panels: list[dict[str, Any]]) -> list[dict[str, Any]]:

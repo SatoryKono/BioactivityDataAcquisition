@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from functools import partial
 from typing import Protocol
 
 from bioetl.application.observability.control_plane_evidence import (
@@ -13,6 +14,7 @@ from bioetl.domain.ports import (
     CheckpointPort,
     RunLedgerPort,
     RunManifestPort,
+    RunReportStorePort,
     WorkflowManifestPort,
 )
 from bioetl.interfaces.http._forensic_request_budget import (
@@ -76,6 +78,9 @@ class _HealthResponseSupport(Protocol):
 
 
 class _HealthRoutingHost(_HealthResponseSupport, Protocol):
+    @property
+    def _run_report_store(self) -> RunReportStorePort: ...
+
     @property
     def _control_plane_evidence_service(
         self,
@@ -256,7 +261,8 @@ async def _filter_options_payload(
     query: dict[str, str],
 ) -> dict[str, object]:
     """Build options without writing after the caller's deadline expires."""
-    assert host._run_manifest_port is not None
+    manifest_port = host._run_manifest_port
+    assert manifest_port is not None
     dimension = host._read_optional_param(query, "dimension") or "run_id"
     requested_pipeline = (
         host._read_required_param(query, "pipeline")
@@ -283,7 +289,7 @@ async def _filter_options_payload(
 
     async def manifest_options() -> dict[str, object]:
         manifests, workflow_manifests = await host._selector_catalog.read(
-            host._run_manifest_port,
+            manifest_port,
             host._workflow_manifest_port,
         )
         return await asyncio.to_thread(
@@ -308,7 +314,9 @@ async def _filter_options_payload(
 
     manifest_task = asyncio.create_task(manifest_options())
     report_task = asyncio.create_task(
-        host._selector_catalog.read_reports(scopes, load_report_selector_entries)
+        host._selector_catalog.read_reports(
+            scopes, partial(load_report_selector_entries, store=host._run_report_store)
+        )
         if include_reports
         else asyncio.sleep(0, result=[]),
     )

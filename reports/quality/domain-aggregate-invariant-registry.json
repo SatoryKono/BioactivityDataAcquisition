@@ -7,6 +7,13 @@
         "src/bioetl/domain/aggregates/_batch_aggregate.py",
         "src/bioetl/domain/aggregates/batch.py"
       ],
+      "invariant_test_links": [
+        {
+          "invariant": "record indices are deterministic and monotonically allocated from start_index",
+          "test_path": "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
+          "test_symbol": "test_record_indices_follow_start_index_law"
+        }
+      ],
       "invariants": [
         "batch_id and run_id are assigned at creation and exposed read-only",
         "record indices are deterministic and monotonically allocated from start_index",
@@ -26,6 +33,13 @@
       "implementation_modules": [
         "src/bioetl/domain/aggregates/pipeline_run.py",
         "src/bioetl/domain/aggregates/pipeline_run_stage_result.py"
+      ],
+      "invariant_test_links": [
+        {
+          "invariant": "completed runs require at least one successful stage and no failed stages",
+          "test_path": "tests/unit/domain/aggregates/test_pipeline_run_invariant_properties.py",
+          "test_symbol": "test_success_only_stage_sequences_can_complete"
+        }
       ],
       "invariants": [
         "run_id is assigned at creation and exposed read-only",
@@ -47,6 +61,13 @@
         "src/bioetl/domain/aggregates/_quarantine_value_objects.py",
         "src/bioetl/domain/aggregates/quarantine_entry.py"
       ],
+      "invariant_test_links": [
+        {
+          "invariant": "payload is defensively copied at capture and exposed without caller aliasing",
+          "test_path": "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py",
+          "test_symbol": "test_payload_and_metadata_accessors_are_defensive"
+        }
+      ],
       "invariants": [
         "payload is defensively copied at capture and exposed without caller aliasing",
         "payload_hash is computed canonically from payload and remains immutable",
@@ -62,8 +83,9 @@
       ]
     }
   ],
-  "generated_by": "tests/architecture/test_domain_aggregate_invariant_registry.py",
+  "generated_by": "scripts/engineering/qa/report_architecture_quality_scorecard.py",
   "schema_version": 1,
+  "semantic_completeness": "not_assessed; selected invariant links only",
   "summary": {
     "aggregates_with_invariant_tests": 3,
     "missing_source_paths": [],

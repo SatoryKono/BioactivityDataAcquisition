@@ -767,11 +767,7 @@ def _overview_selected_run_layout(p: dict[int, dict], summary: dict) -> None:
 
 def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
     """Expose explanations without replacing the aggregate saved-run verdict."""
-    summary = next(
-        panel
-        for panel in p.values()
-        if panel.get("id") == 9603
-    )
+    summary = p[9603 if overview else 9406]
     source = p[9002] if overview else p[9451]
     _bind_selected_run_envelope(summary, source)
     summary_fields = ["execution_state", "verdict", "saved_trust", "reason_display"]

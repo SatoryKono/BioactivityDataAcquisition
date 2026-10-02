@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import urlencode
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.domain.ports import RunManifestPort
+from bioetl.domain.ports import RunManifestPort, RunReportStorePort
 from bioetl.interfaces.http._control_plane_selector_records import (
     RunLedgerLookup,
     SelectorRecord,
@@ -15,8 +15,8 @@ from bioetl.interfaces.http._control_plane_selector_records import (
     narrow_manifest_catalog,
 )
 from bioetl.interfaces.http._recent_run_presentation import recent_run_presentation
+from bioetl.interfaces.http.run_report_index import _normalize_list_owner
 from bioetl.interfaces.http.run_report_ops import (
-    _normalize_list_owner,
     _validated_artifact_paths,
     list_pipeline_run_report_payloads,
 )
@@ -186,6 +186,7 @@ def list_recent_pipeline_runs(
     root: Path | None = None,
     lookup_run_id: str | None = None,
     now: datetime | None = None,
+    store: RunReportStorePort | None = None,
 ) -> dict[str, object]:
     """Filter and rank all identities before taking one global bounded page.
 
@@ -197,6 +198,7 @@ def list_recent_pipeline_runs(
         limit=None,
         root=root,
         selected_run_id=selected_run_id,
+        store=store,
     )
     if payload["index_state"] not in {"ok", "valid_empty"}:
         return payload

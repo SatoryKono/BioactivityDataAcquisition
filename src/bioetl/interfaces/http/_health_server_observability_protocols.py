@@ -6,7 +6,7 @@ import asyncio
 from typing import Protocol
 
 from bioetl.domain.control_plane import RunLedgerEntry
-from bioetl.domain.ports import RunManifestPort
+from bioetl.domain.ports import RunManifestPort, RunReportStorePort
 from bioetl.domain.types import RunID
 
 
@@ -40,6 +40,9 @@ class _RunLedgerLookup(Protocol):
 
 
 class _HealthObservabilityRoutingHost(_HealthResponseSupport, Protocol):
+    @property
+    def _run_report_store(self) -> RunReportStorePort: ...
+
     @property
     def _run_manifest_port(self) -> RunManifestPort | None: ...
 

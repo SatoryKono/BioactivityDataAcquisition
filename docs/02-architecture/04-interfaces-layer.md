@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-05'
+  Last verified: '2026-10-02'
 
 ______________________________________________________________________
 
@@ -35,7 +35,7 @@ ______________________________________________________________________
 
 Реализует CLI для взаимодействия с пользователем. Использует библиотеку **Click** для определения команд.
 
-**Доступные top-level команды и support/compat модули в `commands/` (снимок синхронизирован на 2026-10-01, ARCH-007 #11859):**
+**Доступные top-level команды и support/compat модули в `commands/` (снимок сверён с `cli/main.py` на 2026-10-02, ARCH-007 #11859):**
 
 | Команда         | Модуль             | Описание                                                                            |
 | --------------- | ------------------ | ----------------------------------------------------------------------------------- |
@@ -62,6 +62,12 @@ ______________________________________________________________________
 | `workflow`      | `workflow.py`      | Декларативные workflow-команды                                                      |
 
 **Вспомогательные реализации:**
+
+Команды `report` получают один `RunReportStorePort` на вызов CLI-группы.
+HTTP bootstrap передаёт свой экземпляр серверу; readiness, списки отчётов,
+selected-run assessment и selector catalog используют этот порт повторно.
+Самостоятельные вызовы reader-функций сохраняют локальный fallback через
+composition factory; глобального singleton report store нет.
 
 Support-only helpers are not published as top-level command seams. Import
 `domains/health/*` and `domains/quarantine/*` owner modules directly from inside

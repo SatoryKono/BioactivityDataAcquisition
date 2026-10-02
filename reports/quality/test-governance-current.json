@@ -342,21 +342,21 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "200",
+      "line": "206",
       "path": "tests/unit/infrastructure/factories/test_factories.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_completes"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "335",
+      "line": "337",
       "path": "tests/unit/infrastructure/factories/test_storage_adapter.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_storage_bundle_close__aclose__a7cd7e53"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "343",
+      "line": "345",
       "path": "tests/unit/infrastructure/factories/test_storage_adapter.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_storage_bundle_close__aclose_is_noop__ee03f62b"
@@ -1512,21 +1512,21 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "200",
+        "line": "206",
         "path": "tests/unit/infrastructure/factories/test_factories.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_completes"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "335",
+        "line": "337",
         "path": "tests/unit/infrastructure/factories/test_storage_adapter.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_storage_bundle_close__aclose__a7cd7e53"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "343",
+        "line": "345",
         "path": "tests/unit/infrastructure/factories/test_storage_adapter.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_storage_bundle_close__aclose_is_noop__ee03f62b"
@@ -2010,8 +2010,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2960,
-      "test_python_file_count": 3194,
+      "test_glob_file_count": 2966,
+      "test_python_file_count": 3200,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2052,13 +2052,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2960,
-    "total_test_functions": 29046,
+    "total_test_files": 2966,
+    "total_test_functions": 29090,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "180f3affc8c503e96ee48a93a01bf79b6fff16799a165966b3a16ea5ea5b6450",
+  "source_tree_sha256": "96018c86730c3bc53229ad9aaffcaae7fd792fd116615c52629afa82b8c4b876",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 83,
@@ -2078,8 +2078,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2960,
-    "test_python_file_count": 3194,
+    "test_glob_file_count": 2966,
+    "test_python_file_count": 3200,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2120,8 +2120,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2960,
-  "total_test_functions": 29046,
+  "total_test_files": 2966,
+  "total_test_functions": 29090,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

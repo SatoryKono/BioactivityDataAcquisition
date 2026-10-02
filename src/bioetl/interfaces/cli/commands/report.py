@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -18,17 +19,35 @@ from bioetl.application.services.run_reports.query import (
     prune_reports,
 )
 from bioetl.composition.observability_runtime import create_run_report_store
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     typed_click_group,
     typed_click_option,
     typed_group_command,
+    typed_pass_context,
 )
 from bioetl.interfaces.http.report_root_config import configured_report_root
 
 
+@dataclass(frozen=True, slots=True)
+class _ReportDependencies:
+    store: RunReportStorePort
+
+
+def _report_store(ctx: click.Context) -> RunReportStorePort:
+    """Bind one store to this invocation, including standalone subcommands."""
+    deps = ctx.find_object(_ReportDependencies)
+    if deps is None:
+        deps = _ReportDependencies(create_run_report_store())
+        ctx.obj = deps
+    return deps.store
+
+
 @typed_click_group()
-def report() -> None:
+@typed_pass_context
+def report(ctx: click.Context) -> None:
     """Inspect and manage local pipeline/workflow run reports."""
+    _report_store(ctx)
 
 
 @typed_group_command(report, "show")
@@ -46,7 +65,9 @@ def report() -> None:
 @typed_click_option(
     "--json", "as_json", is_flag=True, help="Print JSON instead of markdown"
 )
+@typed_pass_context
 def show_command(
+    ctx: click.Context,
     pipeline: str | None,
     run_id: str | None,
     workflow: str | None,
@@ -56,6 +77,7 @@ def show_command(
     as_json: bool,
 ) -> None:
     """Show one pipeline or workflow run report."""
+    store = _report_store(ctx)
     report_root = configured_report_root(root=root)
     if pipeline:
         payload = load_pipeline_report(
@@ -63,7 +85,7 @@ def show_command(
             run_id=run_id,
             latest=latest or run_id is None,
             root=report_root,
-            store=create_run_report_store(),
+            store=store,
         )
         if payload is None:
             raise click.ClickException(
@@ -77,7 +99,7 @@ def show_command(
             workflow_run_id=workflow_run_id,
             latest=latest or workflow_run_id is None,
             root=report_root,
-            store=create_run_report_store(),
+            store=store,
         )
         if payload is None:
             raise click.ClickException(
@@ -99,20 +121,23 @@ def show_command(
     type=click.Path(path_type=Path),
     help="Reports root",
 )
+@typed_pass_context
 def list_command(
+    ctx: click.Context,
     pipeline: str | None,
     workflow: str | None,
     limit: int,
     root: Path | None,
 ) -> None:
     """List recent run reports."""
+    store = _report_store(ctx)
     report_root = configured_report_root(root=root)
     if workflow and not pipeline:
         entries = list_workflow_reports(
             workflow_name=workflow,
             limit=limit,
             root=report_root,
-            store=create_run_report_store(),
+            store=store,
         )
         for item in entries:
             click.echo(
@@ -123,7 +148,7 @@ def list_command(
         pipeline_name=pipeline,
         limit=limit,
         root=report_root,
-        store=create_run_report_store(),
+        store=store,
     )
     for item in entries:
         click.echo(
@@ -141,25 +166,28 @@ def list_command(
     type=click.Path(path_type=Path),
     help="Reports root",
 )
+@typed_pass_context
 def diff_command(
+    ctx: click.Context,
     pipeline: str,
     run_id_a: str,
     run_id_b: str,
     root: Path | None,
 ) -> None:
     """Diff funnel and top reasons between two pipeline runs."""
+    store = _report_store(ctx)
     report_root = configured_report_root(root=root)
     left = load_pipeline_report(
         pipeline_name=pipeline,
         run_id=run_id_a,
         root=report_root,
-        store=create_run_report_store(),
+        store=store,
     )
     right = load_pipeline_report(
         pipeline_name=pipeline,
         run_id=run_id_b,
         root=report_root,
-        store=create_run_report_store(),
+        store=store,
     )
     if left is None or right is None:
         raise click.ClickException("one or both run reports were not found")
@@ -182,7 +210,9 @@ def diff_command(
     default=None,
     type=click.Path(path_type=Path),
 )
+@typed_pass_context
 def prune_command(
+    ctx: click.Context,
     kind: str,
     owner: str | None,
     max_count: int | None,
@@ -191,6 +221,7 @@ def prune_command(
     root: Path | None,
 ) -> None:
     """Prune old run report directories (dry-run by default)."""
+    store = _report_store(ctx)
     removed = prune_reports(
         kind=kind,
         owner=owner,
@@ -199,7 +230,7 @@ def prune_command(
         now=current_utc_time(),
         root=configured_report_root(root=root),
         dry_run=not apply,
-        store=create_run_report_store(),
+        store=store,
     )
     mode = "deleted" if apply else "would delete"
     for path in removed:

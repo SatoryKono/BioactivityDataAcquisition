@@ -527,6 +527,7 @@ def _rewrite_current_audit_report(*, old: str, live: str, current: object) -> No
     from scripts.engineering.qa.technical_debt_audit_registry import (
         SEMANTIC_SUMMARY_END,
         SEMANTIC_SUMMARY_START,
+        _headline_markers,
         build_current_audit_semantic_summary,
         render_current_audit_semantic_summary,
     )
@@ -544,6 +545,14 @@ def _rewrite_current_audit_report(*, old: str, live: str, current: object) -> No
             build_current_audit_semantic_summary(ROOT, current)
         )
         report = report[:start] + new_block + report[end + len(SEMANTIC_SUMMARY_END) :]
+    headline_start = "<!-- current-audit-headlines:start -->"
+    headline_end = "<!-- current-audit-headlines:end -->"
+    if headline_start in report and headline_end in report:
+        prefix, rest = report.split(headline_start, 1)
+        _, suffix = rest.split(headline_end, 1)
+        markers = _headline_markers(build_current_audit_semantic_summary(ROOT, current))
+        headlines = "\n\n".join(markers)
+        report = prefix + headline_start + "\n\n" + headlines + "\n\n" + headline_end + suffix
     if not report.endswith("\n"):
         report += "\n"
     _write_text_atomically(report_path, report)

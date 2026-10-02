@@ -145,9 +145,9 @@ class MergeMetricsRecorderMixin:
         if not enricher_cols:
             return 0
 
-        any_enriched = pl.any_horizontal(
-            [pl.col(col).is_not_null() for col in enricher_cols]
-        )
+        import polars.selectors as cs
+
+        any_enriched = pl.any_horizontal(cs.by_name(enricher_cols).is_not_null())
         # Avoid materializing a new DataFrame via filter; aggregate the mask directly
         return int(df.select(any_enriched.sum()).item())
 
@@ -184,14 +184,16 @@ class MergeMetricsRecorderMixin:
         if df_len == 0:
             return {}
 
-        target_cols = [col for col in df.columns if not col.startswith("_")]
-        if not target_cols:
+        import polars.selectors as cs
+
+        # Quick check if there are any non-private columns
+        if not any(not col.startswith("_") for col in df.columns):
             return {}
 
         # Batch evaluation into a single operation to avoid python loop overhead
         # ⚡ Bolt: Native DataFrame null_count() avoids FFI overhead from creating large expression lists.
-        # Performance impact: Considerably faster metric computation (e.g., 10x faster for 10,000 columns).
-        counts = df.select(target_cols).null_count().row(0, named=True)
+        # ⚡ Bolt: Using Polars selectors instead of list comprehensions over df.columns prevents FFI overhead.
+        counts = df.select((~cs.starts_with("_")).null_count()).row(0, named=True)
         return {col: (df_len - count) / df_len for col, count in counts.items()}
 
 

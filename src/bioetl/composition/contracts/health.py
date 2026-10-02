@@ -14,6 +14,7 @@ if TYPE_CHECKING:
         MetricsPort,
         RunLedgerPort,
         RunManifestPort,
+        RunReportStorePort,
         WorkflowManifestPort,
     )
 
@@ -25,6 +26,7 @@ class HealthServerDependenciesProtocol(Protocol):
     metrics: MetricsPort
     run_manifest_port: RunManifestPort
     workflow_manifest_port: WorkflowManifestPort
+    run_report_store: RunReportStorePort
 
 
 class HealthListenerDependenciesProtocol(Protocol):
@@ -37,6 +39,7 @@ class HealthListenerDependenciesProtocol(Protocol):
     run_ledger_port: RunLedgerPort
     workflow_manifest_port: WorkflowManifestPort
     metrics_exposition: object
+    run_report_store: RunReportStorePort
 
 
 class BronzeCleanupServiceProtocol(Protocol):
