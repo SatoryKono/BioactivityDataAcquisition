@@ -6,9 +6,14 @@ from collections.abc import Awaitable, Callable
 from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
-from uuid import UUID
+from typing import TYPE_CHECKING, Any
 
+from bioetl.application.services.execution.pipeline_run_context_service import (
+    missing_run_id_factory as missing_run_id_factory,
+)
+from bioetl.application.services.execution.pipeline_run_context_service import (
+    resolve_effective_run_id as resolve_effective_run_id,
+)
 from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunOptions,
@@ -210,7 +215,9 @@ def finalize_pipeline_run_report(
         )
         report = replace(
             report,
-            observations={} if options and options.dry_run else run_observations(),
+            observations={}
+            if options and options.dry_run
+            else dict(run_observations()),
         )
         written = write_pipeline_run_report(report, root=report_root, store=store)
     except Exception as exc:
@@ -327,14 +334,11 @@ def _require_execution_runner(runner: object) -> ExecutionMetricsRunnerPort:
     return runner
 
 
-_EMPTY_CACHED_BRONZE_PROVENANCE_MARKER = (
-    "Cached Bronze execution requires at least one persisted batch file"
-)
-
-
 def is_empty_cached_bronze_provenance_error(exc: BaseException) -> bool:
     """Return whether constructor failure is empty cached-Bronze provenance."""
-    return _EMPTY_CACHED_BRONZE_PROVENANCE_MARKER in str(exc)
+    return "Cached Bronze execution requires at least one persisted batch file" in str(
+        exc
+    )
 
 
 def constructor_failure_recorder(
@@ -347,10 +351,10 @@ def constructor_failure_recorder(
     started_at: datetime,
     finalize: Callable[[RunResult, RunOptions | None], RunResult],
     record_event: Callable[..., Awaitable[None]],
-) -> Callable[[Exception], Awaitable[None]]:
+) -> Callable[[Exception], Awaitable[RunResult]]:
     """Build an audited finalizer for failures before the runner can execute."""
 
-    async def record(exc: Exception) -> None:
+    async def record(exc: Exception) -> RunResult:
         completed_at = clock.now()
         await record_event(
             audit,
@@ -362,7 +366,7 @@ def constructor_failure_recorder(
             timestamp=completed_at,
             error_type=type(exc).__name__,
         )
-        finalize(
+        return finalize(
             RunResult(
                 status=PipelineRunResult.FAILED,
                 pipeline_name=pipeline_name,
@@ -403,23 +407,3 @@ async def record_pipeline_audit_event(
     if error_type is not None:
         event_data["error_type"] = error_type
     await audit.log_event(event_name, event_data, timestamp=timestamp)
-
-
-def resolve_effective_run_id(
-    *,
-    run_id: UUID | None,
-    options: RunOptions,
-    run_id_factory: Callable[[], RunID | UUID | str],
-) -> RunID:
-    if run_id is not None:
-        return cast(RunID, run_id)
-    if options.exact_replay:
-        raise ValueError("exact replay requires explicit run_id")
-    generated_run_id = run_id_factory()
-    if isinstance(generated_run_id, UUID):
-        return cast(RunID, generated_run_id)
-    return cast(RunID, UUID(str(generated_run_id)))
-
-
-def missing_run_id_factory() -> RunID:
-    raise RuntimeError("pipeline run_id_factory must be supplied by composition root")

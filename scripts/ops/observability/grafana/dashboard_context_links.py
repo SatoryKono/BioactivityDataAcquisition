@@ -103,7 +103,11 @@ def build_handoff_url(
     """Return a `/d/{uid}/{path}` URL with canonical var order and time range."""
     if target_uid == "bioetl-runtime":
         target_uid = "bioetl-overview-v2"
-        extras = {k: v for k, v in (extras or {}).items() if k not in {"stage", "provider_hint"}}
+        extras = {
+            k: v
+            for k, v in (extras or {}).items()
+            if k not in {"stage", "provider_hint"}
+        }
     if target_uid not in PATH_BY_UID:
         raise ValueError(f"unknown dashboard uid: {target_uid}")
     if not template and context is None:
@@ -140,9 +144,7 @@ def build_handoff_url(
     if target_uid == "bioetl-provider-health-v2":
         # Auto-select the pipeline's configured provider. Explicit All stays
         # only when the source variable itself is All.
-        resolved = (
-            "${provider_for_pipeline}" if provider == GRAFANA_ALL else provider
-        )
+        resolved = "${provider_for_pipeline}" if provider == GRAFANA_ALL else provider
         extra_values.setdefault("provider", resolved)
         extra_values.setdefault("pipeline_context", pipeline_context)
     return _assemble_url(target_uid, values=values, extras=extra_values)
@@ -513,13 +515,27 @@ def retire_runtime_links(node: object) -> None:
     elif isinstance(node, dict):
         for key, value in node.items():
             if isinstance(value, str):
-                if "bioetl-runtime" in value:
-                    value = re.sub(r"/d/bioetl-runtime(?:/[^?\s\"<>]+)?", "/d/bioetl-overview-v2/2-overview", value)
-                    value = value.replace("bioetl-runtime", "bioetl-overview-v2")
+                for retired_uid in ("bioetl-runtime", "bioetl-provider-health-v2"):
+                    if retired_uid in value:
+                        value = re.sub(
+                            rf"/d/{retired_uid}(?:/[^?\s\"<>]+)?",
+                            "/d/bioetl-overview-v2/2-overview",
+                            value,
+                        )
+                        value = value.replace(retired_uid, "bioetl-overview-v2")
                 if "/d/bioetl-overview-v2/" in value:
-                    value = re.sub(r"&(?:amp;)?var-(?:stage|provider_hint)=[^&\s\"<>]*", "", value)
-                    value = re.sub(r"&(?:amp;)?\$\{(?:stage|provider_hint):queryparam\}", "", value)
+                    value = re.sub(
+                        r"&(?:amp;)?var-(?:stage|provider_hint|provider|pipeline_context|adapter)=[^&\s\"<>]*",
+                        "",
+                        value,
+                    )
+                    value = re.sub(
+                        r"&(?:amp;)?\$\{(?:stage|provider_hint|provider|pipeline_context|adapter):queryparam\}",
+                        "",
+                        value,
+                    )
                 value = value.replace("Pipeline Diagnostics", "Run Overview")
+                value = value.replace("Open Provider Health", "Open Provider Evidence")
                 node[key] = value
             else:
                 retire_runtime_links(value)

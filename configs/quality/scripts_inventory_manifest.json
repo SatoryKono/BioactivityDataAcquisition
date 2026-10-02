@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-02T10:37:19.957803+00:00",
+  "generated_at": "2026-10-02T13:05:44.163636+00:00",
   "summary": {
     "total_scripts": 635,
     "status_counts": {
@@ -3075,7 +3075,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 379,
+          "line": 374,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         },
@@ -3126,7 +3126,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 376,
+          "line": 371,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
@@ -12830,13 +12830,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
-          "line": 177,
+          "line": 176,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
-          "line": 189,
+          "line": 188,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         }
@@ -14273,7 +14273,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_content_contract.py",
-          "line": 183,
+          "line": 184,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_dashboard_content_contract import ("
         }
@@ -16824,8 +16824,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "tests/unit/repo_backed/scripts/engineering/dev/test_setup_env_wsl_branches.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.run_local_coverage_verify import _windows_bash"
+        },
         {
           "path": "tests/unit/scripts/qa/test_run_local_coverage_verify.py",
           "line": 9,
@@ -20064,7 +20070,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2448,
+          "line": 2452,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20089,13 +20095,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2496,
+          "line": 2502,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 615,
+          "line": 625,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -20132,13 +20138,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2493,
+          "line": 2499,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 620,
+          "line": 630,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import ("
         },
@@ -20215,9 +20221,9 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2548,
+          "line": 2549,
           "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana._overview_identity import apply_saved_evidence_readability"
+          "text": "from scripts.ops.observability.grafana._overview_identity import ("
         }
       ]
     },
@@ -20236,9 +20242,9 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 60,
+          "line": 62,
           "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana._overview_quality import exclusion_quality_expression"
+          "text": "from scripts.ops.observability.grafana._overview_quality import ("
         }
       ]
     },
@@ -20251,19 +20257,19 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2512,
+          "line": 2518,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2521,
+          "line": 2527,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2538,
+          "line": 2544,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         }
@@ -20282,13 +20288,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2552,
+          "line": 2556,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._replay_layout import apply_replay_layout"
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2579,
+          "line": 2586,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._replay_layout import apply_replay_layout"
         }
@@ -20313,9 +20319,9 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2553,
+          "line": 2557,
           "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana._replay_readiness_design import apply_replay_readiness_design, apply_trust_action_display"
+          "text": "from scripts.ops.observability.grafana._replay_readiness_design import ("
         }
       ]
     },
@@ -20330,11 +20336,11 @@
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 260,
           "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana._run_explorer_columns import _RESET_FILTERS"
+          "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2507,
+          "line": 2513,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         }
@@ -20367,13 +20373,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1407,
+          "line": 1409,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import STATUS_URL"
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2529,
+          "line": 2535,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -20385,7 +20391,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 625,
+          "line": 635,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -20416,7 +20422,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2488,
+          "line": 2494,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
@@ -20435,7 +20441,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2501,
+          "line": 2507,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope"
         },
@@ -20826,7 +20832,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2441,
+          "line": 2445,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
@@ -20932,7 +20938,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2627,
+          "line": 2634,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.generate_prometheus_only_dashboards import ("
         },
@@ -22442,7 +22448,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 338,
+          "line": 333,
           "source_group": "tests",
           "text": "root / \"scripts/ops/runtime/mcp/apply-shared-to-devin.py\""
         }

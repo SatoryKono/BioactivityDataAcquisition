@@ -40,9 +40,7 @@ class MergeOutputWriterMixin:
                 return normalized[idx + len(layer) :]
         return path
 
-    def _coerce_null_columns(
-        self, df: pl.DataFrame
-    ) -> pl.DataFrame:
+    def _coerce_null_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Coerce Null-typed columns to String for Delta Lake compatibility."""
         host = cast("_MergeOutputHostProtocol", cast(object, self))
         import polars as pl

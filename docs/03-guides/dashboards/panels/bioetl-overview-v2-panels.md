@@ -155,11 +155,11 @@ uses the remaining 17 columns.
 - **Purpose:** Explain diagnostics navigation and handoffs.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 22. Review Run Identity
+### 22. Run Identity
 - **Type:** Table
-- **Purpose:** Show run ID, pipeline, run type, and timestamp.
-- **Data sources:** BioETL Ops HTTP control-plane identity endpoint
-  `/ops/control-plane/identity-table`; this is not a Prometheus panel.
+- **Purpose:** Show identity for the selected run alongside its status evidence.
+- **Data sources:** BioETL Ops HTTP selected-run status endpoint
+  `/ops/observability/selected-run-status`; this is not a Prometheus panel.
 
 ### 23. Review Processed Records — removed
 

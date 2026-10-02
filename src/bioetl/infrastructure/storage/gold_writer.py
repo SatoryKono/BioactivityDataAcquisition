@@ -196,8 +196,7 @@ class GoldWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         self._contract_rollout_policy = services.contract_rollout_policy
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
-        if TYPE_CHECKING:
-            _metadata_host: _GoldMetadataHost = self
+        _metadata_host: _GoldMetadataHost = self
 
     async def write_gold(
         self,

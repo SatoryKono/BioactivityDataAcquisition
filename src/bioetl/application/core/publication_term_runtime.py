@@ -21,10 +21,7 @@ def publication_pubmed_id(record: BronzeRecord) -> str | None:
         return None
     if isinstance(value, int):
         return str(value) if value > 0 else None
-    if isinstance(value, str):
-        stripped = value.strip()
-        return stripped or None
-    return None
+    return _as_nonempty_str(value)
 
 
 def _heading_as_mapping(heading: object) -> dict[str, object] | None:
@@ -52,8 +49,7 @@ def _qualifier_name(qualifier: object) -> str | None:
             parsed = _as_nonempty_str(qualifier.get(key))
             if parsed is not None:
                 return parsed
-    name = getattr(qualifier, "name", None)
-    return _as_nonempty_str(name) if isinstance(name, str) else None
+    return _as_nonempty_str(getattr(qualifier, "name", None))
 
 
 def mesh_terms_from_pubmed_headings(
@@ -76,13 +72,12 @@ def mesh_terms_from_pubmed_headings(
             mesh_id = _as_nonempty_str(mapping.get("descriptor_ui"))
             if heading_name is None:
                 continue
-            qualifier_names: list[str] = []
-            raw_qualifiers = mapping.get("qualifiers")
-            if isinstance(raw_qualifiers, list):
-                for qualifier in raw_qualifiers:
-                    parsed = _qualifier_name(qualifier)
-                    if parsed is not None:
-                        qualifier_names.append(parsed)
+            qualifiers = mapping.get("qualifiers")
+            qualifier_names = (
+                list(filter(None, map(_qualifier_name, qualifiers)))
+                if isinstance(qualifiers, list)
+                else []
+            )
             mesh_terms.append(
                 {
                     "mesh_heading": heading_name,
@@ -98,13 +93,11 @@ def mesh_terms_from_pubmed_headings(
                         "mesh_qualifier": extra,
                     }
                 )
-    keyword_terms: list[str] = []
-    if isinstance(keywords, list):
-        for keyword in keywords:
-            if isinstance(keyword, str):
-                stripped = keyword.strip()
-                if stripped:
-                    keyword_terms.append(stripped)
+    keyword_terms = (
+        list(filter(None, map(_as_nonempty_str, keywords)))
+        if isinstance(keywords, list)
+        else []
+    )
     return mesh_terms, keyword_terms
 
 

@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
@@ -12,7 +11,6 @@ from typing import Any
 
 from bioetl.application.services.run_reports.artifact_digest import (
     canonical_report_sha256,
-    file_sha256,
 )
 from bioetl.application.services.run_reports.markdown import (
     render_pipeline_run_report_markdown,
@@ -98,10 +96,8 @@ def resolve_workflow_report_dir(
 
 
 def _stored_sha256(path: Path, store: RunReportStorePort) -> str:
-    """Hash persisted bytes when the path is on disk, else the stored UTF-8 text."""
-    if path.is_file():
-        return file_sha256(path)
-    return hashlib.sha256(store.read_text(str(path)).encode("utf-8")).hexdigest()
+    """Obtain persisted artifact identity through the selected storage backend."""
+    return store.sha256(str(path))
 
 
 def _atomic_write_text(path: Path, content: str, *, store: RunReportStorePort) -> None:
@@ -154,12 +150,12 @@ def _with_self_artifacts(
 
 
 def _with_kind_digest(
-    artifacts: tuple[dict[str, Any], ...],
+    artifacts: tuple[dict[str, object], ...],
     *,
     kind: str,
     sha256: str,
-) -> tuple[dict[str, Any], ...]:
-    items: list[dict[str, Any]] = []
+) -> tuple[dict[str, object], ...]:
+    items: list[dict[str, object]] = []
     for item in artifacts:
         if str(item.get("kind")) == kind:
             items.append({**item, "sha256": sha256})

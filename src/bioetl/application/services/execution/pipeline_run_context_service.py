@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, TypeVar, cast
+from uuid import UUID
 
 from bioetl.domain.context import (
     CachedBronzeContext,
@@ -146,3 +147,23 @@ class PipelineRunContextService:
                 date=options.cached_bronze_date,
             )
         return CachedBronzeContext.disabled()
+
+
+def resolve_effective_run_id(
+    *,
+    run_id: UUID | None,
+    options: RunOptions,
+    run_id_factory: Callable[[], RunID | UUID | str],
+) -> RunID:
+    if run_id is not None:
+        return cast(RunID, run_id)
+    if options.exact_replay:
+        raise ValueError("exact replay requires explicit run_id")
+    generated_run_id = run_id_factory()
+    if isinstance(generated_run_id, UUID):
+        return cast(RunID, generated_run_id)
+    return cast(RunID, UUID(str(generated_run_id)))
+
+
+def missing_run_id_factory() -> RunID:
+    raise RuntimeError("pipeline run_id_factory must be supplied by composition root")

@@ -37,7 +37,7 @@ def build_artifacts_from_result(
 
 def _cached_bronze_batch_artifacts(
     options: RunOptions | None,
-) -> list[dict[str, Any]]:
+) -> list[dict[str, object]]:
     if (
         options is None
         or not options.use_cached_bronze
@@ -55,7 +55,7 @@ def _cached_bronze_batch_artifacts(
     pattern = (
         "batch_*.jsonl.zst" if options.cached_bronze_date else "**/batch_*.jsonl.zst"
     )
-    items: list[dict[str, Any]] = []
+    items: list[dict[str, object]] = []
     for batch_file in sorted(search_root.glob(pattern)):
         if not batch_file.is_file():
             continue
