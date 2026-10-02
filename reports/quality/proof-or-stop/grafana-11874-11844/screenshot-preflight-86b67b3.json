@@ -1,0 +1,39 @@
+{
+  "checks": [
+    {
+      "name": "grafana",
+      "status": "ok",
+      "detail": "http://localhost:3002/api/health reachable"
+    },
+    {
+      "name": "panel-3010-terminal-states",
+      "status": "ok",
+      "detail": "3010 positive render must classify healthy; successful empty must classify valid-empty (noValue starts with VALID EMPTY); a visible TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is a healthy fail-closed bind/origin state (HTTP 200), not explicit-error. Missing datasource or bootstrap deferred/failed must classify explicit-error. explicit-error is not success for positive 3010 renders. Use --fallback playwright (Grafana Render API leaves terminal state not-checked)."
+    },
+    {
+      "name": "prometheus",
+      "status": "ok",
+      "detail": "http://localhost:9090/api/v1/status/runtimeinfo reachable"
+    },
+    {
+      "name": "quarantine-explorer",
+      "status": "not_applicable",
+      "detail": "Quarantine Explorer HTTP/UI surface is retired from the shipped dashboard portfolio; domain quarantine write/storage remains unchanged."
+    },
+    {
+      "name": "screenshots",
+      "status": "ok",
+      "detail": "reports\\observability\\grafana\\screenshots-86b67b3-final\\render-manifest.json and all dashboard PNGs are current; requested/actual viewport, theme, and required panel terminal states are verified"
+    },
+    {
+      "name": "bioetl-control-plane-source",
+      "status": "ok",
+      "detail": "Ops HTTP runtime source identity matches the selected runtime root"
+    },
+    {
+      "name": "bioetl-prometheus-target",
+      "status": "ok",
+      "detail": "active bioetl scrape target health=up"
+    }
+  ]
+}
