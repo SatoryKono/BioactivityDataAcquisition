@@ -9,12 +9,16 @@ from typing import TYPE_CHECKING, Any, Protocol
 import httpx
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.adapters.http.request_timing import (
+    RequestTimingHost,
+    execute_timed_request,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import CircuitBreakerPort, RateLimiterPort
 
 
-class _HTTPClientRequestHost(Protocol):
+class _HTTPClientRequestHost(RequestTimingHost, Protocol):
     """Structural host contract for one-shot HTTP requests."""
 
     rate_limiter: RateLimiterPort
@@ -105,6 +109,8 @@ class HTTPClientRequestMethodsMixin:
         url: str,
         params: JsonDict | None = None,
         headers: dict[str, str] | None = None,
+        *,
+        request_timeout: float | None = None,
     ) -> httpx.Response:
         """Send single GET request without retry loop.
 
@@ -117,9 +123,13 @@ class HTTPClientRequestMethodsMixin:
             httpx.Response from the server, raises on non-2xx status.
         """
         client = self._get_client()
-        await self.rate_limiter.acquire()
-        response = await self.circuit_breaker.call(
-            client.request, "GET", url, params=params, headers=headers
+        response = await execute_timed_request(
+            self,
+            client,
+            "GET",
+            url,
+            {"params": params, "headers": headers},
+            request_timeout=request_timeout,
         )
         # circuit_breaker.call is typed to return httpx.Response for this path.
         response.raise_for_status()

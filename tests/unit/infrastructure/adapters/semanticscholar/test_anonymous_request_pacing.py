@@ -39,6 +39,11 @@ async def test_health_data_and_retry_share_anonymous_budget(monkeypatch):
         limiter_module, "time", SimpleNamespace(monotonic=lambda: now[0])
     )
     monkeypatch.setattr(limiter_module.asyncio, "sleep", sleep)
+    from bioetl.infrastructure.adapters.http import request_timing
+
+    monkeypatch.setattr(
+        request_timing, "time", SimpleNamespace(monotonic=lambda: now[0])
+    )
 
     def respond(request):
         requests.append((request.method, now[0]))

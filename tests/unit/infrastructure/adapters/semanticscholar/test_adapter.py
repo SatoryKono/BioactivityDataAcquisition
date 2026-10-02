@@ -532,3 +532,22 @@ class TestFetch:
                 query="test",
             ):
                 continue
+
+
+@pytest.mark.asyncio
+async def test_health_latency_excludes_local_admission_wait(
+    adapter, mock_http_client, monkeypatch
+):
+    import httpx
+    from types import SimpleNamespace
+    from bioetl.infrastructure.adapters.semanticscholar import health_metadata_mixin
+
+    moments = iter([0.0, 50.0])
+    monkeypatch.setattr(
+        health_metadata_mixin, "time", SimpleNamespace(monotonic=lambda: next(moments))
+    )
+    mock_http_client.get_once.return_value = httpx.Response(
+        200,
+        extensions={"bioetl_transport_seconds": 0.1},
+    )
+    assert await adapter._probe_health() == HealthStatus.HEALTHY

@@ -144,6 +144,11 @@ class SemanticScholarHealthMetadataMixin(SemanticScholarHealthMetadataMixinABC):
                     url, params=params, headers=deps._build_headers()
                 )
             elapsed = time.monotonic() - start_time
+            extensions = getattr(response, "extensions", None)
+            if isinstance(extensions, dict):
+                transport_seconds = extensions.get("bioetl_transport_seconds")
+                if isinstance(transport_seconds, (int, float)):
+                    elapsed = transport_seconds
 
             status_code = response.status_code
             if status_code in (429, 403):
