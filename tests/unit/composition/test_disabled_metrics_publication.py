@@ -1,9 +1,13 @@
 """Disabled optional monitoring must not perform gateway I/O."""
 
+import pytest
 from types import SimpleNamespace
 from unittest.mock import Mock
 
 from bioetl.composition import observability_runtime
+
+
+pytestmark = pytest.mark.unit
 
 
 def test_disabled_metrics_skip_gateway_and_integrity_publication(monkeypatch):

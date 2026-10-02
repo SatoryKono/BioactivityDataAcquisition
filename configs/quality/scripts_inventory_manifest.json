@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-02T15:11:42.779232+00:00",
+  "generated_at": "2026-10-02T16:06:46.341063+00:00",
   "summary": {
-    "total_scripts": 635,
+    "total_scripts": 636,
     "status_counts": {
-      "active": 336,
+      "active": 337,
       "supporting": 299
     },
     "reference_group_coverage": {
@@ -15,7 +15,7 @@
       "other": 48,
       "scripts": 531,
       "skills": 12,
-      "tests": 446
+      "tests": 447
     }
   },
   "scripts": [
@@ -21513,6 +21513,51 @@
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-11-17",
       "next_step": "Retain as the Windows-side compatibility launcher for the canonical scripts.ops ensure-quarantine-explorer command while Grafana local audit flows may still need a direct PowerShell entrypoint; retire it once Windows-specific observability launch wrappers are fully consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17."
+    },
+    {
+      "path": "scripts/ops/observability/green_acceptance.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "tests/integration/test_live_green_acceptance.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import discover, execute, launch_timeout"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import Case, command, green_failures"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import inspect_composite_parents"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 35,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import discover"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 56,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import logged_errors"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_launch_deadlines.py",
+          "line": 4,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import Case, command, launch_timeout"
+        }
+      ]
     },
     {
       "path": "scripts/ops/observability/refresh_visual_json_baseline.py",

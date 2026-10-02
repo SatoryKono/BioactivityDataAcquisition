@@ -15,6 +15,9 @@ from bioetl.application.services.execution.pipeline_runner_models import RunOpti
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
+from bioetl.composition.bootstrap.runtime._dependency_runner_support import (
+    resolve_required_gold_pipelines,
+)
 from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (
     initialize_domain_enum_fields,
 )
@@ -175,16 +178,7 @@ def build_runner_factories(
         build_context=build_context_fn,
         pipeline_runner_builder=pipeline_runner_builder,
         filter_extraction_service=filter_extraction_service,
-        gold_required_pipelines=(
-            frozenset(
-                {"chembl_target", "chembl_target_component", "chembl_protein_class"}
-            )
-            if any(
-                phase.pipeline == "chembl_target_protein_classification"
-                for phase in (*config.dependencies, *config.enrichers)
-            )
-            else frozenset()
-        ),
+        gold_required_pipelines=resolve_required_gold_pipelines(config),
         required_persistence_profile=getattr(
             runtime, "required_persistence_profile", None
         ),
