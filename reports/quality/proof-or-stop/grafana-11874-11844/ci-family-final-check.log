@@ -5,7 +5,7 @@ CI drift families check: test-gov, flaky-fingerprint, telemetry, evidence, remot
 + E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_test_governance_audit --check
 + E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-flaky-test-burndown-review --check
 + E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m pytest tests/architecture/test_test_telemetry_baseline.py tests/architecture/test_test_telemetry_governance.py -q --tb=short
-evidence_surface_sha256 current: 8bfa419eaedeeba98b2bf223a9796a609d271bad76e7972705e50f2d5a1a09b5
+evidence_surface_sha256 current: 5c9177468845438b93053bc911c921d8466d560c4ff69a931d6116b575b69514
 + E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
 + E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
 CI drift families complete (no budget ratchet)

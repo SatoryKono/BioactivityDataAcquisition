@@ -1,0 +1,11 @@
+[flaky-test-burndown-review] wrote E:\github\bda-grafana-11874-11844\reports\quality\flaky-test-burndown-review.json
+[test-telemetry] source_tree_sha256=9425ab28921349d1f8d15cc58d432d09d0207955c06e2af351776ada424667d0
+Generated 15 text artifacts for chembl_activity
+CI drift families update: test-gov, flaky-fingerprint, telemetry, evidence, remote-main, dataflow
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-flaky-test-burndown-review
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.ci.update_test_telemetry_baseline --coverage-percent 96.74 --source-branch main --source-commit 9f71c644417551222e489ec08c6b358e7c0b64b2 --source-run-id 36202183545 --source-event push --source-run-url https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/36202183545
+evidence_surface_sha256 already aligned
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.diagrams generate-dataflows --pipeline chembl_activity
+CI drift families complete (no budget ratchet)

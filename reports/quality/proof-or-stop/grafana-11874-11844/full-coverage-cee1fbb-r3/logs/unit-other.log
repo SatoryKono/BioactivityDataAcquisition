@@ -1,0 +1,69 @@
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  1%]
+........................................................................ [  3%]
+........................................................................ [  4%]
+........................................................................ [  6%]
+........................................................................ [  8%]
+........................................................................ [  9%]
+...........................................s............................ [ 11%]
+........................................................................ [ 12%]
+........................................................................ [ 14%]
+........................................................................ [ 16%]
+........................................................................ [ 17%]
+........................................................................ [ 19%]
+.....sss................................................................ [ 20%]
+...........................................F...............
+================================== FAILURES ===================================
+____ test_workflow_run_rejects_delete_orphans_when_limit_follows_extracts _____
+[gw1] win32 -- Python 3.13.7 E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe
+
+cli_runner = <click.testing.CliRunner object at 0x0000014739E165F0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000014739E16740>
+tmp_path = WindowsPath('C:/Users/Fedor/AppData/Local/Temp/bioetl-pytest/basetemp-16508-a925cbed/popen-gw1/test_workflow_run_rejects_dele0')
+
+    def test_workflow_run_rejects_delete_orphans_when_limit_follows_extracts(
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+        tmp_path: Path,
+    ) -> None:
+        """CLI limits cannot prove referential completeness, even within one run."""
+        import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+    
+        fake_service = _FakeWorkflowRunnerService()
+        cached_bronze_path = tmp_path / "bronze"
+        cached_bronze_path.mkdir()
+        monkeypatch.setattr(
+            workflow_cmd,
+            "get_workflow_execution_service",
+            lambda registry=None: fake_service,
+            raising=True,
+        )
+        result = cli_runner.invoke(
+            cli,
+            [
+                "workflow",
+                "run",
+                "chembl_core",
+                "--limit",
+                "1000",
+                "--required-persistence-profile",
+                "degraded_observable",
+                "--use-cached-bronze",
+                "--cached-bronze-path",
+                str(cached_bronze_path),
+            ],
+        )
+    
+>       assert result.exit_code != 0
+E       assert <ExitCode.OK: 0> != 0
+E        +  where <ExitCode.OK: 0> = <Result okay>.exit_code
+
+tests\unit\interfaces\cli\test_workflow_cli.py:517: AssertionError
+=========================== short test summary info ===========================
+SKIPPED [1] tests\unit\interfaces\cli\commands\test_cli_coverage_boost_helpers.py:834: PosixPath not available on Windows
+SKIPPED [3] tests\unit\interfaces\http\test_run_report_artifacts.py:96: Windows account cannot create symbolic links
+FAILED tests/unit/interfaces/cli/test_workflow_cli.py::test_workflow_run_rejects_delete_orphans_when_limit_follows_extracts
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!

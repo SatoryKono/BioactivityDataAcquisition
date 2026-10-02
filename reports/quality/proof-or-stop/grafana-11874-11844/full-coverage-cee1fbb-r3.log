@@ -1,0 +1,37 @@
+[local-coverage] HEAD=cee1fbb97df1d2e5631bc337bb76ca5c55613cdb source=5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f scratch=E:\github\bda-grafana-11874-11844\reports\quality\proof-or-stop\grafana-11874-11844\full-coverage-cee1fbb-r3
+[local-coverage] start smoke
+[local-coverage] smoke exit=0 coverage=yes
+[local-coverage] start contract-confidence
+[local-coverage] contract-confidence exit=0 coverage=yes
+[local-coverage] start repo-backed-unit-product
+[local-coverage] repo-backed-unit-product exit=0 coverage=yes
+[local-coverage] start repo-backed-unit-tooling
+[local-coverage] repo-backed-unit-tooling exit=0 coverage=yes
+[local-coverage] start repo-backed-unit-ops
+[local-coverage] repo-backed-unit-ops exit=0 coverage=yes
+[local-coverage] start unit-scripts-tooling-passport
+[local-coverage] unit-scripts-tooling-passport exit=0 coverage=yes
+[local-coverage] start unit-scripts-tooling-debt-governance
+[local-coverage] unit-scripts-tooling-debt-governance exit=0 coverage=yes
+[local-coverage] start unit-scripts-tooling-other
+[local-coverage] unit-scripts-tooling-other exit=0 coverage=yes
+[local-coverage] start unit-filesystem-contracts
+[local-coverage] unit-filesystem-contracts exit=0 coverage=yes
+[local-coverage] start unit-subprocess-backed
+[local-coverage] unit-subprocess-backed exit=0 coverage=yes
+[local-coverage] start unit-domain
+[worker-retry] unit-domain: exit=1; preserved attempt 1; rerun unchanged command
+[local-coverage] unit-domain exit=0 coverage=yes
+[local-coverage] start unit-application
+[local-coverage] unit-application exit=2 coverage=no
+[local-coverage] start unit-infrastructure
+[local-coverage] unit-infrastructure exit=2 coverage=no
+[local-coverage] start unit-other
+[local-coverage] unit-other exit=2 coverage=no
+[local-coverage] start integration
+[local-coverage] integration exit=0 coverage=yes
+[local-coverage] start security
+[local-coverage] security exit=0 coverage=yes
+[local-coverage] start serial
+[local-coverage] serial exit=0 coverage=yes
+[local-coverage] incomplete; evidence: E:\github\bda-grafana-11874-11844\reports\quality\proof-or-stop\grafana-11874-11844\full-coverage-cee1fbb-r3\manifest.json

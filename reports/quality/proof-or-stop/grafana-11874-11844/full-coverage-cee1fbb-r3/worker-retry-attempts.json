@@ -1,0 +1,13 @@
+[
+  {
+    "log": "E:\\github\\bda-grafana-11874-11844\\reports\\quality\\proof-or-stop\\grafana-11874-11844\\full-coverage-cee1fbb-r3\\logs\\unit-domain.log",
+    "attempt": 1,
+    "exit_code": 1,
+    "action": "rerun_same_canonical_command",
+    "failed_file_sha256": {
+      "logs\\unit-domain.log": "fe030cb28eb8df62b56983310328b2e7b1dac98f519b76b4c7328d5acc3c89f3",
+      "junit\\unit-domain.xml": "d04d37a5ad2f139c87bd81e14e80a2a6eb47b300382f46d7c95e0fcd43d65aa8",
+      "shards\\.coverage.unit-domain": "1e06f9afdeef69cb3596e028056e4111750ed997e537161b9c6d03734cc6b7a1"
+    }
+  }
+]

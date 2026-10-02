@@ -3,126 +3,1057 @@
     11874,
     11844
   ],
-  "tested_head_sha": "f042bfb86e67e4bfb256181c977772f52b842154",
-  "product_base_sha": "f892511e55993b0b6321e0d8b2bd103eef1e3284",
-  "inventory_generation_head_sha": "f042bfb86e67e4bfb256181c977772f52b842154",
-  "source_tree_sha256": "7630667db64d1d000aba2b7a922cbb548ed2e35b9ddc98e468ed331c72609cc8",
+  "final_pr_head_sha": "91a1443fe81dd5706d21c7fe0a5ae4b42741be42",
   "coverage": {
-    "complete": true,
-    "shards": 17,
+    "producer_head_sha": "f9d20f27b43bc9cdc2b2dbd2d23aafce6fa94854",
+    "verification_head_sha": "1f91db2541a821e535e382055f619eb2d9233e02",
+    "source_tree_sha256": "5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f",
+    "complete_shards": 17,
     "line_percent": 99.69,
     "branch_percent": 94.32,
-    "tests": 32426,
+    "junit": {
+      "tests": 32437,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 181
+    },
+    "verified_file_sha256": {
+      "manifest.json": "55815597f33337b30dc2b05e00169f4ac7b49bb7ade78ee058a6fe6c28780de5",
+      "coverage.xml": "95b05f4e02569d9439dc6e629b9c3f979490baef1c0f827da3e65f5ca91ce451",
+      "shards/.coverage.smoke": "1fb5cdd93f56750d2379c247b69c8045894e22bbff2686892d074e483c709865",
+      "junit/smoke.xml": "340f281e2d5b8ea1c93d9b670d53e9982abaa95bbcaf1ac220ea1709852699ee",
+      "logs/smoke.log": "bd52a3f3f7fd4027d804d5c0681bd30eae6d5c08da5dd14916f516864e193a01",
+      "shards/.coverage.contract-confidence": "47255854707476555d883eb30e1aae6f3364f763e9b62d1655a2d09a96f93316",
+      "junit/contract-confidence.xml": "c3989744e0e50c66593e3baf70811947438e534fd240a730d58679ae51a16977",
+      "logs/contract-confidence.log": "93b1f5c16d8b59b14a59c2ea4239437ec1a4b090afd840c701e40704b2fa1c15",
+      "shards/.coverage.repo-backed-unit-product": "5c442487bb95bdfe73fb150c1c413feb29c41b96f54af6a5057e8beedb3fddd0",
+      "junit/repo-backed-unit-product.xml": "c68fbe936c2c7e9dc26d22b53ff26628991fd2ad665ed16b8e8fe9bad9758fc8",
+      "logs/repo-backed-unit-product.log": "f5f42adcc348cd65591a565c2ae1e337bff42c92482dbfd1a8c406a93344b1c4",
+      "shards/.coverage.repo-backed-unit-tooling": "1fdc05a783a9fe18520f061b0603e7473a3a1340f8c0b464e07b1a63643833aa",
+      "junit/repo-backed-unit-tooling.xml": "2adab3dfe38f4373e2a6bd6d930f59d7c341f0cdb668c99d1f8c3203d8a2508f",
+      "logs/repo-backed-unit-tooling.log": "9c0c15648fc3cca597184815174a1d99beb043b89be422de5141085be7626b2e",
+      "shards/.coverage.repo-backed-unit-ops": "661a6f3d129e1d1330da7cf2305b50dfbec03f7cf1682010d30b9ab4ebb3e627",
+      "junit/repo-backed-unit-ops.xml": "593c1c9c831dc74d57cb080047c1f1b6acb98fd06c0df018da3bedadffd2d383",
+      "logs/repo-backed-unit-ops.log": "18e51a70b81427160857cf6e6db44b63ff58c4e49895518951cd36d5a70c1407",
+      "shards/.coverage.unit-scripts-tooling-passport": "1193d9f207ae262740482f204d24c398c0afb0295aedd807ae1d5f28bc017f71",
+      "junit/unit-scripts-tooling-passport.xml": "c19dc3bcd16919b7b0592e03416651da02804e0db0e8ac7c85f0d63b9642d389",
+      "logs/unit-scripts-tooling-passport.log": "484c9174e669d7e8737c9fd0484f52a8adc714c6cfb9a278e4dcb1ee15585e36",
+      "shards/.coverage.unit-scripts-tooling-debt-governance": "9847c9308bd9d7a3a995c346462ea930c999ff2fa5d0790fb6d55dd2bb979a9c",
+      "junit/unit-scripts-tooling-debt-governance.xml": "65830b0828a096f0199d381303708c77382214c8b7bd68837afeaad29e32562a",
+      "logs/unit-scripts-tooling-debt-governance.log": "274c5f96d23bb491757fef3a15033b56f272126823a4bde2519699708c5ec9f0",
+      "shards/.coverage.unit-scripts-tooling-other": "9c215a0bc4ad03401ee598f761cab5616f713a05bb72db913665ab99b334f3f0",
+      "junit/unit-scripts-tooling-other.xml": "3d99471701002cd1d625efce53ec4c5d8ecd3a196880c29f39fdbaa0c2243e93",
+      "logs/unit-scripts-tooling-other.log": "da6125f47fef66def6acc9d8a199ffa5ebeaf989b4da9bbed10e16fa98423295",
+      "shards/.coverage.unit-filesystem-contracts": "f04c7887aa441c9614115736433046518dbd69d002099a9945a899fe664f7b0e",
+      "junit/unit-filesystem-contracts.xml": "136e34e68ab8f8170a0514db330d6e3f88ef943b73e4fe9ec20240ac1b36946c",
+      "logs/unit-filesystem-contracts.log": "ae1b082cef08b60419f812754607daa6312172bd36582cd66b3d052e32362ea2",
+      "shards/.coverage.unit-subprocess-backed": "503c951b9199d829f4eafcc3f310c8d57fbcb429bf4e1b223102bb7ded12e814",
+      "junit/unit-subprocess-backed.xml": "b74b851db3d03e2f49cdc6845e7669697cc9a132f45a0034769e67ef607d0663",
+      "logs/unit-subprocess-backed.log": "55cf85556f9212aec3cf3688ddb048b901ad2536966113215358784c657a7532",
+      "shards/.coverage.unit-domain": "5b584b8d9b74ad345a0415977bb7c6e726067f77288c814168aaf8ee5935d093",
+      "junit/unit-domain.xml": "2132e04e232cb93ad55683731505a5a0285be77943e64b0e9fc7715c36d70009",
+      "logs/unit-domain.log": "5261edc4b372eac48096caa5d1fb7c64814a941de0264690d47b54523e29cba7",
+      "shards/.coverage.unit-application": "40b7c9c8f7b1078f660285f3b8ba87902760eb2d54e0e58c9a8e937c62152c0f",
+      "junit/unit-application.xml": "478b8046457653d6b2a70589f4dded8ed8ce43791991239b2f84b11341c2161e",
+      "logs/unit-application.log": "bbaa4045ae6b85bef86410277101d759894171766a2d92a9a812753a99b8f58f",
+      "shards/.coverage.unit-infrastructure": "d7a2fd65e62aa0a4ae79602f88850f940696a61ed73c78fc8629425235cc2778",
+      "junit/unit-infrastructure.xml": "68d182de2ca9690de0555979ab370a1e6a10af5d078be1e6500047944ebfaa1f",
+      "logs/unit-infrastructure.log": "3755f7326b6428b8aeae6d822ce916fbd4a93835e0968b741fc4233d397d5d64",
+      "shards/.coverage.unit-other": "c9b1aeafc5567aab2a4248b9f795009b045e0396a20da06a96d4255d6d8c5ca5",
+      "junit/unit-other.xml": "ae95f109760dd58b5dc37f6a6c8d8c794870eca6d23a7c76e96e603feb8aa154",
+      "logs/unit-other.log": "9f422f0f5806c4da5bbd67184b9dfec89c8f7f9548a231056d0d8ebcb6a0b086",
+      "shards/.coverage.integration": "880d258b483b0cc79ad616f8830cbf5f77776699c6dbcabc2d7152d4f454dc28",
+      "junit/integration.xml": "30efab203ae4aa7158d3b534b5f29a71aec87d7170a4f14eaf1d3d351eb986bb",
+      "logs/integration.log": "24395cc17e14424bafece236e2229acd62e02f0227b2d6d7396b80d9ee3b5e9d",
+      "shards/.coverage.security": "f28c9d070b0be3853154aeef51a195b43954c8563bf01a595331c0fc93dc5714",
+      "junit/security.xml": "ec8aa51265881e953a28eca078d902c08c81a4822de1704b9f10d9beae87b530",
+      "logs/security.log": "3e259816e27e4225458db3fbaf11150345968203df3b5df6a1a08d85f00e3263",
+      "shards/.coverage.serial": "cea67c23c410cf0e291f3be9c64e9c9b08b604837ffa0ac81aef9f1b26956939",
+      "junit/serial.xml": "68bfe45435505d35e224a81a51a53e10fc65e905a1bc9e720109527e0edfe12a",
+      "logs/serial.log": "9d5a2646cfea101970d3c6e3eb8c2650770734a095b2562b4c25cf9f554c913c"
+    },
+    "source_and_qa_changes_after_measurement": [],
+    "tests_changed_after_measurement": [
+      "tests/integration/adapters/test_http_retry_semantics.py",
+      "tests/unit/composition/test_workflow_cohort.py",
+      "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
+      "tests/unit/interfaces/cli/test_workflow_cli.py",
+      "tests/unit/scripts/qa/test_dashboard_content_contract_sources.py"
+    ],
+    "limit": "R11 measurement remains bound to its producer commit. Later test fixture/marker/docstring differences require supplemental owning tests and do not constitute a new full coverage run."
+  },
+  "supplemental_owning_tests": {
+    "tests": 141,
     "failures": 0,
     "errors": 0,
-    "skipped": 181
+    "skipped": 0
+  },
+  "screenshots": {
+    "uids": [
+      "bioetl-control-plane-v1",
+      "bioetl-dq-v2",
+      "bioetl-incident-v1",
+      "bioetl-overview-v2",
+      "bioetl-run-explorer-v1"
+    ],
+    "preflight": {
+      "grafana": "ok",
+      "panel-3010-terminal-states": "ok",
+      "prometheus": "ok",
+      "quarantine-explorer": "not_applicable",
+      "screenshots": "ok",
+      "bioetl-control-plane-source": "ok",
+      "bioetl-prometheus-target": "ok"
+    },
+    "capture_head_sha": "91a1443fe81dd5706d21c7fe0a5ae4b42741be42"
   },
   "ci": "BLOCKED_EXTERNAL_PERMANENT",
-  "telemetry": "Historical measurements/provenance preserved; current tests fingerprint rebound. Local XML is separately SHA-bound.",
-  "scope": "Retirement/navigation, complete measured coverage, screenshot freshness. Full live visual release acceptance remains separate.",
+  "full_live_visual_release_acceptance": false,
+  "followups": [
+    "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11895",
+    "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11899"
+  ],
   "inventory_adoption": {
-    "mode": "canonical_nonregressing_adoption",
-    "additive_xml_sha256": "6bfa820b8490c4db84b6d41ce274372b3a68fc1b074a34a9b997fd1a6e30d966",
-    "promoted_measured_modules": 2545,
+    "mode": "canonical_nonregressing_adoption_preserved_from_concurrent_main",
+    "complete_producer_head_sha": "f9d20f27b43bc9cdc2b2dbd2d23aafce6fa94854",
+    "source_tree_sha256": "5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f",
+    "additive_xml_sha256": "4bed3befe08092efc88fecbd8388d8829665fe1126d74f526322592c4bf2f3ff",
+    "primary_xml_path": "reports/coverage/coverage.xml",
+    "primary_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
+    "promoted_measured_modules": 2478,
     "retained_rows": [
       {
+        "path": "src/bioetl/application/composite/conflict_resolver.py",
+        "measured_r11_percent": 96.25,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/composite/coordinator.py",
+        "measured_r11_percent": 96.23,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/composite/runner_pkg/runner.py",
+        "measured_r11_percent": 98.96,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/core/_quarantine_manager_support.py",
+        "measured_r11_percent": 97.87,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/core/_quarantine_metrics_support.py",
+        "measured_r11_percent": 96.72,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/core/batch_metrics_accounting.py",
+        "measured_r11_percent": 97.01,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/core/batch_transformer_attempt_failures.py",
+        "measured_r11_percent": 98.59,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/core/batch_transformer_attempt_success.py",
+        "measured_r11_percent": 96.67,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/core/data_sources/assay_parameters.py",
+        "measured_r11_percent": 83.78,
+        "accepted_historical_percent": 93.62
+      },
+      {
+        "path": "src/bioetl/application/core/publication_term_extraction_mixin.py",
+        "measured_r11_percent": 98.63,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/core/publication_term_runtime.py",
+        "measured_r11_percent": 89.02,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/pipelines/chembl/molecule_transformer.py",
+        "measured_r11_percent": 98.0,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/snapshot_ledger.py",
+        "measured_r11_percent": 97.87,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/services/control_plane/workflow/inspection_service.py",
+        "measured_r11_percent": 96.08,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/services/dq/gold_filter_diagnostics.py",
+        "measured_r11_percent": 94.12,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/services/execution/_pipeline_runner_support.py",
+        "measured_r11_percent": 95.37,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/services/execution/pipeline_run_execution_service.py",
+        "measured_r11_percent": 97.96,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/services/execution/workflow_runner_step_execution.py",
+        "measured_r11_percent": 98.41,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/services/run_reports/enrichment.py",
+        "measured_r11_percent": 99.09,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/services/run_reports/observations.py",
+        "measured_r11_percent": 98.31,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/services/run_reports/source_identity.py",
+        "measured_r11_percent": 98.64,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/application/services/workflow/workflow_runner_reports.py",
+        "measured_r11_percent": 90.53,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/composition/bootstrap/runtime/pipeline.py",
+        "measured_r11_percent": 97.67,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/composition/bootstrap/runtime/runner.py",
+        "measured_r11_percent": 96.55,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/composition/bootstrap/runtime/runner_factory_builder_service.py",
+        "measured_r11_percent": 98.39,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/composition/bootstrap/runtime/runtime_basics.py",
+        "measured_r11_percent": 97.78,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/composition/control_plane_archive.py",
+        "measured_r11_percent": 96.15,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/composition/factories/datasource/pubchem.py",
+        "measured_r11_percent": 97.67,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/composition/providers/registration_bio.py",
+        "measured_r11_percent": 98.63,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py",
+        "measured_r11_percent": 99.15,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/composition/runtime_builders/_runner_input_preparation.py",
+        "measured_r11_percent": 98.11,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
+        "measured_r11_percent": 98.84,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/domain/control_plane/snapshot_materialization.py",
+        "measured_r11_percent": 96.3,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/domain/run_reports/reason_catalog.py",
+        "measured_r11_percent": 98.51,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/domain/run_reports/selected_status.py",
+        "measured_r11_percent": 94.57,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/domain/run_reports/stage_diagnostics.py",
+        "measured_r11_percent": 91.41,
+        "accepted_historical_percent": 93.55
+      },
+      {
+        "path": "src/bioetl/domain/run_reports/workflow_builder.py",
+        "measured_r11_percent": 98.81,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/domain/run_reports/workflow_totals.py",
+        "measured_r11_percent": 97.62,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/domain/schemas/chembl/publication_similarity.py",
+        "measured_r11_percent": 96.3,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/domain/schemas/chembl/similarity_pair.py",
+        "measured_r11_percent": 89.66,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/domain/value_objects/protein_class_hierarchy.py",
+        "measured_r11_percent": 99.21,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/domain/workflow/config.py",
+        "measured_r11_percent": 96.81,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/adapters/chembl/_client_request_helpers.py",
+        "measured_r11_percent": 98.61,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/adapters/crossref/_doi_batch_processor.py",
+        "measured_r11_percent": 94.68,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
+        "measured_r11_percent": 98.63,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/adapters/http/_client_retry_policy.py",
+        "measured_r11_percent": 98.18,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/adapters/http/_health_monitor_transitions.py",
+        "measured_r11_percent": 98.11,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/adapters/openalex/health_probe.py",
+        "measured_r11_percent": 92.59,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/adapters/semanticscholar/_search_fetch_flow.py",
+        "measured_r11_percent": 98.11,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/adapters/semanticscholar/fallback.py",
+        "measured_r11_percent": 98.77,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/adapters/uniprot/_idmapping_transport.py",
+        "measured_r11_percent": 98.97,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/checkpoint/metrics_rehydrate.py",
+        "measured_r11_percent": 92.0,
+        "accepted_historical_percent": 94.44
+      },
+      {
         "path": "src/bioetl/infrastructure/config/config_root.py",
-        "new_measured_percent": 90.0,
-        "historical_accepted_percent": 97.5,
-        "source_changed_since_historical_measurement": false
+        "measured_r11_percent": 97.5,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/control_plane/file_provider_health_evidence.py",
+        "measured_r11_percent": 96.15,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/control_plane/file_run_manifest_store.py",
+        "measured_r11_percent": 98.28,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+        "measured_r11_percent": 83.64,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/infrastructure/validation/pandera_validator.py",
+        "measured_r11_percent": 87.8,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/interfaces/cli/commands/config_dq.py",
+        "measured_r11_percent": 99.15,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/interfaces/cli/commands/debug.py",
+        "measured_r11_percent": 97.22,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py",
+        "measured_r11_percent": 96.26,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/interfaces/cli/commands/domains/health/server_integration_lifecycle.py",
+        "measured_r11_percent": 98.89,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/interfaces/http/_health_server_control_plane_evidence_routing.py",
+        "measured_r11_percent": 99.04,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "measured_r11_percent": 99.16,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/interfaces/http/_identity_display_rows.py",
+        "measured_r11_percent": 98.25,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/interfaces/http/_report_selector_options.py",
+        "measured_r11_percent": 97.98,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/interfaces/http/_selector_catalog.py",
+        "measured_r11_percent": 98.46,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/interfaces/http/recent_pipeline_runs.py",
+        "measured_r11_percent": 98.82,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/interfaces/http/run_report_ops.py",
+        "measured_r11_percent": 94.93,
+        "accepted_historical_percent": 100.0
+      },
+      {
+        "path": "src/bioetl/interfaces/http/selected_run_status.py",
+        "measured_r11_percent": 99.27,
+        "accepted_historical_percent": 100.0
       }
     ],
-    "direct_candidate_regression_guard": "FAILED: config_root 97.50 -> 90.00",
-    "inventory_role": "Orphan acceptance snapshot with historical primary XML and current additive XML; final main inventory preserved separately."
+    "direct_candidate_guard_exit": 1,
+    "current_inventory_owning_tests": "PASS",
+    "measurements_added_by_hand": 0,
+    "note": "Accepted higher historical values retained; current R11 measurements remain explicit in the separate raw candidate. Historical primary XML does not measure the two new modules."
   },
-  "screenshots": [
-    "bioetl-control-plane-v1",
-    "bioetl-dq-v2",
-    "bioetl-incident-v1",
-    "bioetl-overview-v2",
-    "bioetl-run-explorer-v1"
-  ],
-  "known_visual_followup": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11895",
+  "failed_or_interrupted_runs_are_excluded_from_measured_xml": true,
   "files": {
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/manifest.json": {
-      "sha256": "76458d51ae9c6989e27bd209c89e88afb6f1d1822150a5748afb60c82abda15e",
-      "bytes": 24066
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-control-plane-v1.png": {
+      "sha256": "9df0406ee8b76a06c17c717a147793dbfb6854f6b1660ac3cf667603c5cdf039",
+      "bytes": 390222
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/coverage.xml": {
-      "sha256": "b97b8b3d28f831fcbca206151f3bbc799193eb653783fc5cf3b3c79a6a282438",
-      "bytes": 5232842
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-dq-v2.png": {
+      "sha256": "952101594fbac98c1b2f05863cacd3b4f7da3d897947ed047a3dbb65f5b84583",
+      "bytes": 287931
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/github-ci-f892511.json": {
-      "sha256": "ccf052ab840086d9629c93dde6a6bc0c495d73bdcfca05ff891765961326749b",
-      "bytes": 78259
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-incident-v1.png": {
+      "sha256": "8c1eedcb1e61f8bb18dafd70fdaa1bf1846fd409c67b22aa47f1ffee4b13a51d",
+      "bytes": 2207348
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/github-ci-f042bfb.json": {
-      "sha256": "f113b7a24e4b1c736b4d4a4f8a5158eaad20765aafeab5f241691030fadd2111",
-      "bytes": 21407
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-overview-v2.png": {
+      "sha256": "4bb90cce0ac73c7e7a5e8f7d845d39535fbb5ff8d6fb417f35ed23efc60d7551",
+      "bytes": 255571
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/run_coverage_with_worker_retry.py": {
-      "sha256": "4e0d1d94367ff2ab2e897888c146786500eac628da87f0be1c1ba246dfbdb8b8",
-      "bytes": 2499
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-run-explorer-v1.png": {
+      "sha256": "03d3897cfb807c92e3274a6bcb6f52e59257ea77701299a47c6fe72f3d909d51",
+      "bytes": 158885
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/worker-retry-attempts.json": {
-      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-      "bytes": 2
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/dashboard-release-gates.json": {
+      "sha256": "f92e1381c4ca48b74ef3b20f9a443d75e932173351247cf7d05d597b3bef9c4a",
+      "bytes": 9977
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2.log": {
-      "sha256": "83675ff525d15111e2be7e843f48b8eb5bc098a815e69ae1f0c5ecce9864b392",
-      "bytes": 2127
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/live-panel-audit.json": {
+      "sha256": "5933b071c5c92b2f5cbcc687f0590267f254a96e2f842bd882c3e267aa334e5c",
+      "bytes": 3825375
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/coverage-execution-context.json": {
-      "sha256": "68016c80eaa7105ec38c1527175682e378c7af09215d11e1e33c1abe5f599a36",
-      "bytes": 594
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/render-manifest--full-set--11874-five-dashboard-final-91a1443.json": {
+      "sha256": "c608650e550e4e38c98a17d035fc58c0cc03ae13cb94f308686c7b3ac4baec54",
+      "bytes": 7929429
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb/manifest.json": {
-      "sha256": "6aaf3d0a024fda16edab4f651349f0f3b5aa46e87f6378cd79f5f6b34660f4a0",
-      "bytes": 19748
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/render-manifest.json": {
+      "sha256": "c608650e550e4e38c98a17d035fc58c0cc03ae13cb94f308686c7b3ac4baec54",
+      "bytes": 7929429
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb/logs/unit-domain.log": {
-      "sha256": "66cb1acb7119fbf818b36ee7f225be70ae197510d353fead45fbcea4866ce1fe",
-      "bytes": 66
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-control-plane-v1-tiles/000-0.png": {
+      "sha256": "5a150d8e5e0c9922c24452df2062985cdeb222b9d3c90b8b639930dce596d3ae",
+      "bytes": 209688
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f892511/manifest.json": {
-      "sha256": "18c3f840d42a2a5c6fad6e3b8bc7655a06dfd74186e37f22d6373315d3bf5426",
-      "bytes": 23375
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-control-plane-v1-tiles/001-0.png": {
+      "sha256": "e9e0aac6c1e8e23fbe093d73f0919488f79dcf4f1db7405df57867f6d2535ff2",
+      "bytes": 147093
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-1c2e1b1/manifest.json": {
-      "sha256": "2b70a6ea6929505dead821f1d2d5f029a13ba91bfd518ee070474f16f17331cb",
-      "bytes": 11663
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-control-plane-v1-tiles/surface.json": {
+      "sha256": "f7c25c1d4bf0816550c79ce93ae21cb8db12479ada46bd679751857c0e2f4e5b",
+      "bytes": 195
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/ci-family-final-check.log": {
-      "sha256": "ed45c5fc137bc881b1a79057b3fd460e8fe28f36d029130314a19317ee252169",
-      "bytes": 1192
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-dq-v2-tiles/000-0.png": {
+      "sha256": "304dbf4a089edc97c18ff74c784ce24ef0b9ddd1f8fed40998c2d50a5c64b0d1",
+      "bytes": 160387
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/module-coverage-main-guard.log": {
-      "sha256": "e39c7c8495c11b3781a4116112e8edaad58e79f9e534b4818722b9eae3cfa6a2",
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-dq-v2-tiles/001-0.png": {
+      "sha256": "168698bd61ae4bfe0af37ab3f0446f3f8053c0e7c1e26122bcf30d753d3225dc",
+      "bytes": 142652
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-dq-v2-tiles/surface.json": {
+      "sha256": "ecca3246a63747d6cc587bd70839ec88b717d31c87b2e1d8d3dfee6d9a280dfe",
+      "bytes": 195
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-incident-v1-tiles/000-0.png": {
+      "sha256": "8becccdbd48879c570e27e03545fb61281dfbe550844c4b1cc50e22be1ca86f6",
+      "bytes": 285317
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-incident-v1-tiles/001-0.png": {
+      "sha256": "51ec02b3cfd0d04d75e4e58aaa7d7c8bf1b2012dfe4739ae8399b4d715ac2e9e",
+      "bytes": 203071
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-incident-v1-tiles/002-0.png": {
+      "sha256": "bd3169f4d0f9b52e82960ff2e08700be83ada6515b917b9484574d911ad9ebb5",
+      "bytes": 243820
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-incident-v1-tiles/003-0.png": {
+      "sha256": "e5be29abbadbf82ce6527163893cada0fad50a541d60aa943aabed54d42fe3b0",
+      "bytes": 219279
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-incident-v1-tiles/004-0.png": {
+      "sha256": "aab486849580df7023a2e3ee80368f1142f91e5e55c1f04a91f5c6c94bb2e87e",
+      "bytes": 182106
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-incident-v1-tiles/005-0.png": {
+      "sha256": "08692ddca1822690fa519c9e4dcd1f48a3ada2385359a770f87aaf486d73fd9f",
+      "bytes": 169289
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-incident-v1-tiles/006-0.png": {
+      "sha256": "f57a2cae7f5bb04d575506a6508bb94e2e34742a5bc35f24bd27a3327ede5784",
+      "bytes": 210591
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-incident-v1-tiles/007-0.png": {
+      "sha256": "f6b88c729a3dc035e65d555c450268ad4eb982ea1aca4d683dad5468a93f35f6",
+      "bytes": 203764
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-incident-v1-tiles/008-0.png": {
+      "sha256": "aa6413a10c77328f532873d794043f8ca9d6861326cfec6b0d9ce85854879bb0",
+      "bytes": 188115
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-incident-v1-tiles/surface.json": {
+      "sha256": "582506acf794403ca0070d56ca9c6c05362a8b64453926d733b9830307bb563b",
+      "bytes": 196
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-overview-v2-tiles/000-0.png": {
+      "sha256": "a2e1e28bc9a3d19c1d3df742c4c1c79b4753d4083b5143a2553e89677c5d767b",
+      "bytes": 160642
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-overview-v2-tiles/surface.json": {
+      "sha256": "8b823665d4bd5b5dce3c7b9c8e3c275ca99132874df18b5792a94e5ea7f946f6",
+      "bytes": 195
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-run-explorer-v1-tiles/000-0.png": {
+      "sha256": "146c16db2da9fc16da7dbbfd380ac3798295ed0c1b2dd0066eae9abd52068cb5",
+      "bytes": 84671
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/bioetl-run-explorer-v1-tiles/surface.json": {
+      "sha256": "8b823665d4bd5b5dce3c7b9c8e3c275ca99132874df18b5792a94e5ea7f946f6",
+      "bytes": 195
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-control-plane-v1/1000.png": {
+      "sha256": "8b93b558242f39fa2451dc86f70a527fa4fe05bbb83165829b7f2ba4a3f4c51b",
+      "bytes": 5541
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-control-plane-v1/9400.png": {
+      "sha256": "2723451d8cf8e3bd1e9a67982da19bf84163e45140a902e7bbbea917f2172e9b",
+      "bytes": 7674
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-control-plane-v1/9422.png": {
+      "sha256": "3ef17bb8a20ab4ba3a2b43cab766a00e69bf56ba0bc041559b34c9e0ac5b0620",
+      "bytes": 10071
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-control-plane-v1/9423.png": {
+      "sha256": "c7d4e00d57986c73bbaf37e79451516ce4195bc0672002d88addedbbe8635fbc",
+      "bytes": 18583
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-dq-v2/1000.png": {
+      "sha256": "2abc6598c909cf3c1e1bc24809883a2abc0c8591592471340adf784ccf207939",
+      "bytes": 4606
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-dq-v2/9400.png": {
+      "sha256": "e239258486c5272ac3a6f64cd1731d1c62d21040cf025b8fc7d7a78d0b11efb4",
+      "bytes": 14906
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-dq-v2/9402.png": {
+      "sha256": "e54955a6430442d6afdafaf61143519871ab150c71995be8fccea04687040409",
+      "bytes": 10581
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-dq-v2/9406.png": {
+      "sha256": "4c7fd53e0fe61b0d88f73f075c1dda19efbc87d4d0d0e128e0be113813d2a50f",
+      "bytes": 13186
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-incident-v1/1000.png": {
+      "sha256": "e0cc4a57d233c642e37349d65f632e8f51f36ab506ac1ef1dfd8567911b8744e",
+      "bytes": 5440
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-incident-v1/2001.png": {
+      "sha256": "0b6a64717b06e7be8d7346c3269c559ffab7c98440aeebcabb41de3ebd257499",
+      "bytes": 15920
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-incident-v1/2005.png": {
+      "sha256": "01867fecdc0edb090ddd03f8f977329895fe6185a1150f2599d99dca71434a7f",
+      "bytes": 22620
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-incident-v1/2010.png": {
+      "sha256": "e8ed7f5cfc9a25566232f69fe3e5a8554619d88c8def1a048c26964f8821448c",
+      "bytes": 21151
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-incident-v1/9400.png": {
+      "sha256": "3be29b96623c96448bddd44596f9504a495bf03c9e0f0346c79224ee29ba4bc6",
+      "bytes": 19223
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-incident-v1/9401.png": {
+      "sha256": "3da0df4d85c4bfc1db59431a7eacd368c0f4a6602cf51b8544d43265042a329b",
+      "bytes": 9335
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-overview-v2/1000.png": {
+      "sha256": "e8b6e66af2caac7eadc5b28f2b6b8f2bd28c349458df182ba4f0e5ac77a5d251",
+      "bytes": 5440
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-overview-v2/9002.png": {
+      "sha256": "bf796e9ccf25e82b4d463733703ce4c05d16280d81ec5bb671778f7df0fd53cf",
+      "bytes": 7436
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-overview-v2/9300.png": {
+      "sha256": "7492b2df3c61e4d53493689f9b7e387d18386e8f4714fb2904599f949ae84a1d",
+      "bytes": 19988
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-overview-v2/9603.png": {
+      "sha256": "0a4e25fd618be0843760e6bdb5f7915c7196b3cd8d09b80d639e2257636ca60d",
+      "bytes": 6162
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-overview-v2/9604.png": {
+      "sha256": "f46b965d9a6e8ba0eca16429ce31c050c4dd4969525ac8e94a099cc3d176965f",
+      "bytes": 8091
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-overview-v2/99.png": {
+      "sha256": "5a54c1b2200e276c0a065139136962c83838973df47b65041c3989f6cc0c6adc",
+      "bytes": 13710
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-run-explorer-v1/1.png": {
+      "sha256": "ee35df5b38a56cb9a7e0e6ac16ed1126c596349ca3f7b5f201c5ddc09ead56d7",
+      "bytes": 11987
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-run-explorer-v1/3010.png": {
+      "sha256": "d4cf6e6ee3803a56060c30a2f662fe0b3a2655371c41a851d51f268a337ba7ef",
+      "bytes": 14262
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native/panels/bioetl-control-plane-v1/9423/page-1.png": {
+      "sha256": "c7d4e00d57986c73bbaf37e79451516ce4195bc0672002d88addedbbe8635fbc",
+      "bytes": 18583
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/coverage.xml": {
+      "sha256": "95b05f4e02569d9439dc6e629b9c3f979490baef1c0f827da3e65f5ca91ce451",
+      "bytes": 5237196
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/manifest.json": {
+      "sha256": "55815597f33337b30dc2b05e00169f4ac7b49bb7ade78ee058a6fe6c28780de5",
+      "bytes": 25895
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/contract-confidence.xml": {
+      "sha256": "c3989744e0e50c66593e3baf70811947438e534fd240a730d58679ae51a16977",
+      "bytes": 235910
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/integration.xml": {
+      "sha256": "30efab203ae4aa7158d3b534b5f29a71aec87d7170a4f14eaf1d3d351eb986bb",
+      "bytes": 471223
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/repo-backed-unit-ops.xml": {
+      "sha256": "593c1c9c831dc74d57cb080047c1f1b6acb98fd06c0df018da3bedadffd2d383",
+      "bytes": 53154
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/repo-backed-unit-product.xml": {
+      "sha256": "c68fbe936c2c7e9dc26d22b53ff26628991fd2ad665ed16b8e8fe9bad9758fc8",
+      "bytes": 73679
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/repo-backed-unit-tooling.xml": {
+      "sha256": "2adab3dfe38f4373e2a6bd6d930f59d7c341f0cdb668c99d1f8c3203d8a2508f",
+      "bytes": 85124
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/security.xml": {
+      "sha256": "ec8aa51265881e953a28eca078d902c08c81a4822de1704b9f10d9beae87b530",
+      "bytes": 12415
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/serial.xml": {
+      "sha256": "68bfe45435505d35e224a81a51a53e10fc65e905a1bc9e720109527e0edfe12a",
+      "bytes": 925
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/smoke.xml": {
+      "sha256": "340f281e2d5b8ea1c93d9b670d53e9982abaa95bbcaf1ac220ea1709852699ee",
+      "bytes": 10396
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/unit-application.xml": {
+      "sha256": "478b8046457653d6b2a70589f4dded8ed8ce43791991239b2f84b11341c2161e",
+      "bytes": 1265089
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/unit-domain.xml": {
+      "sha256": "2132e04e232cb93ad55683731505a5a0285be77943e64b0e9fc7715c36d70009",
+      "bytes": 1355567
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/unit-filesystem-contracts.xml": {
+      "sha256": "136e34e68ab8f8170a0514db330d6e3f88ef943b73e4fe9ec20240ac1b36946c",
+      "bytes": 61637
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/unit-infrastructure.xml": {
+      "sha256": "68d182de2ca9690de0555979ab370a1e6a10af5d078be1e6500047944ebfaa1f",
+      "bytes": 889870
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/unit-other.xml": {
+      "sha256": "ae95f109760dd58b5dc37f6a6c8d8c794870eca6d23a7c76e96e603feb8aa154",
+      "bytes": 742714
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/unit-scripts-tooling-debt-governance.xml": {
+      "sha256": "65830b0828a096f0199d381303708c77382214c8b7bd68837afeaad29e32562a",
+      "bytes": 7176
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/unit-scripts-tooling-other.xml": {
+      "sha256": "3d99471701002cd1d625efce53ec4c5d8ecd3a196880c29f39fdbaa0c2243e93",
+      "bytes": 239131
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/unit-scripts-tooling-passport.xml": {
+      "sha256": "c19dc3bcd16919b7b0592e03416651da02804e0db0e8ac7c85f0d63b9642d389",
+      "bytes": 3363
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/junit/unit-subprocess-backed.xml": {
+      "sha256": "b74b851db3d03e2f49cdc6845e7669697cc9a132f45a0034769e67ef607d0663",
+      "bytes": 1685
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/contract-confidence.log": {
+      "sha256": "93b1f5c16d8b59b14a59c2ea4239437ec1a4b090afd840c701e40704b2fa1c15",
+      "bytes": 1768
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/integration.log": {
+      "sha256": "24395cc17e14424bafece236e2229acd62e02f0227b2d6d7396b80d9ee3b5e9d",
+      "bytes": 4649
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/repo-backed-unit-ops.log": {
+      "sha256": "18e51a70b81427160857cf6e6db44b63ff58c4e49895518951cd36d5a70c1407",
+      "bytes": 324
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/repo-backed-unit-product.log": {
+      "sha256": "f5f42adcc348cd65591a565c2ae1e337bff42c92482dbfd1a8c406a93344b1c4",
+      "bytes": 589
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/repo-backed-unit-tooling.log": {
+      "sha256": "9c0c15648fc3cca597184815174a1d99beb043b89be422de5141085be7626b2e",
+      "bytes": 3860
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/security.log": {
+      "sha256": "3e259816e27e4225458db3fbaf11150345968203df3b5df6a1a08d85f00e3263",
+      "bytes": 208
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/serial.log": {
+      "sha256": "9d5a2646cfea101970d3c6e3eb8c2650770734a095b2562b4c25cf9f554c913c",
       "bytes": 81
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/module-coverage-measured-refresh-f042.log": {
-      "sha256": "344e0f5a9e71a14e286f8904cb6c4d8d3229f49766a0f5a0d23b2f071d73b8ec",
-      "bytes": 321
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/smoke.log": {
+      "sha256": "bd52a3f3f7fd4027d804d5c0681bd30eae6d5c08da5dd14916f516864e193a01",
+      "bytes": 162
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/module-coverage-nonregressing-refresh-f042.log": {
-      "sha256": "cf4a3761f3510584bf722a48b39e7f0343fbfcc1c27290a46cf8afca52813caf",
-      "bytes": 186
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/unit-application.log": {
+      "sha256": "bbaa4045ae6b85bef86410277101d759894171766a2d92a9a812753a99b8f58f",
+      "bytes": 8551
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/module-inventory-f042-measured-candidate.json": {
-      "sha256": "797a11a4f628c19ae89dd746dac979a4920a6090360588ea8ddf230ea5fd22aa",
-      "bytes": 1825470
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/unit-domain.log": {
+      "sha256": "5261edc4b372eac48096caa5d1fb7c64814a941de0264690d47b54523e29cba7",
+      "bytes": 9830
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/module-coverage-candidate-owner-check.log": {
-      "sha256": "55cc7f2a80d437302c0b52d9838e4f117b74f8c2358fa4aaca6e163ed5c0b10e",
-      "bytes": 1450
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/unit-filesystem-contracts.log": {
+      "sha256": "ae1b082cef08b60419f812754607daa6312172bd36582cd66b3d052e32362ea2",
+      "bytes": 2278
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/unit-infrastructure.log": {
+      "sha256": "3755f7326b6428b8aeae6d822ce916fbd4a93835e0968b741fc4233d397d5d64",
+      "bytes": 6899
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/unit-other.log": {
+      "sha256": "9f422f0f5806c4da5bbd67184b9dfec89c8f7f9548a231056d0d8ebcb6a0b086",
+      "bytes": 6072
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/unit-scripts-tooling-debt-governance.log": {
+      "sha256": "274c5f96d23bb491757fef3a15033b56f272126823a4bde2519699708c5ec9f0",
+      "bytes": 81
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/unit-scripts-tooling-other.log": {
+      "sha256": "da6125f47fef66def6acc9d8a199ffa5ebeaf989b4da9bbed10e16fa98423295",
+      "bytes": 4953
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/unit-scripts-tooling-passport.log": {
+      "sha256": "484c9174e669d7e8737c9fd0484f52a8adc714c6cfb9a278e4dcb1ee15585e36",
+      "bytes": 275
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verified-r11-coverage/logs/unit-subprocess-backed.log": {
+      "sha256": "55cf85556f9212aec3cf3688ddb048b901ad2536966113215358784c657a7532",
+      "bytes": 81
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/manifest.json": {
+      "sha256": "64cb015ddca6b043a91070669ecc99866d64fc8936f51623306681e01142c9e2",
+      "bytes": 23521
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/worker-retry-attempts.json": {
+      "sha256": "0bb00fa2b3af349346aee25ebd16476a96e38695dfdb7d9139bf9f9d311228e7",
+      "bytes": 599
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/contract-confidence.xml": {
+      "sha256": "642777add35bb9626e837cfac08b6250ee3662be9d785a92086040cad46e543b",
+      "bytes": 235817
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/integration.xml": {
+      "sha256": "a32fc91356ea5a2f06f46983f5f5b2df6d9bd52c5f563c94be4cb8f0d4f6ab67",
+      "bytes": 468187
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/repo-backed-unit-ops.xml": {
+      "sha256": "4f25b0744f302ae504a2c80b1a0df4ab65f1347c8261c8baff7256b9e97ad564",
+      "bytes": 53154
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/repo-backed-unit-product.xml": {
+      "sha256": "424e4b6f3645624296f3f0638191d4e6aacba3aa767e9d507ddd455bb70eabbd",
+      "bytes": 73679
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/repo-backed-unit-tooling.xml": {
+      "sha256": "02d740b53bb76ebd874914e07769ea2ef53ce035eca6c70a0a7dd9afbd4bc3a5",
+      "bytes": 82503
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/security.xml": {
+      "sha256": "fdd47bffc8acd4ac7771d477d9d157b0814e0dc0499d0458cb1ed5ef86bf0355",
+      "bytes": 12415
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/serial.xml": {
+      "sha256": "aa7b8d91eac33b3aa7fb1a58d4fc598d4bb10be73ce70b4c8c4bfce43dc76c1f",
+      "bytes": 925
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/smoke.xml": {
+      "sha256": "45b6e45b89e287840ecb11ec9ee76c1b20a6c7617a35d79b422b6165cb1c85fe",
+      "bytes": 10397
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/unit-application.xml": {
+      "sha256": "e16d8e75e7f8751e6bff111d3c2a6df4b7f23483a9d51b44cd93ce48c84421d4",
+      "bytes": 473648
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/unit-domain.xml": {
+      "sha256": "06850a3d884e8badeb99c52d6225485faa7226f43fc95d148da44244ced007ec",
+      "bytes": 1355107
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/unit-filesystem-contracts.xml": {
+      "sha256": "e5b861fd5de9dc1b5de47f21fa05c3410bacd462348cf999c27162aeb6669d40",
+      "bytes": 61469
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/unit-infrastructure.xml": {
+      "sha256": "1b95e7fb40015c69239186fb926b8d396ce6e340de311ca60b31f539f8c67df8",
+      "bytes": 137775
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/unit-other.xml": {
+      "sha256": "4f5e49b8642b3e09e7de83c3d4dcb7ce558945a0e7b972fd614697f7d61d3f2f",
+      "bytes": 169318
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/unit-scripts-tooling-debt-governance.xml": {
+      "sha256": "1e999d8f2f927d0e03455e621c91563c2a53ab4a84aee82067f65d7f5214c179",
+      "bytes": 7175
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/unit-scripts-tooling-other.xml": {
+      "sha256": "8406b577943bfe3162f0766302ab0500122504519071640475e4a882fd4f090b",
+      "bytes": 237567
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/unit-scripts-tooling-passport.xml": {
+      "sha256": "72412e86e5ccb3d067a90fad4a82ecb75e3f8bad99be0f35d5383b1e3d8abe36",
+      "bytes": 3317
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/junit/unit-subprocess-backed.xml": {
+      "sha256": "aafa63f88e39bcee3169b1f84cb1057dbc4b2537fc5a8da0483a836e5d9c8711",
+      "bytes": 1685
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/contract-confidence.log": {
+      "sha256": "93b1f5c16d8b59b14a59c2ea4239437ec1a4b090afd840c701e40704b2fa1c15",
+      "bytes": 1768
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/integration.log": {
+      "sha256": "542bc203bcfe3f6556c7608f5329146c2965264d9cad6b9c70346d9b8437318b",
+      "bytes": 4511
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/repo-backed-unit-ops.log": {
+      "sha256": "18e51a70b81427160857cf6e6db44b63ff58c4e49895518951cd36d5a70c1407",
+      "bytes": 324
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/repo-backed-unit-product.log": {
+      "sha256": "f5f42adcc348cd65591a565c2ae1e337bff42c92482dbfd1a8c406a93344b1c4",
+      "bytes": 589
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/repo-backed-unit-tooling.log": {
+      "sha256": "e71b9936bcdffbf144ed8d239e73a2cb41d03c735ab7ae3701282aa81335e0a4",
+      "bytes": 3860
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/security.log": {
+      "sha256": "3e259816e27e4225458db3fbaf11150345968203df3b5df6a1a08d85f00e3263",
+      "bytes": 208
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/serial.log": {
+      "sha256": "9d5a2646cfea101970d3c6e3eb8c2650770734a095b2562b4c25cf9f554c913c",
+      "bytes": 81
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/smoke.log": {
+      "sha256": "bd52a3f3f7fd4027d804d5c0681bd30eae6d5c08da5dd14916f516864e193a01",
+      "bytes": 162
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/unit-application.log": {
+      "sha256": "598f553963a9af386640f2a361878b3a0f6f2114bcf3cc7ab5b083488a19428a",
+      "bytes": 6607
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/unit-domain.log": {
+      "sha256": "3ddb0068c0f005288c117ea011a00be9db954d81fc325cfdd537ca6eb01f6af8",
+      "bytes": 9830
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/unit-filesystem-contracts.log": {
+      "sha256": "643328cede35fa8bae061cfb66d126ba7a38d958f396daf427b0e8ae35e31b8b",
+      "bytes": 2286
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/unit-infrastructure.log": {
+      "sha256": "484bbe3738a752b8c5007469ae1e48da56f9dcd29bb0d18cd9a42020f0ff5102",
+      "bytes": 2766
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/unit-other.log": {
+      "sha256": "c511c8c92b487cf2991949d8f391bc21f6215e16fa7516495f72f3a0a0f83736",
+      "bytes": 3655
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/unit-scripts-tooling-debt-governance.log": {
+      "sha256": "274c5f96d23bb491757fef3a15033b56f272126823a4bde2519699708c5ec9f0",
+      "bytes": 81
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/unit-scripts-tooling-other.log": {
+      "sha256": "195b1ce5ebb0b1da43fdedb32358e6ee1f652ff1b9bea510068a3132ede95ea5",
+      "bytes": 4953
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/unit-scripts-tooling-passport.log": {
+      "sha256": "484c9174e669d7e8737c9fd0484f52a8adc714c6cfb9a278e4dcb1ee15585e36",
+      "bytes": 275
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/logs/unit-subprocess-backed.log": {
+      "sha256": "55cf85556f9212aec3cf3688ddb048b901ad2536966113215358784c657a7532",
+      "bytes": 81
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/failed-worker-attempts/unit-domain-1/unit-domain.log": {
+      "sha256": "fe030cb28eb8df62b56983310328b2e7b1dac98f519b76b4c7328d5acc3c89f3",
+      "bytes": 10527
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3/failed-worker-attempts/unit-domain-1/unit-domain.xml": {
+      "sha256": "d04d37a5ad2f139c87bd81e14e80a2a6eb47b300382f46d7c95e0fcd43d65aa8",
+      "bytes": 1354310
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-6a4aa1b-final/manifest.json": {
+      "sha256": "1c6ab3f9f27b822f72e69d3ce2efdde915fb43f79c92d0ebb6cb24e87e536a38",
+      "bytes": 3359
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-6a4aa1b-final/junit/contract-confidence.xml": {
+      "sha256": "59e6465df1586633addf225313c0803ba63b38e2712c376414bda90e77f2ff6b",
+      "bytes": 235816
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-6a4aa1b-final/junit/smoke.xml": {
+      "sha256": "f7d0c85cba703856f3ed99248499ac0203be65f282f901a1cc26e1aaaa141a22",
+      "bytes": 10398
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-6a4aa1b-final/logs/contract-confidence.log": {
+      "sha256": "93b1f5c16d8b59b14a59c2ea4239437ec1a4b090afd840c701e40704b2fa1c15",
+      "bytes": 1768
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-6a4aa1b-final/logs/repo-backed-unit-product.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-6a4aa1b-final/logs/smoke.log": {
+      "sha256": "bd52a3f3f7fd4027d804d5c0681bd30eae6d5c08da5dd14916f516864e193a01",
+      "bytes": 162
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/r11-independent-verification.json": {
+      "sha256": "ded274875a5f4e7c6b97f6bac09d879e974b19a198c7bdadd3823a50dac6b233",
+      "bytes": 6710
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/verify_r11_evidence.py": {
+      "sha256": "c0b9e9061712b1844965466e47bfb1067b288e9045629f926d7f10af6bed67d1",
+      "bytes": 3366
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/final-owning-acceptance.xml": {
+      "sha256": "dceb43387807f9ac43e47731512ce12ac6ed3edbc9978a84a4a89ead7bf3cd64",
+      "bytes": 23232
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/final-owning-acceptance.log": {
+      "sha256": "9a368212de38d6771a85dab4b65ebe65c0893c73ca2b69d491eb6e66be2a400c",
+      "bytes": 162
     },
     "reports/quality/proof-or-stop/grafana-11874-11844/inventory-adoption-ledger.json": {
-      "sha256": "715a935c4242af28987e5298c1b2f9d6e1040b1349c0fe6b64c9c2cb2684a701",
-      "bytes": 657
+      "sha256": "4582bed08213cf4d38e340e6109e5a9aa80f684c38c2a109b9bf57e9a054af96",
+      "bytes": 13011
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/architecture-dashboard-main.log": {
-      "sha256": "cea18eb96c9eb758f33b02eb31dfda5700e61fd53e05265cf1ef371c20159fac",
-      "bytes": 466
+    "reports/quality/proof-or-stop/grafana-11874-11844/module-inventory-r11-measured-candidate.json": {
+      "sha256": "19f9667e7343aa77ca36131d6140d4430270a629bbef5ced58e02d2ca3768492",
+      "bytes": 1826129
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/module-coverage-r11-direct-candidate.log": {
+      "sha256": "93af8fb7f320e205ffcaa27d628616698c16cfca3985e49b10d182765a73a963",
+      "bytes": 2923
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/module-coverage-main-guard.log": {
+      "sha256": "f20bfafced530785ebeda1595593cc6c92c93098e6d8ce8129160e77d8548094",
+      "bytes": 106
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/github-ci-11898-final.json": {
+      "sha256": "5b60945e20d28aaeab2e0c7f1680c766a7c5977922fa18be930ac4b6b42b0316",
+      "bytes": 25234
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/ci-family-final-check.log": {
+      "sha256": "45275bfbf43bdb8848789c3bab5937ddd649895cb127b594c5db2375b26f184e",
+      "bytes": 1192
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/ci-family-merged-final-refresh.log": {
+      "sha256": "8bd0eb06ca1b75ce0f966f6ac0cac6fd4ec85f716e25afac70cfaf542268465f",
+      "bytes": 1505
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/nav-main-final.log": {
+      "sha256": "042df56391a3fd396631b915911ed0856a4e1113c42fa6ac471055bce52b5321",
+      "bytes": 291
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/nav-direct-entrypoint-failed.log": {
+      "sha256": "7b54bbbfd697870a4b2fc8ee9deaea50634ca697f60fdb1728eb672a22a2c694",
+      "bytes": 331
     },
     "reports/quality/proof-or-stop/grafana-11874-11844/docs-links-main.log": {
       "sha256": "81a8ea6147fb0d7e0c5bd6006cc77ba838d35d513bff016f0347c909253f4837",
@@ -132,393 +1063,61 @@
       "sha256": "7efa601e4c66b0d8e544108192bcd4bf74a0116f3350049fd834be118be43471",
       "bytes": 179
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/nav-main-f892511.log": {
-      "sha256": "042df56391a3fd396631b915911ed0856a4e1113c42fa6ac471055bce52b5321",
-      "bytes": 291
+    "reports/quality/proof-or-stop/grafana-11874-11844/docs-cleanup-final.log": {
+      "sha256": "8fa08159dd2001f795c3dc17fbc4553d2a3e23bc879ad2b9b3748e520b085a21",
+      "bytes": 61
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/audit-cycle-f892511-main.log": {
-      "sha256": "63f523eb2d2de64789150cffe4787fd23f46d593fc5c2210a59fb71ce4792bf4",
-      "bytes": 21940
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/screenshot-preflight-f892511.json": {
-      "sha256": "a2abd0d19d3e99ef841ccb185e09d352e803cda525d35ee9ae548b2838206d11",
-      "bytes": 1714
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/screenshot-preflight-default-directory.json": {
+    "reports/quality/proof-or-stop/grafana-11874-11844/screenshot-preflight-final.json": {
       "sha256": "720381bb058330873be1ee887383e3054c3bc6f511787e0eb46d54fce5fd19ba",
       "bytes": 1701
     },
-    "reports/quality/proof-or-stop/grafana-11874-11844/ci-family-remote-check.log": {
-      "sha256": "6c28485b097f006429f67dc70e8100c551008a9b7804991709b12a460083723c",
-      "bytes": 555
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/historical-telemetry-source-run.json": {
-      "sha256": "2356352af29d06513556e140946e9c6ed312a981f3b44868286119cf17813d3b",
-      "bytes": 225
-    },
-    "reports/quality/module-coverage-inventory.json": {
-      "sha256": "b38c66a0210e9d072b3c4811a9a0ca296d328c43c7132fcf2a8240981d10394b",
-      "bytes": 1825737
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/contract-confidence.xml": {
-      "sha256": "4c502aa5f4794f3e25ffdeffb884a5713dc8c4148721199d0c3e8d51288b9a1d",
-      "bytes": 235816
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/integration.xml": {
-      "sha256": "4a5f2a06649053e38d3ecfb1ec5cbef5c0ba6d61f0c1aa5f5a9a5f13e92cfc68",
-      "bytes": 468187
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/repo-backed-unit-ops.xml": {
-      "sha256": "514ae9d85cd6f2fd7afda086c45e1401436c0a4eb1e9e3fff9497d5178cd765a",
-      "bytes": 53154
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/repo-backed-unit-product.xml": {
-      "sha256": "4afd02f074206fcbba145836a9d832920ca171773446d4d670d2340f54b71e2c",
-      "bytes": 73679
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/repo-backed-unit-tooling.xml": {
-      "sha256": "334f420401d176ddf304470255d68fbf5d22104da58da7c6bb034b46416d8e98",
-      "bytes": 82502
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/security.xml": {
-      "sha256": "1223772c93f51f37c52d9558952f7fe9dc77333a965a7dbde345828f254093f6",
-      "bytes": 12415
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/serial.xml": {
-      "sha256": "520fde9a41b38015405bc87e6c3ddd0e9ff054fe165bb56bed80c5b895b22d27",
-      "bytes": 925
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/smoke.xml": {
-      "sha256": "fec2dc28199bc32412a2c4cab2ba406f4c507792a32c52d9a57aa6641c4d9532",
-      "bytes": 10397
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/unit-application.xml": {
-      "sha256": "fd7cf517e61ab919b9645432102151052c31c0ede77cde1ca29a06f5efae9684",
-      "bytes": 1265089
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/unit-domain.xml": {
-      "sha256": "07647409bed9eebbc5bbf725546b744cb701379876a19d27495cd6f1af0b3b8e",
-      "bytes": 1355107
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/unit-filesystem-contracts.xml": {
-      "sha256": "31ccb699bfc41e10b3329376ab3587189f67109f609b421efa456f59be490c1c",
-      "bytes": 61469
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/unit-infrastructure.xml": {
-      "sha256": "c06d66b5a48d7edd77dc1a2aa25b2aab7fb3ffbbf3daedf9e2e360bec35f2fb3",
-      "bytes": 889162
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/unit-other.xml": {
-      "sha256": "79e8df7cb418d5572deffb8294b6c4c291238672cb1bff181fd33aced6d105dd",
-      "bytes": 741113
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/unit-scripts-tooling-debt-governance.xml": {
-      "sha256": "0ba991d526cc1e00eca1e6d9a8b967f5d20b7474163847170e539f1fa4020887",
-      "bytes": 7176
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/unit-scripts-tooling-other.xml": {
-      "sha256": "dcd7d4d48360600d8cdd4dd3dbd1bdc2e37c5eb1d9f1e6b403380de00160c190",
-      "bytes": 237567
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/unit-scripts-tooling-passport.xml": {
-      "sha256": "757e29bfceef15ecf5423925d7316624ac470726bf15e358814511771e07e682",
-      "bytes": 3317
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/junit/unit-subprocess-backed.xml": {
-      "sha256": "991c982810f444e8869b1097a62950557983b5197929b2ae2cbcc9cad7ce784b",
-      "bytes": 1685
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/branch-gate.log": {
-      "sha256": "f7866cd0f771c1c8b4885f4c525dbf9bd1fb90e7ec92ea66714a6e23dd27c0ba",
-      "bytes": 75
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/combine.log": {
-      "sha256": "5420024871bf79863a7029b2b3a0ae20ad8734b72e23b39a1267edbd89cd64c3",
-      "bytes": 19
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/contract-confidence.log": {
-      "sha256": "93b1f5c16d8b59b14a59c2ea4239437ec1a4b090afd840c701e40704b2fa1c15",
-      "bytes": 1768
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/integration.log": {
-      "sha256": "542bc203bcfe3f6556c7608f5329146c2965264d9cad6b9c70346d9b8437318b",
-      "bytes": 4511
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/line-gate.log": {
-      "sha256": "58dbead18013efc1ea5b1eed91253c9e39b476b75dd8a45ce9b82a74b11f789b",
-      "bytes": 486095
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/repo-backed-unit-ops.log": {
-      "sha256": "18e51a70b81427160857cf6e6db44b63ff58c4e49895518951cd36d5a70c1407",
-      "bytes": 324
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/repo-backed-unit-product.log": {
-      "sha256": "f5f42adcc348cd65591a565c2ae1e337bff42c92482dbfd1a8c406a93344b1c4",
-      "bytes": 589
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/repo-backed-unit-tooling.log": {
-      "sha256": "b6c846d531129942a92c525910e57be74ef776d762ce0a80320dfaad2bcd669a",
-      "bytes": 3860
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/security.log": {
-      "sha256": "3e259816e27e4225458db3fbaf11150345968203df3b5df6a1a08d85f00e3263",
-      "bytes": 208
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/serial.log": {
-      "sha256": "9d5a2646cfea101970d3c6e3eb8c2650770734a095b2562b4c25cf9f554c913c",
-      "bytes": 81
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/smoke.log": {
-      "sha256": "bd52a3f3f7fd4027d804d5c0681bd30eae6d5c08da5dd14916f516864e193a01",
-      "bytes": 162
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/unit-application.log": {
-      "sha256": "bbaa4045ae6b85bef86410277101d759894171766a2d92a9a812753a99b8f58f",
-      "bytes": 8551
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/unit-domain.log": {
-      "sha256": "39e7a8e68ee61cbb07ea98f8379a261c11e86d844d64fe84066d76a023d21dab",
-      "bytes": 9830
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/unit-filesystem-contracts.log": {
-      "sha256": "4c27d7beeff1ecb4ffeb21aab68c10c1a93e9649c5408c26545337cef2160558",
-      "bytes": 2286
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/unit-infrastructure.log": {
-      "sha256": "0ff4c3866c3dacf2e85540da6179ebc8d1fc45ea81c97fdbe543030e6799c09a",
-      "bytes": 6899
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/unit-other.log": {
-      "sha256": "4a01eb4ed48d23491eb6ccce88e62a96a77534bd75241f4a2a8f4006f01f9172",
-      "bytes": 6074
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/unit-scripts-tooling-debt-governance.log": {
-      "sha256": "274c5f96d23bb491757fef3a15033b56f272126823a4bde2519699708c5ec9f0",
-      "bytes": 81
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/unit-scripts-tooling-other.log": {
-      "sha256": "8e23d8a6a803a61999511f15c912ca2c6310ec6cf5c5829e3030a9ad62ccf18c",
-      "bytes": 4953
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/unit-scripts-tooling-passport.log": {
-      "sha256": "484c9174e669d7e8737c9fd0484f52a8adc714c6cfb9a278e4dcb1ee15585e36",
-      "bytes": 275
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/unit-subprocess-backed.log": {
-      "sha256": "55cf85556f9212aec3cf3688ddb048b901ad2536966113215358784c657a7532",
-      "bytes": 81
-    },
-    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-f042bfb-r2/logs/xml.log": {
-      "sha256": "efbf35918f70e88977857222752db7a57606566c07862fa8051e425dfa3b03ce",
-      "bytes": 143
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-control-plane-v1.png": {
-      "sha256": "9df0406ee8b76a06c17c717a147793dbfb6854f6b1660ac3cf667603c5cdf039",
-      "bytes": 390222
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-dq-v2.png": {
-      "sha256": "952101594fbac98c1b2f05863cacd3b4f7da3d897947ed047a3dbb65f5b84583",
-      "bytes": 287931
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-incident-v1.png": {
-      "sha256": "4800ff85800189c1cf5998dd172f815310966d9914eb8606a37ad9705c36c1bb",
-      "bytes": 2236850
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-overview-v2.png": {
-      "sha256": "7a19bfb8eb29718ae62b88ebe62294bd873472f448c51050f20f6b5352cb8a49",
-      "bytes": 255566
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-run-explorer-v1.png": {
-      "sha256": "03d3897cfb807c92e3274a6bcb6f52e59257ea77701299a47c6fe72f3d909d51",
-      "bytes": 158885
-    },
-    "reports/observability/grafana/screenshots-f892511-main/dashboard-release-gates.json": {
-      "sha256": "61770cf3149769fb8ab47ab83c3310f0141ba1b6afd2d7698fe7b07bbce97511",
-      "bytes": 9972
-    },
-    "reports/observability/grafana/screenshots-f892511-main/live-panel-audit.json": {
-      "sha256": "dd836efb56b12fa5f121b510c42072ab3416c7780b3cde2a4d9740c0cde096f3",
-      "bytes": 3821624
-    },
-    "reports/observability/grafana/screenshots-f892511-main/render-manifest--full-set--11874-five-dashboard-f892511-main.json": {
-      "sha256": "d810ba1df34275d5e84facb9c606543eb746ceeee3abbd24c1659dcc9e5cfd6c",
-      "bytes": 8046771
-    },
-    "reports/observability/grafana/screenshots-f892511-main/render-manifest.json": {
-      "sha256": "d810ba1df34275d5e84facb9c606543eb746ceeee3abbd24c1659dcc9e5cfd6c",
-      "bytes": 8046771
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-control-plane-v1-tiles/000-0.png": {
-      "sha256": "5a150d8e5e0c9922c24452df2062985cdeb222b9d3c90b8b639930dce596d3ae",
-      "bytes": 209688
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-control-plane-v1-tiles/001-0.png": {
-      "sha256": "e9e0aac6c1e8e23fbe093d73f0919488f79dcf4f1db7405df57867f6d2535ff2",
-      "bytes": 147093
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-control-plane-v1-tiles/surface.json": {
-      "sha256": "f7c25c1d4bf0816550c79ce93ae21cb8db12479ada46bd679751857c0e2f4e5b",
-      "bytes": 195
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-dq-v2-tiles/000-0.png": {
-      "sha256": "304dbf4a089edc97c18ff74c784ce24ef0b9ddd1f8fed40998c2d50a5c64b0d1",
-      "bytes": 160387
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-dq-v2-tiles/001-0.png": {
-      "sha256": "168698bd61ae4bfe0af37ab3f0446f3f8053c0e7c1e26122bcf30d753d3225dc",
-      "bytes": 142652
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-dq-v2-tiles/surface.json": {
-      "sha256": "ecca3246a63747d6cc587bd70839ec88b717d31c87b2e1d8d3dfee6d9a280dfe",
-      "bytes": 195
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-incident-v1-tiles/000-0.png": {
-      "sha256": "8b0ef112c17b1ff85fa330690d0a8dc13eaa79880e5474b382b8d5e4500e3c12",
-      "bytes": 289089
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-incident-v1-tiles/001-0.png": {
-      "sha256": "d0e5fb214c1c9ec4e70b96110d7ba859be6392f19e477b8136438ae6639628dc",
-      "bytes": 221357
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-incident-v1-tiles/002-0.png": {
-      "sha256": "837c7f343c44faa2c56061e4191a224a0481da0f2c109065ff5868b3b51d31c6",
-      "bytes": 240512
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-incident-v1-tiles/003-0.png": {
-      "sha256": "d49efcaa4ded892644a8ff8d28a4173b704366306888e2e8237a06547b249874",
-      "bytes": 218426
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-incident-v1-tiles/004-0.png": {
-      "sha256": "39805601cc2552d1334cf619a1b3f6c8494a09877586edafe9734e0eee70e379",
-      "bytes": 180633
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-incident-v1-tiles/005-0.png": {
-      "sha256": "494e82fd6ea8abb189bece8e0f88218bd9ebcd536feac3e02625f8fef3ae73eb",
-      "bytes": 171292
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-incident-v1-tiles/006-0.png": {
-      "sha256": "ce2bc5a591888be154f41352f1f15ffc7d0a57b28b72fca0c54b345abc5f3dda",
-      "bytes": 210447
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-incident-v1-tiles/007-0.png": {
-      "sha256": "a4c76dd6c06d3b618c223c7998b8bd24258a0f77efa293951b124d62a66afc7d",
-      "bytes": 208837
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-incident-v1-tiles/008-0.png": {
-      "sha256": "879d297e2ce079cea6f9c5db853c9a31ef7c4009e94ec20b41d2a37cbfbffd61",
-      "bytes": 193857
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-incident-v1-tiles/surface.json": {
-      "sha256": "582506acf794403ca0070d56ca9c6c05362a8b64453926d733b9830307bb563b",
-      "bytes": 196
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-overview-v2-tiles/000-0.png": {
-      "sha256": "91f96707324253e6ab66506f041c540c92500ef12262b5f9136b0fda67026a9b",
-      "bytes": 160622
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-overview-v2-tiles/surface.json": {
-      "sha256": "8b823665d4bd5b5dce3c7b9c8e3c275ca99132874df18b5792a94e5ea7f946f6",
-      "bytes": 195
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-run-explorer-v1-tiles/000-0.png": {
-      "sha256": "146c16db2da9fc16da7dbbfd380ac3798295ed0c1b2dd0066eae9abd52068cb5",
-      "bytes": 84671
-    },
-    "reports/observability/grafana/screenshots-f892511-main/bioetl-run-explorer-v1-tiles/surface.json": {
-      "sha256": "8b823665d4bd5b5dce3c7b9c8e3c275ca99132874df18b5792a94e5ea7f946f6",
-      "bytes": 195
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-control-plane-v1/1000.png": {
-      "sha256": "8b93b558242f39fa2451dc86f70a527fa4fe05bbb83165829b7f2ba4a3f4c51b",
-      "bytes": 5541
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-control-plane-v1/9400.png": {
-      "sha256": "2723451d8cf8e3bd1e9a67982da19bf84163e45140a902e7bbbea917f2172e9b",
-      "bytes": 7674
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-control-plane-v1/9422.png": {
-      "sha256": "3ef17bb8a20ab4ba3a2b43cab766a00e69bf56ba0bc041559b34c9e0ac5b0620",
-      "bytes": 10071
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-control-plane-v1/9423.png": {
-      "sha256": "c7d4e00d57986c73bbaf37e79451516ce4195bc0672002d88addedbbe8635fbc",
-      "bytes": 18583
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-dq-v2/1000.png": {
-      "sha256": "2abc6598c909cf3c1e1bc24809883a2abc0c8591592471340adf784ccf207939",
-      "bytes": 4606
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-dq-v2/9400.png": {
-      "sha256": "e239258486c5272ac3a6f64cd1731d1c62d21040cf025b8fc7d7a78d0b11efb4",
-      "bytes": 14906
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-dq-v2/9402.png": {
-      "sha256": "e54955a6430442d6afdafaf61143519871ab150c71995be8fccea04687040409",
-      "bytes": 10581
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-dq-v2/9406.png": {
-      "sha256": "4c7fd53e0fe61b0d88f73f075c1dda19efbc87d4d0d0e128e0be113813d2a50f",
-      "bytes": 13186
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-incident-v1/1000.png": {
-      "sha256": "e0cc4a57d233c642e37349d65f632e8f51f36ab506ac1ef1dfd8567911b8744e",
-      "bytes": 5440
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-incident-v1/2001.png": {
-      "sha256": "0b6a64717b06e7be8d7346c3269c559ffab7c98440aeebcabb41de3ebd257499",
-      "bytes": 15920
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-incident-v1/2005.png": {
-      "sha256": "6a379253d65ea8dc74f1e5bc569438fa962428a7d71bd36086a184d156643afb",
-      "bytes": 22594
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-incident-v1/2010.png": {
-      "sha256": "68b641ae24309307e1d034420c5c8af2bff1194766b02fee78a12b6f8e0b5bab",
-      "bytes": 21376
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-incident-v1/9400.png": {
-      "sha256": "3be29b96623c96448bddd44596f9504a495bf03c9e0f0346c79224ee29ba4bc6",
-      "bytes": 19223
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-incident-v1/9401.png": {
-      "sha256": "3da0df4d85c4bfc1db59431a7eacd368c0f4a6602cf51b8544d43265042a329b",
-      "bytes": 9335
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-overview-v2/1000.png": {
-      "sha256": "e8b6e66af2caac7eadc5b28f2b6b8f2bd28c349458df182ba4f0e5ac77a5d251",
-      "bytes": 5440
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-overview-v2/9002.png": {
-      "sha256": "bf796e9ccf25e82b4d463733703ce4c05d16280d81ec5bb671778f7df0fd53cf",
-      "bytes": 7436
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-overview-v2/9300.png": {
-      "sha256": "7492b2df3c61e4d53493689f9b7e387d18386e8f4714fb2904599f949ae84a1d",
-      "bytes": 19988
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-overview-v2/9603.png": {
-      "sha256": "0a4e25fd618be0843760e6bdb5f7915c7196b3cd8d09b80d639e2257636ca60d",
-      "bytes": 6162
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-overview-v2/9604.png": {
-      "sha256": "f46b965d9a6e8ba0eca16429ce31c050c4dd4969525ac8e94a099cc3d176965f",
-      "bytes": 8091
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-overview-v2/99.png": {
-      "sha256": "5a54c1b2200e276c0a065139136962c83838973df47b65041c3989f6cc0c6adc",
-      "bytes": 13710
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-run-explorer-v1/1.png": {
-      "sha256": "ee35df5b38a56cb9a7e0e6ac16ed1126c596349ca3f7b5f201c5ddc09ead56d7",
-      "bytes": 11987
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-run-explorer-v1/3010.png": {
-      "sha256": "d4cf6e6ee3803a56060c30a2f662fe0b3a2655371c41a851d51f268a337ba7ef",
-      "bytes": 14262
-    },
-    "reports/observability/grafana/screenshots-f892511-main/panels/bioetl-control-plane-v1/9423/page-1.png": {
-      "sha256": "c7d4e00d57986c73bbaf37e79451516ce4195bc0672002d88addedbbe8635fbc",
-      "bytes": 18583
+    "reports/quality/proof-or-stop/grafana-11874-11844/audit-cycle-final-91a1443.log": {
+      "sha256": "8a0ca85c23388fbffce6bd16b0024234f301dc6ac28cbd93355b8de279dc7a1d",
+      "bytes": 21952
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/domain-worker-retry-diagnosis.json": {
+      "sha256": "b10180af0ec4d978b57663f828a9c71c712df458c27b13d918791eca96d4bc80",
+      "bytes": 1067
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/domain-worker-24508-stack.log": {
+      "sha256": "eb9741ba64d2eacd311886519b6b37fe021a9e9d1020449486723c16c668ba9f",
+      "bytes": 760
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/domain-worker-30140-stack.log": {
+      "sha256": "3a56f13700fbe3258c5e0c905098612e1c85f47e35abd71c4044b71cc7653de8",
+      "bytes": 1803
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/domain-controller-stack.log": {
+      "sha256": "07c19b7429343cfb654529fc0b2120d3199ecdd956556f714bb50298f00552bc",
+      "bytes": 1987
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-cee1fbb-r3.log": {
+      "sha256": "cd410d6fbe17d605baa5095cef47e458b9c40c8ab2872353d084c917bb546843",
+      "bytes": 2205
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-6a4aa1b-final.log": {
+      "sha256": "4fc9253085fffdabaeb6ef1015ade2da1c2f2289aecb9e5b178c41b8a9c1752c",
+      "bytes": 481
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/coverage-execution-context-final.json": {
+      "sha256": "8865204ff8214abf5b6abf4d66a2607ef11a1dd6c103bd5c5f9ad79061a78ab7",
+      "bytes": 1079
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/run_current_main_coverage_final.py": {
+      "sha256": "c762b866e064aeafaf349817e01356300190abb9c531c3110bc8c065a667f864",
+      "bytes": 2663
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/prepare_final_evidence.py": {
+      "sha256": "319eeb0c549737b6ddcc7995413ea6e0aaee0cd53153768c0444e0a21c0d0d7d",
+      "bytes": 4899
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/publish_final_evidence.py": {
+      "sha256": "b0c3b059e5b471debb706af5fb4b6e0de0e8e091bc440e77c89e93aa425fec1f",
+      "bytes": 1641
+    },
+    "reports/quality/proof-or-stop/grafana-11874-11844/final-module-coverage-inventory.json": {
+      "sha256": "5b84b0c3ed503ce34fa58529dea11db04161133b41eefbc0dd4e18bd57c90d68",
+      "bytes": 1774632
     }
   }
 }

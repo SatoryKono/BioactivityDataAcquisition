@@ -1,0 +1,278 @@
+grafana-audit-cycle: ensure observability backend
+Observability backend: started http://127.0.0.1:8014/health
+grafana-audit-cycle: semantic preflight
+grafana: status=ok detail=http://localhost:3002/api/health reachable
+panel-3010-terminal-states: status=ok detail=3010 positive render must classify healthy; successful empty must classify valid-empty (noValue starts with VALID EMPTY); a visible TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is a healthy fail-closed bind/origin state (HTTP 200), not explicit-error. Missing datasource or bootstrap deferred/failed must classify explicit-error. explicit-error is not success for positive 3010 renders. Use --fallback playwright (Grafana Render API leaves terminal state not-checked).
+prometheus: status=ok detail=http://localhost:9090/api/v1/status/runtimeinfo reachable
+quarantine-explorer: status=not_applicable detail=Quarantine Explorer HTTP/UI surface is retired from the shipped dashboard portfolio; domain quarantine write/storage remains unchanged.
+bioetl-control-plane-source: status=ok detail=Ops HTTP runtime source identity matches the selected runtime root
+bioetl-prometheus-target: status=ok detail=active bioetl scrape target health=up
+grafana-audit-cycle: discover filled dashboards
+grafana-audit-cycle: live panel semantic gate
+bioetl-control-plane-v1#9422 Review Exact Replay Readiness: ok/nonempty_result
+bioetl-control-plane-v1#9418 Review Selected-Run Trust: ok/nonempty_table
+bioetl-dq-v2#9402 ID: ok/expected_empty
+bioetl-dq-v2#9403 Processed Records: ok/expected_empty
+bioetl-control-plane-v1#9423 Review Exact Replay Checks: ok/nonempty_result
+bioetl-control-plane-v1#9408 Review Replay Evidence: ok/nonempty_result
+bioetl-control-plane-v1#9414 Review Manifest Validation: ok/nonempty_result
+bioetl-control-plane-v1#9415 Review Lineage Validation: ok/nonempty_result
+bioetl-control-plane-v1#9416 Review Retention Compliance: ok/nonempty_result
+bioetl-control-plane-v1#9413 Review Checkpoint Validation: ok/nonempty_result
+bioetl-control-plane-v1#9406 Compare Checkpoint Anchors: ok/nonempty_result
+bioetl-dq-v2#9406 Review Selected Run Status: ok/nonempty_result
+bioetl-dq-v2#9403 Inspect Processed Records: ok/nonempty_result
+bioetl-dq-v2#9460 Inspect Selected Run Stages: ok/nonempty_result
+bioetl-dq-v2#9460 Inspect Selected Run Stages: ok/blocked_unavailable
+bioetl-dq-v2#9451 Inspect Selected Run Domains: ok/nonempty_result
+bioetl-dq-v2#9452 Inspect Selected Run Identity: ok/nonempty_result
+bioetl-incident-v1#9401 Monitor Scope Status: ok/empty_result
+bioetl-incident-v1#2010 Inspect Ranked Suspects: ok/nonzero_result
+bioetl-incident-v1#2005 Monitor Global Alerts: ok/nonzero_result
+bioetl-incident-v1#2006 Track Alert State History: ok/nonzero_result
+bioetl-incident-v1#2002 Inspect Runtime Suspects: ok/nonzero_result
+bioetl-incident-v1#2003 Inspect Provider Suspects: ok/empty_result
+bioetl-incident-v1#2004 Inspect DQ Suspects: ok/nonzero_result
+bioetl-incident-v1#22011 Inspect Global Signal Measurements: ok/nonzero_result
+bioetl-incident-v1#2101 Review Selected Run Status: ok/nonempty_result
+bioetl-incident-v1#18940 Monitor Pipeline Status: ok/empty_result
+bioetl-incident-v1#9101 Review Runtime Blockers: ok/empty_result
+bioetl-incident-v1#9102 Monitor Coverage: ok/nonzero_result
+bioetl-incident-v1#9102 Monitor Coverage: ok/nonzero_result
+bioetl-incident-v1#9102 Monitor Coverage: ok/nonzero_result
+bioetl-incident-v1#2460 Review Stage Progress: ok/zero_result
+bioetl-incident-v1#9463 Review Total Run Duration: ok/nonempty_result
+bioetl-incident-v1#238 Track Stage Backlog Trend: ok/zero_result
+bioetl-incident-v1#207 Track Phase Duration: ok/empty_result
+bioetl-incident-v1#207 Track Phase Duration: ok/empty_result
+bioetl-incident-v1#207 Track Phase Duration: ok/empty_result
+bioetl-incident-v1#239 Track Pipeline Duration: ok/empty_result
+bioetl-incident-v1#239 Track Pipeline Duration: ok/empty_result
+bioetl-incident-v1#239 Track Pipeline Duration: ok/empty_result
+bioetl-incident-v1#237 Monitor Worst Stage Lag: ok/zero_result
+bioetl-incident-v1#16 Monitor Active Blocker Count: ok/zero_result
+bioetl-incident-v1#205 Monitor Failed Runs: ok/empty_result
+bioetl-incident-v1#230 Monitor Pipeline Alerts: ok/zero_result
+bioetl-incident-v1#9996 Track Failed Workflow Runs: ok/empty_result
+bioetl-incident-v1#236 Monitor No-Records Runs: ok/zero_result
+bioetl-incident-v1#9997 Track Failed Workflow Steps: ok/empty_result
+bioetl-incident-v1#21 Monitor Memory Pressure: ok/zero_result
+bioetl-incident-v1#256 Review Errors by Stage & Code: ok/empty_result
+bioetl-incident-v1#241 Compare Records by Stage & Run Type: ok/nonzero_result
+bioetl-incident-v1#891 Monitor Replay: ok/zero_result
+bioetl-incident-v1#892 Track Checkpoint: ok/nonzero_result
+bioetl-incident-v1#893 Monitor Ledger: ok/zero_result
+bioetl-incident-v1#907 Monitor Telemetry: ok/zero_result
+bioetl-incident-v1#240 Track Records by Stage / Interval: ok/nonzero_result
+bioetl-incident-v1#4 Inspect DQ Alert Conditions: ok/empty_result
+bioetl-incident-v1#5 Inspect Control Plane Alerts: ok/zero_result
+bioetl-incident-v1#6 Inspect Provider Alerts: ok/nonzero_result
+bioetl-incident-v1#259 Inspect Global Provider Alert Conditions: ok/empty_result
+bioetl-incident-v1#908 Review Observed Terminal Counters: ok/nonzero_result
+bioetl-incident-v1#7 Inspect Entities Stale Over 24h: ok/zero_result
+bioetl-incident-v1#8804 Track Global Read Failures: ok/zero_result
+bioetl-incident-v1#136 Monitor Global Read Failures (30m): ok/zero_result
+bioetl-incident-v1#122 Track Missing Lineage: ok/empty_result
+bioetl-incident-v1#137 Track Lineage Failures: ok/empty_result
+bioetl-incident-v1#2 Track Ledger Failures: ok/zero_result
+bioetl-incident-v1#130 Track Replay Blockers: ok/zero_result
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-incident-v1#242 Inspect Active Runtime Blocker Detail: ok/empty_result
+bioetl-incident-v1#2461 Inspect Current Missing Stage Signals: ok/zero_result
+bioetl-incident-v1#8806 Compare Global Reads by Store: ok/nonzero_result
+bioetl-incident-v1#1 Track Manifest Failures: ok/zero_result
+bioetl-incident-v1#3 Track Incompatibilities: ok/empty_result
+bioetl-incident-v1#104 Track Unreconstructable: ok/zero_result
+bioetl-incident-v1#138 Review Missing Lineage by Layer: ok/empty_result
+bioetl-incident-v1#120 Track Replay Drift: ok/empty_result
+bioetl-incident-v1#132 Monitor Manifest (30m): ok/zero_result
+bioetl-incident-v1#209 Track Global Shutdown Starts: ok/empty_result
+bioetl-incident-v1#101 Track Load Failures: ok/zero_result
+bioetl-incident-v1#133 Monitor Ledger (30m): ok/zero_result
+bioetl-incident-v1#210 Track Global Shutdown Completions: ok/empty_result
+bioetl-incident-v1#102 Track Save Failures: ok/zero_result
+bioetl-incident-v1#9491 Inspect Telemetry Coverage: ok/zero_result
+bioetl-incident-v1#9491 Inspect Telemetry Coverage: ok/zero_result
+bioetl-incident-v1#9491 Inspect Telemetry Coverage: ok/zero_result
+bioetl-incident-v1#9491 Inspect Telemetry Coverage: ok/zero_result
+bioetl-incident-v1#9491 Inspect Telemetry Coverage: ok/zero_result
+bioetl-incident-v1#103 Track Global Admin Failures: ok/empty_result
+bioetl-incident-v1#111 Track Global Read Latency: ok/empty_result
+bioetl-incident-v1#131 Track Observed Manifest Write Increments: ok/nonzero_result
+bioetl-incident-v1#121 Track Peak Replay Lag: ok/zero_result
+bioetl-incident-v1#107 Compare Global Audit Write Outcomes: ok/empty_result
+bioetl-incident-v1#134 Track Replay Drift by Type: ok/empty_result
+bioetl-incident-v1#9105 Track Stage Lag: ok/zero_result
+bioetl-incident-v1#8805 Compare Checkpoint Outcomes: ok/empty_result
+bioetl-incident-v1#108 Compare Global Audit Query Outcomes: ok/empty_result
+bioetl-incident-v1#135 Track Replay Lag: ok/zero_result
+bioetl-incident-v1#8807 Compare Ledger Appends by Type & Status: ok/nonzero_result
+bioetl-incident-v1#243 Inspect Stage Expectedness: ok/nonzero_result
+bioetl-incident-v1#243 Inspect Stage Expectedness: ok/nonzero_result
+bioetl-incident-v1#105 Track Checkpoint Save Latency: ok/empty_result
+bioetl-incident-v1#105 Track Checkpoint Save Latency: ok/empty_result
+bioetl-incident-v1#105 Track Checkpoint Save Latency: ok/empty_result
+bioetl-incident-v1#109 Track Global Audit Write Latency: ok/empty_result
+bioetl-incident-v1#109 Track Global Audit Write Latency: ok/empty_result
+bioetl-incident-v1#109 Track Global Audit Write Latency: ok/empty_result
+bioetl-incident-v1#106 Track Global Checkpoint Admin Latency: ok/empty_result
+bioetl-incident-v1#106 Track Global Checkpoint Admin Latency: ok/empty_result
+bioetl-incident-v1#106 Track Global Checkpoint Admin Latency: ok/empty_result
+bioetl-incident-v1#110 Track Global Audit Query Latency: ok/empty_result
+bioetl-incident-v1#110 Track Global Audit Query Latency: ok/empty_result
+bioetl-incident-v1#110 Track Global Audit Query Latency: ok/empty_result
+bioetl-incident-v1#220 Monitor Runtime Error Rate: ok/empty_result
+bioetl-incident-v1#112 Compare Lineage Persistence Outcomes: ok/nonzero_result
+bioetl-incident-v1#9460 Inspect Selected Run Stages: ok/nonempty_result
+bioetl-incident-v1#9460 Inspect Selected Run Stages: ok/blocked_unavailable
+bioetl-incident-v1#9451 Inspect Selected Run Domains: ok/nonempty_result
+bioetl-incident-v1#9452 Inspect Selected Run Identity: ok/nonempty_result
+bioetl-incident-v1#9701 Review Current Workflow Evidence: ok/empty_result
+bioetl-incident-v1#9701 Review Current Workflow Evidence: ok/empty_result
+bioetl-overview-v2#9002 Review Run Domains: ok/nonempty_result
+bioetl-overview-v2#9300 Review Run Identity: ok/nonempty_result
+bioetl-overview-v2#9480 Review Provider Evidence: ok/nonempty_result
+bioetl-overview-v2#9481 Review Provider Check: ok/nonempty_result
+bioetl-overview-v2#9460 Inspect Selected Run Stages: ok/nonempty_result
+bioetl-overview-v2#9460 Inspect Selected Run Stages: ok/blocked_unavailable
+bioetl-overview-v2#9460 Inspect Selected Run Stages: ok/blocked_unavailable
+bioetl-overview-v2#9482 Review Data Quality: ok/blocked_unavailable
+bioetl-run-explorer-v1#3010 Inspect Recent Runs (last 10): ok/nonempty_result
+grafana-audit-cycle: rerender screenshots
+rendered bioetl-control-plane-v1 -> E:\github\bda-grafana-11874-11844\reports\observability\grafana\screenshots-final-91a1443\render-api\bioetl-control-plane-v1.png
+rendered bioetl-dq-v2 -> E:\github\bda-grafana-11874-11844\reports\observability\grafana\screenshots-final-91a1443\render-api\bioetl-dq-v2.png
+rendered bioetl-incident-v1 -> E:\github\bda-grafana-11874-11844\reports\observability\grafana\screenshots-final-91a1443\render-api\bioetl-incident-v1.png
+rendered bioetl-overview-v2 -> E:\github\bda-grafana-11874-11844\reports\observability\grafana\screenshots-final-91a1443\render-api\bioetl-overview-v2.png
+rendered bioetl-run-explorer-v1 -> E:\github\bda-grafana-11874-11844\reports\observability\grafana\screenshots-final-91a1443\render-api\bioetl-run-explorer-v1.png
+Done.
+[1/1] loading bioetl-control-plane-v1 ...
+[1/1] goto bioetl-control-plane-v1 -> http://localhost:3002/d/bioetl-control-plane-v1/replay-readiness?orgId=1&theme=dark&refresh=off&from=now-24h&to=now&timezone=UTC&var-workflow=All&var-pipeline=chembl_target&var-run_type=incremental&var-run_id=-
+[1/1] navigation committed bioetl-control-plane-v1
+[1/1] domcontentloaded bioetl-control-plane-v1
+[1/1] waiting for networkidle bioetl-control-plane-v1 ...
+[1/1] settling bioetl-control-plane-v1 for 12000ms ...
+[1/1] expanding 2 collapsed row(s) for bioetl-control-plane-v1 ...
+[1/1] expanded row 'Inspect Resume / Checkpoint' in bioetl-control-plane-v1
+[1/1] expanded row 'Inspect Manifest / Lineage / Retention' in bioetl-control-plane-v1
+[1/1] expanded 2/2 collapsed row(s) for bioetl-control-plane-v1
+[1/1] settling expanded rows for bioetl-control-plane-v1 for 12000ms ...
+[1/1] waiting for dashboard content bioetl-control-plane-v1 ...
+[1/1] materializing lazy panels for bioetl-control-plane-v1 ...
+[1/1] detected 9 rendered panel marker(s) for bioetl-control-plane-v1 using [data-testid^="data-testid Panel header"]
+[1/1] terminal-state validation passed for bioetl-control-plane-v1 (9 required non-row panel(s))
+[1/1] capturing screenshot bioetl-control-plane-v1 with timeout 180000ms ...
+[1/1] terminal-state validation passed for bioetl-control-plane-v1 (9 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-control-plane-v1 (9 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-control-plane-v1 (7 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-control-plane-v1 (7 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-control-plane-v1 (9 required non-row panel(s))
+rendered bioetl-control-plane-v1 -> bioetl-control-plane-v1.png
+[1/1] loading bioetl-dq-v2 ...
+[1/1] goto bioetl-dq-v2 -> http://localhost:3002/d/bioetl-dq-v2/data-quality?orgId=1&theme=dark&refresh=off&from=now-24h&to=now&timezone=UTC&var-workflow=All&var-pipeline=chembl_target&var-run_type=incremental&var-run_id=-
+[1/1] navigation committed bioetl-dq-v2
+[1/1] domcontentloaded bioetl-dq-v2
+[1/1] waiting for networkidle bioetl-dq-v2 ...
+[1/1] settling bioetl-dq-v2 for 12000ms ...
+[1/1] expanding 1 collapsed row(s) for bioetl-dq-v2 ...
+[1/1] expanded row 'Inspect Saved Run Evidence' in bioetl-dq-v2
+[1/1] expanded 1/1 collapsed row(s) for bioetl-dq-v2
+[1/1] settling expanded rows for bioetl-dq-v2 for 12000ms ...
+[1/1] waiting for dashboard content bioetl-dq-v2 ...
+[1/1] materializing lazy panels for bioetl-dq-v2 ...
+[1/1] detected 8 rendered panel marker(s) for bioetl-dq-v2 using [data-testid^="data-testid Panel header"]
+[1/1] terminal-state validation passed for bioetl-dq-v2 (8 required non-row panel(s))
+[1/1] capturing screenshot bioetl-dq-v2 with timeout 180000ms ...
+[1/1] terminal-state validation passed for bioetl-dq-v2 (8 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-dq-v2 (8 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-dq-v2 (7 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-dq-v2 (7 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-dq-v2 (8 required non-row panel(s))
+rendered bioetl-dq-v2 -> bioetl-dq-v2.png
+[1/1] loading bioetl-incident-v1 ...
+[1/1] goto bioetl-incident-v1 -> http://localhost:3002/d/bioetl-incident-v1/6-incident-workspace?orgId=1&theme=dark&refresh=off&from=now-24h&to=now&timezone=UTC&var-workflow=All&var-pipeline=chembl_target&var-run_type=incremental&var-run_id=-
+[1/1] navigation committed bioetl-incident-v1
+[1/1] domcontentloaded bioetl-incident-v1
+[1/1] waiting for networkidle bioetl-incident-v1 ...
+[1/1] settling bioetl-incident-v1 for 12000ms ...
+[1/1] expanding 8 collapsed row(s) for bioetl-incident-v1 ...
+[1/1] expanded row 'Inspect Current Workflow Evidence' in bioetl-incident-v1
+[1/1] expanded row 'Inspect Saved Run Evidence' in bioetl-incident-v1
+[1/1] expanded row 'Browse Global Alerts' in bioetl-incident-v1
+[1/1] expanded row 'Browse Global Suspects' in bioetl-incident-v1
+[1/1] expanded row 'Pipeline fleet and range, not this Run ID' in bioetl-incident-v1
+[1/1] expanded row 'Inspect Selected Run Summary' in bioetl-incident-v1
+[1/1] expanded row 'Domain Suspect Details · GLOBAL / CURRENT' in bioetl-incident-v1
+[1/1] expanded row 'Review Alert Evidence' in bioetl-incident-v1
+[1/1] expanded 8/8 collapsed row(s) for bioetl-incident-v1
+[1/1] settling expanded rows for bioetl-incident-v1 for 12000ms ...
+[1/1] waiting for dashboard content bioetl-incident-v1 ...
+[1/1] materializing lazy panels for bioetl-incident-v1 ...
+[1/1] detected 12 rendered panel marker(s) for bioetl-incident-v1 using [data-testid^="data-testid Panel header"]
+[1/1] terminal-state validation passed for bioetl-incident-v1 (11 required non-row panel(s))
+[1/1] capturing screenshot bioetl-incident-v1 with timeout 180000ms ...
+[1/1] terminal-state validation passed for bioetl-incident-v1 (11 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (11 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (12 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (12 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (24 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (24 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (18 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (18 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (17 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (17 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (9 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (9 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (9 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (9 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (7 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (7 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (6 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (6 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-incident-v1 (11 required non-row panel(s))
+rendered bioetl-incident-v1 -> bioetl-incident-v1.png
+[1/1] loading bioetl-overview-v2 ...
+[1/1] goto bioetl-overview-v2 -> http://localhost:3002/d/bioetl-overview-v2/run-overview?orgId=1&theme=dark&refresh=off&from=now-24h&to=now&timezone=UTC&var-workflow=All&var-pipeline=chembl_target&var-run_type=incremental&var-run_id=-
+[1/1] navigation committed bioetl-overview-v2
+[1/1] domcontentloaded bioetl-overview-v2
+[1/1] waiting for networkidle bioetl-overview-v2 ...
+[1/1] settling bioetl-overview-v2 for 12000ms ...
+[1/1] waiting for dashboard content bioetl-overview-v2 ...
+[1/1] materializing lazy panels for bioetl-overview-v2 ...
+[1/1] detected 10 rendered panel marker(s) for bioetl-overview-v2 using [data-testid^="data-testid Panel header"]
+[1/1] terminal-state validation passed for bioetl-overview-v2 (10 required non-row panel(s))
+[1/1] capturing screenshot bioetl-overview-v2 with timeout 180000ms ...
+[1/1] terminal-state validation passed for bioetl-overview-v2 (10 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-overview-v2 (10 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-overview-v2 (10 required non-row panel(s))
+rendered bioetl-overview-v2 -> bioetl-overview-v2.png
+[1/1] loading bioetl-run-explorer-v1 ...
+[1/1] goto bioetl-run-explorer-v1 -> http://localhost:3002/d/bioetl-run-explorer-v1/run-explorer?orgId=1&theme=dark&refresh=off&from=now-24h&to=now&timezone=UTC&var-workflow=All&var-pipeline=chembl_target&var-run_type=incremental&var-run_id=-
+[1/1] navigation committed bioetl-run-explorer-v1
+[1/1] domcontentloaded bioetl-run-explorer-v1
+[1/1] waiting for networkidle bioetl-run-explorer-v1 ...
+[1/1] settling bioetl-run-explorer-v1 for 12000ms ...
+[1/1] waiting for dashboard content bioetl-run-explorer-v1 ...
+[1/1] materializing lazy panels for bioetl-run-explorer-v1 ...
+[1/1] detected 2 rendered panel marker(s) for bioetl-run-explorer-v1 using [data-testid^="data-testid Panel header"]
+[1/1] terminal-state validation passed for bioetl-run-explorer-v1 (2 required non-row panel(s))
+[1/1] capturing screenshot bioetl-run-explorer-v1 with timeout 180000ms ...
+[1/1] terminal-state validation passed for bioetl-run-explorer-v1 (2 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-run-explorer-v1 (2 required non-row panel(s))
+[1/1] terminal-state validation passed for bioetl-run-explorer-v1 (2 required non-row panel(s))
+rendered bioetl-run-explorer-v1 -> bioetl-run-explorer-v1.png
+grafana-audit-cycle: render-only preflight
+grafana: status=ok detail=http://localhost:3002/api/health reachable
+grafana-render-auth: status=ok detail=frontend settings auth probe succeeded
+ops-http-bootstrap: status=ok detail=ops_http=ready (identity_matched)
+ops-http-datasource: status=ok detail=uid=bioetl-ops-http type=yesoreyeram-infinity-datasource
+playwright-runtime: status=ok detail=Playwright Chromium available at C:\Users\Fedor\AppData\Local\ms-playwright\chromium-1148\chrome-win\chrome.exe
+expanded-row-capture: status=ok detail=Playwright renderer expands collapsed dashboard rows by default for full-state audits and materializes lazy-rendered panels.
+screenshots: status=ok detail=reports\observability\grafana\screenshots-final-91a1443\render-manifest.json and all dashboard PNGs are current; requested/actual viewport, theme, and required panel terminal states are verified

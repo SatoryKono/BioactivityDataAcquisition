@@ -1,0 +1,6 @@
+[local-coverage] HEAD=6a4aa1b5671d61d5d4f2707b0d744f8fd0473847 source=5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f scratch=E:\github\bda-grafana-11874-11844\reports\quality\proof-or-stop\grafana-11874-11844\full-coverage-6a4aa1b-final
+[local-coverage] start smoke
+[local-coverage] smoke exit=0 coverage=yes
+[local-coverage] start contract-confidence
+[local-coverage] contract-confidence exit=0 coverage=yes
+[local-coverage] start repo-backed-unit-product

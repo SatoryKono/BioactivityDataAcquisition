@@ -1,0 +1,14 @@
+{
+  "shard": "unit-domain",
+  "attempt": 1,
+  "intervention": "Terminated verified own worker PID30140 only; canonical harness preserved failure and repeated unchanged group.",
+  "evidence": "Worker main thread stuck in pytest_timeout_set_timer -> threading.Thread.start -> Event.wait; controller waiting on xdist queue; worker CPU and log unchanged across samples. No product assertion completed for interrupted item.",
+  "root_cause": "Unresolved native timer-thread startup hang; resource pressure is not proven.",
+  "interrupted_item": "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py::TestDoiBaseValidation::test_doi_invalid_format[]",
+  "changes_to_gates_workers_or_test_selection": false,
+  "stack_logs": {
+    "domain-worker-24508-stack.log": "eb9741ba64d2eacd311886519b6b37fe021a9e9d1020449486723c16c668ba9f",
+    "domain-worker-30140-stack.log": "3a56f13700fbe3258c5e0c905098612e1c85f47e35abd71c4044b71cc7653de8",
+    "domain-controller-stack.log": "07c19b7429343cfb654529fc0b2120d3199ecdd956556f714bb50298f00552bc"
+  }
+}

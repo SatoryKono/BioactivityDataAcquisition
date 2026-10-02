@@ -1,0 +1,81 @@
+{
+  "complete": false,
+  "head": "6a4aa1b5671d61d5d4f2707b0d744f8fd0473847",
+  "producer": "run_local_coverage_verify.py",
+  "python": "3.13.7",
+  "required_shards": [
+    "smoke",
+    "contract-confidence",
+    "repo-backed-unit-product",
+    "repo-backed-unit-tooling",
+    "repo-backed-unit-ops",
+    "unit-scripts-tooling-passport",
+    "unit-scripts-tooling-debt-governance",
+    "unit-scripts-tooling-other",
+    "unit-filesystem-contracts",
+    "unit-subprocess-backed",
+    "unit-domain",
+    "unit-application",
+    "unit-infrastructure",
+    "unit-other",
+    "integration",
+    "security",
+    "serial"
+  ],
+  "schema_version": 1,
+  "scratch_dir": "E:\\github\\bda-grafana-11874-11844\\reports\\quality\\proof-or-stop\\grafana-11874-11844\\full-coverage-6a4aa1b-final",
+  "shards": [
+    {
+      "command": [
+        "C:\\Program Files\\Git\\bin\\bash.exe",
+        "scripts/engineering/dev/run_pytest.sh",
+        "--narrow",
+        "tests/smoke/",
+        "-m",
+        "not memory",
+        "--with-coverage",
+        "--cov-report=",
+        "--timeout=300",
+        "-p",
+        "no:cacheprovider",
+        "--junitxml=reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-6a4aa1b-final/junit/smoke.xml",
+        "-p",
+        "no:xdist"
+      ],
+      "coverage_file": "E:\\github\\bda-grafana-11874-11844\\reports\\quality\\proof-or-stop\\grafana-11874-11844\\full-coverage-6a4aa1b-final\\shards\\.coverage.smoke",
+      "coverage_sha256": "1fb5cdd93f56750d2379c247b69c8045894e22bbff2686892d074e483c709865",
+      "exit_code": 0,
+      "junit_file": "E:\\github\\bda-grafana-11874-11844\\reports\\quality\\proof-or-stop\\grafana-11874-11844\\full-coverage-6a4aa1b-final\\junit\\smoke.xml",
+      "log_file": "E:\\github\\bda-grafana-11874-11844\\reports\\quality\\proof-or-stop\\grafana-11874-11844\\full-coverage-6a4aa1b-final\\logs\\smoke.log",
+      "name": "smoke",
+      "seconds": 48.8
+    },
+    {
+      "command": [
+        "C:\\Program Files\\Git\\bin\\bash.exe",
+        "scripts/engineering/dev/run_pytest.sh",
+        "--narrow",
+        "tests/contract/",
+        "tests/unit/contracts/",
+        "-m",
+        "no_api or not network",
+        "--with-coverage",
+        "--cov-report=",
+        "--timeout=300",
+        "-p",
+        "no:cacheprovider",
+        "--junitxml=reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-6a4aa1b-final/junit/contract-confidence.xml",
+        "-p",
+        "no:xdist"
+      ],
+      "coverage_file": "E:\\github\\bda-grafana-11874-11844\\reports\\quality\\proof-or-stop\\grafana-11874-11844\\full-coverage-6a4aa1b-final\\shards\\.coverage.contract-confidence",
+      "coverage_sha256": "47255854707476555d883eb30e1aae6f3364f763e9b62d1655a2d09a96f93316",
+      "exit_code": 0,
+      "junit_file": "E:\\github\\bda-grafana-11874-11844\\reports\\quality\\proof-or-stop\\grafana-11874-11844\\full-coverage-6a4aa1b-final\\junit\\contract-confidence.xml",
+      "log_file": "E:\\github\\bda-grafana-11874-11844\\reports\\quality\\proof-or-stop\\grafana-11874-11844\\full-coverage-6a4aa1b-final\\logs\\contract-confidence.log",
+      "name": "contract-confidence",
+      "seconds": 95.14
+    }
+  ],
+  "source_tree_sha256": "5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f"
+}

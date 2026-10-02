@@ -1,0 +1,17 @@
+Process 24508: E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -u -c "import sys;exec(eval(sys.stdin.readline()))"
+Python v3.13.7 (C:\Users\Fedor\AppData\Local\Programs\Python\Python313\python.exe)
+
+Thread 13708 (idle): "MainThread"
+    wait (threading.py:359)
+    wait (threading.py:659)
+    integrate_as_primary_thread (execnet\gateway_base.py:385)
+    serve (execnet\gateway_base.py:1273)
+    serve (execnet\gateway_base.py:1806)
+    <module> (<string>:8)
+    <module> (<string>:1)
+Thread 28828 (idle)
+    read (execnet\gateway_base.py:534)
+    from_io (execnet\gateway_base.py:567)
+    _thread_receiver (execnet\gateway_base.py:1160)
+    run (execnet\gateway_base.py:341)
+    _perform_spawn (execnet\gateway_base.py:411)

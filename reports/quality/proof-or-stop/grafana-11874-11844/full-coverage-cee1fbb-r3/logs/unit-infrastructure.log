@@ -1,0 +1,50 @@
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  1%]
+........................................................................ [  2%]
+........................................................................ [  4%]
+........................................................................ [  5%]
+........................................................................ [  6%]
+........................................................................ [  8%]
+........................................................................ [  9%]
+........................................................................ [ 10%]
+........................................................................ [ 12%]
+........................................................................ [ 13%]
+........................................................................ [ 15%]
+.....F.........
+================================== FAILURES ===================================
+_____ test_reconcile_foreign_keys_config_is_normalized_into_domain_config _____
+[gw0] win32 -- Python 3.13.7 E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe
+
+    def test_reconcile_foreign_keys_config_is_normalized_into_domain_config() -> None:
+        schema = WorkflowConfigFileSchema.model_validate(_payload(_valid_config()))
+    
+        workflow = schema.to_domain()
+    
+        step = workflow.steps[0]
+        assert isinstance(step, TransformStepConfig)
+>       assert step.config == {
+            "source_layer": "gold",
+            "reference_layer": "gold",
+            "mutation_layer": "gold",
+            "source_table": "chembl.assay",
+            "reference_table": "chembl.target",
+            "source_key": "target_id",
+            "reference_key": "target_id",
+            "primary_keys": ["assay_id"],
+            "action": "delete_orphans",
+            "nulls_equal": False,
+        }
+E       AssertionError: assert {'source_laye...l.assay', ...} == {'source_laye...l.assay', ...}
+E         
+E         Omitting 10 identical items, use -vv to show
+E         Left contains 1 more item:
+E         {'require_closed_cohort': False}
+E         Use -v to get more diff
+
+tests\unit\infrastructure\config\test_workflow_reconcile_foreign_keys_config.py:83: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/unit/infrastructure/config/test_workflow_reconcile_foreign_keys_config.py::test_reconcile_foreign_keys_config_is_normalized_into_domain_config
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!

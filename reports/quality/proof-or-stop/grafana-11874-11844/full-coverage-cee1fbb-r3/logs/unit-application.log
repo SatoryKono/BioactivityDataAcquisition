@@ -1,0 +1,117 @@
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  0%]
+........................................................................ [  1%]
+........................................................................ [  2%]
+........................................................................ [  3%]
+........................................................................ [  4%]
+........................................................................ [  5%]
+........................................................................ [  6%]
+........................................................................ [  7%]
+........................................................................ [  8%]
+........................................................................ [  9%]
+........................................................................ [ 10%]
+........................................................................ [ 11%]
+........................................................................ [ 12%]
+........................................................................ [ 13%]
+........................................................................ [ 14%]
+........................................................................ [ 15%]
+........................................................................ [ 16%]
+........................................................................ [ 17%]
+........................................................................ [ 18%]
+........................................................................ [ 19%]
+........................................................................ [ 20%]
+........................................................................ [ 21%]
+........................................................................ [ 21%]
+........................................................................ [ 22%]
+........................................................................ [ 23%]
+........................................................................ [ 24%]
+........................................................................ [ 25%]
+........................................................................ [ 26%]
+........................................................................ [ 27%]
+........................................................................ [ 28%]
+........................................................................ [ 29%]
+........................................................................ [ 30%]
+........................................................................ [ 31%]
+........................................................................ [ 32%]
+........................................................................ [ 33%]
+........................................................................ [ 34%]
+........................................................................ [ 35%]
+........................................................................ [ 36%]
+....................................F..............
+================================== FAILURES ===================================
+______________ test_executor_returns_serializable_metadata_only _______________
+[gw1] win32 -- Python 3.13.7 E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe
+
+    @pytest.mark.asyncio
+    async def test_executor_returns_serializable_metadata_only() -> None:
+        port = _RecordingPort()
+        executor = build_reconcile_foreign_keys_executor(port)
+        spec = WorkflowTransformSpec.from_step(
+            TransformStepConfig(
+                step_id="reconcile_assay_target_orphans",
+                transform_name="reconcile_foreign_keys",
+                config={
+                    "source_table": "chembl_assay",
+                    "reference_table": "chembl_target",
+                    "source_key": "target_id",
+                    "reference_key": "target_id",
+                    "primary_keys": ["assay_id"],
+                    "action": "delete_orphans",
+                    "reference_completeness_evidence": {
+                        "status": "complete",
+                        "evidence_ref": "tests/unit/application/workflow/fk-reference-complete",
+                    },
+                },
+            )
+        )
+    
+        payload = await executor(spec, upstream_outputs={})
+    
+        assert port.request is not None
+>       assert payload == {
+            "transform_name": "reconcile_foreign_keys",
+            "fingerprint": spec.fingerprint,
+            "workflow_name": None,
+            "workflow_run_id": None,
+            "manifest_id": None,
+            "step_id": "reconcile_assay_target_orphans",
+            "source_table": "chembl_assay",
+            "reference_table": "chembl_target",
+            "source_key": "target_id",
+            "reference_key": "target_id",
+            "source_layer": "silver",
+            "reference_layer": "silver",
+            "mutation_layer": "silver",
+            "source_keys": ["target_id"],
+            "source_run_ids": [],
+            "source_scope": "all_current",
+            "reference_keys": ["target_id"],
+            "action": "delete_orphans",
+            "nulls_equal": False,
+            "scanned_rows": 3,
+            "retained_rows": 2,
+            "orphan_rows_deleted": 1,
+            "mutated": True,
+            "dry_run": False,
+            "would_mutate": False,
+            "mutation_mode": "unknown",
+            "quarantine_batch_id": None,
+            "quarantine_rows_written": 0,
+            "quarantine_error_code": None,
+            "reference_completeness": "complete",
+            "unproven_unmatched_rows": 0,
+        }
+E       AssertionError: assert {'transform_n...d': None, ...} == {'transform_n...d': None, ...}
+E         
+E         Omitting 31 identical items, use -vv to show
+E         Left contains 1 more item:
+E         {'closed_cohort_verified': False}
+E         Use -v to get more diff
+
+tests\unit\application\workflow\test_reconcile_foreign_keys.py:309: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/unit/application/workflow/test_reconcile_foreign_keys.py::test_executor_returns_serializable_metadata_only
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!

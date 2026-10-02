@@ -1,0 +1,22 @@
+{
+  "tested_head_sha": "6a4aa1b5671d61d5d4f2707b0d744f8fd0473847",
+  "product_base_sha": "42f364a39526e42bec9f23e813910052ca5eb440",
+  "wrapper_sha256": "c762b866e064aeafaf349817e01356300190abb9c531c3110bc8c065a667f864",
+  "resource_limits_from_invocation": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  },
+  "worker_count": 2,
+  "line_gate_percent": 85,
+  "branch_gate_percent": 85,
+  "owned_runtime_paused_during_measurement": [
+    "Grafana :3002",
+    "Ops HTTP :8014"
+  ],
+  "retry_policy": "Up to three identical command attempts only for native worker crash, the observed bootstrap timeout, or MemoryError; failed files preserved.",
+  "wrapper_path": "reports/quality/proof-or-stop/grafana-11874-11844/run_current_main_coverage_final.py",
+  "failed_preceding_run": "full-coverage-cee1fbb-r3/manifest.json",
+  "test_repairs": "Explicit closed-cohort metadata/default fields; permit bound cohorts, preserve independently bounded extract rejection; 61 focused tests passed."
+}
