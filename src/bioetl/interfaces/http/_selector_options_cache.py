@@ -9,9 +9,9 @@ from collections import OrderedDict
 from collections.abc import Awaitable, Callable, Mapping
 from copy import deepcopy
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from time import monotonic
 
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
     run_bounded_forensic_operation,
@@ -182,7 +182,7 @@ class SelectorOptionsCache:
             )
             entry.payload = deepcopy(payload)
             entry.completed_at = monotonic()
-            entry.observed_at = datetime.now(UTC).isoformat()
+            entry.observed_at = current_utc_time().isoformat()
             entry.snapshot_id = hashlib.sha256(
                 json.dumps([key, payload], sort_keys=True, ensure_ascii=False).encode(
                     "utf-8"

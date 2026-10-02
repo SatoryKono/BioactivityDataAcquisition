@@ -32,7 +32,7 @@ pytestmark = pytest.mark.unit
 
 @pytest.mark.asyncio
 async def test_merge_io_returns_unchanged_frames_without_joinable_inputs() -> None:
-    host = MergeIOMixin()
+    host = MergeIOMixin(config=MagicMock(), logger=MagicMock())
     frame = pl.DataFrame({"id": [1]})
     dependencies = [SimpleNamespace(pipeline="chembl_target")]
     assert (

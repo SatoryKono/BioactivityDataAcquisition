@@ -304,3 +304,33 @@ def test_http_identity_panel_docs_match_shipped_datasource_contract(
     ):
         if processed_section is not None:
             assert token in processed_section
+
+
+def test_overview_identity_docs_match_selected_run_status_contract() -> None:
+    dashboard_path = DASHBOARD_DIR / "bioetl-overview-v2.json"
+    panel = _dashboard_panel_by_id(dashboard_path, 9300)
+    doc_text = (PANEL_DOCS_DIR / "bioetl-overview-v2-panels.md").read_text(
+        encoding="utf-8"
+    )
+    section = _documented_panel_section(doc_text, "Review Run Identity")
+    assert panel["datasource"] == "BioETL Ops HTTP"
+    assert str(panel["targets"][0]["url"]).startswith(
+        "/ops/observability/selected-run-status"
+    )
+    for token in (
+        "BioETL Ops HTTP",
+        "/ops/observability/selected-run-status",
+        "this is not a Prometheus panel",
+    ):
+        assert token in section
+    panels = _iter_dashboard_panels(
+        json.loads(dashboard_path.read_text(encoding="utf-8"))["panels"]
+    )
+    assert 9301 not in {item["id"] for item in panels}
+
+
+@pytest.mark.parametrize(
+    "dashboard_name", ("bioetl-runtime", "bioetl-provider-health-v2")
+)
+def test_retired_dashboard_json_stays_absent(dashboard_name: str) -> None:
+    assert not (DASHBOARD_DIR / f"{dashboard_name}.json").exists()

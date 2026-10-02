@@ -36,6 +36,9 @@ from bioetl.interfaces.http._health_server_control_plane_metrics_refresh import 
     run_periodic_control_plane_metrics_refresh,
     stop_control_plane_metrics_refresh,
 )
+from bioetl.interfaces.http._health_server_observability_protocols import (
+    HealthServerControlPlaneDeps as HealthServerControlPlaneDeps,
+)
 from bioetl.interfaces.http._run_explorer_snapshot import (
     RunExplorerSnapshotCache,
     run_periodic_run_explorer_snapshot,
@@ -55,7 +58,6 @@ from bioetl.interfaces.http.processed_records_table import (
 )
 from bioetl.interfaces.http.types import (
     HealthResponse,
-    HealthServerControlPlaneDeps,
     _StaticHealthMetricsExposition,
 )
 

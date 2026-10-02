@@ -129,7 +129,7 @@ def test_lineage_preflight_and_replay_refresh(monkeypatch: pytest.MonkeyPatch) -
         ) -> None:
             result[str(kwargs.get("pipeline_name"))] = kwargs.get("fields")
 
-    host = _Host()
+    host = _Host(logger=MagicMock())
     config = SimpleNamespace(
         seed=SimpleNamespace(pipeline="chembl_activity"),
         dependencies=(SimpleNamespace(pipeline="chembl_document"),),
