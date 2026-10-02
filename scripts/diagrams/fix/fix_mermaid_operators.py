@@ -216,7 +216,13 @@ def check_file(path: Path) -> FileCheckResult:
 
 def fix_file(path: Path, *, dry_run: bool) -> int:
     """Rewrite a Mermaid file in-place and return replacement count."""
-    safe_path = _resolve_repo_file_path(path)
+    relative_path = _normalize_repo_relative_path(path)
+    safe_path = _resolve_repo_file_path(relative_path)
+    diagram_root = (_repo_root() / "docs/02-architecture" / DIAGRAM_ROOT.name).resolve()
+    if not safe_path.resolved_path.is_relative_to(diagram_root):
+        raise ValueError(f"refusing to process path outside {diagram_root}: {path}")
+    if safe_path.resolved_path.suffix not in SUPPORTED_SUFFIXES:
+        raise ValueError(f"not a Mermaid source file: {path}")
     lines = _read_validated_repo_text(safe_path).splitlines()
     if detect_diagram_type(lines) not in TARGET_DIAGRAM_TYPES:
         return 0

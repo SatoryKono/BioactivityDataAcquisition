@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-02T07:26:05.465023+00:00",
+  "generated_at": "2026-10-02T08:34:17.343137+00:00",
   "summary": {
     "total_scripts": 638,
     "status_counts": {
@@ -6835,7 +6835,7 @@
           "path": "tests/unit/repo_backed/tools/test_fix_mermaid_operators_security.py",
           "line": 17,
           "source_group": "tests",
-          "text": "module_path = repo_root / \"scripts/diagrams/fix_mermaid_operators.py\""
+          "text": "module_path = repo_root / \"scripts/diagrams/fix/fix_mermaid_operators.py\""
         }
       ]
     },
