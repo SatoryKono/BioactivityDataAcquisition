@@ -136,6 +136,8 @@ def test_active_docs_sync_workflow_selector_and_cta_titles() -> None:
     # must stay absent from the generated inventory.
     assert "bioetl-workflow-overview.json" not in panel_inventory
     assert "| bioetl-runtime.json |" not in panel_inventory
+    assert "| bioetl-run-explorer-v1.json |" in panel_inventory
+    assert "Inspect Recent Runs (last 10)" in panel_inventory
     assert "| bioetl-incident-v1.json | 9996 | Track Failed Workflow Runs |" in (
         panel_inventory
     )
