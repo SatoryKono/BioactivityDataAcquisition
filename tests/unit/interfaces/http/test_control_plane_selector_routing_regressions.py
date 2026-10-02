@@ -5,6 +5,8 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, cast
+from unittest.mock import MagicMock
+from bioetl.domain.ports import RunReportStorePort
 
 import pytest
 
@@ -12,7 +14,6 @@ from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.interfaces.http import _control_plane_selector_filters as selector_filters
 from bioetl.interfaces.http import _health_server_readiness as readiness_module
 from bioetl.interfaces.http import health_server_routing_mixin as routing_module
-from bioetl.interfaces.http import report_root_config
 from bioetl.interfaces.http._control_plane_selector_records import SelectorRecord
 from bioetl.interfaces.http.health_server_routing_mixin import HealthServerRoutingMixin
 from bioetl.interfaces.http.types import HealthResponse
@@ -69,6 +70,8 @@ class _MetricsExposition:
 class _RoutingHost(HealthServerRoutingMixin):
     def __init__(self) -> None:
         self._clock = _Clock()
+        self._run_report_store = MagicMock(spec=RunReportStorePort)
+        self._run_report_store.is_dir.return_value = False
         self._health_monitor: object | None = None
         self._metrics_exposition = _MetricsExposition()
         self.provider_statuses: dict[str, JsonDict] = {}
@@ -270,12 +273,12 @@ async def test_routing_mixin_health_lifecycle_is_deterministic_and_fail_closed(
 ) -> None:
     host = _RoutingHost()
     monkeypatch.setattr(
-        report_root_config,
+        readiness_module,
         "report_root_readiness_check",
         lambda: {"status": "healthy", "marker": "valid"},
     )
     monkeypatch.setattr(
-        report_root_config,
+        readiness_module,
         "enforce_report_root_marker",
         lambda: False,
     )
@@ -304,12 +307,12 @@ async def test_routing_mixin_health_lifecycle_is_deterministic_and_fail_closed(
     assert "providers" in (await host._handle_health()).checks
 
     monkeypatch.setattr(
-        report_root_config,
+        readiness_module,
         "report_root_readiness_check",
         lambda: {"status": "unhealthy", "marker": "missing"},
     )
     monkeypatch.setattr(
-        report_root_config,
+        readiness_module,
         "enforce_report_root_marker",
         lambda: True,
     )

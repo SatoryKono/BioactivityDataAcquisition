@@ -47,7 +47,9 @@ def _provider_paths(payload: object) -> list[str]:
 
 
 @pytest.mark.parametrize("profile", ["dashboards", "dashboards-prometheus-only"])
-def test_each_dashboard_has_one_provider_and_preserves_folder_access(profile: str) -> None:
+def test_each_dashboard_has_one_provider_and_preserves_folder_access(
+    profile: str,
+) -> None:
     """Providers have disjoint files; only Run Explorer stays in BioETL."""
     directory = Path("grafana/provisioning") / profile
     files = sorted(directory.glob("*.y*ml"))

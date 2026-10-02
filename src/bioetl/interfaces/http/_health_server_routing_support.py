@@ -4,19 +4,8 @@ from __future__ import annotations
 
 import asyncio
 from functools import partial
-from typing import Protocol
 
-from bioetl.application.observability.control_plane_evidence import (
-    ControlPlaneEvidenceService,
-)
 from bioetl.domain.control_plane import WorkflowManifest
-from bioetl.domain.ports import (
-    CheckpointPort,
-    RunLedgerPort,
-    RunManifestPort,
-    RunReportStorePort,
-    WorkflowManifestPort,
-)
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
     forensic_unavailable_payload,
@@ -35,6 +24,9 @@ from bioetl.interfaces.http._health_server_identity_routing_support import (
     handle_control_plane_identity_evidence,
     handle_control_plane_identity_table,
 )
+from bioetl.interfaces.http._health_server_observability_protocols import (
+    _HealthRoutingHost as _HealthRoutingHost,
+)
 from bioetl.interfaces.http._health_server_observability_routing import (
     dispatch_observability_request,
 )
@@ -47,7 +39,6 @@ from bioetl.interfaces.http._report_selector_options import (
 )
 from bioetl.interfaces.http._selector_catalog import (
     SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
-    SelectorCatalog,
 )
 from bioetl.interfaces.http.control_plane_selector_context import (
     RUN_ID_NO_SELECTION,
@@ -59,83 +50,6 @@ from bioetl.interfaces.http.control_plane_selector_context import (
 _NOT_FOUND_MESSAGE = "Not Found"
 _FILTER_OPTIONS_TIMEOUT_SECONDS = 20.0
 _CONTROL_PLANE_CLIENT_ERRORS = (ValueError, RuntimeError, OSError, ConnectionError)
-
-
-class _HealthResponseSupport(Protocol):
-    async def _send_response(
-        self,
-        writer: asyncio.StreamWriter,
-        status_code: int,
-        message: str,
-    ) -> None: ...
-
-    async def _send_payload_response(
-        self,
-        writer: asyncio.StreamWriter,
-        status_code: int,
-        payload: dict[str, object],
-    ) -> None: ...
-
-
-class _HealthRoutingHost(_HealthResponseSupport, Protocol):
-    @property
-    def _run_report_store(self) -> RunReportStorePort: ...
-
-    @property
-    def _control_plane_evidence_service(
-        self,
-    ) -> ControlPlaneEvidenceService | None: ...
-
-    @property
-    def _forensic_endpoint_limiter(self) -> asyncio.Semaphore: ...
-
-    @property
-    def _selector_endpoint_limiter(self) -> asyncio.Semaphore: ...
-
-    @property
-    def _selector_catalog(self) -> SelectorCatalog: ...
-
-    @property
-    def _checkpoint_port(self) -> CheckpointPort | None: ...
-
-    @property
-    def _run_manifest_port(self) -> RunManifestPort | None: ...
-
-    @property
-    def _run_ledger_port(self) -> RunLedgerPort | None: ...
-
-    @property
-    def _workflow_manifest_port(self) -> WorkflowManifestPort | None: ...
-
-    @property
-    def _data_root(self) -> str | None: ...
-
-    @property
-    def _runtime_source_id(self) -> str | None: ...
-
-    def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
-
-    @staticmethod
-    def _read_optional_param(query: dict[str, str], name: str) -> str | None: ...
-
-    @staticmethod
-    def _is_all_scope_token(value: str | None) -> bool: ...
-
-    def _read_int_param(
-        self,
-        query: dict[str, str],
-        name: str,
-        default: int,
-        *,
-        minimum: int,
-    ) -> int: ...
-
-    @classmethod
-    def _read_scope_csv_param(
-        cls,
-        query: dict[str, str],
-        name: str,
-    ) -> tuple[str, ...]: ...
 
 
 async def dispatch_control_plane_request(
@@ -413,19 +327,15 @@ async def _dispatch_ops_endpoints(
     if path == "/ops/control-plane/ready":
         await handle_control_plane_ready(host, writer)
         return True
-    if path == "/ops/control-plane/filter-options":
-        await handle_control_plane_filter_options(host, writer, query)
-        return True
-    if path == "/ops/control-plane/selector-context":
-        await handle_control_plane_selector_context(host, writer, query)
-        return True
-    if path == "/ops/control-plane/identity-table":
-        await handle_control_plane_identity_table(host, writer, query)
-        return True
-    if path == "/ops/control-plane/identity-evidence":
-        await handle_control_plane_identity_evidence(host, writer, query)
-        return True
-    if path == "/ops/control-plane/checkpoint-freshness":
-        await handle_control_plane_checkpoint_freshness(host, writer, query)
-        return True
-    return False
+    handlers = {
+        "/ops/control-plane/filter-options": handle_control_plane_filter_options,
+        "/ops/control-plane/selector-context": handle_control_plane_selector_context,
+        "/ops/control-plane/identity-table": handle_control_plane_identity_table,
+        "/ops/control-plane/identity-evidence": handle_control_plane_identity_evidence,
+        "/ops/control-plane/checkpoint-freshness": handle_control_plane_checkpoint_freshness,
+    }
+    handler = handlers.get(path)
+    if handler is None:
+        return False
+    await handler(host, writer, query)
+    return True

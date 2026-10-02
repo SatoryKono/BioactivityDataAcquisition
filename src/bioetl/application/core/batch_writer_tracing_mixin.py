@@ -37,7 +37,9 @@ class _BatchWriterTracingHostProtocol(Protocol):
 class BatchWriterTracingMixin:
     """Operational cross-cutting concerns for BatchWriter."""
 
-    async def _validate_lock(self: _BatchWriterTracingHostProtocol, operation: str) -> None:
+    async def _validate_lock(
+        self: _BatchWriterTracingHostProtocol, operation: str
+    ) -> None:
         """Validate lock ownership before write operation."""
         lock_validator = self._lock_validator
         if lock_validator is None:
@@ -53,7 +55,11 @@ class BatchWriterTracingMixin:
             raise LockNotHeldError(operation, f"lock:{table_name}")
 
     def _start_span(
-        self: _BatchWriterTracingHostProtocol, name: str, layer: str, record_count: int, batch_id: BatchID | None = None
+        self: _BatchWriterTracingHostProtocol,
+        name: str,
+        layer: str,
+        record_count: int,
+        batch_id: BatchID | None = None,
     ) -> SpanType | None:
         """Start tracing span for write operation."""
         if not self._tracer:
@@ -72,7 +78,11 @@ class BatchWriterTracingMixin:
         span.__enter__()
         return span
 
-    def _end_span(self: _BatchWriterTracingHostProtocol, span: SpanType | None, error: Exception | None = None) -> None:
+    def _end_span(
+        self: _BatchWriterTracingHostProtocol,
+        span: SpanType | None,
+        error: Exception | None = None,
+    ) -> None:
         """Close tracing span with optional exception metadata."""
         close_span(span, error)
 
