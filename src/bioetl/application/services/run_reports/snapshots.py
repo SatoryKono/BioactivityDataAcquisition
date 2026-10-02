@@ -26,6 +26,8 @@ def publish_snapshot(
     if report.get("schema_version") not in _PIPELINE_REPORT_SCHEMAS:
         raise ValueError("pipeline_snapshot_schema_required")
     report = {**report, "schema_version": "pipeline_run_report_v2"}
+    # Late archive/workflow observations change the report's canonical content.
+    # Bind its self digest to this revision before signing the snapshot.
     artifacts = report.get("artifacts")
     if isinstance(artifacts, list):
         digest = canonical_report_sha256(report)

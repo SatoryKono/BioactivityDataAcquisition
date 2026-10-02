@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 import re
 from collections import deque
@@ -20,6 +21,7 @@ import pytest
 import yaml
 from tests.integration._grafana_test_support import (
     _collect_dashboard_links,
+    get_dashboard_panels,
     load_dashboard,
 )
 
@@ -35,6 +37,37 @@ def _load_contract() -> dict[str, object]:
     return yaml.safe_load(_CONTRACT_PATH.read_text(encoding="utf-8"))
 
 
+def _navigation_routes(payload: dict) -> list[dict]:
+    """Follow header routes or exact-run table actions on the entry page."""
+    if payload.get("uid") != "bioetl-run-explorer-v1":
+        return _collect_dashboard_links(payload)
+    tables = [p for p in get_dashboard_panels(payload) if p.get("id") == 3010]
+    assert len(tables) == 1 and tables[0].get("type") == "table", (
+        "Run Explorer must expose one run table id=3010"
+    )
+    expected = _load_contract()["navigation_surfaces"]["selected_run_rows"]["fields"]
+    links = []
+    for field, target_uid in expected.items():
+        overrides = [
+            o
+            for o in tables[0]["fieldConfig"]["overrides"]
+            if o.get("matcher") == {"id": "byName", "options": field}
+        ]
+        assert len(overrides) == 1, f"Missing or duplicate navigation field {field}"
+        properties = [p for p in overrides[0]["properties"] if p.get("id") == "links"]
+        assert len(properties) == 1, f"Missing links on {field}"
+        field_links = properties[0]["value"]
+        assert isinstance(field_links, list) and len(field_links) == 1
+        link = field_links[0]
+        assert isinstance(link, dict)
+        assert link["url"].startswith(f"/d/{target_uid}/")
+        assert "var-run_id=${__data.fields.run_id:percentencode}" in link["url"]
+        assert "${__url_time_range}" in link["url"]
+        assert link["includeVars"] is False
+        links.append(link)
+    return links
+
+
 def _build_top_level_edges() -> dict[str, set[str]]:
     edges: dict[str, set[str]] = {}
     for path in _DASHBOARDS_DIR.glob("*.json"):
@@ -43,7 +76,7 @@ def _build_top_level_edges() -> dict[str, set[str]]:
         assert isinstance(source_uid, str), f"{path.name} must define string uid"
         edges.setdefault(source_uid, set())
 
-        for link in _collect_dashboard_links(payload):
+        for link in _navigation_routes(payload):
             url = link.get("url")
             if not isinstance(url, str):
                 continue
@@ -60,7 +93,7 @@ def _iter_top_level_uid_links() -> list[tuple[str, str, str]]:
         payload = load_dashboard(path)
         source_uid = payload.get("uid")
         assert isinstance(source_uid, str), f"{path.name} must define string uid"
-        for link in _collect_dashboard_links(payload):
+        for link in _navigation_routes(payload):
             url = link.get("url")
             if not isinstance(url, str):
                 continue
@@ -77,7 +110,7 @@ def _iter_top_level_uid_links_with_title() -> list[tuple[str, str, str, str]]:
         payload = load_dashboard(path)
         source_uid = payload.get("uid")
         assert isinstance(source_uid, str), f"{path.name} must define string uid"
-        for link in _collect_dashboard_links(payload):
+        for link in _navigation_routes(payload):
             title = link.get("title")
             url = link.get("url")
             if not isinstance(title, str) or not isinstance(url, str):
@@ -281,3 +314,28 @@ def test_primary_priority_links_are_unique_per_target_uid_and_semantics() -> Non
             assert len(semantics_list) <= 1, (
                 f"{source_uid}->{target_uid} has more than one primary link semantics: {semantics_list}"
             )
+
+
+@pytest.mark.parametrize(
+    "damage", ["missing_table", "missing_action", "foreign_run_id"]
+)
+def test_explorer_row_navigation_fails_closed(damage: str) -> None:
+    payload = deepcopy(load_dashboard(_DASHBOARDS_DIR / "bioetl-run-explorer-v1.json"))
+    table = next(p for p in payload["panels"] if p["id"] == 3010)
+    if damage == "missing_table":
+        payload["panels"].remove(table)
+    else:
+        field = next(
+            o
+            for o in table["fieldConfig"]["overrides"]
+            if o["matcher"] == {"id": "byName", "options": "Overview"}
+        )
+        prop = next(p for p in field["properties"] if p["id"] == "links")
+        if damage == "missing_action":
+            prop["value"] = []
+        else:
+            prop["value"][0]["url"] = prop["value"][0]["url"].replace(
+                "${__data.fields.run_id:percentencode}", "${run_id}"
+            )
+    with pytest.raises(AssertionError):
+        _navigation_routes(payload)

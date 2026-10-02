@@ -123,7 +123,7 @@ def test_governed_publication_identifier_arrays_publish_canonical_json_patterns(
         ("uniprot", "protein", "chembl_ids"): (r'^\[("CHEMBL\d+"(,"CHEMBL\d+")*)?\]$'),
         ("uniprot", "protein", "drugbank_ids"): (r'^\[("DB\d{5}"(,"DB\d{5}")*)?\]$'),
         ("uniprot", "protein", "go_terms"): (
-            r'^\[(("GO:\d{7}"|\{[^\]]*"id":"GO:\d{7}"[^\]]*\})(,("GO:\d{7}"|\{[^\]]*"id":"GO:\d{7}"[^\]]*\}))*)?\]$'
+            '^\\[(?:(?:"GO:\\d{7}"|\\{(?:[^"{}]|"(?:[^"\\\\]|\\\\.)*")*"id":"GO:\\d{7}"(?:[^"{}]|"(?:[^"\\\\]|\\\\.)*")*\\})(?:,(?:"GO:\\d{7}"|\\{(?:[^"{}]|"(?:[^"\\\\]|\\\\.)*")*"id":"GO:\\d{7}"(?:[^"{}]|"(?:[^"\\\\]|\\\\.)*")*\\}))*)?\\]$'
         ),
         ("uniprot", "protein", "interpro_xrefs"): (
             r'^\[(("IPR\d{6}"|\{[^\]]*"id":"IPR\d{6}"[^\]]*\})(,("IPR\d{6}"|\{[^\]]*"id":"IPR\d{6}"[^\]]*\}))*)?\]$'

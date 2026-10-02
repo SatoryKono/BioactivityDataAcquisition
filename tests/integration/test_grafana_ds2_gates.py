@@ -82,7 +82,34 @@ def test_overview_status_uses_only_l0_operator_terminology() -> None:
     assert all(p.get("id") != 214 for p in get_dashboard_panels(dashboard))
 
 
-def test_runtime_metrics_evidence_uses_standard_threshold_steps() -> None:
+def test_incident_pipeline_scope_status_matches_priority_enum() -> None:
+    """Pipeline scope priority must use the canonical OK/WARN/CRIT/UNKNOWN vocabulary."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    status = next(
+        panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 18940
+    )
+    operator_copy = " ".join(
+        (str(status.get("title") or ""), str(status.get("description") or ""))
+    ).upper()
+    assert "HEALTHY" not in operator_copy
+    assert "DEGRADED" not in operator_copy
+    assert "BROKEN" not in operator_copy
+
+    mappings = status["fieldConfig"]["defaults"]["mappings"]
+    values = next(mapping for mapping in mappings if mapping["type"] == "value")
+    assert {key: option["text"] for key, option in values["options"].items()} == {
+        "0": "OK",
+        "1": "UNKNOWN",
+        "2": "WARN",
+        "3": "CRIT",
+    }
+
+    for code, label in ((0, "OK"), (1, "UNKNOWN"), (2, "WARN"), (3, "CRIT")):
+        assert f"{code}={label}" in status["description"]
+    assert "bioetl_workflow_scope_priority_by_input" in status["targets"][0]["expr"]
+
+
+def test_incident_metrics_evidence_uses_standard_threshold_steps() -> None:
     """Evidence chip follows shared severity thresholds; null mapping stays UNKNOWN."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     evidence = next(

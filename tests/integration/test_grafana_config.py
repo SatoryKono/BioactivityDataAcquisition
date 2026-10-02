@@ -976,6 +976,16 @@ def test_dashboard_has_required_variables(dashboard_path):
     assert expected_vars is not None, (
         f"Unexpected dashboard file: {dashboard_path.name}"
     )
+    expected_vars = expected_vars | {"provider_for_pipeline"}
+    provider_context = next(
+        variable
+        for variable in dashboard["templating"]["list"]
+        if variable["name"] == "provider_for_pipeline"
+    )
+    assert provider_context["hide"] == 2
+    assert provider_context["definition"] == (
+        'label_values(bioetl_workflow_pipeline_expected{pipeline=~"$pipeline"}, provider)'
+    )
     assert variables == expected_vars, (
         f"Dashboard {dashboard_path.name} variables mismatch. "
         f"Expected: {sorted(expected_vars)}, got: {sorted(variables)}"
@@ -1414,7 +1424,7 @@ def test_provider_health_status_mappings_match_description_enum() -> None:
     assert "saved check verdict" in panel["description"]
 
 
-def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_labels():
+def test_incident_provider_alert_conditions_do_not_filter_on_missing_pipeline_labels():
     """Provider runtime alert summaries are fleet-wide and must not filter on pipeline."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel = next(
@@ -1437,7 +1447,7 @@ def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_lab
     )
 
 
-def test_runtime_provider_alert_conditions_local_panel_scopes_all_addends_to_provider_hint():
+def test_incident_provider_alert_conditions_use_declared_provider_scope():
     """Selected-pipeline provider handoff must not mix in unscoped global provider alert sums."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel = next(
@@ -1450,6 +1460,12 @@ def test_runtime_provider_alert_conditions_local_panel_scopes_all_addends_to_pro
     )
     assert panel is not None
     expr = panel["targets"][0]["expr"]
+    variables = {v["name"]: v for v in dashboard["templating"]["list"]}
+    assert "provider_hint" not in variables
+    assert variables["provider"]["current"]["value"] == "unknown"
+    assert "${pipeline}" in variables["provider"]["definition"]
+    assert "${workflow}" in variables["provider"]["definition"]
+    assert "$provider_hint" not in expr
     assert "bioetl_runtime_provider_alert_count" in expr
     assert expr.count('provider=~"$provider"') == 2
     assert "bioetl_provider_current_status" in expr

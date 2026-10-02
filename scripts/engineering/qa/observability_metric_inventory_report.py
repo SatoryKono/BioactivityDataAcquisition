@@ -260,6 +260,7 @@ def _panel_contract(
         "documents_backend_down": any(
             token in documentation_lower
             for token in (
+                "query error",
                 "backend down",
                 "backend failure",
                 "backend unavailable",
@@ -568,7 +569,10 @@ def _http_semantics_violations(typed_targets: list[dict[str, object]]) -> list[s
         f"{row['dashboard_uid']}::panel={row['panel_id']}"
         for row in typed_targets
         if row["kind"] == "http"
-        and not (row["documents_valid_empty"] and row["documents_backend_down"])
+        and not (
+            (row["documents_valid_empty"] or row["empty_state"] == "coverage_gap")
+            and row["documents_backend_down"]
+        )
     ]
 
 

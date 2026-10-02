@@ -969,7 +969,7 @@
         "h": 14
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved accounting: count in is the input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+      "description": "SELECTED RUN · Saved accounting: count in is the input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1568,7 +1568,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",

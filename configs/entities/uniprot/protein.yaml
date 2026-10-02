@@ -186,9 +186,9 @@ quality:
     error_message: Invalid UniProt flag value
   - field: organism_scientific
     type: pattern
-    pattern: ^[A-Z][a-z]+ [a-z]+.*$
+    pattern: ^[A-Z][A-Za-z]+ [A-Za-z0-9].*$
     nullable: true
-    error_message: Organism should be in binomial nomenclature
+    error_message: Scientific organism name must include a genus or virus name and qualifier
   - field: taxonomy_id
     type: range
     min: 1
@@ -225,7 +225,7 @@ quality:
     error_message: Invalid UniProt protein_existence value
   - field: go_terms
     type: pattern
-    pattern: '^\[(("GO:\d{7}"|\{[^\]]*"id":"GO:\d{7}"[^\]]*\})(,("GO:\d{7}"|\{[^\]]*"id":"GO:\d{7}"[^\]]*\}))*)?\]$'
+    pattern: '^\[(?:(?:"GO:\d{7}"|\{(?:[^"{}]|"(?:[^"\\]|\\.)*")*"id":"GO:\d{7}"(?:[^"{}]|"(?:[^"\\]|\\.)*")*\})(?:,(?:"GO:\d{7}"|\{(?:[^"{}]|"(?:[^"\\]|\\.)*")*"id":"GO:\d{7}"(?:[^"{}]|"(?:[^"\\]|\\.)*")*\}))*)?\]$'
     nullable: true
     error_message: go_terms must be a canonical JSON array of GO references
   - field: pdb_xrefs

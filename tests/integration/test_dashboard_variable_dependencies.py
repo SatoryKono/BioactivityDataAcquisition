@@ -94,6 +94,17 @@ def test_runtime_variable_dependencies():
     assert variables["read_latency_quantile"]["current"]["value"] == "0.95"
 
 
+def test_overview_variable_dependencies():
+    """Run Overview owns runtime context after Pipeline Diagnostics retirement."""
+    variables = _templating_map("grafana/dashboards/bioetl-overview-v2.json")
+    assert {"workflow", "pipeline", "run_type", "run_id"} <= variables.keys()
+    assert 'pipeline=~"$pipeline"' in variables["run_type"]["definition"]
+    run_query = variables["run_id"]["definition"]
+    for selector in ("${workflow}", "${pipeline}", "${run_type:csv}"):
+        assert selector in run_query
+    assert "stage" not in variables
+
+
 def test_dq_variable_dependencies():
     """bioetl-dq-v2: $stage depends on pipeline/run_type and defaults to All."""
     variables = _templating_map("grafana/dashboards/bioetl-dq-v2.json")
@@ -117,6 +128,24 @@ def test_provider_health_variable_dependencies():
     assert variables["run_id"]["datasource"] == "BioETL Ops HTTP"
     assert variables["run_id"]["multi"] is False
     assert not Path("grafana/dashboards/bioetl-provider-health-v2.json").exists()
+
+
+def test_overview_provider_context_is_derived_from_pipeline():
+    """Provider evidence is bound to the selected run, not a fleet selector."""
+    variables = _templating_map("grafana/dashboards/bioetl-overview-v2.json")
+    provider = variables["provider_for_pipeline"]
+    assert provider["definition"] == (
+        'label_values(bioetl_workflow_pipeline_expected{pipeline=~"$pipeline"}, provider)'
+    )
+    assert provider["hide"] == 2
+    assert not {"provider", "pipeline_context", "adapter"} & variables.keys()
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {panel["id"]: panel for panel in dashboard["panels"]}
+    for panel_id in (9480, 9481):
+        target = panels[panel_id]["targets"][0]
+        assert target["url"].startswith("/ops/observability/selected-run-status?")
+        assert "pipeline=${pipeline}" in target["url"]
+        assert "run_id=${run_id}" in target["url"]
 
 
 def test_incident_provider_derives_from_pipeline_or_workflow():
