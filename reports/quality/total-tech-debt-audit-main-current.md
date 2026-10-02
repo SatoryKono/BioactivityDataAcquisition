@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `a85261bccdf5f38acfcb3f8ed18c5450048e311675ae2e7e850a984bc7261983`
+Evidence surface SHA-256: `93cce47a9804443bd217d61c55feaab2aeee739d392f5286f399dfbb9df91d2d`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,27 +18,27 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "a85261bccdf5f38acfcb3f8ed18c5450048e311675ae2e7e850a984bc7261983",
+  "evidence_surface_sha256": "93cce47a9804443bd217d61c55feaab2aeee739d392f5286f399dfbb9df91d2d",
   "metrics": {
-    "architecture_integral_score": 7.37,
-    "architecture_interpretation": "satisfactory_system_refactoring_required",
+    "architecture_integral_score": 9.47,
+    "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 46,
-    "debt_gate_fail_count": 1,
-    "debt_gate_pass_count": 45,
+    "debt_gate_fail_count": 0,
+    "debt_gate_pass_count": 46,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 2490,
     "layer_violation_count": 0,
-    "no_executable_lines_module_count": 5,
+    "no_executable_lines_module_count": 4,
     "partially_covered_module_count": 27,
-    "source_module_count": 2541,
+    "source_module_count": 2521,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 19
+    "unmeasured_module_count": 0
   },
   "schema_version": "technical-debt-audit-summary-v1"
 }
@@ -48,27 +48,26 @@ Refresh reason: Reconcile generated metadata while preserving the historical aud
 
 ## Current metadata refresh — 2026-10-02 (#11859)
 
-Merged source: main `8f024f97cb10` plus the report-store injection changes.
+Merged source: main `614a14e8f936` plus the report-store injection changes.
 The following rollup is derived from the current committed artifact surface:
 
-Debt-governance gates: **45 pass / 1 fail**;
-Architecture quality integral score: **7.37** (`satisfactory_system_refactoring_required`);
-source_module_count: **2541**;
+Debt-governance gates: **46 pass / 0 fail**;
+Architecture quality integral score: **9.47** (`good_targeted_improvements`);
+source_module_count: **2521**;
 fully_covered: **2490**;
 partially_covered: **27**;
-no_executable_lines: **5**;
+no_executable_lines: **4**;
 uncovered: **0**;
-unmeasured: **19**;
-= 2541 == source_module_count;
+unmeasured: **0**;
+= 2521 == source_module_count;
 Contract coverage matrix schema: **contract-coverage-matrix-v3**;
 Constructor waivers (shrink-only inventory): **1** entries;
 Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**;
 Layer violations: **0**.
 
-The inherited coverage inventory has 2541 rows, including 19 explicitly
-unmeasured modules. Its governed source scope has 2542 modules; the new
-`effective_config_runtime_identity.py` row is missing. The completeness
-guard and unmeasured-module debt gate fail. Hash refresh retains historical
+The inherited coverage inventory retains 2521 measured rows. Its governed
+source scope has 2542 modules, with 21 missing measurement rows. The
+completeness guard fails. Hash refresh retains historical
 measurements; it is not new coverage acceptance. A complete 17-shard run
 is required. No release PASS or budget growth is claimed.
 
