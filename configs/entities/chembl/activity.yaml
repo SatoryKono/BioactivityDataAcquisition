@@ -233,9 +233,9 @@ quality:
       error_message: Invalid standard_units value
     - field: units
       type: pattern
-      pattern: "^(?:[A-Za-zµ%][A-Za-z0-9µ%._-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$"
+      pattern: "^[A-Za-zµ%][A-Za-z0-9µ%._-]*(?:[ /][A-Za-zµ%][A-Za-z0-9µ%._-]*)*$"
       nullable: true
-      error_message: units must be a canonical unit token when present
+      error_message: units must be a raw unit token or compound unit expression when present
     - field: qudt_units
       type: pattern
       pattern: '^(?:https?://[^\s]+|[A-Za-zµ%][A-Za-z0-9µ%._/-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'

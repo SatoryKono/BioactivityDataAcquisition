@@ -205,6 +205,7 @@ def _exit_with_composite_result(success: bool, error_message: str | None) -> Non
 )
 @typed_click_option(
     "--seed-limit",
+    "--limit",
     type=int,
     help="Maximum records for seed pipeline",
 )

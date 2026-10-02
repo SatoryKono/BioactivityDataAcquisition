@@ -130,16 +130,26 @@ class ChemblHealthMixin:
         Returns:
             HealthStatus from the ChEMBL status endpoint or DEGRADED on transient failures.
         """
-        status = await probe_chembl_status(
-            http_client=self.http_client,
-            adapter_metrics=self._adapter_metrics,
-            logger=self._logger,
-            provider_name=self.provider_name,
-            timeout_seconds=CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS,
-            health_errors=CHEMBL_HEALTH_ERRORS,
-            transient_errors=CHEMBL_TRANSIENT_HEALTH_ERRORS,
-            handle_response=self._handle_health_response,
-        )
+        for attempt in range(2):
+            status = await probe_chembl_status(
+                http_client=self.http_client,
+                adapter_metrics=self._adapter_metrics,
+                logger=self._logger,
+                provider_name=self.provider_name,
+                timeout_seconds=CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS,
+                health_errors=CHEMBL_HEALTH_ERRORS,
+                transient_errors=CHEMBL_TRANSIENT_HEALTH_ERRORS,
+                handle_response=self._handle_health_response,
+            )
+            if status != HealthStatus.DEGRADED:
+                break
+            if attempt == 0:
+                self._logger.warning(
+                    "health_probe_retry",
+                    provider=self.provider_name,
+                    previous_status=status.value,
+                    attempt=2,
+                )
         self._last_probe_health_status = status
         return status
 

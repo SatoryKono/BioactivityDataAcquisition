@@ -1,6 +1,6 @@
 {
   "name": "@bioetl/grafana-router-v7-bridge",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -19,12 +19,13 @@
     "node": ">=20"
   },
   "dependencies": {
-    "react-router-v7": "npm:react-router@7.18.4"
+    "react-router-v7": "npm:react-router@7.18.4",
+    "react-router-dom-v5": "npm:react-router-dom@5.3.4",
+    "@types/react-router-dom-v5": "npm:@types/react-router-dom@5.3.3"
   },
   "peerDependencies": {
     "react": ">=18 <20",
-    "react-dom": ">=18 <20",
-    "react-router-dom": "^5.3.4"
+    "react-dom": ">=18 <20"
   },
   "devDependencies": {
     "esbuild": "0.25.10",
@@ -37,5 +38,9 @@
     "@types/react-dom": "19.2.2",
     "@types/react-router-dom": "5.3.3"
   },
-  "types": "./index.d.ts"
+  "types": "./index.d.ts",
+  "files": [
+    "index.mjs",
+    "index.d.ts"
+  ]
 }

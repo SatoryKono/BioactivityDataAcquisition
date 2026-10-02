@@ -104,9 +104,9 @@ quality:
     error_message: CID must be a canonical positive integer string
   - field: molecular_formula
     type: pattern
-    pattern: ^[A-Z][A-Za-z0-9]*$
+    pattern: ^(?:[A-Z][a-z]?[0-9]*)+(?:[+-][0-9]*)?$
     nullable: true
-    error_message: Molecular formula must start with uppercase letter
+    error_message: Molecular formula must contain element counts and an optional ionic charge
   - field: molecular_weight
     type: range
     min: 10

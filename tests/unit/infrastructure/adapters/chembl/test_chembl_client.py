@@ -392,6 +392,29 @@ async def test_health_check_probe_timeout_returns_degraded(
 
     assert status == HealthStatus.DEGRADED
     assert adapter._last_probe_health_status == HealthStatus.DEGRADED
+    assert mock_http_client.get_once.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_health_probe_retries_transient_failure_and_requires_confirmed_up(
+    adapter, mock_http_client
+):
+    response = MagicMock(status_code=200)
+    response.json.return_value = {"status": "UP"}
+    mock_http_client.get_once = AsyncMock(
+        side_effect=[httpx.ReadTimeout("transient"), response]
+    )
+    assert await adapter.health_check() == HealthStatus.HEALTHY
+    assert mock_http_client.get_once.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_repeated_degradation_never_becomes_healthy(adapter, mock_http_client):
+    response = MagicMock(status_code=200)
+    response.json.return_value = {"status": "DEGRADED"}
+    mock_http_client.get_once = AsyncMock(return_value=response)
+    assert await adapter.health_check() == HealthStatus.DEGRADED
+    assert mock_http_client.get_once.await_count == 2
 
 
 @pytest.mark.asyncio

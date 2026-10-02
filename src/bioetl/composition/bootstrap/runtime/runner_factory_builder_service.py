@@ -67,8 +67,10 @@ class RunnerFactoryBuilder[RunOptionsT]:
         pipeline_runner_builder: Callable[[PipelineRunContext], PipelineRunner],
         filter_extraction_service: CompositeFilterExtractor,
         required_persistence_profile: str | None = None,
+        gold_required_pipelines: frozenset[str] = frozenset(),
     ) -> None:
         self._logger = logger
+        self._gold_required_pipelines = gold_required_pipelines
         self._run_options_cls = run_options_cls
         self._build_context = build_context
         self._pipeline_runner_builder = pipeline_runner_builder
@@ -110,7 +112,7 @@ class RunnerFactoryBuilder[RunOptionsT]:
                 pipeline_name=seed_pipeline,
                 run_type="incremental",
                 limit=seed_limit,
-                skip_gold=True,
+                skip_gold=seed_pipeline not in self._gold_required_pipelines,
                 **bronze_opts,
             )
 
@@ -166,7 +168,7 @@ class RunnerFactoryBuilder[RunOptionsT]:
                 run_type="incremental",
                 limit=limit,
                 ignore_yaml_filter=True,
-                skip_gold=True,
+                skip_gold=pipeline_name not in self._gold_required_pipelines,
                 filter_ids=filter_ids,
                 filter_field=filter_field,
                 fallback_mapping=fallback_mapping,
@@ -227,7 +229,7 @@ class RunnerFactoryBuilder[RunOptionsT]:
                 filter_field=filter_field,
                 multi_filter_ids=multi_filter_ids,
                 ignore_yaml_filter=True,
-                skip_gold=True,
+                skip_gold=pipeline_name not in self._gold_required_pipelines,
                 execution_context="dependency",
                 **bronze_opts,
             )

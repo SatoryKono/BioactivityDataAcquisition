@@ -47,6 +47,7 @@ class UniProtProteinTransformer(  # pyright: ignore[reportIncompatibleMethodOver
         index: int,
     ) -> SilverRecord | None:
         """Transform raw UniProt record to Silver format."""
+        self._reject_inactive_record(record)
         try:
             accession = str(self._get_required_field(record, "primaryAccession"))
             entry_name = self._get_entry_name(record)
@@ -73,6 +74,7 @@ class UniProtProteinTransformer(  # pyright: ignore[reportIncompatibleMethodOver
         index: int,
     ) -> PreSilverRecord | None:
         """Build an intermediate UniProt payload for application finalization."""
+        self._reject_inactive_record(record)
         try:
             accession = str(self._get_required_field(record, "primaryAccession"))
             entry_name = self._get_entry_name(record)
@@ -89,6 +91,18 @@ class UniProtProteinTransformer(  # pyright: ignore[reportIncompatibleMethodOver
                 index=index,
             )
             return None
+
+    def _reject_inactive_record(self, record: BronzeRecord) -> None:
+        """Keep deletion tombstones in Bronze without treating them as proteins."""
+        if record.get("entryType") == "Inactive":
+            raise FilteredOutError(
+                "UniProt entry is inactive",
+                details={
+                    "entry_type": "Inactive",
+                    "accession": record.get("primaryAccession"),
+                    "inactive_reason": record.get("inactiveReason"),
+                },
+            )
 
     def _get_entry_name(self, record: BronzeRecord) -> str:
         """Extract entry name (uniProtkbId) as required field."""

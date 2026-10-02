@@ -23,6 +23,43 @@ if TYPE_CHECKING:
 class ChemblFetchMultiFilterMixin:
     """Provides multi-field filter fetch implementation for ChEMBL."""
 
+    async def _fetch_compound_record_intersection(
+        self,
+        url: str,
+        filters: dict[str, list[str]],
+        pk_field: str,
+        limit: int | None,
+    ) -> AsyncIterator[BronzeRecord]:
+        """Query one scalar key set and apply the complete AND predicate locally.
+
+        Compound records expose both filter keys as scalar fields. Fetching all
+        pages for the smaller key set is a superset of the requested intersection;
+        local membership checks preserve that intersection without a Cartesian
+        product of remote requests. Other entity/filter shapes retain their
+        existing server-side filtering path.
+        """
+        remote_key = min(filters, key=lambda key: len(filters[key]))
+        allowed = {key: frozenset(values) for key, values in filters.items()}
+        host = as_mixin_host(self)
+        batch_size = host._determine_multi_filter_batch_size(
+            url, {remote_key: filters[remote_key]}, "compound_record"
+        )
+        seen_ids: set[str] = set()
+        emitted = 0
+        for batch in host._batch_ids(filters[remote_key], batch_size):
+            params = host._build_filter_in_params({remote_key: batch})
+            async for record in host._fetch_multi_filter_page_loop(
+                url, params, "compound_record", pk_field, seen_ids
+            ):
+                if not all(
+                    str(record.get(key)) in values for key, values in allowed.items()
+                ):
+                    continue
+                yield record
+                emitted += 1
+                if limit is not None and emitted >= limit:
+                    return
+
     def _determine_multi_filter_batch_size(
         self,
         url: str,
@@ -113,7 +150,9 @@ class ChemblFetchMultiFilterMixin:
         Returns:
             Async iterator of deduplicated BronzeRecord dicts matching all filters.
         """
-        if not filters:
+        if not filters or any(not values for values in filters.values()):
+            return
+        if limit is not None and limit <= 0:
             return
         url = as_mixin_host(self)._mapper.get_resource_url(
             entity_type
@@ -127,6 +166,18 @@ class ChemblFetchMultiFilterMixin:
             as_mixin_host(self)._normalize_filter_field(entity_type, k)
             for k in filter_keys  # Any: mixin host
         ]
+        if entity_type == "compound_record" and set(api_filter_keys) == {
+            "molecule_chembl_id",
+            "document_chembl_id",
+        }:
+            normalized_filters = dict(
+                zip(api_filter_keys, (filters[key] for key in filter_keys), strict=True)
+            )
+            async for record in self._fetch_compound_record_intersection(
+                url, normalized_filters, pk_field, limit
+            ):
+                yield record
+            return
         filter_batches = [
             list(as_mixin_host(self)._batch_ids(filters[k], batch_size))
             for k in filter_keys  # Any: mixin host

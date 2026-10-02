@@ -10,6 +10,7 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, ClassVar, cast
 
 from bioetl.application.core.base_transformer.errors import TransformationError
+from bioetl.application.core.base_transformer_runtime import serialize_json_list
 from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
     FieldGroup,
@@ -102,7 +103,6 @@ _JSON_FIELDS: tuple[str, ...] = (
     "molecule_structures",
     "molecule_synonyms",
     "cross_references",
-    "atc_classifications",
 )
 
 
@@ -253,6 +253,9 @@ class MoleculeTransformer(BaseChemblTransformer):
             **map_field_groups(record, _MOLECULE_GROUPS),
             # JSON serialization using helper method
             **self.serialize_json_fields(rec, _JSON_FIELDS),
+            "atc_classifications": serialize_json_list(
+                cast("list[object] | None", rec.get("atc_classifications"))
+            ),
             # Nested dict extraction with renames
             **flatten_nested_dict(
                 cast(
