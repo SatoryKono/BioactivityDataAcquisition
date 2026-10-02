@@ -17,9 +17,9 @@
     "ratchet_policy": "shrink_only"
   },
   "summary": {
-    "total_cast_any_count": 353,
+    "total_cast_any_count": 317,
     "justified_count": 241,
-    "unjustified_count": 112,
+    "unjustified_count": 76,
     "by_category": {
       "pd3_host_attr_default": 131,
       "pd6_host_attr_default": 90,
@@ -28,12 +28,12 @@
       "any_host_attr": 16,
       "any_json": 0,
       "as_mixin_host_call": 0,
-      "unjustified": 112
+      "unjustified": 76
     },
     "by_layer": {
       "application": {
-        "total": 172,
-        "unjustified": 49
+        "total": 152,
+        "unjustified": 29
       },
       "composition": {
         "total": 19,
@@ -44,8 +44,8 @@
         "unjustified": 2
       },
       "infrastructure": {
-        "total": 147,
-        "unjustified": 55
+        "total": 131,
+        "unjustified": 39
       },
       "interfaces": {
         "total": 3,
@@ -53,53 +53,17 @@
       }
     },
     "unjustified_by_subcategory": {
-      "pd4_host_default_pending_protocol": 43,
-      "free_form_reason": 68,
+      "pd4_host_default_pending_protocol": 12,
+      "free_form_reason": 63,
       "no_reason_tag": 1
     },
-    "file_count": 113
+    "file_count": 107
   },
   "top_files": [
-    {
-      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
-      "total": 8,
-      "unjustified": 8,
-      "justified": 0
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
-      "total": 8,
-      "unjustified": 8,
-      "justified": 0
-    },
-    {
-      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
-      "total": 6,
-      "unjustified": 6,
-      "justified": 0
-    },
-    {
-      "path": "src/bioetl/application/composite/merger_output_mixin.py",
-      "total": 5,
-      "unjustified": 5,
-      "justified": 0
-    },
-    {
-      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
-      "total": 5,
-      "unjustified": 5,
-      "justified": 0
-    },
     {
       "path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
       "total": 5,
       "unjustified": 5,
-      "justified": 0
-    },
-    {
-      "path": "src/bioetl/application/services/medallion/medallion_lifecycle.py",
-      "total": 4,
-      "unjustified": 4,
       "justified": 0
     },
     {
@@ -209,12 +173,48 @@
       "total": 2,
       "unjustified": 1,
       "justified": 1
+    },
+    {
+      "path": "src/bioetl/application/composite/_preflight_orchestration.py",
+      "total": 1,
+      "unjustified": 1,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/composite/_preflight_reporting.py",
+      "total": 1,
+      "unjustified": 1,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/composite/key_extractor.py",
+      "total": 1,
+      "unjustified": 1,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/composite/merger_input_mixin.py",
+      "total": 1,
+      "unjustified": 1,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/core/base_transformer/base.py",
+      "total": 1,
+      "unjustified": 1,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/core/batch_executor_runtime_state.py",
+      "total": 1,
+      "unjustified": 1,
+      "justified": 0
     }
   ],
   "unjustified_reason_tags": [
     {
       "reason": "host default (PD4)",
-      "count": 43
+      "count": 12
     },
     {
       "reason": "dynamic compat patch target",
@@ -278,22 +278,6 @@
     },
     {
       "reason": "cast for nullable numeric coercion",
-      "count": 1
-    },
-    {
-      "reason": "concrete BatchWriter supplies the host context",
-      "count": 1
-    },
-    {
-      "reason": "concrete host injects an optional async validator",
-      "count": 1
-    },
-    {
-      "reason": "concrete host supplies the classifier",
-      "count": 1
-    },
-    {
-      "reason": "concrete host supplies the metrics recorder",
       "count": 1
     },
     {
@@ -414,10 +398,6 @@
     },
     {
       "reason": "structural to_dict duck-type",
-      "count": 1
-    },
-    {
-      "reason": "tracing port returns an OTel-compatible runtime object",
       "count": 1
     }
   ],
@@ -551,56 +531,6 @@
       "unjustified_subcategory": "pd4_host_default_pending_protocol",
       "reason_tag": "host default (PD4)",
       "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/composite/merger_output_mixin.py",
-      "line": 23,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_config: MergeConfig = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/composite/merger_output_mixin.py",
-      "line": 24,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/composite/merger_output_mixin.py",
-      "line": 25,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_storage: MergedStoragePort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/composite/merger_output_mixin.py",
-      "line": 26,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_field_group_registry: FieldGroupRegistry | None = cast("
-    },
-    {
-      "path": "src/bioetl/application/composite/merger_output_mixin.py",
-      "line": 29,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_gold_schema: Any | None = cast(Any, None)  # Any: host default (PD4)"
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_control_plane_mixin.py",
@@ -1353,56 +1283,6 @@
       "snippet": "_data_schema: Any = cast(Any, None)  # Any: heterogeneous schema adapter"
     },
     {
-      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
-      "line": 25,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "free_form_reason",
-      "reason_tag": "concrete host injects an optional async validator",
-      "snippet": "_lock_validator: Any = cast("
-    },
-    {
-      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
-      "line": 30,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "free_form_reason",
-      "reason_tag": "concrete BatchWriter supplies the host context",
-      "snippet": "_context: Any = cast("
-    },
-    {
-      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
-      "line": 33,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "free_form_reason",
-      "reason_tag": "tracing port returns an OTel-compatible runtime object",
-      "snippet": "_tracer: Any = cast("
-    },
-    {
-      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
-      "line": 36,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "free_form_reason",
-      "reason_tag": "concrete host supplies the classifier",
-      "snippet": "_error_classifier: Any = cast("
-    },
-    {
-      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
-      "line": 39,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "free_form_reason",
-      "reason_tag": "concrete host supplies the metrics recorder",
-      "snippet": "_batch_metrics: Any = cast("
-    },
-    {
       "path": "src/bioetl/application/core/postrun/_failure_policy.py",
       "line": 113,
       "layer": "application",
@@ -1913,46 +1793,6 @@
       "snippet": "table=cast(Any, table),  # Any: export port accepts Arrow/table duck-type"
     },
     {
-      "path": "src/bioetl/application/services/medallion/medallion_lifecycle.py",
-      "line": 70,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "storage: MedallionStorageProtocol = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/medallion/medallion_lifecycle.py",
-      "line": 71,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/medallion/medallion_lifecycle.py",
-      "line": 158,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "storage: MedallionStorageProtocol = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/medallion/medallion_lifecycle.py",
-      "line": 159,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
       "path": "src/bioetl/application/services/medallion/medallion_maintenance_mixin.py",
       "line": 29,
       "layer": "application",
@@ -2061,66 +1901,6 @@
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD3)",
       "snippet": "_run_type: str = cast(Any, None)  # Any: host attr default (PD3)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
-      "line": 41,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
-      "line": 42,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
-      "line": 43,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_bronze_analyzer: BronzeDQAnalyzerPort | None = cast("
-    },
-    {
-      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
-      "line": 46,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_silver_analyzer: SilverDQAnalyzerPort | None = cast("
-    },
-    {
-      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
-      "line": 49,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_gold_analyzer: GoldDQAnalyzerPort | None = cast("
-    },
-    {
-      "path": "src/bioetl/application/services/quality/dq_report_generation_mixin.py",
-      "line": 52,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_report_writer: DQReportWriterPort | None = cast("
     },
     {
       "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
@@ -3383,86 +3163,6 @@
       "snippet": "_metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD3)"
     },
     {
-      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
-      "line": 38,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
-      "line": 39,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_metadata_writer: MetadataWriterPort = cast("
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
-      "line": 42,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_metadata_coordinator: MetadataCoordinatorPort | None = cast("
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
-      "line": 45,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_lineage_store: LineageStorePort | None = cast("
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
-      "line": 48,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_flat_structure: bool = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
-      "line": 49,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_metrics: MetricsPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
-      "line": 50,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "base_path: Path = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
-      "line": 51,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
       "path": "src/bioetl/infrastructure/storage/bronze/validation_mixin.py",
       "line": 18,
       "layer": "infrastructure",
@@ -3711,86 +3411,6 @@
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD5 product zero hold)",
       "snippet": "default=cast(Any, None),  # Any: host attr default (PD5 product zero hold)"
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
-      "line": 44,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
-      "line": 45,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
-      "line": 46,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
-      "line": 47,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_metadata_writer: object | None = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
-      "line": 48,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_metadata_coordinator: MetadataCoordinatorPort | None = cast("
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
-      "line": 51,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_lineage_store: LineageStorePort | None = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
-      "line": 52,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_dq_calculator: DQMetricsCalculator | None = cast("
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
-      "line": 55,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_host: object | None = cast(Any, None)  # Any: host default (PD4)"
     },
     {
       "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",

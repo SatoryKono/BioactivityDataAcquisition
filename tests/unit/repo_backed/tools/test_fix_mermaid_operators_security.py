@@ -1,4 +1,4 @@
-"""Security regression tests for the legacy Mermaid operator codemod."""
+"""Security regression tests for the canonical Mermaid operator codemod."""
 
 from __future__ import annotations
 

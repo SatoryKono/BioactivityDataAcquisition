@@ -59,11 +59,11 @@ SVG mass exceeds clone budgets; do not use LFS for canonical `.mmd` text.
 | Item | Decision | Rationale |
 | --- | --- | --- |
 | Untrack bulk SVG / full CI-only SVG | **Declined** | PR `check-diagram-drift` requires tracked sibling SVG when sources change; SVG is primary SSOT render surface |
-| Keep curated PNG in git for nightly | **Declined** | Nightly `render.sh` then `--require-png` on `png-compatibility.txt`; no git PNG needed |
+| Keep curated PNG in git for nightly | **Declined** | Local `render.sh` then `--require-png` on `png-compatibility.txt`; nightly CI is disabled; no git PNG needed |
 
 ## Acceptance
 
 - [x] Policy documented and linked from ADR-040 / diagram governance policy
 - [x] Tracked PNG baselines removed from git index (including curated smoke set)
 - [x] SVG retained for drift gate (bulk SVG untrack explicitly declined)
-- [x] CI continues to produce PNG artifacts on render jobs
+- [x] PNG remains reproducible locally; disabled nightly CI is not claimed as render evidence

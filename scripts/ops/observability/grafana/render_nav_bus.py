@@ -2518,7 +2518,7 @@ def apply_to_dashboard(
         payload["panels"] = [
             panel for panel in payload["panels"] if panel.get("id") not in {9402, 9403}
         ]
-    from scripts.ops.observability.grafana._stage_removal_columns import (
+    from scripts.ops.observability.grafana._provider_evidence_columns import (
         apply_stage_removal_columns,
     )
 

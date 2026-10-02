@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Protocol
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
@@ -34,21 +34,15 @@ if TYPE_CHECKING:
         MetricsPort,
     )
 
-    class _BronzeWriterSideEffectsHost:
-        _audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)
-        _metadata_writer: MetadataWriterPort = cast(
-            Any, None
-        )  # Any: host default (PD4)
-        _metadata_coordinator: MetadataCoordinatorPort | None = cast(
-            Any, None
-        )  # Any: host default (PD4)
-        _lineage_store: LineageStorePort | None = cast(
-            Any, None
-        )  # Any: host default (PD4)
-        _flat_structure: bool = cast(Any, None)  # Any: host default (PD4)
-        _metrics: MetricsPort = cast(Any, None)  # Any: host default (PD4)
-        base_path: Path = cast(Any, None)  # Any: host default (PD4)
-        logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
+    class _BronzeWriterSideEffectsHost(Protocol):
+        _audit: AuditPort | None
+        _metadata_writer: MetadataWriterPort
+        _metadata_coordinator: MetadataCoordinatorPort | None
+        _lineage_store: LineageStorePort | None
+        _flat_structure: bool
+        _metrics: MetricsPort
+        base_path: Path
+        logger: LoggerPort
 
         async def _calculate_checksum(self, path: Path) -> str: ...
 
@@ -57,7 +51,7 @@ class BronzeWriterSideEffectsMixin:
     """Handles audit and metadata side effects after Bronze write."""
 
     async def _log_bronze_audit(
-        self,
+        self: _BronzeWriterSideEffectsHost,
         *,
         run_id: RunID,
         ingestion_ts: datetime,
@@ -70,7 +64,7 @@ class BronzeWriterSideEffectsMixin:
         provider: str,
         entity: str,
     ) -> None:
-        host = cast("_BronzeWriterSideEffectsHost", self)  # pyright: ignore[reportInvalidCast]
+        host = self
         if not host._audit:
             return
 
@@ -91,7 +85,7 @@ class BronzeWriterSideEffectsMixin:
         await host._audit.log_write(audit_entry)
 
     async def _maybe_write_bronze_metadata(
-        self,
+        self: _BronzeWriterSideEffectsHost,
         *,
         run_id: RunID,
         run_type: RunType,
@@ -106,7 +100,7 @@ class BronzeWriterSideEffectsMixin:
         source_metadata: SourceMetadata | None,
     ) -> None:
         """Create and persist Bronze metadata through the canonical coordinator path."""
-        host = cast("_BronzeWriterSideEffectsHost", self)  # pyright: ignore[reportInvalidCast]
+        host = self
         prepared = prepare_bronze_metadata_write(
             host,
             BronzeMetadataWriteRequest(
@@ -148,7 +142,7 @@ class BronzeWriterSideEffectsMixin:
         )
 
     async def _build_bronze_write_result(
-        self,
+        self: _BronzeWriterSideEffectsHost,
         *,
         prepared: Any,  # Any: local prepared payload type is owned by BronzeWriter module
         batch_id: BatchID,
@@ -159,7 +153,7 @@ class BronzeWriterSideEffectsMixin:
         table_identity: tuple[str, str] | None = None,
     ) -> BronzeWriteResult:
         """Build write result payload and include checksum."""
-        host = cast("_BronzeWriterSideEffectsHost", self)  # pyright: ignore[reportInvalidCast]
+        host = self
         span.set_attribute("record_count", record_count)
         span.set_attribute("compressed_size", compressed_size)
         checksum = await host._calculate_checksum(prepared.full_path)

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import sys
 from dataclasses import dataclass
@@ -297,6 +298,15 @@ def _build_row(spec: PortCoverageSpec) -> dict[str, Any]:
 def build_payload() -> dict[str, Any]:
     rows = [_build_row(spec) for spec in TRACKED_PORTS]
     unresolved = [row for row in rows if row["coverage_status"] != "covered"]
+    declared_ports = sorted(
+        {
+            node.name
+            for path in (PROJECT_ROOT / "src/bioetl/domain/ports").rglob("*.py")
+            for node in ast.walk(ast.parse(path.read_text(encoding="utf-8")))
+            if isinstance(node, ast.ClassDef) and node.name.endswith("Port")
+        }
+    )
+    tracked_names = {row["port_name"] for row in rows}
     return {
         "schema_version": "1.0.0",
         "scope": "core_active_ports",
@@ -304,6 +314,13 @@ def build_payload() -> dict[str, Any]:
         "covered_count": len(rows) - len(unresolved),
         "unresolved_count": len(unresolved),
         "tracked_ports": [row["port_name"] for row in rows],
+        "universe": {
+            "definition": "Classes named *Port declared under src/bioetl/domain/ports; aliases are not separate ports",
+            "declared_ports": declared_ports,
+            "excluded_ports": sorted(set(declared_ports) - tracked_names),
+            "exclusion_reason": "Outside the explicitly selected core_active_ports binding matrix; no completeness claim",
+            "semantic_completeness": "not_assessed",
+        },
         "rows": rows,
     }
 

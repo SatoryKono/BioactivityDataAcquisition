@@ -58,39 +58,22 @@ Three architecture scanners count different populations. They are not interchang
 and a numeric gap is not a layer violation. Re-measure with the live commands before
 copying these integers forward.
 
-Live counts below: coverage inventory and the dependency map were checked on 2026-10-02. The import-linter file count remains the 2026-09-23 review pass. Grafana/ops Python
-under `scripts/ops/observability/grafana/` stays outside RF-06 hotspot families
-(decision C / `#10447`); do not fold those files into `debt_scorecard.yaml`
-without a separate ADR.
-
-Hash-only coverage refresh (`--allow-missing-coverage-xml`) hashes all
-`src/bioetl/**/*.py` and drops deleted inventory paths. It does not add rows
-for new modules until a coverage XML refresh. The committed inventory records
-2521 measured source rows; its governed source scope currently contains 2542
-files. The 21 missing measurement rows require a complete coverage-verify run.
-Refreshing the digest preserves historical measurements and cannot fill those
-evidence gaps.
-`src/bioetl/composition` count is 282 modules live per the architecture scorecard
-(`max_modules` held at 295, shrink-only; ARCH-011, #11859; verified 2026-10-02).
-`composition_runtime_builders` family inventory is 56 modules (measured=56);
-hotspot coverage floors stay at those live counts without raising debt budgets.
+Snapshot: 2026-10-02, synchronized with main `8e9d32ad911e`.
+Composition contains **282** Python modules (`src/bioetl/composition/**/*.py`,
+including package initializers); its cap remains **295**, shrink-only.
+Grafana/ops Python under `scripts/ops/observability/grafana/` stays outside
+RF-06 hotspot families (decision C / `#10447`).
 
 | Scanner | Artifact / command | What it counts |
 | --- | --- | --- |
-| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows in the reporter's governed source scope (currently 2521 measured rows). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; new modules are added only from a coverage XML refresh (`--refresh-nonregressing-from-coverage-xml` or the coverage-verify lane). |
-| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Python modules scanned recursively beneath `src/bioetl` (currently 2540). Import edges resolve to hexagonal layers and groups; package roots can be scanned without contributing a classified layer edge. |
-| import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (2426 files in the 2026-09-23 review pass; Windows: `importlinter.cli.lint_imports(..., no_cache=True)` when `lint-imports.exe` is absent). Excludes stubs / non-imported modules |
+| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for existing source modules. Hash-only refresh drops deleted paths but adds new modules only after coverage XML measurement. Check `source_module_count` against the live tree before claiming complete measurement. |
+| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Python modules scanned recursively beneath `src/bioetl`; import edges resolve to hexagonal layers and groups. Package roots can be scanned without contributing a classified layer edge. |
+| import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the package graph; excludes stubs and non-imported modules. Its count is not the coverage denominator. |
 
-`families_at_budget` on the architecture scorecard is currently empty after
-`#10468`: `application_services_control_plane` fan-in is 1/2 and
-`composition_runtime_builders` fan-in is 2/3. `module_boundaries_coupling` is
-10.0. Do not raise the fan-in or loc caps; keep new internal imports and
-oversized files flat. `composition_factories_pipeline` `files_ge_250_loc` is
-0/0 (budget unchanged). `application_core` live LOC is 23443 with `files=194`
-(budget unchanged).
-
-Closeout evidence: `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py`
-and `reports/quality/hotspot-family-baseline.json`.
+Read current family files, LOC, fan-in and budget warnings from
+`reports/quality/hotspot-family-baseline.json` and the architecture scorecard.
+Historical counts from earlier reviews are not live acceptance evidence.
+Do not raise module, LOC, fan-in or duplication caps to reconcile a snapshot.
 
 ## Architecture scorecard semantics
 

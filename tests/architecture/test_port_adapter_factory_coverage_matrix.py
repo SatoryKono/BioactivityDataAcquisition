@@ -58,6 +58,16 @@ def test_port_adapter_factory_coverage_has_no_unresolved_core_ports() -> None:
     ]
     assert not violations, "\n".join(violations)
 
+    universe = payload["universe"]
+    assert isinstance(universe, dict)
+    declared = set(universe["declared_ports"])
+    excluded = set(universe["excluded_ports"])
+    tracked = {row["port_name"] for row in _rows()}
+    assert tracked <= declared
+    assert declared == tracked | excluded
+    assert not tracked & excluded
+    assert universe["semantic_completeness"] == "not_assessed"
+
 
 @pytest.mark.architecture
 def test_port_adapter_factory_coverage_paths_exist() -> None:

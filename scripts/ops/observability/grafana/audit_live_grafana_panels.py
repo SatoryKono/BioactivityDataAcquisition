@@ -260,7 +260,7 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         panel_id=9422,
         title="Review Exact Replay Readiness",
         source_kind="http",
-        semantic_kind="http_table",
+        semantic_kind="http_endpoint",
     ),
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
@@ -271,7 +271,7 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
     ),
     # bioetl-overview-v2#9301 (Processed Records) no longer exists on the
     # shipped Overview surface; the reviewed HTTP-table coverage now lives on
-    # control-plane/dq 9402/9403 specs below.
+    # Replay Readiness evidence/checks and Data Quality specs below.
     PanelAuditSpec(
         dashboard_uid="bioetl-dq-v2",
         panel_id=9402,

@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import json
+import ast
 from pathlib import Path
 from typing import Any
 
@@ -81,3 +82,13 @@ def test_domain_aggregate_invariant_rows_have_direct_test_envelopes() -> None:
             path for path in row["test_paths"] if "invariant" in Path(path).stem
         ]
         assert invariant_tests, row["aggregate"]
+        for link in row["invariant_test_links"]:
+            assert link["invariant"] in row["invariants"]
+            assert link["test_path"] in row["test_paths"]
+            tree = ast.parse(
+                (PROJECT_ROOT / link["test_path"]).read_text(encoding="utf-8")
+            )
+            assert any(
+                isinstance(node, ast.FunctionDef) and node.name == link["test_symbol"]
+                for node in ast.walk(tree)
+            ), link

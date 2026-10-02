@@ -1218,7 +1218,7 @@
             "data": "",
             "method": "GET"
           },
-          "uql": "parse-json | jsonata \"presentation_trust.($base := $sift($, function($v,$k){$k != \\\"trust_reasons_action\\\"}); $merge([$base, reasons_count > 0 ? {\\\"trust_reasons_action\\\":\\\"View trust reasons\\\"} : {\\\"trust_action_note\\\": reasons_count = 0 ? \\\"No trust issues\\\" : \\\"Not assessed\\\"}]))\""
+          "uql": "parse-json | jsonata \"[presentation_trust.($base := $sift($, function($v,$k){$k != \\\"trust_reasons_action\\\"}); $merge([$base, reasons_count > 0 ? {\\\"trust_reasons_action\\\":\\\"View trust reasons\\\"} : {\\\"trust_action_note\\\": reasons_count = 0 ? \\\"No trust issues\\\" : \\\"Not assessed\\\"}]))]\""
         }
       ],
       "transformations": [

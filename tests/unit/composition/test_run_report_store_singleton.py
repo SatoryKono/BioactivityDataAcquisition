@@ -26,6 +26,11 @@ from bioetl.interfaces.http.health_server import (
 
 pytestmark = pytest.mark.unit
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
+
 
 def test_standalone_hosts_own_independent_store_lifetimes(monkeypatch) -> None:
     stores = [create_run_report_store(), create_run_report_store()]

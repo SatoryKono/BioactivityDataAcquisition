@@ -1,30 +1,30 @@
 {
   "summary": {
-    "scanned_modules": 2540,
-    "total_internal_imports": 7996,
+    "scanned_modules": 2541,
+    "total_internal_imports": 8001,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 340,
     "violations": 0,
-    "source_fingerprint": "b6164a714bd4f24e368ec7355590af790aedff5458cbe5015b025099298cded7"
+    "source_fingerprint": "d9a9dd0a243487c7d5fc1613f2121cf8564e5d91cede7e5053bbba65d36db88f"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1580,
+      "imports": 1581,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1061,
+      "imports": 1065,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 210,
+      "imports": 212,
       "allowed": true
     },
     {
@@ -36,7 +36,7 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 296,
+      "imports": 295,
       "allowed": true
     },
     {
@@ -54,13 +54,13 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 777,
+      "imports": 775,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1238,
+      "imports": 1239,
       "allowed": true
     },
     {
@@ -92,7 +92,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 140
+      "imports": 141
     },
     {
       "source": "infrastructure.adapters",
@@ -112,7 +112,7 @@
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 83
+      "imports": 84
     },
     {
       "source": "infrastructure.storage",
@@ -122,7 +122,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.ports",
-      "imports": 63
+      "imports": 62
     },
     {
       "source": "application.pipelines",
@@ -137,7 +137,7 @@
     {
       "source": "application.services",
       "target": "domain.ports",
-      "imports": 51
+      "imports": 53
     },
     {
       "source": "composition.factories",

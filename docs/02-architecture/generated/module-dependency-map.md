@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2540`
-- Internal import edges (raw): `7996`
+- Scanned modules: `2541`
+- Internal import edges (raw): `8001`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `340`
@@ -21,15 +21,15 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1580 OK| application
-    application -->|1061 OK| domain
-    composition -->|210 OK| application
+    application -->|1581 OK| application
+    application -->|1065 OK| domain
+    composition -->|212 OK| application
     composition -->|635 OK| composition
-    composition -->|296 OK| domain
+    composition -->|295 OK| domain
     composition -->|265 OK| infrastructure
     domain -->|1278 OK| domain
-    infrastructure -->|777 OK| domain
-    infrastructure -->|1238 OK| infrastructure
+    infrastructure -->|775 OK| domain
+    infrastructure -->|1239 OK| infrastructure
     interfaces -->|70 OK| application
     interfaces -->|58 OK| composition
     interfaces -->|85 OK| domain
@@ -40,15 +40,15 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1580 | allowed |
-| `application`    | `domain`         |    1061 | allowed |
-| `composition`    | `application`    |     210 | allowed |
+| `application`    | `application`    |    1581 | allowed |
+| `application`    | `domain`         |    1065 | allowed |
+| `composition`    | `application`    |     212 | allowed |
 | `composition`    | `composition`    |     635 | allowed |
-| `composition`    | `domain`         |     296 | allowed |
+| `composition`    | `domain`         |     295 | allowed |
 | `composition`    | `infrastructure` |     265 | allowed |
 | `domain`         | `domain`         |    1278 | allowed |
-| `infrastructure` | `domain`         |     777 | allowed |
-| `infrastructure` | `infrastructure` |    1238 | allowed |
+| `infrastructure` | `domain`         |     775 | allowed |
+| `infrastructure` | `infrastructure` |    1239 | allowed |
 | `interfaces`     | `application`    |      70 | allowed |
 | `interfaces`     | `composition`    |      58 | allowed |
 | `interfaces`     | `domain`         |      85 | allowed |
@@ -58,16 +58,16 @@ flowchart LR
 
 | From Group                     | To Group                                   | Imports |
 | ------------------------------ | ------------------------------------------ | ------: |
-| `application.services`         | `domain.control_plane`                     |     140 |
+| `application.services`         | `domain.control_plane`                     |     141 |
 | `infrastructure.adapters`      | `domain.types`                             |     123 |
 | `application.composite`        | `domain.composite`                         |     113 |
 | `application.core`             | `domain.types`                             |      93 |
-| `application.services`         | `domain.types`                             |      83 |
+| `application.services`         | `domain.types`                             |      84 |
 | `infrastructure.storage`       | `domain.types`                             |      72 |
-| `infrastructure.storage`       | `domain.ports`                             |      63 |
+| `infrastructure.storage`       | `domain.ports`                             |      62 |
 | `application.pipelines`        | `domain.types`                             |      57 |
 | `application.composite`        | `domain.ports`                             |      56 |
-| `application.services`         | `domain.ports`                             |      51 |
+| `application.services`         | `domain.ports`                             |      53 |
 | `composition.factories`        | `application.core`                         |      47 |
 | `infrastructure.storage`       | `domain.value_objects`                     |      43 |
 | `composition.bootstrap`        | `application.services`                     |      39 |

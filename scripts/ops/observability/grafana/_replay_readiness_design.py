@@ -25,6 +25,11 @@ def apply_trust_action_display(payload: dict) -> None:
             options["renameByName"].pop("trust_reasons_action", None)
             options["indexByName"]["trust_action_note"] = 4
     overrides = trust["fieldConfig"]["overrides"]
+    if any(item["matcher"].get("options") == "Action" for item in overrides):
+        overrides[:] = [
+            item for item in overrides
+            if item["matcher"].get("options") != "trust_reasons_action"
+        ]
     for item in overrides:
         if item["matcher"].get("options") == "Action":
             item["matcher"]["options"] = "trust_reasons_action"
