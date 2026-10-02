@@ -156,70 +156,48 @@ def test_input_snapshot_resolution_branches(
 ) -> None:
     manifest = SimpleNamespace(source_refs=(SimpleNamespace(input_snapshots=(1, 2)),))
     assert snapshots.collect_manifest_input_snapshot_refs(manifest) == (1, 2)  # type: ignore[arg-type]
-    orig_load = snapshots._load_manifest
     monkeypatch.setattr(
         snapshots, "resolve_cached_bronze_input_snapshot_refs", lambda **_k: ()
     )
-    monkeypatch.setattr(
-        snapshots,
-        "_load_manifest",
-        lambda **_k: SimpleNamespace(
-            source_refs=(SimpleNamespace(input_snapshots=("parent",)),)
-        ),
-    )
-    refs = snapshots.resolve_pipeline_input_snapshot_refs(
-        ctx=SimpleNamespace(replay_of_manifest_id="m", replay_of_run_id=None),  # type: ignore[arg-type]
-        cached_bronze=None,
-        settings=object(),  # type: ignore[arg-type]
-        provider="chembl",
-        entity="activity",
-    )
-    assert refs == ("parent",)
-    monkeypatch.setattr(snapshots, "_load_manifest", orig_load)
 
     class _Store:
         def __init__(self, **_k: object) -> None:
-            return None
+            pass
 
-        def get(self, manifest_id: str) -> str | None:
-            return "loaded" if manifest_id == "hit" else None
+        def get(self, manifest_id: str) -> object:
+            return manifest if manifest_id == "hit" else None
 
         def get_by_run_id(self, _run_id: object) -> object:
-            raise ValueError("bad uuid path")
+            raise ValueError("corrupt manifest")
 
     monkeypatch.setattr(snapshots, "FileRunManifestStore", _Store)
     monkeypatch.setattr(snapshots, "control_plane_root", lambda *_a, **_k: tmp_path)
-    assert (
-        snapshots._load_manifest(
-            settings=object(),  # type: ignore[arg-type]
-            manifest_id="hit",
-            run_id=None,
-        )
-        == "loaded"
+    refs = snapshots.resolve_pipeline_input_snapshot_refs(
+        ctx=SimpleNamespace(replay_of_manifest_id="hit", replay_of_run_id=None),
+        cached_bronze=None,
+        settings=object(),
+        provider="chembl",
+        entity="activity",
     )
-    assert (
-        snapshots._load_manifest(
-            settings=object(),  # type: ignore[arg-type]
-            manifest_id="miss",
-            run_id=None,
-        )
-        is None
-    )
-    assert (
-        snapshots._load_manifest(
-            settings=object(),  # type: ignore[arg-type]
-            manifest_id="miss",
-            run_id="not-a-uuid",
-        )
-        is None
-    )
+    assert refs == (1, 2)
     assert (
         snapshots.resolve_manifest_input_snapshot_refs(
-            settings=object(),  # type: ignore[arg-type]
-            manifest_id="miss",
+            settings=object(), manifest_id="miss"
         )
         == ()
     )
+    assert (
+        snapshots.resolve_manifest_input_snapshot_refs(
+            settings=object(), manifest_id="miss", run_id="not-a-uuid"
+        )
+        == ()
+    )
+    with pytest.raises(ValueError, match="corrupt manifest"):
+        snapshots.resolve_manifest_input_snapshot_refs(
+            settings=object(),
+            manifest_id="miss",
+            run_id="00000000-0000-0000-0000-000000000001",
+        )
 
 
 def test_effective_config_serializer_optional_fields() -> None:

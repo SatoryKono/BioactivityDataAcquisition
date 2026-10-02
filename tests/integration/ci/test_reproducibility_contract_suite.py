@@ -88,6 +88,7 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapter
+from bioetl.domain.composite import ConflictResolution, MergeConfig, MergeStrategy
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
@@ -138,7 +139,15 @@ class _MergeMetricsMixinHarness(MergeMetricsRecorderMixin):
 
 
 def _make_merge_metrics_mixin() -> MergeMetricsRecorderMixin:
-    return _MergeMetricsMixinHarness()
+    return _MergeMetricsMixinHarness(
+        config=MergeConfig(
+            strategy=MergeStrategy.LEFT_OUTER,
+            conflict_resolution=ConflictResolution.SEED_PRIORITY,
+            output_silver_path="silver/composite/publication",
+            output_gold_path="gold/publication_enriched",
+        ),
+        logger=NoOpLogger(),
+    )
 
 
 def _make_manifest(
