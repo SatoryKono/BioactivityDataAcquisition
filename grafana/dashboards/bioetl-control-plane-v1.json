@@ -413,7 +413,7 @@
         "h": 3
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is selected; QUERY ERROR means backend unavailable or request failure. UNKNOWN means no assessed value, never READY. Open replay checks for basis. Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run.",
+      "description": "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is selected; QUERY ERROR means backend unavailable or request failure. UNKNOWN means no assessed value, never READY. Open replay checks for basis. Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "options": {
         "reduceOptions": {
           "values": true,
@@ -620,7 +620,7 @@
     },
     {
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · All identity anchors, missing first. Presence is not verification. Exact Replay Checks determines readiness. Inspect a value to copy it in full. No rows is not a pass; missing evidence is UNKNOWN and failed requests are QUERY ERROR.",
+      "description": "SELECTED RUN · All identity anchors, missing first. Presence is not verification. Exact Replay Checks determines readiness. Inspect a value to copy it in full. No rows is not a pass; missing evidence is UNKNOWN and failed requests are QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -788,7 +788,7 @@
         "h": 4
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded.",
+      "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1305,7 +1305,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID.",
+          "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2431,7 +2431,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID.",
+          "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2655,7 +2655,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass.",
+          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "fieldConfig": {
             "defaults": {
               "custom": {

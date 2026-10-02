@@ -373,6 +373,25 @@ def render_links(*, current_uid: str) -> list[dict[str, Any]]:
     return links
 
 
+def _document_required_http_evidence(payload: dict[str, Any]) -> None:
+    """Distinguish absent required run evidence from a successful empty listing."""
+    required_panels = {
+        "bioetl-control-plane-v1": {9406, 9408, 9413, 9414, 9418, 9422},
+        "bioetl-dq-v2": {9403, 9460},
+        "bioetl-incident-v1": {9460, 9463},
+        "bioetl-overview-v2": {9300, 9460, 9482},
+    }.get(payload.get("uid"), set())
+    explanation = (
+        " Empty is a coverage gap: required saved evidence is missing, not a pass. "
+        "Request failure is QUERY ERROR."
+    )
+    for panel in _walk_panels(payload.get("panels", [])):
+        if panel.get("id") in required_panels:
+            description = str(panel.get("description", ""))
+            if explanation not in description:
+                panel["description"] = description + explanation
+
+
 def _walk_panels(panels: list[object]) -> list[dict[str, Any]]:
     discovered: list[dict[str, Any]] = []
     stack = list(panels)
@@ -2586,6 +2605,7 @@ def apply_to_dashboard(
         from scripts.ops.observability.grafana._replay_layout import apply_replay_layout
 
         apply_replay_layout(payload)
+    _document_required_http_evidence(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:
