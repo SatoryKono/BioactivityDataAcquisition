@@ -1,4 +1,4 @@
-# Shipped 6-dashboard surface inventory (DRM residual; UIDs stable post-DUX).
+# Shipped 5-dashboard surface inventory (DRM residual; UIDs stable post-DUX).
 # Source of truth for panel counts is grafana/dashboards/*.json.
 
 dashboards:
@@ -12,7 +12,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 27
+    panel_count: 13
     key_panels:
       - id: 9422
         title: Review Exact Replay Readiness
@@ -30,10 +30,6 @@ dashboards:
         title: Review Lineage Validation
         type: table
         description: Lineage closure for the selected Run ID
-      - id: 9402
-        title: Review Run Summary
-        type: table
-        description: Shared shell panel for run/manifest identity
     selector_variables:
       - workflow
       - pipeline
@@ -51,18 +47,18 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 11
+    panel_count: 10
     key_panels:
       - id: 9603
-        title: Review Selected Run Status
+        title: Selected Run Status
         type: table
         description: Saved assessment of the selected Run ID
       - id: 9002
-        title: Review Run Domains
+        title: Run Domains
         type: table
         description: Saved domain status for the selected Run ID
       - id: 9300
-        title: Review Run Identity
+        title: Run Identity
         type: table
         description: HTTP identity for the selected Run ID
     selector_variables:
