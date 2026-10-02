@@ -35,12 +35,15 @@ Source: src/bioetl/infrastructure/adapters/http/client_retry_mixin.py
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
 
+from bioetl.domain.ports import CircuitBreakerPort
 from bioetl.domain.ports.noop import NoOpTracing
+from bioetl.domain.types import CircuitBreakerState
 from bioetl.domain.exceptions import (
     CircuitBreakerOpenError,
     RecoverableError,
@@ -73,7 +76,8 @@ class _ConcreteRetryClient(HTTPClientRetryMixin):
         self.run_id = "test-run-001"
         self._metrics = MagicMock()
         self.rate_limiter = AsyncMock()
-        self.circuit_breaker = AsyncMock()
+        self.circuit_breaker = MagicMock(spec=CircuitBreakerPort)
+        self.circuit_breaker.get_state.return_value = CircuitBreakerState.CLOSED
         self._tracer = tracer if tracer is not None else NoOpTracing()
         self._client = AsyncMock(spec=httpx.AsyncClient)
 
@@ -181,8 +185,7 @@ async def test_handle_retry_delay_honors_retry_after_header(
     client: _ConcreteRetryClient,
 ) -> None:
     """Retry-After header value replaces calculated delay (within max_delay)."""
-    response = MagicMock(spec=httpx.Response)
-    response.headers = {"Retry-After": "10.0"}
+    response = httpx.Response(429, headers={"Retry-After": "10.0"})
 
     with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
         returned = await client._handle_retry_delay(
@@ -199,8 +202,7 @@ async def test_handle_retry_delay_ignores_invalid_retry_after(
     client: _ConcreteRetryClient,
 ) -> None:
     """Non-numeric Retry-After header falls back to calculated delay."""
-    response = MagicMock(spec=httpx.Response)
-    response.headers = {"Retry-After": "not-a-number"}
+    response = httpx.Response(429, headers={"Retry-After": "not-a-number"})
 
     with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
         returned = await client._handle_retry_delay(attempt=0, response=response)
@@ -223,8 +225,7 @@ async def test_handle_retry_delay_clamps_retry_after_to_max_delay(
         max_delay=30.0,
     )
     client = _ConcreteRetryClient(retry_config=config)
-    response = MagicMock(spec=httpx.Response)
-    response.headers = {"Retry-After": "9999"}
+    response = httpx.Response(429, headers={"Retry-After": "9999"})
 
     with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
         returned = await client._handle_retry_delay(attempt=0, response=response)
@@ -551,7 +552,20 @@ async def test_request_with_retry_honors_retry_after_in_full_flow(
     ]
     client.circuit_breaker.call.side_effect = _passthrough_circuit_breaker_call
 
-    with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
+    clock = [0.0]
+
+    async def advance_clock(delay: float) -> None:
+        clock[0] += delay
+
+    with (
+        patch(
+            "bioetl.infrastructure.adapters.http.request_timing.time",
+            SimpleNamespace(monotonic=lambda: clock[0]),
+        ),
+        patch(
+            "asyncio.sleep", new_callable=AsyncMock, side_effect=advance_clock
+        ) as mock_sleep,
+    ):
         response = await client._request_with_retry(
             "GET",
             "https://api.example.com/data",

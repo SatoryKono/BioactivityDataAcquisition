@@ -17,7 +17,7 @@ import json
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, call
+from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID
 
 from httpx import HTTPStatusError, Request, Response
@@ -273,7 +273,7 @@ async def test_semanticscholar_retry_wait_is_bounded_and_cancellable(
     mock_logger: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """An explicit wait cap bounds retries, and cancellation stops the loop."""
+    """A wait budget rejects early retry; provider cooldown remains cancellable."""
     adapter = _build_semanticscholar_adapter(mock_logger)
     adapter._http_client.retry_config = RetryConfig(
         max_attempts=3,
@@ -293,17 +293,20 @@ async def test_semanticscholar_retry_wait_is_bounded_and_cancellable(
         async with adapter._http_client:
             with pytest.raises(RetryExhaustedError) as caught:
                 _ = [r async for r in adapter.fetch("publication", query="test")]
-            assert caught.value.attempts == 3
-            assert route.call_count == 3
-            assert sleep.await_args_list == [call(4.0), call(4.0)]
+            assert caught.value.attempts == 1
+            assert route.call_count == 1
+            sleep.assert_not_awaited()
             assert caught.value.last_error.response.headers["Retry-After"] == "99999"
             assert caught.value.url.endswith("/paper/search")
             sleep.reset_mock()
             sleep.side_effect = asyncio.CancelledError
             with pytest.raises(asyncio.CancelledError):
                 _ = [r async for r in adapter.fetch("publication", query="test")]
-            assert route.call_count == 4
-            sleep.assert_awaited_once_with(4.0)
+            # A new request on this client still honors the provider cooldown.
+            # Cancellation interrupts admission before a second transport call.
+            assert route.call_count == 1
+            sleep.assert_awaited_once()
+            assert 4.0 < sleep.await_args.args[0] <= 99999.0
 
 
 @pytest.mark.integration
