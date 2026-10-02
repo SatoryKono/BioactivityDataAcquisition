@@ -104,3 +104,14 @@ updates:
     groups:
       npm-grafana-selectorshell:
         patterns: ["*"]
+
+  - package-ecosystem: "npm"
+    directory: "/grafana/tooling/router-v7-bridge"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    groups:
+      npm-grafana-router-bridge:
+        patterns: ["*"]

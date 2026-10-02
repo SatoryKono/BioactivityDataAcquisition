@@ -1,0 +1,46 @@
+name: Router 7 bridge candidate
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - "grafana/tooling/router-v7-bridge/**"
+      - ".github/workflows/router-v7-bridge.yml"
+  push:
+    branches: [main]
+    paths:
+      - "grafana/tooling/router-v7-bridge/**"
+      - ".github/workflows/router-v7-bridge.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bridge-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: grafana/tooling/router-v7-bridge
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "24"
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Test bridge behavior and security boundaries
+        run: npm test
+      - name: Check exported TypeScript API
+        run: npm run typecheck
+      - name: Build browser candidate
+        run: npm run build
+      - name: Audit candidate dependencies
+        run: npm audit --audit-level=moderate

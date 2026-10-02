@@ -115,6 +115,7 @@ jobs:
             --lockfile=scripts/ai/gemini/npm-tooling/package-lock.json
             --lockfile=grafana/plugins/bioetl-scenes-app/package-lock.json
             --lockfile=grafana/plugins/bioetl-selectorshell-panel/package-lock.json
+            --lockfile=grafana/tooling/router-v7-bridge/package-lock.json
             --format=json
             --output-file=osv-results.json
 
