@@ -53,7 +53,7 @@ async def test_health_data_and_retry_share_anonymous_budget(monkeypatch):
 
     settings = SimpleNamespace(test_mode=False)
     config = HttpClientFactory._resolve_config("semanticscholar", settings)
-    assert config.rate == 0.02
+    assert config.rate == 0.01
     client = UnifiedHTTPClient(
         rate_limiter=TokenBucketRateLimiter(config.rate, config.capacity),
         circuit_breaker=CircuitBreakerGuard(provider="semanticscholar"),
@@ -65,5 +65,5 @@ async def test_health_data_and_retry_share_anonymous_budget(monkeypatch):
         await client.get_once("https://example.test/health")
         await client.get("https://example.test/data")
     assert len(requests) == 3
-    assert requests[1][1] - requests[0][1] >= 50
+    assert requests[1][1] - requests[0][1] >= 100
     assert requests[2][1] - requests[1][1] >= 120
