@@ -76,6 +76,8 @@ jobs:
         run: npm audit --audit-level=moderate
       - name: Check plugin types
         run: npm run typecheck
+      - name: Lint plugin sources
+        run: npm run lint
       - name: Test plugin behavior
         run: npm run test:ci
       - name: Build plugin
