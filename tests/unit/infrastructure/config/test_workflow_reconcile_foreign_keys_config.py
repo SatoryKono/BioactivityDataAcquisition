@@ -29,10 +29,12 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
 from pydantic import ValidationError
 
-from bioetl.domain.workflow import TransformStepConfig
+from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
 from bioetl.infrastructure.schemas.workflow_config import WorkflowConfigFileSchema
 
 pytestmark = pytest.mark.unit
@@ -91,6 +93,7 @@ def test_reconcile_foreign_keys_config_is_normalized_into_domain_config() -> Non
         "primary_keys": ["assay_id"],
         "action": "delete_orphans",
         "nulls_equal": False,
+        "require_closed_cohort": False,
     }
 
 
@@ -229,12 +232,29 @@ def test_delete_orphans_rejects_limited_pipeline_behind_intermediary() -> None:
 
 
 @pytest.mark.parametrize("workflow_name", ["chembl_core", "chembl_baseline"])
-def test_cli_limit_override_rejects_incomplete_references(workflow_name: str) -> None:
+@pytest.mark.parametrize("bound_cohort", [False, True])
+def test_cli_limit_override_requires_bound_references(
+    workflow_name: str, bound_cohort: bool
+) -> None:
     from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
     from bioetl.interfaces.cli.commands._workflow_override_support import (
         apply_cli_overrides,
     )
 
     workflow = load_workflow_config(workflow_name)
-    with pytest.raises(ValueError, match="independently bounded extracts"):
-        apply_cli_overrides(workflow, limit=1000)
+    if not bound_cohort:
+        workflow = replace(
+            workflow,
+            steps=tuple(
+                replace(step, reference_cohort=None)
+                if isinstance(step, WorkflowStepConfig)
+                else step
+                for step in workflow.steps
+            ),
+        )
+        with pytest.raises(ValueError, match="independently bounded extracts"):
+            apply_cli_overrides(workflow, limit=1000)
+    else:
+        updated = apply_cli_overrides(workflow, limit=1000)
+        assert all(step.run_options.limit == 1000 for step in updated.pipeline_steps)
+        assert any(step.reference_cohort for step in updated.pipeline_steps)

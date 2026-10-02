@@ -30,7 +30,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import inspect
 from pathlib import Path
 from typing import Any
@@ -63,9 +63,8 @@ pytestmark = pytest.mark.unit
 def _limit_safe_multi_pipeline_workflow() -> WorkflowConfig:
     """Workflow that stays valid when CLI --limit is applied to every extract.
 
-    Production chembl_core keeps delete_orphans downstream of assay/target
-    extracts; stamping --limit onto those steps is rejected by
-    reject_delete_orphans_after_limited_extracts (#8989).
+    This fixture tests CLI option forwarding without FK reconciliation.
+    Production chembl_core separately verifies an explicitly bound cohort.
     """
     return WorkflowConfig(
         name="chembl_core",
@@ -481,15 +480,29 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
     )
 
 
-def test_workflow_run_rejects_delete_orphans_when_limit_follows_extracts(
+@pytest.mark.parametrize("bound_cohort", [False, True])
+def test_workflow_run_requires_bound_cohort_when_limit_follows_extracts(
     cli_runner: CliRunner,
     monkeypatch: Any,
     tmp_path: Path,
+    bound_cohort: bool,
 ) -> None:
-    """CLI limits cannot prove referential completeness, even within one run."""
+    """Only explicitly bound cohorts permit limited FK reconciliation."""
     import bioetl.interfaces.cli.commands.workflow as workflow_cmd
 
     fake_service = _FakeWorkflowRunnerService()
+    workflow = workflow_cmd.load_workflow_config("chembl_core")
+    if not bound_cohort:
+        workflow = replace(
+            workflow,
+            steps=tuple(
+                replace(step, reference_cohort=None)
+                if isinstance(step, WorkflowStepConfig)
+                else step
+                for step in workflow.steps
+            ),
+        )
+    monkeypatch.setattr(workflow_cmd, "load_workflow_config", lambda name: workflow)
     cached_bronze_path = tmp_path / "bronze"
     cached_bronze_path.mkdir()
     monkeypatch.setattr(
@@ -514,9 +527,17 @@ def test_workflow_run_rejects_delete_orphans_when_limit_follows_extracts(
         ],
     )
 
-    assert result.exit_code != 0
-    assert "independently bounded extracts" in result.output
-    assert fake_service.received_config is None
+    if bound_cohort:
+        assert result.exit_code == 0, result.output
+        assert fake_service.received_config is not None
+        assert all(
+            step.run_options.limit == 1000
+            for step in fake_service.received_config.pipeline_steps
+        )
+    else:
+        assert result.exit_code != 0
+        assert "independently bounded extracts" in result.output
+        assert fake_service.received_config is None
 
 
 def test_workflow_run_forwards_baseline_resume_repair_steps(
