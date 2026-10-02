@@ -9,6 +9,9 @@ from pathlib import Path
 from scripts.ops.observability.green_acceptance import Case, command, green_failures
 
 
+pytestmark = pytest.mark.unit
+
+
 def test_composite_children_cannot_substitute_parent_evidence(tmp_path):
     from scripts.ops.observability.green_acceptance import inspect_composite_parents
 

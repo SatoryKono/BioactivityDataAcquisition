@@ -110,6 +110,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
     card["links"] = [
         {
             "title": "View replay checks",
+            "includeVars": False,
             "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9423&${__url_time_range}",
             "targetBlank": False,
         }

@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-02T11:36:40.834380+00:00",
+  "generated_at": "2026-10-02T16:06:46.341063+00:00",
   "summary": {
-    "total_scripts": 635,
+    "total_scripts": 636,
     "status_counts": {
-      "active": 336,
+      "active": 337,
       "supporting": 299
     },
     "reference_group_coverage": {
@@ -15,7 +15,7 @@
       "other": 48,
       "scripts": 531,
       "skills": 12,
-      "tests": 445
+      "tests": 447
     }
   },
   "scripts": [
@@ -14273,7 +14273,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_content_contract.py",
-          "line": 183,
+          "line": 184,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_dashboard_content_contract import ("
         }
@@ -14697,7 +14697,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_cli.py",
@@ -14709,6 +14709,12 @@
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
           "line": 227,
           "source_group": "scripts",
+          "text": "from scripts.engineering.qa.observability_metric_inventory_report import ("
+        },
+        {
+          "path": "tests/architecture/test_observability_metric_governance.py",
+          "line": 212,
+          "source_group": "tests",
           "text": "from scripts.engineering.qa.observability_metric_inventory_report import ("
         }
       ],
@@ -20070,7 +20076,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2448,
+          "line": 2478,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20095,7 +20101,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2496,
+          "line": 2528,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -20138,7 +20144,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2493,
+          "line": 2525,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
         },
@@ -20221,9 +20227,9 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2548,
+          "line": 2575,
           "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana._overview_identity import apply_saved_evidence_readability"
+          "text": "from scripts.ops.observability.grafana._overview_identity import ("
         }
       ]
     },
@@ -20257,19 +20263,19 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2512,
+          "line": 2544,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2521,
+          "line": 2553,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2538,
+          "line": 2570,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         }
@@ -20288,13 +20294,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2552,
+          "line": 2582,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._replay_layout import apply_replay_layout"
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2579,
+          "line": 2612,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._replay_layout import apply_replay_layout"
         }
@@ -20319,9 +20325,9 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2553,
+          "line": 2583,
           "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana._replay_readiness_design import apply_replay_readiness_design, apply_trust_action_display"
+          "text": "from scripts.ops.observability.grafana._replay_readiness_design import ("
         }
       ]
     },
@@ -20336,11 +20342,11 @@
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 260,
           "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana._run_explorer_columns import _RESET_FILTERS"
+          "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2507,
+          "line": 2539,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         }
@@ -20373,13 +20379,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1407,
+          "line": 1428,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import STATUS_URL"
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2529,
+          "line": 2561,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -20422,7 +20428,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2488,
+          "line": 2520,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
@@ -20441,7 +20447,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2501,
+          "line": 2533,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope"
         },
@@ -20832,7 +20838,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2441,
+          "line": 2471,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
@@ -20844,7 +20850,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_selection_actions.py",
-          "line": 8,
+          "line": 9,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import build_handoff_url"
         },
@@ -20938,7 +20944,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2627,
+          "line": 2661,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.generate_prometheus_only_dashboards import ("
         },
@@ -21210,7 +21216,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/navigation-contract.md",
-          "line": 21,
+          "line": 28,
           "source_group": "docs",
           "text": "Nav HTML is generated by `scripts/ops/observability/grafana/render_nav_bus.py`."
         }
@@ -21507,6 +21513,51 @@
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-11-17",
       "next_step": "Retain as the Windows-side compatibility launcher for the canonical scripts.ops ensure-quarantine-explorer command while Grafana local audit flows may still need a direct PowerShell entrypoint; retire it once Windows-specific observability launch wrappers are fully consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17."
+    },
+    {
+      "path": "scripts/ops/observability/green_acceptance.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "tests/integration/test_live_green_acceptance.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import discover, execute, launch_timeout"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import Case, command, green_failures"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import inspect_composite_parents"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 35,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import discover"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 56,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import logged_errors"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_launch_deadlines.py",
+          "line": 4,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import Case, command, launch_timeout"
+        }
+      ]
     },
     {
       "path": "scripts/ops/observability/refresh_visual_json_baseline.py",

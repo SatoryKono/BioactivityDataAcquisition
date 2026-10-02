@@ -7,11 +7,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.composite import DependencyConfig
+    from bioetl.domain.composite import CompositeConfig, DependencyConfig
 
 __all__ = [
     "build_dependency_debug_context",
     "resolve_dependency_runner_limit",
+    "resolve_required_gold_pipelines",
 ]
 
 
@@ -61,3 +62,15 @@ def resolve_dependency_runner_limit(
     if filter_ids is None and multi_filter_ids is None:
         return None
     return len(keys)
+
+
+def resolve_required_gold_pipelines(config: CompositeConfig) -> frozenset[str]:
+    """Keep Gold-producing prerequisites enabled for derived classification stages."""
+    pipelines = {phase.pipeline for phase in config.dependencies} | {
+        phase.pipeline for phase in config.enrichers
+    }
+    if "chembl_target_protein_classification" in pipelines:
+        return frozenset(
+            {"chembl_target", "chembl_target_component", "chembl_protein_class"}
+        )
+    return frozenset()

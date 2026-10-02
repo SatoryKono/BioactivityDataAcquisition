@@ -1,7 +1,11 @@
 """Process deadlines cover configured stages without changing acceptance gates."""
 
+import pytest
 import yaml
 from scripts.ops.observability.green_acceptance import Case, command, launch_timeout
+
+
+pytestmark = pytest.mark.unit
 
 
 def test_composite_deadline_covers_long_enricher(tmp_path):

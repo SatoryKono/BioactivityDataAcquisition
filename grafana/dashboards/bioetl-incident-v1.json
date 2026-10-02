@@ -2744,7 +2744,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · Pipeline / Run Type readiness. Mapping: 0=OK, 1=WARN, 2=CRIT, 3/null=UNKNOWN. This is not the selected Run ID verdict.",
+          "description": "CURRENT · Worst domain priority in the selected workflow/pipeline/run-type scope. Mapping: 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT; null is UNKNOWN. Run ID does not filter this card. A workflow-wide failure does not prove that this pipeline or the selected run failed.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3766,7 +3766,7 @@
           "id": 9463,
           "type": "stat",
           "title": "Review Total Run Duration",
-          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN.",
+          "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "gridPos": {
             "x": 0,
             "y": 67,
@@ -6054,7 +6054,7 @@
           },
           "targets": [
             {
-              "expr": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider_hint\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0)",
+              "expr": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider\"}) > bool 0)",
               "refId": "A"
             }
           ],
@@ -11319,7 +11319,7 @@
             "h": 8
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",

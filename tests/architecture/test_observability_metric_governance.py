@@ -163,7 +163,19 @@ def test_control_plane_recording_rules_are_declared() -> None:
 
 
 @pytest.mark.architecture
-def test_http_panel_contract_recognizes_explicit_backend_failure_copy() -> None:
+@pytest.mark.parametrize(
+    ("failure_copy", "documents_failure"),
+    [
+        ("Backend failure renders as QUERY ERROR.", True),
+        ("Request failure is QUERY ERROR.", True),
+        ("QUERY ERROR is a failed request.", True),
+        ("Run the query to inspect saved rows.", False),
+        ("No values are available.", False),
+    ],
+)
+def test_http_panel_contract_recognizes_explicit_backend_failure_copy(
+    failure_copy: str, documents_failure: bool
+) -> None:
     """QUERY ERROR copy must satisfy the backend-failure documentation contract."""
     contract = inventory._panel_contract(
         dashboard_uid="example-dashboard",
@@ -171,9 +183,7 @@ def test_http_panel_contract_recognizes_explicit_backend_failure_copy() -> None:
             "id": 1,
             "title": "Example HTTP panel",
             "description": "Valid empty means no matching rows.",
-            "fieldConfig": {
-                "defaults": {"noValue": "Backend failure renders as QUERY ERROR."}
-            },
+            "fieldConfig": {"defaults": {"noValue": failure_copy}},
         },
         target={
             "refId": "A",
@@ -184,7 +194,33 @@ def test_http_panel_contract_recognizes_explicit_backend_failure_copy() -> None:
     )
 
     assert contract["documents_valid_empty"] is True
-    assert contract["documents_backend_down"] is True
+    assert contract["documents_backend_down"] is documents_failure
+
+
+@pytest.mark.architecture
+@pytest.mark.parametrize(
+    ("description", "violations"),
+    [
+        ("Empty is a coverage gap. Request failure is QUERY ERROR.", []),
+        ("Empty is a coverage gap.", ["example::panel=1"]),
+        ("Request failure is QUERY ERROR.", ["example::panel=1"]),
+    ],
+)
+def test_required_http_evidence_never_becomes_valid_empty(
+    description: str, violations: list[str]
+) -> None:
+    from scripts.engineering.qa.observability_metric_inventory_report import (
+        _http_semantics_violations,
+    )
+
+    contract = inventory._panel_contract(
+        dashboard_uid="example",
+        panel={"id": 1, "description": description},
+        target={"refId": "A", "source": "url", "url": "/ops/example"},
+        datasource_type="BioETL Ops HTTP",
+    )
+    assert contract["documents_valid_empty"] is False
+    assert _http_semantics_violations([contract]) == violations
 
 
 @pytest.mark.architecture
@@ -215,7 +251,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert report["direct_alert_inputs"]
 
     http_targets = report["http_targets"]
-    assert len(http_targets) == 42  # Overview summary reuses the saved domain response.
+    assert len(http_targets) == 32  # Five retained dashboards after retirement.
     assert any(
         target["dashboard_uid"] == "bioetl-control-plane-v1"
         and target["panel_id"] == 9418
@@ -226,8 +262,8 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
-        "promql": 182,  # Workflow-scope panels plus Incident panel 22011.
-        "http": 42,
+        "promql": 105,  # Fleet queries are now owned by Incident Workspace.
+        "http": 32,
         "loki": 0,
         "tempo": 0,
         "unknown": 0,
@@ -235,7 +271,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert all(target["datasource_type"] for target in report["typed_targets"])
     assert all(
         target["datasource_type"] == "yesoreyeram-infinity-datasource"
-        and target["documents_valid_empty"]
+        and (target["documents_valid_empty"] or target["empty_state"] == "coverage_gap")
         and target["documents_backend_down"]
         for target in http_targets
     )

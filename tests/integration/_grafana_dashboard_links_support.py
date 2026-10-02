@@ -31,7 +31,7 @@ _DASHBOARD_UID_RE = re.compile(r"^/d/([^\\/?]+)")
 
 _LINK_VAR_RE = re.compile(r"[?&]var-(\w+)=")
 
-_LINK_VAR_VALUE_RE = re.compile(r"[?&]var-(\w+)=([^&#]+)")
+_LINK_VAR_VALUE_RE = re.compile(r"[?&]var-(\w+)=([^&#]*)")
 
 _NAV_LINK_CONTRACT_PATH = Path(
     "docs/03-guides/dashboards/contracts/navigation-links.yaml"
@@ -68,6 +68,7 @@ def _normalize_required_panel_entry(uid: str, entry: object) -> dict[str, object
         "panel_id": panel_id,
         "target_uid": target_uid,
         "link_titles": tuple(str(title) for title in link_titles),
+        "required_view_panel": entry.get("required_view_panel"),
     }
 
 
@@ -340,9 +341,12 @@ def _assert_l1_inbound_status_policy(
 
 def _target_panel_links(panel: dict[str, object], target_uid: str) -> list[str]:
     urls: list[str] = []
-    for link in _iter_panel_data_links(panel):
+    for link in [*panel.get("links", []), *_iter_panel_data_links(panel)]:
         url = link.get("url")
         if isinstance(url, str) and _extract_dashboard_uid(url) == target_uid:
+            assert link.get("includeVars") is False, (
+                "Inbound link must disable implicit vars"
+            )
             urls.append(url)
     return urls
 
@@ -353,6 +357,10 @@ def _assert_inbound_target_link_policy(
     passed_vars = _extract_link_vars(url)
     required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID[target_uid]
     forbidden_vars = _FORBIDDEN_DASHBOARD_LINK_VARS_BY_TARGET_UID[target_uid]
+    assert passed_vars <= _ALLOWED_DASHBOARD_LINK_VARS[target_uid]
+    assert _extract_link_var_values(url).get("run_id") == "$run_id", (
+        "Selected-run inbound link must preserve the exact Run ID"
+    )
     assert required_vars <= passed_vars, (
         f"Inbound path {source_uid}:{panel_id}->{target_uid} missing vars "
         f"{sorted(required_vars - passed_vars)} via {url}"
@@ -383,7 +391,7 @@ def _assert_inbound_route_policy(
     assert isinstance(source_uid, str)
     assert isinstance(panel_id, int)
     assert isinstance(panel_title, str) and panel_title
-    if level_name == "L1":
+    if level_name == "L1" or status_row_title_matcher is not None:
         assert isinstance(status_row_title_matcher, str) and status_row_title_matcher
 
     source_dashboard = dashboards.get(source_uid)
@@ -397,7 +405,7 @@ def _assert_inbound_route_policy(
     assert panel.get("title") == panel_title, (
         f"Source panel id={panel_id} title mismatch: expected {panel_title!r}, got {panel.get('title')!r}"
     )
-    if level_name == "L1":
+    if level_name == "L1" or status_row_title_matcher is not None:
         _assert_l1_inbound_status_policy(
             source_dashboard=source_dashboard,
             panel=panel,
@@ -470,7 +478,7 @@ def _assert_critical_panel_entry(
         f"{dashboard_path.name} ({uid}) missing critical panel id={panel_id}"
     )
 
-    data_links = _iter_panel_data_links(panel)
+    data_links = [*panel.get("links", []), *_iter_panel_data_links(panel)]
     assert data_links, (
         f"{dashboard_path.name} panel id={panel_id} must define dataLinks"
     )
@@ -497,6 +505,12 @@ def _assert_critical_panel_entry(
     allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS[target_uid]
     for link in matching_links:
         url = str(link.get("url", ""))
+        view_panel = entry.get("required_view_panel")
+        if view_panel is not None:
+            assert isinstance(view_panel, int)
+            assert dict(parse_qsl(urlsplit(url).query)).get("viewPanel") == str(
+                view_panel
+            ), f"Critical detail action must open panel {view_panel}"
         assert link.get("includeVars") is False, (
             f"{dashboard_path.name} panel id={panel_id} link {link.get('title')!r} "
             "must keep includeVars=false"
@@ -672,8 +686,18 @@ def _assert_preserved_identity_handoff(
     assert selector == "run_id", "preserved identity selector must be run_id"
     assert required_value == "$run_id", "preserved run_id handoff value must be $run_id"
 
+    values = _extract_link_var_values(url)
+    reset = spec["catalog_reset"]
+    if target_uid == reset["target_uid"] and values.get("run_id") == "-":
+        assert values == reset["required_values"], (
+            f"{dashboard_name} catalog reset must clear all selectors and search: {url}"
+        )
+        _assert_required_time_tokens(
+            url, tokens=_DASHBOARD_TIME_HANDOFF_TOKENS, context="catalog reset"
+        )
+        return
+
     if current_uid in source_uids and target_uid in target_uids:
-        values = _extract_link_var_values(url)
         assert selector in passed_vars, (
             f"{dashboard_name} link to {target_uid} must preserve exact Run ID "
             f"with var-{selector}={required_value}: {url}"
@@ -773,11 +797,12 @@ def _assert_cross_dashboard_link_policy(
     if target_uid == "${__data.fields.action_dashboard_uid}":
         assert current_uid == "bioetl-incident-v1"
         assert link.get("title") == "Open domain diagnostics"
-        for resolved_uid, scope in {
-            "bioetl-runtime": "var-stage=%24__all",
-            "bioetl-dq-v2": "var-stage=%24__all",
-            "bioetl-provider-health-v2": "var-provider=chembl&var-pipeline_context=unknown",
-        }.items():
+        for resolved_uid, scope in (
+            ("bioetl-overview-v2", ""),
+            ("bioetl-overview-v2", "viewPanel=9480"),
+            ("bioetl-dq-v2", "var-stage=%24__all"),
+            ("bioetl-control-plane-v1", ""),
+        ):
             resolved_url = url.replace(
                 "${__data.fields.action_dashboard_uid}", resolved_uid
             ).replace("${__data.fields.action_scope}", scope)

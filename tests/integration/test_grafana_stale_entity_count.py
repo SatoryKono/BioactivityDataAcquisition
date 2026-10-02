@@ -11,7 +11,7 @@ pytestmark = pytest.mark.integration
 
 
 def test_stale_entity_promtool_cases_execute_the_shipped_expression() -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 7)
     target = panel["targets"][0]
     assert target["instant"] is True and target["range"] is False

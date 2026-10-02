@@ -99,15 +99,15 @@ class TestCrossPipelineOntologyNormalization:
 
     def test_tissue_ontology_fields(self) -> None:
         """Test that tissue profile has ontology ID normalization."""
-        # Check that ontology fields have appropriate normalization rules
-        bto_rule = CHEMBL_TISSUE_PROFILE.field_rules["bto_id"]
-        assert "ontology" in bto_rule.notes.lower()
-
-        efo_rule = CHEMBL_TISSUE_PROFILE.field_rules["efo_id"]
-        assert "ontology" in efo_rule.notes.lower()
-
-        uberon_rule = CHEMBL_TISSUE_PROFILE.field_rules["uberon_id"]
-        assert "ontology" in uberon_rule.notes.lower()
+        cases = {
+            "bto_id": ("BTO:0000142", "BTO_0000142"),
+            "efo_id": ("EFO;0000319", "EFO_0000319"),
+            "uberon_id": ("UBERON:0002107", "UBERON_0002107"),
+        }
+        for field, (raw, expected) in cases.items():
+            rule = CHEMBL_TISSUE_PROFILE.field_rules[field]
+            assert rule.apply(raw) == expected
+            assert rule.apply(expected) == expected
 
     def test_ontology_id_edge_cases(self) -> None:
         """Test edge cases for ontology ID normalization."""
@@ -165,19 +165,12 @@ class TestProfileSpecialRulesCoverage:
 
     def test_tissue_profile_special_rules(self) -> None:
         """Test that tissue profile has expected special rules."""
-        special_rules = {
-            field_name: rule
-            for field_name, rule in CHEMBL_TISSUE_PROFILE.field_rules.items()
-            if any(keyword in rule.notes for keyword in ["Normalize", "normalize"])
-        }
-
-        # Should have rules for ontology fields
-        expected_fields = {"bto_id", "efo_id", "uberon_id"}
-        actual_fields = set(special_rules.keys())
-
-        assert expected_fields.issubset(actual_fields), (
-            f"Missing special rules for: {expected_fields - actual_fields}"
-        )
+        for field in ("bto_id", "efo_id", "uberon_id"):
+            rule = CHEMBL_TISSUE_PROFILE.field_rules[field]
+            assert rule.apply(None) is None
+            assert rule.apply("None") is None
+            assert rule.apply("unknown") is None
+            assert rule.apply("unrecognized identifier") == "unrecognized identifier"
 
 
 class TestNormalizationFunctionIntegration:

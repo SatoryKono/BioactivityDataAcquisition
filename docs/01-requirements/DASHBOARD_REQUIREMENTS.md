@@ -84,7 +84,7 @@ size option.
 | `DASH-FIRST-001` | Every dashboard MUST answer one operator question through `state × confidence × basis × next_action`. |
 | `DASH-FIRST-002` | Current status and first action MUST precede selected-range and forensic evidence. Forensic rows MUST ship collapsed. |
 | `DASH-STATE-002` | Operator states MUST use the canonical `OK/WARN/CRIT/UNKNOWN` palette; documented trust gates MAY add `INCOMPLETE`. Color MUST NOT be the only carrier of meaning. |
-| `DASH-NAV-001` | Every dashboard MUST expose the ordered `0..6` navigation bus, omit its self-link, preserve time, and pass only target-allowlisted variables. |
+| `DASH-NAV-001` | Every dashboard MUST expose its declared navigation surface in `navigation-links.yaml`: the ordered header bus on detail/workspace pages, or exact-run table actions on Run Explorer. Header links omit self-links; all routes preserve time, explicitly serialize target-allowlisted variables, and disable implicit variable copying. Row actions MUST carry the clicked row identity. |
 | `DASH-SCOPE-001` | A data-bearing panel with `scope=selected_run` MUST use `evidence_source=ops_http`. Prometheus MUST NOT claim exact UUID scope (`DASH-DATA-002`). |
 | `DASH-SCOPE-002` | `bioetl-overview-v2` first window MUST show `Review Selected Run Status` (`9603`) and `Review Run Domains` (`9002`). Run ID is always set. CURRENT fleet panels are not on this page. |
 | `DASH-ACTION-001` | Critical operator panels MUST expose an actionable dashboard or runbook CTA without duplicate or conflicting handoffs. |
