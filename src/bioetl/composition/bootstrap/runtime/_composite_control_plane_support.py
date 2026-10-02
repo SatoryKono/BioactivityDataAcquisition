@@ -11,7 +11,7 @@ from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
-from bioetl.composition.runtime_builders._run_manifest_refs import (
+from bioetl.composition.control_plane_paths import (
     control_plane_root as _shared_control_plane_root,
 )
 from bioetl.composition.snapshot_serialization import (
