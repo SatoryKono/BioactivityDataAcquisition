@@ -30,12 +30,16 @@ def _git_changed_files() -> list[str]:
         ["git", "diff", "--name-only", "origin/main...HEAD"],
         ["git", "diff", "--name-only", "HEAD~1..HEAD"],
         ["git", "diff", "--name-only", "--cached"],
+        ["git", "diff", "--name-only"],
     )
+    changed: set[str] = set()
     for cmd in commands:
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
-        if result.returncode == 0 and result.stdout.strip():
-            return [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    return []
+        if result.returncode == 0:
+            changed.update(
+                line.strip() for line in result.stdout.splitlines() if line.strip()
+            )
+    return sorted(changed)
 
 
 def _repository_utc_date() -> date:
@@ -90,3 +94,24 @@ def test_ux_report_freshness_helper_accepts_today_and_yesterday() -> None:
     """Gate must not hardcode a frozen calendar date (DRM-01)."""
     anchor = date(2030, 1, 15)
     assert _fresh_report_dates(anchor) == {"2030-01-15", "2030-01-14"}
+
+
+def test_ux_freshness_combines_committed_staged_and_working_tree_changes(monkeypatch):
+    outputs = iter(
+        [
+            "docs/README.md\n",
+            "",
+            "tests/example.py\n",
+            "grafana/dashboards/example.json\n",
+        ]
+    )
+
+    def run(*args, **kwargs):
+        return subprocess.CompletedProcess(args[0], 0, stdout=next(outputs), stderr="")
+
+    monkeypatch.setattr(subprocess, "run", run)
+    assert _git_changed_files() == [
+        "docs/README.md",
+        "grafana/dashboards/example.json",
+        "tests/example.py",
+    ]

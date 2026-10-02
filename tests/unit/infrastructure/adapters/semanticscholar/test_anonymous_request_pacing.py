@@ -11,6 +11,9 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
 
+pytestmark = pytest.mark.unit
+
+
 def test_invalid_rate_configuration_does_not_fall_back_to_faster_requests(monkeypatch):
     from pydantic import ValidationError
 

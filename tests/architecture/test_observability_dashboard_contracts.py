@@ -180,6 +180,7 @@ def test_pipeline_summary_dashboards_apply_run_type_to_labelled_metrics() -> Non
     allowlist, pipeline_summary = _load_allowlist()
     label_sets = get_metric_label_sets()
     offenders: list[str] = []
+    checked = 0
 
     for dashboard_name in sorted(pipeline_summary):
         dashboard_path = DASHBOARD_DIR / dashboard_name
@@ -187,6 +188,10 @@ def test_pipeline_summary_dashboards_apply_run_type_to_labelled_metrics() -> Non
         for panel in _iter_panels(dashboard):
             title = str(panel.get("title", ""))
             for expr in _panel_expressions(panel):
+                # Global incident evidence is intentionally independent of the
+                # selected pipeline. Apply run-type parity to selected scope.
+                if "$pipeline" not in expr and "${pipeline" not in expr:
+                    continue
                 for metric_name, selector_body in _PROMQL_METRIC_SELECTOR_RE.findall(
                     expr
                 ):
@@ -195,11 +200,14 @@ def test_pipeline_summary_dashboards_apply_run_type_to_labelled_metrics() -> Non
                     expected_labels = label_sets.get(metric_name)
                     if expected_labels is None or "run_type" not in expected_labels:
                         continue
+                    checked += 1
                     if "run_type" not in selector_body:
                         offenders.append(
                             f"{dashboard_name} :: {title} :: {metric_name} missing run_type filter"
                         )
     assert not offenders, "\n".join(offenders[:20])
+
+    assert checked > 0, "selected pipeline metric coverage must not be empty"
 
 
 def _panel_display_title(panel: object) -> str:
@@ -213,25 +221,24 @@ def _panel_display_title(panel: object) -> str:
     return str(panel.get("title") or "")
 
 
-def test_provider_health_provenance_documents_provider_global_scope() -> None:
-    dashboard = json.loads(
-        (DASHBOARD_DIR / "bioetl-provider-health-v2.json").read_text(encoding="utf-8")
+def test_provider_evidence_scope_distinguishes_saved_run_from_global_alerts() -> None:
+    overview = json.loads(
+        (DASHBOARD_DIR / "bioetl-overview-v2.json").read_text(encoding="utf-8")
     )
-    provenance = next(
-        (
-            panel
-            for panel in dashboard.get("panels", [])
-            if _panel_display_title(panel) == "Understand Evidence Scope"
-        ),
-        None,
+    panel = next(p for p in _iter_panels(overview) if p.get("id") == 9480)
+    assert "SELECTED RUN" in panel["description"]
+    assert "UNKNOWN" in panel["description"]
+    assert "run_id=" in panel["targets"][0]["url"]
+    assert not _panel_expressions(panel)
+    incident = json.loads(
+        (DASHBOARD_DIR / "bioetl-incident-v1.json").read_text(encoding="utf-8")
     )
-    assert provenance is not None
-    content = str(provenance.get("options", {}).get("content", ""))
-    assert "GLOBAL" in content or "global" in content.lower()
-    assert "every provider" in content
-    assert "SELECTED PROVIDER" in content
-    assert "${provider:text}" in content
-    assert "UNKNOWN" in content
+    alerts = next(p for p in _iter_panels(incident) if p.get("id") == 2005)
+    assert "GLOBAL" in alerts["description"]
+    assert (
+        "independent of selected Pipeline, Provider and Run ID" in alerts["description"]
+    )
+    assert "$run_id" not in " ".join(_panel_expressions(alerts))
 
 
 def test_workflow_overview_exposes_failed_pipeline_run_handoff() -> None:

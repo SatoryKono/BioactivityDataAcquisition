@@ -20,10 +20,10 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "caba223013640aa7f73717025e1ff89292ff8ea8f56f1f1ceb907ff4e06a6879",
-    "bioetl-dq-v2": "c5f1705c645bb57112c32bd30f7e33717c8135ec14a96af19edce704cfe6e50a",
-    "bioetl-incident-v1": "ca356b31a08fed9181f1c3994a7d10556045c1100f505ca83df5290167b3e3ec",
-    "bioetl-overview-v2": "a48ae1a8313d43a64dd38d5b5c9bd00272889f6ed454bf02a802fef39ba09ab2",
+    "bioetl-control-plane-v1": "d97762b253cd9c99eefedab556036c0c407038348e0442921ede9b416c4d11d2",
+    "bioetl-dq-v2": "b293b2ef8f0e17d9f812c8cda2b2c1f60c9fc86ecd4d0acb5b25551ab3e6b91d",
+    "bioetl-incident-v1": "cd43b6364cdcba995fbcfcb860dc499ee2d8c6390a4fbecce60ace87f2322206",
+    "bioetl-overview-v2": "ea824818170be4095a3568a629dd270dbf1e4e3c24c5128627207421529b79c9",
     "bioetl-run-explorer-v1": "f60bdaf8bb0320a0e53c1b1428ebbdfe45759df05b91093d44ce28999312dba0"
   },
   "panels": [
@@ -1668,8 +1668,8 @@
         "expressions": [
           "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
           "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
-          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~\"duplicate|overwrite\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
-          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~\"consistent|inconsistent\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",risk_type=~\"duplicate|overwrite\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+          "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\",integrity_type=~\"consistent|inconsistent\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
           "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} > 0 and push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} <= time())) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))"
         ],
         "target_count": 5

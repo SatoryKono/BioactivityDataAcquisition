@@ -317,6 +317,7 @@ def test_build_runner_factories_wires_phase_builders_and_bronze_options() -> Non
     assert callable(result[2])
 
 
+@pytest.mark.unit
 def test_manifest_bound_storage_preserves_run_identity():
     from bioetl.domain.ports import PipelineControlPlaneArtifacts
 
