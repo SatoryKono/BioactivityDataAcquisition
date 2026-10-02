@@ -146,8 +146,9 @@ def test_recorded_action_scope_is_destination_specific() -> None:
             expected = "var-pipeline=$1"
             if uid in {"bioetl-dq-v2"}:
                 expected += "&var-stage=$$__all"
-            elif uid == "bioetl-provider-health-v2":
-                expected += "&var-provider=$$__all&var-pipeline_context=$1"
+            elif rule.get("labels", {}).get("action_target") == "provider":
+                assert uid == "bioetl-overview-v2"
+                expected += "&viewPanel=9480"
             expr = rule["expr"]
             assert expr.startswith("label_replace((")
             assert expr.endswith(
