@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -159,8 +160,13 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
         ["git", "status", "--porcelain", "-uno"], cwd=root, text=True
     ).strip(), "Commit candidate before replay-ready launches"
     folder = output / case.id
+    assert folder.resolve().is_relative_to(root.resolve()), (
+        "Output must stay inside the isolated worktree"
+    )
     folder.mkdir(parents=True, exist_ok=False)
     data, reports = folder / "data", folder / "reports"
+    shutil.copytree(root / "data/input", data / "input")
+    shutil.copy2(root / "uv.lock", folder / "uv.lock")
     environment = {
         **os.environ,
         **{
@@ -189,7 +195,7 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
         try:
             result = subprocess.run(
                 args,
-                cwd=root,
+                cwd=folder,
                 env=environment,
                 stdout=log,
                 stderr=subprocess.STDOUT,

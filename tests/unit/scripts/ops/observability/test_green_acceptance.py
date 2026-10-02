@@ -27,7 +27,9 @@ def test_composite_limit_alias_preserves_seed_limit():
 def test_every_launch_has_limit_1000(kind):
     args = command(Case(kind, "chembl_assay"))
     assert args[args.index("--limit") + 1] == "1000"
-    assert args[args.index("--required-persistence-profile") + 1] == "degraded_observable"
+    assert (
+        args[args.index("--required-persistence-profile") + 1] == "degraded_observable"
+    )
 
 
 def test_all_green_passes():
