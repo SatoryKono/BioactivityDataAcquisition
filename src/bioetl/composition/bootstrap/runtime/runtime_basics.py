@@ -15,6 +15,9 @@ from bioetl.application.services.execution.pipeline_runner_models import RunOpti
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
+from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (
+    initialize_domain_enum_fields,
+)
 from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
     build_pipeline_context,
 )
@@ -22,9 +25,6 @@ from bioetl.composition.factories.services.port_factories import create_metrics
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.time import SystemClock
-from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (
-    initialize_domain_enum_fields,
-)
 
 if TYPE_CHECKING:
     import polars as pl
@@ -32,15 +32,15 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
     from bioetl.application.services.quality.dq_report_service import DQReportService
+    from bioetl.composition.bootstrap.composite_infrastructure_context import (
+        CompositeRuntimeStorageProtocol,
+    )
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
         CompositeFilterExtractor,
     )
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
         CompositeSupportServicesFactory,
-    )
-    from bioetl.composition.bootstrap.composite_infrastructure_context import (
-        CompositeRuntimeStorageProtocol,
     )
     from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
         BronzeRunOptions,
@@ -175,6 +175,16 @@ def build_runner_factories(
         build_context=build_context_fn,
         pipeline_runner_builder=pipeline_runner_builder,
         filter_extraction_service=filter_extraction_service,
+        gold_required_pipelines=(
+            frozenset(
+                {"chembl_target", "chembl_target_component", "chembl_protein_class"}
+            )
+            if any(
+                phase.pipeline == "chembl_target_protein_classification"
+                for phase in (*config.dependencies, *config.enrichers)
+            )
+            else frozenset()
+        ),
         required_persistence_profile=getattr(
             runtime, "required_persistence_profile", None
         ),

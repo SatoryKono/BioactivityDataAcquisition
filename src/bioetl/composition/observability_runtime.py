@@ -10,11 +10,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.composition.observability_metrics_profile import (
-    MetricsOperatorProfile,
-    get_metrics_operator_profile,
-)
-from bioetl.domain.runtime.composition_boundary_policy import resolve_seed_run_type
+from bioetl.composition import _services
 from bioetl.composition.bootstrap.cli.metrics import (
     bootstrap_metrics_service,
     refresh_control_plane_integrity_metrics,
@@ -29,25 +25,29 @@ from bioetl.composition.bootstrap.runtime_public_exports import (
     ObservabilityWorkflowServiceProtocol,
     RunManifestInspectionServiceProtocol,
 )
-from bioetl.composition import _services
+from bioetl.composition.observability_metrics_profile import (
+    MetricsOperatorProfile,
+    get_metrics_operator_profile,
+)
+from bioetl.composition.runtime_builders import config_access as _config_access
+from bioetl.domain.exceptions import MetricsServerError
+from bioetl.domain.runtime.composition_boundary_policy import resolve_seed_run_type
 from bioetl.infrastructure.observability.required_publication_series import (
     ensure_required_control_plane_publication_series,
 )
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
 )
-from bioetl.composition.runtime_builders import config_access as _config_access
-from bioetl.domain.exceptions import MetricsServerError
 
 _PUSHGATEWAY_FALLBACK = "localhost:9091"
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, RunReportStorePort
     from bioetl.application.services.quality.quarantine_service import QuarantineService
-    from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.application.services.workflow.observability_workflow_service import (
         RunForensicDossierResult,
     )
+    from bioetl.domain.ports import LoggerPort, RunReportStorePort
+    from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
     "MetricsOperatorProfile",
@@ -123,6 +123,9 @@ def push_metrics_to_gateway(
     """Push metrics through the canonical composition-owned observability seam."""
 
     settings = _config_access.get_settings()
+    observability = getattr(settings, "observability", None)
+    if not getattr(observability, "metrics_enabled", True):
+        return False
     gateway = getattr(settings, "pushgateway_url", None) or _PUSHGATEWAY_FALLBACK
     grouping_key: dict[str, str] = {}
     if pipeline_name:

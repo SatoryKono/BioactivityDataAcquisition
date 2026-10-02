@@ -6,8 +6,7 @@ import os
 from pathlib import Path
 
 import pytest
-
-from scripts.ops.observability.green_acceptance import discover, execute
+from scripts.ops.observability.green_acceptance import discover, execute, launch_timeout
 
 ROOT = Path(__file__).resolve().parents[2]
 CASES = discover(ROOT)
@@ -24,7 +23,9 @@ CASES = discover(ROOT)
         pytest.param(
             case,
             id=case.id,
-            marks=pytest.mark.timeout(1900 * (1 + len(case.prerequisites))),
+            marks=pytest.mark.timeout(
+                launch_timeout(case, ROOT) + 1800 * len(case.prerequisites) + 120
+            ),
         )
         for case in CASES
     ],

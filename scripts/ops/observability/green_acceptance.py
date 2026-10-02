@@ -90,7 +90,12 @@ def command(case: Case) -> list[str]:
     if case.kind == "workflow":
         args = ["workflow", "run", case.name]
     elif case.kind == "composite":
-        args = ["run-composite", "--composite", case.name.removeprefix("composite_")]
+        args = [
+            "run-composite",
+            "--composite",
+            case.name.removeprefix("composite_"),
+            "--no-health-server",
+        ]
     else:
         args = ["run", "--pipeline", case.name, "--no-health-server"]
     return [
@@ -103,6 +108,27 @@ def command(case: Case) -> list[str]:
         "--required-persistence-profile",
         "degraded_observable",
     ]
+
+
+def launch_timeout(case: Case, root: Path) -> int:
+    """Allow every configured stage its budget before the process-tree deadline."""
+    if case.kind == "pipeline":
+        return 1800
+    if case.kind == "composite":
+        name = case.name.removeprefix("composite_")
+        config = yaml.safe_load(
+            (root / "configs/composites" / f"{name}.yaml").read_text(encoding="utf-8")
+        )["composite"]
+        stages = [*config.get("dependencies", []), *config.get("enrichers", [])]
+        return (
+            1800 + 600 + sum(int(stage.get("timeout_seconds", 600)) for stage in stages)
+        )
+    config = yaml.safe_load(
+        (root / "configs/workflows" / f"{case.name}.yaml").read_text(encoding="utf-8")
+    )["workflow"]
+    return 300 + sum(
+        1800 if step["kind"] == "pipeline" else 300 for step in config["steps"]
+    )
 
 
 def green_failures(status: str, presentation: dict, assessment: dict) -> list[str]:
@@ -219,6 +245,8 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
         BIOETL_CONFIGS_ROOT=str(root / "configs"),
         PYTHONPATH=os.pathsep.join([str(root / "src"), str(root)]),
         BIOETL_METRICS_ENABLED="false",
+        BIOETL_OBSERVABILITY__METRICS_ENABLED="false",
+        BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED="false",
         BIOETL_PUSHGATEWAY_URL="",
         PYTHONDONTWRITEBYTECODE="1",
         OPENBLAS_NUM_THREADS="1",
@@ -234,11 +262,14 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
         ] = "true"
     args = command(case)
     failures = []
-    launches = [command(Case("pipeline", name)) for name in case.prerequisites]
-    launches.append(args)
+    launch_cases = [Case("pipeline", name) for name in case.prerequisites] + [case]
+    launches = [command(launch_case) for launch_case in launch_cases]
+    timeouts = [launch_timeout(launch_case, root) for launch_case in launch_cases]
     with (folder / "launch.log").open("w", encoding="utf-8") as log:
-        for launch in launches:
-            failures.extend(run_launch(launch, folder, environment, log))
+        for launch, timeout in zip(launches, timeouts, strict=True):
+            failures.extend(
+                run_launch(launch, folder, environment, log, timeout_seconds=timeout)
+            )
             if failures:
                 break
     failures.extend(logged_errors((folder / "launch.log").read_text(encoding="utf-8")))
@@ -265,6 +296,7 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
                 "case": case.id,
                 "command": args,
                 "launches": launches,
+                "launch_timeout_seconds": timeouts,
                 "limit": 1000,
                 "source_commit": subprocess.check_output(
                     ["git", "rev-parse", "HEAD"], cwd=root, text=True
@@ -280,7 +312,12 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
 
 
 def run_launch(
-    args: list[str], folder: Path, environment: dict[str, str], log: TextIO
+    args: list[str],
+    folder: Path,
+    environment: dict[str, str],
+    log: TextIO,
+    *,
+    timeout_seconds: int = 1800,
 ) -> list[str]:
     """Run one bounded launch and terminate its complete Windows process tree."""
     failures = []
@@ -292,7 +329,7 @@ def run_launch(
             stdout=log,
             stderr=subprocess.STDOUT,
         )
-        returncode = process.wait(timeout=1800)
+        returncode = process.wait(timeout=timeout_seconds)
         if returncode:
             failures.append(f"exit_code={returncode}")
     except subprocess.TimeoutExpired:
@@ -307,7 +344,7 @@ def run_launch(
         else:
             process.kill()
         process.wait(timeout=30)
-        failures.append("launch_timeout=1800s")
+        failures.append(f"launch_timeout={timeout_seconds}s")
     return failures
 
 
