@@ -7,6 +7,9 @@ from scripts.engineering.qa.generate_dashboard_content_contract import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 def test_verdict_reuse_keeps_ops_http_provenance():
     source = {
         "id": 9002,
