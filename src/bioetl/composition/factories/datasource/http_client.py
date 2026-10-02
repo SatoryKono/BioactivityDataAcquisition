@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from pydantic import ValidationError
+
 from bioetl.composition.factories.datasource.data_source_factory import (
     resolve_datasource_provider_registry as _resolve_provider_registry,
 )
@@ -129,6 +131,9 @@ class HttpClientFactory:
         registry = _resolve_provider_registry(provider_registry)
         try:
             source_config = load_source_config(provider)
+        except ValidationError:
+            # Invalid throttling must never turn into a faster fallback client.
+            raise
         except ValueError:
             source_config = None
 
