@@ -223,6 +223,10 @@ required_panel_links_by_uid:
     link_titles:
     - View replay checks
     required_view_panel: 9423
+  - panel_id: 9418
+    target_uid: bioetl-run-explorer-v1
+    link_titles:
+    - Open Run Explorer
   bioetl-incident-v1:
   - panel_id: 2010
     target_uid: ${__data.fields.action_dashboard_uid}
@@ -334,9 +338,9 @@ navigation_transition_contract:
   first_action_contract:
     bioetl-overview-v2:
       panel_id: 9002
-      panel_title: Run Domains
-      min_cta: 2
-      max_cta: 2
+      panel_title: Review Run Domains
+      min_cta: 3
+      max_cta: 3
       ctas:
       - title: Open Control Plane
         expected_target_uid: bioetl-control-plane-v1
