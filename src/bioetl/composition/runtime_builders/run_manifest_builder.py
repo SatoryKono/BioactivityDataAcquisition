@@ -12,7 +12,7 @@ from bioetl.composition.runtime_builders.run_manifest_support import (
     build_run_manifest_provenance_bundle as build_run_manifest_provenance_bundle,
     resolve_run_context_values,
 )
-from bioetl.composition.runtime_builders._run_manifest_control_plane_refs import (
+from bioetl.composition.runtime_builders.run_manifest_support import (
     create_control_plane_refs_for_manifest,
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (

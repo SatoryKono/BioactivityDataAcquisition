@@ -56,10 +56,12 @@ def test_missing_finalization_preserves_provider_without_inventing_check():
         pipeline="chembl_assay",
         run_id="00000000-0000-0000-0000-000000000001",
     )
-    assert result["provider_checks"] == [{
-        "provider": "chembl",
-        "check_result": "INCOMPLETE",
-        "evidence": "finalization_missing",
-        "observed_at": None,
-    }]
+    assert result["provider_checks"] == [
+        {
+            "provider": "chembl",
+            "check_result": "INCOMPLETE",
+            "evidence": "finalization_missing",
+            "observed_at": None,
+        }
+    ]
     assert result["replay_readiness_now"] == "INSUFFICIENT"

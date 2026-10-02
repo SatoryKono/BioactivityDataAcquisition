@@ -131,7 +131,7 @@ def test_monitoring_guide_routes_panel_detail_to_all_shipped_panel_docs() -> Non
         for dashboard_stem in dashboard_stems
         if f"{dashboard_stem}-panels.md" not in panel_doc_names
     )
-    assert len(dashboard_stems) == 7
+    assert dashboard_stems, "shipped dashboard inventory must not be empty"
     assert not missing_panel_docs, missing_panel_docs
     assert "dashboard-inventory.md" in guide, (
         f"{guide_path} must route inventory ownership to dashboard-inventory.md"

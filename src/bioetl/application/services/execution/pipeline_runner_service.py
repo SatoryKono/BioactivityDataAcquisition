@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 
 from bioetl.application.services.run_reports.control_plane_snapshot import (
+    archive_run_completion,
     capture_run_completion,
 )
 from bioetl.application.services.run_reports.observations import (
@@ -200,7 +201,7 @@ class PipelineRunnerService:
         options: RunOptions,
         started_at: datetime,
         started_monotonic: float,
-        record_constructor_failure: Callable[[Exception], Awaitable[None]],
+        record_constructor_failure: Callable[[Exception], Awaitable[RunResult]],
     ) -> RunResult:
         observation_token = bind_run_observations()
         accounting = StageAccountingAccumulator()
@@ -210,32 +211,9 @@ class PipelineRunnerService:
             try:
                 runner = _require_execution_runner(self.runner_factory.create(context))
             except Exception as exc:
+                failed_result = await record_constructor_failure(exc)
                 if is_empty_cached_bronze_provenance_error(exc):
-                    completed_at = self.clock.now()
-                    await _record_pipeline_audit_event(
-                        self.audit,
-                        event_name="PipelineRunCompleted",
-                        pipeline_name=pipeline_name,
-                        run_id=run_id,
-                        run_type=options.run_type,
-                        status="failed",
-                        timestamp=completed_at,
-                        error_type=type(exc).__name__,
-                    )
-                    return self._finalize_report(
-                        RunResult(
-                            status=PipelineRunResult.FAILED,
-                            pipeline_name=pipeline_name,
-                            run_id=str(run_id),
-                            run_type=options.run_type,
-                            started_at=started_at,
-                            completed_at=completed_at,
-                            error_type=type(exc).__name__,
-                            error_message=str(exc),
-                        ),
-                        options,
-                    )
-                await record_constructor_failure(exc)
+                    return failed_result
                 raise
             return await self._execute_pipeline(
                 runner=runner,
@@ -407,9 +385,4 @@ class PipelineRunnerService:
     def _archive_control_plane(
         self, result: RunResult, options: RunOptions | None
     ) -> None:
-        if self.archive_control_plane is None:
-            return
-        try:
-            self.archive_control_plane(result, options)
-        except (OSError, RuntimeError, TypeError, ValueError):
-            return
+        archive_run_completion(self.archive_control_plane, result, options)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import shutil
 from pathlib import Path
 
@@ -41,6 +42,11 @@ class FileRunReportStoreAdapter:
 
     def read_text(self, path: str) -> str:
         return Path(path).read_text(encoding="utf-8")
+
+    def sha256(self, path: str) -> str:
+        """Preserve persisted newline bytes when computing artifact identity."""
+        with Path(path).open("rb") as stream:
+            return hashlib.file_digest(stream, "sha256").hexdigest()
 
     def read_identity_text(self, path: str) -> str:
         """Share compact identities across catalog readers, checking file freshness."""

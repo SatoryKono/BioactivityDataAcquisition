@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pytest
 
+from scripts.engineering.qa.run_local_coverage_verify import _windows_bash
+
 
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
@@ -130,7 +132,7 @@ def _logged_commands(tmp_path: Path) -> list[str]:
 def test_setup_env_wsl_syntax() -> None:
     try:
         completed = subprocess.run(
-            ["bash", "-n", _bash_arg(SCRIPT)],
+            [_windows_bash() if os.name == "nt" else "bash", "-n", _bash_arg(SCRIPT)],
             cwd=str(ROOT),
             check=False,
             capture_output=True,

@@ -42,7 +42,7 @@ def control_plane_root(*args: object, **kwargs: object) -> object:
 
 def build_planned_artifacts(*args: object, **kwargs: object) -> object:
     return compat_attr(
-        "bioetl.composition.runtime_builders._run_manifest_planned_artifacts",
+        "bioetl.composition.runtime_builders.run_manifest_support",
         "build_planned_artifacts",
         *args,
         **kwargs,

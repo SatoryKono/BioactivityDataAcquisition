@@ -39,6 +39,29 @@ def _normalize_cached_bronze_surface_for_semantic_identity(candidate: JsonDict) 
         cached_bronze["bronze_path"] = _CACHED_BRONZE_PATH_SENTINEL
 
 
+def _normalize_runtime_settings(runtime: object) -> str | None:
+    """Normalize settings only when the persisted runtime carries a snapshot."""
+    if not isinstance(runtime, dict):
+        return None
+    snapshot = runtime.get("settings_snapshot")
+    if not isinstance(snapshot, dict):
+        return None
+    return _normalize_settings_snapshot_for_semantic_identity(snapshot)
+
+
+def _bind_environment_settings_hash(env: object, snapshot_hash: str | None) -> None:
+    """Keep environment identity aligned with the normalized runtime snapshot."""
+    if not isinstance(env, dict):
+        return
+    execution = env.get("execution_environment")
+    if not isinstance(execution, dict):
+        return
+    if snapshot_hash is None:
+        execution.pop("settings_snapshot_hash", None)
+    else:
+        execution["settings_snapshot_hash"] = snapshot_hash
+
+
 def normalize_runtime_overrides_for_semantic_identity(
     runtime_overrides: JsonDict,
 ) -> JsonDict:
@@ -50,25 +73,8 @@ def normalize_runtime_overrides_for_semantic_identity(
         if isinstance(layer_overrides, dict):
             _normalize_cached_bronze_surface_for_semantic_identity(layer_overrides)
 
-    normalized_settings_hash: str | None = None
-    runtime_overrides_payload = normalized.get("runtime")
-    if isinstance(runtime_overrides_payload, dict):
-        settings_snapshot = runtime_overrides_payload.get("settings_snapshot")
-        if isinstance(settings_snapshot, dict):
-            normalized_settings_hash = (
-                _normalize_settings_snapshot_for_semantic_identity(settings_snapshot)
-            )
-
-    env_overrides = normalized.get("env")
-    if isinstance(env_overrides, dict):
-        execution_environment = env_overrides.get("execution_environment")
-        if isinstance(execution_environment, dict):
-            if normalized_settings_hash is not None:
-                execution_environment["settings_snapshot_hash"] = (
-                    normalized_settings_hash
-                )
-            else:
-                execution_environment.pop("settings_snapshot_hash", None)
+    normalized_settings_hash = _normalize_runtime_settings(normalized.get("runtime"))
+    _bind_environment_settings_hash(normalized.get("env"), normalized_settings_hash)
 
     return normalized
 

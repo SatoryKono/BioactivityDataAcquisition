@@ -38,15 +38,15 @@ protocols:
   target_tier: composition_contracts
 - name: HealthServerDependenciesProtocol
   path: src/bioetl/composition/contracts/health.py
-  line: 21
+  line: 22
   target_tier: composition_contracts
 - name: HealthListenerDependenciesProtocol
   path: src/bioetl/composition/contracts/health.py
-  line: 30
+  line: 32
   target_tier: composition_contracts
 - name: BronzeCleanupServiceProtocol
   path: src/bioetl/composition/contracts/health.py
-  line: 42
+  line: 45
   target_tier: composition_contracts
 - name: SupportsDefaultRegistry
   path: src/bioetl/composition/contracts/providers.py
