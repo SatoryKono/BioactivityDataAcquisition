@@ -16,7 +16,7 @@ pytestmark = pytest.mark.integration
 
 def test_failed_runs_uses_one_selected_window_evaluation() -> None:
     """The stat must not reduce a rolling 15-minute series into a six-hour claim."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 205)
     (target,) = panel["targets"]
     assert target["instant"] is True
@@ -36,7 +36,7 @@ def test_failed_runs_uses_one_selected_window_evaluation() -> None:
     contract = next(
         item
         for item in contracts["targets"]
-        if item["dashboard_uid"] == "bioetl-runtime" and item["panel_id"] == 205
+        if item["dashboard_uid"] == "bioetl-incident-v1" and item["panel_id"] == 205
     )
     assert contract["empty_state"] == "coverage_gap"
     assert contract["documents_valid_empty"] is False
@@ -45,7 +45,7 @@ def test_failed_runs_uses_one_selected_window_evaluation() -> None:
 
 def test_failed_runs_promtool_cases_execute_the_shipped_expression() -> None:
     """Keep engine-level expected values tied to the shipped query, including resets."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 205)
     expression = panel["targets"][0]["expr"]
     expression = expression.replace("$pipeline", "chembl_assay")

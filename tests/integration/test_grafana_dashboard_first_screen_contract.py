@@ -126,7 +126,7 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
         "`bioetl_provider_current_status`",
         "`bioetl_dq_current_status`",
         "Selected-range count/rate/trend",
-        "Provider Health first screen uses current-status gauges only; range evidence is collapsed (epic #6572)",
+        "Provider Evidence uses the selected Run ID on Overview",
         "Layout grammar by dashboard role",
         "Visibility tiers and collapse policy",
         "L0 answer-first hub",
@@ -142,25 +142,23 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
 
 
 def test_primary_dashboards_expose_common_context_header_panels() -> None:
-    """Selected-run workspaces retain an explicit compact scope and verdict."""
-    for name, scope_id in [
-        ("bioetl-control-plane-v1.json", 9400),
-        ("bioetl-dq-v2.json", 9400),
-        ("bioetl-overview-v2.json", 99),
-    ]:
-        dashboard = load_dashboard(_DASHBOARD_DIR / name)
+    specs = {
+        "bioetl-control-plane-v1.json": (9400, 9422),
+        "bioetl-overview-v2.json": (99, 9604),
+        "bioetl-dq-v2.json": (9400,),
+        "bioetl-incident-v1.json": (9400, 9401),
+    }
+    for filename, ids in specs.items():
+        dashboard = load_dashboard(_DASHBOARD_DIR / filename)
         panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
-        scope = panels[scope_id]
-        assert scope["gridPos"]["y"] <= 4
-        assert scope["gridPos"]["h"] <= 4
-        assert "SELECTED RUN" in str(scope).upper()
-    dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-control-plane-v1.json")
-    verdict = next(p for p in dashboard["panels"] if p["id"] == 9422)
-    assert verdict["gridPos"]["w"] == 9
-    assert verdict["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
-    assert {"SELECT RUN", "QUERY ERROR"} <= set(
-        verdict["description"].split("; ")
-    ) or all(s in verdict["description"] for s in ["SELECT RUN", "QUERY ERROR"])
+        for pid in ids:
+            panel = panels[pid]
+            assert panel["gridPos"]["y"] == 2
+            assert panel["gridPos"]["h"] == 3
+        if filename == "bioetl-control-plane-v1.json":
+            assert panels[9422]["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+            assert "SELECT RUN" in panels[9422]["description"]
+            assert "QUERY ERROR" in panels[9422]["description"]
 
 
 def test_current_status_recording_rules_are_canonicalized() -> None:
@@ -198,35 +196,37 @@ def test_current_status_recording_rules_are_canonicalized() -> None:
         )
 
 
-def test_selected_run_first_screens_use_saved_status() -> None:
-    """Retired CURRENT workspaces resolve to Overview; selected-run verdicts remain saved."""
-    assert not (_DASHBOARD_DIR / "bioetl-runtime.json").exists()
-    assert not (_DASHBOARD_DIR / "bioetl-provider-health-v2.json").exists()
-    for name, pid, source in [
-        ("bioetl-overview-v2.json", 9002, "selected-run-status"),
-        ("bioetl-dq-v2.json", 9406, "selected-run-status"),
-    ]:
-        panels = {
-            p["id"]: p
-            for p in get_dashboard_panels(load_dashboard(_DASHBOARD_DIR / name))
-        }
-        status = panels[pid]
-        assert status["gridPos"]["y"] < FIRST_WINDOW_Y
-        assert "run_id=${run_id}" in str(status["targets"])
-        assert source in str(status["targets"])
-        assert "SELECTED RUN" in status["description"]
-        assert not any("expr" in t for t in status["targets"])
+def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> None:
+    incident = load_dashboard(_DASHBOARD_DIR / "bioetl-incident-v1.json")
+    current = next(p for p in get_dashboard_panels(incident) if p["id"] == 9401)
+    assert "bioetl_workflow_scope_priority_by_input" in current["targets"][0]["expr"]
+    assert "Run ID does not filter" in current["description"]
+    for filename, pid in (
+        ("bioetl-overview-v2.json", 9002),
+        ("bioetl-dq-v2.json", 9406),
+    ):
+        dashboard = load_dashboard(_DASHBOARD_DIR / filename)
+        panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == pid)
+        assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
+        assert all(
+            "selected-run-status?" in t["url"] and "run_id=${run_id}" in t["url"]
+            for t in panel["targets"]
+        )
+        assert all("expr" not in t for t in panel["targets"])
+    overview = load_dashboard(_DASHBOARD_DIR / "bioetl-overview-v2.json")
+    assert {9480, 9481}.issubset({p["id"] for p in overview["panels"]})
 
 
-def test_dual_status_twins_are_removed_from_overview_and_dq() -> None:
-    for name, banned in [
-        ("bioetl-overview-v2.json", "Runtime Status"),
-        ("bioetl-dq-v2.json", "Monitor Current DQ Status"),
-    ]:
-        panels = get_dashboard_panels(load_dashboard(_DASHBOARD_DIR / name))
-        assert banned not in {p.get("title") for p in panels}
-        assert any(p["id"] == (9603 if "overview" in name else 9406) for p in panels)
+def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
     assert not (_DASHBOARD_DIR / "bioetl-runtime.json").exists()
+    dq = load_dashboard(_DASHBOARD_DIR / "bioetl-dq-v2.json")
+    panels = {p["id"]: p for p in get_dashboard_panels(dq)}
+    assert 9406 in panels and 9401 not in panels
+    assert "Monitor Current DQ Status" not in {p["title"] for p in panels.values()}
+    overview = load_dashboard(_DASHBOARD_DIR / "bioetl-overview-v2.json")
+    # The headline reuses the same assessment rather than another independent status query.
+    panels = {p["id"]: p for p in get_dashboard_panels(overview)}
+    assert panels[9604]["targets"] == panels[9603]["targets"]
 
 
 def test_overview_and_control_plane_first_screens_use_role_appropriate_queries() -> (
@@ -281,6 +281,7 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
         "bioetl-incident-v1.json": [
             "Review Runtime Blockers",
         ],
+        "bioetl-overview-v2.json": [],
         "bioetl-dq-v2.json": [],
     }
 
@@ -329,14 +330,9 @@ def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
         assert panel is not None, (
             f"{dashboard_name} must expose required trust marker {panel_title!r}"
         )
-        rows = [
-            p
-            for p in dashboard["panels"]
-            if p.get("type") == "row" and panel in p.get("panels", [])
-        ]
-        assert len(rows) == 1 and rows[0]["id"] == 8808
-        assert rows[0]["collapsed"] is True
-        assert "CURRENT" in panel["description"]
+        fleet_row = next(row for row in dashboard["panels"] if row.get("id") == 8808)
+        assert fleet_row["collapsed"] is True
+        assert panel["id"] in {p["id"] for p in get_dashboard_panels(fleet_row)}
         assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
             "UNKNOWN"
         )
@@ -405,77 +401,39 @@ def test_control_plane_exact_readiness_shares_selected_run_row() -> None:
     assert selected_run["w"] + exact_readiness["w"] == 24
 
 
-def test_saved_provider_and_dq_evidence_stays_in_collapsed_rows() -> None:
-    overview = load_dashboard(_DASHBOARD_DIR / "bioetl-overview-v2.json")
-    row = next(p for p in overview["panels"] if p["id"] == 9483)
-    assert row["collapsed"] is True
-    assert {9480, 9481, 9482, 9460} == {p["id"] for p in row["panels"]}
-    for panel in row["panels"]:
-        assert "SELECTED RUN" in panel["description"]
-        assert "run_id=" in str(panel["targets"])
-        assert not any("expr" in t for t in panel["targets"])
-    dq = load_dashboard(_DASHBOARD_DIR / "bioetl-dq-v2.json")
-    rows = [p for p in dq["panels"] if p.get("type") == "row"]
-    assert rows and all(p["collapsed"] is True for p in rows)
+def test_provider_and_dq_range_evidence_panels_are_below_first_screen() -> None:
+    assert not (_DASHBOARD_DIR / "bioetl-provider-health-v2.json").exists()
+    incident = load_dashboard(_DASHBOARD_DIR / "bioetl-incident-v1.json")
+    row = next(p for p in incident["panels"] if p["id"] == 8808)
+    assert row["collapsed"] and row["gridPos"]["y"] >= FIRST_WINDOW_Y
+    ids = {p["id"] for p in get_dashboard_panels(row)}
+    assert {111, 205, 9101, 9102, 9996, 9997}.issubset(ids)
+    for filename in ("bioetl-overview-v2.json", "bioetl-dq-v2.json"):
+        dashboard = load_dashboard(_DASHBOARD_DIR / filename)
+        first = [
+            p
+            for p in dashboard["panels"]
+            if p["type"] != "row" and p["gridPos"]["y"] < FIRST_WINDOW_Y
+        ]
+        assert first
+        assert all("expr" not in t for p in first for t in p.get("targets", []))
 
 
 def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
-    """Text/CTA first-screen panels should expose machine-readable operator guidance."""
-    expectations = {
-        "bioetl-overview-v2.json": {
-            "Inspect Scope & Evidence": {
-                "tokens": ("selected run", "unknown"),
-                "max_y": 12,
-            },
-        },
-        "bioetl-dq-v2.json": {
-            "Understand Evidence Scope": {
-                "tokens": ("selected run", "time-range"),
-                "max_y": 4,
-            },
-        },
+    specs = {
+        "bioetl-control-plane-v1.json": (9400, "SELECTED RUN"),
+        "bioetl-overview-v2.json": (99, "SELECTED RUN"),
+        "bioetl-dq-v2.json": (9400, "SELECTED RUN"),
+        "bioetl-incident-v1.json": (9400, "CURRENT"),
     }
-
-    for dashboard_name, panel_expectations in expectations.items():
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-
-        def _operator_title(panel: dict) -> str:
-            title = str(panel.get("title") or "").strip()
-            if title:
-                return title
-            options = panel.get("options") or {}
-            return str(options.get("bioetlDisplayTitle") or "").strip()
-
-        panels_by_title = {
-            _operator_title(panel): panel
-            for panel in get_dashboard_panels(dashboard)
-            if _operator_title(panel)
-        }
-        panels_by_id = {
-            panel.get("id"): panel
-            for panel in get_dashboard_panels(dashboard)
-            if panel.get("id") is not None
-        }
-        for panel_title, spec in panel_expectations.items():
-            panel = (
-                panels_by_id.get(spec["panel_id"])
-                if spec.get("panel_id") is not None
-                else panels_by_title.get(panel_title)
-            )
-            assert panel is not None, (
-                f"{dashboard_name} missing first-screen guidance panel {panel_title!r}"
-            )
-            assert panel.get("gridPos", {}).get("y", 999) <= spec["max_y"], (
-                f"{dashboard_name}:{panel_title} must stay on the first screen"
-            )
-            description = str(panel.get("description", "")).lower()
-            assert description, (
-                f"{dashboard_name}:{panel_title} must define machine-readable description text"
-            )
-            for token in spec["tokens"]:
-                assert token in description, (
-                    f"{dashboard_name}:{panel_title} description must mention {token!r}"
-                )
+    for filename, (pid, badge) in specs.items():
+        dashboard = load_dashboard(_DASHBOARD_DIR / filename)
+        panel = next(p for p in dashboard["panels"] if p["id"] == pid)
+        assert badge in panel["description"]
+        content = panel["options"]["content"]
+        assert badge in content or (badge == "SELECTED RUN" and "${run_id}" in content)
+        assert panel["gridPos"]["y"] <= 4
+        assert "overflow:hidden" not in panel["options"]["content"]
 
 
 def test_navigation_bus_panels_document_handoff_policy() -> None:
@@ -537,14 +495,13 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
 
 
 def test_current_status_headlines_use_instant_queries() -> None:
-    """The Incident CURRENT headline cannot lastNotNull a selected range."""
-    panels = get_dashboard_panels(
-        load_dashboard(_DASHBOARD_DIR / "bioetl-incident-v1.json")
-    )
-    headline = next(p for p in panels if p["id"] == 9401)
-    instants = [t.get("instant") for t in headline["targets"] if "expr" in t]
-    assert instants and all(flag is True for flag in instants)
-    assert all("$__range" not in t["expr"] for t in headline["targets"] if "expr" in t)
+    dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-incident-v1.json")
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    for pid in (9401, 18940):
+        panel = panels[pid]
+        assert panel["targets"]
+        assert all(t.get("instant") is True for t in panel["targets"])
+        assert all("$__range" not in t["expr"] for t in panel["targets"])
 
 
 def test_run_explorer_shows_ten_rows_and_only_the_browse_surface() -> None:

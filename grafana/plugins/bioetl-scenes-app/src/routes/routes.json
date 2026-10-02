@@ -7,29 +7,29 @@
     {
       "slug": "operations-home",
       "title": "Operations Home",
-      "subtitle": "Fleet verdict, impact and first safe action.",
+      "subtitle": "Saved verdict, domain assessment and first evidence action.",
       "dominantLocalization": "subsystem",
       "decisionObjects": ["Context Bar", "Verdict Strip", "Status Matrix", "Action Rail"],
       "compatibilityUids": ["bioetl-overview-v2"],
-      "primaryPanelIds": [214, 9002, 215]
+      "primaryPanelIds": [9604, 9002, 9300]
     },
     {
       "slug": "pipeline-flow",
       "title": "Pipeline Flow",
-      "subtitle": "Blocker and stage localization for the selected scope.",
+      "subtitle": "Fleet and range blockers in collapsed Incident diagnostics.",
       "dominantLocalization": "pipeline-stage",
       "decisionObjects": ["Context Bar", "Verdict Strip", "Evidence Confidence", "Status Matrix", "Action Rail"],
-      "compatibilityUids": ["bioetl-runtime"],
+      "compatibilityUids": ["bioetl-incident-v1"],
       "primaryPanelIds": [9101, 9102, 9105, 9991]
     },
     {
       "slug": "dependency-health",
       "title": "Dependency Health",
-      "subtitle": "Provider-global degradation, freshness and causes.",
+      "subtitle": "Saved provider checks for the selected run; not live provider health.",
       "dominantLocalization": "provider",
       "decisionObjects": ["Context Bar", "Verdict Strip", "Evidence Confidence", "Status Matrix", "Action Rail"],
-      "compatibilityUids": ["bioetl-provider-health-v2"],
-      "primaryPanelIds": [9101, 9102, 9103, 9104]
+      "compatibilityUids": ["bioetl-overview-v2"],
+      "primaryPanelIds": [9480, 9481]
     },
     {
       "slug": "incident-console",
@@ -43,20 +43,20 @@
     {
       "slug": "data-trust-recovery",
       "title": "Data Trust & Recovery",
-      "subtitle": "Trust and DQ remain separate evidence tabs and compatibility UIDs.",
+      "subtitle": "Saved replay checks and DQ accounting remain distinct evidence.",
       "dominantLocalization": "recovery-gate",
       "decisionObjects": ["Context Bar", "Verdict Strip", "Evidence Confidence", "Status Matrix", "Action Rail"],
       "compatibilityUids": ["bioetl-control-plane-v1", "bioetl-dq-v2"],
-      "primaryPanelIds": [906, 139, 8, 101]
+      "primaryPanelIds": [9422, 9423, 9403]
     },
     {
       "slug": "run-explorer",
       "title": "Run Explorer",
-      "subtitle": "Exact-run identity, accounting and recorded failure evidence.",
+      "subtitle": "Latest ten saved runs with exact-run evidence actions.",
       "dominantLocalization": "run",
       "decisionObjects": ["Context Bar", "Verdict Strip", "Evidence Confidence", "Status Matrix", "Action Rail"],
       "compatibilityUids": ["bioetl-run-explorer-v1"],
-      "primaryPanelIds": [3010, 3011, 3014, 3023]
+      "primaryPanelIds": [3010]
     }
   ]
 }

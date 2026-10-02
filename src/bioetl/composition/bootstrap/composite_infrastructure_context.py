@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Callable
 
 from bioetl.domain.ports import (
     ClockPort,
     LockPort,
     LoggerPort,
     MetricsPort,
+    PipelineControlPlaneArtifacts,
     TracingPort,
 )
 from bioetl.infrastructure.config.settings_api import Settings
@@ -28,6 +30,10 @@ class CompositeInfrastructureContext:
     storage: CompositeRuntimeStorageProtocol
     lock: LockPort
     clock: ClockPort | None = None
+    storage_for_manifest: (
+        Callable[[PipelineControlPlaneArtifacts], CompositeRuntimeStorageProtocol]
+        | None
+    ) = None
 
 
 __all__ = ["CompositeInfrastructureContext", "CompositeRuntimeStorageProtocol"]

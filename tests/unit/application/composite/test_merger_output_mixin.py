@@ -179,3 +179,28 @@ class TestWriteMergedGold:
             await mixin._write_merged_gold(df)
 
         mixin._storage.write_gold_merged.assert_not_called()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("fail_io", [False, True])
+async def test_composite_gold_validation_evidence_does_not_mask_io_failure(fail_io):
+    from bioetl.application.services.run_reports.observations import (
+        bind_run_observations,
+        reset_run_observations,
+        run_observations,
+    )
+
+    mixin = _make_mixin(_gold_schema=object())
+    token = bind_run_observations()
+    try:
+        if fail_io:
+            mixin._storage.write_gold_merged.side_effect = OSError("disk unavailable")
+            with pytest.raises(OSError):
+                await mixin._write_merged_gold(pl.DataFrame({"id": [1]}))
+            assert "Data Validation" not in run_observations()
+        else:
+            await mixin._write_merged_gold(pl.DataFrame({"id": [1]}))
+            assert run_observations()["Data Validation"]["verdict"] == "OK"
+            assert run_observations()["Data Validation"]["facts"]["records"] == 1
+    finally:
+        reset_run_observations(token)

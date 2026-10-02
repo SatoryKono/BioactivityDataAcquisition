@@ -31,11 +31,10 @@ def apply_replay_layout(payload: dict) -> None:
         ),
     )
     checks["options"].pop("sortBy", None)
-    checks["options"]["footer"] = {"show": False, "enablePagination": True}
     evidence = place(9408, 0, 18, 24, 10)
     evidence["title"] = "Review Replay Evidence"
     evidence["description"] = (
-        "SELECTED RUN · All identity anchors, missing first. Presence is not verification. "
+        "SELECTED RUN · All identity anchors, missing first. Presence is not verification. VALID EMPTY means the successful response contains no anchors. "
         "Exact Replay Checks determines readiness. Inspect a value to copy it in full. "
         "No rows is not a pass; missing evidence is UNKNOWN and failed requests are QUERY ERROR."
     )
@@ -70,9 +69,6 @@ def apply_replay_layout(payload: dict) -> None:
             },
         },
     ]
-    evidence["description"] += (
-        " VALID EMPTY means no saved replay evidence rows; QUERY ERROR means the request failed."
-    )
     evidence["fieldConfig"] = {
         "defaults": {
             "noValue": "UNKNOWN",
@@ -128,7 +124,15 @@ def apply_replay_layout(payload: dict) -> None:
     note = " Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run."
     if note not in verdict["description"]:
         verdict["description"] += note
-    trust = place(9418, 0, 28, 24, 4)
+    trust = place(9418, 0, 28, 24, 5)
+    trust["fieldConfig"]["defaults"]["links"] = [
+        {
+            "title": "Open Run Explorer",
+            "url": "/d/bioetl-run-explorer-v1/run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+            "includeVars": False,
+            "targetBlank": False,
+        }
+    ]
     trust["options"]["cellHeight"] = "sm"
     trust["options"]["footer"] = {"show": False, "enablePagination": False}
 
@@ -150,11 +154,8 @@ def apply_replay_layout(payload: dict) -> None:
         place(9400, 0, 2, 15, 3),
         verdict,
         checks,
-        row(
-            9430,
-            "Inspect Replay / Trust / Manifest / Lineage / Retention",
-            18,
-            (9408, 9418, 9414, 9415, 9416),
-        ),
-        row(9431, "Inspect Resume / Checkpoint", 19, (9413, 9406)),
+        evidence,
+        trust,
+        row(9430, "Inspect Manifest / Lineage / Retention", 33, (9414, 9415, 9416)),
+        row(9431, "Inspect Resume / Checkpoint", 34, (9413, 9406)),
     ]

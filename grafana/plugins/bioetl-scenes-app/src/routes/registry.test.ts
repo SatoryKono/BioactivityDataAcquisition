@@ -18,4 +18,14 @@ describe('workspace route registry', () => {
     const route = WORKSPACE_ROUTES.find((candidate) => candidate.slug === 'data-trust-recovery');
     expect(route?.compatibilityUids).toEqual(['bioetl-control-plane-v1', 'bioetl-dq-v2']);
   });
+  it('maps the six routes only to the five approved current JSON UIDs', () => {
+    const uids = [...new Set(WORKSPACE_ROUTES.flatMap((route) => [...route.compatibilityUids]))].sort();
+    expect(uids).toEqual([
+      'bioetl-control-plane-v1',
+      'bioetl-dq-v2',
+      'bioetl-incident-v1',
+      'bioetl-overview-v2',
+      'bioetl-run-explorer-v1',
+    ]);
+  });
 });

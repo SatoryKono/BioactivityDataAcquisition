@@ -129,7 +129,7 @@ def _detail_fields(panel: dict, fields: list[str]) -> None:
             )
     panel["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"] = True
     panel["fieldConfig"]["defaults"]["custom"]["minWidth"] = 50
-    panel["options"]["cellHeight"] = "lg"
+    panel["options"]["cellHeight"] = "sm" if panel["gridPos"]["h"] <= 6 else "lg"
     panel["options"]["footer"]["enablePagination"] = True
 
 

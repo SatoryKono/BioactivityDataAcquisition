@@ -6,10 +6,33 @@ def apply_overview_identity(payload: dict) -> None:
     panels = payload["panels"]
     panels[:] = [panel for panel in panels if panel.get("id") not in {9301, 9399, 9390}]
     by_id = {panel["id"]: panel for panel in panels}
-    by_id[9002]["gridPos"].update(x=0, y=5, w=15, h=12)
+    by_id[9002]["gridPos"].update(x=0, y=5, w=15, h=13)
     by_id[9603]["gridPos"].update(x=15, y=5, w=9, h=5)
     identity = next(p for p in panels if p.get("id") == 9300)
-    identity["gridPos"].update(x=15, y=10, w=9, h=7)
+    identity["gridPos"].update(x=15, y=10, w=9, h=8)
+    for pid in (9002, 9603):
+        by_id[pid]["options"]["cellHeight"] = "sm"
+    # Fixed status widths must fit the existing 200% CSS budget; Reason stays flexible.
+    for override in by_id[9603]["fieldConfig"]["overrides"]:
+        field = override["matcher"].get("options")
+        if field in {"Status", "Result", "Trust"}:
+            override["properties"] = [
+                prop for prop in override["properties"] if prop["id"] != "custom.width"
+            ]
+            if field in {"Result", "Trust"}:
+                override["properties"].append({"id": "custom.width", "value": 80})
+    # Provider evidence is now local. Keep the three domain actions discoverable
+    # without forwarding legacy provider selectors that Overview does not own.
+    links = by_id[9002]["fieldConfig"]["defaults"].setdefault("links", [])
+    links[:] = [link for link in links if link.get("title") != "Open Provider Evidence"]
+    links.append(
+        {
+            "title": "Open Provider Evidence",
+            "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9480&${__url_time_range}",
+            "includeVars": False,
+            "targetBlank": False,
+        }
+    )
     target = identity["targets"][0]
     target.update(
         url="/ops/observability/selected-run-status?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&workflow=${workflow:csv}",
@@ -72,16 +95,17 @@ def apply_overview_identity(payload: dict) -> None:
             }
         ],
     }
+    # The fixed five-parameter projection retains every identity value.
     identity["transformations"] = [
+        {"id": "limit", "options": {"limitField": 5}},
         {
             "id": "organize",
             "options": {
                 "indexByName": {"parameter": 0, "value": 1},
                 "renameByName": {"parameter": "Parameter", "value": "Value"},
             },
-        }
+        },
     ]
-    identity["transformations"].append({"id": "limit", "options": {"limitField": 5}})
 
 
 def apply_saved_evidence_readability(payload: dict) -> None:

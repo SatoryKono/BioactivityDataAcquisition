@@ -50,9 +50,9 @@ async def test_inactive_uniprot_tombstone_is_explicitly_filtered(method):
 )
 def test_active_or_unknown_records_are_not_silently_filtered(entry_type):
     transformer = instantiate_test_transformer(UniProtProteinTransformer)
-    transformer._reject_inactive_record(
-        {"entryType": entry_type, "annotationScore": 0.0}
-    )
+    record = {"entryType": entry_type, "annotationScore": 0.0}
+    transformer._reject_inactive_record(record)
+    assert record == {"entryType": entry_type, "annotationScore": 0.0}
 
 
 @pytest.mark.parametrize(

@@ -3,11 +3,10 @@ source: grafana/dashboards/*.json
 epic: '#6570'
 phase: '#6574'
 mode: error
-calibration_note: '2026-08-07 Phase 2 (#6574): first-screen mega-expr diet â€” DQ
-  reasons and Overview domain tracks moved under collapsed progressive-disclosure
-  rows; timeseries maxDataPoints/interval capped; budget tightened toward â‰¤200 char
-  first-screen expressions and â‰¤6 first-load PromQL (worst board). first_screen_y_max
-  is the PromQL/HTTP selection window (FIRST_LOAD_Y_MAX), not the visual fold (see
+calibration_note: '2026-08-07 Phase 2 (#6574): first-screen mega-expr diet â€” DQ reasons and Overview
+  domain tracks moved under collapsed progressive-disclosure rows; timeseries maxDataPoints/interval capped;
+  budget tightened toward â‰¤200 char first-screen expressions and â‰¤6 first-load PromQL (worst board).
+  first_screen_y_max is the PromQL/HTTP selection window (FIRST_LOAD_Y_MAX), not the visual fold (see
   layout-budgets.yaml:first_window_y).'
 first_screen_y_max: 28
 budgets:

@@ -38,6 +38,11 @@ if __package__ in {None, ""}:
         sys.path.insert(0, root_str)
 DASH_DIR = ROOT / "grafana" / "dashboards"
 CUSTOM_WIDTH = "custom.width"
+HTTP_EVIDENCE_STATES = (
+    "VALID EMPTY means an empty successful response; it does not replace "
+    "UNKNOWN for missing required evidence. Backend failure renders as "
+    "QUERY ERROR and must not be interpreted as an empty successful response."
+)
 
 # Full portfolio bus (order is normative).
 BUS: list[dict[str, str]] = [
@@ -246,9 +251,8 @@ _PRESERVE_SCOPE_TOOLTIP = "Preserves selected scope and time range."
 
 NAV_DESCRIPTION = (
     "Sanitizer-compatible navigation bus with native keyboard focus. "
-    "Shared navigation: Run Explorer / Replay Readiness / Run Overview / "
-    "Incident Workspace. Data Quality is a contextual drilldown; saved provider "
-    "evidence is owned by Run Overview. "
+    "Shared link-only bus: Run Explorer / Replay Readiness / Run Overview / "
+    "Incident Workspace. Data Quality is a contextual detail destination. "
     "Current workspace is a non-interactive chip (aria-disabled + data-current=page, "
     "underlined) so active state is not color-only. Handoffs open same-tab, "
     "preserve current time range, and document scope reset or context mapping "
@@ -343,7 +347,7 @@ def render_html(*, current_uid: str) -> str:
         f'style="{CONTAINER_STYLE}">',
     ]
     for item in BUS:
-        if item["uid"] in _NAV_HIDDEN_UIDS and item["uid"] != current_uid:
+        if item["uid"] in _NAV_HIDDEN_UIDS:
             continue
         parts.append(_chip_html(item, current_uid=current_uid, source_uid=current_uid))
     parts.append("</div>")
@@ -372,6 +376,25 @@ def render_links(*, current_uid: str) -> list[dict[str, Any]]:
             }
         )
     return links
+
+
+def _document_required_http_evidence(payload: dict[str, Any]) -> None:
+    """Distinguish absent required run evidence from a successful empty listing."""
+    required_panels = {
+        "bioetl-control-plane-v1": {9406, 9408, 9413, 9414, 9418, 9422},
+        "bioetl-dq-v2": {9403, 9460},
+        "bioetl-incident-v1": {9460, 9463},
+        "bioetl-overview-v2": {9300, 9460, 9482},
+    }.get(payload.get("uid"), set())
+    explanation = (
+        " Empty is a coverage gap: required saved evidence is missing, not a pass. "
+        "Request failure is QUERY ERROR."
+    )
+    for panel in _walk_panels(payload.get("panels", [])):
+        if panel.get("id") in required_panels:
+            description = str(panel.get("description", ""))
+            if explanation not in description:
+                panel["description"] = description + explanation
 
 
 def _walk_panels(panels: list[object]) -> list[dict[str, Any]]:
@@ -1895,7 +1918,6 @@ def _stamp_nav_panel(nav: dict[str, Any], panels: list[object]) -> None:
 
 
 def _attach_nav_bus(nav: dict[str, Any], *, current_uid: str) -> None:
-    nav["description"] = NAV_DESCRIPTION
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,
@@ -2080,8 +2102,10 @@ def _stamp_runtime_fleet_panel(panel: dict[str, Any]) -> None:
     if panel.get("id") == 18940:
         panel["title"] = "Monitor Pipeline Status"
         panel["description"] = (
-            "CURRENT · Pipeline / Run Type readiness. Mapping: 0=OK, 1=WARN, "
-            "2=CRIT, 3/null=UNKNOWN. This is not the selected Run ID verdict."
+            "CURRENT · Worst domain priority in the selected workflow/pipeline/run-type "
+            "scope. Mapping: 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT; null is UNKNOWN. "
+            "Run ID does not filter this card. A workflow-wide failure does not "
+            "prove that this pipeline or the selected run failed."
         )
     if panel_id == 9102 and "evidence confidence" not in description.lower():
         panel["description"] = (
@@ -2440,6 +2464,11 @@ def apply_to_dashboard(
         _stash_trust_range_panels(payload)
     elif current_uid == "bioetl-incident-v1":
         _attach_runtime_fleet_row(payload)
+        for panel in _walk_panels(payload.get("panels", [])):
+            for target in panel.get("targets", []):
+                expression = target.get("expr")
+                if isinstance(expression, str):
+                    target["expr"] = expression.replace("$provider_hint", "$provider")
     # Remove generated details before earlier layout passes measure bottom rows.
     payload["panels"] = [
         panel for panel in payload.get("panels", []) if panel.get("id") != 9450
@@ -2579,105 +2608,143 @@ def apply_to_dashboard(
             pending.extend(children)
     if current_uid == "bioetl-overview-v2":
         payload["panels"] = [p for p in payload["panels"] if p.get("id") != 9450]
+        # Preserve DASH-COPY-003 action verbs on saved-evidence surfaces.
+        titles = {
+            9002: "Review Run Domains",
+            9603: "Review Selected Run Status",
+            9300: "Review Run Identity",
+            9604: "Review Overall Verdict",
+            9480: "Review Provider Evidence",
+            9481: "Review Provider Check",
+            9482: "Review Data Quality",
+        }
+        for panel in payload["panels"]:
+            if panel.get("id") in titles:
+                panel["title"] = titles[panel["id"]]
+        payload["description"] = (
+            "SELECTED RUN. Run ID is always selected. The first screen shows saved "
+            "status, domain verdicts and full identity for that run. Provider evidence "
+            "and stage accounting follow below the fold. CURRENT fleet panels, First "
+            "Action, and TIME RANGE history are not on Overview. run_id is HTTP "
+            "context only and is never a Prometheus label."
+        )
     if current_uid == "bioetl-control-plane-v1":
         from scripts.ops.observability.grafana._replay_layout import apply_replay_layout
 
         apply_replay_layout(payload)
-    if current_uid == "bioetl-overview-v2":
-        detail_ids = {9480, 9481, 9460, 9482}
-        details = [
-            panel for panel in payload["panels"] if panel.get("id") in detail_ids
-        ]
-        payload["panels"] = [
-            panel
-            for panel in payload["panels"]
-            if panel.get("id") not in detail_ids | {9483}
-        ]
-        payload["panels"].append(
-            {
-                "id": 9483,
-                "type": "row",
-                "title": "Inspect Saved Provider / Stage / Data Quality Evidence",
-                "collapsed": True,
-                "gridPos": {"x": 0, "y": 17, "w": 24, "h": 1},
-                "panels": details,
-            }
-        )
-        names = {
-            9603: "Review Selected Run Status",
-            9604: "Review Overall Verdict",
-            9300: "Review Run Identity",
-            9480: "Inspect Provider Evidence",
-            9481: "Review Provider Check",
-            9482: "Review Data Quality",
-        }
-        for panel in _walk_panels(payload["panels"]):
-            if panel.get("id") in names:
-                panel["title"] = names[panel["id"]]
-            if panel.get("id") == 9481:
-                panel["gridPos"].update(w=8, h=3)
-            if panel.get("id") == 9002:
-                panel["options"]["cellHeight"] = "sm"
-            if panel.get("id") == 9603:
-                for override in panel["fieldConfig"]["overrides"]:
-                    override["properties"] = [
-                        prop
-                        for prop in override["properties"]
-                        if prop.get("id") != "custom.width"
-                    ]
-    if current_uid == "bioetl-dq-v2":
-        for panel in _walk_panels(payload["panels"]):
-            if panel.get("id") == 9403:
-                panel["options"]["footer"]["enablePagination"] = True
-                for override in panel["fieldConfig"]["overrides"]:
-                    override["properties"] = [
-                        prop
-                        for prop in override["properties"]
-                        if prop.get("id") != "custom.width"
-                    ]
+    from scripts.ops.observability.grafana._provider_evidence_columns import (
+        apply_dq_accounting_layout,
+    )
+
+    apply_dq_accounting_layout(payload)
+    scope_ids = {
+        "bioetl-overview-v2": 99,
+        "bioetl-control-plane-v1": 9400,
+        "bioetl-dq-v2": 9400,
+        "bioetl-incident-v1": 9400,
+        "bioetl-run-explorer-v1": 1,
+    }
+    for panel in payload.get("panels", []):
+        if panel.get("id") == scope_ids.get(payload.get("uid")):
+            content = panel.get("options", {}).get("content", "")
+            if "white-space:normal" not in content:
+                content = content.replace('style="', 'style="white-space:normal;', 1)
+            if "max-width:96ch" not in content:
+                content = content.replace("max-width:100%", "max-width:96ch")
+                content = content.replace('style="', 'style="max-width:96ch;', 1)
+            panel["options"]["content"] = content
     if current_uid == "bioetl-incident-v1":
-        variables = payload["templating"]["list"]
+        variables = payload.setdefault("templating", {}).setdefault("list", [])
         if not any(v.get("name") == "read_latency_quantile" for v in variables):
-            variables.append(
-                {
-                    "name": "read_latency_quantile",
-                    "label": "Read latency",
-                    "type": "custom",
-                    "query": "p50 : 0.5,p95 : 0.95,p99 : 0.99",
-                    "description": "Histogram quantile for global read latency; p95 by default.",
-                    "current": {"text": "p95", "value": "0.95", "selected": True},
-                    "options": [
-                        {"text": label, "value": value, "selected": value == "0.95"}
-                        for label, value in [
-                            ("p50", "0.5"),
-                            ("p95", "0.95"),
-                            ("p99", "0.99"),
-                        ]
-                    ],
-                    "includeAll": False,
-                    "multi": False,
-                    "hide": 0,
-                }
+            control = json.loads(
+                (DASH_DIR / "bioetl-control-plane-v1.json").read_text(encoding="utf-8")
             )
-        for panel in _walk_panels(payload["panels"]):
-            description = str(panel.get("description") or "")
-            if description.startswith("GLOBAL · ") and not description.startswith(
-                ("GLOBAL · CURRENT", "GLOBAL · TIME RANGE")
+            variables.append(
+                next(
+                    v
+                    for v in control["templating"]["list"]
+                    if v["name"] == "read_latency_quantile"
+                )
+            )
+        for panel in _walk_panels(payload.get("panels", [])):
+            for target in panel.get("targets", []):
+                if isinstance(target.get("expr"), str):
+                    target["expr"] = target["expr"].replace(
+                        "$provider_hint", "$provider"
+                    )
+    # Compact tables keep the same row height as first-window summaries.
+    for panel in _walk_panels(payload.get("panels", [])):
+        if panel.get("type") == "table" and (
+            panel.get("gridPos", {}).get("h", 0) <= 6
+            or not (
+                panel.get("options", {}).get("footer", {}).get("enablePagination")
+                is True
+                and panel.get("fieldConfig", {})
+                .get("defaults", {})
+                .get("custom", {})
+                .get("cellOptions", {})
+                .get("wrapText")
+                is True
+            )
+        ):
+            panel.setdefault("options", {})["cellHeight"] = "sm"
+    # Provider Health retirement changes the target variable ownership contract.
+    pending_links = [payload]
+    while pending_links:
+        value = pending_links.pop()
+        if isinstance(value, dict):
+            url = value.get("url")
+            if isinstance(url, str) and url.startswith("/d/bioetl-overview-v2/"):
+                value["url"] = re.sub(
+                    r"&var-(?:provider|pipeline_context|adapter)=[^&#]*", "", url
+                )
+                value["url"] = re.sub(
+                    r"&\$\{(?:provider|pipeline_context|adapter):queryparam\}",
+                    "",
+                    value["url"],
+                )
+                if "Provider Evidence" in str(value.get("title", "")):
+                    if "viewPanel=" not in value["url"]:
+                        value["url"] += "&viewPanel=9480"
+                    value["tooltip"] = (
+                        "Saved Provider Evidence for the selected Run ID. CURRENT provider alert conditions remain in Incident Workspace and do not prove this saved verdict."
+                    )
+            if (
+                isinstance(value.get("url"), str)
+                and current_uid == "bioetl-incident-v1"
+                and value["url"].startswith("/d/bioetl-dq-v2/")
             ):
-                targets = panel.get("targets") or []
-                temporal = (
-                    "CURRENT"
-                    if targets
-                    and all(target.get("instant") is True for target in targets)
-                    else "TIME RANGE"
+                value["url"] = value["url"].replace(
+                    "${stage:queryparam}", "var-stage=$__all"
                 )
-                panel["description"] = description.replace(
-                    "GLOBAL · ", f"GLOBAL · {temporal} · ", 1
-                )
-            if panel.get("id") == 9102 and "GLOBAL" not in description:
-                panel["description"] = "GLOBAL · " + description
-    # Late evidence appenders must obey the same retired-UID and selector policy.
-    finalize_dashboard_links(payload)
+            pending_links.extend(value.values())
+        elif isinstance(value, list):
+            pending_links.extend(value)
+    # Match the shared table baseline even when a specialized builder replaces defaults.
+    pending = list(payload["panels"])
+    while pending:
+        panel = pending.pop()
+        pending.extend(panel.get("panels", []))
+        description = panel.get("description", "")
+        if "Handoff: Provider Health" in description:
+            panel["description"] = description.replace(
+                "Handoff: Provider Health",
+                "Handoff: CURRENT provider signals in Pipeline fleet and range on this page; "
+                "saved Provider Evidence is in Run Overview.",
+            )
+        if panel.get("type") == "table":
+            panel.setdefault("fieldConfig", {}).setdefault("defaults", {}).setdefault(
+                "custom", {}
+            ).setdefault("minWidth", 50)
+        if any(
+            target.get("url", "").startswith(("/ops/", "/health/"))
+            for target in panel.get("targets", [])
+        ):
+            http_states = HTTP_EVIDENCE_STATES
+            description = panel.get("description", "").rstrip()
+            if http_states not in description:
+                panel["description"] = f"{description} {http_states}".strip()
+    _document_required_http_evidence(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

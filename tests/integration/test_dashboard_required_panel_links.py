@@ -23,20 +23,20 @@ pytestmark = pytest.mark.integration
 
 
 def test_overview_dashboard_required_panel_links():
-    """Selected-run domains retain CP/DQ/provider actions after retirement."""
+    """bioetl-overview-v2: Check required panel links by panel ID."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panels = {p.get("id"): p for p in get_dashboard_panels(dashboard)}
-    assert 9603 in panels and 9002 in panels and 9480 in panels
-    links = panels[9002]["fieldConfig"]["defaults"]["links"]
+
+    # Live alert/first-action cards are no longer selected-run evidence.
+    assert 214 not in panels and 215 not in panels
+    links = panels[9002]["links"]
     assert {link["title"] for link in links} == {
         "Open Control Plane",
         "Open Data Quality",
         "Open Provider Evidence",
     }
-    assert all(link["includeVars"] is False for link in links)
-    assert not ({214, 215} & set(panels)), (
-        "Retired CURRENT fleet cards must stay absent"
-    )
+    assert all("${run_id:queryparam}" in link["url"] for link in links)
+    assert all("${__url_time_range}" in link["url"] for link in links)
 
 
 def test_dq_dashboard_required_panel_links():
@@ -50,13 +50,18 @@ def test_dq_dashboard_required_panel_links():
     assert any(link.get("title") == "Open Run Explorer" for link in links)
 
 
-def test_retired_workflow_and_runtime_workspaces_stay_absent():
-    """Workflow evidence is reached through saved run evidence, not retired UIDs."""
-    for name in (
-        "bioetl-workflow-overview",
-        "bioetl-runtime",
-        "bioetl-provider-health-v2",
-    ):
-        assert not (Path("grafana/dashboards") / f"{name}.json").exists()
-    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
-    assert any(p["id"] == 9002 for p in get_dashboard_panels(overview))
+def test_workflow_overview_required_panel_links():
+    """bioetl-workflow-overview retired; workflow-band lives on runtime."""
+    from pathlib import Path
+
+    workflow_overview = Path("grafana/dashboards/bioetl-workflow-overview.json")
+    runtime = Path("grafana/dashboards/bioetl-runtime.json")
+    incident = Path("grafana/dashboards/bioetl-incident-v1.json")
+    assert not workflow_overview.exists(), (
+        "bioetl-workflow-overview.json was retired (#6570/#6647); "
+        "workflow-band evidence lives on bioetl-runtime"
+    )
+    assert not runtime.exists()
+    assert incident.is_file()
+    panels = {p["id"]: p for p in get_dashboard_panels(load_dashboard(incident))}
+    assert {9996, 9997, 9701} <= set(panels)

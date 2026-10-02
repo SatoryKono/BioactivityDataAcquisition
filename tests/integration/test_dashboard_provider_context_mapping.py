@@ -22,24 +22,24 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
-def test_provider_context_mapping_preserves_source_values():
-    """Provider evidence is a saved-run handoff after workspace retirement."""
-    from tests.integration._grafana_test_support import get_dashboard_files
-
-    retired = {"bioetl-runtime", "bioetl-provider-health-v2"}
-    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
-    links = _collect_dashboard_links(overview)
-    provider = [link for link in links if link.get("title") == "Open Provider Evidence"]
-    assert provider
-    for link in provider:
-        assert "/d/bioetl-overview-v2/2-overview?" in link["url"]
-        assert "viewPanel=9480" in link["url"]
-        assert "run_id" in link["url"]
-        assert "${__url_time_range}" in link["url"]
-        assert not any(
-            "var-" + name + "=" in link["url"]
-            for name in ("provider", "adapter", "pipeline_context", "stage")
-        )
-    for path in get_dashboard_files():
-        for link in _collect_dashboard_links(load_dashboard(path)):
-            assert not any("/d/" + uid + "/" in str(link.get("url")) for uid in retired)
+@pytest.mark.parametrize(
+    "source", ["bioetl-overview-v2", "bioetl-run-explorer-v1", "bioetl-incident-v1"]
+)
+def test_provider_context_mapping_preserves_source_values(source: str) -> None:
+    """Current Provider Evidence handoffs retain exact identity and own no legacy vars."""
+    dashboard = load_dashboard(Path("grafana/dashboards") / (source + ".json"))
+    links = [
+        link
+        for link in _collect_dashboard_links(dashboard)
+        if link.get("title") in {"Open Provider Evidence", "Provider Evidence"}
+    ]
+    if source != "bioetl-incident-v1":
+        assert links
+    for link in links:
+        url = link["url"]
+        assert url.startswith("/d/bioetl-overview-v2/")
+        assert "var-provider=" not in url and "var-pipeline_context=" not in url
+        assert "var-adapter=" not in url
+        assert "${__url_time_range}" in url
+        assert "run_id" in url and "pipeline" in url
+    assert not Path("grafana/dashboards/bioetl-provider-health-v2.json").exists()

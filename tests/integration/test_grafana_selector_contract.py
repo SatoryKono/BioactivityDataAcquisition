@@ -251,11 +251,11 @@ def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
     for dashboard in dashboards:
         uid = dashboard.get("uid")
         if uid in {
-            "bioetl-runtime",
-            "bioetl-provider-health-v2",
             "bioetl-silver-reject-explorer",
             "bioetl-workflow-overview",
             "bioetl-alerts-slo",
+            "bioetl-runtime",
+            "bioetl-provider-health-v2",
         }:
             # Historical evidence rows only; retired shipping surface.
             continue
@@ -349,12 +349,16 @@ def test_role_local_pipeline_handoffs_have_visible_recovery_paths() -> None:
         navigation.get("options", {}).get("content", "")
     )
 
-    scope = _panel_by_id("bioetl-control-plane-v1.json", 9400)
-    assert "SELECTED RUN" in str(scope).upper()
-    assert "Run ID" in str(scope)
-    verdict = _panel_by_id("bioetl-control-plane-v1.json", 9422)
-    assert "not CURRENT health" in verdict["description"]
-    assert any("viewPanel=9423" in link["url"] for link in verdict["links"])
+    # Recovery uses the exact-run trust table and its scoped Explorer action.
+    panel = _panel_by_id("bioetl-control-plane-v1.json", 9418)
+    links = panel["fieldConfig"]["defaults"]["links"]
+    explorer = next(
+        link for link in links if "/d/bioetl-run-explorer-v1/" in link["url"]
+    )
+    assert "${run_id:queryparam}" in explorer["url"]
+    assert "${pipeline:queryparam}" in explorer["url"]
+    assert "${__url_time_range}" in explorer["url"]
+    assert explorer["includeVars"] is False
 
 
 def test_overview_universe_is_an_exact_runtime_alias() -> None:
@@ -523,14 +527,16 @@ def test_current_dashboards_do_not_ship_future_execution_selectors() -> None:
         )
 
 
-def test_provider_evidence_follows_selected_run_without_retired_selector() -> None:
+def test_provider_health_selector_follows_selected_run() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
-    variables = {v["name"] for v in dashboard["templating"]["list"]}
-    assert not {"provider", "pipeline_context", "adapter"} & variables
-    provider = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9480)
-    assert "run_id=${run_id}" in str(provider["targets"])
-    assert "selected-run-status" in str(provider["targets"])
-    assert not Path("grafana/dashboards/bioetl-provider-health-v2.json").exists()
+    variables = {item["name"]: item for item in dashboard["templating"]["list"]}
+    assert "provider" not in variables
+    panel = _panel_by_id("bioetl-overview-v2.json", 9480)
+    query = panel["targets"][0]["url"]
+    assert query.startswith("/ops/observability/selected-run-status?")
+    assert "pipeline=${pipeline}" in query
+    assert "run_id=${run_id}" in query
+    assert "saved" in panel["description"].lower()
 
 
 def test_http_selector_frames_declare_columns_for_empty_catalogs() -> None:

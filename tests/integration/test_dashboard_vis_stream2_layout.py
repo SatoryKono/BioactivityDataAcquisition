@@ -29,8 +29,7 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 _CONTROL = Path("grafana/dashboards/bioetl-control-plane-v1.json")
-_OVERVIEW = Path("grafana/dashboards/bioetl-overview-v2.json")
-_INCIDENT = Path("grafana/dashboards/bioetl-incident-v1.json")
+_PROVIDER = Path("grafana/dashboards/bioetl-provider-health-v2.json")
 
 
 def _panel(dashboard: dict, panel_id: int) -> dict:
@@ -55,29 +54,44 @@ def _organize(panel: dict) -> dict:
 def test_replay_anchor_tables_hide_internal_columns_and_rename_operator_fields() -> (
     None
 ):
-    panel = _panel(load_dashboard(_CONTROL), 9408)
-    include = panel["transformations"][0]["options"]["include"]["names"]
-    assert include == ["label", "priority", "present", "status", "value_full", "why"]
-    assert not {"copy_mode", "copy_value", "Time"} & set(include)
-    assert _organize(panel)["renameByName"]["label"] == "Parameter"
-    assert panel["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+    dashboard = load_dashboard(_CONTROL)
+    compare = _panel(dashboard, 9406)
+    excluded = _organize(compare)["excludeByName"]
+    assert excluded["copy_mode"] is True
+    assert excluded["copy_value"] is True
+    assert excluded["Time"] is True
+    assert _organize(compare)["renameByName"]["current_value_full"] == "Current"
+    assert _organize(compare)["renameByName"]["checkpoint_value_full"] == "Checkpoint"
+    for pid in (9406, 9408):
+        panel = _panel(dashboard, pid)
+        assert panel["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+        assert panel["options"]["footer"]["enablePagination"] is True
 
 
 def test_identity_values_and_gaps_use_short_values_and_compact_height() -> None:
-    """The collapsed evidence table retains full values and copy access."""
     dashboard = load_dashboard(_CONTROL)
     panel = _panel(dashboard, 9408)
-    row = _panel(dashboard, 9430)
-    assert row["collapsed"] is True and panel in row["panels"]
-    assert panel["gridPos"]["h"] == 9
     assert _organize(panel)["renameByName"]["value_full"] == "Value"
-    assert any("view=copy_values" in link["url"] for link in panel["links"])
-    assert "present ? 1 : 0" in panel["targets"][0]["uql"]
+    value = next(
+        o
+        for o in panel["fieldConfig"]["overrides"]
+        if o["matcher"].get("options") == "Value"
+    )
+    props = {p["id"]: p["value"] for p in value["properties"]}
+    assert (
+        props.get(
+            "custom.inspect", panel["fieldConfig"]["defaults"]["custom"]["inspect"]
+        )
+        is True
+    )
+    assert panel["gridPos"]["w"] == 24
+    assert panel["options"]["footer"]["enablePagination"] is True
+    assert "Presence is not verification" in panel["description"]
 
 
 def test_read_latency_defaults_to_p95_table_legend() -> None:
     """#10248 T4: p95 default, quantile selector, last/max legend table."""
-    dashboard = load_dashboard(_INCIDENT)
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel = _panel(dashboard, 111)
     assert len(panel.get("targets") or []) == 1
     expr = str((panel.get("targets") or [{}])[0].get("expr") or "")
@@ -93,48 +107,42 @@ def test_read_latency_defaults_to_p95_table_legend() -> None:
     )
     assert quantile.get("current", {}).get("value") == "0.95"
     assert str(quantile.get("description") or "").strip()
+    reads = _panel(dashboard, 8806)
+    axis = (
+        (reads.get("fieldConfig") or {})
+        .get("defaults", {})
+        .get("custom", {})
+        .get("axisLabel")
+    )
+    assert "reads / $__interval" in str(axis)
 
 
 def test_provider_severity_column_has_min_width_and_narrower_provider() -> None:
-    """Saved provider observations replace the retired CURRENT severity matrix."""
-    dashboard = load_dashboard(_OVERVIEW)
-    row = _panel(dashboard, 9483)
-    assert row["collapsed"] is True
-    assert {9480, 9481} <= {p["id"] for p in row["panels"]}
-    panel = _panel(dashboard, 9481)
-    assert "provider_checks" in str(panel["targets"])
-    assert "run_id=${run_id}" in str(panel["targets"])
-    values = next(
-        m["options"]
-        for m in panel["fieldConfig"]["defaults"]["mappings"]
-        if m["type"] == "value"
-    )
-    assert values["UNKNOWN"]["color"] == "gray"
-    assert values["ERROR"]["color"] == "red"
-    assert not any("bioetl_provider_current_status" in str(p) for p in row["panels"])
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panel = _panel(dashboard, 9480)
+    assert panel["options"]["cellHeight"] == "sm"
+    assert panel["options"]["footer"]["enablePagination"] is True
+    assert panel["fieldConfig"]["defaults"]["custom"]["minWidth"] >= 50
+    names = _organize(panel)["renameByName"]
+    assert names["provider"] == "Provider"
+    assert names["check_result"] == "Result"
+    assert names["check_performed"] == "Performed"
+    assert panel["gridPos"]["y"] >= 18
+    assert not _PROVIDER.exists()
 
 
 def test_nav_chips_use_eight_px_gap_and_status_stats_stay_compact() -> None:
-    """#10257 C3: nav spacing and compact UNKNOWN on background stats."""
-    for path in (
-        _CONTROL,
-        Path("grafana/dashboards/bioetl-overview-v2.json"),
-        Path("grafana/dashboards/bioetl-dq-v2.json"),
-        Path("grafana/dashboards/bioetl-incident-v1.json"),
-    ):
+    for path in sorted(Path("grafana/dashboards").glob("*.json")):
+        if path.name == "bioetl-run-explorer-v1.json":
+            continue
         dashboard = load_dashboard(path)
         nav = _panel(dashboard, 1000)
-        content = str((nav.get("options") or {}).get("content") or "")
+        content = nav["options"]["content"]
         assert "gap:8px" in content
         assert "padding:0 2px" in content
-        for panel in get_dashboard_panels(dashboard):
-            if panel.get("type") != "stat":
-                continue
-            options = panel.get("options") or {}
-            if options.get("colorMode") != "background":
-                continue
-            text = options.get("text") or {}
-            assert options.get("textMode") in {"value", "value_and_name"}
-            assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
-            assert 20 <= text.get("valueSize", 0) <= 48
-            assert text.get("titleSize", 0) >= 12
+        assert "font-size:16px" in content
+        assert nav["gridPos"]["h"] == 2
+    readiness = _panel(load_dashboard(_CONTROL), 9422)
+    assert readiness["options"]["textMode"] == "value"
+    assert readiness["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert readiness["options"]["text"]["valueSize"] >= 20

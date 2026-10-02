@@ -432,6 +432,11 @@ def get_dashboard_navigation_links(dashboard: dict) -> list[dict]:
     navigation_panels = [
         panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 1000
     ]
+    if dashboard.get("uid") == "bioetl-run-explorer-v1":
+        # The run-selection entry point uses row actions, not the global bus.
+        assert not navigation_panels
+        assert any(p.get("id") == 3010 for p in get_dashboard_panels(dashboard))
+        return []
     assert navigation_panels, "dashboard must define navigation panel id=1000"
     assert len(navigation_panels) == 1, (
         "dashboard must define exactly one navigation panel id=1000"
@@ -567,6 +572,16 @@ def _assert_workflow_context_variable(
     assert workflow_var is not None, (
         f"Dashboard {dashboard_path.name} must define shared 'workflow' context"
     )
+    if dashboard_path.name == "bioetl-run-explorer-v1.json":
+        assert workflow_var["datasource"] == "BioETL Ops HTTP"
+        query = workflow_var["query"]["infinityQuery"]
+        assert query["parser"] == "backend"
+        assert "/ops/control-plane/filter-options" in query["url"]
+        assert "dimension=workflow" in query["url"]
+        assert "response_shape=options" in query["url"]
+        assert workflow_var["multi"] is False
+        assert workflow_var["includeAll"] is True
+        return
     assert "bioetl_workflow_universe" in _query_text(workflow_var), (
         f"Dashboard {dashboard_path.name} 'workflow' query must use workflow universe"
     )

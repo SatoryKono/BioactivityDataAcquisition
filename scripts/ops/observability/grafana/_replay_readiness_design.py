@@ -5,13 +5,7 @@ from copy import deepcopy
 
 def apply_trust_action_display(payload: dict) -> None:
     """Only materialize a linked Action field when a saved reason exists."""
-    pending = list(payload["panels"])
-    by_id = {}
-    while pending:
-        panel = pending.pop()
-        by_id[panel["id"]] = panel
-        pending.extend(panel.get("panels", []))
-    trust = by_id[9418]
+    trust = next(p for p in payload["panels"] if p.get("id") == 9418)
     expression = (
         '[presentation_trust.($base := $sift($, function($v,$k){$k != "trust_reasons_action"}); '
         '$merge([$base, reasons_count > 0 ? {"trust_reasons_action":"View trust reasons"} : '
@@ -72,8 +66,7 @@ def apply_replay_readiness_design(payload: dict) -> None:
         "OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. "
         "UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is "
         "selected; QUERY ERROR means backend unavailable or request failure. "
-        "UNKNOWN means no assessed value, never READY. Open replay checks for basis. "
-        "Saved processing_status and trust_status are separate outcomes, not this exact-replay verdict."
+        "UNKNOWN means no assessed value, never READY. Open replay checks for basis."
     )
     card["options"] = {
         "reduceOptions": {
@@ -110,17 +103,17 @@ def apply_replay_readiness_design(payload: dict) -> None:
             "noValue": "UNKNOWN",
             "mappings": [
                 {
-                    "type": "special",
-                    "options": {
-                        "match": "null",
-                        "result": {"text": "UNKNOWN", "color": "gray"},
-                    },
-                },
-                {
                     "type": "value",
                     "options": {
                         state: {"text": state, "color": color}
                         for state, color in colors.items()
+                    },
+                },
+                {
+                    "type": "special",
+                    "options": {
+                        "match": "null",
+                        "result": {"text": "UNKNOWN", "color": "#555555"},
                     },
                 },
             ],
@@ -142,9 +135,9 @@ def apply_replay_readiness_design(payload: dict) -> None:
     card["links"] = [
         {
             "title": "View replay checks",
+            "includeVars": False,
             "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9423&${__url_time_range}",
             "targetBlank": False,
-            "includeVars": False,
         }
     ]
     if row is None:

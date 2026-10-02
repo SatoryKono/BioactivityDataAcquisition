@@ -15,11 +15,13 @@ import re
 
 import pytest
 import yaml
+from tests.integration._dashboard_layout_budgets import (
+    FIRST_WINDOW_Y,
+    panel_declared_row_cap,
+)
 from tests.integration._grafana_test_support import (
     get_dashboard_files,
     get_dashboard_panels,
-    get_row_child_panels,
-    index_panels_by_base_title,
     load_dashboard,
     panel_display_title,
 )
@@ -98,7 +100,7 @@ def test_dashboard_titles_do_not_expose_fixed_window_suffixes(
 
 def test_runtime_top_fold_text_panels_do_not_overlap() -> None:
     """Runtime first-fold text blocks must keep a readable, non-overlapping layout."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     text_panels = [
         panel
         for panel in dashboard.get("panels", [])
@@ -139,110 +141,52 @@ def test_root_panels_including_rows_do_not_overlap(dashboard_path: Path) -> None
 
 
 def test_runtime_detect_row_stays_below_first_window_tables() -> None:
-    """#9172: row 252 must sit at or below y=16 and remain collapsed."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    detect_row = next(
-        (panel for panel in dashboard.get("panels", []) if panel.get("id") == 252),
-        None,
-    )
-    assert detect_row is not None
-    assert detect_row.get("collapsed") is True
-    assert int((detect_row.get("gridPos") or {}).get("y", -1)) >= 12
-    blockers = next(
-        (panel for panel in dashboard.get("panels", []) if panel.get("id") == 9101),
-        None,
-    )
-    coverage = next(
-        (panel for panel in dashboard.get("panels", []) if panel.get("id") == 9102),
-        None,
-    )
-    assert blockers is not None and coverage is not None
-    _assert_panels_stay_in_grid_without_overlap(
-        [blockers, coverage, detect_row],
-        context="Runtime first-window tables vs Detect row",
+    """Fleet diagnostics remain below the current suspect answer."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    row = next(p for p in dashboard["panels"] if p["id"] == 8808)
+    assert row["collapsed"] is True
+    assert row["gridPos"]["y"] >= FIRST_WINDOW_Y
+    ids = {p["id"] for p in get_dashboard_panels({"panels": row["panels"]})}
+    assert {9101, 9102, 242, 205, 9996, 9997} <= ids
+    assert (
+        next(p for p in dashboard["panels"] if p["id"] == 2010)["gridPos"]["y"]
+        < FIRST_WINDOW_Y
     )
 
 
 def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
-    """Runtime detail guidance stays under the collapsed Detect row group."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    detect_row = next(
-        (panel for panel in dashboard.get("panels", []) if panel.get("id") == 252),
-        None,
-    )
-    assert detect_row is not None, "Runtime dashboard must keep Detect row"
-    assert detect_row.get("collapsed") is True
-    detect_panels = get_row_child_panels(dashboard, "Inspect Detection Signals")
-    detail_panel = next(
-        panel
-        for panel in detect_panels
-        if panel.get("title") == "Inspect Active Runtime Blocker Detail"
-    )
-    assert detail_panel.get("gridPos", {}).get("y", 0) > detect_row.get(
-        "gridPos", {}
-    ).get("y", 0)
-    detect_titles = {
-        panel.get("title")
-        for panel in detect_panels
-        if isinstance(panel.get("title"), str)
-    }
-    assert "Inspect Active Runtime Blocker Detail" in detect_titles
-    _assert_panels_stay_in_grid_without_overlap(
-        detect_panels, context="Runtime Detect disclosure"
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    row = next(p for p in dashboard["panels"] if p["id"] == 8808)
+    detail = next(p for p in row["panels"] if p["id"] == 242)
+    assert row["collapsed"] is True
+    assert detail["title"] == "Inspect Active Runtime Blocker Detail"
+    assert detail["gridPos"]["y"] > row["gridPos"]["y"]
+    assert 242 not in {p["id"] for p in dashboard["panels"]}
 
 
 def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
-    """Runtime First Action stays on first paint; ID/Processed Records stay below triage."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    root_panels = index_panels_by_base_title(
-        [panel for panel in dashboard.get("panels", []) if isinstance(panel, dict)]
-    )
-
-    first_action_grid = root_panels["Understand Pipeline Scope"]["gridPos"]
-    assert first_action_grid["y"] <= 8
-    assert first_action_grid["w"] >= 8
-    context_row = next(
-        panel for panel in dashboard["panels"] if panel.get("id") == 9993
-    )
-    assert context_row.get("collapsed") is True
-    assert context_row["gridPos"]["y"] > first_action_grid["y"]
-    context_titles = {
-        panel_display_title(panel)
-        for panel in get_row_child_panels(dashboard, "Inspect Run Context")
-    }
-    assert {"Inspect Pipeline Identity", "Inspect Processed Records"}.issubset(
-        context_titles
+    """Exact-run identity has one owner on the Overview first screen."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    identity = next(p for p in dashboard["panels"] if p["id"] == 9300)
+    assert identity["gridPos"] == {"x": 15, "y": 10, "w": 9, "h": 8}
+    assert "/ops/observability/selected-run-status?" in identity["targets"][0]["url"]
+    assert "run_id=${run_id}" in identity["targets"][0]["url"]
+    assert (
+        "custom.inspect" in str(identity["fieldConfig"])
+        or identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
     )
 
 
 def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None:
-    """Runtime trust marker stays on first paint; failed-run KPI stays secondary."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    root = {
-        panel.get("title"): panel
-        for panel in dashboard.get("panels", [])
-        if isinstance(panel.get("title"), str)
-    }
-
-    panel = root["Monitor Coverage"]
-    grid = panel.get("gridPos", {})
-    assert grid["y"] <= 23
-    assert grid["w"] >= 4, (
-        "Monitor Coverage must reserve readable width on the first screen"
-    )
-    secondary_row = next(
-        panel for panel in dashboard["panels"] if panel.get("id") == 9992
-    )
-    assert secondary_row.get("collapsed") is True
-    assert secondary_row["gridPos"]["y"] > grid["y"]
-    secondary_titles = {
-        child.get("title")
-        for child in get_row_child_panels(
-            dashboard, "Inspect Secondary Runtime Indicators"
-        )
-    }
-    assert "Monitor Failed Runs" in secondary_titles
+    """Coverage and failed-run counters stay discoverable in fleet disclosure."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    row = next(p for p in dashboard["panels"] if p["id"] == 8808)
+    panels = {p["id"]: p for p in get_dashboard_panels({"panels": row["panels"]})}
+    assert row["collapsed"] is True
+    assert panels[9102]["gridPos"]["w"] >= 4
+    assert panels[9102]["title"] == "Monitor Coverage"
+    assert "bioetl_pipeline_runs_total" in str(panels[205]["targets"])
+    assert panels[9102]["gridPos"]["y"] > row["gridPos"]["y"]
 
 
 def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> (
@@ -262,68 +206,36 @@ def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping
 
 
 def test_control_plane_row_sequence_matches_operator_flow() -> None:
-    """Collapsed Control Plane diagnostics preserve the operator flow order."""
+    """Replay diagnostics separate persisted provenance from resume validation."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    row_panels = [
-        panel for panel in dashboard.get("panels", []) if panel.get("type") == "row"
+    rows = [p for p in dashboard["panels"] if p["type"] == "row"]
+    assert [(p["id"], p["title"]) for p in rows] == [
+        (9430, "Inspect Manifest / Lineage / Retention"),
+        (9431, "Inspect Resume / Checkpoint"),
     ]
-    row_pairs = [
-        (panel.get("id"), panel.get("title"))
-        for panel in sorted(
-            row_panels, key=lambda panel: panel.get("gridPos", {}).get("y", 0)
-        )
-    ]
-    expected_prefix = [
-        (9419, "Review Lineage Validation"),
-        (902, "Inspect Checkpoint and Replay Checks"),
-        (901, "Inspect Manifest Validation"),
-        (905, "Inspect Run Identity Evidence"),
-    ]
-    assert row_pairs[: len(expected_prefix)] == expected_prefix, (
-        f"Control Plane row order/title drifted: {row_pairs}"
-    )
-    assert any(panel_id == 9412 for panel_id, _ in row_pairs), (
-        f"Control Plane must keep collapsed Run context row: {row_pairs}"
-    )
-    assert all(panel.get("collapsed") is True for panel in row_panels)
-    assert all(panel.get("panels") for panel in row_panels)
+    assert all(p["collapsed"] is True and p["panels"] for p in rows)
+    assert [p["id"] for p in rows[0]["panels"]] == [9414, 9415, 9416]
+    assert [p["id"] for p in rows[1]["panels"]] == [9413, 9406]
 
 
 def test_control_plane_named_review_surfaces_are_findable() -> None:
-    """Operator-named Review* surfaces must not hide inside a differently named row."""
+    """Exact readiness is first-window; provenance is explicitly disclosed below."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    root = {
-        panel.get("id"): panel
-        for panel in dashboard.get("panels", [])
-        if isinstance(panel, dict)
-    }
-    trust = root[9418]
-    retention = root[9416]
-    lineage_row = root[9419]
-    assert trust.get("title") == "Review Selected-Run Trust"
-    assert retention.get("title") == "Review Retention Compliance"
-    assert lineage_row.get("title") == "Review Lineage Validation"
-    assert lineage_row.get("type") == "row"
-    assert lineage_row.get("collapsed") is True
-    assert trust.get("gridPos", {}).get("y", 99) < 18
-    assert retention.get("gridPos", {}).get("y", 99) < 18
-    assert lineage_row.get("gridPos", {}).get("y") == 14
-    child_ids = [child.get("id") for child in lineage_row.get("panels") or []]
-    assert 9415 in child_ids
-    lineage = next(
-        child for child in lineage_row.get("panels") or [] if child.get("id") == 9415
-    )
-    assert lineage.get("title") == "Review Lineage Validation"
-    assert 904 not in root
-    assert 9416 not in child_ids
-    assert 9418 not in child_ids
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    assert panels[9422]["title"] == "Review Exact Replay Readiness"
+    assert panels[9422]["gridPos"]["y"] < 18
+    assert panels[9418]["title"] == "Review Selected-Run Trust"
+    assert panels[9416]["title"] == "Review Retention Compliance"
+    assert panels[9415]["title"] == "Review Lineage Validation"
+    assert {9414, 9415, 9416} <= {p["id"] for p in panels[9430]["panels"]}
+    assert panels[9430]["collapsed"] is True
 
 
 def test_retention_panel_9416_retry_preserves_selected_run_and_time() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panel = next(
         item
-        for item in dashboard.get("panels", [])
+        for item in get_dashboard_panels(dashboard)
         if isinstance(item, dict) and item.get("id") == 9416
     )
     target = panel["targets"][0]
@@ -338,82 +250,40 @@ def test_retention_panel_9416_retry_preserves_selected_run_and_time() -> None:
 
 
 def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:
-    """Selected-range blocker evidence stays close to the replay drilldown row."""
+    """The readiness verdict and all exact checks precede the first-window fold."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title")
-    }
-    panel = panels.get("Track Replay Blockers")
-    assert panel is not None
-    row_panel = panels["Inspect Checkpoint and Replay Checks"]
-    grid_pos = panel.get("gridPos", {})
-    assert grid_pos.get("y") > row_panel.get("gridPos", {}).get("y", 0)
-    assert grid_pos.get("w", 0) == 8
-    assert grid_pos.get("h", 0) == 3
+    panels = {p["id"]: p for p in dashboard["panels"]}
+    answer, checks = panels[9422], panels[9423]
+    assert checks["type"] == "table"
+    assert checks["gridPos"]["y"] == answer["gridPos"]["y"] + answer["gridPos"]["h"]
+    assert checks["gridPos"]["y"] + checks["gridPos"]["h"] <= 18
+    assert checks["gridPos"]["w"] == 24
 
 
 def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
-    """Long first-screen title cards must keep enough width to avoid avoidable truncation risk."""
+    """Replay verdict and exact-checks titles retain readable first-window width."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panels = {
-        panel_display_title(panel): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel_display_title(panel)
-    }
-
-    for panel_title in (
-        "Monitor Ledger",
-        "Monitor Telemetry",
-        "Inspect Scope & Evidence",
-    ):
-        panel = panels.get(panel_title)
-        assert panel is not None
-        grid_pos = panel.get("gridPos", {})
-        assert grid_pos.get("w", 0) >= 5, (
-            f"{panel_title} needs extra width for stable title/text rendering"
-        )
+    panels = {p["id"]: p for p in dashboard["panels"]}
+    for pid in (9400, 9422, 9423):
+        assert panels[pid]["gridPos"]["w"] >= 5
 
 
 def test_control_plane_trust_panels_follow_reference_widths() -> None:
-    """Trust top band preserves scalar area; evidence tables use full width."""
+    """First-window verdict shares a row with scope; exact checks use full width."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panels = index_panels_by_base_title(get_dashboard_panels(dashboard))
-
-    scope = panels["Inspect Scope & Evidence"]["gridPos"]
-    readiness = panels["Monitor Readiness"]["gridPos"]
-    run_summary = panels["Review Run Summary"]["gridPos"]
-    processed = panels["Review Processed Records"]["gridPos"]
-    telemetry = panels["Monitor Telemetry"]["gridPos"]
-
-    assert scope == {"x": 0, "y": 2, "w": 18, "h": 3}
-    assert readiness == {"x": 18, "y": 2, "w": 6, "h": 3}
-    assert readiness["w"] == telemetry["w"]
-    assert run_summary["w"] == 24
-    assert processed["w"] == 24
-    assert telemetry["w"] == 6
-    assert run_summary["x"] == 0
-    assert processed["x"] == 0
-    assert telemetry["x"] == 18
-
-    quarter_width = 24 // 4
-    quarter_panels = [
-        panels["Monitor Replay"]["gridPos"],
-        panels["Track Checkpoint"]["gridPos"],
-        panels["Monitor Ledger"]["gridPos"],
-    ]
-    assert [grid["w"] for grid in quarter_panels] == [quarter_width] * 3
-    assert [grid["x"] for grid in quarter_panels] == [
-        0,
-        quarter_width,
-        2 * quarter_width,
-    ]
+    panels = {p["id"]: p for p in dashboard["panels"]}
+    scope, verdict, checks = (panels[pid]["gridPos"] for pid in (9400, 9422, 9423))
+    assert scope == {"x": 0, "y": 2, "w": 15, "h": 3}
+    assert verdict == {"x": 15, "y": 2, "w": 9, "h": 3}
+    assert checks == {"x": 0, "y": 5, "w": 24, "h": 13}
+    _assert_panels_stay_in_grid_without_overlap(
+        [panels[9400], panels[9422], panels[9423]], context="Replay first-window"
+    )
 
 
 def test_control_plane_terminal_events_table_has_readable_width() -> None:
     """Terminal event evidence table should keep enough width for practical status visibility."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -426,102 +296,43 @@ def test_control_plane_terminal_events_table_has_readable_width() -> None:
 
 
 def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
-    """Manifest evidence must use packed, non-overlapping disclosure bands."""
+    """Persisted manifest, lineage and retention use full-width disclosure tables."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    row = next(
-        panel
-        for panel in dashboard.get("panels", [])
-        if panel.get("title") == "Inspect Manifest Validation"
-    )
-    assert row.get("collapsed") is True
-    child_panels = get_row_child_panels(dashboard, "Inspect Manifest Validation")
-    panels = {panel.get("title"): panel for panel in child_panels if panel.get("title")}
-    terminal = panels["Review Observed Terminal Counters"]
-    terminal_grid = terminal.get("gridPos", {})
-    assert terminal_grid.get("h") == 4
-    assert terminal_grid.get("w") == 24
-    assert terminal_grid.get("x") == 0
-    assert terminal_grid.get("y", 0) > row.get("gridPos", {}).get("y", 0)
-    failure_panels = [
-        panels["Track Manifest Failures"],
-        panels["Track Ledger Failures"],
-        panels["Monitor Manifest (30m)"],
-        panels["Monitor Ledger (30m)"],
-    ]
-    assert {panel.get("gridPos", {}).get("w") for panel in failure_panels} == {8}
-    assert {panel.get("gridPos", {}).get("h") for panel in failure_panels} == {3}
-    assert {panel.get("gridPos", {}).get("y") for panel in failure_panels} == {
-        terminal_grid["y"] + terminal_grid["h"],
-        terminal_grid["y"] + terminal_grid["h"] + 3,
-    }
-    assert {panel.get("gridPos", {}).get("x") for panel in failure_panels} == {
-        0,
-        8,
-    }
+    row = next(p for p in dashboard["panels"] if p["id"] == 9430)
+    assert row["collapsed"] is True
+    assert {p["id"] for p in row["panels"]} == {9414, 9415, 9416}
+    for p in row["panels"]:
+        assert p["gridPos"]["x"] == 0 and p["gridPos"]["w"] == 24
+        assert p["gridPos"]["y"] > row["gridPos"]["y"]
+        assert p["gridPos"]["h"] >= 4
     _assert_panels_stay_in_grid_without_overlap(
-        child_panels, context="Control Plane manifest/ledger disclosure"
+        row["panels"], context="Replay provenance"
     )
 
 
 def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> None:
-    """Replay-safety disclosure must pack evidence into non-overlapping bands."""
+    """Resume and checkpoint evidence remain accessible without overlapping rows."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    row_panel = next(
-        panel
-        for panel in dashboard.get("panels", [])
-        if panel.get("type") == "row"
-        and panel.get("title") == "Inspect Checkpoint and Replay Checks"
-    )
-    assert row_panel.get("collapsed") is True
-    child_panels = get_row_child_panels(
-        dashboard, "Inspect Checkpoint and Replay Checks"
-    )
-    panels = {panel.get("id"): panel for panel in child_panels}
-
-    known_blind_spots = panels[894]
-    blind_spots_grid = known_blind_spots.get("gridPos", {})
-    assert blind_spots_grid.get("x") == 0
-    assert blind_spots_grid.get("w") == 24
-    row_y = row_panel.get("gridPos", {}).get("y", 0)
-    assert blind_spots_grid.get("y") == row_y + 1
-
-    blocker_grid = panels[130].get("gridPos", {})
-    assert blocker_grid.get("x") == 0
-    assert blocker_grid.get("w") == 8
-    assert blocker_grid.get("h") == 3
-    assert blocker_grid.get("y") == blind_spots_grid.get("y") + blind_spots_grid.get(
-        "h"
-    )
-    for index, ids in enumerate(((130, 3, 104), (120, 101, 102), (103, 121))):
-        band = [panels[panel_id]["gridPos"] for panel_id in ids]
-        assert {grid["y"] for grid in band} == {blocker_grid["y"] + index * 3}
-        assert {grid["w"] for grid in band} == {8}
-        assert {grid["h"] for grid in band} == {3}
-        assert {grid["x"] for grid in band} == {i * 8 for i in range(len(ids))}
+    row = next(p for p in dashboard["panels"] if p["id"] == 9431)
+    assert row["collapsed"] is True
+    assert {p["id"] for p in row["panels"]} == {9413, 9406}
+    for p in row["panels"]:
+        assert p["gridPos"]["x"] == 0 and p["gridPos"]["w"] == 24
+        assert p["gridPos"]["y"] > row["gridPos"]["y"]
+        assert p["gridPos"]["h"] >= 4
     _assert_panels_stay_in_grid_without_overlap(
-        child_panels, context="Control Plane replay-safety disclosure"
+        row["panels"], context="Resume/checkpoint"
     )
 
 
 def test_control_plane_lineage_top_band_uses_full_row_width() -> None:
-    """Audit/lineage top singleton should fill the row instead of leaving avoidable dead space."""
+    """Selected-run lineage belongs to the persisted provenance disclosure."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    row_panel = next(
-        panel
-        for panel in dashboard.get("panels", [])
-        if panel.get("type") == "row"
-        and panel.get("title") == "Inspect Audit & Lineage Evidence"
-    )
-    panels = {
-        panel.get("id"): panel
-        for panel in get_row_child_panels(dashboard, "Inspect Audit & Lineage Evidence")
-    }
-    panel = panels[122]
-    grid_pos = panel.get("gridPos", {})
-    assert grid_pos.get("x") == 0
-    assert grid_pos.get("y", 0) > row_panel.get("gridPos", {}).get("y", 0)
-    assert grid_pos.get("w") == 8
-    assert grid_pos.get("h") == 3
+    row = next(p for p in dashboard["panels"] if p["id"] == 9430)
+    panel = next(p for p in row["panels"] if p["id"] == 9415)
+    assert panel["gridPos"]["w"] == 24 and panel["gridPos"]["x"] == 0
+    assert panel["gridPos"]["y"] > row["gridPos"]["y"]
+    assert "run_id=${run_id}" in panel["targets"][0]["url"]
 
 
 def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
@@ -558,7 +369,7 @@ def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
 
 def test_runtime_alert_condition_breakdown_panels_exist() -> None:
     """Runtime must expose localization panels in addition to summary cards."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     expected = {
         "Track Stage Backlog Trend": "bioetl_stage_backlog_records",
         "Review Errors by Stage & Code": "bioetl_errors_total",
@@ -581,7 +392,7 @@ def test_runtime_alert_condition_breakdown_panels_exist() -> None:
         assert required_metric in expr
 
 
-@pytest.mark.parametrize("dashboard_file", ["bioetl-control-plane-v1.json"])
+@pytest.mark.parametrize("dashboard_file", ["bioetl-incident-v1.json"])
 def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
     """Control-plane replay diagnostics must keep reconstructability, drift, and lag separate."""
     dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
@@ -603,7 +414,7 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
     assert "bioetl_replay_lag_seconds" not in reconstruct_expr
 
     drift = panels.get("Replay Drift Events")
-    if dashboard_file == "bioetl-control-plane-v1.json":
+    if dashboard_file == "bioetl-incident-v1.json":
         drift = panels.get("Track Replay Drift")
     assert drift is not None
     drift_expr = "\n".join(
@@ -626,7 +437,7 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
 
 def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
     """Control-plane trust-state panels must not mask missing telemetry as zero."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -648,7 +459,7 @@ def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
         assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
             "UNKNOWN"
         )
-        assert panel.get("options", {}).get("colorMode") == "background"
+        assert panel.get("options", {}).get("colorMode") == "value"
 
         value_mapping = next(
             (
@@ -670,7 +481,7 @@ def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
 
 def test_control_plane_run_type_noop_panels_disclose_scope_limit() -> None:
     """Panels backed by metric families without run_type must disclose that the selector is a no-op."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     expected_titles = (
         "Track Incompatibilities",
         "Track Unreconstructable",
@@ -703,7 +514,7 @@ def test_control_plane_run_type_noop_panels_disclose_scope_limit() -> None:
 
 def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
     """Control-plane must expose terminal ledger evidence and missing telemetry risk."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -734,49 +545,25 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
 
 
 def test_control_plane_bounded_failure_rows_preserve_unknown_evidence() -> None:
-    """Bounded failure rows must expose status/reason instead of healthy-looking zeros."""
+    """Exact replay checks preserve error rows and do not replace absence with zero."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panel = next(
-        panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 9417
-    )
-
-    assert panel.get("type") == "table"
-    assert panel.get("options", {}).get("showHeader") is True
-    target = panel.get("targets", [])[0]
-    assert target.get("root_selector") == "rows"
-    assert target.get("url", "").startswith("/ops/control-plane/failure-reasons?")
-
-    description = str(panel.get("description", "")).lower()
-    assert (
-        "every category row carries bounded status and reason evidence" in description
-    )
-    assert "unknown backend verdict must remain visible" in description
-    assert "must not look like a healthy zero" in description
-
-    visible_columns = {
-        override.get("matcher", {}).get("options")
-        for override in panel.get("fieldConfig", {}).get("overrides", [])
-    }
-    assert {"count", "status", "reason"}.issubset(visible_columns)
-    count_override = next(
-        override
-        for override in panel.get("fieldConfig", {}).get("overrides", [])
-        if override.get("matcher", {}).get("options") == "count"
-    )
-    count_properties = {
-        property_.get("id"): property_.get("value")
-        for property_ in count_override.get("properties", [])
-    }
-    assert count_properties.get("noValue") == "UNKNOWN"
-    no_value = str(
-        panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-    ).lower()
-    assert "backend unavailable must not be treated as zero failures" in no_value
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9423)
+    assert panel["type"] == "table"
+    assert panel["options"]["showHeader"] is True
+    assert panel["options"]["footer"]["enablePagination"] is True
+    target = panel["targets"][0]
+    assert target["parser"] == "uql"
+    assert "replay_checks" in target["uql"]
+    assert "run_id=${run_id}" in target["url"]
+    assert "/ops/observability/selected-run-status?" in target["url"]
+    assert "QUERY ERROR" in panel["description"]
+    assert "unknown" in panel["description"].lower()
+    assert not any(t.get("id") == "limit" for t in panel.get("transformations", []))
 
 
 def test_control_plane_first_screen_normalizes_workflow_pipeline_aliases() -> None:
     """Trust first-screen cards use thin pipeline selectors (#6574; no mega-expr glue)."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -804,7 +591,7 @@ def test_control_plane_first_screen_normalizes_workflow_pipeline_aliases() -> No
 
 def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
     """Manifest/ledger ratio panels should project >10% into CRIT severity."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -899,33 +686,17 @@ def test_dashboard_default_time_and_refresh_policy_by_uid_class() -> None:
 
 
 def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
-    """Provider detail telemetry ships under progressive disclosure."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    panels = get_dashboard_panels(dashboard)
-    detail_row = next(
-        (
-            panel
-            for panel in panels
-            if panel.get("type") == "row"
-            and panel.get("title") == "Selected Provider Details"
-        ),
-        None,
-    )
-    assert detail_row is not None
-    assert detail_row.get("collapsed") is True
-
-    child_panels = get_row_child_panels(dashboard, "Selected Provider Details")
-    child_titles = {
-        panel.get("title")
-        for panel in child_panels
-        if isinstance(panel.get("title"), str)
-    }
-    assert "Inspect Health p95" in child_titles
-    assert detail_row.get("gridPos", {}).get("y", 0) < min(
-        int(panel.get("gridPos", {}).get("y", 0)) for panel in child_panels
-    )
+    """Current provider suspects are disclosed separately from saved run evidence."""
+    incident = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    row = next(p for p in incident["panels"] if p["id"] == 2099)
+    assert row["collapsed"] is True
+    provider = next(p for p in row["panels"] if p["id"] == 2003)
+    assert provider["gridPos"]["y"] > row["gridPos"]["y"]
+    assert "bioetl_provider_current_cause" in str(provider["targets"])
+    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    saved = next(p for p in overview["panels"] if p["id"] == 9480)
+    assert "run_id=${run_id}" in str(saved["targets"])
+    assert "expr" not in saved["targets"][0]
 
 
 def test_short_table_panels_use_compact_cell_height() -> None:
@@ -999,7 +770,7 @@ def test_all_table_panels_use_uniform_cell_height() -> None:
                 ):
                     assert paginated is False
                 else:
-                    assert paginated
+                    assert paginated or panel_declared_row_cap(panel) is not None
                 assert custom.get("minWidth") == 50
     assert tables
 
@@ -1108,19 +879,17 @@ def test_table_panels_fill_panel_width() -> None:
 
 
 def test_dq_score_chart_keeps_readable_height_with_semantic_legend() -> None:
-    """The score chart identifies the measured series and retains drawing room.
-
-    Issue #8530: DQ panel 153 Track Volume-Weighted DQ Score.
-    """
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panel = next(
-        (item for item in get_dashboard_panels(dashboard) if item.get("id") == 153),
-        None,
-    )
-    assert panel is not None, "DQ panel 153 must exist"
-    assert panel.get("type") == "timeseries"
-    assert panel.get("gridPos", {}).get("h") == 6
-    assert panel.get("options", {}).get("legend", {}).get("showLegend") is True
+    """Run quality uses saved accounting; no range chart implies run success."""
+    dq = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    assert 153 not in {p["id"] for p in get_dashboard_panels(dq)}
+    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    quality = next(p for p in overview["panels"] if p["id"] == 9482)
+    assert quality["type"] == "canvas"
+    assert quality["gridPos"]["h"] == 6
+    assert "run_id=${run_id:percentencode}" in quality["targets"][0]["url"]
+    assert "UNKNOWN" in quality["description"]
+    assert "historical run overrides" in quality["description"]
+    assert "quarantined" in quality["description"].lower()
 
 
 def test_dashboard_metadata_policy_invariants() -> None:

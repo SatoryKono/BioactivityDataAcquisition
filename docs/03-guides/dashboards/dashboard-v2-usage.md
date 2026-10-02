@@ -1,13 +1,5 @@
 ______________________________________________________________________
 
-> Portfolio update (2026-10-01): Pipeline Diagnostics (`bioetl-runtime`) is retired.
-> No panels were transferred as part of its removal. The active set is Run Explorer,
-> Replay Readiness, Run Overview, Provider Health, Data Quality, and Incident Workspace.
-> Use Run Overview for saved-run evidence, Data Quality for record counts, and
-> Incident Workspace for current/range telemetry. References to Pipeline Diagnostics
-> in older scenario descriptions below are historical and are not active routes.
-
-
 Version: 1.5.0
 Status: active
 Class: published
@@ -20,6 +12,39 @@ Reviewers:
 ______________________________________________________________________
 
 # BioETL Dashboards v2: Usage
+
+## Current operator path — approved cutover 2026-10-02
+
+The shipped portfolio contains **five dashboards**, with the ownership and
+navigation contract in [the dashboard index](README.md) and
+[ADR-053](../../02-architecture/decisions/ADR-053-optional-grafana-scenes-app-shell.md).
+
+1. Browse the latest ten saved runs in Run Explorer and select the full Run ID.
+2. Open Run Overview for the saved verdict, domain assessment, identity and
+   Provider Evidence (panel 9480). Saved provider checks do not prove live health.
+3. Open Replay Readiness for the selected run's replay checks; UNKNOWN is not a pass.
+4. Open Data Quality for saved stage count in/count out/percentage. Missing
+   denominators are N/A; skipped stages are omitted; recorded zeros are retained.
+5. Use Incident Workspace for CURRENT incidents, GLOBAL alerts and collapsed
+   fleet/range workflow diagnostics. This telemetry is not exact-run evidence.
+
+The four visible navigation chips are Run Explorer, Replay Readiness, Run
+Overview and `6. Incident Workspace`; Data Quality has contextual entry links.
+Run Explorer uses row actions instead of navigation panel 1000. Other nav panels
+have height 2 and 16px wrapping text, including at 1024px. Standalone
+`bioetl-runtime` and `bioetl-provider-health-v2` are retired. Provider routes use
+Overview panel 9480; runtime diagnostics use Incident row 8808.
+
+The optional Scenes adapter remains read-only and opt-in. See
+[Optional Scenes dual path](scenes-dual-path.md). Static tests validate the
+shipped contract; they do not establish deployed/browser acceptance.
+
+## Historical operator scenarios (before the cutover)
+
+The remainder preserves earlier recipes and evidence references for audit history.
+Its seven-board routing, retired UIDs, panel layouts and selector propagation
+are superseded by the current operator path above. These historical instructions
+must not be used as current provisioning or navigation requirements.
 
 > **Current stable shipped operator guide** for the seven-board portfolio (`grafana/dashboards/*.json`). Draft v3 specs live under `v3.0/` and are non-shipping.
 

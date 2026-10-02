@@ -50,38 +50,33 @@ def test_shipped_dashboards_do_not_handoff_to_silver_reject_explorer() -> None:
 
 
 def test_dq_v2_exposes_current_silver_reject_evidence_panels() -> None:
-    """Live DQ reject evidence uses the post-retitle panel names."""
     dashboard = load_dashboard(_DQ)
-    titles = {panel.get("title") for panel in get_dashboard_panels(dashboard)}
-    required = {
-        "Monitor Silver Filter Rejects",
-        "Monitor Silver Reject Mismatch",
-        "Inspect Top Silver Reject Reasons",
-        "Inspect Top Silver Reject Fields",
-        "Inspect Silver Rejects by Pipeline",
-    }
-    missing = sorted(required - titles)
-    assert missing == [], f"DQ v2 missing silver-reject evidence panels: {missing}"
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9403)
+    target = panel["targets"][0]
+    assert "/ops/observability/processed-records?" in target["url"]
+    assert "run_id=${run_id}" in target["url"]
+    stage_input = next(t for t in panel["targets"] if t["refId"] == "StageInput")
+    for outcome in (
+        "silver_filtered_out_records",
+        "silver_quarantined_records",
+        "silver_deduplicated_records",
+    ):
+        assert outcome in stage_input["uql"]
+    assert all("expr" not in t for t in panel["targets"])
+    assert panel["gridPos"]["h"] == 14
+    assert not any(t["id"] == "limit" for t in panel["transformations"])
 
 
 def test_dq_v2_silver_reject_mismatch_is_background_stat() -> None:
-    """Accounting mismatch remains a high-visibility monitor."""
     dashboard = load_dashboard(_DQ)
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Silver Reject Mismatch"
-        ),
-        None,
+    assert not any(
+        p["title"] == "Monitor Silver Reject Mismatch"
+        for p in get_dashboard_panels(dashboard)
     )
-    assert panel is not None
-    assert panel.get("type") == "stat"
-    assert panel.get("options", {}).get("colorMode") in {
-        "background",
-        "backgroundSolid",
-        "value",
-    }
+    # Saved accounting never borrows a current fleet mismatch stat as this run's verdict.
+    status = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9406)
+    assert "run_id=${run_id}" in status["targets"][0]["url"]
+    assert status["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
 
 
 def test_dq_v2_json_is_parseable_and_has_stable_uid() -> None:

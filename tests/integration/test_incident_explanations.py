@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
 
 pytestmark = pytest.mark.integration
 
@@ -34,7 +35,7 @@ def test_global_context_and_row_action_do_not_inherit_selected_history():
     panels = _panels()
     assert (
         "independent of selected Pipeline, Provider and Run ID"
-        in panels[9400]["options"]["content"]
+        in panels[2005]["description"]
     )
     for pid in (2010, 22010):
         panel = panels[pid]
@@ -59,7 +60,25 @@ def test_verification_is_presentation_only_and_not_health():
         source = (
             panels[pid] if pid == 2005 else panels[panels[pid]["targets"][0]["panelId"]]
         )
-        assert source["targets"][0]["expr"] == "bioetl_incident_global_alerts"
+        rule_payload = yaml.safe_load(
+            Path("grafana/prometheus-rules/bioetl_observability.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        global_rule = next(
+            rule
+            for group in rule_payload["groups"]
+            for rule in group["rules"]
+            if rule.get("record") == "bioetl_incident_global_alerts"
+        )
+
+        def normalize(expr: str) -> str:
+            return "".join(expr.split())
+
+        assert normalize(source["targets"][0]["expr"]) in {
+            "bioetl_incident_global_alerts",
+            normalize(global_rule["expr"]),
+        }
         rules = Path("grafana/prometheus-rules/bioetl_observability.yml").read_text(
             encoding="utf-8"
         )

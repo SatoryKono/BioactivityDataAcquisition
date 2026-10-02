@@ -24,10 +24,21 @@ def assert_processed_records_field_overrides(
         for prop in value_overrides[0].get("properties", [])
     }
     assert value_properties["custom.align"] == "right"
-    assert value_properties["custom.width"] == 70
-    assert value_properties["noValue"] == "UNKNOWN"
-    assert value_properties["custom.cellOptions"] == {"type": "color-text"}
-    assert value_properties.get("mappings", []) == []
+    assert value_properties["custom.width"] == 100
+    assert value_properties["noValue"] == "N/A"
+    assert value_properties["custom.cellOptions"] == {
+        "type": "color-text",
+        "wrapText": False,
+    }
+    assert value_properties["mappings"] == [
+        {
+            "type": "value",
+            "options": {
+                "UNKNOWN": {"text": "N/A", "color": "gray"},
+                "No data": {"text": "N/A", "color": "gray"},
+            },
+        }
+    ]
     assert value_properties["color"] == {"mode": "fixed", "fixedColor": "text"}
     assert "thresholds" not in value_properties
     assert "decimals" not in value_properties
@@ -43,9 +54,13 @@ def assert_processed_records_field_overrides(
         for prop in percentage_overrides[0].get("properties", [])
     }
     assert percentage_properties["custom.align"] == "right"
-    assert percentage_properties["noValue"] == "UNKNOWN"
-    assert percentage_properties["custom.cellOptions"] == {"type": "color-text"}
-    assert percentage_properties.get("mappings", []) == []
+    assert percentage_properties["noValue"] == "N/A"
+    assert percentage_properties["custom.cellOptions"] == {
+        "type": "color-text",
+        "wrapText": False,
+    }
+    assert percentage_properties["mappings"] == value_properties["mappings"]
+    assert percentage_properties["displayName"] == "percentage of Bronze"
     assert percentage_properties["color"] == {"mode": "fixed", "fixedColor": "text"}
     assert "thresholds" not in percentage_properties
 
@@ -65,5 +80,6 @@ def assert_processed_records_field_overrides(
     assert row_status_properties["custom.cellOptions"] == {
         "type": "color-text",
         "applyToRow": True,
+        "wrapText": False,
     }
     assert row_status_properties["mappings"] == expected_row_status_mappings

@@ -1,116 +1,50 @@
 version: 1
 source: grafana/dashboards/*.json
 mode: error
-note: Historical CURRENT-card disposition after the approved five-dashboard cutover. Overview owns selected-run
-  status/domains and saved provider evidence; retired cards must remain absent. No layout or panel budget
-  is increased.
+note: Approved five-dashboard cutover 2026-10-02. Incident owns CURRENT/fleet telemetry;
+  Overview and Replay Readiness assess saved Run ID. Numeric layout budgets are unchanged.
 entries:
-- dashboard: bioetl-overview-v2.json
-  id: 214
-  disposition: retire
+- dashboard: bioetl-incident-v1.json
+  id: 9401
+  disposition: keep
   owner: '@bioetl-observability'
   freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
-- dashboard: bioetl-overview-v2.json
-  id: 215
-  disposition: retire
+  reason: CURRENT workflow/domain verdict; never filtered by Run ID.
+- dashboard: bioetl-incident-v1.json
+  id: 18940
+  disposition: collapse
   owner: '@bioetl-observability'
   freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
+  reason: Retained pipeline status in the fleet row; no saved-run claim.
+  collapse_into: bioetl-incident-v1.json:8808
+- dashboard: bioetl-incident-v1.json
+  id: 891
+  disposition: collapse
+  owner: '@bioetl-observability'
+  freshness_slo: 60s
+  reason: CURRENT replay safety telemetry in the fleet row; not exact-run readiness.
+  collapse_into: bioetl-incident-v1.json:8808
 - dashboard: bioetl-overview-v2.json
   id: 9002
   disposition: keep
   owner: '@bioetl-observability'
   freshness_slo: 60s
-  reason: Saved selected-run domain evidence; absence remains UNKNOWN, not CURRENT provider health.
+  reason: Saved domain assessments for the selected Run ID.
 - dashboard: bioetl-overview-v2.json
-  id: 9031
-  disposition: retire
+  id: 9604
+  disposition: keep
   owner: '@bioetl-observability'
   freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
-- dashboard: bioetl-overview-v2.json
-  id: 9003
-  disposition: retire
-  owner: '@bioetl-observability'
-  freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
-- dashboard: bioetl-overview-v2.json
-  id: 9004
-  disposition: retire
-  owner: '@bioetl-observability'
-  freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
-- dashboard: bioetl-overview-v2.json
-  id: 9006
-  disposition: retire
-  owner: '@bioetl-observability'
-  freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
-- dashboard: bioetl-overview-v2.json
-  id: 9007
-  disposition: retire
-  owner: '@bioetl-observability'
-  freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
-- dashboard: bioetl-provider-health-v2.json
-  id: 9401
-  disposition: retire
-  owner: '@bioetl-observability'
-  freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
-- dashboard: bioetl-provider-health-v2.json
-  id: 9101
-  disposition: retire
-  owner: '@bioetl-observability'
-  freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
-- dashboard: bioetl-provider-health-v2.json
-  id: 9107
-  disposition: retire
-  owner: '@bioetl-observability'
-  freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
-- dashboard: bioetl-provider-health-v2.json
-  id: 9104
-  disposition: retire
-  owner: '@bioetl-observability'
-  freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
-- dashboard: bioetl-provider-health-v2.json
-  id: 9111
-  disposition: retire
-  owner: '@bioetl-observability'
-  freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
+  reason: Same saved assessment as the summary; no independent verdict query.
 - dashboard: bioetl-control-plane-v1.json
-  id: 9401
-  disposition: retire
+  id: 9422
+  disposition: keep
   owner: '@bioetl-observability'
   freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
-- dashboard: bioetl-control-plane-v1.json
-  id: 891
-  disposition: retire
-  owner: '@bioetl-observability'
-  freshness_slo: 60s
-  reason: Retired in the accepted portfolio cutover; no CURRENT card may claim selected-run health.
-- dashboard: bioetl-incident-v1.json
-  id: 9401
-  disposition: collapse
-  collapse_into: bioetl-overview-v2.json:214
-  owner: '@bioetl-observability'
-  freshness_slo: 60s
-  reason: Incident CURRENT status uses the same l0_status family as Overview 214.
+  reason: Saved exact-replay readiness and explicit UNKNOWN.
 - dashboard: bioetl-run-explorer-v1.json
   id: 3010
   disposition: keep
   owner: '@bioetl-observability'
   freshness_slo: 60s
-  reason: Browse-mode Ops HTTP index, not a CURRENT Prometheus card.
-- dashboard: bioetl-overview-v2.json
-  id: 9603
-  disposition: keep
-  owner: '@bioetl-observability'
-  freshness_slo: 60s
-  reason: Primary selected-run status and evidence navigation; no CURRENT fleet verdict.
+  reason: Disk-backed launch catalog; browse scope, not current health.

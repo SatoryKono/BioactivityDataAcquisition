@@ -13,8 +13,8 @@ synthetic_zero_allowlist:
 - dashboard: bioetl-control-plane-v1.json
   id: 5
   owner: '@bioetl-observability'
-  rationale: Compare Checkpoint Outcomes fills a missing disposition series so the
-    stacked comparison still lists no_events; not a status/trust verdict.
+  rationale: Compare Checkpoint Outcomes fills a missing disposition series so the stacked comparison
+    still lists no_events; not a status/trust verdict.
   retire_when: recording rule emits an explicit no_events series
 first_window_inspect_tables:
 - dashboard: bioetl-incident-v1.json
@@ -45,19 +45,18 @@ first_window_inspect_tables:
 - dashboard: bioetl-dq-v2.json
   id: 9406
   owner: '@bioetl-observability'
-  rationale: Selected-run status is the Data Quality answer. Run ID is always set
-    on this page.
+  rationale: Selected-run status is the Data Quality answer. Run ID is always set on this page.
   retire_when: 9406 leaves the first window
 operator_question:
   bioetl-control-plane-v1.json:
     answer_ids:
     - 9422
-    next_action_id: 9422
+    next_action_id: 9418
     basis_tokens:
-    - SELECTED RUN
+    - CURRENT
     - trust_status
     next_action_tokens:
-    - View replay checks
+    - processing_status
   bioetl-overview-v2.json:
     answer_ids:
     - 9603

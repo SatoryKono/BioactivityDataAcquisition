@@ -75,88 +75,25 @@ regenerate the dashboards before rolling back the backend.
 
 ## Dashboard families
 
-Shipped portfolio is **exactly 7 dashboards** (`0..6`). Machine inventory:
-`docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.
+The approved ADR-053 cutover ships **exactly five dashboards**. The machine
+inventory and selector contracts are authoritative for current owned variables.
 
-### Pipeline summary
+- Saved-run surfaces: Replay Readiness, Run Overview, Data Quality. Their exact
+  `run_id` narrows Ops HTTP evidence, never Prometheus labels. DQ additionally
+  owns `stage` (default All).
+- Incident Workspace owns CURRENT triage plus GLOBAL and selected-range fleet
+  diagnostics; it owns `provider` and `read_latency_quantile` in addition to the
+  shared workflow/pipeline/run_type/run_id shell. Exact run evidence in its lower
+  summary is distinct from CURRENT/range Prometheus queries.
+- Run Explorer owns the disk-indexed latest-ten catalog and shared selector shell;
+  selection opens exact saved-run evidence rather than promising range filtering.
+- `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-workflow-overview`,
+  `bioetl-alerts-slo` and Silver Reject Explorer are retired standalone surfaces.
+  Runtime diagnostics belong to Incident's Fleet row; saved provider checks belong
+  to Overview panel 9480. Exact record forensics use CLI `bioetl quarantine inspect`.
 
-Dashboards:
-
-- `1. Trust` (`bioetl-control-plane-v1`)
-- `3. Pipeline Diagnostics` (`bioetl-runtime`)
-- `5. Data Quality` (`bioetl-dq-v2`)
-
-These surfaces answer pipeline-scoped operator questions and remain
-Prometheus-first for Status/diagnostic panels. Their shipped top-level
-selectors include the shared context shell and optional role-specific filters:
-
-- `workflow` as context/evidence
-- `pipeline`
-- `run_type`
-- `run_id` as preserved HTTP identity context
-- optional `stage` (Runtime + DQ; default **All**)
-- Grafana time range
-
-### Hybrid overview
-
-Dashboard:
-
-- `2. Overview` (`bioetl-overview-v2`)
-
-Hybrid Overview keeps pipeline-summary current-status semantics, exposes the
-shared context shell, and uses `run_id` for Ops HTTP identity / processed-record
-tables without claiming exact-run PromQL filtering for aggregate Status.
-
-### Provider-first
-
-Dashboard:
-
-- `4. Provider Health` (`bioetl-provider-health-v2`)
-
-This surface is intentionally provider-first, while still exposing the shared
-context shell for provenance, identity, and processed-record evidence:
-
-- `workflow` as context/evidence
-- `pipeline` / `run_type` as context shell
-- `run_id` as preserved HTTP identity context
-- visible `provider` (derived from pipeline/workflow when set; else `unknown`)
-- hidden `pipeline_context`
-- hidden detail-only `adapter`
-- Grafana time range
-
-`pipeline_context` preserves return-path context and is not a first-class
-provider business selector.
-
-### Incident triage
-
-Dashboard:
-
-- `6. Incident Workspace` (`bioetl-incident-v1`)
-
-Read-only triage board with the shared context shell plus visible `provider`
-(same derivation defaults as Provider Health).
-
-### Exact-run explorer
-
-Dashboard:
-
-- `Run Explorer` (`bioetl-run-explorer-v1`)
-
-Canonical hub for Ops HTTP `ID` / `Inspect Processed Records` KPIs under the
-shared context shell. No provider/stage business selectors on the top bar.
-
-### Retired families (not shipped JSON)
-
-Do **not** document these as active families:
-
-| Retired board | Replacement |
-| --- | --- |
-| `bioetl-workflow-overview` (`5. Workflow`) | Workflow band inside `3. Pipeline Diagnostics` |
-| `bioetl-alerts-slo` | Overview Alert/SLO triage row |
-| `bioetl-silver-reject-explorer` (Silver Reject Explorer) | CLI `bioetl quarantine inspect` + DQ reject panels |
-
-See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md)
-and [dashboard-inventory.md](dashboard-inventory.md).
+See [dashboard-inventory.md](dashboard-inventory.md) and
+[navigation-contract.md](navigation-contract.md) for current destinations.
 
 ## Selector taxonomy
 
@@ -234,43 +171,17 @@ Use `bioetl quarantine inspect` for exact reject forensics.
 
 ## Ship-now selector contract
 
-The current shipped selector model (7 dashboards only):
+The current shipped selector model (five dashboards):
 
-- `1. Trust`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
-- `2. Overview`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
-- `3. Pipeline Diagnostics`: `workflow`, `pipeline`, `run_type`, `run_id`,
-  `stage` (default All), hidden `provider_hint`, time range
-- `4. Provider Health`: `workflow`, `pipeline`, `run_type`, `run_id`,
-  `provider`, hidden `pipeline_context`, hidden detail-only `adapter`, time range
-- `5. Data Quality`: `workflow`, `pipeline`, `run_type`, `run_id`, `stage`
-  (default All), time range
-- `6. Incident Workspace`: `workflow`, `pipeline`, `run_type`, `run_id`,
-  `provider`, time range
-- `Run Explorer`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
+- Replay Readiness, Run Overview and Run Explorer: workflow, pipeline, run_type,
+  run_id and time range; auxiliary HTTP lookup variables remain dashboard-owned.
+- Data Quality: the shared shell plus stage (default All).
+- Incident Workspace: the shared shell plus provider and read_latency_quantile.
 
-This contract is unified by the shared context shell, taxonomy, and family
-rules. It does not force every Status panel to consume every visible selector.
-
-## Hidden handoff contract
-
-Hidden selector propagation is a separate contract from visible filtering.
-
-Shipped hidden handoff:
-
-- `pipeline_context`
-
-Shipped hidden detail-only scope:
-
-- `adapter`
-
-Rules:
-
-- hidden vars preserve context or detail-only scope
-- hidden vars do not automatically become visible selectors
-- forensic identifiers do not propagate across dashboards by default
-- primary `run_id` propagates only between primary dashboards that expose the
-  same selector and is never mapped to Silver `quarantine_run_id`
-- no blanket `includeVars=true` semantics for cross-dashboard navigation
+Hidden propagation is distinct from visible filtering. Handoffs carry only
+variables owned by the target; they never use blanket `includeVars=true`, never
+map primary `run_id` into `quarantine_run_id`, and never transfer retired provider
+`pipeline_context` or `adapter` variables to Overview.
 
 ## Why exact execution filtering is not shipped everywhere today
 

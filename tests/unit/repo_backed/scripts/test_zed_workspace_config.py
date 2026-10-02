@@ -655,3 +655,27 @@ def test_zed_env_doctor_cli_exits_nonzero_on_missing_module(
     assert code == 2
     assert "missing_module" in captured.err
     assert "setup_env_windows.ps1" in captured.err
+
+
+def test_local_zed_keymap_has_unique_reachable_bindings() -> None:
+    """Strict JSON parsing rejects shadowed key chords in a supplied local keymap."""
+
+    def _unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
+        result: dict[str, object] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate JSON key: {key}")
+            result[key] = value
+        return result
+
+    keymap_path = ZED_ROOT / "keymap.json"
+    if not keymap_path.is_file():
+        pytest.skip("Optional local Zed config is absent: keymap.json")
+    payload = json.loads(
+        keymap_path.read_text(encoding="utf-8"),
+        object_pairs_hook=_unique_object,
+    )
+    bindings = payload["bindings"]
+
+    assert bindings["ctrl-d"] == "editor::SelectNextOccurrence"
+    assert bindings["ctrl-alt-d"] == "editor::DuplicateLine"

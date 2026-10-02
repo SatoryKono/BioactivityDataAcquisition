@@ -12,11 +12,12 @@ dashboards:
     next_action_tokens:
     - View replay checks
     basis_tokens:
-    - CURRENT
-    - processing_status
-    - trust_status
+    - SELECTED RUN
+    - UNKNOWN
+    - Unknown is not a pass
   bioetl-overview-v2:
-    question: What is the saved assessment of the selected Run ID?
+    question: What is the saved assessment, runtime/domain status, identity, and provider evidence of the selected
+      Run ID?
     answer_panel_ids:
     - 9603
     - 9002
@@ -35,11 +36,12 @@ dashboards:
     - SELECTED RUN
     - QUERY ERROR
   bioetl-incident-v1:
-    question: What is the highest-confidence active suspect?
+    question: What is the highest-confidence active suspect, and which current/global runtime, provider, or control-plane
+      evidence explains it?
     answer_panel_ids:
     - 2010
     next_action_tokens:
-    - Open domain diagnostics
+    - Action opens the domain page named on the row
     basis_tokens:
     - TIME RANGE
     - VALID EMPTY
@@ -57,20 +59,20 @@ allowlists:
   - dashboard: bioetl-incident-v1.json
     id: 2010
     owner: '@bioetl-observability'
-    rationale: Canonical DASH-FIT-003 answer panel. Title uses Inspect because the
-      operator question is the ranked-suspect matrix, not a below-fold dump.
+    rationale: Canonical DASH-FIT-003 answer panel. Title uses Inspect because the operator question is the ranked-suspect
+      matrix, not a below-fold dump.
     retire_when: answer panel is retitled without Inspect or moved below the fold
   - dashboard: bioetl-run-explorer-v1.json
     id: 3010
     owner: '@bioetl-observability'
-    rationale: Canonical DASH-FIT-003 browse/select table. First-window Inspect Recent
-      Runs is the exact-run picker, not forensic evidence.
+    rationale: Canonical DASH-FIT-003 browse/select table. First-window Inspect Recent Runs is the exact-run picker,
+      not forensic evidence.
     retire_when: browse table is retitled without Inspect or replaced as answer panel
   - dashboard: bioetl-dq-v2.json
     id: 9402
     owner: '@bioetl-observability'
-    rationale: First-window identity for the selected Run ID. Inspect names the HTTP
-      table, not a collapsed range dump.
+    rationale: First-window identity for the selected Run ID. Inspect names the HTTP table, not a collapsed range
+      dump.
     retire_when: 9402 leaves the first window or is retitled without Inspect
   - dashboard: bioetl-dq-v2.json
     id: 9403
@@ -81,6 +83,6 @@ allowlists:
   - dashboard: bioetl-run-explorer-v1.json
     id: 3010
     owner: '@bioetl-observability'
-    rationale: 'Browse/select is the action: choosing a row sets run_id; Report opens
-      the persisted file or an explicit report-not-found response.'
+    rationale: 'Browse/select is the action: choosing a row sets run_id; Report opens the persisted file or an explicit
+      report-not-found response.'
     retire_when: 3010 grows a unique primary /d/ or runbook CTA

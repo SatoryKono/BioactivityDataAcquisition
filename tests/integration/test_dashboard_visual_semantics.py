@@ -23,39 +23,39 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
-def test_saved_dq_errors_do_not_become_healthy_history() -> None:
-    """DQ no longer projects range-history colors onto a saved Run ID."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
-    assert 153 not in panels
-    status = panels[9406]
-    assert "SELECTED RUN" in status["description"]
-    assert "QUERY ERROR" in str(status)
-    assert "INCOMPLETE" in str(status)
-    assert "run_id=${run_id}" in str(status["targets"])
-    assert not any("expr" in t for t in status["targets"])
-
-
-def test_saved_provider_status_has_fail_closed_mapping() -> None:
-    panel = next(
-        p
+def test_dq_history_colors_survive_trailing_missing_samples() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    quality = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9482)
+    assert quality["type"] == "canvas"
+    assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    query = quality["targets"][0]
+    assert "run_id=${run_id:percentencode}" in query["url"]
+    assert "excluded UNKNOWN" in query["uql"]
+    assert "tracking='full'" in query["uql"]
+    assert "$count($distinct($s.stage_id)) = 3" in query["uql"]
+    assert not any(
+        p["id"] == 153
         for p in get_dashboard_panels(
-            load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+            load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
         )
-        if p["id"] == 9481
     )
+
+
+def test_status_panels_have_correct_value_mapping():
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9401)
     defaults = panel["fieldConfig"]["defaults"]
+    options = next(m["options"] for m in defaults["mappings"] if m["type"] == "value")
+    assert {key: value["text"] for key, value in options.items()} == {
+        "0": "OK",
+        "1": "UNKNOWN",
+        "2": "WARN",
+        "3": "CRIT",
+    }
+    assert options["0"]["color"] == "green"
+    assert options["3"]["color"] == "red"
+    assert options["1"]["color"] != "green"
     assert defaults["noValue"] == "UNKNOWN"
-    values = next(m["options"] for m in defaults["mappings"] if m["type"] == "value")
-    assert values["UNKNOWN"]["color"] == "gray"
-    assert values["OK"]["color"] == "green"
-    assert values["ERROR"]["color"] == "red"
-    assert any(
-        m["type"] == "special"
-        and m["options"]["match"] == "null"
-        and m["options"]["result"]["text"] == "UNKNOWN"
-        for m in defaults["mappings"]
-    )
 
 
 def test_thresholds_configuration():

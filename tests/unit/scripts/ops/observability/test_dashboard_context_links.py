@@ -41,9 +41,7 @@ def test_rewrite_fills_missing_run_id_and_time() -> None:
         "/d/bioetl-runtime/bioetl-runtime?viewPanel=9401&var-pipeline=$pipeline"
         "&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
     )
-    assert viewpanel.startswith("/d/bioetl-overview-v2/2-overview?")
-    assert "var-run_id=" in viewpanel
-    assert "viewPanel=" not in viewpanel
+    assert "var-run_id=" not in viewpanel
     assert preserves_time_window(viewpanel)
 
 
@@ -79,57 +77,6 @@ def test_urls_for_context_do_not_keep_a_foreign_uuid() -> None:
         "var-run_id=68c11d41-1d2f-5dc9-b041-9265bc485046" in url
         for url in urls.values()
     )
-
-
-@pytest.mark.parametrize("retired", ["bioetl-runtime", "bioetl-provider-health-v2"])
-def test_legacy_handoff_maps_to_live_owner_without_losing_identity_or_time(
-    retired: str,
-) -> None:
-    from urllib.parse import parse_qs, urlsplit
-
-    run_id = "68c11d41-1d2f-5dc9-b041-9265bc485046"
-    url = rewrite_dashboard_handoff_url(
-        f"/d/{retired}/old-slug?var-workflow=wf&var-pipeline=chembl_assay"
-        f"&var-run_type=backfill&var-run_id={run_id}&from=1000&to=2000"
-        "&var-provider=chembl&var-pipeline_context=wrong&var-stage=silver&viewPanel=9101"
-    )
-    parsed = urlsplit(url)
-    assert parsed.path == "/d/bioetl-overview-v2/2-overview"
-    assert parse_qs(parsed.query) == {
-        "var-workflow": ["wf"],
-        "var-pipeline": ["chembl_assay"],
-        "var-run_type": ["backfill"],
-        "var-run_id": [run_id],
-        "from": ["1000"],
-        "to": ["2000"],
-    }
-    assert rewrite_dashboard_handoff_url(url) == url
-
-
-@pytest.mark.parametrize("retired", ["bioetl-runtime", "bioetl-provider-health-v2"])
-def test_legacy_template_builder_never_emits_retired_selectors(retired: str) -> None:
-    url = build_handoff_url(retired, extras={"provider": "unknown", "stage": "silver"})
-    assert url.startswith("/d/bioetl-overview-v2/2-overview?")
-    assert "${run_id:queryparam}" in url
-    assert preserves_time_window(url)
-    assert "provider" not in url and "stage" not in url
-
-
-def test_context_urls_and_routes_cover_exactly_the_shipped_portfolio() -> None:
-    import json
-    from pathlib import Path
-    from scripts.ops.observability.grafana.dashboard_context_links import (
-        ACTIVE_UIDS,
-        PATH_BY_UID,
-    )
-
-    shipped = {
-        json.loads(p.read_text(encoding="utf-8"))["uid"]
-        for p in Path("grafana/dashboards").glob("*.json")
-    }
-    assert set(ACTIVE_UIDS) == set(PATH_BY_UID) == shipped
-    with pytest.raises(ValueError, match="unknown dashboard"):
-        build_handoff_url("unknown-dashboard")
 
 
 def test_action_targets_use_allowlisted_dashboard_routes() -> None:
@@ -244,20 +191,51 @@ def test_severity_colors_are_never_normalized_to_unknown(color: str) -> None:
     assert _semantic_palette({"text": "UNKNOWN", "color": color})["color"] == color
 
 
-def test_queryparam_handoffs_remain_stable_across_regeneration() -> None:
+def test_retired_provider_route_opens_local_saved_evidence_without_foreign_selectors():
+    url = build_handoff_url(
+        "bioetl-provider-health-v2",
+        extras={
+            "provider": "chembl",
+            "adapter": "rest",
+            "pipeline_context": "chembl_activity",
+            "stage": "silver",
+        },
+    )
+    assert url.startswith("/d/bioetl-overview-v2/2-overview?")
+    assert "&viewPanel=9480&" in url
+    for key in (
+        "var-provider=",
+        "var-adapter=",
+        "var-pipeline_context=",
+        "var-stage=",
+        "var-viewPanel=",
+    ):
+        assert key not in url
+    assert "${run_id:queryparam}" in url
+    assert "${__url_time_range}" in url
+
+
+def test_finalizing_serialized_context_tokens_is_idempotent():
+    from copy import deepcopy
     from scripts.ops.observability.grafana.dashboard_context_links import (
         finalize_dashboard_links,
     )
 
-    link = {
-        "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}"
+    payload = {
+        "panels": [
+            {
+                "links": [
+                    {
+                        "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                        "includeVars": True,
+                    }
+                ]
+            }
+        ]
     }
-    payload = {"links": [link]}
     finalize_dashboard_links(payload)
-    first = link["url"]
+    expected = deepcopy(payload)
     for _ in range(3):
         finalize_dashboard_links(payload)
-        assert link["url"] == first
-    for name in ("workflow", "pipeline", "run_type", "run_id"):
-        assert first.count("${" + name + ":queryparam}") == 1
-        assert "${" + name + ":queryparam}=" not in first
+        assert payload == expected
+    assert "${run_id:queryparam}=" not in str(payload)

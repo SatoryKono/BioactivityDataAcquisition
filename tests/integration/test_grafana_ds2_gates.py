@@ -34,8 +34,6 @@ _DASHBOARDS = sorted(Path("grafana/dashboards").glob("bioetl-*.json"))
 _OPERATOR_UIDS = {
     "bioetl-control-plane-v1",
     "bioetl-overview-v2",
-    "bioetl-runtime",
-    "bioetl-provider-health-v2",
     "bioetl-dq-v2",
     "bioetl-incident-v1",
     "bioetl-run-explorer-v1",
@@ -56,7 +54,7 @@ def _continuous_lag_expr(expr: str) -> bool:
 
 
 def test_runtime_stage_lag_primary_panel_is_timeseries() -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panels = {
         panel.get("id"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -74,10 +72,21 @@ def test_runtime_stage_lag_primary_panel_is_timeseries() -> None:
 
 
 def test_overview_status_uses_only_l0_operator_terminology() -> None:
-    """Overview headline must use the canonical OK/WARN/CRIT/UNKNOWN vocabulary."""
+    """Saved verdict never implies healthy fleet or permission to replay."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    status = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9604)
+    assert status["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert status["datasource"]["uid"] == "-- Dashboard --"
+    assert status["targets"][0]["panelId"] == 9002
+    assert "run_verdict" in str(status["transformations"])
+    assert all(p.get("id") != 214 for p in get_dashboard_panels(dashboard))
+
+
+def test_incident_pipeline_scope_status_matches_priority_enum() -> None:
+    """Pipeline scope priority must use the canonical OK/WARN/CRIT/UNKNOWN vocabulary."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     status = next(
-        panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 214
+        panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 18940
     )
     operator_copy = " ".join(
         (str(status.get("title") or ""), str(status.get("description") or ""))
@@ -90,15 +99,19 @@ def test_overview_status_uses_only_l0_operator_terminology() -> None:
     values = next(mapping for mapping in mappings if mapping["type"] == "value")
     assert {key: option["text"] for key, option in values["options"].items()} == {
         "0": "OK",
-        "1": "WARN",
-        "2": "CRIT",
-        "3": "UNKNOWN",
+        "1": "UNKNOWN",
+        "2": "WARN",
+        "3": "CRIT",
     }
 
+    for code, label in ((0, "OK"), (1, "UNKNOWN"), (2, "WARN"), (3, "CRIT")):
+        assert f"{code}={label}" in status["description"]
+    assert "bioetl_workflow_scope_priority_by_input" in status["targets"][0]["expr"]
 
-def test_runtime_metrics_evidence_uses_standard_threshold_steps() -> None:
+
+def test_incident_metrics_evidence_uses_standard_threshold_steps() -> None:
     """Evidence chip follows shared severity thresholds; null mapping stays UNKNOWN."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     evidence = next(
         panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 9102
     )
@@ -161,9 +174,9 @@ def test_incident_status_maps_value_three_and_null() -> None:
                 result = options.get("result") or {}
                 null_text = result.get("text")
     assert flat.get("0") == "OK"
-    assert flat.get("1") == "WARN"
-    assert flat.get("2") == "CRIT"
-    assert flat.get("3") in {"UNKNOWN", "INCOMPLETE"}
+    assert flat.get("1") == "UNKNOWN"
+    assert flat.get("2") == "WARN"
+    assert flat.get("3") == "CRIT"
     assert null_text == "UNKNOWN"
 
 
@@ -220,23 +233,23 @@ def test_trust_primary_recovery_ssot_title_and_link() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     assert 906 not in panels
-    scope = panels[9400]
-    content = scope["options"]["content"]
-    assert "Do not replay" in content
-    assert "INCOMPLETE" in content and "UNKNOWN" in content
-    urls = [item["url"] for item in scope["options"]["dataLinks"]]
-    for pid in (130, 9418, 9415, 9416):
-        assert any(f"viewPanel={pid}" in url for url in urls)
+    assert "Replay Checks" in panels[9400]["options"]["content"]
+    verdict = panels[9422]
+    mappings = verdict["fieldConfig"]["defaults"]["mappings"][0]["options"]
+    assert mappings["BLOCKED"]["color"] == "red"
+    assert mappings["UNKNOWN"]["color"] == "#555555"
+    assert mappings["INCOMPLETE"]["color"] == "#555555"
+    assert any("viewPanel=9423" in link["url"] for link in verdict["links"])
+    assert all(link["includeVars"] is False for link in verdict["links"])
+    assert panels[9423]["gridPos"]["y"] + panels[9423]["gridPos"]["h"] <= 18
 
 
 def test_operator_status_stats_map_null_unknown() -> None:
     """First-screen Status stats on operator UIDs must map null → UNKNOWN text."""
     required = {
         "bioetl-control-plane-v1",
-        "bioetl-runtime",
         "bioetl-dq-v2",
         "bioetl-incident-v1",
-        "bioetl-provider-health-v2",
         "bioetl-overview-v2",
     }
     for path in _DASHBOARDS:

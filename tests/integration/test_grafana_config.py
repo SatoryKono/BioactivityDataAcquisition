@@ -38,7 +38,6 @@ from tests.integration._grafana_test_support import (
     get_metric_label_sets,
     get_panel_expressions,
     load_dashboard,
-    panel_display_title,
 )
 
 
@@ -135,6 +134,16 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "step_kind",
     },
 }
+for _name in (
+    "bioetl-control-plane-v1.json",
+    "bioetl-overview-v2.json",
+    "bioetl-dq-v2.json",
+    "bioetl-incident-v1.json",
+    "bioetl-run-explorer-v1.json",
+):
+    EXPECTED_VARS_BY_DASHBOARD[_name].add("provider_for_pipeline")
+EXPECTED_VARS_BY_DASHBOARD["bioetl-incident-v1.json"].add("read_latency_quantile")
+
 _OPTIONAL_LOCAL_PANEL_TYPES = {"bioetl-selectorshell-panel"}
 
 
@@ -549,12 +558,12 @@ def _assert_overview_identity_panel(dashboard: dict) -> None:
     identity_targets = identity_panel.get("targets", [])
     assert isinstance(identity_targets, list) and len(identity_targets) == 1
     identity_target = identity_targets[0]
-    assert identity_target.get("parser") == "backend"
-    assert identity_target.get("root_selector") == "display_rows"
-    assert (
-        str(identity_target.get("url", ""))
-        == "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
-    )
+    assert identity_target["parser"] == "uql"
+    assert identity_target["url"].startswith("/ops/observability/selected-run-status?")
+    assert "run_id=${run_id}" in identity_target["url"]
+    assert "parse-json | jsonata" in identity_target["uql"]
+    assert "Run ID" in identity_target["root_selector"]
+    assert "Not recorded in saved run evidence" in identity_target["root_selector"]
 
 
 def _assert_overview_variable_sources(
@@ -933,16 +942,28 @@ def test_dashboard_recording_rule_queries_are_backed_by_shipped_rules_config() -
 
 def test_overview_exposes_actual_alert_state_triage_surface() -> None:
     """Overview should include a dashboard-as-code alert-state triage surface."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panels = {panel.get("id"): panel for panel in get_dashboard_panels(dashboard)}
 
-    alert_panel = panels.get(9601)
+    alert_panel = panels.get(2005)
 
     assert alert_panel is not None
-    assert alert_panel["title"] == "Review Active Alerts"
+    assert alert_panel["title"] == "Monitor Global Alerts"
     expressions = [target.get("expr", "") for target in alert_panel.get("targets", [])]
-    assert any("ALERTS" in expr for expr in expressions)
-    assert any("alertstate" in expr for expr in expressions)
+    assert any("bioetl_incident_alert_priority" in expr for expr in expressions)
+    rules = yaml.safe_load(
+        Path("grafana/prometheus-rules/bioetl_observability.yml").read_text(
+            encoding="utf-8"
+        )
+    )
+    alert_rule = next(
+        rule
+        for group in rules["groups"]
+        for rule in group["rules"]
+        if rule.get("record") == "bioetl_incident_alert_priority"
+    )
+    assert 'ALERTS{severity="critical",alertstate="firing"}' in alert_rule["expr"]
+    assert 'alertstate="pending"' in alert_rule["expr"]
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
@@ -954,6 +975,16 @@ def test_dashboard_has_required_variables(dashboard_path):
 
     assert expected_vars is not None, (
         f"Unexpected dashboard file: {dashboard_path.name}"
+    )
+    expected_vars = expected_vars | {"provider_for_pipeline"}
+    provider_context = next(
+        variable
+        for variable in dashboard["templating"]["list"]
+        if variable["name"] == "provider_for_pipeline"
+    )
+    assert provider_context["hide"] == 2
+    assert provider_context["definition"] == (
+        'label_values(bioetl_workflow_pipeline_expected{pipeline=~"$pipeline"}, provider)'
     )
     assert variables == expected_vars, (
         f"Dashboard {dashboard_path.name} variables mismatch. "
@@ -1131,68 +1162,46 @@ def test_latest_timestamp_panels_are_explicitly_success_timestamp_panels() -> No
 
 def test_control_plane_dashboard_has_primary_question() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    description = str(dashboard.get("description", ""))
-
-    assert "Primary question:" in description
-    assert "safely replay/resume" in description
-    assert "GLOBAL read-path panels are not pipeline-scoped" in description
+    description = dashboard["description"]
+    assert "selected Run ID" in description
+    assert "exact-replayed from saved evidence" in description
+    assert "first screen" in description
 
 
 def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panels = get_dashboard_panels(dashboard)
-    kpi_titles = {
-        "Monitor Replay",
-        "Track Checkpoint",
-        "Monitor Ledger",
-        "Monitor Telemetry",
-    }
-    next_step_title = "Inspect Scope & Evidence"
-    first_screen_titles = {
-        panel_display_title(panel)
-        for panel in panels
-        if panel.get("type") != "row"
-        and int((panel.get("gridPos") or {}).get("y", 999)) < 18
-    }
-
-    assert kpi_titles.issubset(first_screen_titles)
-    assert next_step_title in first_screen_titles
-    assert len(first_screen_titles & kpi_titles) == 4
+    first = {p["id"]: p for p in dashboard["panels"] if p["gridPos"]["y"] < 18}
+    assert set(first) == {1000, 9400, 9422, 9423}
+    assert first[9422]["type"] == "stat"
+    assert first[9423]["type"] == "table"
+    assert all(p["gridPos"]["y"] + p["gridPos"]["h"] <= 18 for p in first.values())
+    assert "Unknown is not a pass" in first[9423]["description"]
 
 
 def test_control_plane_l1_has_single_next_step_panel_with_expected_target() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     assert 906 not in panels
-    scope = panels[9400]
-    content = scope["options"]["content"]
-    assert "Do not replay" in content
-    assert "INCOMPLETE" in content and "UNKNOWN" in content
-    urls = [item["url"] for item in scope["options"]["dataLinks"]]
-    for pid in (130, 9418, 9415, 9416):
-        assert any(f"viewPanel={pid}" in url for url in urls)
+    links = panels[9422]["links"]
+    assert len(links) == 1
+    assert "viewPanel=9423" in links[0]["url"]
+    assert "${run_id:queryparam}" in links[0]["url"]
+    assert "${__url_time_range}" in links[0]["url"]
+    assert links[0]["includeVars"] is False
 
 
 def test_control_plane_has_replay_resume_blockers_panel() -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title")
-    }
-    panel = panels.get("Track Replay Blockers")
-
-    assert panel is not None
-    expr = "\n".join(
-        target.get("expr", "")
-        for target in panel.get("targets", [])
-        if isinstance(target.get("expr"), str)
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    panel = next(
+        p
+        for p in get_dashboard_panels(dashboard)
+        if p["title"] == "Track Replay Blockers"
     )
+    expr = "\n".join(t["expr"] for t in panel["targets"])
     assert "bioetl_trust_replay_blocker_events_total" in expr
     assert "bioetl_trust_replay_blocker_integrity" in expr
     assert "[$__range]" in expr
-    assert "increase(" in expr
-    assert "max_over_time(" in expr
+    assert "increase(" in expr and "max_over_time(" in expr
     assert "bioetl_control_plane_manifest_writes_total" not in expr
     assert len(expr) < 400
 
@@ -1237,7 +1246,7 @@ def test_control_plane_read_panels_do_not_filter_on_missing_pipeline_label() -> 
 
 
 def test_control_plane_global_panels_are_marked_global() -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     global_metric_tokens = (
         "bioetl_control_plane_reads_total",
         "bioetl_control_plane_read_duration_seconds_bucket",
@@ -1256,7 +1265,7 @@ def test_control_plane_global_panels_are_marked_global() -> None:
 
 
 def test_control_plane_latency_panels_have_p50_p95_p99() -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -1273,7 +1282,7 @@ def test_control_plane_latency_panels_have_p50_p95_p99() -> None:
 
 
 def test_control_plane_no_missing_metric_promql() -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     expressions = "\n".join(get_panel_expressions(dashboard))
     panels = {
         panel.get("title"): panel
@@ -1294,121 +1303,72 @@ def test_control_plane_no_missing_metric_promql() -> None:
 
 def test_control_plane_identity_evidence_panels_exist() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title")
-    }
-    for title, view in {
-        "Review Identity Gaps": "view=gaps",
-        "Compare Checkpoint Anchors": "view=checkpoint_compare",
-        "Inspect Identity Values": "view=copy_values",
-        "Review Required Replay Anchors": "view=anchors",
-        "Review Additional Forensic Anchors": "view=anchors",
-    }.items():
-        _assert_identity_evidence_panel(panels, title, view)
-
-    assert "priority=P1" in str(
-        panels["Review Required Replay Anchors"]["targets"][0]["url"]
-    )
-    assert "priority=P2" in str(
-        panels["Review Additional Forensic Anchors"]["targets"][0]["url"]
-    )
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    # Identity presence and checkpoint comparison remain separate from readiness.
+    for pid in (9408, 9406, 9423):
+        panel = panels[pid]
+        assert panel["type"] == "table"
+        assert all("run_id=${run_id}" in t["url"] for t in panel["targets"])
+        assert all("expr" not in t for t in panel["targets"])
+    assert "Presence is not verification" in panels[9408]["description"]
+    assert "MISMATCH is critical" in panels[9406]["description"]
+    assert "Unknown is not a pass" in panels[9423]["description"]
 
 
 def test_control_plane_remaining_replay_safety_text_is_not_stale() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panel = next(
-        (
-            panel
-            for panel in get_dashboard_panels(dashboard)
-            if panel.get("title") == "Review Uncovered Replay Signals"
-        ),
-        None,
-    )
-    assert panel is not None
-    content = str(panel.get("options", {}).get("content", ""))
-    assert panel.get("options", {}).get("mode") == "html"
-    assert "Remaining replay-safety signal:" in content
-    assert "occurrence-only vs semantic drift" in content
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9422)
+    description = panel["description"]
     assert (
-        "Duplicate/overwrite write risk is now bounded Prometheus telemetry" in content
+        "Occurrence-only versus semantic drift still requires exact-run evidence"
+        in description
     )
-    assert "checkpoint_age <= recovery window / RPO" not in content
-    assert "manifest_id/run_id identity table in Grafana" not in content
-    assert "duplicate-record evidence" not in content
-    description = str(panel.get("description", "")).lower()
-    assert "residual semantic-drift evidence" in description
-    assert "duplicate/overwrite write risk is now instrumented" in description
-    assert "not yet covered" not in description
-    assert "manifest/run identity" not in description
-    assert "execution/config/contract/input anchors" not in description
-    assert "checkpoint freshness lag" not in description
+    assert "current write-risk telemetry is not proof for this run" in description
+    assert "UNKNOWN means no assessed value, never READY" in description
 
 
 def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
-    """Review/context cards must fit their grids without hidden clipping."""
-    panel_specs = {
-        "bioetl-control-plane-v1.json": {139: ("html", 4)},
-        "bioetl-overview-v2.json": {9021: ("html", 3)},
-        "bioetl-runtime.json": {2541: ("html", 3)},
-        "bioetl-provider-health-v2.json": {9400: ("html", 3)},
-        "bioetl-incident-v1.json": {2007: ("html", 4)},
+    specs = {
+        "bioetl-control-plane-v1.json": {9400: 3},
+        "bioetl-overview-v2.json": {99: 3},
+        "bioetl-dq-v2.json": {9400: 3},
+        "bioetl-incident-v1.json": {9400: 3, 2541: 3},
     }
-    for filename, expected in panel_specs.items():
+    for filename, expected in specs.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / filename)
-        panels = {
-            int(panel["id"]): panel
-            for panel in get_dashboard_panels(dashboard)
-            if panel.get("id") in expected
-        }
-        assert panels.keys() == expected.keys()
-        for panel_id, (mode, height) in expected.items():
-            panel = panels[panel_id]
-            assert panel.get("options", {}).get("mode") == mode
-            assert panel.get("gridPos", {}).get("h") == height
-            assert "overflow:hidden" not in str(
-                panel.get("options", {}).get("content", "")
-            )
-
-    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
-    overview_panels = {
-        int(panel["id"]): panel for panel in get_dashboard_panels(overview)
-    }
-    assert overview_panels[9002]["options"]["cellHeight"] == "sm"
-    assert overview_panels[9002]["gridPos"]["h"] >= 5
-    assert overview_panels[215]["gridPos"]["h"] >= 5
-    assert overview_panels[215]["gridPos"]["y"] < overview_panels[9603]["gridPos"]["y"]
-
-    run_explorer = load_dashboard(
-        Path("grafana/dashboards/bioetl-run-explorer-v1.json")
-    )
-    run_panels = {
-        int(panel["id"]): panel for panel in get_dashboard_panels(run_explorer)
-    }
-    assert set(run_panels) == {1, 3010}
-    assert run_panels[3010]["type"] == "table"
-    assert (
-        not {3011, 3012, 3013, 3014, 3020, 3022, 3023, 3098, 3099} & run_panels.keys()
-    )
+        panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+        for pid, height in expected.items():
+            panel = panels[pid]
+            assert panel["gridPos"]["h"] == height
+            assert panel["options"]["mode"] == "html"
+            assert "overflow:hidden" not in panel["options"]["content"]
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    assert panels[9002]["options"]["cellHeight"] == "sm"
+    assert panels[9002]["gridPos"]["h"] == 13
+    assert panels[9300]["gridPos"]["y"] + panels[9300]["gridPos"]["h"] <= 18
+    assert 215 not in panels
+    explorer = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
+    assert {p["id"] for p in get_dashboard_panels(explorer)} == {1, 3010}
 
 
 def test_control_plane_dashboard_links_are_scoped() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    links = {
-        link.get("title"): link
-        for link in get_dashboard_navigation_links(dashboard)
-        if link.get("title")
+    links = get_dashboard_navigation_links(dashboard)
+    assert {link["title"] for link in links} == {
+        "Run Explorer",
+        "Run Overview",
+        "6. Incident Workspace",
     }
-
-    assert links
-    assert all(link.get("includeVars") is False for link in links.values())
-    assert "includeVars=true" not in json.dumps(links)
-    assert "Back to Overview" not in links
-    assert "0. Control Plane" not in links
-    assert "1. Trust" not in links  # self-link omitted from machine-readable bus
-    for title in ("2. Overview", "3. Pipeline Diagnostics", "5. Data Quality"):
-        _assert_scoped_control_plane_nav_link(title, links[title])
+    for link in links:
+        assert link["includeVars"] is False
+        assert "${__url_time_range}" in link["url"]
+        if link["title"] == "Run Explorer":
+            assert "var-run_id=-" in link["url"]
+            assert "var-pipeline=.*" in link["url"]
+        else:
+            assert "${run_id:queryparam}" in link["url"]
+            assert "${pipeline:queryparam}" in link["url"]
 
 
 def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
@@ -1428,98 +1388,45 @@ def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
 
 
 def test_provider_dashboard_uses_pipeline_filters():
-    """Ensure provider dashboard uses pipeline variable directly (no provider regex hack)."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9480)
+    assert all(
+        "pipeline=${pipeline}" in t["url"] and "run_id=${run_id}" in t["url"]
+        for t in panel["targets"]
     )
-    all_expressions = get_panel_expressions(dashboard)
-    assert all("$provider_.*" not in expr for expr in all_expressions), (
-        "Provider dashboard still uses fragile $provider_.* regex in panel queries"
-    )
+    assert all("expr" not in t for t in panel["targets"])
 
 
 def test_provider_dashboard_surfaces_current_health_status_panel() -> None:
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Raw Health Status"
-        ),
-        None,
-    )
-    assert panel is not None, (
-        "Provider Health dashboard must expose raw provider health enum evidence"
-    )
-    expressions = [
-        target.get("expr", "")
-        for target in panel.get("targets", [])
-        if isinstance(target.get("expr"), str)
-    ]
-    assert any("bioetl_provider_health_status" in expr for expr in expressions)
-    assert any(
-        "bioetl_provider_health_check_provider_universe_15m" in expr
-        for expr in expressions
-    ), "Provider health status panel must fail closed to UNKNOWN for known providers"
-    assert all('{pipeline=~"$pipeline"}' not in expr for expr in expressions), (
-        "Provider health status panel must stay provider-scoped only"
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    assert {9480, 9481}.issubset(panels)
+    assert "not live fleet health" in panels[9481]["description"]
+    assert "Cached Bronze" in panels[9480]["description"]
+    assert "provider API was not called" in panels[9480]["description"]
 
 
 def test_provider_health_panel_114_description_disallows_zero_as_healthy() -> None:
-    """Panel 114 description must keep provider enum semantics for 0 state."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    panel = next(
-        (item for item in get_dashboard_panels(dashboard) if item.get("id") == 114),
-        None,
-    )
-    assert panel is not None, "Panel id=114 not found"
-
-    description = str(panel.get("description", ""))
-    assert "0=UNHEALTHY" in description, (
-        "Panel id=114 must explicitly document 0 as UNHEALTHY"
-    )
-    assert "UNKNOWN" in description, (
-        "Panel id=114 must document UNKNOWN fallback when raw status is absent"
-    )
-    description_upper = description.upper()
-    assert "0=HEALTHY" not in description_upper
-    assert "0=OK" not in description_upper
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9481)
+    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert "Missing evidence stays UNKNOWN" in panel["description"]
+    assert "QUERY ERROR" in panel["description"]
+    assert "vector(0)" not in json.dumps(panel)
 
 
 def test_provider_health_status_mappings_match_description_enum() -> None:
-    """Provider status panels must keep mapping texts and enum descriptions aligned."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    expected_pairs = {"0": "UNHEALTHY", "1": "DEGRADED", "2": "HEALTHY"}
-    expected_null = "UNKNOWN"
-    panel = next(
-        (item for item in get_dashboard_panels(dashboard) if item.get("id") == 114),
-        None,
-    )
-    assert panel is not None, "provider health raw enum panel id=114 must exist"
-    mappings = panel.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])
-    assert isinstance(mappings, list) and mappings, "panel id=114 mappings must exist"
-    value_mapping = next(
-        (mapping for mapping in mappings if mapping.get("type") == "value"),
-        None,
-    )
-    assert value_mapping is not None, "panel id=114 must define value mappings"
-    description = str(panel.get("description", ""))
-    _assert_provider_health_value_mappings(
-        value_mapping.get("options", {}), description, expected_pairs
-    )
-    _assert_provider_health_null_mapping(mappings, description, expected_null)
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9481)
+    mappings = panel["fieldConfig"]["defaults"]["mappings"]
+    assert "UNKNOWN" in json.dumps(mappings)
+    assert panel["targets"][0]["root_selector"] == "provider_checks"
+    assert "saved check verdict" in panel["description"]
 
 
-def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_labels():
+def test_incident_provider_alert_conditions_do_not_filter_on_missing_pipeline_labels():
     """Provider runtime alert summaries are fleet-wide and must not filter on pipeline."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel = next(
         (
             item
@@ -1540,9 +1447,9 @@ def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_lab
     )
 
 
-def test_runtime_provider_alert_conditions_local_panel_scopes_all_addends_to_provider_hint():
+def test_incident_provider_alert_conditions_use_declared_provider_scope():
     """Selected-pipeline provider handoff must not mix in unscoped global provider alert sums."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel = next(
         (
             item
@@ -1553,68 +1460,65 @@ def test_runtime_provider_alert_conditions_local_panel_scopes_all_addends_to_pro
     )
     assert panel is not None
     expr = panel["targets"][0]["expr"]
+    variables = {v["name"]: v for v in dashboard["templating"]["list"]}
+    assert "provider_hint" not in variables
+    assert variables["provider"]["current"]["value"] == "unknown"
+    assert "${pipeline}" in variables["provider"]["definition"]
+    assert "${workflow}" in variables["provider"]["definition"]
+    assert "$provider_hint" not in expr
     assert "bioetl_runtime_provider_alert_count" in expr
-    assert expr.count('provider=~"$provider_hint"') == 2
+    assert expr.count('provider=~"$provider"') == 2
     assert "bioetl_provider_current_status" in expr
     assert "unless on()" not in expr
     assert "bioetl_runtime_alert_condition_provider_" not in expr
 
 
 def test_workflow_step_panels_apply_status_variable() -> None:
-    dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
-    expected = {
-        "Step Outcomes by Kind / Step Status / Range": (
-            'status=~"$step_status"',
-            'step_kind=~"$step_kind"',
-        ),
-        "Step Duration p95 by Kind / Step Status / Range": (
-            'status=~"$step_status"',
-            'step_kind=~"$step_kind"',
-        ),
-    }
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title")
-    }
-    for title, required_snippets in expected.items():
-        _assert_workflow_step_panel_selectors(panels, title, required_snippets)
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    assert not Path("grafana/dashboards/bioetl-workflow-overview.json").exists()
+    variables = _dashboard_variable_names(dashboard)
+    assert {
+        "step_status",
+        "step_kind",
+        "pipeline_context",
+        "run_type_context",
+    }.isdisjoint(variables)
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9997)
+    assert "TIME RANGE" in panel["description"]
+    assert "no Stage label" in panel["description"]
+    expr = panel["targets"][0]["expr"]
+    assert "$pipeline" in expr and "$workflow" in expr
+    assert "$step_status" not in expr and "$step_kind" not in expr
 
 
 def test_workflow_pipeline_status_fails_closed_without_runtime_fallback() -> None:
-    dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Pipeline Status"
-        ),
-        None,
-    )
-    assert panel is not None
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9401)
     expr = panel["targets"][0]["expr"]
-    assert "bioetl_workflow_pipeline_verdict_status" in expr
+    assert "bioetl_workflow_scope_priority_by_input" in expr
     assert "bioetl_runtime_current_status" not in expr
-    assert 'pipeline=~"$pipeline_context"' in expr
-    assert 'run_type=~"$run_type_context"' in expr
-    assert " or " not in expr
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    assert defaults.get("noValue") == "NOT RESOLVED"
-    description = str(panel.get("description", ""))
-    assert "Runtime fallback is intentionally forbidden" in description
-    assert "never green" in description
+    assert "vector(0)" not in expr
+    defaults = panel["fieldConfig"]["defaults"]
+    assert defaults["noValue"] == "UNKNOWN"
+    options = next(m["options"] for m in defaults["mappings"] if m["type"] == "value")
+    assert options["1"]["text"] == "UNKNOWN"
+    assert options["1"]["color"] != "green"
 
 
 def test_workflow_dashboard_collapses_step_diagnostics_below_first_screen() -> None:
-    dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
-    _assert_workflow_step_diagnostics_layout(dashboard)
-    _assert_workflow_first_action_panel(dashboard)
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    rows = [p for p in dashboard["panels"] if p["type"] == "row"]
+    assert rows
+    assert all(row["collapsed"] for row in rows)
+    ids = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    assert {9996, 9997, 9991, 9701}.issubset(ids)
+    assert len(ids[9991]["links"]) == 4
+    assert any(9997 in {p["id"] for p in get_dashboard_panels(row)} for row in rows)
 
 
 @pytest.mark.parametrize(
     ("dashboard_file", "variable_name"),
     [
-        ("bioetl-runtime.json", "stage"),
         ("bioetl-dq-v2.json", "stage"),
     ],
 )

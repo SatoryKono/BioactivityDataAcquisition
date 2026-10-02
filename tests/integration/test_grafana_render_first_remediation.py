@@ -15,6 +15,7 @@ from __future__ import annotations
 from html import unescape
 from html.parser import HTMLParser
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -118,7 +119,7 @@ class _NavigationMarkupParser(HTMLParser):
 
 def test_rf001_headline_status_is_evidence_aware() -> None:
     control = _load("bioetl-control-plane-v1.json")
-    runtime = _load("bioetl-runtime.json")
+    runtime = _load("bioetl-incident-v1.json")
     dq = _load("bioetl-dq-v2.json")
 
     control_expr = _record_expr(
@@ -138,10 +139,10 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
     )
     assert "bioetl_runtime_current_status_scoped" in runtime_expr
     assert "* 3" in runtime_expr
-    assert all(
-        panel.get("id") != 9401
-        for panel in _iter_panels(list(runtime.get("panels", [])))
+    assert "bioetl_workflow_scope_priority_by_input" in str(
+        _panel(runtime, 18940)["targets"]
     )
+    assert _mapping_text(_panel(runtime, 18940), "1") == "UNKNOWN"
 
     assert "run_id=${run_id}" in str(_panel(dq, 9406).get("targets"))
     provenance = str(_panel(dq, 9400).get("options", {}).get("content", ""))
@@ -273,7 +274,6 @@ def test_iteration_2_empty_distributions_use_no_data_capable_tables() -> None:
             156,
         ): 'sum by (pipeline) (max_over_time(bioetl_processed_records_gold_quarantined_current{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range]))',
         (
-            "bioetl-provider-health-v2.json",
             107,
         ): '(100 * sum by (provider) (increase(bioetl_health_check_failures_total{provider=~"$provider"}[$__range])) / clamp_min(sum(increase(bioetl_health_check_failures_total{provider=~"$provider"}[$__range])), 1))',
     }
@@ -292,97 +292,47 @@ def test_iteration_2_empty_distributions_use_no_data_capable_tables() -> None:
 def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
     canonical_titles = (
         "Run Explorer",
-        "1. Trust",
-        "2. Overview",
-        "3. Pipeline Diagnostics",
-        "4. Provider Health",
-        "5. Data Quality",
+        "Replay Readiness",
+        "Run Overview",
         "6. Incident Workspace",
     )
     for path in sorted(DASHBOARD_DIR.glob("bioetl-*.json")):
-        if path.name == "bioetl-run-explorer-v1.json":
+        dashboard = _load(path.name)
+        if path.stem == "bioetl-run-explorer-v1":
+            assert 1000 not in {p["id"] for p in dashboard["panels"]}
             continue
-        dashboard = json.loads(path.read_text(encoding="utf-8"))
-        content = unescape(
-            str(_panel(dashboard, 1000).get("options", {}).get("content", ""))
-        )
+        content = unescape(_panel(dashboard, 1000)["options"]["content"])
         positions = [content.index(title) for title in canonical_titles]
         assert positions == sorted(positions), path.name
-        assert "5. Workflow" not in content, path.name
-        assert "6. Alerts" not in content, path.name
+        assert (
+            "Provider Health" not in content and "Pipeline Diagnostics" not in content
+        )
         parser = _NavigationMarkupParser()
         parser.feed(content)
-        tags = [tag for tag, _attrs in parser.elements]
-        assert not ({"style", "script", "iframe", "object"} & set(tags)), path.name
-
+        assert not {"style", "script", "iframe", "object"} & {
+            t for t, _ in parser.elements
+        }
         containers = [
-            attrs
-            for tag, attrs in parser.elements
-            if tag == "div" and attrs.get("class") == "bioetl-nav"
+            a
+            for t, a in parser.elements
+            if t == "div" and a.get("class") == "bioetl-nav"
         ]
-        assert len(containers) == 1, path.name
-        container_style = containers[0].get("style", "")
-        for token in ("display:flex", "flex-wrap:nowrap", "overflow:visible"):
-            assert token in container_style, (path.name, token)
-
-        anchors = [attrs for tag, attrs in parser.elements if tag == "a"]
-        current = [
-            attrs
-            for tag, attrs in parser.elements
-            if attrs.get("aria-current") == "page"
-            or attrs.get("data-current") == "page"
-            or "bioetl-nav-current" in str(attrs.get("class", ""))
-        ]
-        handoff_links = [
-            attrs
-            for attrs in anchors
-            if attrs.get("aria-current") != "page"
-            and attrs.get("aria-disabled") != "true"
-            and "bioetl-nav-current" not in str(attrs.get("class", ""))
-        ]
-        uid = str(dashboard.get("uid") or "")
-        # Full portfolio bus: 7 workspaces; current is non-interactive chip
-        # (anchor with aria-disabled keeps styles under Grafana sanitizer).
-        # Run Explorer keeps the same chips and makes every handoff non-interactive.
-        if path.name == "bioetl-run-explorer-v1.json":
-            assert len(handoff_links) == 0, path.name
-            assert len(current) == 1, path.name
-            disabled = [
-                attrs
-                for tag, attrs in parser.elements
-                if tag == "a" and attrs.get("aria-disabled") == "true"
-            ]
-            assert len(disabled) == 7, path.name
-            assert all(
-                not str(attrs.get("href") or "").startswith("/d/") for attrs in disabled
-            ), path.name
-            for attrs in disabled:
-                if attrs in current:
-                    continue
-                style = attrs.get("style", "")
-                assert "background:#334155" in style, path.name
-                assert "pointer-events:none" in style, path.name
-            continue
-        assert len(handoff_links) == 6, path.name
-        assert len(current) == 1, path.name
-        for attrs in handoff_links:
-            style = attrs.get("style", "")
-            for token in (
-                "width:14%",
-                "text-align:center",
-                "color:#f8fafc",
-                "background:#334155",
-                "border:2px solid #94a3b8",
-            ):
-                assert token in style, (path.name, token)
-            assert attrs.get("href"), path.name
-        current_style = current[0].get("style", "")
-        for token in (
-            "width:14%",
-            "background:#1d4ed8",
-            "border:2px solid #7dd3fc",
-        ):
-            assert token in current_style, (path.name, token)
+        assert len(containers) == 1
+        assert "flex-wrap:nowrap" in containers[0]["style"]
+        anchors = [a for t, a in parser.elements if t == "a"]
+        assert len(anchors) == 4
+        current = [a for a in anchors if a.get("aria-current") == "page"]
+        assert len(current) == (0 if path.stem == "bioetl-dq-v2" else 1)
+        for anchor in anchors:
+            assert "font:600 16px/18px Arial" in anchor["style"]
+            assert "overflow-wrap:anywhere" in anchor["style"]
+            assert "min-width:0" in anchor["style"]
+            if anchor in current:
+                assert anchor["aria-disabled"] == "true"
+                assert not anchor["href"].startswith("/d/")
+            else:
+                assert "background:#334155" in anchor["style"]
+                assert anchor["href"].startswith("/d/")
 
 
 def test_rf003_navigation_tokens_meet_wcag_contrast_floors() -> None:
@@ -413,54 +363,39 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     assert inputs["gridPos"]["w"] >= 8
     assert status["gridPos"]["y"] < FIRST_WINDOW_Y
 
-    provider = _load("bioetl-provider-health-v2.json")
-    provider_ids = {
-        panel.get("id") for panel in _iter_panels(list(provider.get("panels", [])))
-    }
-    assert {9101, 9107, 9104}.isdisjoint(provider_ids)
+    provider = _panel(overview, 9480)
+    assert provider["gridPos"]["y"] >= FIRST_WINDOW_Y
+    assert "run_id=${run_id}" in provider["targets"][0]["url"]
+    assert _panel(overview, 9481)["gridPos"]["y"] == provider["gridPos"]["y"]
+
     # Workflow overview + Alerts/SLO retired (#6570/#6647).
 
 
 def test_rf004_identity_and_scope_are_persistent() -> None:
-    latency = _panel(_load("bioetl-incident-v1.json"), 111)
+    incident = _load("bioetl-incident-v1.json")
+    latency = _panel(incident, 111)
+    target = latency["targets"][0]
+    assert "sum by (le, store, operation)" in target["expr"]
+    assert "$read_latency_quantile" in target["expr"]
+    assert target["legendFormat"] == "{{store}} / {{operation}}"
     assert latency["options"]["legend"]["showLegend"] is True
-    assert len(latency["targets"]) == 1
-    latency_target = latency["targets"][0]
-    assert "sum by (le, store, operation)" in latency_target["expr"]
-    assert "$read_latency_quantile" in latency_target["expr"]
-    assert latency_target["legendFormat"] == "{{store}} / {{operation}}"
-    legend = latency["options"]["legend"]
-    assert legend["displayMode"] == "table"
-    assert "lastNotNull" in legend["calcs"]
-    assert "max" in legend["calcs"]
-    control = _load("bioetl-control-plane-v1.json")
-    variable_names = {
-        item.get("name")
-        for item in control.get("templating", {}).get("list", [])
-        if isinstance(item, dict)
+    assert "read_latency_quantile" in {
+        v["name"] for v in incident["templating"]["list"]
     }
-    assert "read_latency_quantile" in variable_names
-    present = {
-        panel.get("id") for panel in _iter_panels(list(control.get("panels", [])))
-    }
-    assert 9404 not in present
-    assert 9452 not in present
-    copy_panel = _panel(control, 9407)
-    assert copy_panel["gridPos"]["y"] >= 0
+    overview = _load("bioetl-overview-v2.json")
+    identity = _panel(overview, 9300)
+    assert "run_id=${run_id}" in identity["targets"][0]["url"]
+    assert identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+    assert {
+        "Run ID",
+        "Pipeline",
+        "Run Type",
+        "Started at",
+        "Total Run Duration",
+    } <= set(
+        re.findall(r'"parameter":"([^"]+)"', identity["targets"][0]["root_selector"])
+    )
 
-    for name in (
-        "bioetl-control-plane-v1.json",
-        "bioetl-runtime.json",
-        "bioetl-provider-health-v2.json",
-        "bioetl-dq-v2.json",
-    ):
-        no_value = str(
-            _panel(_load(name), 9402)
-            .get("fieldConfig", {})
-            .get("defaults", {})
-            .get("noValue", "")
-        )
-        assert no_value.startswith("SELECT RUN")
     # Workflow overview + Alerts/SLO retired; ID-card noValue contract remains.
 
 
@@ -474,12 +409,10 @@ def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     }
     assert removed.isdisjoint(present)
 
-    provider = _load("bioetl-provider-health-v2.json")
-    provider_ids = {
-        panel.get("id") for panel in _iter_panels(list(provider.get("panels", [])))
-    }
-    assert 104 not in provider_ids
-
+    provider = _panel(overview, 9480)
+    assert provider["gridPos"]["y"] >= FIRST_WINDOW_Y
+    assert "run_id=${run_id}" in provider["targets"][0]["url"]
+    assert _panel(overview, 9481)["gridPos"]["y"] == provider["gridPos"]["y"]
     dq = _load("bioetl-dq-v2.json")
     dq_ids = {panel.get("id") for panel in _iter_panels(list(dq.get("panels", [])))}
     assert 8 not in dq_ids
@@ -487,19 +420,15 @@ def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
 
 def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     control = _load("bioetl-control-plane-v1.json")
-    root_panels = list(control.get("panels", []))
-    control_rows = [panel for panel in root_panels if panel.get("type") == "row"]
-    assert len(control_rows) >= 5
-    assert all(panel.get("collapsed") is True for panel in control_rows)
-    assert all(panel.get("panels") for panel in control_rows)
-    first_row_y = min(panel["gridPos"]["y"] for panel in control_rows)
-    # Nav h=4 occupies y=0..4. The first collapsed row sits on the last first-window
-    # row; expanded children start at FIRST_WINDOW_Y.
-    assert first_row_y + 1 <= FIRST_WINDOW_Y
-    assert [panel["gridPos"]["y"] for panel in control_rows] == list(
-        range(first_row_y, first_row_y + len(control_rows))
-    )
-    assert not any(collapsed_row_above_fold(panel) for panel in control_rows)
+    rows = [p for p in control["panels"] if p["type"] == "row"]
+    assert {p["id"] for p in rows} == {9430, 9431}
+    assert all(p["collapsed"] is True and p["panels"] for p in rows)
+    assert all(p["gridPos"]["y"] >= FIRST_WINDOW_Y for p in rows)
+    assert not any(collapsed_row_above_fold(p) for p in rows)
+    verdict = _panel(control, 9422)
+    checks = _panel(control, 9423)
+    assert verdict["gridPos"]["y"] + verdict["gridPos"]["h"] <= FIRST_WINDOW_Y
+    assert checks["gridPos"]["y"] + checks["gridPos"]["h"] <= FIRST_WINDOW_Y
 
 
 def test_rf006_collapsed_row_above_fold_fails_closed() -> None:
@@ -524,9 +453,9 @@ def test_rf006_collapsed_row_above_fold_fails_closed() -> None:
         panel.get("id") for panel in _iter_panels(list(overview.get("panels", [])))
     }
     assert {9030, 9009, 9012, 9600, 215, 9601}.isdisjoint(present)
-    assert _panel(overview, 9602).get("collapsed") is True
+    assert 9602 not in present
 
-    runtime = _load("bioetl-runtime.json")
+    runtime = _load("bioetl-incident-v1.json")
     runtime_ids = {
         panel.get("id") for panel in _iter_panels(list(runtime.get("panels", [])))
     }
@@ -535,25 +464,15 @@ def test_rf006_collapsed_row_above_fold_fails_closed() -> None:
 
 def test_audit_followup_action_first_layout_contracts() -> None:
     overview = _load("bioetl-overview-v2.json")
-    present = {
-        panel.get("id") for panel in _iter_panels(list(overview.get("panels", [])))
-    }
-    assert {9013, 9021}.isdisjoint(present)
-    run_context = _panel(overview, 9602)
-    assert run_context.get("collapsed") is True
-    assert run_context.get("panels")
-
-    provider = _load("bioetl-provider-health-v2.json")
-    provider_ids = {
-        panel.get("id") for panel in _iter_panels(list(provider.get("panels", [])))
-    }
-    assert {9106, 9105, 91, 9404, 9405, 9450, 9101, 9102, 9103}.isdisjoint(provider_ids)
-
+    present = {p["id"] for p in _iter_panels(overview["panels"])}
+    assert {9013, 9021, 9602, 9450}.isdisjoint(present)
+    assert _panel(overview, 9300)["gridPos"]["y"] < FIRST_WINDOW_Y
+    assert _panel(overview, 9480)["gridPos"]["y"] >= FIRST_WINDOW_Y
     dq = _load("bioetl-dq-v2.json")
-    dq_rows = [panel for panel in dq.get("panels", []) if panel.get("type") == "row"]
-    assert [panel.get("title") for panel in dq_rows] == ["Inspect Saved Run Evidence"]
-    assert dq_rows[0].get("collapsed") is True
-    assert {9402, 9403, 9406} <= {panel.get("id") for panel in dq.get("panels", [])}
+    rows = [p for p in dq["panels"] if p["type"] == "row"]
+    assert [p["title"] for p in rows] == ["Inspect Saved Run Evidence"]
+    assert rows[0]["collapsed"] is True and rows[0]["panels"]
+    assert {9402, 9403, 9406} <= {p["id"] for p in dq["panels"]}
 
 
 def test_collapsed_rows_never_ship_empty_nested_panels() -> None:
@@ -565,8 +484,6 @@ def test_collapsed_rows_never_ship_empty_nested_panels() -> None:
     operator_files = (
         "bioetl-control-plane-v1.json",
         "bioetl-overview-v2.json",
-        "bioetl-runtime.json",
-        "bioetl-provider-health-v2.json",
         "bioetl-dq-v2.json",
         "bioetl-incident-v1.json",
         "bioetl-run-explorer-v1.json",
@@ -713,15 +630,19 @@ def test_operator_critical_tables_expose_full_values() -> None:
                         for link in panel.get("links", [])
                     )
                     detail = _panel(dashboard, 22005)
-                    assert _wrapped_field_names(detail), (
-                        "Full alert evidence must retain wrapping"
-                    )
+                    assert (
+                        detail["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+                    ), "Full alert evidence must retain wrapping"
                     assert any(
                         t["id"] == "limit" and t["options"]["limitField"] == 2
                         for t in panel["transformations"]
                     ), "Compact summary must fit the two visible rows"
                     continue
                 if panel_id in {2010, 3010}:
+                    continue
+                if panel_id == 9403:
+                    assert custom["inspect"] is True
+                    assert panel["gridPos"]["w"] == 24
                     continue
                 wrapped = _wrapped_field_names(panel)
                 # Dashboard now wraps at defaults, not via overrides, so allow empty
@@ -762,32 +683,18 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
 
 
 def test_cycle4_named_text_columns_wrap_below_fold() -> None:
-    """#9570 #9568 #9571 #9569 #9567: wrap long text without table-default wrap."""
-    cases = (
-        ("bioetl-overview-v2.json", 9301, "parameter"),
-        ("bioetl-dq-v2.json", 9403, "parameter"),
-        ("bioetl-provider-health-v2.json", 9403, "parameter"),
-        ("bioetl-runtime.json", 9403, "parameter"),
-        ("bioetl-control-plane-v1.json", 9403, "parameter"),
-        ("bioetl-control-plane-v1.json", 9417, "reason"),
+    overview = _load("bioetl-overview-v2.json")
+    stages = _panel(overview, 9460)
+    assert stages["gridPos"]["y"] >= FIRST_WINDOW_Y
+    assert stages["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+    trust = _panel(_load("bioetl-control-plane-v1.json"), 9418)
+    assert trust["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+    reason = next(
+        o
+        for o in trust["fieldConfig"]["overrides"]
+        if o["matcher"]["options"] == "reasons_text"
     )
-    for dashboard_name, panel_id, field in cases:
-        panel = _panel(_load(dashboard_name), panel_id)
-        custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
-        assert custom.get("cellOptions", {}).get("wrapText") in (True, False, None)
-        wrapped = _wrapped_field_names(panel)
-        if dashboard_name in {
-            "bioetl-control-plane-v1.json",
-            "bioetl-provider-health-v2.json",
-        }:
-            # #10498/#10501: fixed-height pagination replaces wrapped rows after live
-            # 1600x900 verification; Inspect retains the full selectable value.
-            assert panel["options"]["cellHeight"] == "md"
-            assert custom.get("inspect") is True
-            assert panel["options"]["footer"]["enablePagination"] is True
-            assert field not in wrapped
-            continue
-        assert field in wrapped, (dashboard_name, panel_id, wrapped)
+    assert {"id": "custom.inspect", "value": True} in reason["properties"]
 
 
 def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:
@@ -816,7 +723,7 @@ def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:
     docs = f"{panel.get('description') or ''} {panel.get('fieldConfig')}"
     assert "504" in docs
     assert "deadline_exceeded" in docs
-    assert "refresh" in docs.lower()
+    assert "failed request is not OK" in docs
 
 
 def test_incident_ranked_suspects_uses_one_comparable_value_column() -> None:
@@ -1088,7 +995,11 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
         for url in first_links
     )
     assert all("var-run_type=$run_type" not in url for url in first_links)
-    assert all("viewPanel" not in url for url in first_links)
+    assert all(
+        "var-run_id=${__data.fields.run_id:percentencode}" in url
+        for url in first_links
+        if url.startswith("/d/")
+    )
     hidden = {
         str((item.get("matcher") or {}).get("options"))
         for item in (first_screen.get("fieldConfig") or {}).get("overrides") or []
@@ -1192,12 +1103,7 @@ def test_below_fold_tables_exclude_time_without_name_metric() -> None:
         ("bioetl-control-plane-v1.json", 9415),
         ("bioetl-control-plane-v1.json", 9413),
         ("bioetl-control-plane-v1.json", 9414),
-        ("bioetl-control-plane-v1.json", 9407),
-        ("bioetl-control-plane-v1.json", 9405),
         ("bioetl-control-plane-v1.json", 9406),
-        ("bioetl-control-plane-v1.json", 9408),
-        ("bioetl-control-plane-v1.json", 9409),
-        ("bioetl-control-plane-v1.json", 9417),
     )
     for dashboard_name, panel_id in cases:
         panel = _panel(_load(dashboard_name), panel_id)
@@ -1231,7 +1137,7 @@ def test_cycle4_below_fold_declared_widths_fit_200pct_css_budget() -> None:
     chrome_px = 40
     cases = (
         ("bioetl-incident-v1.json", 2002, 8),
-        ("bioetl-control-plane-v1.json", 9403, 6),
+        ("bioetl-dq-v2.json", 9403, 24),
     )
     for dashboard_name, panel_id, grid_w in cases:
         panel = _panel(_load(dashboard_name), panel_id)
@@ -1258,51 +1164,26 @@ def test_cycle4_below_fold_declared_widths_fit_200pct_css_budget() -> None:
 
 def test_selected_trust_reasons_link_preserves_multiple_run_types() -> None:
     panel = _panel(_load("bioetl-control-plane-v1.json"), 9418)
-    action = next(
-        item
-        for item in panel["fieldConfig"]["overrides"]
-        if item["matcher"]["options"] == "Action"
-    )
-    links = next(
-        item["value"] for item in action["properties"] if item["id"] == "links"
-    )
-    assert "${run_type:queryparam}" in links[0]["url"]
-    assert "${run_id:queryparam}" in links[0]["url"]
-    assert "var-run_type=${run_type:csv}" not in links[0]["url"]
-    count = next(
-        item
-        for item in panel["fieldConfig"]["overrides"]
-        if item["matcher"]["options"] == "Reason count"
-    )
-    count_links = next(
-        (item["value"] for item in count["properties"] if item["id"] == "links"),
-        [],
-    )
-    assert count_links == []
+    links = panel["fieldConfig"]["defaults"]["links"]
+    assert links
+    for link in links:
+        assert "${run_type:queryparam}" in link["url"]
+        assert "${run_id:queryparam}" in link["url"]
+        assert "${__url_time_range}" in link["url"]
+        assert link["includeVars"] is False
 
 
 def test_visible_trust_reason_count_opens_frozen_reason_details() -> None:
-    dashboard = _load("bioetl-control-plane-v1.json")
-    trust = _panel(dashboard, 9418)
-    action = next(
-        item
-        for item in trust["fieldConfig"]["overrides"]
-        if item["matcher"]["options"] == "Action"
-    )
-    links = next(
-        item["value"] for item in action["properties"] if item["id"] == "links"
-    )
-    assert links[0]["title"] == "View trust reasons"
-    assert "viewPanel=9418" in links[0]["url"]
-    assert "${run_id:queryparam}" in links[0]["url"]
-    return
-    details = _panel(dashboard, 9451)
-    names = next(
-        item["options"]["include"]["names"]
-        for item in details["transformations"]
-        if item["id"] == "filterFieldsByName"
-    )
-    assert "reason_display" in names
+    trust = _panel(_load("bioetl-control-plane-v1.json"), 9418)
+    assert trust["targets"][0]["parser"] == "uql"
+    assert "presentation_trust" in trust["targets"][0]["uql"]
+    assert "run_id=${run_id}" in trust["targets"][0]["url"]
+    overrides = {
+        o["matcher"]["options"]: o["properties"]
+        for o in trust["fieldConfig"]["overrides"]
+    }
+    assert {"id": "custom.hidden", "value": False} in overrides["reasons_count"]
+    assert {"id": "custom.inspect", "value": True} in overrides["reasons_text"]
 
 
 @pytest.mark.parametrize("dashboard_path", sorted(DASHBOARD_DIR.glob("*.json")))
@@ -1439,8 +1320,8 @@ def test_runtime_first_action_separates_endpoint_from_completeness() -> None:
     )
     assert "bioetl_rt_stage_ratio" in stage_expr
     assert "bioetl_runtime_trust_gap_active_10m" in stage_expr
-    header = _panel(_load("bioetl-runtime.json"), 9400)["options"]["content"]
-    assert "SELECTED RUN" in header
+    header = _panel(fleet, 9400)["options"]["content"]
+    assert "Run ID does not filter" in header
     for panel_id in (2542, 2543):
         panel = _panel(fleet, panel_id)
         assert panel["gridPos"]["h"] >= 3

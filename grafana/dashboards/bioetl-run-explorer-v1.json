@@ -319,7 +319,7 @@
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
         "mode": "html",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;width:100%;max-width:100%;box-sizing:border-box;overflow:visible\"><strong>Last 10 launches · newest first · independent of the time range</strong><br>Select a status to view details. <a href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a></div>"
+        "content": "<div style=\"max-width:96ch;padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:20px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;width:100%;max-width:96ch;box-sizing:border-box;overflow:visible\"><strong>Last 10 launches · newest first · independent of the time range</strong><br>Select a status to view details. <a href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\"><strong>Reset filters</strong></a></div>"
       },
       "description": "Browse the latest 10 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
       "links": [
@@ -335,7 +335,7 @@
       "id": 3010,
       "type": "table",
       "title": "Inspect Recent Runs (last 10)",
-      "description": "GLOBAL · Browse the last 10 launches, newest Started first, independent of the time range. Workflow and Pipeline open passports. Run ID opens the persisted Report; inspect its full UUID in the cell. Overview is processing status, not replay readiness. Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. QUERY ERROR is a source failure; VALID EMPTY means no matching launches. Rows are artifact-backed: a tree_missing index means saved run artifacts are absent; verify backing with verify_report_bind.py. Running is a recorded state, not proof of current liveness. Missing reports have no link.",
+      "description": "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. Last 10 launches, newest Started first, independent of the time range. Workflow and Pipeline open passports. Run ID opens the persisted Report; inspect its full UUID in the cell. Overview is processing status, not replay readiness. Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. QUERY ERROR is a source failure; VALID EMPTY means no matching launches. Rows are artifact-backed: a tree_missing index means saved run artifacts are absent; verify backing with verify_report_bind.py. Running is a recorded state, not proof of current liveness. Missing reports have no link. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "gridPos": {
         "h": 13,
         "w": 24,
@@ -378,9 +378,27 @@
                 "value": true
               },
               {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Workflow passport",
+                    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/${__data.fields.workflow_passport_path:raw}",
+                    "includeVars": false,
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#93C5FD"
+                }
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "markdown"
+                  "type": "auto"
                 }
               }
             ]
@@ -444,7 +462,8 @@
                     "title": "Provider Evidence",
                     "url": "/d/bioetl-overview-v2/2-overview?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}&viewPanel=9480",
                     "includeVars": false,
-                    "targetBlank": false
+                    "targetBlank": false,
+                    "tooltip": "Saved Provider Evidence for the selected Run ID. CURRENT provider alert conditions remain in Incident Workspace and do not prove this saved verdict."
                   }
                 ]
               },
@@ -469,7 +488,7 @@
               },
               {
                 "id": "custom.inspect",
-                "value": false
+                "value": true
               },
               {
                 "id": "custom.width",
@@ -693,7 +712,7 @@
                 "value": [
                   {
                     "title": "Saved Evidence",
-                    "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}&viewPanel=9408",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope:percentencode}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}&viewPanel=9418",
                     "includeVars": false,
                     "targetBlank": false
                   }
@@ -1116,6 +1135,18 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "workflow_passport_path"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "pipeline_passport_url"
             },
             "properties": [
@@ -1253,7 +1284,7 @@
           "format": "table",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items.($merge([$, {\"workflow_id\": workflow_passport_url != \"\" ? \"[\" & workflow_id & \"](\" & workflow_passport_url & \")\" : \"N/A\", \"pipeline_passport_path\": $substringAfter(pipeline_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\"), \"overview_handoff\": \"Open\", \"diagnostics_handoff\": \"Open\", \"provider_handoff\": \"Open\", \"quality_handoff\": \"Open\"}]))",
+          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items.($merge([$, {\"workflow_id\": workflow_id != \"\" ? workflow_id : \"N/A\", \"run_label\": run_id, \"workflow_passport_path\": $substringAfter(workflow_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\"), \"pipeline_passport_path\": $substringAfter(pipeline_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\"), \"overview_handoff\": \"Open\", \"diagnostics_handoff\": \"Open\", \"provider_handoff\": \"Open\", \"quality_handoff\": \"Open\"}]))",
           "source": "url",
           "type": "json",
           "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",
@@ -1296,6 +1327,7 @@
                 "report_url",
                 "report_label",
                 "workflow_passport_url",
+                "workflow_passport_path",
                 "pipeline_passport_url",
                 "pipeline_passport_path"
               ]
@@ -1322,8 +1354,9 @@
               "report_url": 13,
               "report_label": 14,
               "workflow_passport_url": 15,
-              "pipeline_passport_url": 16,
-              "pipeline_passport_path": 17
+              "workflow_passport_path": 16,
+              "pipeline_passport_url": 17,
+              "pipeline_passport_path": 18
             },
             "renameByName": {
               "workflow_id": "Workflow",

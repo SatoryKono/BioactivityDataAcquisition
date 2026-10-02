@@ -31,7 +31,7 @@ _DASHBOARD_UID_RE = re.compile(r"^/d/([^\\/?]+)")
 
 _LINK_VAR_RE = re.compile(r"[?&]var-(\w+)=")
 
-_LINK_VAR_VALUE_RE = re.compile(r"[?&]var-(\w+)=([^&#]+)")
+_LINK_VAR_VALUE_RE = re.compile(r"[?&]var-(\w+)=([^&#]*)")
 
 _NAV_LINK_CONTRACT_PATH = Path(
     "docs/03-guides/dashboards/contracts/navigation-links.yaml"
@@ -68,6 +68,7 @@ def _normalize_required_panel_entry(uid: str, entry: object) -> dict[str, object
         "panel_id": panel_id,
         "target_uid": target_uid,
         "link_titles": tuple(str(title) for title in link_titles),
+        "required_view_panel": entry.get("required_view_panel"),
     }
 
 
@@ -340,9 +341,12 @@ def _assert_l1_inbound_status_policy(
 
 def _target_panel_links(panel: dict[str, object], target_uid: str) -> list[str]:
     urls: list[str] = []
-    for link in _iter_panel_data_links(panel):
+    for link in [*panel.get("links", []), *_iter_panel_data_links(panel)]:
         url = link.get("url")
         if isinstance(url, str) and _extract_dashboard_uid(url) == target_uid:
+            assert link.get("includeVars") is False, (
+                "Inbound link must disable implicit vars"
+            )
             urls.append(url)
     return urls
 
@@ -353,6 +357,10 @@ def _assert_inbound_target_link_policy(
     passed_vars = _extract_link_vars(url)
     required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID[target_uid]
     forbidden_vars = _FORBIDDEN_DASHBOARD_LINK_VARS_BY_TARGET_UID[target_uid]
+    assert passed_vars <= _ALLOWED_DASHBOARD_LINK_VARS[target_uid]
+    assert _extract_link_var_values(url).get("run_id") == "$run_id", (
+        "Selected-run inbound link must preserve the exact Run ID"
+    )
     assert required_vars <= passed_vars, (
         f"Inbound path {source_uid}:{panel_id}->{target_uid} missing vars "
         f"{sorted(required_vars - passed_vars)} via {url}"
@@ -383,7 +391,7 @@ def _assert_inbound_route_policy(
     assert isinstance(source_uid, str)
     assert isinstance(panel_id, int)
     assert isinstance(panel_title, str) and panel_title
-    if level_name == "L1":
+    if level_name == "L1" or status_row_title_matcher is not None:
         assert isinstance(status_row_title_matcher, str) and status_row_title_matcher
 
     source_dashboard = dashboards.get(source_uid)
@@ -397,7 +405,7 @@ def _assert_inbound_route_policy(
     assert panel.get("title") == panel_title, (
         f"Source panel id={panel_id} title mismatch: expected {panel_title!r}, got {panel.get('title')!r}"
     )
-    if level_name == "L1":
+    if level_name == "L1" or status_row_title_matcher is not None:
         _assert_l1_inbound_status_policy(
             source_dashboard=source_dashboard,
             panel=panel,
@@ -470,7 +478,7 @@ def _assert_critical_panel_entry(
         f"{dashboard_path.name} ({uid}) missing critical panel id={panel_id}"
     )
 
-    data_links = _iter_panel_data_links(panel) + list(panel.get("links") or [])
+    data_links = [*panel.get("links", []), *_iter_panel_data_links(panel)]
     assert data_links, (
         f"{dashboard_path.name} panel id={panel_id} must define dataLinks"
     )
@@ -497,6 +505,12 @@ def _assert_critical_panel_entry(
     allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS[target_uid]
     for link in matching_links:
         url = str(link.get("url", ""))
+        view_panel = entry.get("required_view_panel")
+        if view_panel is not None:
+            assert isinstance(view_panel, int)
+            assert dict(parse_qsl(urlsplit(url).query)).get("viewPanel") == str(
+                view_panel
+            ), f"Critical detail action must open panel {view_panel}"
         assert link.get("includeVars") is False, (
             f"{dashboard_path.name} panel id={panel_id} link {link.get('title')!r} "
             "must keep includeVars=false"
@@ -672,13 +686,35 @@ def _assert_preserved_identity_handoff(
     assert selector == "run_id", "preserved identity selector must be run_id"
     assert required_value == "$run_id", "preserved run_id handoff value must be $run_id"
 
+    values = _extract_link_var_values(url)
+    reset = spec["catalog_reset"]
+    if target_uid == reset["target_uid"] and values.get("run_id") == "-":
+        assert values == reset["required_values"], (
+            f"{dashboard_name} catalog reset must clear all selectors and search: {url}"
+        )
+        _assert_required_time_tokens(
+            url, tokens=_DASHBOARD_TIME_HANDOFF_TOKENS, context="catalog reset"
+        )
+        return
+
     if current_uid in source_uids and target_uid in target_uids:
         values = _extract_link_var_values(url)
+        if target_uid == "bioetl-run-explorer-v1" and values.get("run_id") == "-":
+            assert {
+                key: values.get(key) for key in ("workflow", "pipeline", "run_type")
+            } == dict.fromkeys(("workflow", "pipeline", "run_type"), ".*")
+            assert "var-lookup_run_id=" in url
+            return
+        expected_identity = (
+            "${__data.fields.run_id:percentencode}"
+            if current_uid == "bioetl-run-explorer-v1"
+            else required_value
+        )
         assert selector in passed_vars, (
             f"{dashboard_name} link to {target_uid} must preserve exact Run ID "
             f"with var-{selector}={required_value}: {url}"
         )
-        assert values.get(selector) == required_value, (
+        assert values.get(selector) == expected_identity, (
             f"{dashboard_name} link to {target_uid} must use "
             f"var-{selector}={required_value}, got {values.get(selector)!r}: {url}"
         )
@@ -774,8 +810,9 @@ def _assert_cross_dashboard_link_policy(
         assert current_uid == "bioetl-incident-v1"
         assert link.get("title") == "Open domain diagnostics"
         for resolved_uid, scope in {
-            "bioetl-overview-v2": "",
+            "bioetl-incident-v1": "",
             "bioetl-dq-v2": "var-stage=%24__all",
+            "bioetl-overview-v2": "viewPanel=9480",
         }.items():
             resolved_url = url.replace(
                 "${__data.fields.action_dashboard_uid}", resolved_uid
@@ -812,14 +849,6 @@ def _assert_cross_dashboard_link_policy(
                 "${__data.fields.route_pipeline:percentencode}",
                 "${__data.fields.pipeline:percentencode}",
             }
-        elif target_uid == "bioetl-run-explorer-v1" and "var-lookup_run_id=" in url:
-            values = _extract_link_var_values(url)
-            assert values == {
-                "workflow": ".*",
-                "pipeline": ".*",
-                "run_type": ".*",
-                "run_id": "-",
-            }, "Global Run Explorer navigation must clear selection explicitly"
         elif current_uid == "bioetl-run-explorer-v1" and "${__data.fields." in url:
             values = _extract_link_var_values(url)
             assert values["run_id"] in {
@@ -1483,7 +1512,7 @@ _SANITIZER_SAFE_NAV_TOKENS = (
     "display:flex",
     "flex-wrap:nowrap",
     "overflow:visible",
-    "box-sizing:border-box",
+    "width:16.5%",
     "font:600 16px/18px Arial",
     "min-width:0",
     "overflow-wrap:anywhere",
@@ -1508,19 +1537,24 @@ def _assert_titles_in_order(
 def _assert_visual_bus_base_content(
     *, dashboard_name: str, content: str, panel: dict[str, object]
 ) -> None:
-    titles = _BASE_VISUAL_NAV_TITLES
-    if dashboard_name == "bioetl-dq-v2.json":
-        titles = (*titles[:-1], "Data Quality", titles[-1])
-    for title in titles:
+    for title in _BASE_VISUAL_NAV_TITLES:
         assert title in content, (
             f"{dashboard_name} visual navigation bus must render '{title}'"
         )
-    _assert_titles_in_order(content, titles, dashboard_name=dashboard_name)
+    _assert_titles_in_order(
+        content, _BASE_VISUAL_NAV_TITLES, dashboard_name=dashboard_name
+    )
     assert "<style" not in content.lower(), (
         f"{dashboard_name} navigation must survive Grafana Text-panel "
         "sanitization without a style block"
     )
     for token in _SANITIZER_SAFE_NAV_TOKENS:
+        if dashboard_name == "bioetl-dq-v2.json" and token in {
+            "background:#1d4ed8",
+            "border:2px solid #7dd3fc",
+        }:
+            assert token not in content
+            continue
         assert token in content, (
             f"{dashboard_name} navigation must define sanitizer-safe {token}"
         )
@@ -1533,7 +1567,7 @@ def _assert_visual_bus_base_content(
     description = str(panel.get("description", ""))
     assert "Sanitizer-compatible" in description
     assert "native keyboard focus" in description
-    assert "saved provider evidence" in description
+    assert "Run Overview" in description
     assert "Incident Workspace" in description
     assert "Run Explorer" in description
 
@@ -1541,6 +1575,10 @@ def _assert_visual_bus_base_content(
 def _assert_current_dashboard_disabled_in_visual_bus(
     *, dashboard_name: str, uid: str, content: str
 ) -> None:
+    if uid == "bioetl-dq-v2":
+        assert 'aria-current="page"' not in content
+        assert "Data Quality" not in content
+        return
     current_title = _EXPECTED_CURRENT_NAV_TITLE[uid]
     # Current chip is non-interactive: span[aria-current] (legacy) or
     # a[aria-disabled][aria-current] (DUX7 sanitizer-safe styles).

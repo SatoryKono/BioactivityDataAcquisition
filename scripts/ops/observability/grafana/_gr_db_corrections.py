@@ -942,7 +942,7 @@ _BRONZE_PERCENTAGE_DISPLAY = "percentage of Bronze"
 _PROCESSED_RECORDS_NOVALUE = (
     "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer."
 )
-_PROCESSED_RECORDS_DESCRIPTION = "SELECTED RUN · Saved record accounting evidence: count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are not displayed. Accounting evidence is not OK or a verdict. Request failure is QUERY ERROR."
+_PROCESSED_RECORDS_DESCRIPTION = "SELECTED RUN · Saved accounting: count in is the input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR."
 
 
 def _dq_processed_records(panel: dict[str, Any]) -> None:
@@ -1004,7 +1004,7 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
         {
             "id": "organize",
             "options": {
-                "excludeByName": {"row_status": True},
+                "excludeByName": {"row_status": True, "Time": True, "percintage": True},
                 "indexByName": {
                     "parameter": 0,
                     "count in": 1,

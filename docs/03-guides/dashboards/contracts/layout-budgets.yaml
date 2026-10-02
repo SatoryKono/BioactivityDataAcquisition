@@ -1,8 +1,8 @@
 version: 1
 source: grafana/dashboards/*.json
 mode: error
-note: Distinct fold constants for the five shipped dashboards. Do not unify first_window_y
-  with first_load_y_max. first_load_y_max MUST stay equal to performance-budgets.yaml:first_screen_y_max.
+note: Distinct fold constants for the five shipped dashboards. Do not unify first_window_y with first_load_y_max.
+  first_load_y_max MUST stay equal to performance-budgets.yaml:first_screen_y_max.
 first_window_y: 18
 first_load_y_max: 28
 viewport_rows: 18
@@ -11,47 +11,46 @@ first_screen_shell_panels:
 - dashboard: bioetl-overview-v2.json
   id: 99
   owner: '@bioetl-observability'
-  rationale: Native title omitted so h=3 Inspect Scope & Evidence body fits DASH-FIT-004.
-    Display title stays in bioetlDisplayTitle.
+  rationale: Native title omitted so h=3 Inspect Scope & Evidence body fits DASH-FIT-004. Display title
+    stays in bioetlDisplayTitle.
   retire_when: the banner can keep a native title without overflowing at 200%
 - dashboard: bioetl-run-explorer-v1.json
   id: 1
   owner: '@bioetl-observability'
-  rationale: Native title omitted so h=3 Understand Run Scope body fits DASH-FIT-004.
-    Display title stays in bioetlDisplayTitle.
+  rationale: Native title omitted so h=3 Understand Run Scope body fits DASH-FIT-004. Display title stays
+    in bioetlDisplayTitle.
   retire_when: the banner can keep a native title without overflowing at 200%
 - dashboard: bioetl-control-plane-v1.json
   id: 906
   owner: '@bioetl-observability'
-  rationale: First-window next-step rail stays readable at h=3 full width when navigation
-    is h=4. Native Grafana header is omitted; copy stays inside the HTML body at 16px.
-    Display title stays in bioetlDisplayTitle. Trust/Retention tables compact to h=4
-    so the CTA occupies y=11..13 and the KPI strip stays y=14 h=3 with no shared grid
-    cells.
+  rationale: First-window next-step rail stays readable at h=3 full width when navigation is h=4. Native
+    Grafana header is omitted; copy stays inside the HTML body at 16px. Display title stays in bioetlDisplayTitle.
+    Trust/Retention tables compact to h=4 so the CTA occupies y=11..13 and the KPI strip stays y=14 h=3
+    with no shared grid cells.
   retire_when: the CTA can keep a native title without overflowing at 200%
 - dashboard: bioetl-control-plane-v1.json
   id: 9400
   owner: '@bioetl-observability'
-  rationale: Native title omitted so h=4 Inspect Scope & Evidence body fits DASH-FIT-004.
-    Display title stays in bioetlDisplayTitle.
+  rationale: Native title omitted so h=4 Inspect Scope & Evidence body fits DASH-FIT-004. Display title
+    stays in bioetlDisplayTitle.
   retire_when: the banner can keep a native title without overflowing at 200%
 - dashboard: bioetl-dq-v2.json
   id: 9400
   owner: '@bioetl-observability'
-  rationale: Native title omitted so Understand Evidence Scope body fits DASH-FIT-004.
-    Display title stays in bioetlDisplayTitle.
+  rationale: Native title omitted so Understand Evidence Scope body fits DASH-FIT-004. Display title stays
+    in bioetlDisplayTitle.
   retire_when: the banner can keep a native title without overflowing at 200%
 - dashboard: bioetl-incident-v1.json
   id: 9400
   owner: '@bioetl-observability'
-  rationale: Native title omitted so Understand Incident Scope body fits DASH-FIT-004.
-    Display title stays in bioetlDisplayTitle.
+  rationale: Native title omitted so Understand Incident Scope body fits DASH-FIT-004. Display title stays
+    in bioetlDisplayTitle.
   retire_when: the banner can keep a native title without overflowing at 200%
 - dashboard: bioetl-incident-v1.json
   id: 2001
   owner: '@bioetl-observability'
-  rationale: Native title omitted so h=3 Start Incident Triage body fits DASH-FIT-004.
-    Display title stays in bioetlDisplayTitle.
+  rationale: Native title omitted so h=3 Start Incident Triage body fits DASH-FIT-004. Display title stays
+    in bioetlDisplayTitle.
   retire_when: the CTA can keep a native title without overflowing at 200%
 min_height:
   root:
@@ -121,6 +120,11 @@ first_window_summary_tables:
   owner: '@bioetl-observability'
   bind: limit
 - dashboard: bioetl-overview-v2.json
+  id: 215
+  max_rows: 2
+  owner: '@bioetl-observability'
+  bind: topk
+- dashboard: bioetl-overview-v2.json
   id: 9002
   max_rows: 6
   owner: '@bioetl-observability'
@@ -130,6 +134,11 @@ first_window_summary_tables:
   max_rows: 5
   owner: '@bioetl-observability'
   bind: limit
+- dashboard: bioetl-overview-v2.json
+  id: 9301
+  max_rows: 5
+  owner: '@bioetl-observability'
+  bind: paginate
 - dashboard: bioetl-dq-v2.json
   id: 9402
   max_rows: 5
@@ -214,6 +223,6 @@ allowlists:
   - dashboard: bioetl-incident-v1.json
     id: 8808
     owner: '@bioetl-observability'
-    rationale: Collapsed Pipeline fleet and range row moved from Pipeline Diagnostics.
-      It is below-fold fleet evidence, not a first-screen scalar group.
+    rationale: Collapsed Pipeline fleet and range row moved from Pipeline Diagnostics. It is below-fold
+      fleet evidence, not a first-screen scalar group.
     retire_when: fleet signals are represented by first-window scalar cards on Incident

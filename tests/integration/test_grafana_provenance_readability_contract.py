@@ -17,41 +17,27 @@ _SPECS = {
     "bioetl-control-plane-v1.json": (
         9400,
         "Inspect Scope & Evidence",
-        ("SELECTED RUN", "CURRENT", "Do not replay", "INCOMPLETE", "UNKNOWN"),
+        ("${run_id}", "Replay Checks"),
     ),
     "bioetl-overview-v2.json": (
         99,
         "Inspect Scope & Evidence",
-        ("CURRENT", "first action", "VERIFY", "SELECTED RUN"),
-    ),
-    "bioetl-runtime.json": (
-        9400,
-        "Understand Pipeline Scope",
-        ("CURRENT", "active blocker", "SCRAPING", "UNKNOWN"),
-    ),
-    "bioetl-provider-health-v2.json": (
-        9400,
-        "Understand Evidence Scope",
-        ("GLOBAL", "every provider", "SELECTED PROVIDER", "UNKNOWN"),
+        ("${run_id}", "assesses that run only", "UNKNOWN"),
     ),
     "bioetl-dq-v2.json": (
         9400,
         "Understand Evidence Scope",
-        (
-            "Is data conformant, and what impact needs action?",
-            "Status/reasons",
-            "scopes are not peers",
-        ),
+        ("SELECTED RUN", "CURRENT", "TIME RANGE", "not on this page"),
     ),
     "bioetl-incident-v1.json": (
         9400,
         "Understand Incident Scope",
-        ("GLOBAL", "not verified causes", "Telemetry gaps", "UNKNOWN"),
+        ("CURRENT", "GLOBAL", "not verified causes", "Run ID does not filter"),
     ),
     "bioetl-run-explorer-v1.json": (
         1,
         "Understand Run Scope",
-        ("Open Report", "BROWSE", "not this time range", "SELECTED RUN"),
+        ("Last 10 launches", "independent of the time range", "Reset filters"),
     ),
 }
 
@@ -109,9 +95,10 @@ def test_provenance_panel_readability_contract(
     css = (
         _REQUIRED_CSS_FIRST_WINDOW_H3 if filename in _FIRST_WINDOW_H3 else _REQUIRED_CSS
     )
-    assert all(token in content for token in css)
+    assert all(token in content for token in css if not token.startswith("line-height"))
+    assert "line-height:1.2" in content or "line-height:20px" in content
     assert all(token in content for token in required_copy)
-    assert "background:" not in content
+    assert "background:" not in content.replace("background:none", "")
     assert "background-color" not in content
     assert "#ff9830" not in content
     assert "rgba(255,152,48" not in content

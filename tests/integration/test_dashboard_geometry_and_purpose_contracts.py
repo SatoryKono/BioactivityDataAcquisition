@@ -344,9 +344,9 @@ def test_first_window_verdict_cards_state_interpretation() -> None:
 
 
 def test_always_visible_nonrow_stack_fits_viewport() -> None:
-    """DASH-FIT-001: max(y+h) of root non-row panels <= VIEWPORT_ROWS.
+    """DASH-FIT-001: max(y+h) of first-window root non-row panels <= VIEWPORT_ROWS.
 
-    Collapsed row headers may sit on/after the fold.
+    Below-fold evidence may be root panels; canonical answers must stay first-window (DASH-FIT-003).
     """
     assert VIEWPORT_ROWS is not None
     violations: list[str] = []
@@ -361,7 +361,7 @@ def test_always_visible_nonrow_stack_fits_viewport() -> None:
             grid = _grid(panel)
             y = grid.get("y")
             h = grid.get("h")
-            if isinstance(y, int) and isinstance(h, int):
+            if isinstance(y, int) and isinstance(h, int) and y < FIRST_WINDOW_Y:
                 bottoms.append(y + h)
         bottom = max(bottoms, default=0)
         if bottom > VIEWPORT_ROWS:

@@ -1,8 +1,24 @@
-## Five-dashboard retirement and navigation — 2026-10-02
+## Retirement route corrections — 2026-10-02
 
-Legacy workspace handoffs preserve exact-run identity and time. Overview retains three domain CTAs. Supplementary evidence groups ship collapsed while status, domains and identity remain in the answer band. Static validation and outstanding browser/coverage work are recorded in [the UX report](../../reports/dashboard-ux-checks/2026-10-02.md) (`docs/reports/dashboard-ux-checks/2026-10-02.md`).
+Provider and runtime links resolve to Run Overview and preserve run identity
+and time range. Provider alert links target evidence panel 9480. The
+[validation report](../../reports/dashboard-ux-checks/2026-10-02.md) records
+static checks and outstanding full-suite and browser acceptance gaps.
 
 ______________________________________________________________________
+
+## Approved five-dashboard cutover — 2026-10-02
+
+ADR-053 records the maintainer-approved current portfolio: Replay Readiness,
+Run Overview, Data Quality, Incident Workspace and Run Explorer. Saved provider
+checks belong to Overview; fleet/range runtime diagnostics belong to Incident.
+Contracts and tests follow these five UIDs without raising layout, readability,
+coverage or debt thresholds. Earlier dated entries below describe their original
+surfaces and are not current routing requirements.
+
+Static UX evidence and explicit live-render limitations:
+[2026-10-02 UX check](../../reports/dashboard-ux-checks/2026-10-02.md)
+(`docs/reports/dashboard-ux-checks/2026-10-02.md`).
 
 ## UX report artifact requirement
 

@@ -1279,7 +1279,7 @@ def test_overview_next_action_route_priority_scores_are_ordered() -> None:
     assert by_reason["workflow_scope_requires_review"] == 10
     assert by_reason["no_recent_activity_or_unknown_state"] == 5
 
-    # Saved runtime and provider evidence moved to Run Overview.
+    # Gold lifecycle saved evidence belongs to Run Overview after the five-dashboard cutover.
     gold_rule = next(
         rule
         for rule in route_rules
@@ -1308,6 +1308,7 @@ def test_overview_next_action_route_priority_scores_are_ordered() -> None:
     assert provider_rule.get("labels", {}).get("action_dashboard_uid") == (
         "bioetl-overview-v2"
     )
+    assert "viewPanel=9480" in provider_rule["expr"]
     # Provider severity remains global (scalar max); pipeline context is URL-layer only.
     assert "scalar(" in str(provider_rule.get("expr", ""))
 

@@ -65,7 +65,7 @@ size option.
 | ID | Requirement |
 | --- | --- |
 | `DASH-ARCH-001` | Grafana MUST remain an optional, read-only presentation adapter. It MUST NOT become a write authority, control plane, or required local runtime dependency. |
-| `DASH-PORTFOLIO-001` | The five shipped JSON UIDs after the accepted Runtime/Provider retirement MUST remain authoritative rollback fallbacks; ADR-053 describes the historical portfolio before this cutover. |
+| `DASH-PORTFOLIO-001` | The five provisioned JSON UIDs defined by the approved 2026-10-02 JSON cutover in ADR-053 MUST remain authoritative rollback fallbacks until another approved cutover. Retired runtime/provider UIDs MUST NOT reappear in active links or provisioning. |
 | `DASH-DATA-001` | Dashboard queries MUST use shipped metrics, recording rules, Grafana, or BioETL Ops HTTP contracts. Invented series are forbidden. |
 | `DASH-DATA-002` | `run_id`, `manifest_id`, record identifiers, hashes, and filesystem paths MUST NOT be used as Prometheus labels or label filters. Exact-run identity belongs to Ops HTTP/control-plane evidence. |
 | `DASH-STATE-001` | Missing required evidence MUST remain `UNKNOWN`, `INCOMPLETE`, or an explicit error; it MUST NOT become a healthy zero. |
@@ -84,7 +84,7 @@ size option.
 | `DASH-FIRST-001` | Every dashboard MUST answer one operator question through `state × confidence × basis × next_action`. |
 | `DASH-FIRST-002` | Current status and first action MUST precede selected-range and forensic evidence. Forensic rows MUST ship collapsed. |
 | `DASH-STATE-002` | Operator states MUST use the canonical `OK/WARN/CRIT/UNKNOWN` palette; documented trust gates MAY add `INCOMPLETE`. Color MUST NOT be the only carrier of meaning. |
-| `DASH-NAV-001` | Primary workspaces MUST expose the active ordered navigation bus, omit their active self-link, preserve time, and pass only target-allowlisted variables. Run Explorer is a selection leaf with exact-row handoffs; Data Quality is reached contextually and displays its current workspace when opened. |
+| `DASH-NAV-001` | Every dashboard MUST expose its declared navigation surface in `navigation-links.yaml`: the ordered header bus on detail/workspace pages, or exact-run table actions on Run Explorer. Header links omit self-links; all routes preserve time, explicitly serialize target-allowlisted variables, and disable implicit variable copying. Row actions MUST carry the clicked row identity. |
 | `DASH-SCOPE-001` | A data-bearing panel with `scope=selected_run` MUST use `evidence_source=ops_http`. Prometheus MUST NOT claim exact UUID scope (`DASH-DATA-002`). |
 | `DASH-SCOPE-002` | `bioetl-overview-v2` first window MUST show `Review Selected Run Status` (`9603`) and `Review Run Domains` (`9002`). Run ID is always set. CURRENT fleet panels are not on this page. |
 | `DASH-ACTION-001` | Critical operator panels MUST expose an actionable dashboard or runbook CTA without duplicate or conflicting handoffs. |
@@ -212,7 +212,7 @@ Derived from the geometry-grounded proposal
 | --- | --- | --- |
 | `DASH-LAYOUT-003` | Every `type:"row"` header MUST have `gridPos.h == 1`. | enforced |
 | `DASH-LAYOUT-004` | Root data-bearing panels MUST meet a type-aware minimum `gridPos.h`: `table >= 5`; `timeseries`/`heatmap`/`state-timeline >= 5`; `stat`/`gauge`/`bargauge >= 3` (verdict cards SHOULD be `>= 4`); `text >= 2`. Nested children inside additional panel groups use the same floors except `table >= 4` (compact forensic tables). Exceptions live in the governed min-height allowlist. | enforced |
-| `DASH-FIT-001` | Always-visible root **non-row** panels MUST have `max(y+h) <= VIEWPORT_ROWS` (`18`, calibrated to the 1366×768 first-viewport / kiosk=tv chrome using Grafana stride 38px). Collapsed row headers MAY sit on or below the fold. | enforced |
+| `DASH-FIT-001` | First-window root **non-row** panels (`y < FIRST_WINDOW_Y`) MUST have `max(y+h) <= VIEWPORT_ROWS` (`18`, calibrated to the 1366×768 first-viewport / kiosk=tv chrome using Grafana stride 38px). Saved evidence MAY remain in root panels below the fold; canonical answers MUST remain first-window under DASH-FIT-003. Collapsed row headers MAY sit on or below the fold. | enforced |
 | `DASH-FIT-002` | No always-visible root panel may straddle the fold: `y < FIRST_WINDOW_Y < y+h` is forbidden unless governed-allowlisted. | enforced |
 | `DASH-FIT-003` | The per-dashboard canonical answer panel (§7.1) MUST be a root, non-nested panel with `gridPos.y < FIRST_WINDOW_Y` on every dashboard. | enforced |
 | `DASH-FIT-004` | Every root non-row panel with `gridPos.y < FIRST_WINDOW_Y` MUST have a recorded first-window containment result. First-window `text`, `stat`, and summary-table panels MUST fail closed when `scrollHeight > clientHeight` or `scrollWidth > clientWidth`, with only the documented browser-rounding tolerance. No first-window overflow exception may be added merely to preserve a failing layout. Horizontal scrolling is allowed only for explicitly named below-fold explorer panels. | enforced |
@@ -223,7 +223,7 @@ Derived from the geometry-grounded proposal
 | `DASH-COPY-006` | First-window verdict cards (background `stat` whose mappings encode `OK` plus `WARN`/`CRIT`) MUST state `OK`/`WARN`/`CRIT`/`UNKNOWN` in the description. Documented trust gates (`1. Trust`/`3. Pipeline Diagnostics` `9401`) MUST also state `INCOMPLETE`. Presence/coverage gates without that palette are out of scope. | enforced |
 | `DASH-COPY-007` | Data-typed panels MUST declare ≥1 live target (non-empty PromQL `expr` or Infinity `url`, `hide != true`). | enforced |
 | `DASH-PERF-003` | The answer fold (`FIRST_WINDOW_Y=18`) and the first-load budget window (`FIRST_LOAD_Y_MAX=28`) MUST stay distinct, named constants. | enforced |
-| `DASH-DENSITY-002` | Every additional panel group with ≥1 scalar panel MUST have scalar density (values / `w×h`, `stat`/`gauge`/`bargauge` only) greater than the dashboard's first-screen scalar density (§5.4). | enforced (all 7 uids in scalar_density_enforced_uids) |
+| `DASH-DENSITY-002` | Every additional panel group with ≥1 scalar panel MUST have scalar density (values / `w×h`, `stat`/`gauge`/`bargauge` only) greater than the dashboard's first-screen scalar density (§5.4). | enforced (all 5 uids in scalar_density_enforced_uids) |
 
 Named constants and governed exception allowlists (`owner + rationale + retire_when`)
 live in [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml)
@@ -234,9 +234,9 @@ and are loaded by `tests/integration/_dashboard_layout_budgets.py`.
 | UID | Required answer |
 | --- | --- |
 | `bioetl-control-plane-v1` | Can the selected run be exactly replayed from saved inputs? |
-| `bioetl-overview-v2` | What is the saved assessment of the selected Run ID? |
+| `bioetl-overview-v2` | What is the saved assessment, runtime/domain status, identity, and provider evidence of the selected Run ID? |
 | `bioetl-dq-v2` | What is the DQ assessment of the selected Run ID? |
-| `bioetl-incident-v1` | What is the highest-confidence active suspect? |
+| `bioetl-incident-v1` | What is the highest-confidence active suspect, and which current/global runtime, provider, or control-plane evidence explains it? |
 | `bioetl-run-explorer-v1` | Which pipelines ran most recently, and where are their reports? |
 
 ### 7.1 Canonical answer-panel map (`DASH-FIT-003` input)
@@ -247,7 +247,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | UID | Answer panel (title / id) | Notes |
 | --- | --- | --- |
 | `bioetl-control-plane-v1` | `Review Exact Replay Readiness` (`9422`) | exact-run readiness from saved inputs; CURRENT `9401` is not this answer |
-| `bioetl-overview-v2` | `Review Selected Run Status` (`9603`) + `Review Run Domains` (`9002`) | Saved HTTP evidence for the selected Run ID. |
+| `bioetl-overview-v2` | `Selected Run Status` (`9603`) + `Run Domains` (`9002`) | Saved HTTP evidence for the selected Run ID. Provider evidence/check remains available at `9480` / `9481`. |
 | `bioetl-dq-v2` | `Review Selected Run Status` (`9406`) | saved HTTP evidence for the selected Run ID |
 | `bioetl-incident-v1` | `Inspect Ranked Suspects` (`2010`) | highest-confidence suspect matrix |
 | `bioetl-run-explorer-v1` | `Inspect Recent Runs` (`3010`) | Browse/select the exact run via picker `3010` only. Identity and processed records are on destination dashboards, not this UID. |

@@ -10,10 +10,13 @@ from bioetl.application.core.batch_transformer_state import (
     RecordTransformOutcome as RecordTransformOutcome,
 )
 from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.services.dq.disabled_gold_filter import DisabledGoldFilter
 from bioetl.application.services.dq.gold_filter_diagnostics import (
     resolve_gold_filter_details as _resolve_gold_filter_details,
 )
 from bioetl.domain.exceptions.validation import ValidationError
+from bioetl.domain.run_reports.context import get_stage_accounting
+from bioetl.domain.run_reports.models import StageId
 from bioetl.domain.run_reports.reason_catalog import compose_field_reason_code
 from bioetl.domain.types import ErrorType
 
@@ -76,6 +79,13 @@ def _build_gold_record(
     gold_transform: GoldTransformCallback,
 ) -> tuple[dict[str, object] | None, bool, object | None]:
     """Create a Gold record and report contract-based exclusion."""
+    if isinstance(gold_filter, DisabledGoldFilter):
+        accounting = get_stage_accounting()
+        if accounting is not None:
+            accounting.record_removal(
+                StageId.GOLD.value, outcome="skipped", reason_code="OPERATOR_SKIPPED"
+            )
+        return None, False, None
     if not gold_filter(context, silver_record):
         return None, True, _resolve_gold_filter_details(gold_filter, silver_record)
     gold_record = cast(

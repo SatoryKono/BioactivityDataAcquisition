@@ -41,9 +41,7 @@ QUERY_TYPES = {
 }
 
 
-def test_canonical_context_trims_run_id_and_shares_uuid_across_five_active_uids() -> (
-    None
-):
+def test_canonical_context_trims_run_id_and_shares_uuid_across_seven_uids() -> None:
     with pytest.raises(RunIdError):
         normalize_run_id("%20%20")
     with pytest.raises(RunIdError):
@@ -145,16 +143,14 @@ def test_empty_state_classes_are_declared_and_visible_copy_differs() -> None:
     assert event_copy != missing_copy
 
 
-def test_saved_provider_evidence_does_not_claim_current_health() -> None:
+def test_provider_freshness_is_not_present_ok_on_missing_health_status() -> None:
     dashboard = load_dashboard(DASHBOARD_DIR / "bioetl-overview-v2.json")
-    panel = next(p for p in get_dashboard_panels(dashboard) if p.get("id") == 9480)
-    target = panel["targets"][0]
-    assert panel["datasource"] == "BioETL Ops HTTP"
-    assert "run_id=" in target["url"]
-    assert "UNKNOWN" in panel["description"]
-    assert "QUERY ERROR" in panel["description"]
-    assert "provider_checks" in str(target)
-    assert not (DASHBOARD_DIR / "bioetl-provider-health-v2.json").exists()
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9480)
+    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert "saved" in panel["description"].lower()
+    assert "provider API was not called" in panel["description"]
+    assert all("expr" not in t for t in panel["targets"])
+    assert all("run_id=${run_id}" in t["url"] for t in panel["targets"])
 
 
 def test_current_card_disposition_covers_first_window_current_panels() -> None:
@@ -170,10 +166,7 @@ def test_current_card_disposition_covers_first_window_current_panels() -> None:
         assert item.get("reason")
         if item.get("disposition") == "collapse":
             assert item.get("collapse_into")
-        path = DASHBOARD_DIR / str(item["dashboard"])
-        if item["disposition"] == "retire" and not path.exists():
-            continue
-        dashboard = load_dashboard(path)
+        dashboard = load_dashboard(DASHBOARD_DIR / str(item["dashboard"]))
         panel = next(
             (
                 candidate
@@ -182,9 +175,6 @@ def test_current_card_disposition_covers_first_window_current_panels() -> None:
             ),
             None,
         )
-        if item["disposition"] == "retire":
-            assert panel is None, "Retired card must remain absent"
-            continue
         if panel is None:
             missing_panels.append(f"{item['dashboard']}:{item['id']}")
     assert not missing_panels, "disposition panel missing:\n" + "\n".join(
@@ -196,9 +186,9 @@ def test_current_card_disposition_covers_first_window_current_panels() -> None:
         for item in entries
         if item.get("disposition") == "keep"
     }
-    assert ("bioetl-overview-v2.json", 9603) in keep
-    assert ("bioetl-overview-v2.json", 9002) in keep
-    fleet = next(panel for panel in overview["panels"] if panel.get("id") == 9603)
+    assert ("bioetl-incident-v1.json", 9401) in keep
+    assert ("bioetl-overview-v2.json", 9604) in keep
+    fleet = next(panel for panel in overview["panels"] if panel.get("id") == 9604)
     assert int((fleet.get("gridPos") or {}).get("y") or 99) < FIRST_WINDOW_Y
 
 

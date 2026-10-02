@@ -930,7 +930,7 @@ pmid → pmid → pubmed-id
 
 ### 3.2.3. Dashboard Presentation Contract
 
-Подробный проверяемый контракт для семи shipped Grafana dashboards закреплён в
+Подробный проверяемый контракт для пяти shipped Grafana dashboards закреплён в
 [`DASHBOARD_REQUIREMENTS.md`](../01-requirements/DASHBOARD_REQUIREMENTS.md) и
 остаётся подчинён ADR-010/ADR-053 и правилам observability этого раздела.
 

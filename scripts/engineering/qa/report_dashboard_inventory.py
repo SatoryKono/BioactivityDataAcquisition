@@ -42,17 +42,15 @@ MANDATORY_LINK_UIDS: dict[str, set[str]] = {
         "bioetl-dq-v2",
         "bioetl-control-plane-v1",
     },
-    "bioetl-provider-health-v2": {
-        "bioetl-overview-v2",
-        "bioetl-control-plane-v1",
-        "bioetl-dq-v2",
-    },
     "bioetl-dq-v2": {
         "bioetl-overview-v2",
         "bioetl-control-plane-v1",
     },
-    # Data Quality is contextual from Run Overview after workspace retirement.
-    "bioetl-control-plane-v1": {"bioetl-overview-v2"},
+    "bioetl-control-plane-v1": {
+        "bioetl-overview-v2",
+        "bioetl-incident-v1",
+        "bioetl-run-explorer-v1",
+    },
 }
 
 
@@ -131,21 +129,19 @@ def _extract_variables(payload: dict[str, Any]) -> list[str]:
 
 
 def _extract_link_uids(payload: dict[str, Any]) -> list[str]:
-    # Contextual panel handoffs are part of the accepted navigation contract.
+    links = list(payload.get("links", []))
+    for panel in _iter_panels(payload):
+        defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
+        links.extend(defaults.get("links") or [])
+        links.extend((panel.get("options") or {}).get("dataLinks") or [])
+        panel_links = panel.get("links", [])
+        if isinstance(panel_links, list):
+            links.extend(link for link in panel_links if isinstance(link, dict))
     discovered: set[str] = set()
-
-    def visit(value: object) -> None:
-        if isinstance(value, dict):
-            for key, child in value.items():
-                if key == "url" and isinstance(child, str):
-                    discovered.update(re.findall(r"/d/(\w+(?:-\w+)*)", child))
-                else:
-                    visit(child)
-        elif isinstance(value, list):
-            for child in value:
-                visit(child)
-
-    visit(payload)
+    for link in links:
+        url = str(link.get("url", ""))
+        matches = re.findall(r"/d/(\w+(?:-\w+)*)", url)
+        discovered.update(matches)
     return sorted(discovered)
 
 
@@ -721,10 +717,20 @@ def _provisioning_field_errors(
         errors.append(
             "provisioning: BioETL updateIntervalSeconds must be a positive integer"
         )
-    leaf_path = "/var/lib/grafana/dashboards/bioetl-run-explorer-v1.json"
-    if path_basename != "dashboards" and path != leaf_path:
+    shipped_files = {
+        "bioetl-run-explorer-v1.json",
+        "bioetl-control-plane-v1.json",
+        "bioetl-overview-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-incident-v1.json",
+    }
+    is_shipped_file = (
+        path_basename in shipped_files
+        and str(path) == f"/var/lib/grafana/dashboards/{path_basename}"
+    )
+    if path_basename != "dashboards" and not is_shipped_file:
         errors.append(
-            "provisioning: BioETL provider path must target a dashboards directory or the Run Explorer leaf, "
+            "provisioning: BioETL provider path must target a dashboards directory, "
             f"got {path!r}"
         )
     return errors

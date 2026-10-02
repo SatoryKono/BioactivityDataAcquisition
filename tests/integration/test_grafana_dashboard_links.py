@@ -84,8 +84,9 @@ def test_ops_http_health_links_use_same_origin_grafana_proxy() -> None:
             if _FORBIDDEN_OPS_HTTP_BROWSER_HOST_RE.match(url):
                 forbidden.append(f"{dashboard_path.name}:{title!r} -> {url}")
 
-    assert health_links, (
-        "Authored backend-health CTAs must remain available after retirement"
+    assert len(health_links) == 3, (
+        "Shipped dashboards must expose exactly three Ops HTTP health CTAs; "
+        f"found {len(health_links)}"
     )
     assert not forbidden, (
         "Browser-side Ops HTTP health links must not target loopback, "
@@ -631,9 +632,9 @@ def test_local_log_guidance_matches_shipped_structured_log_fields() -> None:
     )
 
 
-def test_overview_exposes_contextual_data_quality_handoff() -> None:
+def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
     """Overview and Runtime should offer an explicit handoff into DQ triage."""
-    for dashboard_name in ("bioetl-overview-v2.json",):
+    for dashboard_name in ("bioetl-overview-v2.json", "bioetl-incident-v1.json"):
         _assert_named_dashboard_handoff(
             dashboard_name=dashboard_name,
             expected_title="Open Data Quality",
@@ -641,9 +642,9 @@ def test_overview_exposes_contextual_data_quality_handoff() -> None:
         )
 
 
-def test_dq_exposes_control_plane_handoff() -> None:
+def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
     """Runtime and DQ should offer an explicit handoff into control-plane triage."""
-    for dashboard_name in ("bioetl-dq-v2.json",):
+    for dashboard_name in ("bioetl-incident-v1.json", "bioetl-dq-v2.json"):
         _assert_named_dashboard_handoff(
             dashboard_name=dashboard_name,
             expected_title="Replay Readiness",
@@ -661,3 +662,31 @@ def test_navigation_dashboards_do_not_expose_removed_silver_reject_explorer() ->
         _assert_explicit_silver_explorer_policy(
             dashboard_name=dashboard_name, expected={}
         )
+
+
+@pytest.mark.parametrize("damage", [None, "pipeline", "search", "time", "foreign_run"])
+def test_catalog_reset_is_explicit_and_does_not_weaken_identity_handoff(damage):
+    url = (
+        "/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&var-pipeline=.*"
+        "&var-run_type=.*&var-run_id=-&var-lookup_run_id=&${__url_time_range}"
+    )
+    if damage == "pipeline":
+        url = url.replace("var-pipeline=.*", "var-pipeline=$pipeline")
+    elif damage == "search":
+        url = url.replace("var-lookup_run_id=", "var-lookup_run_id=old-run")
+    elif damage == "time":
+        url = url.replace("&${__url_time_range}", "")
+    elif damage == "foreign_run":
+        url = url.replace("var-run_id=-", "var-run_id=foreign-run")
+    link = {"title": "Run Explorer", "url": url, "includeVars": False}
+    kwargs = {
+        "dashboard_name": "bioetl-overview-v2.json",
+        "current_uid": "bioetl-overview-v2",
+        "link": link,
+        "dashboard_links": [link],
+    }
+    if damage is None:
+        _assert_cross_dashboard_link_policy(**kwargs)
+    else:
+        with pytest.raises(AssertionError):
+            _assert_cross_dashboard_link_policy(**kwargs)

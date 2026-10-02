@@ -99,9 +99,6 @@ def _build_composite_source_nodes_and_edges(
                 "composite_source": True,
                 "composite_run_id": composite_run_id,
                 "composite_name": composite_name,
-                "selected_fields": selected_fields,
-                "selected_field_count": len(selected_fields),
-                "enrichment_status": enrichment_status.get(provider),
             },
         )
         nodes.append(node)
