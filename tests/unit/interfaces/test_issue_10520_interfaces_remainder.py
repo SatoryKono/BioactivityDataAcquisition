@@ -102,7 +102,6 @@ def test_observability_ready_and_rehydrate_branches(
         return orig_import(name, *args, **kwargs)
 
     monkeypatch.setattr(obs_mod, "import_module", _import_ok)
-    monkeypatch.setattr(obs_mod, "create_run_report_store", lambda: object())
     monkeypatch.setattr(
         obs_mod, "_rehydrate_provider_health_gauges", lambda _deps: None
     )
@@ -114,7 +113,7 @@ def test_observability_ready_and_rehydrate_branches(
     obs_mod._rehydrate_current_metrics(logger=None)
     monkeypatch.setattr(
         "bioetl.composition.health_service_access.get_health_server_dependencies",
-        lambda: SimpleNamespace(metrics=object()),
+        lambda: SimpleNamespace(metrics=object(), run_report_store=object()),
     )
     obs_mod._start_health_observability(logger)
     logger.info.assert_called()

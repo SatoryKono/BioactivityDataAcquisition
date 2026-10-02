@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `95cfdf4410acb78b07426f001e3fcb20e0306a0b2dd12ab888b3b72f809c23c7`
+Evidence surface SHA-256: `93cce47a9804443bd217d61c55feaab2aeee739d392f5286f399dfbb9df91d2d`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "95cfdf4410acb78b07426f001e3fcb20e0306a0b2dd12ab888b3b72f809c23c7",
+  "evidence_surface_sha256": "93cce47a9804443bd217d61c55feaab2aeee739d392f5286f399dfbb9df91d2d",
   "metrics": {
     "architecture_integral_score": 9.47,
     "architecture_interpretation": "good_targeted_improvements",
@@ -46,38 +46,33 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 Refresh reason: Reconcile generated metadata while preserving the historical audited commit. Current gate results are recorded in the semantic summary; this is not full coverage acceptance. No budget growth.
 
-## Current metadata refresh — 2026-10-02 (#11846)
+## Current metadata refresh — 2026-10-02 (#11859)
 
-Source commit: `8f024f97cb10d87d2d12b31f7a4282aac1cf895c`.
-Current generated metadata: 46/46 debt gates pass; architecture score `9.47`
-(`good_targeted_improvements`); debt-governance gates passing. These results
-do not establish full coverage acceptance or a release PASS.
-The machine-readable semantic summary above is the sole current numerical
-rollup; dated refresh notes are historical snapshots. The original audited
-commit and audit date remain unchanged. This metadata rebind is not a new
-repository-wide architecture audit or a fresh coverage measurement.
+Merged source: main `614a14e8f936` plus the report-store injection changes.
+The following rollup is derived from the current committed artifact surface:
 
-The module inventory retains 2521 measured rows, while the live source tree
-contains 2542 Python modules: 21 modules have no inventory row. The
-`test_module_coverage_inventory_covers_every_source_module` guard fails.
-Its source-tree digest is
-refreshed without adopting a new coverage XML. Full 17-group coverage producer
-acceptance remains unverified under #11745 (still open); zero unmeasured and
-uncovered rows do not prove that acceptance. No overall release PASS is claimed.
-Commit `6b7e9cd8ff8f` added 20 of those paths without a new coverage XML.
-Nineteen of them are unmeasured (`coverage_xml_has_no_class_entry`) and fail
-`module_coverage_unmeasured_modules` (`max_count: 0`). This refresh keeps the
-last authoritative row set at the same `source_tree_sha256` and does not raise
-that ratchet.
+Debt-governance gates: **46 pass / 0 fail**;
+Architecture quality integral score: **9.47** (`good_targeted_improvements`);
+source_module_count: **2521**;
+fully_covered: **2490**;
+partially_covered: **27**;
+no_executable_lines: **4**;
+uncovered: **0**;
+unmeasured: **0**;
+= 2521 == source_module_count;
+Contract coverage matrix schema: **contract-coverage-matrix-v3**;
+Constructor waivers (shrink-only inventory): **1** entries;
+Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**;
+Layer violations: **0**.
 
-The live cast census is 353 total / 112 unjustified (previously 370 / 129).
-Hotspot observations after source_tree_sha256 fcbcdec5: runtime-builders LOC
-6764, application_core LOC 24787, control_plane LOC 15496 and
-helper_function_ratio 0.401. Files, oversized-file counts, fan-in caps, and
-exemption rows are unchanged. The unjustified cast(Any) ratchet
-max_unjustified_count is 112, lowered from the recorded baseline 131 to the
-confirmed census count. Debt outcome: decreased for unjustified casts, flat
-for bounded hotspot debt.
+The inherited coverage inventory retains 2521 measured rows. Its governed
+source scope has 2542 modules, with 21 missing measurement rows. The
+completeness guard fails. Hash refresh retains historical
+measurements; it is not new coverage acceptance. A complete 17-shard run
+is required. No release PASS or budget growth is claimed.
+
+The original audited SHA/date remain unchanged. The live unjustified cast
+ratchet remains 112 (historical baseline 131), with no added exemptions.
 
 ## Retained facade importer census
 

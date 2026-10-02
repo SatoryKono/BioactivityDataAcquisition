@@ -5,7 +5,7 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -14,6 +14,32 @@ from bioetl.interfaces.cli.commands.domains.health import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_build_health_server_injects_bootstrap_report_store(monkeypatch) -> None:
+    from bioetl.interfaces.http import health_server as server_module
+
+    store = MagicMock()
+    bootstrap = SimpleNamespace(
+        health_monitor=None,
+        checkpoint_port=None,
+        run_manifest_port=None,
+        run_ledger_port=None,
+        workflow_manifest_port=None,
+        run_report_store=store,
+    )
+    monkeypatch.setattr(
+        deps,
+        "load_settings",
+        lambda: SimpleNamespace(prometheus_url=None, runtime_source_id=None),
+    )
+    factory = MagicMock(side_effect=AssertionError("store was already assembled"))
+    monkeypatch.setattr(server_module, "create_run_report_store", factory)
+    server = deps.build_health_server(
+        host="127.0.0.1", port=0, deps=bootstrap, quarantine_service=None
+    )
+    assert server._run_report_store is store
+    factory.assert_not_called()
 
 
 @pytest.mark.parametrize("data_root", [None, Path("data")])

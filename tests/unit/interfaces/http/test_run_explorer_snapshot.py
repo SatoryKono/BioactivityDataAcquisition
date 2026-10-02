@@ -91,7 +91,9 @@ async def test_refresh_strips_cached_age_and_materialize_uses_request_clock(
 
     monkeypatch.setattr(snapshot_module, "list_recent_pipeline_runs", _scan)
     cache = RunExplorerSnapshotCache()
-    source = SimpleNamespace(_run_manifest_port=object(), _run_ledger_port=object())
+    source = SimpleNamespace(
+        _run_manifest_port=object(), _run_ledger_port=object(), _run_report_store=Mock()
+    )
     await cache.refresh_once(source)
     assert seen[0]["limit"] == 10
     assert seen[0]["pipeline"] == ".*"
@@ -136,7 +138,9 @@ async def test_failed_refresh_keeps_the_last_page(
 
     monkeypatch.setattr(snapshot_module, "list_recent_pipeline_runs", _scan)
     cache = RunExplorerSnapshotCache()
-    source = SimpleNamespace(_run_manifest_port=object(), _run_ledger_port=object())
+    source = SimpleNamespace(
+        _run_manifest_port=object(), _run_ledger_port=object(), _run_report_store=Mock()
+    )
     await cache.refresh_once(source)
     await cache.refresh_once(source)
     body = cache.materialize(now=_COMPLETED + timedelta(seconds=90))
@@ -162,7 +166,9 @@ async def test_periodic_scan_waits_out_the_interval(
 
     monkeypatch.setattr(snapshot_module, "list_recent_pipeline_runs", _scan)
     cache = RunExplorerSnapshotCache()
-    source = SimpleNamespace(_run_manifest_port=object(), _run_ledger_port=object())
+    source = SimpleNamespace(
+        _run_manifest_port=object(), _run_ledger_port=object(), _run_report_store=Mock()
+    )
     task = asyncio.create_task(
         run_periodic_run_explorer_snapshot(cache, source, interval_seconds=30)
     )
@@ -192,6 +198,7 @@ async def test_default_request_uses_snapshot_without_another_scan(
     host = SimpleNamespace(
         _read_optional_param=HealthServerRoutingMixin._read_optional_param,
         _run_manifest_port=Mock(),
+        _run_report_store=Mock(),
         _run_ledger_port=Mock(),
         _run_explorer_snapshot=cache,
         _send_payload_response=AsyncMock(),
@@ -213,6 +220,7 @@ async def test_scoped_request_still_scans_when_snapshot_exists(
     host = SimpleNamespace(
         _read_optional_param=HealthServerRoutingMixin._read_optional_param,
         _run_manifest_port=Mock(),
+        _run_report_store=Mock(),
         _run_ledger_port=Mock(),
         _run_explorer_snapshot=cache,
         _send_payload_response=AsyncMock(),

@@ -70,6 +70,7 @@ def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_
                     register_all_pipelines_fn=lambda registry=None: None,
                     get_settings_fn=lambda: SimpleNamespace(
                         data_dir=str(tmp_path),
+                        bronze_path=tmp_path / "bronze",
                         pipeline=SimpleNamespace(heartbeat_interval=30),
                         test_mode=False,
                     ),
@@ -140,6 +141,7 @@ def test_build_pipeline_runner_persists_manifest_before_empty_cached_bronze_fail
                     register_all_pipelines_fn=lambda registry=None: None,
                     get_settings_fn=lambda: SimpleNamespace(
                         data_dir=str(tmp_path),
+                        bronze_path=tmp_path / "bronze",
                         pipeline=SimpleNamespace(heartbeat_interval=30),
                         test_mode=True,
                     ),
@@ -214,6 +216,7 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
                         register_all_pipelines_fn=lambda registry=None: None,
                         get_settings_fn=lambda: SimpleNamespace(
                             data_dir=str(tmp_path),
+                            bronze_path=tmp_path / "bronze",
                             pipeline=SimpleNamespace(heartbeat_interval=30),
                             test_mode=False,
                         ),

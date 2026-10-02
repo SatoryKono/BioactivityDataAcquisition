@@ -13,6 +13,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.selected_run
 )
 from bioetl.application.services.run_reports.query import list_pipeline_reports
 from bioetl.composition.observability_runtime import create_run_report_store
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.selected_status import (
     assess_report,
     evidence_digest,
@@ -88,7 +89,12 @@ def _saved_trust(
     }
 
 
-def _selected_pipeline(pipeline: str, run_id: str, root: Path | None) -> str | None:
+def _selected_pipeline(
+    pipeline: str,
+    run_id: str,
+    root: Path | None,
+    store: RunReportStorePort | None = None,
+) -> str | None:
     """Resolve an aggregate selector only from an unambiguous exact report path."""
     owners = pipeline_owners(pipeline)
     if owners is not None and len(owners) == 1:
@@ -100,7 +106,7 @@ def _selected_pipeline(pipeline: str, run_id: str, root: Path | None) -> str | N
         pipeline_name=None,
         limit=None,
         root=base,
-        store=create_run_report_store(),
+        store=store if store is not None else create_run_report_store(),
     )
     matches = [
         entry.owner

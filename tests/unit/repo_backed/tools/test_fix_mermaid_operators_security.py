@@ -14,7 +14,7 @@ pytestmark = pytest.mark.repo_backed
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[4]
-    module_path = repo_root / "scripts/diagrams/fix_mermaid_operators.py"
+    module_path = repo_root / "scripts/diagrams/fix/fix_mermaid_operators.py"
     spec = importlib.util.spec_from_file_location(
         "fix_mermaid_operators_security_module",
         module_path,
@@ -55,13 +55,17 @@ def test_fix_file_rejects_parent_traversal_and_non_diagram_targets(
     _diagram_root(tmp_path)
 
     with pytest.raises(ValueError, match="parent traversal"):
-        module.fix_file(Path("docs/02-architecture/diagrams/../escape.mmd"))
+        module.fix_file(
+            Path("docs/02-architecture/diagrams/../escape.mmd"), dry_run=False
+        )
     with pytest.raises(ValueError, match="repository-relative"):
-        module.fix_file(tmp_path / "outside.mmd")
+        module.fix_file(tmp_path / "outside.mmd", dry_run=False)
     with pytest.raises(ValueError, match="outside"):
-        module.fix_file(Path("outside.mmd"))
+        module.fix_file(Path("outside.mmd"), dry_run=False)
     with pytest.raises(ValueError, match="not a Mermaid"):
-        module.fix_file(Path("docs/02-architecture/diagrams/diagram.txt"))
+        module.fix_file(
+            Path("docs/02-architecture/diagrams/diagram.txt"), dry_run=False
+        )
 
 
 def test_fix_file_rejects_symlink_escape(

@@ -313,6 +313,7 @@ async def handle_pipeline_run_reports_list(
             limit=limit,
             manifest_port=host._run_manifest_port,
             ledger_port=host._run_ledger_port,
+            store=host._run_report_store,
         )
         await host._send_payload_response(writer, 200, payload)
         return
@@ -321,6 +322,7 @@ async def handle_pipeline_run_reports_list(
         pipeline_name=pipeline,
         limit=limit,
         selected_run_id=selected_run_id,
+        store=host._run_report_store,
     )
     await host._send_payload_response(writer, 200, payload)
 
@@ -344,5 +346,6 @@ async def handle_workflow_run_reports_list(
         list_workflow_run_report_payloads,
         workflow_name=workflow,
         limit=limit,
+        store=host._run_report_store,
     )
     await host._send_payload_response(writer, 200, payload)

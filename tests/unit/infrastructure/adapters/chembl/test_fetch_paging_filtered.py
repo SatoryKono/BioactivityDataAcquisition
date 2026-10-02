@@ -206,7 +206,7 @@ async def test_paginate_filter_results_stops_when_offset_reaches_limit() -> None
 
 
 @pytest.mark.asyncio
-async def test_paginate_filter_results_logs_and_stops_on_adapter_error() -> None:
+async def test_paginate_filter_results_logs_and_propagates_adapter_error() -> None:
     adapter = _PagingFilteredAdapter()
 
     async def _boom(*args, **kwargs):
@@ -215,20 +215,19 @@ async def test_paginate_filter_results_logs_and_stops_on_adapter_error() -> None
 
     adapter._fetch_page = _boom  # type: ignore[method-assign]
 
-    rows = await collect_async_iterator(
-        adapter._paginate_filter_results(
-            "https://example.test/activity",
-            ["CHEMBL1"],
-            "molecule",
-            "activity",
-            "chembl_id",
-            set(),
-            0,
-            None,
+    with pytest.raises(RuntimeError, match="stop"):
+        await collect_async_iterator(
+            adapter._paginate_filter_results(
+                "https://example.test/activity",
+                ["CHEMBL1"],
+                "molecule",
+                "activity",
+                "chembl_id",
+                set(),
+                0,
+                None,
+            )
         )
-    )
-
-    assert rows == []
     adapter._logger.warning.assert_called_once_with(
         "chembl_pagination_interrupted",
         entity_type="activity",

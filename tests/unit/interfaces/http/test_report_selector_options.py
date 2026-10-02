@@ -243,11 +243,13 @@ async def test_filter_catalog_reads_overlap_without_losing_options(monkeypatch) 
         barrier.wait()
         return {"items": [{"text": "chembl_assay", "value": "chembl_assay"}]}
 
-    def reports(scopes):
+    def reports(scopes, *, store):
+        assert store is host._run_report_store
         barrier.wait()
         return []
 
     host = HealthServerRoutingMixin()
+    host._run_report_store = Mock()
     from bioetl.interfaces.http._selector_catalog import SelectorCatalog
 
     host._selector_endpoint_limiter = asyncio.Semaphore(4)
@@ -328,6 +330,9 @@ async def test_http_handler_merges_report_only_options(
     _report(tmp_path)
     monkeypatch.setenv("BIOETL_REPORT_ROOT", str(tmp_path))
     host = HealthServerRoutingMixin()
+    from bioetl.composition.observability_runtime import create_run_report_store
+
+    host._run_report_store = create_run_report_store()
     import asyncio
 
     from bioetl.interfaces.http._selector_catalog import SelectorCatalog

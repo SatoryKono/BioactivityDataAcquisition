@@ -15,6 +15,7 @@ from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
 from bioetl.application.services.quality.quarantine_service import QuarantineService
+from bioetl.composition.observability_runtime import create_run_report_store
 from bioetl.domain.ports import (
     CheckpointPort,
     ClockPort,
@@ -23,6 +24,7 @@ from bioetl.domain.ports import (
     LoggerPort,
     RunLedgerPort,
     RunManifestPort,
+    RunReportStorePort,
     WorkflowManifestPort,
 )
 from bioetl.interfaces.http._forensic_request_budget import (
@@ -84,6 +86,7 @@ class HealthServerControlPlaneDeps:
     control_plane_integrity_refresher: ControlPlaneMetricsRefresher | None = None
     metrics_exposition: HealthMetricsExpositionPort | None = None
     runtime_source_id: str | None = None
+    run_report_store: RunReportStorePort | None = None
 
 
 class HealthServer(
@@ -107,6 +110,7 @@ class HealthServer(
             "control_plane_integrity_refresher",
             "metrics_exposition",
             "runtime_source_id",
+            "run_report_store",
         }
     )
 
@@ -175,6 +179,9 @@ class HealthServer(
                     recognized.get("metrics_exposition"),
                 ),
                 runtime_source_id=cast(str | None, recognized.get("runtime_source_id")),
+                run_report_store=cast(
+                    RunReportStorePort | None, recognized.get("run_report_store")
+                ),
             )
         return control_plane or HealthServerControlPlaneDeps()
 
@@ -201,6 +208,12 @@ class HealthServer(
         self._quarantine_service = deps.quarantine_service
         self._checkpoint_port = deps.checkpoint_port
         self._run_manifest_port = deps.run_manifest_port
+        # Standalone callers retain one composition-owned adapter per host.
+        self._run_report_store = (
+            deps.run_report_store
+            if deps.run_report_store is not None
+            else create_run_report_store()
+        )
         self._run_ledger_port = deps.run_ledger_port
         self._workflow_manifest_port = deps.workflow_manifest_port
         self._control_plane_evidence_service = deps.control_plane_evidence_service

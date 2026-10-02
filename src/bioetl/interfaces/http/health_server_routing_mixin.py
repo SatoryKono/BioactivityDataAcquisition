@@ -19,6 +19,7 @@ from bioetl.domain.ports import (
     HealthMonitorPort,
     RunLedgerPort,
     RunManifestPort,
+    RunReportStorePort,
     WorkflowManifestPort,
 )
 from bioetl.domain.types import HealthStatus, JsonDict
@@ -42,6 +43,7 @@ class HealthServerRoutingMixin:
     _quarantine_service: QuarantineService | None = None
     _checkpoint_port: CheckpointPort | None = None
     _run_manifest_port: RunManifestPort | None = None
+    _run_report_store: RunReportStorePort
     _run_ledger_port: RunLedgerPort | None = None
     _workflow_manifest_port: WorkflowManifestPort | None = None
     _control_plane_evidence_service: ControlPlaneEvidenceService | None = None

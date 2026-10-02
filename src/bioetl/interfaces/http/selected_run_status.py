@@ -13,6 +13,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.selected_run
     empty_replay_readiness,
     project_selected_run_replay_readiness,
 )
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.selected_status import (
     DOMAINS,
     RULES_VERSION,
@@ -256,12 +257,13 @@ def load_selected_run_status(
     run_id: str,
     root: Path | None = None,
     manifest_port: object | None = None,
+    store: RunReportStorePort | None = None,
 ) -> dict[str, object]:
     """Load and revalidate the exact report, revision and bound identity each time."""
     if run_id in {"", "-", "All", "$__all"}:
         return unavailable_status(pipeline, run_id, _SELECT_RUN, "selection_required")
     try:
-        selected_pipeline = _selected_pipeline(pipeline, run_id, root)
+        selected_pipeline = _selected_pipeline(pipeline, run_id, root, store)
     except ValueError as exc:
         return unavailable_status(pipeline, run_id, "ERROR", str(exc))
     if selected_pipeline is None:
@@ -372,6 +374,7 @@ async def handle_selected_run_status(
             pipeline=pipeline,
             run_id=run_id,
             manifest_port=host._run_manifest_port,
+            store=host._run_report_store,
         )
         if result.get("reason") == "run_not_found":
             active = active_run_diagnostics(host, pipeline, run_id)
