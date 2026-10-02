@@ -91,6 +91,7 @@ def test_reconcile_rows_config_is_normalized_into_domain_config() -> None:
         "right_columns": ["target_id"],
         "left_primary_keys": ["activity_id"],
         "nulls_equal": False,
+        "require_closed_cohort": False,
         "type_policy": "strict",
         "report_only": True,
         "preserve_order": True,

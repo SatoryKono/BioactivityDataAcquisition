@@ -41,6 +41,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
+from bioetl.domain.ports import CircuitBreakerPort
 from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.exceptions import (
     CircuitBreakerOpenError,
@@ -76,10 +77,8 @@ class _ConcreteRetryClient(HTTPClientRetryMixin):
         self.run_id = "test-run-001"
         self._metrics = MagicMock()
         self.rate_limiter = AsyncMock()
-        self.circuit_breaker = AsyncMock()
-        self.circuit_breaker.get_state = MagicMock(
-            return_value=CircuitBreakerState.CLOSED
-        )
+        self.circuit_breaker = MagicMock(spec=CircuitBreakerPort)
+        self.circuit_breaker.get_state.return_value = CircuitBreakerState.CLOSED
         self._tracer = tracer if tracer is not None else NoOpTracing()
         self._client = AsyncMock(spec=httpx.AsyncClient)
 

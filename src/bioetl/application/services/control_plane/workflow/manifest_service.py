@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import copy
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 
 from bioetl.application.services.control_plane.workflow.manifest_models import (
@@ -160,7 +160,11 @@ class WorkflowManifestService:
                 config=(
                     copy.deepcopy(step.config)
                     if isinstance(step, TransformStepConfig)
-                    else None
+                    else (
+                        {"reference_cohort": asdict(step.reference_cohort)}
+                        if step.reference_cohort
+                        else None
+                    )
                 ),
             )
             for step in config.steps

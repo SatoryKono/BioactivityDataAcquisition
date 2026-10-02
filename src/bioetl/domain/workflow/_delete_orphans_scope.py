@@ -119,6 +119,37 @@ def mark_delete_orphans_current_run_scope(config: WorkflowConfig) -> WorkflowCon
     return _require_workflow_config(replace(config, steps=tuple(updated_steps)))
 
 
+def _has_bound_reference_cohort(
+    transform: TransformStepConfig, config: WorkflowConfig
+) -> bool:
+    """Permit bounded verification only for an explicitly linked selection."""
+    options = transform.config or {}
+    if options.get("require_closed_cohort") is not True:
+        return False
+    source_table, reference_table = (
+        options.get("source_table"),
+        options.get("reference_table"),
+    )
+    for producer in config.pipeline_steps:
+        cohort = producer.reference_cohort
+        if cohort is None:
+            continue
+        table = producer.pipeline_name.replace("_", ".", 1)
+        if (
+            table == reference_table
+            and cohort.table == source_table
+            and cohort.column == options.get("source_key")
+        ):
+            return True
+        if (
+            table == source_table
+            and cohort.table == reference_table
+            and cohort.column == options.get("reference_key")
+        ):
+            return True
+    return False
+
+
 def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None:
     """Reject effective configuration with delete_orphans on limited extracts.
 
@@ -132,7 +163,7 @@ def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None
         if transform is None:
             continue
         limited = _limited_upstream_pipeline_ids(transform.step_id, config, steps_by_id)
-        if limited:
+        if limited and not _has_bound_reference_cohort(transform, config):
             raise ValueError(
                 "reconcile_foreign_keys action=delete_orphans cannot depend on "
                 "pipeline steps with run_options.limit "

@@ -1,0 +1,105 @@
+# Audit #11859: source-bound coverage closeout
+
+Date: 2026-10-02. Validation tier: local full producer; CI and live Grafana acceptance are separate.
+
+Producer commit: `20b95b1f3b1d7e12316ad43e0614b8726f6d48b5`.
+Source tree SHA-256: `2ded428f3384dd12845fdea38e6a157340f54dc4265c35d939e75514271f803b`.
+Coverage XML SHA-256: `32ec2bdc964a7e3a46f529cfc48af9887b73de81e385331fad40a25198b3c76f`.
+
+All 17 canonical groups completed with exit code 0. Each SQLite coverage hash and JUnit result was verified before the canonical nonregressing inventory refresh.
+JUnit: 32188 PASS, 181 SKIP, 0 failures, 0 errors.
+Line coverage: 99.71%; branch coverage: 94.35%. Both unchanged 85% gates passed.
+
+Inventory entries: 2520 to 2541 modules; 21 absent measurements added; source path parity is exact; unmeasured = 0. All previously accepted numeric coverage percentages never decreased. The additive reporter preserves historical accepted measurements when a candidate is lower; this is not a claim that every historical row was replaced.
+
+The originally listed twenty-second module, `_run_manifest_control_plane_refs.py`, was removed upstream in #11885 and is absent from the current source tree. It was not recreated or assigned a synthetic measurement.
+
+## Added measurements
+
+| Module path | Line coverage | Status |
+| --- | ---: | --- |
+| `src/bioetl/application/core/_batch_write_events.py` | 100.0% | `fully_covered` |
+| `src/bioetl/application/core/_quarantine_entries.py` | 100.0% | `fully_covered` |
+| `src/bioetl/application/core/publication_term_enrichment.py` | 89.06% | `partially_covered` |
+| `src/bioetl/application/services/control_plane/ledger/_input_snapshot_manifest.py` | 86.36% | `partially_covered` |
+| `src/bioetl/application/services/control_plane/manifest/input_snapshot_resolution.py` | 100.0% | `fully_covered` |
+| `src/bioetl/application/services/run_reports/artifact_digest.py` | 96.55% | `partially_covered` |
+| `src/bioetl/composition/providers/publication_term_pubmed_enricher.py` | 83.72% | `partially_covered` |
+| `src/bioetl/composition/providers/registration_bio_uniprot.py` | 100.0% | `fully_covered` |
+| `src/bioetl/domain/config/effective_config_payloads.py` | 100.0% | `fully_covered` |
+| `src/bioetl/domain/control_plane/_reproducibility_policy_persistence.py` | 94.12% | `partially_covered` |
+| `src/bioetl/domain/control_plane/effective_config_runtime_identity.py` | 100.0% | `fully_covered` |
+| `src/bioetl/domain/run_reports/accounting_projections.py` | 96.43% | `partially_covered` |
+| `src/bioetl/domain/run_reports/reason_catalog_data.py` | 100.0% | `fully_covered` |
+| `src/bioetl/infrastructure/adapters/chembl/target_protein_classification_loading_mixin.py` | 98.46% | `partially_covered` |
+| `src/bioetl/infrastructure/control_plane/replay_object_verifier.py` | 88.04% | `partially_covered` |
+| `src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_ensure_parts.py` | 100.0% | `fully_covered` |
+| `src/bioetl/interfaces/http/_health_server_records_table.py` | 100.0% | `fully_covered` |
+| `src/bioetl/interfaces/http/_selected_run_artifact_probes.py` | 77.38% | `partially_covered` |
+| `src/bioetl/interfaces/http/_selected_run_report_assessment.py` | 94.87% | `partially_covered` |
+| `src/bioetl/interfaces/http/_selector_options_cache.py` | 99.09% | `partially_covered` |
+| `src/bioetl/interfaces/http/run_report_index.py` | 100.0% | `fully_covered` |
+
+## Scope and limits
+
+Five-dashboard cutover is explicit in ADR-053 and RULES. Runtime and Provider Health remain retired; optional Scenes fallback contracts and tests match the five shipped UIDs. The merged navigation contract retains exact-run inbound rejection tests, replay checks, row identity and local Provider Evidence.
+
+The full producer excludes opt-in network/live launches. Skips retain their JUnit reasons, including Windows symlink/platform limitations and unavailable optional local tooling. No skipped case is claimed as passed.
+
+GitHub Actions has an external account billing blocker; this local producer is not an exact-SHA CI PASS or machine ADMIT. Live Grafana/browser/render acceptance remains NOT_VERIFIED; no monitoring stack was started.
+
+Raw evidence is retained in `reports/quality/proof-or-stop/audit-11859-coverage-20261002-r8/` in the acceptance worktree. Failed/incomplete earlier attempts were not combined into this XML.
+
+## Concurrent-main refresh (R9)
+
+Producer commit: `98658994ed2cbbe77434de73b4db25f24639dc56`. Source tree SHA-256: `14130992652285370fe8050b43145e3860e88a4374e92f32752407af6607fd32`. XML SHA-256: `427a6bf9bd527084c64d50f1b300d784354e094a11ca7d7a7d46bd197f200a10`.
+
+All 17 groups passed: 32210 PASS, 181 SKIP, 0 failures/errors. Line coverage 99.69%, branch coverage 94.32%; unchanged gates passed. Each shard hash and JUnit result was verified.
+
+Inventory now contains all 2546 current source modules, with no absent paths and unmeasured = 0. The five modules added by concurrent main work are measured below; all accepted numeric values remain nonregressing. R8 above is retained as historical evidence for the original 21 missing measurements.
+
+| Module path | Line coverage | Status |
+| --- | ---: | --- |
+| `src/bioetl/application/services/dq/disabled_gold_filter.py` | 100.0% | `fully_covered` |
+| `src/bioetl/application/services/run_reports/composite.py` | 90.7% | `partially_covered` |
+| `src/bioetl/composition/bootstrap/runtime/composite_child_runner.py` | 94.12% | `partially_covered` |
+| `src/bioetl/composition/bootstrap/runtime/composite_contract_evidence.py` | 94.74% | `partially_covered` |
+| `src/bioetl/composition/bootstrap/runtime/composite_reporter.py` | 71.43% | `partially_covered` |
+
+Raw R9 evidence: `reports/quality/proof-or-stop/audit-11859-coverage-20261002-r9/`. CI remains BLOCKED_EXTERNAL; live browser/render acceptance remains NOT_VERIFIED.
+
+## Final merged-surface verification
+
+Concurrent main commit `e6c42b06ccb0b928001c60dcb310abec63211ba4` changes no production Python source. Its freshness guards and scoped Incident telemetry fixtures were retained. The source tree SHA remains the R9 SHA above.
+
+Clean committed owning suite: 131 PASS, 2 explicit retired-workflow-dashboard SKIP, 0 failures/errors. Both source inventory freshness guards passed without skips. Full docs verify, including strict build, passed. TypeScript typecheck passed; Scenes Jest passed both suites (9 cases), using the existing Windows portable test discovery wrapper. Pinned Prometheus v3.13.1 promtool telemetry scenarios passed. Canonical renderer check passed for all five JSON dashboards. Coupled test-governance/flaky/evidence/remote-main checks and the full-tree Git gate passed. Git diff whitespace check passed.
+
+Runtime AI sources/mirrors were not changed in this cutover, so mirror synchronization was not required. Live renders/browser acceptance were not run; they remain NOT_VERIFIED. GitHub Actions remains BLOCKED_EXTERNAL due to the previously verified account billing lock; this closeout does not claim a CI PASS or machine ADMIT.
+
+## Later upstream inventory reconciliation
+
+Main `f892511e55993` contains a parallel full measured inventory for the R9 production source SHA, with identical 2546 paths. Its candidate values improve none of the accepted rows and lower 67 of them. Accepted nonregressing values were retained. The parallel XML remains identified by upstream path `reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-d65e6f4/coverage.xml` and normalized SHA-256 `e66c8cdd3f11384f725d72f2e2c28767c82eb763b75679fa7e1e1ec6476b9955`. This did not measure the subsequently added `request_timing.py`; a separate full producer is required for that later source tree.
+
+## Latest-main workflow contract reconciliation
+
+Main `42f364a39526e42bec9f23e813910052ca5eb440` introduces bound reference cohorts. Source SHA-256 is `5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f`, with 2548 Python module paths. R10 on merge commit `309dd80b256851ab665f8b9493583a58cbee7574` is incomplete: application, infrastructure and other unit groups failed on stale config/payload and composition fixtures. It was stopped after complete diagnostic runs; no R10 combined XML was generated or reused.
+
+Complete diagnostics found 2 application, 4 infrastructure and 2 other-unit failures. Integration remained green (2673 PASS, 60 SKIP). Fixtures now include the new closed-cohort fields and Gold reader settings. Both YAML-config and CLI contracts preserve rejection of independently bounded extracts while permitting explicitly bound cohorts. The HTTP fixture fixes retain real response status, synchronous circuit-breaker state and a local virtual admission clock; long provider waits fail closed and remain cancellable. Focused workflow contracts passed 71 tests, and the HTTP timing/retry selection passed 53 tests. Full replacement coverage is required before publication.
+
+## Complete latest-source producer (R11)
+
+Producer commit: `f9d20f27b43bc9cdc2b2dbd2d23aafce6fa94854`. Source tree SHA-256: `5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f`. Raw XML SHA-256: `95b05f4e02569d9439dc6e629b9c3f979490baef1c0f827da3e65f5ca91ce451`. Canonical normalized additive XML SHA-256: `4bed3befe08092efc88fecbd8388d8829665fe1126d74f526322592c4bf2f3ff`.
+
+All 17 required groups passed: **32256 PASS, 181 SKIP, 0 failures/errors** (32437 cases). Line coverage is **99.69%**, branch coverage **94.32%**; unchanged 85% gates passed. Every shard coverage SHA and JUnit result was independently verified, as was the final raw XML SHA. Source/test/QA inputs stayed fixed throughout this producer. Raw evidence is retained at `reports/quality/proof-or-stop/audit-11859-coverage-20261002-r11/`, with the independently derived receipt `reports/quality/proof-or-stop/r11-verified-summary.json`. Failed R10 data was not reused.
+
+The canonical nonregressing inventory now includes exactly all **2548** current Python module paths, with **uncovered=0, unmeasured=0**. All previously accepted numeric percentages remain nondecreasing. New measurements are `workflow_cohort.py` (83.33%, partially covered) and `request_timing.py` (100.0%, fully covered). Historical R8/R9 measurements above remain tied to their respective source SHAs; the additive inventory preserves accepted per-module facts rather than claiming every retained row is a newly measured R11 value. No module-level tier floor or debt budget was raised.
+
+Before R11, complete maxfail=0 reruns passed: application 7537 PASS; infrastructure 5263 PASS / 7 SKIP; other unit 4477 PASS / 6 SKIP; integration 2673 PASS / 60 SKIP. These checks support the repaired contracts; R11 is the separate authoritative complete coverage producer.
+
+Post-producer governance found four upstream test functions without required markers (budget 0). Only `pytest.mark.unit` metadata was added in the two owning files; their 11 cases passed, and test governance now reports zero violations. These markers do not change the 17 producer path/marker selections. The R11 full measurement remains explicitly tied to its producer commit, while the production source SHA is unchanged. Coupled test-governance, flaky fingerprint, evidence and remote-main checks passed without budget ratcheting.
+
+The upstream primary XML metadata had replaced the canonical `reports/coverage/coverage.xml` baseline with a machine-local proof path, violating the stable inventory shape contract. Its accepted historical path and SHA `14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c` were restored from the prior accepted inventory. The canonical reporter then re-evaluated the complete R11 additive XML; all 2548 rows, nonregressing values and R11 additive provenance were preserved. This metadata correction does not claim the primary historical XML measured the two new modules. Full docs verify, including strict build, passed on the resulting docs surface.
+
+## Final publication checks
+
+Clean owning acceptance suite on `e85a4dc7dc4bd`: **156 PASS, 3 explicit SKIP, 0 failures/errors** (159 cases). The complete-source-path and current-source-hash guards both passed without skips. Two skips concern the retired workflow dashboard; the third UX freshness check is inactive because dashboard JSON files are unchanged. All five committed JSON blob SHA-256 values were separately verified against the UX report (Git LF encoding; native checkout CRLF does not change the committed identities). Renderer idempotence, full-tree commit gate and whitespace checks passed. Full docs verify, including strict build, passed. Runtime AI surfaces were not changed, so runtime mirror synchronization is not required. Live Grafana/browser/render checks were not run.

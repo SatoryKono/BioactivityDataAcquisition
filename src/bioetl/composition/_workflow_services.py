@@ -25,6 +25,9 @@ from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.time import SystemClock
+from bioetl.composition.workflow_cohort import WorkflowCohortResolver
+from bioetl.infrastructure.storage.delta_reader import DeltaReader
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 
 if TYPE_CHECKING:
     from bioetl.application.services.workflow.control_plane.execution_service import (
@@ -147,6 +150,9 @@ def get_workflow_runner_service(
     return cast(
         "WorkflowRunnerService",
         workflow_runner_service.WorkflowRunnerService(
+            cohort_resolver=WorkflowCohortResolver(
+                DeltaReader(base_path=settings.gold_path, logger=create_noop_logger())
+            ),
             report_store=FileRunReportStoreAdapter(),
             report_root=settings.report_root,
             pipeline_runner=pipeline_runner_factory(registry),
