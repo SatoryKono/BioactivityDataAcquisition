@@ -145,6 +145,10 @@ def _assert_processed_records_target_contract(processed: dict[str, object]) -> N
     )
     assert "records_in" in targets[1]["uql"]
     assert targets[0] == {
+        "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http",
+        },
         "format": "table",
         "parser": "backend",
         "refId": "A",
@@ -375,7 +379,10 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         in panels[9400]["options"]["content"]
     )
     identity = panels[9402]
-    assert identity["datasource"] == "BioETL Ops HTTP"
+    assert identity["datasource"] == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
     assert all("run_id=${run_id}" in t["url"] for t in identity["targets"])
     assert identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
     processed = panels[9403]
@@ -400,7 +407,10 @@ def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> No
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     for pid in (9406, 9408, 9423):
         panel = panels[pid]
-        assert panel["datasource"] == "BioETL Ops HTTP"
+        assert panel["datasource"] == {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http",
+        }
         assert get_panel_expressions({"panels": [panel]}) == []
         assert all("run_id=${run_id}" in t["url"] for t in panel["targets"])
     for path in Path("grafana/dashboards").glob("*.json"):

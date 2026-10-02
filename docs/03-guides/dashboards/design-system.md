@@ -573,9 +573,15 @@ Metadata MUST follow repo policy rather than mechanical suite-wide rewrites:
   Operator-facing dashboards keep the L0/L1 baseline `time.from=now-12h` and
   `refresh=60s`; `bioetl-silver-reject-explorer` is the explicit forensic
   exception with `time.from=now-24h` and `refresh=1m`.
-- `schemaVersion` MAY remain `30` or `39` until an explicit Grafana migration
-  decision is approved. Do not bulk-upgrade exported JSON mechanically just to
-  force one number across the suite.
+- `schemaVersion` MUST be `42` for canonical dashboards targeting the pinned
+  Grafana `12.2.5` runtime. The FK selected-snapshot browser acceptance exposed
+  Grafana's migration of legacy datasource names and query targets: the browser
+  loads the migrated DTO even when the legacy API still returns schema `30`.
+  The canonical generator therefore emits explicit provisioned datasource UID
+  references and query-target inheritance before declaring schema `42`.
+  Preserve queries, URLs and layout; never remove semantic differences from
+  source/browser parity checks to make a capture pass. Static text panels must
+  not acquire a fabricated default Prometheus query during migration.
 - `iteration` is optional. If present, it MUST be a positive integer and should
   be used only for deliberate exported revision tracking, not added everywhere
   as decoration.

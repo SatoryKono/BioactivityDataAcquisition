@@ -3,7 +3,9 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "uid": "-- Grafana --"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -20,7 +22,7 @@
   "iteration": 2,
   "links": [],
   "refresh": "60s",
-  "schemaVersion": 30,
+  "schemaVersion": 42,
   "style": "dark",
   "tags": [
     "bioetl",
@@ -74,7 +76,10 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
         "hide": 0,
         "includeAll": true,
@@ -134,7 +139,10 @@
           "text": "backfill",
           "value": "backfill"
         },
-        "datasource": "Prometheus",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "definition": "label_values(bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
         "hide": 0,
         "includeAll": true,
@@ -164,7 +172,10 @@
           "text": "-",
           "value": "-"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
@@ -412,7 +423,10 @@
         "w": 9,
         "h": 3
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "description": "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is selected; QUERY ERROR means backend unavailable or request failure. UNKNOWN means no assessed value, never READY. Open replay checks for basis. Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "options": {
         "reduceOptions": {
@@ -512,6 +526,10 @@
           "url_options": {
             "method": "GET",
             "data": ""
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
           }
         }
       ],
@@ -541,7 +559,10 @@
       "type": "table",
       "title": "Review Exact Replay Checks",
       "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass. Valid-empty check output stays VALID EMPTY. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "targets": [
         {
           "refId": "A",
@@ -555,7 +576,11 @@
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3)\""
+          "uql": "parse-json | jsonata \"replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3)\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
         }
       ],
       "gridPos": {
@@ -631,7 +656,10 @@
       }
     },
     {
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "description": "SELECTED RUN · All identity anchors, missing first. Presence is not verification. VALID EMPTY means the successful response contains no anchors. Exact Replay Checks determines readiness. Inspect a value to copy it in full. No rows is not a pass; missing evidence is UNKNOWN and failed requests are QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
@@ -734,7 +762,11 @@
             "data": "",
             "method": "GET"
           },
-          "uql": "parse-json | jsonata \"rows^(present ? 1 : 0, priority, name)\""
+          "uql": "parse-json | jsonata \"rows^(present ? 1 : 0, priority, name)\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
         }
       ],
       "title": "Review Replay Evidence",
@@ -800,7 +832,10 @@
         "w": 24,
         "h": 5
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "description": "SELECTED RUN · processing_status is the saved ETL outcome. trust_status is the historical Trust assessment and does not authorize replay. Reason count is the number of saved remarks. Assessed at is when that assessment was recorded. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
@@ -857,7 +892,7 @@
                 "value": {
                   "viz": true,
                   "legend": true,
-                  "tooltip": false
+                  "tooltip": true
                 }
               }
             ]
@@ -989,7 +1024,7 @@
                 "value": {
                   "viz": true,
                   "legend": true,
-                  "tooltip": false
+                  "tooltip": true
                 }
               }
             ]
@@ -1238,7 +1273,11 @@
             "data": "",
             "method": "GET"
           },
-          "uql": "parse-json | jsonata \"[presentation_trust.($base := $sift($, function($v,$k){$k != \\\"trust_reasons_action\\\"}); $merge([$base, reasons_count > 0 ? {\\\"trust_reasons_action\\\":\\\"View trust reasons\\\"} : {\\\"trust_action_note\\\": reasons_count = 0 ? \\\"No trust issues\\\" : \\\"Not assessed\\\"}]))]\""
+          "uql": "parse-json | jsonata \"[presentation_trust.($base := $sift($, function($v,$k){$k != \\\"trust_reasons_action\\\"}); $merge([$base, reasons_count > 0 ? {\\\"trust_reasons_action\\\":\\\"View trust reasons\\\"} : {\\\"trust_action_note\\\": reasons_count = 0 ? \\\"No trust issues\\\" : \\\"Not assessed\\\"}]))]\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
         }
       ],
       "transformations": [
@@ -1324,7 +1363,10 @@
       },
       "panels": [
         {
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "fieldConfig": {
             "defaults": {
@@ -1531,6 +1573,10 @@
               "url_options": {
                 "data": "",
                 "method": "GET"
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
               }
             }
           ],
@@ -1548,7 +1594,10 @@
           ]
         },
         {
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "description": "SELECTED RUN · Lineage closure, identity consistency, cycle freedom, and persistence profile for this Run ID. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "fieldConfig": {
             "defaults": {
@@ -1780,6 +1829,10 @@
               "url_options": {
                 "data": "",
                 "method": "GET"
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
               }
             }
           ],
@@ -1797,7 +1850,10 @@
           ]
         },
         {
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "description": "SELECTED RUN · Five retention rows for this Run ID: policy, evidence floor, required evidence, snapshot evidence, and archive. UNKNOWN is not a healthy zero. No rows can be a valid empty result. A failed request is not OK. Archive N/A means a referenced policy does not require archiving; it is not proof of an archive. Archive verified means local copies and restore evidence passed current hash and identity checks. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "fieldConfig": {
             "defaults": {
@@ -2385,7 +2441,11 @@
                   "text": "observed_at",
                   "type": "string"
                 }
-              ]
+              ],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
+              }
             }
           ],
           "title": "Review Retention Compliance",
@@ -2451,7 +2511,10 @@
       },
       "panels": [
         {
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "fieldConfig": {
             "defaults": {
@@ -2658,6 +2721,10 @@
               "url_options": {
                 "data": "",
                 "method": "GET"
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
               }
             }
           ],
@@ -2675,7 +2742,10 @@
           ]
         },
         {
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "fieldConfig": {
             "defaults": {
@@ -3249,6 +3319,10 @@
               "url_options": {
                 "data": "",
                 "method": "GET"
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
               }
             }
           ],

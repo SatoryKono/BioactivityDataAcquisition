@@ -223,7 +223,7 @@ The behavior matrix separates mutation permission from provider completeness:
 | Mode / condition | Mutation outcome | Persisted evidence |
 | --- | --- | --- |
 | Default `complete-reference`, any upstream limit/offset | CLI/config rejects destructive workflow execution. | No reconciliation commit; validation error. |
-| `complete-reference`, no limit, reference `unproven` | `blocked`; all scanned rows retained. | `reference_completeness_unproven`, unmatched count; completeness remains `unproven`. |
+| `complete-reference`, no limit, nonempty source, reference `unproven` | `blocked`; all scanned rows retained. | `reference_completeness_unproven`, unmatched count; completeness remains `unproven`. |
 | `complete-reference`, no limit, proven complete reference | Existing guarded deletion/Gold expiry; `no_op` when no orphans. | Completeness identity and actual mutation counts. |
 | Explicit `selected-snapshot`, limited or unlimited producers | Scoped deletion/Gold expiry, including partial or total expiry. | Mode, current-run ownership, producer IDs, pinned table IDs/versions, limits and counts; completeness remains `unproven`. |
 | `selected-snapshot`, existing empty pinned reference | All non-null FK rows in the selected source may expire/delete. | Actual `deleted X/X`, retained 0 when every selected row is an orphan; unrelated/history rows preserved. |

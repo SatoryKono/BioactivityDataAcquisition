@@ -2406,6 +2406,30 @@ function screenshotOptions(dashboard, filePath) {
   return options;
 }
 
+function browserDashboardResponseKind(responseUrl, baseUrl, uid) {
+  const url = new URL(responseUrl);
+  if (url.origin !== new URL(baseUrl).origin) return null;
+  if (url.pathname === `/api/dashboards/uid/${encodeURIComponent(uid)}`) return "legacy";
+  const resource = url.pathname.match(/^\/apis\/dashboard\.grafana\.app\/v1beta1\/namespaces\/[^/]+\/dashboards\/([^/]+)\/dto$/);
+  if (resource && decodeURIComponent(resource[1]) === uid) return "grafana-v1beta1-dto";
+  return null;
+}
+
+function normalizeBrowserDashboardPayload(payload, kind, uid) {
+  if (kind === "legacy" && payload?.dashboard?.uid === uid) return payload.dashboard;
+  if (kind === "grafana-v1beta1-dto" &&
+      payload?.kind === "DashboardWithAccessInfo" &&
+      payload?.apiVersion === "dashboard.grafana.app/v1beta1" &&
+      payload?.metadata?.name === uid &&
+      payload.spec && typeof payload.spec === "object" && !Array.isArray(payload.spec) &&
+      (payload.spec.uid === undefined || payload.spec.uid === uid)) {
+    // The DTO resource name is the dashboard UID; metadata.uid identifies the
+    // Kubernetes resource. Preserve every actual spec field (including migrations).
+    return {...payload.spec, uid: payload.metadata.name};
+  }
+  throw new Error(`Browser dashboard response identity/schema mismatch for ${uid}`);
+}
+
 async function renderDashboard(page, dashboard, index, total) {
   const target = dashboardRenderUrl(dashboard);
   const {observeCanvasDrawing,canvasEvidenceFromDom} = require('./capture_canvas_evidence.cjs');
@@ -2423,12 +2447,19 @@ async function renderDashboard(page, dashboard, index, total) {
   dashboard.provisionedModel = {
     captureId: process.env.GRAFANA_CAPTURE_ID || '',
     before: await readModel(), loaded: [], after: null,
+    loadedResponseUrls: [], loadedResponseErrors: [],
   };
   const observedModels = [];
   page.on('response', (response) => {
-    if (response.url().split('?')[0] === modelUrl && response.ok()) {
-      observedModels.push(response.json().then((payload) => {
-        dashboard.provisionedModel.loaded.push(payload.dashboard);
+    const kind = browserDashboardResponseKind(response.url(), CONFIG.baseUrl, dashboard.uid);
+    if (kind) {
+      dashboard.provisionedModel.loadedResponseUrls.push(response.url());
+      observedModels.push((async () => {
+        if (!response.ok()) throw new Error(`Browser dashboard response failed: ${response.status()}`);
+        const payload = await response.json();
+        dashboard.provisionedModel.loaded.push(normalizeBrowserDashboardPayload(payload, kind, dashboard.uid));
+      })().catch(error => {
+        dashboard.provisionedModel.loadedResponseErrors.push(String(error?.message ?? error));
       }));
     }
   });
@@ -2519,6 +2550,9 @@ async function renderDashboard(page, dashboard, index, total) {
     capturedAt: new Date().toISOString(),
   };
   await Promise.all(observedModels);
+  if (dashboard.provisionedModel.loadedResponseErrors.length) {
+    throw new Error(dashboard.provisionedModel.loadedResponseErrors.join("; "));
+  }
   dashboard.provisionedModel.observedUrl = page.url();
   dashboard.provisionedModel.browserVersion = page.nativeZoomEvidence?.browserVersion || page.context().browser().version();
   const panelDir = path.join(CONFIG.outputDir, 'panels', dashboard.uid);
@@ -2709,6 +2743,8 @@ if (require.main === module) {
 }
 
 module.exports = {
+  browserDashboardResponseKind,
+  normalizeBrowserDashboardPayload,
   dashboardEntryFromPayload,
   closeCaptureBrowser,
   mergeTerminalObservations,

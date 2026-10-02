@@ -530,9 +530,10 @@ def _assert_standard_variable_contract(
         f"Dashboard {dashboard_path.name} must define 'run_type' variable"
     )
     if dashboard_path.name == "bioetl-run-explorer-v1.json":
-        assert run_type_var.get("datasource") == "BioETL Ops HTTP", (
-            f"{dashboard_path.name} 'run_type' must use the control-plane catalog"
-        )
+        assert run_type_var.get("datasource") == {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http",
+        }, f"{dashboard_path.name} 'run_type' must use the control-plane catalog"
         infinity = (run_type_var.get("query") or {}).get("infinityQuery") or {}
         run_type_url = str(infinity.get("url", ""))
         assert "/ops/control-plane/filter-options" in run_type_url
@@ -568,7 +569,10 @@ def _assert_workflow_context_variable(
         f"Dashboard {dashboard_path.name} must define shared 'workflow' context"
     )
     if dashboard_path.name == "bioetl-run-explorer-v1.json":
-        assert workflow_var["datasource"] == "BioETL Ops HTTP"
+        assert workflow_var["datasource"] == {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http",
+        }
         query = workflow_var["query"]["infinityQuery"]
         assert query["parser"] == "backend"
         assert "/ops/control-plane/filter-options" in query["url"]
@@ -602,9 +606,10 @@ def _assert_pipeline_filter_options_shell(
     dashboard_path: Path, pipeline_var: dict[str, object]
 ) -> None:
     assert pipeline_var.get("type") == "query"
-    assert pipeline_var.get("datasource") == "BioETL Ops HTTP", (
-        f"Dashboard {dashboard_path.name} 'pipeline' must use BioETL Ops HTTP"
-    )
+    assert pipeline_var.get("datasource") == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }, f"Dashboard {dashboard_path.name} 'pipeline' must use BioETL Ops HTTP"
     assert pipeline_var.get("multi") is False
     query = pipeline_var.get("query", {})
     assert isinstance(query, dict)
@@ -619,7 +624,10 @@ def _assert_run_id_infinity_shell(
     dashboard_path: Path, run_id_var: dict[str, object]
 ) -> None:
     assert run_id_var.get("type") == "query"
-    assert run_id_var.get("datasource") == "BioETL Ops HTTP"
+    assert run_id_var.get("datasource") == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
     assert run_id_var.get("includeAll") is False
     assert run_id_var.get("multi") is False
     run_id_query = run_id_var.get("query", {})
@@ -814,7 +822,10 @@ def _assert_silver_reject_infinity_variable(
     assert variable is not None, (
         f"Dashboard {dashboard_path.name} must define '{variable_name}' variable"
     )
-    assert variable.get("datasource") == "BioETL Ops HTTP", (
+    assert variable.get("datasource") == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }, (
         f"Dashboard {dashboard_path.name} '{variable_name}' must use "
         "BioETL Ops HTTP datasource"
     )

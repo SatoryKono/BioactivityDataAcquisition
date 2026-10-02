@@ -3,7 +3,9 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "uid": "-- Grafana --"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -19,7 +21,7 @@
   "id": null,
   "links": [],
   "refresh": "60s",
-  "schemaVersion": 30,
+  "schemaVersion": 42,
   "style": "dark",
   "tags": [
     "bioetl",
@@ -73,7 +75,10 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
         "hide": 0,
         "includeAll": true,
@@ -133,7 +138,10 @@
           "text": "backfill",
           "value": "backfill"
         },
-        "datasource": "Prometheus",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "definition": "label_values(bioetl_overview_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
         "hide": 0,
         "includeAll": true,
@@ -163,7 +171,10 @@
           "text": "-",
           "value": "-"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
@@ -223,7 +234,10 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "Prometheus",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
         "hide": 0,
         "includeAll": true,
@@ -394,7 +408,10 @@
         "x": 0,
         "y": 5
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "fieldConfig": {
         "defaults": {
@@ -652,7 +669,11 @@
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"[$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : ($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : presentation_summary[0].reason)}])]\""
+          "uql": "parse-json | jsonata \"[$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : ($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : presentation_summary[0].reason)}])]\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
         }
       ],
       "transformations": [
@@ -711,7 +732,10 @@
         "w": 24,
         "h": 8
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "description": "SELECTED RUN · Selected run: Compact identity table showing Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, Replay [Capability.Mode], Checkpoint [Anchors], and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Inspect value opens full identifiers as selectable plain text. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "fieldConfig": {
         "defaults": {
@@ -928,6 +952,10 @@
           "url_options": {
             "data": "",
             "method": "GET"
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
           }
         }
       ],
@@ -968,7 +996,10 @@
         "w": 24,
         "h": 14
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "description": "SELECTED RUN · Saved accounting: count in is the input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "fieldConfig": {
         "defaults": {
@@ -1466,6 +1497,10 @@
           "url_options": {
             "data": "",
             "method": "GET"
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
           }
         },
         {
@@ -1479,7 +1514,11 @@
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($f := funnel; $map(['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','11 gold_deduplicated_records'], function($p) { ($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) }))\""
+          "uql": "parse-json | jsonata \"($f := funnel; $map(['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','11 gold_deduplicated_records'], function($p) { ($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) }))\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
         }
       ],
       "transformations": [
@@ -1567,7 +1606,10 @@
             "w": 24,
             "h": 8
           },
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "options": {
             "showHeader": true,
@@ -1782,6 +1824,10 @@
               "url_options": {
                 "method": "GET",
                 "data": ""
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
               }
             },
             {
@@ -1796,7 +1842,11 @@
                 "method": "GET",
                 "data": ""
               },
-              "uql": "parse-json | jsonata \"($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))\""
+              "uql": "parse-json | jsonata \"($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))\"",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
+              }
             }
           ],
           "transformations": [
@@ -1870,7 +1920,10 @@
             "w": 24,
             "h": 12
           },
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "description": "SELECTED RUN · Domain verdicts of this Run ID; this is not the page status. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "options": {
             "showHeader": true,
@@ -2052,6 +2105,10 @@
               "url_options": {
                 "method": "GET",
                 "data": ""
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
               }
             }
           ],
@@ -2116,7 +2173,10 @@
             "w": 24,
             "h": 8
           },
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "description": "SELECTED RUN · Full identifiers of this Run ID; the short table is Inspect Run Identity on the first screen. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "options": {
             "showHeader": true,
@@ -2220,6 +2280,10 @@
               "url_options": {
                 "method": "GET",
                 "data": ""
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
               }
             }
           ],

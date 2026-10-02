@@ -107,7 +107,10 @@ def test_overview_uses_frozen_v3_selector_set() -> None:
         assert variable.get("current", {}).get("value") == "$__all"
 
     pipeline = variables["pipeline"]
-    assert pipeline.get("datasource") == "BioETL Ops HTTP"
+    assert pipeline.get("datasource") == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
     assert pipeline.get("includeAll") is True
     assert pipeline.get("current", {}).get("text") == "All"
     assert pipeline.get("current", {}).get("value") == "$__all"
@@ -122,7 +125,10 @@ def test_overview_uses_frozen_v3_selector_set() -> None:
     assert variables["run_type"].get("multi") is True
 
     run_id = variables["run_id"]
-    assert run_id.get("datasource") == "BioETL Ops HTTP"
+    assert run_id.get("datasource") == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
     assert run_id.get("includeAll") is False
     assert run_id.get("multi") is False
     assert run_id.get("current", {}).get("text") == "-"
@@ -211,7 +217,10 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
 def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> None:
     identity = _panels_by_title()["Review Run Identity"]
 
-    assert identity.get("datasource") == "BioETL Ops HTTP"
+    assert identity.get("datasource") == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
     assert identity.get("targets", [{}])[0].get("parser") == "uql"
     target = identity["targets"][0]
     assert target["url"].startswith("/ops/observability/selected-run-status?")

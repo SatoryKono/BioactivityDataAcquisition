@@ -480,7 +480,7 @@ def _apply_reconciliation_evidence(payload: dict) -> None:
                     "noValue": "UNKNOWN",
                     "custom": {
                         "align": "left",
-                        "minWidth": 60,
+                        "minWidth": 50,
                         "wrapText": True,
                         "cellOptions": {"type": "auto", "wrapText": True},
                     },
@@ -489,8 +489,8 @@ def _apply_reconciliation_evidence(payload: dict) -> None:
             },
             "options": {
                 "showHeader": True,
-                "cellHeight": "sm",
-                "footer": {"show": False, "enablePagination": False},
+                "cellHeight": "lg",
+                "footer": {"show": False, "enablePagination": True},
             },
         }
     )

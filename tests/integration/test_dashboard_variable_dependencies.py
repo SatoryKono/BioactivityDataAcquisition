@@ -90,7 +90,10 @@ def test_runtime_variable_dependencies():
     assert "bioetl_overview_pipeline_run_type_universe" in query
     assert 'pipeline=~"$pipeline"' in query
     assert variables["provider_for_pipeline"]["hide"] == 2
-    assert variables["run_id"]["datasource"] == "BioETL Ops HTTP"
+    assert variables["run_id"]["datasource"] == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
     assert variables["read_latency_quantile"]["current"]["value"] == "0.95"
 
 
@@ -125,7 +128,10 @@ def test_provider_health_variable_dependencies():
     provider = variables["provider_for_pipeline"]
     assert provider["hide"] == 2
     assert 'pipeline=~"$pipeline"' in str(provider.get("definition") or "")
-    assert variables["run_id"]["datasource"] == "BioETL Ops HTTP"
+    assert variables["run_id"]["datasource"] == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
     assert variables["run_id"]["multi"] is False
     assert not Path("grafana/dashboards/bioetl-provider-health-v2.json").exists()
 

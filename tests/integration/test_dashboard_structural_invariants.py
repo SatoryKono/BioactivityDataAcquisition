@@ -302,7 +302,10 @@ def test_link_urls_use_allowlisted_schemes() -> None:
                         else 9406
                     )
                 )
-                assert report_table["datasource"] == "BioETL Ops HTTP"
+                assert report_table["datasource"] == {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "bioetl-ops-http",
+                }
                 assert report_table["targets"][0]["url"].startswith(
                     "/ops/observability/pipeline-run-report"
                 )

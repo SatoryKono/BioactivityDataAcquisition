@@ -508,7 +508,10 @@ def _assert_workflow_overview_variable_sources(
 
 def _assert_overview_run_id_variable_flags(run_id_var: dict) -> None:
     assert run_id_var.get("type") == "query"
-    assert run_id_var.get("datasource") == "BioETL Ops HTTP"
+    assert run_id_var.get("datasource") == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
     assert run_id_var.get("includeAll") is False
     assert run_id_var.get("multi") is False
     assert run_id_var.get("current", {}).get("text") == "-"
@@ -554,7 +557,10 @@ def _assert_overview_identity_panel(dashboard: dict) -> None:
         None,
     )
     assert identity_panel is not None
-    assert identity_panel.get("datasource") == "BioETL Ops HTTP"
+    assert identity_panel.get("datasource") == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
     identity_targets = identity_panel.get("targets", [])
     assert isinstance(identity_targets, list) and len(identity_targets) == 1
     identity_target = identity_targets[0]
@@ -585,7 +591,10 @@ def _assert_overview_variable_sources(
     pipeline_url = str(infinity.get("url", ""))
     assert "/ops/control-plane/filter-options" in pipeline_url
     assert "dimension=pipeline" in pipeline_url
-    assert pipeline_var.get("datasource") == "BioETL Ops HTTP"
+    assert pipeline_var.get("datasource") == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
 
     run_type_var = variable_map["run_type"]
     run_type_query = run_type_var.get("query", {})
@@ -642,7 +651,10 @@ def _assert_control_plane_read_panel_no_pipeline_filter(
 def _assert_identity_evidence_panel(panels: dict, title: str, view: str) -> None:
     panel = panels.get(title)
     assert panel is not None, f"Control-plane dashboard missing {title!r}"
-    assert panel.get("datasource") == "BioETL Ops HTTP"
+    assert panel.get("datasource") == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
     targets = panel.get("targets", [])
     assert len(targets) == 1
     target = targets[0]
