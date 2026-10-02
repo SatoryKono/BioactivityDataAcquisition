@@ -4,8 +4,44 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import JsonDict
+
+if TYPE_CHECKING:
+    from bioetl.application.observability.control_plane_evidence import (
+        ControlPlaneEvidenceService,
+    )
+    from bioetl.application.services.quality.quarantine_service import QuarantineService
+    from bioetl.domain.ports import (
+        CheckpointPort,
+        HealthMetricsExpositionPort,
+        HealthMonitorPort,
+        RunLedgerPort,
+        RunManifestPort,
+        RunReportStorePort,
+        WorkflowManifestPort,
+    )
+    from bioetl.interfaces.http._health_server_control_plane_metrics_refresh import (
+        ControlPlaneMetricsRefresher,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class HealthServerControlPlaneDeps:
+    """Collaborator bag for optional health-server control-plane ports."""
+
+    health_monitor: HealthMonitorPort | None = None
+    quarantine_service: QuarantineService | None = None
+    checkpoint_port: CheckpointPort | None = None
+    run_manifest_port: RunManifestPort | None = None
+    run_ledger_port: RunLedgerPort | None = None
+    workflow_manifest_port: WorkflowManifestPort | None = None
+    control_plane_evidence_service: ControlPlaneEvidenceService | None = None
+    control_plane_integrity_refresher: ControlPlaneMetricsRefresher | None = None
+    metrics_exposition: HealthMetricsExpositionPort | None = None
+    runtime_source_id: str | None = None
+    run_report_store: RunReportStorePort | None = None
 
 
 @dataclass
