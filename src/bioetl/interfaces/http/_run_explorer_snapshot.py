@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Protocol
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.domain.ports import RunLedgerPort, RunManifestPort
+from bioetl.domain.ports import RunLedgerPort, RunManifestPort, RunReportStorePort
 from bioetl.interfaces.http.recent_pipeline_runs import (
     RECENT_TIMING_FIELDS,
     _scope,
@@ -28,6 +28,9 @@ _REFRESH_ERRORS = (OSError, RuntimeError, TypeError, ValueError, KeyError)
 
 
 class _SnapshotSource(Protocol):
+    @property
+    def _run_report_store(self) -> RunReportStorePort: ...
+
     @property
     def _run_manifest_port(self) -> RunManifestPort | None: ...
 
@@ -75,6 +78,7 @@ class RunExplorerSnapshotCache:
                 limit=DEFAULT_RECENT_LIMIT,
                 manifest_port=manifest_port,
                 ledger_port=source._run_ledger_port,
+                store=source._run_report_store,
             )
         except _REFRESH_ERRORS:
             return

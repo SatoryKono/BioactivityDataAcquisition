@@ -267,10 +267,12 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | ID | Title | Type |
 | --- | --- | --- |
 | 99 | Inspect Scope & Evidence | text |
-| 9604 | Review Overall Verdict | stat |
-| 9603 | Review Selected Run Status | table |
-| 9002 | Review Run Domains | table |
-| 9300 | Review Run Identity | table |
-| 9399 | Inspect Additional Run Identity | row |
-| 9390 | Inspect Full Run Identity | table |
+| 9604 | Overall Verdict | stat |
+| 9002 | Run Domains | table |
+| 9603 | Selected Run Status | table |
+| 9300 | Run Identity | table |
+| 9480 | Provider Evidence | table |
+| 9481 | Provider Check | stat |
+| 9460 | Inspect Selected Run Stages | table |
+| 9482 | Data Quality | canvas |
 <!-- END SHIPPED PANEL INVENTORY -->

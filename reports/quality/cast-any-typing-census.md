@@ -4,10 +4,10 @@ Linked issue: #10596 (AUD-006). Schema: `cast-any-typing-census-v1`.
 
 Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`, `Any: JSON`, `as_mixin_host(`.
 
-- total_cast_any_count: 370
+- total_cast_any_count: 353
 - justified_count: 241
-- unjustified_count: 129
-- file_count: 115
+- unjustified_count: 112
+- file_count: 113
 
 ## By category
 
@@ -20,23 +20,23 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | `any_host_attr` | 16 |
 | `any_json` | 0 |
 | `as_mixin_host_call` | 0 |
-| `unjustified` | 129 |
+| `unjustified` | 112 |
 
 ## By layer
 
 | Layer | Total | Unjustified |
 | --- | ---: | ---: |
-| `application` | 178 | 55 |
+| `application` | 172 | 49 |
 | `composition` | 19 | 5 |
 | `domain` | 12 | 2 |
-| `infrastructure` | 158 | 66 |
+| `infrastructure` | 147 | 55 |
 | `interfaces` | 3 | 1 |
 
 ## Unjustified by sub-bucket (triage only)
 
 | Sub-bucket | Count |
 | --- | ---: |
-| `pd4_host_default_pending_protocol` | 60 |
+| `pd4_host_default_pending_protocol` | 43 |
 | `free_form_reason` | 68 |
 | `no_reason_tag` | 1 |
 
@@ -44,10 +44,8 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 
 | Path | Total | Justified | Unjustified |
 | --- | ---: | ---: | ---: |
-| `src/bioetl/infrastructure/storage/gold/metadata_mixin.py` | 11 | 0 | 11 |
 | `src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py` | 8 | 0 | 8 |
 | `src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py` | 8 | 0 | 8 |
-| `src/bioetl/application/composite/merger_io_mixin.py` | 6 | 0 | 6 |
 | `src/bioetl/application/services/quality/dq_report_generation_mixin.py` | 6 | 0 | 6 |
 | `src/bioetl/application/composite/merger_output_mixin.py` | 5 | 0 | 5 |
 | `src/bioetl/application/core/batch_writer_tracing_mixin.py` | 5 | 0 | 5 |
@@ -69,12 +67,14 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | `src/bioetl/infrastructure/storage/gold/writer_metrics.py` | 2 | 0 | 2 |
 | `src/bioetl/infrastructure/storage/lineage_persistence.py` | 2 | 0 | 2 |
 | `src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py` | 2 | 0 | 2 |
+| `src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py` | 2 | 0 | 2 |
+| `src/bioetl/infrastructure/storage/base_delta_writer_access.py` | 2 | 1 | 1 |
 
 ## Unjustified free-form reason tags
 
 | Reason | Count |
 | --- | ---: |
-| `host default (PD4)` | 60 |
+| `host default (PD4)` | 43 |
 | `dynamic compat patch target` | 4 |
 | `Windows STARTUPINFO duck-type` | 3 |
 | `export port accepts Arrow/table duck-type` | 3 |

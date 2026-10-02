@@ -1417,6 +1417,18 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-11-30"
     },
+    "scripts/ops/observability/grafana/_provider_evidence_columns.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep the provider evidence column transformation internal to render_nav_bus. This import-only helper exposes no standalone CLI or deployment entrypoint.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-11-30"
+    },
+    "scripts/ops/observability/grafana/_replay_layout.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep this import-only replay layout transformation behind render_nav_bus; it does not expose a standalone CLI entrypoint.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-11-30"
+    },
     "scripts/ops/observability/grafana/_selected_run_panels.py": {
       "decision": "shared_helper_module",
       "next_step": "Keep as an internal transformation invoked by render_nav_bus; no standalone command or active CLI entrypoint.",

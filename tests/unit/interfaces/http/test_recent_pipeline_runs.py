@@ -298,6 +298,7 @@ async def test_http_recent_view_passes_scope_and_bounded_limit(monkeypatch):
     host = SimpleNamespace(
         _read_optional_param=lambda query, key: query.get(key),
         _run_manifest_port=Mock(),
+        _run_report_store=Mock(),
         _run_ledger_port=Mock(),
         _send_payload_response=AsyncMock(),
     )
@@ -317,6 +318,7 @@ async def test_http_recent_view_passes_scope_and_bounded_limit(monkeypatch):
     assert catalog.call_args.kwargs["workflow"] == "daily"
     assert catalog.call_args.kwargs["pipeline"] == ".*"
     assert catalog.call_args.kwargs["manifest_port"] is host._run_manifest_port
+    assert catalog.call_args.kwargs["store"] is host._run_report_store
     host._send_payload_response.assert_awaited_once_with(None, 200, {"items": []})
 
 

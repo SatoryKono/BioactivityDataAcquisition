@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from bioetl.application.observability.control_plane_integrity_metrics import (
@@ -16,6 +16,7 @@ from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
 from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.composition.observability_runtime import create_run_report_store
 from bioetl.domain.ports import (
     CheckpointPort,
     HealthCheckResult,
@@ -27,6 +28,7 @@ from bioetl.domain.ports import (
     RawRunManifestInspectionPort,
     RunLedgerPort,
     RunManifestPort,
+    RunReportStorePort,
     WorkflowManifestPort,
 )
 from bioetl.domain.types import HealthStatus
@@ -41,7 +43,9 @@ from bioetl.infrastructure.control_plane.file_run_ledger_store import (
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
 )
-from bioetl.infrastructure.control_plane.replay_object_verifier import ReplayObjectVerifier
+from bioetl.infrastructure.control_plane.replay_object_verifier import (
+    ReplayObjectVerifier,
+)
 from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
     FileWorkflowManifestStore,
 )
@@ -72,6 +76,9 @@ class HealthServerDependencies:
     control_plane_evidence_service: ControlPlaneEvidenceService | None = None
     control_plane_integrity_refresher: ControlPlaneIntegrityMetricsService | None = None
     data_root: Path = Path()
+    run_report_store: RunReportStorePort = field(
+        default_factory=create_run_report_store
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -142,11 +149,6 @@ def _create_control_plane_ports(
     )
 
 
-def _build_health_server_monitor(metrics: MetricsPort) -> HealthMonitorPort:
-
-    return ProviderHealthMonitor(metrics=metrics)
-
-
 def create_health_server_dependencies(
     *,
     metrics: MetricsPort | None = None,
@@ -164,7 +166,7 @@ def create_health_server_dependencies(
         data_root=resolved_data_root,
     )
     return HealthServerDependencies(
-        health_monitor=_build_health_server_monitor(resolved_metrics),
+        health_monitor=ProviderHealthMonitor(metrics=resolved_metrics),
         metrics=resolved_metrics,
         checkpoint_port=checkpoint_port_factory(""),
         run_manifest_port=control_plane_ports.manifest_port,
@@ -202,4 +204,5 @@ def create_health_server_dependencies(
         ),
         metrics_exposition=HealthMetricsExpositionAdapter(),
         data_root=resolved_data_root,
+        run_report_store=create_run_report_store(),
     )

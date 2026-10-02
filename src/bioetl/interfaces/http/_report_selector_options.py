@@ -12,6 +12,7 @@ from bioetl.application.services.run_reports.query import (
     list_pipeline_reports,
 )
 from bioetl.composition.observability_runtime import create_run_report_store
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.interfaces.http._identity_display_rows import format_timestamp_label
 from bioetl.interfaces.http.report_root_config import configured_report_root
 from bioetl.interfaces.http.run_report_ops import load_pipeline_run_report_payload
@@ -155,14 +156,19 @@ def supplement_report_options(
 
 
 def load_report_selector_entries(
-    scopes: dict[str, tuple[str, ...]], *, root: Path | None = None
+    scopes: dict[str, tuple[str, ...]],
+    *,
+    root: Path | None = None,
+    store: RunReportStorePort | None = None,
 ) -> list[ReportIndexEntry]:
     """Read only selected owners while preserving the complete historical catalog."""
     root = configured_report_root(root=root)
+    # Direct callers retain a bounded fallback; server readers inject their port.
+    store = store if store is not None else create_run_report_store()
     pipelines = _allowed_scope(scopes.get("pipeline", ()))
-    owners: list[str | None] = sorted(pipelines)
+    owners: list[str | None] = []
+    owners.extend(sorted(pipelines))
     if not pipelines:
-        store = create_run_report_store()
         base = root / "pipeline"
         if not store.is_dir(str(base)):
             return []
@@ -181,7 +187,7 @@ def load_report_selector_entries(
             pipeline_name=pipeline,
             root=root,
             limit=None,
-            store=create_run_report_store(),
+            store=store,
             include_markdown=False,
         )
 
@@ -189,7 +195,8 @@ def load_report_selector_entries(
         return []
     if len(owners) == 1:
         return read_owner(owners[0])
-    # Each worker owns its store. executor.map preserves owner order and raises
+    # The filesystem adapter has no mutable per-reader state. Workers share the
+    # host's read port; executor.map preserves owner order and raises
     # read failures rather than returning an incomplete successful catalog.
     with ThreadPoolExecutor(max_workers=_CATALOG_READ_WORKERS) as executor:
         entries = [
