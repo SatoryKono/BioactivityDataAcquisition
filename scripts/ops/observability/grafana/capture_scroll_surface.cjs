@@ -49,12 +49,22 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
       return r.width>0 && r.height>0 && el.clientHeight<=innerHeight+2 && el.scrollHeight>el.clientHeight+2
         && el.querySelectorAll('[data-viz-panel-key]').length>1;
     }).sort((a,b)=>b.querySelectorAll('[data-viz-panel-key]').length-a.querySelectorAll('[data-viz-panel-key]').length);
-    const el=candidates.find(candidate=>{
+    let el=candidates.find(candidate=>{
       const before=candidate.scrollTop;candidate.scrollTop=1;
       const scrollable=candidate.scrollTop>0;candidate.scrollTop=before;
       return scrollable;
     });
-    if(!el)throw new Error('No programmatically scrollable dashboard container');
+    if (!el) {
+      // A short dashboard can fit completely in the requested viewport.
+      // Accept that case only when every mounted panel is inside the frame.
+      const panels = [...document.querySelectorAll('[data-viz-panel-key]')];
+      const fits = panels.length > 0 && panels.every(panel => {
+        const box = panel.getBoundingClientRect();
+        return box.width > 0 && box.height > 0 && box.top >= 0 && box.bottom <= innerHeight + 2;
+      });
+      if (!fits) throw new Error('No programmatically scrollable dashboard container');
+      el = document.scrollingElement;
+    }
     el.dataset.bioetlCaptureScroll='true';
     el.scrollTop=0;
     const r=el.getBoundingClientRect();

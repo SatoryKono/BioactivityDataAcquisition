@@ -78,3 +78,5 @@ ______________________________________________________________________
 | `bioetl-silver-reject-explorer` (retired) | `$field`, `$payload_hash`, `$pipeline`, `$quarantine_run_id`, `$reason_code`, `$run_type` |
 | `bioetl-workflow-overview` (retired) | `$pipeline`, `$pipeline_context`, `$pipeline_context_exact`, `$provider_context`, `$provider_context_exact`, `$run_id`, `$run_type`, `$run_type_context`, `$run_type_context_exact`, `$status`, `$step_kind`, `$step_status`, `$workflow`, `$workflow_context` |
 | `bioetl-alerts-slo` (retired) | `$pipeline`, `$run_type`, `$workflow` |
+
+Runtime and Provider Health are retired. Their legacy URLs redirect to Run Overview; saved Provider Evidence uses the selected Run ID and panel 9480.

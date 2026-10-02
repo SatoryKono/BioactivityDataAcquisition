@@ -77,7 +77,7 @@ BACKGROUND_SEVERITY_STAT_PANELS = {
     (DASHBOARD_INCIDENT_V1, PANEL_INSPECT_TELEMETRY_MISSING),
 }
 SCALAR_TREND_TIMESERIES_PANELS: set[tuple[str, str]] = set()
-ALLOWED_TABLE_CELL_OPTION_TYPES = {"auto", "color-background", "color-text"}
+ALLOWED_TABLE_CELL_OPTION_TYPES = {"auto", "color-background", "color-text", "markdown"}
 _SEVERITY_012_VALUE_MAPPING: JsonObject = {
     "0": {"text": "OK", "color": "green"},
     "1": {"text": "WARN", "color": "orange"},
