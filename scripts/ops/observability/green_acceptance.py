@@ -189,23 +189,38 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
         MKL_NUM_THREADS="1",
         NUMEXPR_NUM_THREADS="1",
         POLARS_MAX_THREADS="2",
+        TOKIO_WORKER_THREADS="2",
     )
+    if sys.platform == "win32":
+        environment[
+            "BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PLAIN_WRITE_PROCESS_ISOLATION"
+        ] = "true"
     args = command(case)
     failures = []
     with (folder / "launch.log").open("w", encoding="utf-8") as log:
         try:
-            result = subprocess.run(
+            process = subprocess.Popen(
                 args,
                 cwd=folder,
                 env=environment,
                 stdout=log,
                 stderr=subprocess.STDOUT,
-                timeout=1800,
-                check=False,
             )
-            if result.returncode:
-                failures.append(f"exit_code={result.returncode}")
+            returncode = process.wait(timeout=1800)
+            if returncode:
+                failures.append(f"exit_code={returncode}")
         except subprocess.TimeoutExpired:
+            if sys.platform == "win32":
+                subprocess.run(
+                    ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    check=False,
+                    timeout=30,
+                )
+            else:
+                process.kill()
+            process.wait(timeout=30)
             failures.append("launch_timeout=1800s")
     failures.extend(logged_errors((folder / "launch.log").read_text(encoding="utf-8")))
     paths = sorted(reports.glob("pipeline/*/*/pipeline-run-report.json"))
