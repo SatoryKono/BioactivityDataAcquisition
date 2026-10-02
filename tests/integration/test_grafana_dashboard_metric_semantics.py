@@ -610,7 +610,7 @@ def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
         ),
         "Inspect Provider Alerts": (
             "bioetl_provider_current_status",
-            'provider=~"$provider_hint"',
+            'provider=~"$provider"',
         ),
         "Inspect Global Provider Alert Conditions": (
             "bioetl_provider_current_status",
