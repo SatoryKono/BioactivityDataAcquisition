@@ -93,7 +93,7 @@ def test_dq_dashboard_surfaces_record_flow_invariant_metrics() -> None:
 
 def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> None:
     """Loki log-hygiene row was removed with Loki/Tempo (2026-07-23)."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     row_panel = next(
         (
             panel
@@ -122,7 +122,7 @@ def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> 
 
 def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
     """Runtime remains Prometheus-first; Loki/Tempo hygiene row is gone."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
 
     note_panel = next(
         (
@@ -423,7 +423,7 @@ def test_runtime_alert_condition_panels_use_recording_rules(
 
 def test_runtime_tracing_row_orders_log_hygiene_panels() -> None:
     """Loki Tracing-only Log Hygiene row must stay removed."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     tracing_row = next(
         (
             panel

@@ -276,6 +276,39 @@
           "refId": "StandardVariableQuery"
         },
         "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "p95",
+          "value": "0.95"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Read latency",
+        "multi": false,
+        "name": "read_latency_quantile",
+        "description": "Select one control-plane global read-latency quantile. Default p95 keeps a single series per store/operation instead of overlaying p50/p95/p99. Track Global Read Latency shows last and max for the selected quantile.",
+        "options": [
+          {
+            "selected": false,
+            "text": "p50",
+            "value": "0.50"
+          },
+          {
+            "selected": true,
+            "text": "p95",
+            "value": "0.95"
+          },
+          {
+            "selected": false,
+            "text": "p99",
+            "value": "0.99"
+          }
+        ],
+        "query": "p50 : 0.50, p95 : 0.95, p99 : 0.99",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },
@@ -304,7 +337,7 @@
         "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-current\" href=\"#bioetl-incident-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"6. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">6. Incident Workspace</a></div>"
       },
       "title": "",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Run Overview / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus: Run Explorer / Replay Readiness / Run Overview / Incident Workspace. Data Quality is a contextual detail destination. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
@@ -359,7 +392,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Incident Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">CURRENT: ${workflow:text} / ${pipeline:text} / ${run_type:text}; Run ID does not filter this card.<br>GLOBAL tables below cover all pipelines; suspects are not verified causes. VALID EMPTY is an empty suspect list, not a healthy fleet.</div>"
+        "content": "<div style=\"max-width:96ch;white-space:normal;padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">CURRENT: ${workflow:text} / ${pipeline:text} / ${run_type:text}; Run ID does not filter this card.<br>GLOBAL tables below cover all pipelines; suspects are not verified causes. VALID EMPTY is an empty suspect list, not a healthy fleet.</div>"
       },
       "links": []
     },
@@ -1903,7 +1936,8 @@
                   "type": "auto",
                   "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               },
               "color": {
                 "mode": "thresholds"
@@ -1932,7 +1966,7 @@
               "links": [
                 {
                   "title": "Open domain workspace",
-                  "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${provider:queryparam}&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
+                  "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
                   "includeVars": false,
                   "targetBlank": false
                 }
@@ -2529,7 +2563,8 @@
                   "type": "auto",
                   "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               },
               "links": [
                 {
@@ -2879,7 +2914,8 @@
                   "wrapText": false
                 },
                 "inspect": true,
-                "wrapText": false
+                "wrapText": false,
+                "minWidth": 50
               },
               "mappings": [
                 {
@@ -3556,7 +3592,8 @@
                   "type": "auto",
                   "wrapText": false
                 },
-                "wrapText": false
+                "wrapText": false,
+                "minWidth": 50
               },
               "unit": "short"
             },
@@ -4769,7 +4806,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range])))",
+              "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",pipeline_context=~\"$pipeline\",run_type_context=~\"$run_type\",status=\"failed\"}[$__range])))",
               "refId": "A"
             }
           ],
@@ -4914,7 +4951,8 @@
                 "spanNulls": true,
                 "align": "auto",
                 "displayMode": "auto",
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               },
               "mappings": [
                 {
@@ -5109,7 +5147,8 @@
               "unit": "short",
               "decimals": 0,
               "custom": {
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               },
               "links": [
                 {
@@ -5863,7 +5902,7 @@
               },
               {
                 "title": "Open Data Quality",
-                "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${stage:queryparam}&${__url_time_range}",
+                "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -6041,10 +6080,10 @@
               },
               {
                 "title": "Open Provider Evidence",
-                "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=${provider_for_pipeline:percentencode}&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
+                "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}&viewPanel=9480",
                 "targetBlank": false,
                 "includeVars": false,
-                "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. Provider alert query may scope by $provider_hint when validated."
+                "tooltip": "Saved Provider Evidence for the selected Run ID. CURRENT provider alert conditions remain in Incident Workspace and do not prove this saved verdict."
               }
             ],
             "text": {
@@ -6054,7 +6093,7 @@
           },
           "targets": [
             {
-              "expr": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider_hint\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0)",
+              "expr": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider\"}) > bool 0)",
               "refId": "A"
             }
           ],
@@ -6206,10 +6245,10 @@
               },
               {
                 "title": "Open Provider Evidence",
-                "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=${provider_for_pipeline:percentencode}&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
+                "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}&viewPanel=9480",
                 "targetBlank": false,
                 "includeVars": false,
-                "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. GLOBAL card sums cluster-wide adapter latency and rate-limiter wait conditions."
+                "tooltip": "Saved Provider Evidence for the selected Run ID. CURRENT provider alert conditions remain in Incident Workspace and do not prove this saved verdict."
               }
             ],
             "text": {
@@ -6248,7 +6287,8 @@
               "unit": "short",
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
               "custom": {
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               },
               "decimals": 0
             },
@@ -6381,7 +6421,7 @@
               },
               {
                 "title": "Open Data Quality",
-                "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${stage:queryparam}&${__url_time_range}",
+                "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -6987,7 +7027,8 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               },
               "mappings": [
                 {
@@ -7771,7 +7812,8 @@
               "unit": "short",
               "noValue": "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure.",
               "custom": {
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               }
             },
             "overrides": [
@@ -9474,7 +9516,8 @@
                   "wrapText": false
                 },
                 "inspect": true,
-                "wrapText": false
+                "wrapText": false,
+                "minWidth": 50
               },
               "mappings": [
                 {
@@ -11337,7 +11380,8 @@
                   "type": "auto",
                   "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               }
             },
             "overrides": [
@@ -12124,7 +12168,8 @@
                 "cellOptions": {
                   "type": "auto",
                   "wrapText": true
-                }
+                },
+                "minWidth": 50
               },
               "noValue": "UNKNOWN",
               "unit": "none"
@@ -12178,7 +12223,8 @@
             "showHeader": true,
             "cellHeight": "sm",
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true
             }
           },
           "links": [

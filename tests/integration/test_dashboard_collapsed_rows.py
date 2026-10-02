@@ -73,13 +73,18 @@ def test_every_dashboard_has_at_least_one_row() -> None:
             for panel in get_dashboard_panels(dashboard)
             if panel.get("type") == "row"
         ]
-        if dashboard_path.name == "bioetl-run-explorer-v1.json":
+        if dashboard_path.name in {
+            "bioetl-run-explorer-v1.json",
+            "bioetl-overview-v2.json",
+        }:
             assert rows == []
-            assert len(get_dashboard_panels(dashboard)) == 2
+            assert len(get_dashboard_panels(dashboard)) == (
+                2 if dashboard_path.stem == "bioetl-run-explorer-v1" else 10
+            )
         else:
             assert rows, f"{dashboard_path.name} must declare at least one row group"
         observed += len(rows)
-    assert observed >= 20
+    assert observed == 11
 
 
 def test_row_groups_materialize_expanded_for_test_stage() -> None:
@@ -97,7 +102,10 @@ def test_row_groups_materialize_expanded_for_test_stage() -> None:
         materialized = materialize_expanded(shipped)
         root_panels = materialized["panels"]
         rows = [panel for panel in root_panels if panel.get("type") == "row"]
-        if dashboard_path.name == "bioetl-run-explorer-v1.json":
+        if dashboard_path.name in {
+            "bioetl-run-explorer-v1.json",
+            "bioetl-overview-v2.json",
+        }:
             assert rows == []
             assert len(get_dashboard_panels(materialized)) == shipped_total
             continue

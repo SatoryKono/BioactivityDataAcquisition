@@ -156,7 +156,7 @@ def _provider_evidence_columns(panel: dict) -> None:
     defaults["custom"]["cellOptions"]["wrapText"] = True
     defaults["custom"]["minWidth"] = 50
     panel["options"]["cellHeight"] = "lg"
-    panel["options"]["footer"] = {"show": False, "enablePagination": False}
+    panel["options"]["footer"] = {"show": False, "enablePagination": True}
     widths = {
         "Provider": 75,
         "Data source": 105,
@@ -249,7 +249,12 @@ def apply_provider_evidence_columns(payload: dict) -> None:
         )
 
         panels = payload["panels"]
-        panels[:] = [panel for panel in panels if panel.get("title") not in {"Review Provider Evidence", "Review Provider Check"}]
+        panels[:] = [
+            panel
+            for panel in panels
+            if panel.get("title")
+            not in {"Review Provider Evidence", "Review Provider Check"}
+        ]
         evidence = _provider_check_panel(
             9460,
             "Review Provider Evidence",
@@ -267,7 +272,9 @@ def apply_provider_evidence_columns(payload: dict) -> None:
         _style_provider_check([evidence, check])
         check["options"]["colorMode"] = "value"
         verdict = next(panel for panel in panels if panel.get("id") == 9604)
-        value_size = verdict["options"].setdefault("text", {}).setdefault("valueSize", 48)
+        value_size = (
+            verdict["options"].setdefault("text", {}).setdefault("valueSize", 48)
+        )
         check["options"].setdefault("text", {})["valueSize"] = value_size
         # Overview already owns stage panel 9460 inside saved evidence.
         evidence["id"] = 9480
@@ -298,3 +305,27 @@ def apply_provider_evidence_columns(payload: dict) -> None:
     panels[:] = [panel for panel in panels if panel.get("id") not in {9460, 9461}]
     details["gridPos"]["y"] = 2
     details["panels"][0]["gridPos"]["y"] = 3
+
+
+def apply_dq_accounting_layout(payload: dict) -> None:
+    """Keep the exact-run answer first-window and disclose full accounting below it.
+
+    Four accounting columns and all outcome rows cannot fit the former ten-column
+    first-window slot at 200% zoom. Do not truncate rows or raise the fold budget.
+    """
+    if payload.get("uid") != "bioetl-dq-v2":
+        return
+    by_id = {panel["id"]: panel for panel in payload["panels"]}
+    by_id[9402]["gridPos"].update(x=0, y=10, w=24, h=8)
+    by_id[9403]["gridPos"].update(x=0, y=18, w=24, h=14)
+    # Old aliases share the renamed numeric column; pin its displayed name only.
+    for override in by_id[9403]["fieldConfig"]["overrides"]:
+        if override["matcher"].get("options") in {"value", "value A", "count"}:
+            override["properties"] = [
+                prop for prop in override["properties"] if prop["id"] != "custom.width"
+            ]
+    row = by_id[9450]
+    delta = 32 - row["gridPos"]["y"]
+    row["gridPos"]["y"] = 32
+    for child in row["panels"]:
+        child["gridPos"]["y"] += delta

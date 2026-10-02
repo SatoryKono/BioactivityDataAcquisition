@@ -142,10 +142,28 @@ def _evidence_source(panel: dict[str, object]) -> str:
 
 def _scope(title: str, panel: dict[str, object]) -> str:
     normalized = title.lower()
+    description = str(panel.get("description") or "").strip()
+    for badge, scope in (
+        ("SELECTED RUN", "selected_run"),
+        ("TIME RANGE", "time_range"),
+        ("CURRENT", "current"),
+        ("GLOBAL", "global"),
+    ):
+        if description.startswith(badge):
+            if scope == "selected_run" and _uses_prometheus(panel):
+                return "time_range"
+            return scope
     if panel.get("type") in {"row", "text"}:
         return "global"
     if _is_ops_http(panel) and (
-        "run" in normalized or "manifest" in normalized or "retention" in normalized
+        any(
+            "run_id=" in str(target.get("url") or "")
+            for target in panel.get("targets") or []
+            if isinstance(target, dict)
+        )
+        or "run" in normalized
+        or "manifest" in normalized
+        or "retention" in normalized
     ):
         return "selected_run"
     if _uses_prometheus(panel):
@@ -201,7 +219,7 @@ def _state_model(role: str) -> list[str]:
     if role in {"row_group", "guidance", "navigation"}:
         return ["N/A"]
     if role in {"forensic_table", "evidence_table"}:
-        return ["VALID_EMPTY", "ERROR", "TELEMETRY_ABSENT"]
+        return ["VALID_EMPTY", "UNKNOWN", "ERROR", "TELEMETRY_ABSENT"]
     if role in {"trend", "heatmap", "state_timeline", "alert_timeline"}:
         return ["OK", "WARN", "CRIT", "UNKNOWN", "ERROR", "VALID_EMPTY"]
     return [
@@ -298,6 +316,11 @@ def _merge_panel_contract(
     merged = {**generated, **previous}
     merged["title"] = generated["title"]
     merged["evidence_source"] = generated["evidence_source"]
+    merged["state_model"] = list(
+        dict.fromkeys(
+            [*generated.get("state_model", []), *previous.get("state_model", [])]
+        )
+    )
     if (
         previous.get("evidence_source")
         and previous["evidence_source"] != generated["evidence_source"]
@@ -306,6 +329,8 @@ def _merge_panel_contract(
         for key in ("scope", "scope_class", "empty_state_class"):
             merged[key] = generated[key]
     role = str(merged.get("role") or generated["role"])
+    # Query/copy scope wins over obsolete portfolio overrides.
+    merged["scope"] = generated["scope"]
     if (
         merged["evidence_source"] == "prometheus"
         and merged.get("scope") == "selected_run"

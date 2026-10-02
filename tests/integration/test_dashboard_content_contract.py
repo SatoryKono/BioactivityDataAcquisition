@@ -159,11 +159,11 @@ def test_content_contract_fails_closed_when_table_columns_are_omitted(
     assert isinstance(contract, dict)
     dashboards = contract["dashboards"]
     assert isinstance(dashboards, dict)
-    control_plane = dashboards["bioetl-control-plane-v1"]
+    control_plane = dashboards["bioetl-overview-v2"]
     assert isinstance(control_plane, dict)
     panels = control_plane["panels"]
     assert isinstance(panels, dict)
-    records = panels["9403"]
+    records = panels["9300"]
     assert isinstance(records, dict)
     records.pop("required_columns")
     contract_path = tmp_path / "panel-content-contract.yaml"
@@ -174,7 +174,7 @@ def test_content_contract_fails_closed_when_table_columns_are_omitted(
     )
 
     assert (
-        "panel-content-contract.yaml:bioetl-control-plane-v1:9403: table role "
+        "panel-content-contract.yaml:bioetl-overview-v2:9300: table role "
         "requires required_columns" in errors
     )
 

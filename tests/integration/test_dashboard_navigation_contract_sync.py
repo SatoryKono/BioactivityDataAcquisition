@@ -57,7 +57,6 @@ def test_required_inbound_paths_match_overview_first_action_mirror() -> None:
     contract = _load_contract()
     target_uids = (
         "bioetl-control-plane-v1",
-        "bioetl-provider-health-v2",
         "bioetl-dq-v2",
     )
     route = {
@@ -87,3 +86,20 @@ def test_required_inbound_paths_match_overview_first_action_mirror() -> None:
     urls = {str(link.get("url", "")) for link in (first_action.get("links") or [])}
     for target_uid in target_uids:
         assert any(url.startswith(f"/d/{target_uid}/") for url in urls)
+
+
+def test_provider_action_stays_on_local_saved_evidence() -> None:
+    overview = json.loads(
+        (_DASHBOARDS_DIR / "bioetl-overview-v2.json").read_text(encoding="utf-8")
+    )
+    panel = next(panel for panel in overview["panels"] if panel["id"] == 9002)
+    link = next(
+        link for link in panel["links"] if link["title"] == "Open Provider Evidence"
+    )
+    assert link["url"].startswith("/d/bioetl-overview-v2/")
+    assert "viewPanel=9480" in link["url"]
+    for name in ("workflow", "pipeline", "run_type", "run_id"):
+        assert "${" + name + ":queryparam}" in link["url"]
+    assert "${__url_time_range}" in link["url"]
+    assert "var-provider" not in link["url"]
+    assert "var-pipeline_context" not in link["url"]

@@ -19,7 +19,7 @@ from collections import deque
 import pytest
 import yaml
 from tests.integration._grafana_test_support import (
-    get_dashboard_navigation_links,
+    _collect_dashboard_links,
     load_dashboard,
 )
 
@@ -43,7 +43,7 @@ def _build_top_level_edges() -> dict[str, set[str]]:
         assert isinstance(source_uid, str), f"{path.name} must define string uid"
         edges.setdefault(source_uid, set())
 
-        for link in get_dashboard_navigation_links(payload):
+        for link in _collect_dashboard_links(payload):
             url = link.get("url")
             if not isinstance(url, str):
                 continue
@@ -60,7 +60,7 @@ def _iter_top_level_uid_links() -> list[tuple[str, str, str]]:
         payload = load_dashboard(path)
         source_uid = payload.get("uid")
         assert isinstance(source_uid, str), f"{path.name} must define string uid"
-        for link in get_dashboard_navigation_links(payload):
+        for link in _collect_dashboard_links(payload):
             url = link.get("url")
             if not isinstance(url, str):
                 continue
@@ -77,7 +77,7 @@ def _iter_top_level_uid_links_with_title() -> list[tuple[str, str, str, str]]:
         payload = load_dashboard(path)
         source_uid = payload.get("uid")
         assert isinstance(source_uid, str), f"{path.name} must define string uid"
-        for link in get_dashboard_navigation_links(payload):
+        for link in _collect_dashboard_links(payload):
             title = link.get("title")
             url = link.get("url")
             if not isinstance(title, str) or not isinstance(url, str):

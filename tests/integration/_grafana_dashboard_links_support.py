@@ -674,11 +674,22 @@ def _assert_preserved_identity_handoff(
 
     if current_uid in source_uids and target_uid in target_uids:
         values = _extract_link_var_values(url)
+        if target_uid == "bioetl-run-explorer-v1" and values.get("run_id") == "-":
+            assert {
+                key: values.get(key) for key in ("workflow", "pipeline", "run_type")
+            } == dict.fromkeys(("workflow", "pipeline", "run_type"), ".*")
+            assert "var-lookup_run_id=" in url
+            return
+        expected_identity = (
+            "${__data.fields.run_id:percentencode}"
+            if current_uid == "bioetl-run-explorer-v1"
+            else required_value
+        )
         assert selector in passed_vars, (
             f"{dashboard_name} link to {target_uid} must preserve exact Run ID "
             f"with var-{selector}={required_value}: {url}"
         )
-        assert values.get(selector) == required_value, (
+        assert values.get(selector) == expected_identity, (
             f"{dashboard_name} link to {target_uid} must use "
             f"var-{selector}={required_value}, got {values.get(selector)!r}: {url}"
         )
@@ -774,9 +785,9 @@ def _assert_cross_dashboard_link_policy(
         assert current_uid == "bioetl-incident-v1"
         assert link.get("title") == "Open domain diagnostics"
         for resolved_uid, scope in {
-            "bioetl-runtime": "var-stage=%24__all",
+            "bioetl-incident-v1": "",
             "bioetl-dq-v2": "var-stage=%24__all",
-            "bioetl-provider-health-v2": "var-provider=chembl&var-pipeline_context=unknown",
+            "bioetl-overview-v2": "viewPanel=9480",
         }.items():
             resolved_url = url.replace(
                 "${__data.fields.action_dashboard_uid}", resolved_uid
@@ -1460,9 +1471,6 @@ _BASE_VISUAL_NAV_TITLES = (
     "Run Explorer",
     "Replay Readiness",
     "Run Overview",
-    "Pipeline Diagnostics",
-    "Provider Health",
-    "Data Quality",
     "6. Incident Workspace",
 )
 
@@ -1479,7 +1487,7 @@ _SANITIZER_SAFE_NAV_TOKENS = (
     "display:flex",
     "flex-wrap:nowrap",
     "overflow:visible",
-    "width:14%",
+    "width:16.5%",
     "font:600 16px/18px Arial",
     "min-width:0",
     "overflow-wrap:anywhere",
@@ -1516,6 +1524,12 @@ def _assert_visual_bus_base_content(
         "sanitization without a style block"
     )
     for token in _SANITIZER_SAFE_NAV_TOKENS:
+        if dashboard_name == "bioetl-dq-v2.json" and token in {
+            "background:#1d4ed8",
+            "border:2px solid #7dd3fc",
+        }:
+            assert token not in content
+            continue
         assert token in content, (
             f"{dashboard_name} navigation must define sanitizer-safe {token}"
         )
@@ -1528,7 +1542,7 @@ def _assert_visual_bus_base_content(
     description = str(panel.get("description", ""))
     assert "Sanitizer-compatible" in description
     assert "native keyboard focus" in description
-    assert "Provider Health" in description
+    assert "Run Overview" in description
     assert "Incident Workspace" in description
     assert "Run Explorer" in description
 
@@ -1536,6 +1550,10 @@ def _assert_visual_bus_base_content(
 def _assert_current_dashboard_disabled_in_visual_bus(
     *, dashboard_name: str, uid: str, content: str
 ) -> None:
+    if uid == "bioetl-dq-v2":
+        assert 'aria-current="page"' not in content
+        assert "Data Quality" not in content
+        return
     current_title = _EXPECTED_CURRENT_NAV_TITLE[uid]
     # Current chip is non-interactive: span[aria-current] (legacy) or
     # a[aria-disabled][aria-current] (DUX7 sanitizer-safe styles).
@@ -1801,7 +1819,7 @@ def _assert_named_dashboard_handoff(
     ),
 ) -> None:
     dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-    navigation_links = get_dashboard_navigation_links(dashboard)
+    navigation_links = _collect_dashboard_links(dashboard)
     titles = {link.get("title") for link in navigation_links if link.get("title")}
     urls = [str(link.get("url", "")) for link in navigation_links]
     assert expected_title in titles, (

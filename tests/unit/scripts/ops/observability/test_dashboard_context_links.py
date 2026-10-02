@@ -143,7 +143,6 @@ def test_action_normalization_preserves_rank_query_and_visible_column() -> None:
         ("bioetl-run-explorer-v1", "run-explorer"),
         ("bioetl-control-plane-v1", "1-trust"),
         ("bioetl-overview-v2", "2-overview"),
-        ("bioetl-provider-health-v2", "4-provider-health"),
         ("bioetl-dq-v2", "5-data-quality"),
         ("bioetl-incident-v1", "6-incident-workspace"),
     ],
@@ -190,3 +189,27 @@ def test_severity_colors_are_never_normalized_to_unknown(color: str) -> None:
     )
 
     assert _semantic_palette({"text": "UNKNOWN", "color": color})["color"] == color
+
+
+def test_retired_provider_route_opens_local_saved_evidence_without_foreign_selectors():
+    url = build_handoff_url(
+        "bioetl-provider-health-v2",
+        extras={
+            "provider": "chembl",
+            "adapter": "rest",
+            "pipeline_context": "chembl_activity",
+            "stage": "silver",
+        },
+    )
+    assert url.startswith("/d/bioetl-overview-v2/2-overview?")
+    assert "&viewPanel=9480&" in url
+    for key in (
+        "var-provider=",
+        "var-adapter=",
+        "var-pipeline_context=",
+        "var-stage=",
+        "var-viewPanel=",
+    ):
+        assert key not in url
+    assert "${run_id:queryparam}" in url
+    assert "${__url_time_range}" in url

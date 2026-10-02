@@ -22,35 +22,24 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
-def test_provider_context_mapping_preserves_source_values():
-    """Provider health handoffs must preserve source dashboard provider/adapter values."""
-    # bioetl-runtime → bioetl-provider-health-v2 should preserve provider context
-    runtime_dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    runtime_links = _collect_dashboard_links(runtime_dashboard)
-
-    for link in runtime_links:
-        url = str(link.get("url", ""))
-        title = str(link.get("title", ""))
-
-        # Check links to provider-health
-        if "/d/bioetl-provider-health-v2/" in url:
-            # Runtime to provider-health should preserve pipeline context
-            # This is a SHOULD check - just verify the pattern exists
-            assert "var-pipeline_context" in url or "var-provider" in url, (
-                f"Runtime link '{title}' to Provider Health should include provider context mapping"
-            )
-
-    # bioetl-dq-v2 → bioetl-provider-health-v2 should preserve provider context
-    dq_dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    dq_links = _collect_dashboard_links(dq_dashboard)
-
-    for link in dq_links:
-        url = str(link.get("url", ""))
-        title = str(link.get("title", ""))
-
-        # Check links to provider-health
-        if "/d/bioetl-provider-health-v2/" in url:
-            # DQ to provider-health should preserve pipeline context
-            assert "var-pipeline_context" in url or "var-provider" in url, (
-                f"DQ link '{title}' to Provider Health should include provider context mapping"
-            )
+@pytest.mark.parametrize(
+    "source", ["bioetl-overview-v2", "bioetl-run-explorer-v1", "bioetl-incident-v1"]
+)
+def test_provider_context_mapping_preserves_source_values(source: str) -> None:
+    """Current Provider Evidence handoffs retain exact identity and own no legacy vars."""
+    dashboard = load_dashboard(Path("grafana/dashboards") / (source + ".json"))
+    links = [
+        link
+        for link in _collect_dashboard_links(dashboard)
+        if link.get("title") in {"Open Provider Evidence", "Provider Evidence"}
+    ]
+    if source != "bioetl-incident-v1":
+        assert links
+    for link in links:
+        url = link["url"]
+        assert url.startswith("/d/bioetl-overview-v2/")
+        assert "var-provider=" not in url and "var-pipeline_context=" not in url
+        assert "var-adapter=" not in url
+        assert "${__url_time_range}" in url
+        assert "run_id" in url and "pipeline" in url
+    assert not Path("grafana/dashboards/bioetl-provider-health-v2.json").exists()

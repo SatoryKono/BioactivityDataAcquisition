@@ -2081,7 +2081,7 @@ tests:
       - expr: bioetl_incident_ranked_provider
         eval_time: 1m
         exp_samples:
-          - labels: '{__name__="bioetl_incident_ranked_provider",action="UNKNOWN",action_dashboard_uid="bioetl-provider-health-v2",action_scope="var-provider=unknown&var-pipeline_context=unknown",domain="provider",pipeline="unknown",provider="unknown",signal="telemetry_gap"}'
+          - labels: '{__name__="bioetl_incident_ranked_provider",action="UNKNOWN",action_dashboard_uid="bioetl-overview-v2",action_scope="viewPanel=9480",domain="provider",pipeline="unknown",provider="unknown",signal="telemetry_gap"}'
             value: 0
       - expr: bioetl_incident_ranked_dq
         eval_time: 1m
@@ -2667,7 +2667,7 @@ tests:
     - series: bioetl_incident_alert_priority{pipeline="p"}
       values: '2'
     promql_expr_test:
-    - expr: label_replace(bioetl_incident_alert_priority,"provider","Not provided","provider","^$")
+    - expr: label_replace(bioetl_incident_alert_priority{pipeline=~"p|q"},"provider","Not provided","provider","^$")
       eval_time: 0m
       exp_samples:
       - labels: '{__name__="bioetl_incident_alert_priority",pipeline="p",provider="Not
@@ -2680,7 +2680,7 @@ tests:
     - series: bioetl_incident_alert_priority{pipeline="q",provider="crossref"}
       values: '1'
     promql_expr_test:
-    - expr: label_replace(bioetl_incident_alert_priority,"provider","Not provided","provider","^$")
+    - expr: label_replace(bioetl_incident_alert_priority{pipeline=~"p|q"},"provider","Not provided","provider","^$")
       eval_time: 0m
       exp_samples:
       - labels: '{__name__="bioetl_incident_alert_priority",pipeline="p",provider="Not

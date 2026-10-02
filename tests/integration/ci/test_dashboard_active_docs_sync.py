@@ -135,7 +135,9 @@ def test_active_docs_sync_workflow_selector_and_cta_titles() -> None:
     # bioetl-workflow-overview.json was retired (#6570/#6647); workflow-band
     # evidence now ships on bioetl-runtime (see panel-title-inventory).
     assert "bioetl-workflow-overview.json" not in panel_inventory
-    assert "| bioetl-runtime.json |" in panel_inventory
+    assert "| bioetl-incident-v1.json |" in panel_inventory
+    assert "| bioetl-runtime.json |" not in panel_inventory
+    assert "| bioetl-provider-health-v2.json |" not in panel_inventory
     assert "Track Failed Workflow Runs" in panel_inventory
 
     for token in ("Next Diagnostic Surface", "Workflow Scope"):
@@ -241,32 +243,18 @@ def test_panel_docs_match_shipped_dashboard_panel_titles() -> None:
         (
             "bioetl-overview-v2",
             "Review Run Identity",
-            "Review Processed Records",
+            None,
             9300,
-            9301,
-        ),
-        (
-            "bioetl-provider-health-v2",
-            "Inspect Run Identity",
-            "Inspect Processed Records",
-            9402,
-            9403,
-        ),
-        (
-            "bioetl-runtime",
-            "Inspect Pipeline Identity",
-            "Inspect Processed Records",
-            9402,
-            9403,
+            None,
         ),
     ),
 )
 def test_http_identity_panel_docs_match_shipped_datasource_contract(
     dashboard_name: str,
     identity_title: str,
-    processed_title: str,
+    processed_title: str | None,
     identity_panel_id: int,
-    processed_panel_id: int,
+    processed_panel_id: int | None,
 ) -> None:
     """HTTP-backed identity panels must not drift back to Prometheus docs."""
     dashboard_path = DASHBOARD_DIR / f"{dashboard_name}.json"
@@ -274,23 +262,38 @@ def test_http_identity_panel_docs_match_shipped_datasource_contract(
         encoding="utf-8"
     )
     identity_section = _documented_panel_section(doc_text, identity_title)
-    processed_section = _documented_panel_section(doc_text, processed_title)
-
-    identity_panel = _dashboard_panel_by_id(dashboard_path, identity_panel_id)
-    processed_panel = _dashboard_panel_by_id(dashboard_path, processed_panel_id)
-    identity_target = identity_panel["targets"][0]
-    processed_target = processed_panel["targets"][0]
-
-    for panel in (identity_panel, processed_panel):
-        assert panel["datasource"] == "BioETL Ops HTTP"
-    assert str(identity_target["url"]).startswith("/ops/control-plane/identity-table")
-    assert str(processed_target["url"]).startswith(
-        "/ops/observability/processed-records"
+    processed_section = (
+        _documented_panel_section(doc_text, processed_title)
+        if processed_title
+        else None
     )
 
+    identity_panel = _dashboard_panel_by_id(dashboard_path, identity_panel_id)
+    processed_panel = (
+        _dashboard_panel_by_id(dashboard_path, processed_panel_id)
+        if processed_panel_id
+        else None
+    )
+    identity_target = identity_panel["targets"][0]
+    processed_target = processed_panel["targets"][0] if processed_panel else None
+
+    for panel in (identity_panel, processed_panel):
+        if panel is not None:
+            assert panel["datasource"] == "BioETL Ops HTTP"
+    identity_endpoint = (
+        "/ops/observability/selected-run-status"
+        if dashboard_name == "bioetl-overview-v2"
+        else "/ops/control-plane/identity-table"
+    )
+    assert str(identity_target["url"]).startswith(identity_endpoint)
+    if processed_target is not None:
+        assert str(processed_target["url"]).startswith(
+            "/ops/observability/processed-records"
+        )
+
     for token in (
-        "BioETL Ops HTTP control-plane identity endpoint",
-        "/ops/control-plane/identity-table",
+        "BioETL Ops HTTP",
+        identity_endpoint,
         "this is not a Prometheus panel",
     ):
         assert token in identity_section
@@ -299,4 +302,5 @@ def test_http_identity_panel_docs_match_shipped_datasource_contract(
         "/ops/observability/processed-records",
         "this is not a Prometheus panel",
     ):
-        assert token in processed_section
+        if processed_section is not None:
+            assert token in processed_section

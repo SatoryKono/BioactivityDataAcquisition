@@ -678,8 +678,8 @@ def test_run_explorer_workflow_passport_is_conditional_in_one_column() -> None:
         item for item in get_dashboard_panels(dashboard) if item.get("id") == 3010
     )
     selector = panel["targets"][0]["root_selector"]
-    assert 'workflow_passport_url != ""' in selector
-    assert '"[" & workflow_id & "](" & workflow_passport_url & ")" : "N/A"' in selector
+    assert '"workflow_id": workflow_id != "" ? workflow_id : "N/A"' in selector
+    assert "workflow_passport_url" in selector
 
     organize = next(
         item for item in panel["transformations"] if item["id"] == "organize"
@@ -695,8 +695,10 @@ def test_run_explorer_workflow_passport_is_conditional_in_one_column() -> None:
         if item["matcher"] == {"id": "byName", "options": "Workflow"}
     )
     properties = {item["id"]: item["value"] for item in workflow_override["properties"]}
-    assert properties["custom.cellOptions"]["type"] == "markdown"
-    assert "links" not in properties
+    assert properties["custom.cellOptions"]["type"] == "auto"
+    assert properties["custom.inspect"] is True
+    assert len(properties["links"]) == 1
+    assert "workflow_passport_path" in properties["links"][0]["url"]
 
 
 def test_run_explorer_pipeline_passport_uses_a_fixed_allowed_origin() -> None:

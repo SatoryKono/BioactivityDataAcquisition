@@ -23,8 +23,19 @@ def test_navigation_preserves_selector_url_values(path: Path) -> None:
     dashboard = json.loads(path.read_text(encoding="utf-8"))
     nav = next(p for p in panels(dashboard) if p["id"] == 1000)
     for link in nav["links"]:
-        assert "${run_type:queryparam}" in link["url"]
-        assert "${workflow:queryparam}" in link["url"]
+        if "/d/bioetl-run-explorer-v1/" in link["url"]:
+            for reset in (
+                "var-workflow=.*",
+                "var-pipeline=.*",
+                "var-run_type=.*",
+                "var-run_id=-",
+                "var-lookup_run_id=",
+            ):
+                assert reset in link["url"]
+        else:
+            assert "${run_type:queryparam}" in link["url"]
+            assert "${workflow:queryparam}" in link["url"]
+            assert "${run_id:queryparam}" in link["url"]
         assert "${__url_time_range}" in link["url"]
 
 
@@ -75,7 +86,7 @@ def test_recent_report_column_uses_the_row_http_link() -> None:
 
 
 def test_concrete_context_values_are_not_grafana_globs() -> None:
-    url = build_handoff_url("bioetl-runtime")
+    url = build_handoff_url("bioetl-incident-v1")
     assert "${run_type:queryparam}" in url
     assert "var-run_type=$run_type" not in url
 

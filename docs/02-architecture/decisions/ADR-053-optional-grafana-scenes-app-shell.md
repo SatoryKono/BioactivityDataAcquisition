@@ -136,3 +136,33 @@ Risks without an ADR:
 - DS2-11 (#6912): implementation **deferred** until a dedicated delivery window
   after Wave 1; JSON fallback is the production operator path
 - DS2-12 / DS2-13: remain contract-gated tracking; not authorized by this ADR alone
+
+## Approved JSON portfolio cutover — 2026-10-02
+
+The maintainer approved retaining the five current JSON dashboards while
+completing #11859 acceptance. This is consolidation of the existing JSON
+presentation adapter, not a cutover to the deferred Scenes application.
+It supersedes the seven-UID fallback requirement in decision 3 for this JSON
+portfolio. The Scenes build, parity, and deployment gates remain unchanged.
+
+The provisioned fallback portfolio is now:
+
+- `bioetl-control-plane-v1` — exact replay readiness and saved replay evidence;
+- `bioetl-overview-v2` — selected-run assessment, runtime/domain evidence,
+  identity, and provider evidence/check (`9480` / `9481`);
+- `bioetl-dq-v2` — selected-run data quality and processed-record accounting;
+- `bioetl-incident-v1` — current/global suspects and the retained runtime,
+  provider, and control-plane metric evidence;
+- `bioetl-run-explorer-v1` — recent-run selection and report handoff.
+
+`bioetl-runtime` and `bioetl-provider-health-v2` are retired JSON UIDs.
+Selected-run runtime/provider handoffs go to Run Overview; fleet/current
+runtime and provider investigation goes to Incident Workspace. Active
+navigation, provisioning, contracts, and executable tests must use these
+destinations, rather than requiring retired files or reintroducing duplicate
+dashboards. Historical UID references remain historical evidence only.
+
+Cutover acceptance requires exact five-UID source/provisioning/contract parity,
+tests for the retained evidence and scoped links, and unchanged coverage,
+readability, layout, and debt thresholds. Static checks do not establish
+live-render or usage acceptance. Grafana remains optional under ADR-010.

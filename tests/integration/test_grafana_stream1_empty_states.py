@@ -25,9 +25,9 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
-_PROVIDER_HEALTH_DASHBOARD = Path("grafana/dashboards/bioetl-provider-health-v2.json")
-_PROVIDER_HEALTH_UID = "bioetl-provider-health-v2"
-_PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS = (9460, 9461)
+_PROVIDER_HEALTH_DASHBOARD = Path("grafana/dashboards/bioetl-overview-v2.json")
+_PROVIDER_HEALTH_UID = "bioetl-overview-v2"
+_PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS = (9480, 9481)
 
 
 def _provider_health_panels_by_id() -> dict[int, dict[str, object]]:
@@ -103,59 +103,13 @@ def test_empty_state_hedge_invariant_rejects_the_10246_regression() -> None:
 
 
 def test_provider_health_fleet_cause_tables_are_retired() -> None:
-    """Provider Health answers from selected-run HTTP evidence, not fleet PromQL."""
     panels = _provider_health_panels_by_id()
-    retired = {
-        1,
-        2,
-        7,
-        31,
-        32,
-        91,
-        102,
-        104,
-        105,
-        106,
-        107,
-        108,
-        109,
-        110,
-        111,
-        112,
-        113,
-        114,
-        115,
-        9002,
-        9101,
-        9102,
-        9103,
-        9104,
-        9105,
-        9106,
-        9107,
-        9111,
-        9112,
-        9113,
-        9401,
-        9404,
-        9405,
-        9450,
-        9451,
-        9452,
-    }
-    assert not retired & set(panels), (
-        f"retired fleet panels still ship: {sorted(retired & set(panels))}"
-    )
+    assert not Path("grafana/dashboards/bioetl-provider-health-v2.json").exists()
+    assert {9401, 9101, 9102, 9103, 9107, 114}.isdisjoint(panels)
     for panel_id in _PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS:
         panel = panels[panel_id]
-        expressions = [
-            target["expr"]
-            for target in panel.get("targets", [])
-            if isinstance(target.get("expr"), str)
-        ]
-        assert not expressions, (
-            f"panel {panel_id} must not query Prometheus fleet telemetry"
-        )
+        assert all("expr" not in target for target in panel["targets"])
+        assert all("run_id=${run_id}" in target["url"] for target in panel["targets"])
 
 
 def test_provider_cause_contract_declares_unknown_beside_valid_empty() -> None:
@@ -174,7 +128,7 @@ def test_provider_cause_contract_declares_unknown_beside_valid_empty() -> None:
 
 
 def _runtime_panels_by_id() -> dict[int, dict]:
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     return {
         panel["id"]: panel
         for panel in get_dashboard_panels(dashboard)
@@ -183,23 +137,13 @@ def _runtime_panels_by_id() -> dict[int, dict]:
 
 
 def test_runtime_10251_select_run_novalue_drops_hedge_tails() -> None:
-    """#10251 §7.3: SELECT RUN names one state."""
     panels = _runtime_panels_by_id()
-    expected = {
-        9402: "SELECT RUN — no exact Run ID selected. Choose a run first.",
-        9403: (
-            "SELECT RUN — no exact Run ID selected. "
-            "Choose a run in Inspect Recent Runs."
-        ),
-        9998: "UNKNOWN",
-    }
-    for panel_id, expected_no_value in expected.items():
-        no_value = (
-            panels[panel_id].get("fieldConfig", {}).get("defaults", {}).get("noValue")
-        )
-        assert no_value == expected_no_value
-        assert "VALID EMPTY if" not in str(no_value)
-        assert "UNKNOWN/QUERY ERROR if" not in str(no_value)
+    for pid in (9603, 9604, 9480, 9481):
+        no_value = panels[pid]["fieldConfig"]["defaults"]["noValue"]
+        assert no_value == "UNKNOWN"
+        assert "VALID EMPTY if" not in no_value
+        assert "UNKNOWN/QUERY ERROR if" not in no_value
+    assert not Path("grafana/dashboards/bioetl-runtime.json").exists()
 
 
 def test_dq_10253_selected_run_summary_is_first_window() -> None:

@@ -26,9 +26,6 @@ from tests.integration._grafana_test_support import (
     get_row_child_panels,
     load_dashboard,
 )
-from tests.integration._grafana_processed_records_assertions import (
-    assert_processed_records_field_overrides,
-)
 
 
 def _require_dashboard(name: str) -> Path:
@@ -65,13 +62,7 @@ MAX_OVER_TIME_COUNTER_POLICY_PATH = Path(
     "configs/quality/promql_max_over_time_counter_policy.yaml"
 )
 _MAX_OVER_TIME_METRIC_RE = re.compile(r"max_over_time\(\s*([a-zA-Z_:][a-zA-Z0-9_:]*)")
-_PROCESSED_RECORDS_DASHBOARDS = (
-    "bioetl-control-plane-v1.json",
-    "bioetl-dq-v2.json",
-    "bioetl-overview-v2.json",
-    "bioetl-provider-health-v2.json",
-    "bioetl-runtime.json",
-)
+_PROCESSED_RECORDS_DASHBOARDS = ("bioetl-dq-v2.json",)
 
 _PROCESSED_RECORDS_PARAMETER_LABELS = (
     "01 bronze_records",
@@ -145,7 +136,14 @@ def _assert_processed_records_target_contract(processed: dict[str, object]) -> N
     """Assert the HTTP target and absence semantics for Processed Records."""
     targets = processed.get("targets")
     assert isinstance(targets, list)
-    assert len(targets) == 1
+    assert len(targets) == 2
+    assert targets[1]["refId"] == "StageInput"
+    assert targets[1]["parser"] == "uql"
+    assert (
+        targets[1]["url"]
+        == "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}"
+    )
+    assert "records_in" in targets[1]["uql"]
     assert targets[0] == {
         "format": "table",
         "parser": "backend",
@@ -361,203 +359,70 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
 @pytest.mark.parametrize(
     "dashboard_name",
     [
-        "bioetl-runtime.json",
-        "bioetl-provider-health-v2.json",
         "bioetl-dq-v2.json",
     ],
 )
 def test_operator_context_shell_panels_preserve_canonical_semantics(
     dashboard_name: str,
 ) -> None:
-    """Shared context shell panels must preserve Overview-derived semantics."""
     dashboard = load_dashboard(_require_dashboard(dashboard_name))
-    panels = {
-        panel.get("id"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if isinstance(panel.get("id"), int)
-    }
-    if dashboard_name == "bioetl-dq-v2.json":
-        assert 9401 not in panels
-        assert {9400, 9406, 9402, 9403} <= panels.keys()
-    elif dashboard_name == "bioetl-runtime.json":
-        assert 9401 not in panels
-        assert {9400, 9998, 9402, 9403} <= panels.keys()
-    elif dashboard_name == "bioetl-provider-health-v2.json":
-        assert 9401 not in panels
-        assert {9400, 9402, 9403, 9460, 9461} <= panels.keys()
-    else:
-        assert {9400, 9401, 9402, 9403} <= panels.keys()
-
-    provenance = panels[9400]
-    provenance_description = str(provenance.get("description", "")).lower()
-    provenance_content = str(provenance.get("options", {}).get("content", "")).lower()
-    # Check for scope/evidence in description or content
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    assert 9401 not in panels
+    assert {9400, 9406, 9402, 9403}.issubset(panels)
+    assert "SELECTED RUN" in panels[9400]["description"]
     assert (
-        "scope" in provenance_description
-        or "evidence" in provenance_description
-        or "scope" in provenance_content
-        or "evidence" in provenance_content
+        "CURRENT pipeline status and TIME RANGE scores are not on this page"
+        in panels[9400]["options"]["content"]
     )
-    if dashboard_name == "bioetl-control-plane-v1.json":
-        assert "pipeline" in provenance_description
-        assert (
-            "run type" in provenance_description or "run_type" in provenance_description
-        )
-        assert "run id" in provenance_description or "run_id" in provenance_description
-    if dashboard_name == "bioetl-workflow-overview.json":
-        assert "run id only fills the local id card" in provenance_content
-        assert "selected range workflow scope" in provenance_content
-        assert "exact run: id card only" in provenance_content
-        assert "never exact-run proof" in provenance_content
-    assert "context shell:" not in provenance_content
-    assert "workflow=" not in provenance_content
-    assert "pipeline=" not in provenance_content
-    assert "run id=" not in provenance_content
-    assert "run_id is http identity context" not in provenance_content
-
-    if dashboard_name not in {
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-        "bioetl-provider-health-v2.json",
-    }:
-        status = panels[9401]
-        status_expressions = get_panel_expressions({"panels": [status]})
-        status_description = str(status.get("description", "")).lower()
-        assert status_expressions
-        assert all("run_id" not in expr for expr in status_expressions)
-        assert all("payload_hash" not in expr for expr in status_expressions)
-        if dashboard_name == "bioetl-workflow-overview.json":
-            assert any("$__range" in expr for expr in status_expressions)
-            assert "selected range workflow evidence status" in status_description
-            assert "not current live run state" in status_description
-            assert "not exact-run evidence" in status_description
-            assert "run_id remains local id-only identity context" in status_description
-        elif dashboard_name == "bioetl-provider-health-v2.json":
-            assert any("bioetl_pstatus" in expr for expr in status_expressions)
-            # Provider headline is current-status based (no selected range glue).
-            assert all("$__range" not in expr for expr in status_expressions)
-            assert status_description, (
-                "Provider Monitor Current DQ Status must document operator semantics"
-            )
-            assert not any("), max_over_time" in expr for expr in status_expressions)
-        elif dashboard_name == "bioetl-control-plane-v1.json":
-            assert all("$__range" not in expr for expr in status_expressions)
-            assert any(
-                "bioetl_control_plane_current_status_trusted" in expr
-                for expr in status_expressions
-            )
-            assert "replay/resume" in status_description
-            assert "3=incomplete" in status_description.replace(" ", "")
-        else:
-            assert all("$__range" not in expr for expr in status_expressions)
-            assert "current" in status_description
-        assert "0=ok" in status_description
-        assert "null=unknown" in status_description
-
     identity = panels[9402]
-    identity_description = str(identity.get("description", "")).lower()
-    assert identity.get("datasource") == "BioETL Ops HTTP"
-    identity_target = identity.get("targets", [])[0]
-    assert identity_target.get("format") == "table"
-    assert identity_target.get("parser") == "backend"
-    assert identity_target.get("root_selector") == "display_rows"
-    assert identity_target.get("source") == "url"
-    assert identity_target.get("url_options", {}).get("method") == "GET"
-    assert identity_target.get("url") == (
-        "/ops/control-plane/identity-table?"
-        "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
-    )
-    if dashboard_name == "bioetl-provider-health-v2.json":
-        assert "pipeline/run context evidence only" in identity_description
-        assert "does not prove current provider health" in identity_description
-
+    assert identity["datasource"] == "BioETL Ops HTTP"
+    assert all("run_id=${run_id}" in t["url"] for t in identity["targets"])
+    assert identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
     processed = panels[9403]
-    processed_expressions = get_panel_expressions({"panels": [processed]})
-    processed_description = str(processed.get("description", "")).lower()
-    assert processed.get("datasource") == "BioETL Ops HTTP"
-    assert processed_expressions == []
-    processed_target = processed.get("targets", [])[0]
-    assert processed_target.get("format") == "table"
-    assert processed_target.get("parser") == "backend"
-    assert processed_target.get("root_selector") == "rows"
-    assert processed_target.get("source") == "url"
-    assert processed_target.get("url_options", {}).get("method") == "GET"
-    assert processed_target.get("url") == (
-        "/ops/observability/processed-records?"
-        "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
-    )
-    assert "accounting" in processed_description or (
-        "counts" in processed_description and "outcomes" in processed_description
-    )
-    if dashboard_name == "bioetl-runtime.json":
-        assert "unresolved scope" in processed_description
-        assert "backend failure" in processed_description
-        assert any(
-            next_action in processed_description
-            for next_action in ("/health/live", "run explorer")
-        )
-    else:
-        assert "evidence" in processed_description
-        assert "missing" in processed_description
-        assert "not ok" in processed_description
-        assert "not displayed" in processed_description
-    if dashboard_name == "bioetl-provider-health-v2.json":
-        assert "does not prove current provider health" in processed_description
-        assert "monitor provider telemetry freshness" in processed_description
-
-    dashboard_promql = "\n".join(get_panel_expressions(dashboard))
-    assert "$run_id" not in dashboard_promql
-    assert "${run_id}" not in dashboard_promql
+    _assert_processed_records_target_contract(processed)
+    description = processed["description"]
+    for token in (
+        "SELECTED RUN",
+        "accounting",
+        "count in",
+        "count out",
+        "N/A",
+        "QUERY ERROR",
+    ):
+        assert token in description
+    assert "Skipped outcomes are hidden" in description
+    expressions = "\n".join(get_panel_expressions(dashboard))
+    assert "$run_id" not in expressions and "${run_id}" not in expressions
 
 
 def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> None:
-    """Full identity anchors must stay on HTTP-backed tables, not Prometheus labels."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title")
-    }
-    identity_panels = [
-        panels["Review Identity Gaps"],
-        panels["Compare Checkpoint Anchors"],
-        panels["Inspect Identity Values"],
-        panels["Review Required Replay Anchors"],
-        panels["Review Additional Forensic Anchors"],
-    ]
-
-    for panel in identity_panels:
-        assert panel.get("datasource") == "BioETL Ops HTTP"
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    for pid in (9406, 9408, 9423):
+        panel = panels[pid]
+        assert panel["datasource"] == "BioETL Ops HTTP"
         assert get_panel_expressions({"panels": [panel]}) == []
-        target = panel.get("targets", [])[0]
-        assert "/ops/control-plane/identity-evidence?" in target.get("url", "")
-        assert target.get("root_selector") == "rows"
-
-    prometheus_expressions = "\n".join(get_panel_expressions(dashboard))
-    forbidden_label_tokens = (
-        "run_id=~",
-        "manifest_id=~",
-        "execution_fingerprint=~",
-        "effective_config_hash=~",
-        "input_snapshot_identity_fingerprint=~",
-        "composite_run_identity=~",
-    )
-    assert all(token not in prometheus_expressions for token in forbidden_label_tokens)
+        assert all("run_id=${run_id}" in t["url"] for t in panel["targets"])
+    for path in Path("grafana/dashboards").glob("*.json"):
+        expressions = "\n".join(get_panel_expressions(load_dashboard(path)))
+        for forbidden in (
+            "run_id=~",
+            "manifest_id=~",
+            "execution_fingerprint=~",
+            "effective_config_hash=~",
+            "input_snapshot_identity_fingerprint=~",
+            "composite_run_identity=~",
+        ):
+            assert forbidden not in expressions
 
 
 def test_control_plane_identity_evidence_documents_short_full_split() -> None:
-    """Full identity values stay readable and source metadata remains inspectable."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panel = next(
-        panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Inspect Identity Values"
-    )
-    description = str(panel.get("description", "")).lower()
-    assert "full" in description
-    transformation_payload = json.dumps(panel.get("transformations", []))
-    assert "value_full" in transformation_payload
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9408)
+    assert "value_full" in json.dumps(panel["transformations"])
     assert panel["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+    assert "Inspect a value to copy it" in panel["description"]
+    assert panel["options"]["footer"]["enablePagination"] is True
 
 
 def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:
@@ -610,7 +475,7 @@ def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
         ),
         "Inspect Provider Alerts": (
             "bioetl_provider_current_status",
-            'provider=~"$provider_hint"',
+            'provider=~"$provider"',
         ),
         "Inspect Global Provider Alert Conditions": (
             "bioetl_provider_current_status",
@@ -1011,9 +876,7 @@ def test_runtime_freshness_handoff_preserves_missing_telemetry() -> None:
 
 def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -> None:
     """Provider failure rate must keep neutral zero plus explicit WARN/CRIT policy."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(
         (
             item
@@ -1039,9 +902,7 @@ def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -
 
 
 def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> None:
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(
         (
             item
@@ -1078,9 +939,7 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
 
 
 def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> None:
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(
         (
             item
@@ -1132,9 +991,7 @@ def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> N
 
 def test_provider_critical_table_keeps_severity_only_scope() -> None:
     """Critical providers table must only show active degraded/failing rows."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(
         (
             item
@@ -1174,9 +1031,7 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
 
 def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
     """Raw provider status panel must preserve UNKNOWN for known providers with no sample."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(
         (
             item
@@ -1215,9 +1070,7 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
 
 def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() -> None:
     """Provider top causes must not fabricate synthetic rows when canonical causes are absent."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(
         (
             item
@@ -1252,9 +1105,7 @@ def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_brea
     None
 ):
     """Token/circuit-breaker diagnostics must not synthesize healthy or fake adapter rows."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     expectations = {
         "Monitor Available Rate-Limit Tokens": (
             "bioetl_rate_limiter_tokens_available",
@@ -1301,9 +1152,7 @@ def test_provider_optional_telemetry_panels_explain_empty_samples_do_not_refute_
     None
 ):
     """Optional provider telemetry must disclose no-sample semantics explicitly."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     expectations = {
         "Track Rate-Limiter Wait p95": "optional telemetry can stay empty",
         "Monitor Available Rate-Limit Tokens": "optional telemetry can stay empty",
@@ -1340,9 +1189,7 @@ def test_provider_optional_telemetry_panels_explain_empty_samples_do_not_refute_
 
 def test_provider_degraded_checks_panel_uses_neutral_evidence_thresholds() -> None:
     """Selected-range degraded-count evidence must not reuse current-severity thresholds."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(
         (
             item
@@ -1529,185 +1376,55 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     dashboard_name: str,
 ) -> None:
     dashboard = load_dashboard(_require_dashboard(dashboard_name))
-    panels = {
-        panel.get("id"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if isinstance(panel.get("id"), int)
-    }
-    identity_id, processed_id = {
-        "bioetl-overview-v2.json": (9300, 9301),
-    }.get(dashboard_name, (9402, 9403))
-    identity = panels[identity_id]
-    processed = panels[processed_id]
-    full_width_evidence = dashboard_name in {
-        "bioetl-control-plane-v1.json",
-        "bioetl-provider-health-v2.json",
-    }
-    if dashboard_name in {"bioetl-dq-v2.json", "bioetl-runtime.json"}:
-        assert identity["gridPos"]["w"] == 12
-        assert processed["gridPos"]["w"] == 12
-        assert identity["options"]["footer"]["enablePagination"] is True
-        assert processed["options"]["footer"]["enablePagination"] is True
-        expected_h = (8, 8)
-        assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == expected_h
-    elif dashboard_name == "bioetl-provider-health-v2.json":
-        assert identity["gridPos"]["w"] == 12
-        assert processed["gridPos"]["w"] == 12
-        assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == (5, 5)
-    else:
-        expected_heights = (12, 12) if full_width_evidence else (6, 6)
-        if full_width_evidence:
-            for panel in (identity, processed):
-                assert panel["gridPos"]["w"] == 24
-                assert panel["options"]["footer"]["enablePagination"] is True
-        assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == expected_heights
-    identity_no_value = str(
-        identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-    )
-    processed_no_value = str(
-        processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-    )
-    if dashboard_name == "bioetl-runtime.json":
-        # #11678: Processed Records must not masquerade a 503/504 request
-        # failure as "nothing selected" once a Run ID is in the selector.
-        assert identity_no_value.startswith("SELECT RUN")
-        assert "valid empty" not in identity_no_value.lower()
-        assert "no exact Run ID selected" not in processed_no_value
-        assert "query error" in processed_no_value.lower()
-        assert "503" in processed_no_value and "504" in processed_no_value
-    elif dashboard_name == "bioetl-dq-v2.json":
-        assert identity_no_value.startswith("SELECT RUN")
-        assert processed_no_value.startswith("SELECT RUN")
-        assert "valid empty" not in identity_no_value.lower()
-        assert "query error" not in processed_no_value.lower()
-    else:
-        assert "valid empty" in identity_no_value.lower()
-        assert "query error" in processed_no_value.lower()
-    if dashboard_name == "bioetl-control-plane-v1.json":
-        assert identity.get("options", {}).get("cellHeight") == "lg"
-        assert processed.get("options", {}).get("cellHeight") == "md"
-    else:
-        cell = "md" if full_width_evidence else "sm"
-        assert identity.get("options", {}).get("cellHeight") == cell
-        assert processed.get("options", {}).get("cellHeight") == cell
-    default_identity_cell_options = (
-        identity.get("fieldConfig", {})
-        .get("defaults", {})
-        .get("custom", {})
-        .get("cellOptions", {})
-    )
-    if dashboard_name != "bioetl-control-plane-v1.json":
-        assert default_identity_cell_options.get("wrapText") is not True
-    wrapped_identity_fields = {
-        override["matcher"]["options"]
-        for override in identity.get("fieldConfig", {}).get("overrides", [])
-        for property_ in override.get("properties", [])
-        if property_.get("id") == "custom.cellOptions"
-        and property_.get("value", {}).get("wrapText") is True
-    }
-    expected_wrapped_fields = {"parameter"}
-    if dashboard_name == "bioetl-control-plane-v1.json":
-        expected_wrapped_fields = {"Parameter", "Value"}
-    elif full_width_evidence:
-        expected_wrapped_fields = set()
-        assert identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
-    assert wrapped_identity_fields == expected_wrapped_fields
-
-    assert processed.get("datasource") == "BioETL Ops HTTP"
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    identity, processed = panels[9402], panels[9403]
+    assert identity["gridPos"]["w"] == processed["gridPos"]["w"] == 24
+    assert identity["gridPos"]["y"] + identity["gridPos"]["h"] <= 18
+    assert processed["gridPos"]["y"] == 18
+    assert processed["gridPos"]["h"] == 14
+    assert processed["options"]["cellHeight"] == "sm"
+    assert not any(t["id"] == "limit" for t in processed["transformations"])
     _assert_processed_records_target_contract(processed)
-
-    processed_json = json.dumps(processed, sort_keys=True)
-
-    for stale_label in (
-        "0 reconciliation_status",
-        "1 bronze_records",
-        "2 silver_valid_records",
-        "3 silver_quarantined_records",
-        "4 silver_skipped_records",
-        "5 silver_filtered_out_records",
-        "6 silver_deduplicated_records",
-        "7 silver_accounted_records",
-        "8 silver_delta_vs_bronze",
-        "9 gold_written_records",
-        "14 gold_accounted_records",
-        "15 gold_delta_vs_valid_silver",
-    ):
-        assert f'"{stale_label}"' not in processed_json
-
-    sort_by = processed.get("options", {}).get("sortBy", [])
-    assert sort_by == [{"desc": False, "displayName": "parameter"}]
-    assert processed.get("options", {}).get("cellHeight") == (
-        "md" if full_width_evidence else "sm"
+    assert "QUERY ERROR" in processed["description"]
+    assert processed["fieldConfig"]["defaults"]["custom"]["inspect"] is True
+    organize = next(
+        t["options"] for t in processed["transformations"] if t["id"] == "organize"
     )
-
-    transformations = processed.get("transformations", [])
-    transform_ids = [transformation.get("id") for transformation in transformations]
-    assert transform_ids == ["organize"]
-    organize_options = transformations[0].get("options", {})
-    rename_by_name = organize_options.get("renameByName", {})
-    assert rename_by_name.get("parameter") == "parameter"
-    # API field ``value`` is the record count; operator-facing column is ``count``.
-    assert rename_by_name.get("value") == "count"
-    assert rename_by_name.get("percentage") == "percentage"
-    assert rename_by_name.get("row_status") == ""
-    assert organize_options.get("indexByName", {}).get("parameter") == 0
-    assert organize_options.get("indexByName", {}).get("value") == 1
-    assert organize_options.get("indexByName", {}).get("percentage") == 2
-    assert organize_options.get("indexByName", {}).get("row_status") == 3
-    excluded_fields = organize_options.get("excludeByName", {})
-    assert excluded_fields.get("row_status") is True
-    # Legacy typo field may still appear from stale backends; hide it in Grafana.
-    assert excluded_fields.get("percintage") is True
-    assert excluded_fields.get("Time") is True
-    assert "__name__" not in excluded_fields
-    custom = processed.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
-    assert custom.get("inspect") is True
-    assert "percintage" not in organize_options.get("indexByName", {})
-    assert "percintage" not in organize_options.get("renameByName", {})
-    # All Processed Records tables show parameter + count + percentage.
-    assert excluded_fields.get("percentage") is not True
-    assert excluded_fields.get("parameter") is not True
-    assert excluded_fields.get("value") is not True
-    assert excluded_fields.get("count") is not True
-
-    parameter_overrides = [
-        override
-        for override in processed.get("fieldConfig", {}).get("overrides", [])
-        if override.get("matcher", {}).get("options") == "parameter"
-    ]
-    assert len(parameter_overrides) == 1
-    mappings = parameter_overrides[0].get("properties", [])[0].get("value", [])[0]
-    mapping_options = mappings.get("options", {})
-
-    assert tuple(mapping_options) == _PROCESSED_RECORDS_MAPPING_LABELS
-    for label, display_label in zip(
+    assert organize["renameByName"]["value"] == "count out"
+    assert organize["indexByName"]["parameter"] == 0
+    assert organize["excludeByName"]["row_status"] is True
+    assert organize["excludeByName"]["Time"] is True
+    assert organize["excludeByName"]["percintage"] is True
+    assert organize["excludeByName"].get("percentage") is not True
+    parameter = next(
+        o
+        for o in processed["fieldConfig"]["overrides"]
+        if o["matcher"].get("options") == "parameter"
+    )
+    props = {prop["id"]: prop["value"] for prop in parameter["properties"]}
+    mappings = props["mappings"][0]["options"]
+    assert tuple(mappings) == _PROCESSED_RECORDS_MAPPING_LABELS
+    for label, display in zip(
         _PROCESSED_RECORDS_PARAMETER_LABELS,
         _PROCESSED_RECORDS_DISPLAY_LABELS,
         strict=True,
     ):
-        assert mapping_options[label]["text"] == display_label
+        assert mappings[label]["text"] == display
         if label in _PROCESSED_RECORDS_PRIMARY_COLORS:
-            assert (
-                mapping_options[label]["color"]
-                == _PROCESSED_RECORDS_PRIMARY_COLORS[label]
-            )
-        else:
-            assert "color" not in mapping_options[label]
-
-    parameter_properties = {
-        prop.get("id"): prop.get("value")
-        for prop in parameter_overrides[0].get("properties", [])
-    }
-    assert parameter_properties["custom.align"] == "left"
-    assert parameter_properties["custom.cellOptions"]["type"] == "color-text"
-    expected_wrap = dashboard_name not in {
-        "bioetl-run-explorer-v1.json",
-        "bioetl-control-plane-v1.json",
-        "bioetl-provider-health-v2.json",
-    }
-    assert parameter_properties["custom.cellOptions"].get("wrapText") is expected_wrap
-
-    assert_processed_records_field_overrides(
-        processed,
-        expected_row_status_mappings=_expected_processed_records_row_status_mappings(),
+            assert mappings[label]["color"] == _PROCESSED_RECORDS_PRIMARY_COLORS[label]
+    assert "silver [filtered out]" != mappings["04 silver_quarantined_records"]["text"]
+    assert props["custom.cellOptions"]["type"] == "color-text"
+    assert props["custom.align"] == "left"
+    # Other saved-run owners retain identity without duplicating this accounting table.
+    assert not any(
+        p["id"] == 9301
+        for p in get_dashboard_panels(
+            load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+        )
+    )
+    assert not any(
+        p["id"] == 9403
+        for p in get_dashboard_panels(
+            load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+        )
     )

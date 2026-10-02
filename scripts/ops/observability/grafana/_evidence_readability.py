@@ -722,7 +722,7 @@ def _overview_selected_run_layout(p: dict[int, dict], summary: dict) -> None:
     _override(summary, "Status", _WIDTH, 115)
     for field in ("Domain", "Status", "Reason"):
         _override(p[9002], field, "links", [])
-    _override(summary, "Trust", "displayName", "Replay readiness")
+    _override(summary, "Trust", "displayName", "Trust")
     _override(summary, "Trust", _WIDTH, 150)
     # Auto-wrapped content grows each table independently. Use the same fixed
     # row height for the paired first-window tables; full reasons stay inspectable.

@@ -52,45 +52,40 @@ def _root_ids(dashboard: dict) -> set[object]:
 
 
 def test_overview_dq_timeline_hides_dotstar_and_in_band_state() -> None:
-    """#10249 O1: All not .*; no clipped in-band state text."""
     dashboard = load_dashboard(_OVERVIEW)
-    panel = _panel(dashboard, 9019)
-    expr = str((panel.get("targets") or [{}])[0].get("expr") or "")
-    assert '"pipeline","All"' in expr
-    assert '"run_type","All"' in expr
-    assert (panel.get("options") or {}).get("showValue") == "never"
+    ids = {p["id"] for p in get_dashboard_panels(dashboard)}
+    assert {9018, 9019, 9020}.isdisjoint(ids)
+    quality = _panel(dashboard, 9482)
+    assert quality["type"] == "canvas"
+    assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert "run_id=${run_id:percentencode}" in quality["targets"][0]["url"]
 
 
 def test_set_range_action_names_run_explorer_handoff() -> None:
-    """#10250 O2: visible action name matches the Run Explorer transition."""
     dashboard = load_dashboard(_OVERVIEW)
     panel = _panel(dashboard, 9603)
     blob = str(panel)
-    assert "Open run in Run Explorer" in blob
-    assert '"text": "Set range to run"' not in blob
+    assert "Open Run Explorer" in blob
     assert "${__url_time_range}" in blob
-    assert "Set range to run" in panel["description"]
-    assert "var-run_id" in blob or "${run_id:queryparam}" in blob
+    assert "${run_id:queryparam}" in blob
+    assert "Set range to run" not in str(panel.get("links", []))
 
 
 def test_overview_and_dq_lower_handoffs_are_explicit_links() -> None:
-    """#10250 O3: lower Navigate Diagnostics names are one-click links."""
     overview = load_dashboard(_OVERVIEW)
-    content = str((_panel(overview, 9021).get("options") or {}).get("content") or "")
-    assert "<a href=" in content
-    assert "bioetl-control-plane-v1" in content
-    assert "bioetl-runtime" in content
+    panel = _panel(overview, 9002)
+    links = panel["fieldConfig"]["defaults"]["links"]
+    assert {link["title"] for link in links} == {
+        "Open Control Plane",
+        "Open Data Quality",
+        "Open Provider Evidence",
+    }
+    assert all("${__url_time_range}" in link["url"] for link in links)
+    assert all("${run_id:queryparam}" in link["url"] for link in links)
     dq = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    html = " ".join(
-        str((panel.get("options") or {}).get("content") or "")
-        for panel in get_dashboard_panels(dq)
-        if panel.get("type") == "text"
-    )
-    assert "bioetl-control-plane-v1" in html
-    assert "<a href=" in html
-    assert "canonical" in html
-    assert ">Control Plane</a>" in html
-    assert "${__url_time_range}" in content
+    nav = _panel(dq, 1000)
+    assert "bioetl-control-plane-v1" in nav["options"]["content"]
+    assert "<a " in nav["options"]["content"] and "href=" in nav["options"]["content"]
 
 
 def test_incident_current_alerts_share_first_window_with_runbook() -> None:
@@ -127,46 +122,23 @@ def test_incident_current_alerts_share_first_window_with_runbook() -> None:
 
 
 def test_run_id_selector_and_recent_runs_do_not_label_uuid_as_count() -> None:
-    """#10256 C1/C2: Run ID options keep text/value; recent runs hide Count."""
     dashboard = load_dashboard(_RUNS)
-    run_id = next(
-        item
-        for item in dashboard.get("templating", {}).get("list", [])
-        if item.get("name") == "run_id"
-    )
-    columns = ((run_id.get("query") or {}).get("infinityQuery") or {}).get(
-        "columns"
-    ) or []
-    selectors = {(item.get("selector"), item.get("text")) for item in columns}
-    assert ("text", "__text") in selectors
-    assert ("value", "__value") in selectors
-    assert "response_shape=options" in str(run_id)
+    run_id = next(v for v in dashboard["templating"]["list"] if v["name"] == "run_id")
+    query = run_id["query"]["infinityQuery"]
+    assert {(c["selector"], c["text"]) for c in query["columns"]} == {
+        ("text", "__text"),
+        ("value", "__value"),
+    }
+    assert "response_shape=options" in query["url"]
     recent = _panel(dashboard, 3010)
-    overrides = (recent.get("fieldConfig") or {}).get("overrides") or []
-    assert not any(
-        isinstance(item, dict)
-        and "Value" in str((item.get("matcher") or {}).get("options") or "")
-        and any(
-            prop.get("value") == "Count"
-            for prop in (item.get("properties") or [])
-            if isinstance(prop, dict)
-        )
-        for item in overrides
-    )
     organize = next(
-        item
-        for item in (recent.get("transformations") or [])
-        if item.get("id") == "organize"
+        t["options"] for t in recent["transformations"] if t["id"] == "organize"
     )
-    assert ((organize.get("options") or {}).get("excludeByName") or {}).get(
-        "Value"
-    ) is True
-    rename = (organize.get("options") or {}).get("renameByName") or {}
-    assert rename.get("run_id") == "Run"
-    assert rename.get("started_at") == "Started"
-    assert rename.get("status") == "Processing"
-    assert rename.get("trust_status") == "Replay readiness"
-    assert rename.get("overview_handoff") == "Run Overview"
-    assert rename.get("diagnostics_handoff") == "Pipeline Diagnostics"
-    assert rename.get("quality_handoff") == "Data Quality"
-    assert rename.get("provider_handoff") == "Provider Health"
+    rename = organize["renameByName"]
+    assert len(rename) == 10
+    assert "Count" not in rename.values()
+    assert rename["run_label"] == "Run ID"
+    assert rename["status"] == "Overview"
+    assert rename["saved_evidence_status"] == "Saved Evidence"
+    assert rename["replay_readiness_status"] == "Replay Readiness"
+    assert "run_id" in organize["indexByName"]

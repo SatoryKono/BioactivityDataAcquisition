@@ -24,51 +24,38 @@ pytestmark = pytest.mark.integration
 
 
 def test_dq_history_colors_survive_trailing_missing_samples() -> None:
-    """#10502: a missing final sample must not recolor measured 100% gray."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panels = {panel["id"]: panel for panel in get_dashboard_panels(dashboard)}
-    defaults = panels[153]["fieldConfig"]["defaults"]
-    assert defaults["thresholds"] == panels[2]["fieldConfig"]["defaults"]["thresholds"]
-    assert defaults["color"]["seriesBy"] == "min"
-    assert defaults["custom"]["gradientMode"] == "none"
-    assert defaults["custom"]["fillOpacity"] == 0
-    assert defaults["custom"]["spanNulls"] is False
-    assert "color=minimum observed" in panels[153]["targets"][0]["legendFormat"]
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    quality = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9482)
+    assert quality["type"] == "canvas"
+    assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    query = quality["targets"][0]
+    assert "run_id=${run_id:percentencode}" in query["url"]
+    assert "excluded UNKNOWN" in query["uql"]
+    assert "tracking='full'" in query["uql"]
+    assert "$count($distinct($s.stage_id)) = 3" in query["uql"]
+    assert not any(
+        p["id"] == 153
+        for p in get_dashboard_panels(
+            load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+        )
+    )
 
 
 def test_status_panels_have_correct_value_mapping():
-    """Current-status stat panels must have explicit value mapping for OK/WARN/CRIT/UNKNOWN."""
-    status_dashboards = [
-        "bioetl-runtime.json",
-        "bioetl-provider-health-v2.json",
-        "bioetl-dq-v2.json",
-    ]
-    for dashboard_name in status_dashboards:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        for panel in get_dashboard_panels(dashboard):
-            title = panel.get("title", "")
-            # Check for status/severity panels
-            if "Status" in title or "Severity Matrix" in title:
-                options = panel.get("options", {})
-                color_mode = options.get("colorMode")
-                # Background color mode is expected for current-status stat panels
-                if color_mode == "background":
-                    mappings = options.get("mappings", [])
-                    if mappings:
-                        # If mappings exist, validate they have proper structure
-                        assert isinstance(mappings, list), (
-                            f"{dashboard_name}:{title} mappings must be a list"
-                        )
-                        # Check for at least some status mappings
-                        mapping_values = {
-                            m.get("value")
-                            for m in mappings
-                            if m.get("value") is not None
-                        }
-                        # Don't enforce specific values, just ensure mappings exist
-                        assert len(mapping_values) >= 1, (
-                            f"{dashboard_name}:{title} must have at least one mapping"
-                        )
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9401)
+    defaults = panel["fieldConfig"]["defaults"]
+    options = next(m["options"] for m in defaults["mappings"] if m["type"] == "value")
+    assert {key: value["text"] for key, value in options.items()} == {
+        "0": "OK",
+        "1": "UNKNOWN",
+        "2": "WARN",
+        "3": "CRIT",
+    }
+    assert options["0"]["color"] == "green"
+    assert options["3"]["color"] == "red"
+    assert options["1"]["color"] != "green"
+    assert defaults["noValue"] == "UNKNOWN"
 
 
 def test_thresholds_configuration():

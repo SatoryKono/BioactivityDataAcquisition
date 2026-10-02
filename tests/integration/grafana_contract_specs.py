@@ -13,7 +13,7 @@
 from __future__ import annotations
 
 CONTROL_PLANE_GLOBAL_SCOPE_EXPECTATIONS = {
-    "bioetl-control-plane-v1.json": (
+    "bioetl-incident-v1.json": (
         "Track Global Read Failures",
         "Monitor Global Read Failures (30m)",
         "Track Global Read Latency",
@@ -24,7 +24,7 @@ CONTROL_PLANE_GLOBAL_SCOPE_EXPECTATIONS = {
 }
 
 CONTROL_PLANE_GLOBAL_READ_PANEL_TITLES = {
-    "bioetl-control-plane-v1.json": (
+    "bioetl-incident-v1.json": (
         "Track Global Read Failures",
         "Monitor Global Read Failures (30m)",
         "Track Global Read Latency",
@@ -57,8 +57,6 @@ DIAGNOSTIC_NO_ZERO_FALLBACK_EXPECTATIONS = {
         "Inspect Control Plane Alerts",
         "Inspect Provider Alerts",
         "Inspect Global Provider Alert Conditions",
-    },
-    "bioetl-control-plane-v1.json": {
         "Track Manifest Failures",
         "Track Ledger Failures",
         "Track Incompatibilities",

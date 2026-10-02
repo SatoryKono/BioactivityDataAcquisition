@@ -42,18 +42,14 @@ MANDATORY_LINK_UIDS: dict[str, set[str]] = {
         "bioetl-dq-v2",
         "bioetl-control-plane-v1",
     },
-    "bioetl-provider-health-v2": {
-        "bioetl-overview-v2",
-        "bioetl-control-plane-v1",
-        "bioetl-dq-v2",
-    },
     "bioetl-dq-v2": {
         "bioetl-overview-v2",
         "bioetl-control-plane-v1",
     },
     "bioetl-control-plane-v1": {
         "bioetl-overview-v2",
-        "bioetl-dq-v2",
+        "bioetl-incident-v1",
+        "bioetl-run-explorer-v1",
     },
 }
 
@@ -134,9 +130,10 @@ def _extract_variables(payload: dict[str, Any]) -> list[str]:
 
 def _extract_link_uids(payload: dict[str, Any]) -> list[str]:
     links = list(payload.get("links", []))
-    for panel in payload.get("panels", []):
-        if panel.get("id") != 1000:
-            continue
+    for panel in _iter_panels(payload):
+        defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
+        links.extend(defaults.get("links") or [])
+        links.extend((panel.get("options") or {}).get("dataLinks") or [])
         panel_links = panel.get("links", [])
         if isinstance(panel_links, list):
             links.extend(link for link in panel_links if isinstance(link, dict))
@@ -720,7 +717,18 @@ def _provisioning_field_errors(
         errors.append(
             "provisioning: BioETL updateIntervalSeconds must be a positive integer"
         )
-    if path_basename != "dashboards":
+    shipped_files = {
+        "bioetl-run-explorer-v1.json",
+        "bioetl-control-plane-v1.json",
+        "bioetl-overview-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-incident-v1.json",
+    }
+    is_shipped_file = (
+        path_basename in shipped_files
+        and str(path) == f"/var/lib/grafana/dashboards/{path_basename}"
+    )
+    if path_basename != "dashboards" and not is_shipped_file:
         errors.append(
             "provisioning: BioETL provider path must target a dashboards directory, "
             f"got {path!r}"

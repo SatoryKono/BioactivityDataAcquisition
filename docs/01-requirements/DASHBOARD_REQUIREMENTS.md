@@ -12,7 +12,7 @@ ______________________________________________________________________
 
 ## 1. Authority and scope
 
-This document is the scoped normative contract for the seven shipped Grafana
+This document is the scoped normative contract for the five shipped Grafana
 dashboards in `grafana/dashboards/*.json`. It expands `RULES.md` §3.2.3 into
 testable presentation requirements without replacing `RULES.md`, accepted ADRs,
 or the dashboard JSON source of truth.
@@ -65,12 +65,12 @@ size option.
 | ID | Requirement |
 | --- | --- |
 | `DASH-ARCH-001` | Grafana MUST remain an optional, read-only presentation adapter. It MUST NOT become a write authority, control plane, or required local runtime dependency. |
-| `DASH-PORTFOLIO-001` | The seven provisioned JSON UIDs defined by ADR-053 MUST remain authoritative rollback fallbacks until an approved cutover. |
+| `DASH-PORTFOLIO-001` | The five provisioned JSON UIDs defined by the approved 2026-10-02 JSON cutover in ADR-053 MUST remain authoritative rollback fallbacks until another approved cutover. Retired runtime/provider UIDs MUST NOT reappear in active links or provisioning. |
 | `DASH-DATA-001` | Dashboard queries MUST use shipped metrics, recording rules, Grafana, or BioETL Ops HTTP contracts. Invented series are forbidden. |
 | `DASH-DATA-002` | `run_id`, `manifest_id`, record identifiers, hashes, and filesystem paths MUST NOT be used as Prometheus labels or label filters. Exact-run identity belongs to Ops HTTP/control-plane evidence. |
 | `DASH-STATE-001` | Missing required evidence MUST remain `UNKNOWN`, `INCOMPLETE`, or an explicit error; it MUST NOT become a healthy zero. |
 | `DASH-STATE-004` | Present zero, absent telemetry, endpoint unavailable, and exact-run `processing_status` MUST remain distinct from `trust_status`. Terminal processing success MUST NOT be presented as lineage closure, retention compliance, or replay readiness. |
-| `DASH-STATE-005` | When soft Grafana bootstrap cannot provision validated BioETL Ops HTTP, it MUST select a static Prometheus-only dashboard profile under the same seven stable UIDs. That profile MUST contain no datasource/query targets, MUST state that Ops HTTP is not provisioned, and MUST state that no retention, replay, identity, or run verdict can be inferred. The full dashboard provider MAY be selected only after managed runtime identity and the Infinity dependency are ready; bootstrap status MUST expose the selected `dashboard_profile`. |
+| `DASH-STATE-005` | When soft Grafana bootstrap cannot provision validated BioETL Ops HTTP, it MUST select a static Prometheus-only dashboard profile under the same five stable UIDs. That profile MUST contain no datasource/query targets, MUST state that Ops HTTP is not provisioned, and MUST state that no retention, replay, identity, or run verdict can be inferred. The full dashboard provider MAY be selected only after managed runtime identity and the Infinity dependency are ready; bootstrap status MUST expose the selected `dashboard_profile`. |
 | `DASH-ZERO-001` | Synthetic zero is allowed only for documented zero-valid event counters. Status, cause, freshness, latency, and trust panels MUST preserve absence. |
 | `DASH-DATA-003` | Removed datasources MUST stay removed (ADR-010): no panel or target MUST reference a `loki`/`tempo` datasource or the `:8081` quarantine-explorer endpoint. |
 | `DASH-DATA-004` | Every panel/target datasource MUST be an allowlisted identity — the Prometheus object/string, `BioETL Ops HTTP`, or the built-in Grafana datasource. Unknown UIDs and `${DS_*}` export artifacts are forbidden. |
@@ -212,7 +212,7 @@ Derived from the geometry-grounded proposal
 | --- | --- | --- |
 | `DASH-LAYOUT-003` | Every `type:"row"` header MUST have `gridPos.h == 1`. | enforced |
 | `DASH-LAYOUT-004` | Root data-bearing panels MUST meet a type-aware minimum `gridPos.h`: `table >= 5`; `timeseries`/`heatmap`/`state-timeline >= 5`; `stat`/`gauge`/`bargauge >= 3` (verdict cards SHOULD be `>= 4`); `text >= 2`. Nested children inside additional panel groups use the same floors except `table >= 4` (compact forensic tables). Exceptions live in the governed min-height allowlist. | enforced |
-| `DASH-FIT-001` | Always-visible root **non-row** panels MUST have `max(y+h) <= VIEWPORT_ROWS` (`18`, calibrated to the 1366×768 first-viewport / kiosk=tv chrome using Grafana stride 38px). Collapsed row headers MAY sit on or below the fold. | enforced |
+| `DASH-FIT-001` | First-window root **non-row** panels (`y < FIRST_WINDOW_Y`) MUST have `max(y+h) <= VIEWPORT_ROWS` (`18`, calibrated to the 1366×768 first-viewport / kiosk=tv chrome using Grafana stride 38px). Saved evidence MAY remain in root panels below the fold; canonical answers MUST remain first-window under DASH-FIT-003. Collapsed row headers MAY sit on or below the fold. | enforced |
 | `DASH-FIT-002` | No always-visible root panel may straddle the fold: `y < FIRST_WINDOW_Y < y+h` is forbidden unless governed-allowlisted. | enforced |
 | `DASH-FIT-003` | The per-dashboard canonical answer panel (§7.1) MUST be a root, non-nested panel with `gridPos.y < FIRST_WINDOW_Y` on every dashboard. | enforced |
 | `DASH-FIT-004` | Every root non-row panel with `gridPos.y < FIRST_WINDOW_Y` MUST have a recorded first-window containment result. First-window `text`, `stat`, and summary-table panels MUST fail closed when `scrollHeight > clientHeight` or `scrollWidth > clientWidth`, with only the documented browser-rounding tolerance. No first-window overflow exception may be added merely to preserve a failing layout. Horizontal scrolling is allowed only for explicitly named below-fold explorer panels. | enforced |
@@ -223,7 +223,7 @@ Derived from the geometry-grounded proposal
 | `DASH-COPY-006` | First-window verdict cards (background `stat` whose mappings encode `OK` plus `WARN`/`CRIT`) MUST state `OK`/`WARN`/`CRIT`/`UNKNOWN` in the description. Documented trust gates (`1. Trust`/`3. Pipeline Diagnostics` `9401`) MUST also state `INCOMPLETE`. Presence/coverage gates without that palette are out of scope. | enforced |
 | `DASH-COPY-007` | Data-typed panels MUST declare ≥1 live target (non-empty PromQL `expr` or Infinity `url`, `hide != true`). | enforced |
 | `DASH-PERF-003` | The answer fold (`FIRST_WINDOW_Y=18`) and the first-load budget window (`FIRST_LOAD_Y_MAX=28`) MUST stay distinct, named constants. | enforced |
-| `DASH-DENSITY-002` | Every additional panel group with ≥1 scalar panel MUST have scalar density (values / `w×h`, `stat`/`gauge`/`bargauge` only) greater than the dashboard's first-screen scalar density (§5.4). | enforced (all 7 uids in scalar_density_enforced_uids) |
+| `DASH-DENSITY-002` | Every additional panel group with ≥1 scalar panel MUST have scalar density (values / `w×h`, `stat`/`gauge`/`bargauge` only) greater than the dashboard's first-screen scalar density (§5.4). | enforced (all 5 uids in scalar_density_enforced_uids) |
 
 Named constants and governed exception allowlists (`owner + rationale + retire_when`)
 live in [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml)
@@ -234,11 +234,9 @@ and are loaded by `tests/integration/_dashboard_layout_budgets.py`.
 | UID | Required answer |
 | --- | --- |
 | `bioetl-control-plane-v1` | Can the selected run be exactly replayed from saved inputs? |
-| `bioetl-overview-v2` | What is the saved assessment of the selected Run ID? |
-| `bioetl-runtime` | What is the saved runtime assessment of the selected Run ID? |
-| `bioetl-provider-health-v2` | Which provider is degraded/failing, and why? |
+| `bioetl-overview-v2` | What is the saved assessment, runtime/domain status, identity, and provider evidence of the selected Run ID? |
 | `bioetl-dq-v2` | What is the DQ assessment of the selected Run ID? |
-| `bioetl-incident-v1` | What is the highest-confidence active suspect? |
+| `bioetl-incident-v1` | What is the highest-confidence active suspect, and which current/global runtime, provider, or control-plane evidence explains it? |
 | `bioetl-run-explorer-v1` | Which pipelines ran most recently, and where are their reports? |
 
 ### 7.1 Canonical answer-panel map (`DASH-FIT-003` input)
@@ -249,9 +247,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | UID | Answer panel (title / id) | Notes |
 | --- | --- | --- |
 | `bioetl-control-plane-v1` | `Review Exact Replay Readiness` (`9422`) | exact-run readiness from saved inputs; CURRENT `9401` is not this answer |
-| `bioetl-overview-v2` | `Review Selected Run Status` (`9603`) + `Review Run Domains` (`9002`) | Saved HTTP evidence for the selected Run ID. |
-| `bioetl-runtime` | `Review Selected Run Status` (`9998`) | saved HTTP evidence for the selected Run ID |
-| `bioetl-provider-health-v2` | `Review Provider Check` (`9461`) | saved HTTP evidence for the selected provider context |
+| `bioetl-overview-v2` | `Selected Run Status` (`9603`) + `Run Domains` (`9002`) | Saved HTTP evidence for the selected Run ID. Provider evidence/check remains available at `9480` / `9481`. |
 | `bioetl-dq-v2` | `Review Selected Run Status` (`9406`) | saved HTTP evidence for the selected Run ID |
 | `bioetl-incident-v1` | `Inspect Ranked Suspects` (`2010`) | highest-confidence suspect matrix |
 | `bioetl-run-explorer-v1` | `Inspect Recent Runs` (`3010`) | Browse/select the exact run via picker `3010` only. Identity and processed records are on destination dashboards, not this UID. |

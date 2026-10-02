@@ -10,7 +10,6 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Integration tests for cross-scope marker contract - required titles by transition."""
 
-import json
 from pathlib import Path
 
 import pytest
@@ -28,39 +27,16 @@ def test_cross_scope_links_use_required_titles():
     # Define required title patterns for specific dashboard transitions
     # Based on dashboard-audit-checklist.md section 17.2
     required_transitions = {
-        # From Overview (epic #6570/#6647 naming).
-        ("bioetl-overview-v2", "bioetl-runtime"): [
-            "3. Pipeline Diagnostics",
-            "Open Runtime",
-            "Open Pipeline Diagnostics",
-            "Open 3. Pipeline Diagnostics",
-            "2. Runtime",
-        ],
         ("bioetl-overview-v2", "bioetl-control-plane-v1"): [
-            "1. Trust",
+            "Replay Readiness",
             "Open Control Plane",
-            "Open Trust",
         ],
-        ("bioetl-overview-v2", "bioetl-dq-v2"): [
-            "5. Data Quality",
-            "Open Data Quality",
-        ],
-        ("bioetl-overview-v2", "bioetl-provider-health-v2"): [
-            "4. Provider Health",
-            "Open Provider Health",
-        ],
-        # From Runtime / Pipeline Diagnostics
-        ("bioetl-runtime", "bioetl-dq-v2"): [
+        ("bioetl-overview-v2", "bioetl-dq-v2"): ["Open Data Quality"],
+        ("bioetl-incident-v1", "bioetl-dq-v2"): [
             "Open Data Quality",
             "Inspect DQ",
-            "5. Data Quality",
+            "Open domain workspace",
         ],
-        ("bioetl-runtime", "bioetl-provider-health-v2"): [
-            "Open Provider Health",
-            "Inspect Provider",
-            "4. Provider Health",
-        ],
-        # Workflow overview + Silver Reject Explorer retired.
     }
 
     for (source_uid, target_uid), allowed_titles in required_transitions.items():
@@ -103,66 +79,46 @@ def test_cross_scope_links_have_required_tooltip_tokens():
                 )
 
 
+def _panels(uid: str):
+    from tests.integration._grafana_test_support import get_dashboard_panels
+
+    return {
+        p["id"]: p
+        for p in get_dashboard_panels(
+            load_dashboard(Path("grafana/dashboards") / f"{uid}.json")
+        )
+    }
+
+
 def test_workflow_dashboard_provenance_banner_makes_scope_split_explicit() -> None:
-    """Retired workflow overview dashboard must not reappear in grafana/dashboards."""
-    workflow_overview = Path("grafana/dashboards/bioetl-workflow-overview.json")
-    runtime = Path("grafana/dashboards/bioetl-runtime.json")
-    assert not workflow_overview.exists(), (
-        "bioetl-workflow-overview.json was retired in grafana simplification "
-        "(#6570/#6647); workflow-band evidence lives on bioetl-runtime"
-    )
-    assert runtime.is_file(), "bioetl-runtime.json must host workflow-band evidence"
+    for uid in (
+        "bioetl-workflow-overview",
+        "bioetl-runtime",
+        "bioetl-provider-health-v2",
+    ):
+        assert not (Path("grafana/dashboards") / f"{uid}.json").exists()
+    incident = _panels("bioetl-incident-v1")
+    assert "CURRENT" in incident[9701]["description"]
+    assert "independent of Selected Run" in incident[9701]["description"]
 
 
 def test_workflow_status_panel_repeats_selected_range_contract() -> None:
-    """Retired workflow overview contract is enforced via absence + runtime presence."""
-    workflow_overview = Path("grafana/dashboards/bioetl-workflow-overview.json")
-    runtime = Path("grafana/dashboards/bioetl-runtime.json")
-    assert not workflow_overview.exists()
-    assert runtime.is_file()
-    runtime_payload = json.loads(runtime.read_text(encoding="utf-8"))
-    assert isinstance(runtime_payload.get("panels"), list)
-    assert runtime_payload["panels"], (
-        "runtime dashboard must retain workflow-band panels"
-    )
+    incident = _panels("bioetl-incident-v1")
+    for pid in (9996, 9997):
+        description = incident[pid]["description"]
+        assert description.startswith("TIME RANGE")
+        assert "selected range" in description
+        assert "TELEMETRY MISSING is not a zero" in description
 
 
 def test_provider_health_descriptions_separate_global_and_selected_scope() -> None:
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json").read_text(
-            encoding="utf-8"
-        )
-    )
-
-    def _walk(nodes: object) -> dict[object, dict[str, object]]:
-        found: dict[object, dict[str, object]] = {}
-        if not isinstance(nodes, list):
-            return found
-        for panel in nodes:
-            if not isinstance(panel, dict):
-                continue
-            pid = panel.get("id")
-            if pid is not None:
-                found[pid] = panel
-            found.update(_walk(panel.get("panels")))
-        return found
-
-    panels = _walk(dashboard.get("panels"))
-
-    status_description = str(panels[9401].get("description", ""))
-    assert "selected provider" in status_description
-    assert "Fleet panels" in status_description
-    assert "all providers" in status_description
-
-    provenance_content = str(panels[9400].get("options", {}).get("content", ""))
-    assert "GLOBAL" in provenance_content
-    assert "SELECTED PROVIDER" in provenance_content
-
-    for panel_id in (9101, 9102):
-        description = str(panels[panel_id].get("description", ""))
-        assert "GLOBAL" in description
-        assert "independent of the selected Provider" in description
-
-    top_causes_description = str(panels[9103].get("description", ""))
-    assert "GLOBAL" in top_causes_description
-    assert "independent of the selected Provider" in top_causes_description
+    saved = _panels("bioetl-overview-v2")
+    current = _panels("bioetl-incident-v1")
+    for pid in (9480, 9481):
+        description = saved[pid]["description"]
+        assert description.startswith("SELECTED RUN")
+        assert "saved" in description.lower()
+        assert "UNKNOWN" in description
+    assert current[2003]["description"].startswith("GLOBAL")
+    assert "pipeline and run selectors do not filter" in current[2003]["description"]
+    assert "VALID EMPTY is not TELEMETRY MISSING" in current[2003]["description"]

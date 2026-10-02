@@ -1,105 +1,95 @@
-# Fail-closed allowlists for DASHBOARD_REQUIREMENTS P0/P1 gates (#9212–#9218).
-# Tests: tests/integration/test_dashboard_requirement_gates.py
 schema_version: 1
-owner: "@bioetl-observability"
-
+owner: '@bioetl-observability'
 shipped_uids:
-  - bioetl-control-plane-v1
-  - bioetl-overview-v2
-  - bioetl-provider-health-v2
-  - bioetl-dq-v2
-  - bioetl-incident-v1
-  - bioetl-run-explorer-v1
-
+- bioetl-control-plane-v1
+- bioetl-overview-v2
+- bioetl-dq-v2
+- bioetl-incident-v1
+- bioetl-run-explorer-v1
 ops_http_path_prefixes:
-  - /ops/control-plane/
-  - /ops/observability/
-
-# DASH-ZERO-001: synthetic PromQL zeros allowed only as documented event counters.
+- /ops/control-plane/
+- /ops/observability/
 synthetic_zero_allowlist:
-  - dashboard: bioetl-control-plane-v1.json
-    id: 5
-    owner: "@bioetl-observability"
-    rationale: >-
-      Compare Checkpoint Outcomes fills a missing disposition series so the
-      stacked comparison still lists no_events; not a status/trust verdict.
-    retire_when: recording rule emits an explicit no_events series
+- dashboard: bioetl-control-plane-v1.json
+  id: 5
+  owner: '@bioetl-observability'
+  rationale: Compare Checkpoint Outcomes fills a missing disposition series so the stacked comparison
+    still lists no_events; not a status/trust verdict.
+  retire_when: recording rule emits an explicit no_events series
 first_window_inspect_tables:
-  - dashboard: bioetl-incident-v1.json
-    id: 2010
-    owner: "@bioetl-observability"
-    rationale: DASH-FIT-003 incident answer is the ranked-suspects table.
-    retire_when: a Monitor* verdict card replaces 2010 as the answer panel
-  - dashboard: bioetl-provider-health-v2.json
-    id: 9402
-    owner: "@bioetl-observability"
-    rationale: Selected-run pipeline identity stays on the first window.
-    retire_when: 9402 leaves the first window
-  - dashboard: bioetl-provider-health-v2.json
-    id: 9403
-    owner: "@bioetl-observability"
-    rationale: Selected-run record counts stay on the first window.
-    retire_when: 9403 leaves the first window
-  - dashboard: bioetl-overview-v2.json
-    id: 9002
-    owner: "@bioetl-observability"
-    rationale: Overview domain-status answer table.
-    retire_when: 9002 leaves the first window
-  - dashboard: bioetl-dq-v2.json
-    id: 9402
-    owner: "@bioetl-observability"
-    rationale: Selected-run identity stays on the Data Quality first window.
-    retire_when: 9402 leaves the first window
-  - dashboard: bioetl-dq-v2.json
-    id: 9403
-    owner: "@bioetl-observability"
-    rationale: Selected-run record counts stay on the Data Quality first window.
-    retire_when: 9403 leaves the first window
-  - dashboard: bioetl-run-explorer-v1.json
-    id: 3010
-    owner: "@bioetl-observability"
-    rationale: DASH-FIT-003 browse index showing all ten launches with report links.
-    retire_when: browse index moves behind a collapsed row
-  - dashboard: bioetl-dq-v2.json
-    id: 9406
-    owner: "@bioetl-observability"
-    rationale: Selected-run status is the Data Quality answer. Run ID is always set on this page.
-    retire_when: 9406 leaves the first window
-
-# DASH-FIRST-001: one operator question via answer panel + next-action + basis copy.
+- dashboard: bioetl-incident-v1.json
+  id: 2010
+  owner: '@bioetl-observability'
+  rationale: DASH-FIT-003 incident answer is the ranked-suspects table.
+  retire_when: a Monitor* verdict card replaces 2010 as the answer panel
+- dashboard: bioetl-overview-v2.json
+  id: 9002
+  owner: '@bioetl-observability'
+  rationale: Overview domain-status answer table.
+  retire_when: 9002 leaves the first window
+- dashboard: bioetl-dq-v2.json
+  id: 9402
+  owner: '@bioetl-observability'
+  rationale: Selected-run identity stays on the Data Quality first window.
+  retire_when: 9402 leaves the first window
+- dashboard: bioetl-dq-v2.json
+  id: 9403
+  owner: '@bioetl-observability'
+  rationale: Selected-run record counts stay on the Data Quality first window.
+  retire_when: 9403 leaves the first window
+- dashboard: bioetl-run-explorer-v1.json
+  id: 3010
+  owner: '@bioetl-observability'
+  rationale: DASH-FIT-003 browse index showing all ten launches with report links.
+  retire_when: browse index moves behind a collapsed row
+- dashboard: bioetl-dq-v2.json
+  id: 9406
+  owner: '@bioetl-observability'
+  rationale: Selected-run status is the Data Quality answer. Run ID is always set on this page.
+  retire_when: 9406 leaves the first window
 operator_question:
   bioetl-control-plane-v1.json:
-    answer_ids: [9422]
+    answer_ids:
+    - 9422
     next_action_id: 9418
-    basis_tokens: [CURRENT, trust_status]
-    next_action_tokens: [processing_status]
+    basis_tokens:
+    - CURRENT
+    - trust_status
+    next_action_tokens:
+    - processing_status
   bioetl-overview-v2.json:
-    answer_ids: [9603, 9002]
+    answer_ids:
+    - 9603
+    - 9002
     next_action_id: 9603
-    basis_tokens: [SELECTED RUN]
-    next_action_tokens: [Open Run Explorer]
-  bioetl-provider-health-v2.json:
-    answer_ids: [9461]
-    next_action_id: 9460
-    basis_tokens: [SELECTED RUN]
-    next_action_tokens: [Run ID]
+    basis_tokens:
+    - SELECTED RUN
+    next_action_tokens:
+    - Open Run Explorer
   bioetl-dq-v2.json:
-    answer_ids: [9406]
+    answer_ids:
+    - 9406
     next_action_id: 9406
-    basis_tokens: [SELECTED RUN]
-    next_action_tokens: [Open Run Explorer]
+    basis_tokens:
+    - SELECTED RUN
+    next_action_tokens:
+    - Open Run Explorer
   bioetl-incident-v1.json:
-    answer_ids: [2010]
+    answer_ids:
+    - 2010
     next_action_id: 2001
-    basis_tokens: [Suspects]
-    next_action_tokens: [Start Incident Triage]
+    basis_tokens:
+    - Suspects
+    next_action_tokens:
+    - Start Incident Triage
   bioetl-run-explorer-v1.json:
-    answer_ids: [3010]
+    answer_ids:
+    - 3010
     next_action_id: 1
-    basis_tokens: [Browse]
-    next_action_tokens: [Run ID]
-
-# DASH-STATE-004: panels that must name both processing_status and trust_status.
+    basis_tokens:
+    - Browse
+    next_action_tokens:
+    - Run ID
 trust_split_panels:
-  - dashboard: bioetl-control-plane-v1.json
-    id: 9418
+- dashboard: bioetl-control-plane-v1.json
+  id: 9418

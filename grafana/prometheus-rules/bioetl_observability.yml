@@ -347,9 +347,9 @@ groups:
         labels:
           action_target: provider
           action_reason: provider_global_degradation
-          action_dashboard_uid: bioetl-provider-health-v2
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace(((bioetl_overview_pipeline_run_type_universe * scalar((max(bioetl_l0_input_status_selected{input="provider"} == bool 2)) or vector(0))) * 20), "action_scope", "var-pipeline=$1&var-provider=$$__all&var-pipeline_context=$1", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace(((bioetl_overview_pipeline_run_type_universe * scalar((max(bioetl_l0_input_status_selected{input="provider"} == bool 2)) or vector(0))) * 20), "action_scope", "var-pipeline=$1&viewPanel=9480", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_l0_next_action_route
         labels:
           action_target: workflow
@@ -396,9 +396,9 @@ groups:
         labels:
           action_target: provider
           action_reason: provider_evidence_missing
-          action_dashboard_uid: bioetl-provider-health-v2
+          action_dashboard_uid: bioetl-overview-v2
         expr: >-
-          label_replace(((bioetl_l0_input_status_selected{input="provider"} == bool 3) * 15), "action_scope", "var-pipeline=$1&var-provider=$$__all&var-pipeline_context=$1", "pipeline", "([A-Za-z0-9_]+)")
+          label_replace(((bioetl_l0_input_status_selected{input="provider"} == bool 3) * 15), "action_scope", "var-pipeline=$1&viewPanel=9480", "pipeline", "([A-Za-z0-9_]+)")
       - record: bioetl_l0_next_action_route
         labels:
           action_target: workflow
@@ -1348,10 +1348,10 @@ groups:
               )
               , "provider", "unknown", "provider", "^$"
             ),
-            "action_scope", "var-provider=$1&var-pipeline_context=unknown", "provider", "(.+)"
+            "action_scope", "viewPanel=9480", "provider", "(.+)"
           )
         labels:
-          action_dashboard_uid: bioetl-provider-health-v2
+          action_dashboard_uid: bioetl-overview-v2
 
       - record: bioetl_incident_ranked_dq
         expr: |-
