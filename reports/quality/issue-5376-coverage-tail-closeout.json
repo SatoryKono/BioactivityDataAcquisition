@@ -29,7 +29,7 @@
     "tests/architecture/test_module_coverage_inventory.py"
   ],
   "current_live_metrics": {
-    "below_85_module_count": 8,
+    "below_85_module_count": 3,
     "uncovered_module_count": 0,
     "unmeasured_module_count": 0,
     "tracked_module_coverage_percent": 100,
@@ -39,7 +39,7 @@
     "status": "regressed_after_closeout",
     "historical_status": "bounded_shard_complete",
     "residual_tail_remains": true,
-    "residual_below_85_module_count": 8,
-    "rationale": "Live inventory has 8 measured modules below the default floor after adopting 31 previously missing source modules; uncovered and unmeasured remain 0. The historical shard delta is unchanged."
+    "residual_below_85_module_count": 3,
+    "rationale": "Live inventory has 3 measured modules below the default floor. Current uncovered=0, unmeasured=0. Historical shard delta is unchanged; current values are derived from the source-bound inventory."
   }
 }
