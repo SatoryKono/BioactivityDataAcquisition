@@ -71,7 +71,7 @@ async def execute_timed_request(
             host.logger.info(
                 "http_attempt_completed",
                 provider=host.provider,
-                run_id=str(host.run_id) if host.run_id is not None else "unknown",
+                **({"run_id": str(host.run_id)} if host.run_id is not None else {}),
                 method=method,
                 attempt=attempt_number,
                 phase=phase,

@@ -102,7 +102,9 @@ def _create_chembl_data_source(
         )
 
     support = resolve_provider_assembly_support(assembly_support)
-    http_client = support.create_http_client("chembl", settings, metrics=metrics)
+    http_client = support.create_http_client(
+        "chembl", settings, metrics=metrics, logger=logger
+    )
 
     adapter_config = _get_adapter_config("chembl", default_page_size=1000)
 
@@ -208,7 +210,9 @@ def _create_uniprot_data_source(
 ) -> DataSourcePort:
     """Create UniProt data source with configurable API base URL and filtering."""
     support = resolve_provider_assembly_support(assembly_support)
-    http_client = support.create_http_client("uniprot", settings, metrics=metrics)
+    http_client = support.create_http_client(
+        "uniprot", settings, metrics=metrics, logger=logger
+    )
     helper_services = AdapterHelpersFactory.create_http_helpers(
         provider="uniprot",
         logger=logger,
@@ -240,7 +244,9 @@ def _create_uniprot_idmapping_data_source(
 ) -> DataSourcePort:
     """Read configured ChEMBL seed IDs and yield UniProt ID Mapping results."""
     support = resolve_provider_assembly_support(assembly_support)
-    http_client = support.create_http_client("uniprot", settings, metrics=metrics)
+    http_client = support.create_http_client(
+        "uniprot", settings, metrics=metrics, logger=logger
+    )
     from_db, to_db = _resolve_uniprot_mapping_databases(pipeline_config)
     return IDMappingDataSource(
         idmapping_client=UniProtIDMappingClient(

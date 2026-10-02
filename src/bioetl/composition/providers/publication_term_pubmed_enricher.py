@@ -211,7 +211,9 @@ def create_pubmed_publication_term_enricher(
         return None
     try:
         support = resolve_provider_assembly_support(assembly_support)
-        http_client = support.create_http_client("pubmed", settings, metrics=metrics)
+        http_client = support.create_http_client(
+            "pubmed", settings, metrics=metrics, logger=logger
+        )
         adapter = _build_pubmed_adapter_from_settings(
             adapter_cls=PubMedAdapter,
             http_client=http_client,
