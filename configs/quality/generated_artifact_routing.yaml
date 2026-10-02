@@ -39,6 +39,7 @@ allowed_output_roots:
     - docs/02-architecture/07-compatibility-facade-snapshot.md
     - docs/02-architecture/policies/reproducibility-support-matrix.md
     - docs/03-guides/dashboards/panel-title-inventory.md
+    - docs/03-guides/dashboards/panels/
     - docs/03-guides/dashboards/navigation-contract.md
     - docs/03-guides/dashboards/archive/audit-protocols/dux7-live-residual-protocol.md
     - docs/03-guides/silver-schema-testing-guide.md
