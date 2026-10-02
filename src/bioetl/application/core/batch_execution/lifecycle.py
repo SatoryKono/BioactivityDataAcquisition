@@ -78,6 +78,13 @@ class _BatchProgressInitializerProtocol(Protocol):
 class _BatchCheckpointRecoveryLifecycleProtocol(Protocol):
     """Checkpoint finalization contract used by executor lifecycle."""
 
+    async def save_checkpoint_now(
+        self,
+        *,
+        records_fetched: int,
+        resume_offset: int,
+    ) -> None: ...
+
     async def save_checkpoint_on_exception(
         self,
         *,
@@ -192,6 +199,12 @@ class BatchExecutionLifecycleService:
             )
             self._tracing_manager.end_span(finalization_context.root_span, error)
             return
+        # Retain occurrence evidence even when a short run never reaches the
+        # periodic checkpoint interval. Runner cleanup removes only the active pointer.
+        await self._checkpoint_recovery_service.save_checkpoint_now(
+            records_fetched=finalization_context.total_bronze,
+            resume_offset=finalization_context.resume_offset,
+        )
         self._tracing_manager.set_execution_stats(
             finalization_context.root_span,
             total_fetched=finalization_context.total_fetched,
