@@ -149,7 +149,7 @@ def test_column_priority_helpers_cover_seed_scan_and_fallback_paths() -> None:
 def test_preflight_orchestration_helpers_cover_schema_lookup_aliases_and_annotations() -> (
     None
 ):
-    helper = _DummyPreflight()
+    helper = _DummyPreflight(logger=MagicMock())
     result: dict[str, dict[str, object]] = {}
     fields = {
         "doi": SimpleNamespace(

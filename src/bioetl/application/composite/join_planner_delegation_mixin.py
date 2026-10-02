@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.join_execution import JoinHow
 
@@ -23,13 +23,15 @@ if TYPE_CHECKING:
 class JoinPlannerDelegationMixin:
     """Keep the planner facade thin by delegating focused operations."""
 
-    _join_key_resolver: JoinKeyResolverProtocol = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _dependency_joiner: DependencyJoinerProtocol = cast(
-        Any, None
-    )  # Any: host default (PD4)
-    _join_executor: JoinExecutorProtocol = cast(Any, None)  # Any: host default (PD4)
+    def __init__(
+        self,
+        join_key_resolver: JoinKeyResolverProtocol,
+        dependency_joiner: DependencyJoinerProtocol,
+        join_executor: JoinExecutorProtocol,
+    ) -> None:
+        self._join_key_resolver = join_key_resolver
+        self._dependency_joiner = dependency_joiner
+        self._join_executor = join_executor
 
     def find_join_key_column(
         self,

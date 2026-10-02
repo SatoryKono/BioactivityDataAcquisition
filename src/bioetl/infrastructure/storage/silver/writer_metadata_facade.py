@@ -7,7 +7,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Sequence
 from datetime import datetime, timedelta
-from typing import Any, Literal, cast
+from typing import Literal, cast
 
 import polars as pl
 import pyarrow as pa
@@ -51,9 +51,7 @@ from bioetl.infrastructure.storage.silver.prepared_operation_models import (
 class SilverWriterMetadataFacade:
     """Writer-level metadata helper methods backed by composition services."""
 
-    _metadata: SilverMetadataOperations | None = cast(
-        Any, None
-    )  # Any: host default (PD4)
+    _metadata: SilverMetadataOperations | None = None
 
     _SILVER_METADATA_OPERATIONS_REQUIRED = "Silver metadata operations are required"
 

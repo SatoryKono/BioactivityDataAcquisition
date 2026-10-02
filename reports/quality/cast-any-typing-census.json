@@ -17,9 +17,9 @@
     "ratchet_policy": "shrink_only"
   },
   "summary": {
-    "total_cast_any_count": 317,
+    "total_cast_any_count": 304,
     "justified_count": 241,
-    "unjustified_count": 76,
+    "unjustified_count": 63,
     "by_category": {
       "pd3_host_attr_default": 131,
       "pd6_host_attr_default": 90,
@@ -28,24 +28,24 @@
       "any_host_attr": 16,
       "any_json": 0,
       "as_mixin_host_call": 0,
-      "unjustified": 76
+      "unjustified": 63
     },
     "by_layer": {
       "application": {
-        "total": 152,
-        "unjustified": 29
+        "total": 141,
+        "unjustified": 18
       },
       "composition": {
-        "total": 19,
-        "unjustified": 5
+        "total": 18,
+        "unjustified": 4
       },
       "domain": {
         "total": 12,
         "unjustified": 2
       },
       "infrastructure": {
-        "total": 131,
-        "unjustified": 39
+        "total": 130,
+        "unjustified": 38
       },
       "interfaces": {
         "total": 3,
@@ -53,11 +53,11 @@
       }
     },
     "unjustified_by_subcategory": {
-      "pd4_host_default_pending_protocol": 12,
+      "pd4_host_default_pending_protocol": 0,
       "free_form_reason": 63,
-      "no_reason_tag": 1
+      "no_reason_tag": 0
     },
-    "file_count": 107
+    "file_count": 99
   },
   "top_files": [
     {
@@ -70,18 +70,6 @@
       "path": "src/bioetl/infrastructure/quality/exemptions_registry.py",
       "total": 4,
       "unjustified": 4,
-      "justified": 0
-    },
-    {
-      "path": "src/bioetl/application/composite/join_planner_delegation_mixin.py",
-      "total": 3,
-      "unjustified": 3,
-      "justified": 0
-    },
-    {
-      "path": "src/bioetl/application/core/postrun/_failure_policy.py",
-      "total": 3,
-      "unjustified": 3,
       "justified": 0
     },
     {
@@ -98,12 +86,6 @@
     },
     {
       "path": "src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py",
-      "total": 2,
-      "unjustified": 2,
-      "justified": 0
-    },
-    {
-      "path": "src/bioetl/application/composite/merger_metrics_mixin.py",
       "total": 2,
       "unjustified": 2,
       "justified": 0
@@ -175,18 +157,6 @@
       "justified": 1
     },
     {
-      "path": "src/bioetl/application/composite/_preflight_orchestration.py",
-      "total": 1,
-      "unjustified": 1,
-      "justified": 0
-    },
-    {
-      "path": "src/bioetl/application/composite/_preflight_reporting.py",
-      "total": 1,
-      "unjustified": 1,
-      "justified": 0
-    },
-    {
       "path": "src/bioetl/application/composite/key_extractor.py",
       "total": 1,
       "unjustified": 1,
@@ -205,17 +175,43 @@
       "justified": 0
     },
     {
-      "path": "src/bioetl/application/core/batch_executor_runtime_state.py",
+      "path": "src/bioetl/application/core/batch_processing_support.py",
+      "total": 1,
+      "unjustified": 1,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/core/preflight/service.py",
+      "total": 1,
+      "unjustified": 1,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py",
+      "total": 1,
+      "unjustified": 1,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/services/control_plane/replay/historical_closure_models.py",
+      "total": 1,
+      "unjustified": 1,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/_registry_factory_catalog.py",
+      "total": 1,
+      "unjustified": 1,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/registry_core.py",
       "total": 1,
       "unjustified": 1,
       "justified": 0
     }
   ],
   "unjustified_reason_tags": [
-    {
-      "reason": "host default (PD4)",
-      "count": 12
-    },
     {
       "reason": "dynamic compat patch target",
       "count": 4
@@ -403,26 +399,6 @@
   ],
   "findings": [
     {
-      "path": "src/bioetl/application/composite/_preflight_orchestration.py",
-      "line": 30,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/composite/_preflight_reporting.py",
-      "line": 20,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
       "path": "src/bioetl/application/composite/coordinator_result_mixin.py",
       "line": 18,
       "layer": "application",
@@ -463,36 +439,6 @@
       "snippet": "cast(Any, pa_table)  # Any: pyarrow Table after read boundary"
     },
     {
-      "path": "src/bioetl/application/composite/join_planner_delegation_mixin.py",
-      "line": 26,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_join_key_resolver: JoinKeyResolverProtocol = cast("
-    },
-    {
-      "path": "src/bioetl/application/composite/join_planner_delegation_mixin.py",
-      "line": 29,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_dependency_joiner: DependencyJoinerProtocol = cast("
-    },
-    {
-      "path": "src/bioetl/application/composite/join_planner_delegation_mixin.py",
-      "line": 32,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_join_executor: JoinExecutorProtocol = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
       "path": "src/bioetl/application/composite/key_extractor.py",
       "line": 80,
       "layer": "application",
@@ -511,26 +457,6 @@
       "unjustified_subcategory": "free_form_reason",
       "reason_tag": "pyarrow Table after read boundary",
       "snippet": "cast(Any, arrow_table)  # Any: pyarrow Table after read boundary"
-    },
-    {
-      "path": "src/bioetl/application/composite/merger_metrics_mixin.py",
-      "line": 22,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_config: MergeConfig = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/composite/merger_metrics_mixin.py",
-      "line": 23,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_control_plane_mixin.py",
@@ -1243,16 +1169,6 @@
       "snippet": "identity_service=cast("
     },
     {
-      "path": "src/bioetl/application/core/batch_executor_runtime_state.py",
-      "line": 43,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_runtime_state: BatchExecutorRuntimeState = cast("
-    },
-    {
       "path": "src/bioetl/application/core/batch_processing_support.py",
       "line": 203,
       "layer": "application",
@@ -1281,36 +1197,6 @@
       "unjustified_subcategory": "free_form_reason",
       "reason_tag": "heterogeneous schema adapter",
       "snippet": "_data_schema: Any = cast(Any, None)  # Any: heterogeneous schema adapter"
-    },
-    {
-      "path": "src/bioetl/application/core/postrun/_failure_policy.py",
-      "line": 113,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_runtime: object = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/core/postrun/_failure_policy.py",
-      "line": 124,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)"
-    },
-    {
-      "path": "src/bioetl/application/core/postrun/_failure_policy.py",
-      "line": 125,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_FAILURE_POLICY: PostrunFailurePolicySpec = cast("
     },
     {
       "path": "src/bioetl/application/core/preflight/service.py",
@@ -2081,16 +1967,6 @@
       "unjustified_subcategory": null,
       "reason_tag": "host attr default (PD6)",
       "snippet": "gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD6)"
-    },
-    {
-      "path": "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py",
-      "line": 64,
-      "layer": "composition",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "no_reason_tag",
-      "reason_tag": null,
-      "snippet": "return cast(\"T\", replace(cast(Any, ctx), cached_bronze=cached_bronze))  # Any:"
     },
     {
       "path": "src/bioetl/composition/runtime_builders/_run_manifest_context_updates.py",
@@ -3421,16 +3297,6 @@
       "unjustified_subcategory": "free_form_reason",
       "reason_tag": "DQ metrics .dict() duck-type",
       "snippet": "\"dq_metrics\": cast("
-    },
-    {
-      "path": "src/bioetl/infrastructure/storage/silver/writer_metadata_facade.py",
-      "line": 54,
-      "layer": "infrastructure",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "pd4_host_default_pending_protocol",
-      "reason_tag": "host default (PD4)",
-      "snippet": "_metadata: SilverMetadataOperations | None = cast("
     },
     {
       "path": "src/bioetl/infrastructure/storage/silver/writer_runtime_facade.py",

@@ -4,14 +4,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.composition.control_plane_paths import control_plane_root
+from bioetl.composition.runtime_builders._run_manifest_planned_artifacts import (
+    build_planned_artifacts,
+)
+
 from bioetl.composition.runtime_builders._run_context_values import (
     resolve_run_context_values,
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     ManifestControlPlaneRefs,
-    build_planned_artifacts,
     build_run_source_refs,
-    control_plane_root,
     create_control_plane_refs,
 )
 from bioetl.composition.runtime_builders._run_manifest_replay_support import (

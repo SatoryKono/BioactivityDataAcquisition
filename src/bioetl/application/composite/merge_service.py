@@ -118,9 +118,8 @@ class MergeService(
             raise TypeError(
                 f"MergeService() got unexpected keyword argument(s): {unexpected}"
             )
-        self._config = merge_config
+        MergeIOMixin.__init__(self, merge_config, logger)
         self._storage = storage
-        self._logger = logger
         self._delta_reader = delta_reader
         self._silver_reader = silver_reader
         self._field_group_registry = field_group_registry

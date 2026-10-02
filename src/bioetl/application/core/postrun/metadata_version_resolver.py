@@ -37,8 +37,7 @@ class PostrunMetadataVersionResolver(PostrunFailureHandlingMixin):
         storage: StorageMaintenancePort,
         warning_allowlist: tuple[type[BaseException], ...],
     ) -> None:
-        self._logger = logger
-        self._runtime = runtime
+        super().__init__(runtime, logger)
         self._storage = storage
         self._warning_allowlist = warning_allowlist
 
