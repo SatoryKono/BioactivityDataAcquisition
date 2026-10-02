@@ -23,7 +23,6 @@ from bioetl.application.composite.merger_input_mixin import (
     _MergeInputLoaderMixin,
 )
 from bioetl.application.composite.merger_io_mixin import MergeIOMixin
-from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
     MergeWorkflowContext,
@@ -62,7 +61,6 @@ def _path_to_table_name(path: str) -> str:
 
 class MergeService(
     MergeIOMixin,
-    MergeMetricsRecorderMixin,
     _MergeInputLoaderMixin,
 ):
     """Facade/orchestrator for seed+dependency+enricher merge workflow."""
@@ -118,8 +116,7 @@ class MergeService(
             raise TypeError(
                 f"MergeService() got unexpected keyword argument(s): {unexpected}"
             )
-        MergeIOMixin.__init__(self, merge_config, logger)
-        self._storage = storage
+        MergeIOMixin.__init__(self, merge_config, logger, storage)
         self._delta_reader = delta_reader
         self._silver_reader = silver_reader
         self._field_group_registry = field_group_registry

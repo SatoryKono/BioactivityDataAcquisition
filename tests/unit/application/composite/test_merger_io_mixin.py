@@ -35,6 +35,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.merger_io_mixin import MergeIOMixin
+from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
 
 
@@ -44,6 +45,16 @@ def _empty_field_coverage(_df: pl.DataFrame) -> dict[str, int]:
 
 def _zero_fully_enriched(_df: pl.DataFrame, _enrichers: object) -> int:
     return 0
+
+
+@pytest.mark.unit
+def test_constructor_initializes_typed_host_dependencies() -> None:
+    config, logger, storage = MagicMock(), MagicMock(), AsyncMock()
+    mixin = MergeIOMixin(config=config, logger=logger, storage=storage)
+    assert mixin._config is config
+    assert mixin._logger is logger
+    assert mixin._storage is storage
+    assert isinstance(mixin, MergeMetricsRecorderMixin)
 
 
 def _make_mixin(**overrides: object) -> MergeIOMixin:

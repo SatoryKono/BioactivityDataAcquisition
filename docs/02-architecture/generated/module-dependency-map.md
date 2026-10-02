@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2541`
-- Internal import edges (raw): `8002`
+- Scanned modules: `2539`
+- Internal import edges (raw): `7999`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `340`
@@ -21,38 +21,38 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1581 OK| application
+    application -->|1582 OK| application
     application -->|1064 OK| domain
     composition -->|212 OK| application
-    composition -->|637 OK| composition
-    composition -->|295 OK| domain
+    composition -->|634 OK| composition
+    composition -->|294 OK| domain
     composition -->|265 OK| infrastructure
     domain -->|1278 OK| domain
     infrastructure -->|775 OK| domain
-    infrastructure -->|1239 OK| infrastructure
+    infrastructure -->|1238 OK| infrastructure
     interfaces -->|70 OK| application
     interfaces -->|58 OK| composition
-    interfaces -->|85 OK| domain
-    interfaces -->|443 OK| interfaces
+    interfaces -->|84 OK| domain
+    interfaces -->|445 OK| interfaces
 ```
 
 ## Layer Edge Table
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1581 | allowed |
+| `application`    | `application`    |    1582 | allowed |
 | `application`    | `domain`         |    1064 | allowed |
 | `composition`    | `application`    |     212 | allowed |
-| `composition`    | `composition`    |     637 | allowed |
-| `composition`    | `domain`         |     295 | allowed |
+| `composition`    | `composition`    |     634 | allowed |
+| `composition`    | `domain`         |     294 | allowed |
 | `composition`    | `infrastructure` |     265 | allowed |
 | `domain`         | `domain`         |    1278 | allowed |
 | `infrastructure` | `domain`         |     775 | allowed |
-| `infrastructure` | `infrastructure` |    1239 | allowed |
+| `infrastructure` | `infrastructure` |    1238 | allowed |
 | `interfaces`     | `application`    |      70 | allowed |
 | `interfaces`     | `composition`    |      58 | allowed |
-| `interfaces`     | `domain`         |      85 | allowed |
-| `interfaces`     | `interfaces`     |     443 | allowed |
+| `interfaces`     | `domain`         |      84 | allowed |
+| `interfaces`     | `interfaces`     |     445 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
@@ -74,8 +74,8 @@ flowchart LR
 | `composition.factories`        | `domain.ports`                             |      35 |
 | `application.composite`        | `domain.exceptions`                        |      34 |
 | `infrastructure.storage`       | `domain.models`                            |      34 |
-| `composition.runtime_builders` | `domain.control_plane`                     |      32 |
 | `application.core`             | `domain.ports`                             |      31 |
+| `composition.runtime_builders` | `domain.control_plane`                     |      31 |
 | `infrastructure.storage`       | `domain.medallion`                         |      31 |
 | `interfaces.cli`               | `application.services`                     |      31 |
 | `infrastructure.control_plane` | `domain.control_plane`                     |      30 |
@@ -103,8 +103,8 @@ flowchart LR
 | `application.services`         | `domain.lineage`                           |      17 |
 | `composition.factories`        | `infrastructure.storage`                   |      17 |
 | `infrastructure.schemas`       | `domain.config`                            |      17 |
-| `interfaces.http`              | `domain.ports`                             |      17 |
 | `application.core`             | `domain.exceptions`                        |      16 |
+| `interfaces.http`              | `domain.ports`                             |      16 |
 | `application.services`         | `domain.run_reports`                       |      15 |
 | `composition.bootstrap`        | `infrastructure.config`                    |      15 |
 | `composition.factories`        | `application.ports`                        |      15 |
