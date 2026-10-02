@@ -20,7 +20,7 @@ from bioetl.interfaces.http.recent_pipeline_runs import (
     list_recent_pipeline_runs,
     refresh_recent_timing,
 )
-from bioetl.interfaces.http.run_report_ops import _concrete_run_id
+from bioetl.interfaces.http.run_report_index import _concrete_run_id
 
 DEFAULT_RECENT_LIMIT = 10
 RUN_EXPLORER_SNAPSHOT_INTERVAL_SECONDS = 1.0

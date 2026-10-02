@@ -66,7 +66,9 @@ without a separate ADR.
 Hash-only coverage refresh (`--allow-missing-coverage-xml`) hashes all
 `src/bioetl/**/*.py` and drops deleted inventory paths. It does not add rows
 for new modules until a coverage XML refresh. The committed inventory records
-2521 source modules; refreshing the digest preserves historical measurements.
+2521 measured source rows; the full source tree currently contains 2539 files.
+The 18 missing measurement rows require a complete coverage-verify run;
+refreshing the digest preserves historical measurements and cannot fill them.
 `src/bioetl/composition` count is 282 modules live per the architecture scorecard
 (`max_modules` held at 295, shrink-only; ARCH-011, #11859; verified 2026-10-02).
 `composition_runtime_builders` family inventory is 56 modules (measured=56);

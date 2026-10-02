@@ -261,7 +261,8 @@ async def _filter_options_payload(
     query: dict[str, str],
 ) -> dict[str, object]:
     """Build options without writing after the caller's deadline expires."""
-    assert host._run_manifest_port is not None
+    manifest_port = host._run_manifest_port
+    assert manifest_port is not None
     dimension = host._read_optional_param(query, "dimension") or "run_id"
     requested_pipeline = (
         host._read_required_param(query, "pipeline")
@@ -288,7 +289,7 @@ async def _filter_options_payload(
 
     async def manifest_options() -> dict[str, object]:
         manifests, workflow_manifests = await host._selector_catalog.read(
-            host._run_manifest_port,
+            manifest_port,
             host._workflow_manifest_port,
         )
         return await asyncio.to_thread(
