@@ -19,6 +19,41 @@ from tests.helpers.run_report_store import MemoryReportStore
 pytestmark = pytest.mark.unit
 
 
+def test_late_observation_rebinds_self_digest_and_preserves_old_revision(
+    tmp_path: Path,
+) -> None:
+    from bioetl.application.services.run_reports.snapshots import publish_snapshot
+
+    store = MemoryReportStore()
+    report = build_pipeline_run_report(
+        identity={
+            "pipeline_name": "chembl_activity",
+            "run_id": "late",
+            "status": "success",
+        },
+        metrics={},
+    )
+    written = write_pipeline_run_report(report, root=tmp_path, store=store)
+    original = json.loads(store.read_text(str(written.json_path)))
+    previous = original["selected_run_snapshot"]
+    previous_path = (
+        written.json_path.parent / "status-revisions" / f"{previous['revision']}.json"
+    )
+    retained = store.read_text(previous_path.as_posix())
+    candidate = {k: v for k, v in original.items() if k != "selected_run_snapshot"}
+    candidate["observations"] = {
+        "Workflow": {"verdict": "OK", "reason": "workflow_success"}
+    }
+    published = publish_snapshot(candidate, written.json_path, store=store)
+    own = next(
+        a for a in published["artifacts"] if a["kind"] == "pipeline_run_report_json"
+    )
+    assert own["sha256"] == canonical_report_sha256(published)
+    assert published["selected_run_snapshot"]["revision"] != previous["revision"]
+    assert verify_snapshot(published["selected_run_snapshot"])
+    assert store.read_text(previous_path.as_posix()) == retained
+
+
 def test_writer_records_canonical_json_and_markdown_digests(tmp_path: Path) -> None:
     store = MemoryReportStore()
     report = build_pipeline_run_report(
