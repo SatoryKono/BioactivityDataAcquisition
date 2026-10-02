@@ -154,6 +154,53 @@ reviews:
           and then run
           python -m pytest tests/architecture/test_module_coverage_inventory_freshness.py::test_module_coverage_inventory_source_tree_hash_is_current
 
+    - path: "src/bioetl/domain/**/*.py"
+      instructions: |
+        Enforce the BioETL domain boundary as a hard correctness constraint.
+        Domain MUST NOT import application, infrastructure, composition, interfaces, pandas,
+        HTTP clients, filesystem/storage adapters, environment/config loaders, or other I/O.
+        Domain ports/contracts/value objects/aggregates must remain deterministic and infrastructure-free.
+        For aggregate changes verify state transitions, event ordering, immutability, and deterministic identity/hash behavior.
+        Batch lifecycle is OPEN -> SEALED -> WRITING -> COMMITTED/FAILED; record indexes remain sequential;
+        content hashes exclude META_FIELDS.
+        PipelineRun fails on the first failed stage and completes only when every stage succeeds.
+        QuarantineEntry payload is immutable and payload_hash must remain deterministic.
+
+    - path: "src/bioetl/application/**/*.py"
+      instructions: |
+        Application orchestrates use cases through domain ports and MUST NOT depend on concrete infrastructure implementations.
+        Reject concrete adapter/storage/HTTP construction here; dependency wiring belongs in composition.
+        Verify validation occurs before Silver/Gold writes, failure propagation is explicit, and retries/replay remain idempotent.
+        For DQ changes preserve soft_fail_threshold < hard_fail_threshold and invalid_record_policy in quarantine/skip/fail.
+        Gold strict validation is the default and must not be bypassed or weakened.
+
+    - path: "src/bioetl/infrastructure/**/*.py"
+      instructions: |
+        Infrastructure implements domain ports and owns external I/O; it MUST NOT introduce business/domain policy.
+        Provider HTTP access must use the project's unified HTTP/API client abstraction; do not introduce requests or ad-hoc transports.
+        Verify retry, timeout, rate-limit, idempotency, resource cleanup, error mapping, and observability behavior.
+        Storage changes must preserve Bronze append-only/raw semantics and deterministic Silver/Gold persistence contracts.
+
+    - path: "src/bioetl/composition/**/*.py"
+      instructions: |
+        Composition Root is the only place for concrete dependency injection and runtime wiring.
+        Concrete infrastructure implementations may be assembled here, but business logic must remain in domain/application.
+        Flag duplicated wiring outside composition and dependency directions that point outward from domain/application.
+
+    - path: "src/bioetl/interfaces/**/*.py"
+      instructions: |
+        Interfaces are thin controllers/adapters into application use cases.
+        Do not allow interfaces to bypass application orchestration and call infrastructure directly.
+        Keep parsing/rendering at the boundary; business policy belongs in domain/application.
+
+    - path: "src/bioetl/application/composite/**/*.py"
+      instructions: |
+        Enforce Composite Pipeline invariants: Seed -> Dependencies -> Enrichers -> Merge -> Cross-validation -> Gold write.
+        Enricher join keys must be a subset of seed.output_keys.
+        MANY_TO_ONE requires aggregation configuration; EXPLICIT_RULES requires field_priorities.
+        Conflict resolution must use the governed enum/policy and cross-validation may nullify enricher data.
+        Preserve deterministic merge ordering and idempotent outputs.
+
     - path: "tests/**/*.py"
       instructions: |
         Focus on observable behavior, meaningful assertions, edge/error paths, and determinism.
@@ -166,6 +213,11 @@ reviews:
         - Property-based testing (Hypothesis) for domain logic
         - Architecture test coverage
         - No live service dependencies (use fixtures/fakes)
+        - Regression tests for changed aggregate FSM transitions and event ordering
+        - Deterministic replay/idempotency tests when identity, hashing, ordering, checkpoints, or merge logic changes
+        - Gold strict-validation and DQ threshold/policy tests when contracts or validation change
+        - Composite invariant tests when join keys, cardinality, conflict resolution, merge, or cross-validation changes
+        - Quarantine immutability/hash tests when quarantine payload handling changes
 
     - path: "src/bioetl/infrastructure/adapters/**/*.py"
       instructions: |
@@ -263,6 +315,25 @@ reviews:
         Do not require a scope when no stable component name exists.
 
     custom_checks:
+      - name: "architecture-boundaries"
+        instructions: |
+          PASS: Changed code respects BioETL dependency direction and layer ownership.
+          FAIL on concrete evidence of: infrastructure/application/composition/interfaces imported by domain;
+          I/O or concrete adapters in domain; concrete infrastructure wiring in application/interfaces;
+          interfaces bypassing application; or business policy moved into infrastructure/composition.
+          NOT APPLICABLE: Changes outside architectural/runtime code.
+          Require an exact import, construction site, or call path as evidence; do not fail on naming/style alone.
+
+      - name: "security-regression"
+        instructions: |
+          PASS: No concrete security regression is introduced by the diff.
+          FAIL on evidence of hardcoded secrets; secret/token leakage in logs or artifacts; weakened auth,
+          validation, TLS, workflow permissions, or security controls; command/path/template/workflow injection;
+          unsafe deserialization; provider HTTP bypass of the governed unified client; or unjustified broadening
+          of GitHub Actions permissions.
+          NOT APPLICABLE: Changes with no security-relevant surface.
+          Cite the exact path and vulnerable data/control flow. Do not fail on hypothetical vulnerabilities.
+
       - name: "public-contract-compatibility"
         instructions: |
           PASS: No changes to public contracts (API, schema, CLI, events, config formats, data formats) OR changes include version bump, ADR reference, migration notes, and rollback procedure.
@@ -332,6 +403,14 @@ code_generation:
           Control seed, time, locale, environment, filesystem, and network.
           Use fakes or recorded fixtures instead of live services.
           Do not duplicate production logic or weaken production code.
+          For aggregate changes cover valid and invalid FSM transitions, first-failure semantics,
+          event-after-state-change ordering, immutable quarantine payloads, and deterministic hashes.
+          For DQ/contracts cover threshold ordering, invalid_record_policy, pre-write validation,
+          and strict Gold validation without weakening schemas to make tests pass.
+          For replay/storage/merge changes cover deterministic ordering, duplicate-free reruns,
+          primary-key merge behavior, and META_FIELDS exclusion from content hashes where applicable.
+          For Composite changes cover execution order, join-key subset rules, MANY_TO_ONE aggregation,
+          EXPLICIT_RULES field priorities, conflict-resolution policy, and cross-validation nullification.
           Report exact tests executed or limitations.
 
 # Issue enrichment settings
