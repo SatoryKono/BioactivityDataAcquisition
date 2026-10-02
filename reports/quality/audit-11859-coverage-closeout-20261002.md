@@ -67,3 +67,11 @@ Inventory now contains all 2546 current source modules, with no absent paths and
 | `src/bioetl/composition/bootstrap/runtime/composite_reporter.py` | 71.43% | `partially_covered` |
 
 Raw R9 evidence: `reports/quality/proof-or-stop/audit-11859-coverage-20261002-r9/`. CI remains BLOCKED_EXTERNAL; live browser/render acceptance remains NOT_VERIFIED.
+
+## Final merged-surface verification
+
+Concurrent main commit `e6c42b06ccb0b928001c60dcb310abec63211ba4` changes no production Python source. Its freshness guards and scoped Incident telemetry fixtures were retained. The source tree SHA remains the R9 SHA above.
+
+Clean committed owning suite: 131 PASS, 2 explicit retired-workflow-dashboard SKIP, 0 failures/errors. Both source inventory freshness guards passed without skips. Full docs verify, including strict build, passed. TypeScript typecheck passed; Scenes Jest passed both suites (9 cases), using the existing Windows portable test discovery wrapper. Pinned Prometheus v3.13.1 promtool telemetry scenarios passed. Canonical renderer check passed for all five JSON dashboards. Coupled test-governance/flaky/evidence/remote-main checks and the full-tree Git gate passed. Git diff whitespace check passed.
+
+Runtime AI sources/mirrors were not changed in this cutover, so mirror synchronization was not required. Live renders/browser acceptance were not run; they remain NOT_VERIFIED. GitHub Actions remains BLOCKED_EXTERNAL due to the previously verified account billing lock; this closeout does not claim a CI PASS or machine ADMIT.
