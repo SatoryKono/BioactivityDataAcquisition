@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `a9ded2372a8e1c498a139d7804083fb476d85137ff71f17d48a4d046f32f0589`
+Evidence surface SHA-256: `9c2a12bf61be1e08c062dc87fe64329c84816c58858586a8d94d6d243520f73c`
 
 ## Current evidence summary
 
@@ -23,6 +23,8 @@ coverage inventory, architecture scorecard and debt-governance gates. Its
 This is a metadata rebind, not a new repository-wide audit. The audited SHA
 and audit date above remain historical. Earlier conflicting headline values
 are retained in Git history, not presented as current conclusions here.
+
+debt-governance gates passing. The architecture score `9.47` is unchanged.
 
 Coverage measurements require the complete local 17-shard producer (#11745).
 A hash-only refresh preserves historical measurements and cannot prove full
@@ -66,7 +68,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "a9ded2372a8e1c498a139d7804083fb476d85137ff71f17d48a4d046f32f0589",
+  "evidence_surface_sha256": "9c2a12bf61be1e08c062dc87fe64329c84816c58858586a8d94d6d243520f73c",
   "metrics": {
     "architecture_integral_score": 9.47,
     "architecture_interpretation": "good_targeted_improvements",
@@ -91,6 +93,13 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
   "schema_version": "technical-debt-audit-summary-v1"
 }
 -->
+
+## Retained facade importer census
+
+| Facade | Source importers | Test importers |
+| --- | ---: | ---: |
+| `bioetl.domain.composite.config` | 0 | 44 |
+| `bioetl.application.composite.merger` | 0 | 5 |
 
 ## Evidence anchors
 
