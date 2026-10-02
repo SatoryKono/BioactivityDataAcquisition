@@ -166,6 +166,7 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
     folder.mkdir(parents=True, exist_ok=False)
     data, reports = folder / "data", folder / "reports"
     shutil.copytree(root / "data/input", data / "input")
+    shutil.copytree(root / "configs", folder / "configs")
     shutil.copy2(root / "uv.lock", folder / "uv.lock")
     environment = {
         **os.environ,
