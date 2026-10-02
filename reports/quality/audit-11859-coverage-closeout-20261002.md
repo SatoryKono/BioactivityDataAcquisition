@@ -49,3 +49,21 @@ The full producer excludes opt-in network/live launches. Skips retain their JUni
 GitHub Actions has an external account billing blocker; this local producer is not an exact-SHA CI PASS or machine ADMIT. Live Grafana/browser/render acceptance remains NOT_VERIFIED; no monitoring stack was started.
 
 Raw evidence is retained in `reports/quality/proof-or-stop/audit-11859-coverage-20261002-r8/` in the acceptance worktree. Failed/incomplete earlier attempts were not combined into this XML.
+
+## Concurrent-main refresh (R9)
+
+Producer commit: `98658994ed2cbbe77434de73b4db25f24639dc56`. Source tree SHA-256: `14130992652285370fe8050b43145e3860e88a4374e92f32752407af6607fd32`. XML SHA-256: `427a6bf9bd527084c64d50f1b300d784354e094a11ca7d7a7d46bd197f200a10`.
+
+All 17 groups passed: 32210 PASS, 181 SKIP, 0 failures/errors. Line coverage 99.69%, branch coverage 94.32%; unchanged gates passed. Each shard hash and JUnit result was verified.
+
+Inventory now contains all 2546 current source modules, with no absent paths and unmeasured = 0. The five modules added by concurrent main work are measured below; all accepted numeric values remain nonregressing. R8 above is retained as historical evidence for the original 21 missing measurements.
+
+| Module path | Line coverage | Status |
+| --- | ---: | --- |
+| `src/bioetl/application/services/dq/disabled_gold_filter.py` | 100.0% | `fully_covered` |
+| `src/bioetl/application/services/run_reports/composite.py` | 90.7% | `partially_covered` |
+| `src/bioetl/composition/bootstrap/runtime/composite_child_runner.py` | 94.12% | `partially_covered` |
+| `src/bioetl/composition/bootstrap/runtime/composite_contract_evidence.py` | 94.74% | `partially_covered` |
+| `src/bioetl/composition/bootstrap/runtime/composite_reporter.py` | 71.43% | `partially_covered` |
+
+Raw R9 evidence: `reports/quality/proof-or-stop/audit-11859-coverage-20261002-r9/`. CI remains BLOCKED_EXTERNAL; live browser/render acceptance remains NOT_VERIFIED.
