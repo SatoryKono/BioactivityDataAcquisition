@@ -132,11 +132,11 @@ def test_active_docs_sync_workflow_selector_and_cta_titles() -> None:
     assert "single-select with Include All across primary dashboards" in (
         variable_reference
     )
-    # bioetl-workflow-overview.json was retired (#6570/#6647); workflow-band
-    # evidence now ships on bioetl-runtime (see panel-title-inventory).
+    # The retired workflow/runtime dashboards are replaced by Run Explorer.
     assert "bioetl-workflow-overview.json" not in panel_inventory
-    assert "| bioetl-runtime.json |" in panel_inventory
-    assert "Track Failed Workflow Runs" in panel_inventory
+    assert "| bioetl-runtime.json |" not in panel_inventory
+    assert "| bioetl-run-explorer-v1.json |" in panel_inventory
+    assert "Inspect Recent Runs (last 10)" in panel_inventory
 
     for token in ("Next Diagnostic Surface", "Workflow Scope"):
         assert token not in panel_inventory
@@ -234,27 +234,6 @@ def test_panel_docs_match_shipped_dashboard_panel_titles() -> None:
         (
             "bioetl-dq-v2",
             "Inspect Run Identity",
-            "Inspect Processed Records",
-            9402,
-            9403,
-        ),
-        (
-            "bioetl-overview-v2",
-            "Review Run Identity",
-            "Review Processed Records",
-            9300,
-            9301,
-        ),
-        (
-            "bioetl-provider-health-v2",
-            "Inspect Run Identity",
-            "Inspect Processed Records",
-            9402,
-            9403,
-        ),
-        (
-            "bioetl-runtime",
-            "Inspect Pipeline Identity",
             "Inspect Processed Records",
             9402,
             9403,
