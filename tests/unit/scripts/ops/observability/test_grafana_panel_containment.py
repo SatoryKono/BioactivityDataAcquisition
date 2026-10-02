@@ -48,6 +48,90 @@ def _node_eval(program: str) -> str:
     return result.stdout.strip()
 
 
+def test_navigation_matches_canonical_links_and_retains_focus_and_geometry_guards() -> None:
+    output = _node_eval(r"""
+const fs = require('fs');
+const {navigationValidationFromDom: validate} = require(process.argv[1]);
+const source = JSON.parse(fs.readFileSync('grafana/dashboards/bioetl-overview-v2.json', 'utf8'));
+const html = source.panels.find(panel => panel.id === 1000).options.content;
+const rect = {left:0,right:1000,top:0,bottom:100,height:100};
+let focusVisible = true;
+let panelRect = rect;
+function link(text, title) {
+  return {textContent:text,scrollWidth:100,clientWidth:100,scrollHeight:20,clientHeight:20,
+    getAttribute:key => key === 'title' ? title : null,
+    getBoundingClientRect:() => rect,closest:() => nav,
+    focus() {document.activeElement = this;}};
+}
+const canonical = [...html.matchAll(/<a\b([^>]*)>([^<]*)<\/a>/g)]
+  .map(match => link(match[2], match[1].match(/title="([^"]*)"/)[1]));
+let actual = canonical;
+const nav = {querySelectorAll:() => actual,querySelector:() => actual[0],getBoundingClientRect:() => rect};
+const panel = {querySelector:selector => selector === '.bioetl-nav' ? nav : null,
+  getBoundingClientRect:() => panelRect};
+global.document = {querySelector:() => panel,activeElement:null,
+  createElement:() => ({set innerHTML(value) {this.html = value;},
+    querySelector() {return this.html ? {querySelectorAll:() => canonical} : null;}})};
+global.getComputedStyle = () => ({outlineStyle:'solid',outlineWidth:'2px',
+  outlineColor:focusVisible ? 'rgb(255,255,255)' : 'rgba(255,255,255,0)',boxShadow:'none'});
+const check = () => validate({expectedNavigationHtml:html});
+const good = check();
+actual = canonical.slice(0,-1);
+const missing = check();
+actual = [...canonical, link('Extra dashboard','Extra')];
+const extra = check();
+actual = [link('Foreign dashboard',canonical[0].getAttribute('title')), ...canonical.slice(1)];
+const foreign = check();
+actual = [link(canonical[0].textContent,'Wrong tooltip'), ...canonical.slice(1)];
+const wrongTitle = check();
+actual = canonical;
+focusVisible = false;
+const invisibleFocus = check();
+focusVisible = true;
+panelRect = {...rect,right:900};
+const overflow = check();
+panelRect = rect;
+const absentContract = validate();
+console.log(JSON.stringify({good,missing,extra,foreign,wrongTitle,invisibleFocus,overflow,absentContract}));
+""")
+    result = json.loads(output)
+    assert result["good"]["status"] == "ok"
+    assert result["good"]["linkCount"] == result["good"]["expectedLinkCount"] == 4
+    assert result["good"]["linkNames"] == result["good"]["expectedLinkNames"]
+    for case in ("missing", "extra", "foreign", "wrongTitle", "absentContract"):
+        assert result[case]["status"] == "error", case
+        assert result[case]["canonicalLinksMatch"] is False, case
+    assert result["invisibleFocus"]["status"] == "error"
+    assert result["invisibleFocus"]["focusIndicatorVisible"] is False
+    assert result["overflow"]["status"] == "error"
+    assert result["overflow"]["linksInsidePanel"] is False
+
+
+def test_navigation_absence_is_applicable_only_when_canonical_model_omits_it() -> None:
+    output = _node_eval(r"""
+const {collectNavigationValidation: collect} = require(process.argv[1]);
+(async () => {
+  let unexpected = 0;
+  const page = {locator:() => ({count:async () => unexpected}),
+    keyboard:{press:async () => {throw new Error('must not focus absent navigation');}}};
+  const absent = await collect(page, {navigationExpected:false});
+  unexpected = 1;
+  const extra = await collect(page, {navigationExpected:false});
+  let expectedFailed = false;
+  try {await collect(page,{navigationExpected:true,navigationHtml:'<div class="bioetl-nav"></div>'});}
+  catch {expectedFailed = true;}
+  console.log(JSON.stringify({absent,extra,expectedFailed}));
+})();
+""")
+    result = json.loads(output)
+    assert result["absent"] == {
+        "status": "not_applicable",
+        "reason": "canonical_dashboard_has_no_navigation_panel",
+    }
+    assert result["extra"]["status"] == "error"
+    assert result["expectedFailed"] is True
+
+
 def test_navigation_capture_scopes_containment_without_weakening_full_capture() -> None:
     output = _node_eval("""
 const {selectContainmentPanels} = require(process.argv[1]);

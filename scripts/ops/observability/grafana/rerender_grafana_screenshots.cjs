@@ -839,6 +839,8 @@ function dashboardEntryFromPayload(payload) {
     url: `/d/${uid}/${slug}`,
     file: `${uid}.png`,
     requiredPanels,
+    navigationHtml: allRequiredPanels.find(panel => panel.id === 1000)?.options?.content || "",
+    navigationExpected: allRequiredPanels.some(panel => panel.id === 1000),
     firstWindowPanels: selectContainmentPanels(panels, CONFIG.navigationOnly).map(summarizeFirstWindowPanel),
     requiredTerminalPanelIds:
       uid === "bioetl-silver-reject-explorer" ? [13] : [],
@@ -1753,7 +1755,7 @@ async function collectPanelContainment(page, dashboard) {
   });
 }
 
-function navigationValidationFromDom() {
+function navigationValidationFromDom({expectedNavigationHtml = ""} = {}) {
     const panel =
       document.querySelector('[data-panelid="1000"]') ||
       document.querySelector('[data-viz-panel-key="panel-1000"]') ||
@@ -1769,6 +1771,19 @@ function navigationValidationFromDom() {
           nav.querySelectorAll(".bioetl-nav-link, .bioetl-nav-current"),
         )
       : [];
+    const expectedRoot = document.createElement("div");
+    expectedRoot.innerHTML = expectedNavigationHtml;
+    const expectedNavigation = expectedRoot.querySelector(".bioetl-nav");
+    const expectedLinks = expectedNavigation
+      ? Array.from(expectedNavigation.querySelectorAll(".bioetl-nav-link, .bioetl-nav-current"))
+      : [];
+    const name = link => (link.textContent || "").trim().replace(/\s+/g, " ");
+    const linkNames = links.map(name);
+    const expectedLinkNames = expectedLinks.map(name);
+    const canonicalLinksMatch = expectedLinks.length > 0 &&
+      links.length === expectedLinks.length && links.every((link, index) =>
+        name(link) === name(expectedLinks[index]) &&
+        link.getAttribute("title") === expectedLinks[index].getAttribute("title"));
     const panelRect = panel?.getBoundingClientRect() || null;
     const navRect = nav?.getBoundingClientRect() || null;
     const linkRects = links.map((link) => link.getBoundingClientRect());
@@ -1820,6 +1835,10 @@ function navigationValidationFromDom() {
       titleFound: Boolean(title),
       linkNamesPresent: links.every(link => Boolean(link.textContent?.trim()) && Boolean(link.getAttribute('title'))),
       linkCount: links.length,
+      expectedLinkCount: expectedLinks.length,
+      linkNames,
+      expectedLinkNames,
+      canonicalLinksMatch,
       contentInsidePanel,
       linksInsidePanel,
       linkTextFits,
@@ -1840,7 +1859,7 @@ function navigationValidationFromDom() {
         evidence.navigationFound &&
         !evidence.titleFound &&
         evidence.linkNamesPresent &&
-        evidence.linkCount === 7 &&
+        evidence.canonicalLinksMatch &&
         evidence.contentInsidePanel &&
         evidence.linksInsidePanel &&
         evidence.linkTextFits &&
@@ -1853,13 +1872,19 @@ function navigationValidationFromDom() {
     };
 }
 
-async function collectNavigationValidation(page) {
+async function collectNavigationValidation(page, dashboard) {
+  if (dashboard.navigationExpected === false) {
+    const unexpected = await page.locator('.bioetl-nav, [data-panelid="1000"], [data-viz-panel-key="panel-1000"], [data-griditem-key="grid-item-1000"]').count();
+    return unexpected === 0
+      ? {status: "not_applicable", reason: "canonical_dashboard_has_no_navigation_panel"}
+      : {status: "error", reason: "unexpected_navigation_not_in_canonical_dashboard"};
+  }
   await page.keyboard.press("Tab");
   await page.locator('.bioetl-nav a.bioetl-nav-link[href*="/d/"]').first().focus();
   // Grafana's native focus shadow has a 200 ms transition. Sampling in the
   // focus event frame observes its transparent start rather than the indicator.
   await page.waitForTimeout(250);
-  return page.evaluate(navigationValidationFromDom);
+  return page.evaluate(navigationValidationFromDom, {expectedNavigationHtml: dashboard.navigationHtml});
 }
 
 function typographyValidationFromDom({
@@ -2259,7 +2284,7 @@ async function collectVerifiedPanelSurfaces(page, dashboard) {
   dashboard.typographyValidation = tileTypography.length
     ? mergeTypographyObservations(dashboard.requiredPanels, tileTypography)
     : await collectTypographyValidation(page, dashboard);
-  dashboard.navigationValidation = await collectNavigationValidation(page);
+  dashboard.navigationValidation = await collectNavigationValidation(page, dashboard);
   const containmentSchema = validateContainmentManifest(dashboard.panelContainment);
   if (containmentSchema.status !== "ok") {
     throw new Error(
@@ -2282,7 +2307,8 @@ async function collectVerifiedPanelSurfaces(page, dashboard) {
       `Typography validation failed for ${dashboard.uid}: ${dashboard.typographyValidation.violations.length} violation(s)`,
     );
   }
-  if (dashboard.navigationValidation.status !== "ok") {
+  if (dashboard.navigationValidation.status !== "ok" &&
+      !(dashboard.navigationExpected === false && dashboard.navigationValidation.status === "not_applicable")) {
     throw new Error(
       `Navigation validation failed for ${dashboard.uid}: ${JSON.stringify(dashboard.navigationValidation)}`,
     );
@@ -2676,6 +2702,7 @@ module.exports = {
   mergeTypographyObservations,
   layoutFitMeasurementsFromDom,
   navigationValidationFromDom,
+  collectNavigationValidation,
   graphicsMeasurementsFromDom,
   browserAndKioskStateFromDom,
   accessibilityMeasurementsFromDom,
