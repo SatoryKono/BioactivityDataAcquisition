@@ -54,7 +54,7 @@ def command(case: Case) -> list[str]:
     elif case.kind == "composite":
         args = ["run-composite", "--composite", case.name.removeprefix("composite_")]
     else:
-        args = ["run", "--pipeline", case.name]
+        args = ["run", "--pipeline", case.name, "--no-health-server"]
     return [
         sys.executable,
         "-m",
@@ -62,8 +62,6 @@ def command(case: Case) -> list[str]:
         *args,
         "--limit",
         "1000",
-        "--required-persistence-profile",
-        "replay_ready",
     ]
 
 
@@ -81,6 +79,23 @@ def green_failures(status: str, presentation: dict, assessment: dict) -> list[st
         for key, (actual, wanted) in expected.items()
         if actual != wanted
     ]
+
+
+def logged_errors(text: str) -> list[str]:
+    """Reject structured error records even when the CLI eventually exits zero."""
+    errors = []
+    for line in text.splitlines():
+        try:
+            record = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(record, dict) and record.get("level") in {
+            "error",
+            "critical",
+            "fatal",
+        }:
+            errors.append(f"error_log:{record.get('event', 'unknown')}")
+    return errors
 
 
 def inspect_pipeline(path: Path, reports: Path, data: Path) -> list[str]:
@@ -178,6 +193,7 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
                 failures.append(f"exit_code={result.returncode}")
         except subprocess.TimeoutExpired:
             failures.append("launch_timeout=1800s")
+    failures.extend(logged_errors((folder / "launch.log").read_text(encoding="utf-8")))
     paths = sorted(reports.glob("pipeline/*/*/pipeline-run-report.json"))
     if not paths:
         failures.append("pipeline_reports_missing")
@@ -220,6 +236,9 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
                 "case": case.id,
                 "command": args,
                 "limit": 1000,
+                "source_commit": subprocess.check_output(
+                    ["git", "rev-parse", "HEAD"], cwd=root, text=True
+                ).strip(),
                 "failures": failures,
                 "passed": not failures,
             },

@@ -7,11 +7,27 @@ import pytest
 from scripts.ops.observability.green_acceptance import Case, command, green_failures
 
 
+def test_error_log_cannot_be_hidden_by_successful_exit():
+    from scripts.ops.observability.green_acceptance import logged_errors
+
+    assert logged_errors('{"level":"error","event":"write_failed"}') == [
+        "error_log:write_failed"
+    ]
+    assert logged_errors('{"level":"info","event":"completed"}') == []
+
+
+def test_composite_limit_alias_preserves_seed_limit():
+    from bioetl.interfaces.cli.commands.run_composite import run_composite
+
+    option = next(param for param in run_composite.params if param.name == "seed_limit")
+    assert {"--seed-limit", "--limit"} <= set(option.opts)
+
+
 @pytest.mark.parametrize("kind", ["pipeline", "workflow", "composite"])
 def test_every_launch_has_limit_1000(kind):
     args = command(Case(kind, "chembl_assay"))
     assert args[args.index("--limit") + 1] == "1000"
-    assert args[args.index("--required-persistence-profile") + 1] == "replay_ready"
+    assert "--required-persistence-profile" not in args
 
 
 def test_all_green_passes():
