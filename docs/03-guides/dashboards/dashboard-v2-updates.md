@@ -1,3 +1,10 @@
+## Retirement route corrections — 2026-10-02
+
+Provider and runtime links resolve to Run Overview and preserve run identity
+and time range. Provider alert links target evidence panel 9480. The
+[validation report](../../reports/dashboard-ux-checks/2026-10-02.md) records
+static checks and outstanding full-suite and browser acceptance gaps.
+
 ______________________________________________________________________
 
 ## UX report artifact requirement
