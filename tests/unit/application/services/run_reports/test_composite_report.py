@@ -26,6 +26,7 @@ from bioetl.infrastructure.time import SystemClock
 @pytest.mark.parametrize("outcome", ["success", "error", "cancel"])
 @pytest.mark.parametrize("child_verdict", ["OK", "WARN"])
 async def test_parent_records_terminal_evidence(tmp_path, outcome, child_verdict):
+    archive = MagicMock()
     service = CompositeRunReportService(
         "composite_assay",
         "parent-manifest",
@@ -34,6 +35,7 @@ async def test_parent_records_terminal_evidence(tmp_path, outcome, child_verdict
         SystemClock(),
         MagicMock(),
         MagicMock(),
+        archive=archive,
     )
     child_path = tmp_path / "child.json"
     child_path.write_text(
@@ -86,6 +88,20 @@ async def test_parent_records_terminal_evidence(tmp_path, outcome, child_verdict
             tmp_path / "pipeline/composite_assay/parent-id/pipeline-run-report.json"
         ).read_text()
     )
+    if outcome == "success":
+        archive.assert_called_once()
+        archived_result = archive.call_args.args[0]
+        assert archived_result.run_id == "parent-id"
+        assert archived_result.manifest_id == "parent-manifest"
+        assert archived_result.records_gold == 9
+        assert (
+            json.loads(service.store.read_text(archived_result.run_report_json_path))[
+                "identity"
+            ]["run_id"]
+            == "parent-id"
+        )
+    else:
+        archive.assert_not_called()
     assert report["identity"]["run_id"] == "parent-id"
     assert report["identity"]["manifest_id"] == "parent-manifest"
     assert (

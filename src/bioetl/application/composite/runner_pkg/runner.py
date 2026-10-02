@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.lifecycle_observer_service import (
@@ -99,9 +100,11 @@ class CompositePipelineRunner(
         deps: CompositeRunnerDependencies,
         run_id: str | None = None,
         reporter: CompositeRunReportService | None = None,
+        contract_evidence_finalizer: Callable[[str, bool], None] | None = None,
     ) -> None:
         """Initialize composite runner with config, runtime flags, and deps."""
         self._reporter = reporter
+        self._contract_evidence_finalizer = contract_evidence_finalizer
         self._config = config
         self._runtime = runtime
         bind_runner_dependencies(self, deps)
@@ -251,6 +254,8 @@ class CompositePipelineRunner(
 
     async def _run_with_lock(self) -> CompositeResult:
         """Execute pipeline stages while lock is held."""
+        if self._contract_evidence_finalizer is not None:
+            self._contract_evidence_finalizer(self.run_id, self._runtime.resume)
         state = await self._prepare_run_state()
         state, execution_context = await self._execute_locked_run_phases(state)
         return await self._complete_successful_run(state, execution_context)

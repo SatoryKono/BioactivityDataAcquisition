@@ -10,7 +10,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from bioetl.application.services.execution.pipeline_runner_models import RunResult
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunResult,
+)
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
     record_run_observation,
@@ -51,6 +54,7 @@ class CompositeRunReportService:
     clock: ClockPort
     logger: LoggerPort
     capture: Callable[[str, str, datetime], None]
+    archive: Callable[[RunResult], None] | None = None
 
     def write(
         self,
@@ -153,7 +157,23 @@ class CompositeRunReportService:
             },
             observations=run_observations(),
         )
-        write_pipeline_run_report(report, root=self.root, store=self.store)
+        paths = write_pipeline_run_report(report, root=self.root, store=self.store)
+        if status == "success" and self.archive is not None:
+            self.archive(
+                RunResult(
+                    status=PipelineRunResult.SUCCESS,
+                    pipeline_name=self.pipeline_name,
+                    run_id=run_id,
+                    run_type="composite",
+                    manifest_id=self.manifest_id,
+                    started_at=started_at,
+                    completed_at=completed_at,
+                    records_silver=layers.silver_valid,
+                    records_gold=layers.gold_written,
+                    run_report_json_path=str(paths.json_path),
+                    run_report_markdown_path=str(paths.markdown_path),
+                )
+            )
 
     def _record_child_provider_evidence(self, children: list[RunResult]) -> None:
         verdicts: list[str] = []

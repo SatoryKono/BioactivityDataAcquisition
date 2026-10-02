@@ -315,3 +315,35 @@ def test_build_runner_factories_wires_phase_builders_and_bronze_options() -> Non
     assert callable(result[0])
     assert callable(result[1])
     assert callable(result[2])
+
+
+def test_manifest_bound_storage_preserves_run_identity():
+    from bioetl.domain.ports import PipelineControlPlaneArtifacts
+
+    build_storage = MagicMock()
+    context = bootstrap_runtime_basics(
+        config=_make_config("composite_assay"),
+        run_id=str(_FIXED_UUID),
+        settings_provider=lambda: SimpleNamespace(metrics_enabled=False),
+        logger_bootstrapper=lambda *_: MagicMock(),
+        tracer_bootstrapper=lambda _: MagicMock(),
+        storage_bootstrapper=build_storage,
+        lock_factory=MagicMock,
+        uuid_factory=MagicMock(),
+    )
+    original = build_storage.call_args.kwargs["run_context"]
+    artifacts = PipelineControlPlaneArtifacts(
+        manifest_id="parent-manifest",
+        execution_fingerprint="parent-fingerprint",
+        resolved_config_hash="a" * 64,
+        effective_config_hash="b" * 64,
+    )
+    context.storage_for_manifest(artifacts)
+    bound = build_storage.call_args.kwargs["run_context"]
+    assert bound.manifest_id == artifacts.manifest_id
+    assert bound.execution_fingerprint == artifacts.execution_fingerprint
+    assert bound.resolved_config_hash == artifacts.resolved_config_hash
+    assert bound.effective_config_hash == artifacts.effective_config_hash
+    assert bound.run_id == original.run_id
+    assert bound.started_at == original.started_at
+    assert original.manifest_id is None

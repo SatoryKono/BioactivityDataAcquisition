@@ -21,6 +21,9 @@ from bioetl.application.composite.runtime_wiring_api import (
     MergeService as _MergeService,
 )
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
+from bioetl.composition.bootstrap.runtime.composite_contract_evidence import (
+    create_composite_contract_finalizer,
+)
 from bioetl.composition.bootstrap.runtime.composite_reporter import (
     create_composite_reporter,
 )
@@ -213,6 +216,12 @@ def create_composite_runner_service_from_inputs(
         runtime=normalized_inputs.runtime,
         deps=deps,
         run_id=effective_run_id,
+        contract_evidence_finalizer=create_composite_contract_finalizer(
+            pipeline_name=normalized_inputs.config.name,
+            manifest_id=normalized_inputs.manifest_id,
+        )
+        if normalized_inputs.manifest_id
+        else None,
         reporter=create_composite_reporter(
             pipeline_name=normalized_inputs.config.name,
             manifest_id=normalized_inputs.manifest_id,

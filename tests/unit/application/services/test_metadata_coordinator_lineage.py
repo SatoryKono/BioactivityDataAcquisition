@@ -376,7 +376,14 @@ class TestLineageFragments:
         assert silver_attrs["cv_warn_count"] == 1
         assert silver_attrs["cv_error_count"] == 1
         assert silver_attrs["cv_quarantine_count"] == 1
-        assert mapping_to_plain(crossref_source.attributes)["selected_fields"] == [
+        assert mapping_to_plain(
+            next(
+                edge
+                for edge in fragment.edges
+                if edge.target.node_id == crossref_source.node_id
+                and edge.edge_type == LineageEdgeType.DERIVED_FROM
+            ).attributes
+        )["selected_fields"] == [
             "abstract",
             "title",
         ]
@@ -551,11 +558,11 @@ class TestLineageFragments:
         assert gold_dataset.attributes["cv_warn_count"] == 1
         assert gold_dataset.attributes["cv_error_count"] == 1
         assert gold_dataset.attributes["cv_quarantine_count"] == 1
-        assert mapping_to_plain(openalex_source.attributes)["selected_fields"] == [
+        assert mapping_to_plain(openalex_edge.attributes)["selected_fields"] == [
             "abstract",
             "title",
         ]
-        assert openalex_source.attributes["enrichment_status"] == "success"
+        assert "enrichment_status" not in openalex_source.attributes
         assert openalex_edge.attributes["selected_field_count"] == 2
         assert openalex_edge.attributes["enrichment_status"] == "success"
 
@@ -643,3 +650,41 @@ class TestLineageFragments:
             bundle.metadata.output.lineage_fragment_id
             == bundle.lineage_fragment.fragment_id
         )
+
+
+def test_composite_source_identity_is_stable_across_layer_projections():
+    from bioetl.application.services.lineage.metadata_lineage_composite import (
+        _build_composite_source_nodes_and_edges,
+    )
+    from bioetl.domain.lineage import LineageNodeRef
+
+    context = RunContext.create(
+        run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
+        run_type=RunType.INCREMENTAL,
+        started_at=_FIXED_TIME,
+        provider="composite",
+        entity="merged",
+        manifest_id="parent-manifest",
+    )
+    fragments = []
+    for layer, fields in (("silver", ["title", "abstract"]), ("gold", ["title"])):
+        fragments.append(
+            _build_composite_source_nodes_and_edges(
+                dataset_node=LineageNodeRef(
+                    node_type=LineageNodeType.DATASET,
+                    node_id=f"{layer}:composite.publication@0",
+                ),
+                run_context=context,
+                created_at=_FIXED_TIME,
+                source_providers=["crossref"],
+                provider_field_map={"crossref": fields},
+                enrichment_status={"crossref": "success"},
+                composite_run_id=str(context.run_id),
+                composite_name="composite_publication",
+            )
+        )
+    (silver_nodes, silver_edges), (gold_nodes, gold_edges) = fragments
+    assert silver_nodes == gold_nodes
+    assert list(silver_edges[0].attributes["selected_fields"]) == ["title", "abstract"]
+    assert list(gold_edges[0].attributes["selected_fields"]) == ["title"]
+    assert silver_edges[0].manifest_id == gold_edges[0].manifest_id == "parent-manifest"
