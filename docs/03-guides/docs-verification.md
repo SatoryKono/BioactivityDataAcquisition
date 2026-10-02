@@ -93,7 +93,7 @@ a strict MkDocs build through the in-repo helper chain.
 ### 1. Link and reference checks
 
 ```bash
-uv run python -m scripts.docs check-links --links --specs --configs
+uv run python -m scripts.docs check-links
 ```
 
 Use this first to catch broken internal references, spec links, and config docs
@@ -103,7 +103,7 @@ When you need a reproducible machine-readable result for review or CI parity,
 emit the stable repo-only report artifact as well:
 
 ```bash
-uv run python -m scripts.docs check-links --links --specs --configs \
+uv run python -m scripts.docs check-links \
   --report-json docs/reports/docs-link-check-report.json
 ```
 
@@ -203,19 +203,19 @@ execution inside the OS-appropriate environment:
 
 ```powershell
 .\scripts\engineering\dev\setup_env_windows.ps1
-.\.venv-win\Scripts\python.exe -m scripts.docs check-links --links --specs --configs
+.\.venv-win\Scripts\python.exe -m scripts.docs check-links
 ```
 
 ```bash
 bash scripts/engineering/dev/setup_env_wsl.sh
-"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m scripts.docs check-links --links --specs --configs
+"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m scripts.docs check-links
 ```
 
 If `uv` cache placement causes filesystem issues in WSL, use a writable cache
 location explicitly:
 
 ```bash
-UV_CACHE_DIR=/tmp/.uv-cache uv run python -m scripts.docs check-links --links --specs --configs
+UV_CACHE_DIR=/tmp/.uv-cache uv run python -m scripts.docs check-links
 UV_CACHE_DIR=/tmp/.uv-cache uv sync --extra dev --extra tests --extra tracing --extra docs
 ```
 
@@ -273,7 +273,7 @@ doc-sync PR needs a focused code-versus-doc review.
 ```bash
 rg -n '\$pipeline|\$run_type|\$provider' \
   grafana/dashboards docs/03-guides/dashboards docs/05-operations/01-monitoring-guide.md
-uv run python -m scripts.docs check-links --links --configs
+uv run python -m scripts.docs check-links
 ```
 
 ### 2. Control-plane contracts
@@ -299,7 +299,7 @@ uv run python -m scripts.docs build-site --strict
 - **Command/check**:
 
 ```bash
-uv run python -m scripts.docs check-links --links --specs --configs
+uv run python -m scripts.docs check-links
 rg -n 'configs/providers|configs/entities|configs/composites' README.md docs/04-reference
 ```
 
@@ -326,7 +326,7 @@ rg -n 'data/output|checkpoints|quarantine|control' \
 - **Command/check**:
 
 ```bash
-uv run python -m scripts.docs check-links --links --specs --configs
+uv run python -m scripts.docs check-links
 uv run python -m scripts.docs build-site --strict
 ```
 
@@ -351,7 +351,7 @@ rg -n 'INTERFACES \(CLI|backlog' README.md docs/03-guides/workflows.md
 Use this checklist for PRs that change published docs, runtime guidance, or
 repo-only supporting material that feeds active documentation.
 
-- [ ] Published doc changes were checked with `uv run python -m scripts.docs check-links --links --specs --configs`.
+- [ ] Published doc changes were checked with `uv run python -m scripts.docs check-links`.
 - [ ] Drift-sensitive surfaces were reviewed against the **Live Docs Watchlist** items that match the change.
 - [ ] Any normative conclusion discovered in `reports/**` was migrated into `docs/00-05` before linking the report as supporting evidence.
 - [ ] `uv run python -m scripts.docs check-drift --ports --classes` ran when ports, classes, contracts, or storage/runtime structure changed.

@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `5d18c5eebdb753f5d697d6d95371b1f31915e2498d131cf8aebc0e525e8a22ec`
+Evidence surface SHA-256: `f4baef6614e68159b09c323ace73f838c03143b594a3b98ebd4c98b1795ce275`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,27 +18,27 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "5d18c5eebdb753f5d697d6d95371b1f31915e2498d131cf8aebc0e525e8a22ec",
+  "evidence_surface_sha256": "f4baef6614e68159b09c323ace73f838c03143b594a3b98ebd4c98b1795ce275",
   "metrics": {
-    "architecture_integral_score": 9.47,
-    "architecture_interpretation": "good_targeted_improvements",
+    "architecture_integral_score": 7.37,
+    "architecture_interpretation": "satisfactory_system_refactoring_required",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 46,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 46,
+    "debt_gate_fail_count": 2,
+    "debt_gate_pass_count": 44,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 2490,
     "layer_violation_count": 0,
-    "no_executable_lines_module_count": 4,
+    "no_executable_lines_module_count": 5,
     "partially_covered_module_count": 27,
-    "source_module_count": 2521,
+    "source_module_count": 2541,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 0
+    "unmeasured_module_count": 19
   },
   "schema_version": "technical-debt-audit-summary-v1"
 }
@@ -46,12 +46,38 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 Refresh reason: Reconcile generated metadata while preserving the historical audited commit. Current gate results are recorded in the semantic summary; this is not full coverage acceptance. No budget growth.
 
+## Local branch synchronization — 2026-10-02
+
+Merged main `8f024f97cb10` into `fix/audit-p2-closeout-20261002`.
+Canonical generators reconciled the merged evidence; existing measurements were preserved.
+The current inventory retains 2541 rows, including 19 unmeasured modules.
+The live source tree has 2542 modules; the newly inherited
+`src/bioetl/domain/control_plane/effective_config_runtime_identity.py` has no inventory row.
+The post-merge freshness check confirms this coverage residual; the source digest matches.
+Two markerless test functions inherited from main remain a test-governance violation.
+Debt outcome: flat in source debt; refreshed evidence exposes previously omitted coverage residuals.
+No budgets, exemptions, or thresholds were increased. Full coverage acceptance remains unverified.
+
+Debt-governance gates: **44 pass / 2 fail**;
+Architecture quality integral score: **7.37** (`satisfactory_system_refactoring_required`);
+source_module_count: **2541**;
+fully_covered: **2490**;
+partially_covered: **27**;
+no_executable_lines: **5**;
+uncovered: **0**;
+unmeasured: **19**;
+= 2541 == source_module_count;
+Contract coverage matrix schema: **contract-coverage-matrix-v3**;
+Constructor waivers (shrink-only inventory): **1** entries;
+Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**;
+Layer violations: **0**;
+
 ## Current metadata refresh — 2026-10-02 (#11846)
 
-Source commit: `1e50b76c1a06d32f9525d5358547775a8bec7b8b`.
-Current generated metadata: 46/46 debt gates pass; architecture proxy score
-9.47 (`good_targeted_improvements`). These results do not establish full coverage
-acceptance or a release PASS.
+Source commit: `81e1e43485072922b624e7d1123da0594a293c5f`.
+Current generated metadata: 46/46 debt gates pass; architecture score `9.47`
+(`good_targeted_improvements`); debt-governance gates passing. These results
+do not establish full coverage acceptance or a release PASS.
 The machine-readable semantic summary above is the sole current numerical
 rollup; dated refresh notes are historical snapshots. The original audited
 commit and audit date remain unchanged. This metadata rebind is not a new
@@ -66,9 +92,13 @@ acceptance remains unverified under #11745 (still open); zero unmeasured and
 uncovered rows do not prove that acceptance. No overall release PASS is claimed.
 
 The live cast census is 353 total / 112 unjustified (previously 370 / 129).
-Hotspot runtime-builders LOC is 6764 (previously 6760); files, oversized-file
-counts and fan-in are unchanged. Budget and exemption values are unchanged.
-Debt outcome: decreased for unjustified casts, flat for bounded hotspot debt.
+Hotspot observations after source_tree_sha256 fcbcdec5: runtime-builders LOC
+6764, application_core LOC 24787, control_plane LOC 15496 and
+helper_function_ratio 0.401. Files, oversized-file counts, fan-in caps, and
+exemption rows are unchanged. The unjustified cast(Any) ratchet
+max_unjustified_count is 112, lowered from the recorded baseline 131 to the
+confirmed census count. Debt outcome: decreased for unjustified casts, flat
+for bounded hotspot debt.
 
 ## Retained facade importer census
 

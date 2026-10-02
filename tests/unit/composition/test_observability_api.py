@@ -571,11 +571,12 @@ def test_get_observability_diagnostics_bundle_builds_bundle() -> None:
     mock_workflow.assert_called_once_with()
 
 
-def test_run_report_store_factory_returns_independent_port_instances() -> None:
+def test_run_report_store_factory_returns_shared_instance() -> None:
+    """ARCH-008 (#11859): the factory assembles once and shares by reference."""
     from bioetl.domain.ports import RunReportStorePort
 
     first = observability_api.create_run_report_store()
     second = observability_api.create_run_report_store()
     assert isinstance(first, RunReportStorePort)
     assert isinstance(second, RunReportStorePort)
-    assert first is not second
+    assert first is second

@@ -51,6 +51,22 @@ async def test_read_bronze_uses_to_thread(
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("separator", ["\u0085", "\u2028", "\u2029"])
+@pytest.mark.parametrize("newline", [b"\n", b"\r\n"])
+async def test_read_bronze_preserves_unicode_separators(
+    tmp_path: Path, separator: str, newline: bytes
+) -> None:
+    records = [{"title": f"First{separator}second"}, {"title": "Next record"}]
+    payload = newline.join(orjson.dumps(record) for record in records) + newline
+    path = tmp_path / "batch_unicode.jsonl.zst"
+    path.write_bytes(zstd.ZstdCompressor().compress(payload))
+
+    rows = [row async for row in _Host(tmp_path).read_bronze(path.name)]
+
+    assert rows == records
+
+
+@pytest.mark.asyncio
 async def test_read_bronze_missing_file_raises(tmp_path: Path) -> None:
     """Failure path: missing bronze artifact must not yield silent empty success."""
     host = _Host(tmp_path)
