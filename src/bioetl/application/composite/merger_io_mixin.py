@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.composite.cross_validation import CrossValidationStats
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
+    from bioetl.domain.ports import MergedStoragePort
 
 
 class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
@@ -36,6 +37,7 @@ class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
     """
 
     # -- Host-class attributes (set by MergeService.__init__) --
+    _storage: MergedStoragePort
     _field_group_registry: FieldGroupRegistry | None = None
     _cross_validator: EnrichmentCrossValidator | None = None
     _gold_schema: object | None = None

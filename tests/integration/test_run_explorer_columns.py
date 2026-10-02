@@ -76,8 +76,8 @@ def test_ten_columns_keep_full_identity_for_handoffs():
     [
         ("bioetl-control-plane-v1", "Replay Readiness"),
         ("bioetl-overview-v2", "Run Overview"),
-        ("bioetl-runtime", "Pipeline Diagnostics"),
-        ("bioetl-provider-health-v2", "Provider Health"),
+        ("bioetl-run-explorer-v1", "Run Explorer"),
+        ("bioetl-incident-v1", "6. Incident Workspace"),
         ("bioetl-dq-v2", "Data Quality"),
     ],
 )
@@ -87,3 +87,8 @@ def test_dashboard_names_preserve_uids(uid, title):
     )
     assert dashboard["title"] == title
     assert dashboard["uid"] == uid
+
+
+@pytest.mark.parametrize("uid", ["bioetl-runtime", "bioetl-provider-health-v2"])
+def test_retired_dashboard_files_remain_absent(uid):
+    assert not Path(f"grafana/dashboards/{uid}.json").exists()
