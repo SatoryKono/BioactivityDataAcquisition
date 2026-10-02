@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import json
 from collections import OrderedDict
 from collections.abc import Awaitable, Callable, Mapping
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from time import monotonic
-from uuid import uuid4
 
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
@@ -182,7 +183,11 @@ class SelectorOptionsCache:
             entry.payload = deepcopy(payload)
             entry.completed_at = monotonic()
             entry.observed_at = datetime.now(UTC).isoformat()
-            entry.snapshot_id = uuid4().hex
+            entry.snapshot_id = hashlib.sha256(
+                json.dumps([key, payload], sort_keys=True, ensure_ascii=False).encode(
+                    "utf-8"
+                )
+            ).hexdigest()
             entry.error = None
         except (ForensicEndpointUnavailable, ValueError, OSError, RuntimeError) as exc:
             entry.error = (

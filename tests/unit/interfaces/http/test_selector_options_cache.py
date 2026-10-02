@@ -13,6 +13,18 @@ QUERY = {"dimension": "workflow", "response_shape": "options"}
 PAYLOAD = {"items": [{"text": "assay", "value": "chembl_assay"}]}
 
 
+async def test_snapshot_identity_tracks_scope_and_content():
+    first, second = module.SelectorOptionsCache(), module.SelectorOptionsCache()
+    loader = AsyncMock(return_value=PAYLOAD)
+    original = (await read(first, loader))["catalog"]["snapshot_id"]
+    assert (await read(second, loader))["catalog"]["snapshot_id"] == original
+    scoped = await read(second, loader, {**QUERY, "pipeline": "chembl_assay"})
+    assert scoped["catalog"]["snapshot_id"] != original
+    changed = module.SelectorOptionsCache()
+    result = await read(changed, AsyncMock(return_value={"items": []}))
+    assert result["catalog"]["snapshot_id"] != original
+
+
 async def read(cache, loader, query=None, limiter=None, timeout=1):
     return await cache.read(
         QUERY if query is None else query,

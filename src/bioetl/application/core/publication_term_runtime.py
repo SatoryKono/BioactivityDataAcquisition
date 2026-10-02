@@ -21,10 +21,7 @@ def publication_pubmed_id(record: BronzeRecord) -> str | None:
         return None
     if isinstance(value, int):
         return str(value) if value > 0 else None
-    if isinstance(value, str):
-        stripped = value.strip()
-        return stripped or None
-    return None
+    return _as_nonempty_str(value)
 
 
 def _heading_as_mapping(heading: object) -> dict[str, object] | None:
@@ -52,8 +49,7 @@ def _qualifier_name(qualifier: object) -> str | None:
             parsed = _as_nonempty_str(qualifier.get(key))
             if parsed is not None:
                 return parsed
-    name = getattr(qualifier, "name", None)
-    return _as_nonempty_str(name) if isinstance(name, str) else None
+    return _as_nonempty_str(getattr(qualifier, "name", None))
 
 
 def mesh_terms_from_pubmed_headings(
@@ -76,7 +72,12 @@ def mesh_terms_from_pubmed_headings(
             mesh_id = _as_nonempty_str(mapping.get("descriptor_ui"))
             if heading_name is None:
                 continue
-            qualifier_names = _qualifier_names(mapping.get("qualifiers"))
+            qualifiers = mapping.get("qualifiers")
+            qualifier_names = (
+                list(filter(None, map(_qualifier_name, qualifiers)))
+                if isinstance(qualifiers, list)
+                else []
+            )
             mesh_terms.append(
                 {
                     "mesh_heading": heading_name,
@@ -92,21 +93,12 @@ def mesh_terms_from_pubmed_headings(
                         "mesh_qualifier": extra,
                     }
                 )
-    return mesh_terms, _keyword_terms(keywords)
-
-
-def _qualifier_names(qualifiers: object) -> list[str]:
-    """Preserve the order of nonempty qualifier names."""
-    if not isinstance(qualifiers, list):
-        return []
-    return [name for item in qualifiers if (name := _qualifier_name(item)) is not None]
-
-
-def _keyword_terms(keywords: object) -> list[str]:
-    """Keep only nonempty string keywords in source order."""
-    if not isinstance(keywords, list):
-        return []
-    return [term for item in keywords if (term := _as_nonempty_str(item)) is not None]
+    keyword_terms = (
+        list(filter(None, map(_as_nonempty_str, keywords)))
+        if isinstance(keywords, list)
+        else []
+    )
+    return mesh_terms, keyword_terms
 
 
 def extract_terms_from_publication(
