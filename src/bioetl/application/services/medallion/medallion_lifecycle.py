@@ -1,7 +1,7 @@
 # Host attrs/methods provided by concrete composition.
 """Medallion lifecycle service (Application layer - orchestration).
 
-Implements RULES.md Â§2.1-2.3 medallion architecture lifecycle operations.
+Implements RULES.md §2.1-2.3 medallion architecture lifecycle operations.
 This service manages clearing, vacuum, and future archive operations.
 
 All medallion layer operations are consolidated here:
@@ -50,7 +50,7 @@ class MedallionStorageProtocol(StorageMaintenancePort, Protocol):
 
 
 # Programming errors (ValueError/TypeError) must propagate, not look like storage
-# failures (ARCH-CR-04 / #6866). Do not catch bare RuntimeError â€” it masks
+# failures (ARCH-CR-04 / #6866). Do not catch bare RuntimeError — it masks
 # programming bugs as lifecycle/storage failures (ARCH-CR2-02 / #7007).
 _LIFECYCLE_OPERATION_ERRORS = (
     StorageError,
