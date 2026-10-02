@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2541`
-- Internal import edges (raw): `8001`
+- Internal import edges (raw): `8002`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `340`
@@ -22,9 +22,9 @@ flowchart LR
     composition[composition]
     interfaces[interfaces]
     application -->|1581 OK| application
-    application -->|1065 OK| domain
+    application -->|1064 OK| domain
     composition -->|212 OK| application
-    composition -->|635 OK| composition
+    composition -->|637 OK| composition
     composition -->|295 OK| domain
     composition -->|265 OK| infrastructure
     domain -->|1278 OK| domain
@@ -41,9 +41,9 @@ flowchart LR
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1581 | allowed |
-| `application`    | `domain`         |    1065 | allowed |
+| `application`    | `domain`         |    1064 | allowed |
 | `composition`    | `application`    |     212 | allowed |
-| `composition`    | `composition`    |     635 | allowed |
+| `composition`    | `composition`    |     637 | allowed |
 | `composition`    | `domain`         |     295 | allowed |
 | `composition`    | `infrastructure` |     265 | allowed |
 | `domain`         | `domain`         |    1278 | allowed |
@@ -66,7 +66,7 @@ flowchart LR
 | `infrastructure.storage`       | `domain.types`                             |      72 |
 | `infrastructure.storage`       | `domain.ports`                             |      62 |
 | `application.pipelines`        | `domain.types`                             |      57 |
-| `application.composite`        | `domain.ports`                             |      56 |
+| `application.composite`        | `domain.ports`                             |      55 |
 | `application.services`         | `domain.ports`                             |      53 |
 | `composition.factories`        | `application.core`                         |      47 |
 | `infrastructure.storage`       | `domain.value_objects`                     |      43 |

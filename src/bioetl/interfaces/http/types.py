@@ -44,3 +44,19 @@ class HealthResponse:
 
 
 __all__ = ["HealthResponse"]
+
+
+# Pure liveness fallback when no exposition adapter is injected (unit tests).
+_DEFAULT_HEALTH_SCRAPE_UP_EXPOSITION = (
+    "# HELP bioetl_health_server_scrape_up Health server /metrics scrape "
+    "liveness (1=serving).\n"
+    "# TYPE bioetl_health_server_scrape_up gauge\n"
+    "bioetl_health_server_scrape_up 1\n"
+)
+
+
+class _StaticHealthMetricsExposition:
+    """Interfaces-local fallback exposition (no infrastructure import)."""
+
+    def build_exposition(self) -> str:
+        return _DEFAULT_HEALTH_SCRAPE_UP_EXPOSITION

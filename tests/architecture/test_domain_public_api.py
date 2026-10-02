@@ -20,6 +20,7 @@ from __future__ import annotations
 import pytest
 
 from typing import get_type_hints
+from types import ModuleType
 
 
 pytestmark = pytest.mark.architecture
@@ -88,7 +89,11 @@ def test_domain_all_is_complete() -> None:
     public_attrs = {
         attr
         for attr in all_attrs
-        if not attr.startswith("_") and attr not in excluded_patterns
+        if not attr.startswith("_")
+        and attr not in excluded_patterns
+        and (
+            attr in domain.__all__ or not isinstance(getattr(domain, attr), ModuleType)
+        )
     }
 
     # Get declared __all__

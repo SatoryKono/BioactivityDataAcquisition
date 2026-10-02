@@ -8,7 +8,7 @@ from typing import cast
 
 import pytest
 
-from bioetl.interfaces.http import _health_server_observability_routing as routing
+from bioetl.interfaces.http import _health_server_records_table as routing
 from bioetl.interfaces.http import report_root_config
 
 

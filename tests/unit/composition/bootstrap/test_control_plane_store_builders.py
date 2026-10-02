@@ -41,7 +41,9 @@ pytestmark = pytest.mark.unit
 
 
 def test_run_manifest_store_builder_uses_control_plane_root_and_metrics() -> None:
-    settings = SimpleNamespace(data_dir=Path("/tmp/bioetl"), bronze_path=Path("/tmp/bioetl/bronze"))
+    settings = SimpleNamespace(
+        data_dir=Path("/tmp/bioetl"), bronze_path=Path("/tmp/bioetl/bronze")
+    )
     metrics = MagicMock()
 
     with (

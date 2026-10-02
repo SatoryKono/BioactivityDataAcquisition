@@ -97,7 +97,9 @@ def test_fix_file_rewrites_invalid_arrows_in_place(
     module = _load_module()
     monkeypatch.setattr(module, "_repo_root", lambda: tmp_path)
 
-    diagram = tmp_path / "sequence-demo.mmd"
+    relative = Path("docs/02-architecture/diagrams/sequence-demo.mmd")
+    diagram = tmp_path / relative
+    diagram.parent.mkdir(parents=True)
     diagram.write_text(
         "\n".join(
             [
@@ -110,7 +112,7 @@ def test_fix_file_rewrites_invalid_arrows_in_place(
         encoding="utf-8",
     )
 
-    replacements = module.fix_file(diagram, dry_run=False)
+    replacements = module.fix_file(relative, dry_run=False)
     content = diagram.read_text(encoding="utf-8")
 
     assert replacements == 2
@@ -126,11 +128,13 @@ def test_fix_file_dry_run_does_not_modify_file(
     module = _load_module()
     monkeypatch.setattr(module, "_repo_root", lambda: tmp_path)
 
-    diagram = tmp_path / "class-demo.mmd"
+    relative = Path("docs/02-architecture/diagrams/class-demo.mmd")
+    diagram = tmp_path / relative
+    diagram.parent.mkdir(parents=True)
     original = "\n".join(["classDiagram", "A ==> B"]) + "\n"
     diagram.write_text(original, encoding="utf-8")
 
-    replacements = module.fix_file(diagram, dry_run=True)
+    replacements = module.fix_file(relative, dry_run=True)
     content_after = diagram.read_text(encoding="utf-8")
 
     assert replacements == 1
@@ -142,7 +146,7 @@ def test_fix_file_rejects_paths_outside_repo(tmp_path: Path) -> None:
     diagram = tmp_path / "outside-repo.mmd"
     diagram.write_text("sequenceDiagram\nA ==> B\n", encoding="utf-8")
 
-    with pytest.raises(ValueError, match="outside"):
+    with pytest.raises(ValueError, match=r"repository-relative|outside"):
         module.fix_file(diagram, dry_run=False)
 
 

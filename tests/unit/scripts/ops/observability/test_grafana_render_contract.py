@@ -288,7 +288,9 @@ def test_source_binding_rejects_stale_or_misbound_json(
         "version": 1,
     }
     monkeypatch.setattr(preflight, "_REPO_ROOT", tmp_path)
-    assert preflight._dashboard_source_error("bioetl-overview-v2", source, source) is None
+    assert (
+        preflight._dashboard_source_error("bioetl-overview-v2", source, source) is None
+    )
     if mutation == "digest":
         source["sha256"] = "0" * 64
     elif mutation == "path":
@@ -296,9 +298,12 @@ def test_source_binding_rejects_stale_or_misbound_json(
     elif mutation == "missing":
         source_file.unlink()
     else:
-        source_file.write_text('{"uid":"bioetl-overview-v2","version":2}', encoding="utf-8")
+        source_file.write_text(
+            '{"uid":"bioetl-overview-v2","version":2}', encoding="utf-8"
+        )
     assert (
-        preflight._dashboard_source_error("bioetl-overview-v2", source, source) is not None
+        preflight._dashboard_source_error("bioetl-overview-v2", source, source)
+        is not None
     )
 
 
@@ -593,7 +598,8 @@ def test_render_contract_rejects_missing_typography_evidence() -> None:
     )
 
     assert (
-        problem == "render manifest dashboard bioetl-overview-v2 lacks typography evidence"
+        problem
+        == "render manifest dashboard bioetl-overview-v2 lacks typography evidence"
     )
 
 

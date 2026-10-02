@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import asyncio
 import time
-from dataclasses import dataclass
 from typing import cast
 
 from bioetl.application.observability.control_plane_evidence import (
@@ -37,6 +36,9 @@ from bioetl.interfaces.http._health_server_control_plane_metrics_refresh import 
     run_periodic_control_plane_metrics_refresh,
     stop_control_plane_metrics_refresh,
 )
+from bioetl.interfaces.http._health_server_observability_protocols import (
+    HealthServerControlPlaneDeps as HealthServerControlPlaneDeps,
+)
 from bioetl.interfaces.http._run_explorer_snapshot import (
     RunExplorerSnapshotCache,
     run_periodic_run_explorer_snapshot,
@@ -54,39 +56,10 @@ from bioetl.interfaces.http.health_server_state_mixin import HealthServerStateMi
 from bioetl.interfaces.http.processed_records_table import (
     DEFAULT_PROMETHEUS_BASE_URL,
 )
-from bioetl.interfaces.http.types import HealthResponse
-
-# Pure liveness fallback when no exposition adapter is injected (unit tests).
-_DEFAULT_HEALTH_SCRAPE_UP_EXPOSITION = (
-    "# HELP bioetl_health_server_scrape_up Health server /metrics scrape "
-    "liveness (1=serving).\n"
-    "# TYPE bioetl_health_server_scrape_up gauge\n"
-    "bioetl_health_server_scrape_up 1\n"
+from bioetl.interfaces.http.types import (
+    HealthResponse,
+    _StaticHealthMetricsExposition,
 )
-
-
-class _StaticHealthMetricsExposition:
-    """Interfaces-local fallback exposition (no infrastructure import)."""
-
-    def build_exposition(self) -> str:
-        return _DEFAULT_HEALTH_SCRAPE_UP_EXPOSITION
-
-
-@dataclass(frozen=True, slots=True)
-class HealthServerControlPlaneDeps:
-    """Collaborator bag for optional health-server control-plane ports."""
-
-    health_monitor: HealthMonitorPort | None = None
-    quarantine_service: QuarantineService | None = None
-    checkpoint_port: CheckpointPort | None = None
-    run_manifest_port: RunManifestPort | None = None
-    run_ledger_port: RunLedgerPort | None = None
-    workflow_manifest_port: WorkflowManifestPort | None = None
-    control_plane_evidence_service: ControlPlaneEvidenceService | None = None
-    control_plane_integrity_refresher: ControlPlaneMetricsRefresher | None = None
-    metrics_exposition: HealthMetricsExpositionPort | None = None
-    runtime_source_id: str | None = None
-    run_report_store: RunReportStorePort | None = None
 
 
 class HealthServer(

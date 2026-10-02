@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-02T10:37:19.957803+00:00",
+  "generated_at": "2026-10-02T11:36:40.834380+00:00",
   "summary": {
     "total_scripts": 635,
     "status_counts": {
@@ -3075,7 +3075,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 379,
+          "line": 374,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         },
@@ -3126,7 +3126,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 376,
+          "line": 371,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
@@ -12830,13 +12830,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
-          "line": 177,
+          "line": 176,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
-          "line": 189,
+          "line": 188,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         }
@@ -16824,8 +16824,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "tests/unit/repo_backed/scripts/engineering/dev/test_setup_env_wsl_branches.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.run_local_coverage_verify import _windows_bash"
+        },
         {
           "path": "tests/unit/scripts/qa/test_run_local_coverage_verify.py",
           "line": 9,
@@ -20095,7 +20101,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 615,
+          "line": 625,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -20138,7 +20144,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 620,
+          "line": 630,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import ("
         },
@@ -20236,9 +20242,9 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 60,
+          "line": 62,
           "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana._overview_quality import exclusion_quality_expression"
+          "text": "from scripts.ops.observability.grafana._overview_quality import ("
         }
       ]
     },
@@ -20385,7 +20391,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 625,
+          "line": 635,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -22442,7 +22448,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 338,
+          "line": 333,
           "source_group": "tests",
           "text": "root / \"scripts/ops/runtime/mcp/apply-shared-to-devin.py\""
         }

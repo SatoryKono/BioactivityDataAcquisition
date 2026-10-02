@@ -139,8 +139,7 @@ class MergeService(
         self._coalesce_policy = collaborators.coalesce_policy
         self._conflict_resolver = collaborators.conflict_resolver
         self._join_planner = collaborators.join_planner
-        if TYPE_CHECKING:
-            _io_host: _MergeIOHost = self
+        _io_host: _MergeIOHost = self
 
     async def merge(
         self,

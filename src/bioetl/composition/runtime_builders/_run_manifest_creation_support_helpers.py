@@ -12,7 +12,7 @@ from bioetl.infrastructure.time import SystemClock
 from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec,
 )
-from bioetl.composition.runtime_builders._run_manifest_planned_artifacts import (
+from bioetl.composition.runtime_builders.run_manifest_support import (
     build_planned_artifacts,
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (
