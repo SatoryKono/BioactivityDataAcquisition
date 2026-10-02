@@ -1,0 +1,15 @@
+{
+  "mode": "canonical_nonregressing_adoption",
+  "additive_xml_sha256": "6bfa820b8490c4db84b6d41ce274372b3a68fc1b074a34a9b997fd1a6e30d966",
+  "promoted_measured_modules": 2545,
+  "retained_rows": [
+    {
+      "path": "src/bioetl/infrastructure/config/config_root.py",
+      "new_measured_percent": 90.0,
+      "historical_accepted_percent": 97.5,
+      "source_changed_since_historical_measurement": false
+    }
+  ],
+  "direct_candidate_regression_guard": "FAILED: config_root 97.50 -> 90.00",
+  "inventory_role": "Orphan acceptance snapshot with historical primary XML and current additive XML; final main inventory preserved separately."
+}

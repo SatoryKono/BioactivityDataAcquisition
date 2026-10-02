@@ -1,0 +1,21 @@
+....F........s......                                                     [100%]
+================================== FAILURES ===================================
+_______ test_module_coverage_inventory_is_committed_and_shape_is_stable _______
+
+    @pytest.mark.architecture
+    def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
+        assert INVENTORY_PATH.exists()
+        committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+    
+        assert committed["schema_version"] == 1
+        assert committed["generated_by"].endswith("report_module_coverage_inventory.py")
+>       assert committed["coverage_xml_path"] == "reports/coverage/coverage.xml"
+E       AssertionError: assert 'reports/qual.../coverage.xml' == 'reports/cove.../coverage.xml'
+E         
+E         - reports/coverage/coverage.xml
+E         + reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-d65e6f4/coverage.xml
+
+tests\architecture\test_module_coverage_inventory.py:193: AssertionError
+=========================== short test summary info ===========================
+SKIPPED [1] tests\architecture\_module_coverage_inventory_support.py:131: Committed module-coverage inventory assertions are only authoritative for a clean reports/quality/module-coverage-inventory.json artifact.
+FAILED tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_is_committed_and_shape_is_stable

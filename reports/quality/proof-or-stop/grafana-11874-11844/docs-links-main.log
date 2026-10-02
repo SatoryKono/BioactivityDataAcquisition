@@ -1,0 +1,16 @@
+Links: OK (no broken relative links found)
+Nav docs: OK (all mkdocs nav files exist)
+Nav link scope: OK (all nav docs are included in link checks)
+Local skill nav classification: OK (all local skill pages are in nav or not_in_nav)
+Specs: OK (all referenced spec files exist)
+Configs: OK (all convention-based config files exist)
+Gold contracts index: OK (docs list matches exported JSON files)
+Workflow inventory: OK (published workflow doc matches .github/workflows)
+ChEMBL provider overview: OK (README links match active entity-config inventory)
+Provider spec governance: OK
+Runbook governance: OK
+Control-plane contract governance: OK
+Not-in-nav growth: OK (current 228 <= baseline 228)
+Doc drift: OK (no guardrail violations in mkdocs nav docs)
+
+All checks passed.

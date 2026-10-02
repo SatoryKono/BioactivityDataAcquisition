@@ -1,0 +1,532 @@
+{
+  "head": "f042bfb86e67e4bfb256181c977772f52b842154",
+  "ci": "BLOCKED_EXTERNAL_PERMANENT",
+  "checks": [
+    {
+      "id": 110994556464,
+      "name": "codeql",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994556464",
+      "annotations": []
+    },
+    {
+      "id": 110994556351,
+      "name": "type-checking",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994556351",
+      "annotations": []
+    },
+    {
+      "id": 110994556218,
+      "name": "tests",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994556218",
+      "annotations": []
+    },
+    {
+      "id": 110994556215,
+      "name": "root-hygiene",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994556215",
+      "annotations": []
+    },
+    {
+      "id": 110994556104,
+      "name": "compiled-artifacts",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994556104",
+      "annotations": []
+    },
+    {
+      "id": 110994556059,
+      "name": "commit-governance",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994556059",
+      "annotations": []
+    },
+    {
+      "id": 110994556027,
+      "name": "duplication",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994556027",
+      "annotations": []
+    },
+    {
+      "id": 110994556014,
+      "name": "security",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994556014",
+      "annotations": []
+    },
+    {
+      "id": 110994555969,
+      "name": "docker",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994555969",
+      "annotations": []
+    },
+    {
+      "id": 110994555953,
+      "name": "generated-artifacts",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994555953",
+      "annotations": []
+    },
+    {
+      "id": 110994555770,
+      "name": "commit-governance-not-applicable",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994555770",
+      "annotations": []
+    },
+    {
+      "id": 110994555498,
+      "name": "docs-governance-not-applicable",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994555498",
+      "annotations": []
+    },
+    {
+      "id": 110994555383,
+      "name": "docs-governance",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994555383",
+      "annotations": []
+    },
+    {
+      "id": 110994555271,
+      "name": "docker-not-applicable",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994555271",
+      "annotations": []
+    },
+    {
+      "id": 110994555213,
+      "name": "generated-artifacts-not-applicable",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994555213",
+      "annotations": []
+    },
+    {
+      "id": 110994555165,
+      "name": "lint-arch",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994555165",
+      "annotations": []
+    },
+    {
+      "id": 110994554321,
+      "name": "pr-gate-complete",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994554321",
+      "annotations": [
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "failure",
+          "title": "",
+          "message": "The job was not started because your account is locked due to a billing issue.",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "notice",
+          "title": "",
+          "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\"",
+          "raw_details": ""
+        }
+      ]
+    },
+    {
+      "id": 110994553036,
+      "name": "e2e-nightly-complete",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139184/job/110994553036",
+      "annotations": [
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "failure",
+          "title": "",
+          "message": "The job was not started because your account is locked due to a billing issue.",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "notice",
+          "title": "",
+          "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\"",
+          "raw_details": ""
+        }
+      ]
+    },
+    {
+      "id": 110994537663,
+      "name": "matrix-smoke-nightly-live",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139184/job/110994537663",
+      "annotations": []
+    },
+    {
+      "id": 110994537581,
+      "name": "Classify changes (decision matrix)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139757/job/110994537581",
+      "annotations": [
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "failure",
+          "title": "",
+          "message": "The job was not started because your account is locked due to a billing issue.",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "notice",
+          "title": "",
+          "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\"",
+          "raw_details": ""
+        }
+      ]
+    },
+    {
+      "id": 110994537578,
+      "name": "e2e-nightly-full-replay",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139184/job/110994537578",
+      "annotations": []
+    },
+    {
+      "id": 110994537564,
+      "name": "prompt-tests-nightly",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139184/job/110994537564",
+      "annotations": []
+    },
+    {
+      "id": 110994536020,
+      "name": "inventory",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139071/job/110994536020",
+      "annotations": []
+    },
+    {
+      "id": 110994535562,
+      "name": "matrix-smoke-blocking",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139184/job/110994535562",
+      "annotations": [
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "failure",
+          "title": "",
+          "message": "The job was not started because your account is locked due to a billing issue.",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "notice",
+          "title": "",
+          "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\"",
+          "raw_details": ""
+        }
+      ]
+    },
+    {
+      "id": 110994535540,
+      "name": "mutation-testing (application-export-manifests, src/bioetl/application/services/export_lineage/ex...",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139223/job/110994535540",
+      "annotations": [
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "failure",
+          "title": "",
+          "message": "The job was not started because your account is locked due to a billing issue.",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "notice",
+          "title": "",
+          "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\"",
+          "raw_details": ""
+        }
+      ]
+    },
+    {
+      "id": 110994535427,
+      "name": "mutation-testing (application-control-plane, src/bioetl/application/services/control_plane/, test...",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139223/job/110994535427",
+      "annotations": [
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "failure",
+          "title": "",
+          "message": "The job was not started because your account is locked due to a billing issue.",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "notice",
+          "title": "",
+          "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\"",
+          "raw_details": ""
+        }
+      ]
+    },
+    {
+      "id": 110994535417,
+      "name": "mutation-testing (application-workflow-runner, src/bioetl/application/services/workflow/workflow_...",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139223/job/110994535417",
+      "annotations": [
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "failure",
+          "title": "",
+          "message": "The job was not started because your account is locked due to a billing issue.",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "notice",
+          "title": "",
+          "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\"",
+          "raw_details": ""
+        }
+      ]
+    },
+    {
+      "id": 110994535250,
+      "name": "mutation-testing (domain, src/bioetl/domain/, tests/unit/domain/, 70.0)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139223/job/110994535250",
+      "annotations": [
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "failure",
+          "title": "",
+          "message": "The job was not started because your account is locked due to a billing issue.",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "notice",
+          "title": "",
+          "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\"",
+          "raw_details": ""
+        }
+      ]
+    },
+    {
+      "id": 110994535094,
+      "name": "no-partial-tree",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139115/job/110994535094",
+      "annotations": [
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "failure",
+          "title": "",
+          "message": "The job was not started because your account is locked due to a billing issue.",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "notice",
+          "title": "",
+          "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\"",
+          "raw_details": ""
+        }
+      ]
+    },
+    {
+      "id": 110994534895,
+      "name": "first-window-noscroll",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139170/job/110994534895",
+      "annotations": [
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "failure",
+          "title": "",
+          "message": "The job was not started because your account is locked due to a billing issue.",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "notice",
+          "title": "",
+          "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\"",
+          "raw_details": ""
+        }
+      ]
+    },
+    {
+      "id": 110994534323,
+      "name": "validate-pr-branch-name",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37054139071/job/110994534323",
+      "annotations": [
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "failure",
+          "title": "",
+          "message": "The job was not started because your account is locked due to a billing issue.",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "blob_href": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f042bfb86e67e4bfb256181c977772f52b842154/.github",
+          "start_line": 1,
+          "start_column": null,
+          "end_line": 1,
+          "end_column": null,
+          "annotation_level": "notice",
+          "title": "",
+          "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\"",
+          "raw_details": ""
+        }
+      ]
+    }
+  ],
+  "failure_count": 11,
+  "billing_blocked_count": 11,
+  "all_failures_billing_blocked": true
+}

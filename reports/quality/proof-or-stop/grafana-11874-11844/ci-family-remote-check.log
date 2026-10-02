@@ -1,0 +1,6 @@
+Pipeline dataflow artifacts are current: chembl_activity
+CI drift families check: evidence, remote-main, dataflow
+evidence_surface_sha256 current: b501ebdee0d9efb27b313d1f7e0b7f601d4ffbfc1624232ea989993da4b0f01d
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
+CI drift families complete (no budget ratchet)

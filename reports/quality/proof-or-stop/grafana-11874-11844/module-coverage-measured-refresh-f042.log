@@ -1,0 +1,3 @@
+[module-coverage-inventory] module coverage gates: mode=block-regression; regressions=1; tier_gaps=0
+  - src/bioetl/infrastructure/config/config_root.py: coverage regressed 97.50% -> 90.00%
+[module-coverage-inventory] modules=2547; json=E:\github\bda-grafana-11874-11844\reports\quality\module-coverage-inventory.json

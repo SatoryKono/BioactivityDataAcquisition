@@ -1,0 +1,11 @@
+[flaky-test-burndown-review] artifact is current
+............                                                             [100%]
+Pipeline dataflow artifacts are current: chembl_activity
+CI drift families check: test-gov, flaky-fingerprint, telemetry, evidence, remote-main, dataflow
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_test_governance_audit --check
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-flaky-test-burndown-review --check
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m pytest tests/architecture/test_test_telemetry_baseline.py tests/architecture/test_test_telemetry_governance.py -q --tb=short
+evidence_surface_sha256 current: 8bfa419eaedeeba98b2bf223a9796a609d271bad76e7972705e50f2d5a1a09b5
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
+CI drift families complete (no budget ratchet)

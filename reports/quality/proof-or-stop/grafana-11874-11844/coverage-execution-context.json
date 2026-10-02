@@ -1,0 +1,15 @@
+{
+  "tested_head_sha": "f042bfb86e67e4bfb256181c977772f52b842154",
+  "producer": "scripts/engineering/qa/run_local_coverage_verify.py",
+  "wrapper_sha256": "4e0d1d94367ff2ab2e897888c146786500eac628da87f0be1c1ba246dfbdb8b8",
+  "resource_limits_from_invocation": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  },
+  "worker_count": 2,
+  "line_gate_percent": 85,
+  "branch_gate_percent": 85,
+  "note": "Canonical profile unchanged; prior incomplete attempts are retained and excluded from successful XML."
+}
