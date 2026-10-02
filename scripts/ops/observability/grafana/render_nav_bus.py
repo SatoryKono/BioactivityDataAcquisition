@@ -257,7 +257,9 @@ NAV_DESCRIPTION = (
 
 def _url_for(target: dict[str, str], *, source_uid: str) -> str:
     if target["uid"] == _RUN_EXPLORER_UID:
-        from scripts.ops.observability.grafana._run_explorer_columns import _RESET_FILTERS
+        from scripts.ops.observability.grafana._run_explorer_columns import (
+            _RESET_FILTERS,
+        )
 
         return _RESET_FILTERS
     return build_handoff_url(target["uid"], source_uid=source_uid, template=True)
@@ -2392,7 +2394,9 @@ def apply_to_dashboard(
     )
     if current_uid == "bioetl-overview-v2":
         payload["panels"] = [
-            panel for panel in payload["panels"] if panel.get("id") not in {9480, 9481, 9460, 9461}
+            panel
+            for panel in payload["panels"]
+            if panel.get("id") not in {9480, 9481, 9460, 9461}
         ]
         for panel in payload["panels"]:
             if panel.get("id") == 9450:
@@ -2471,7 +2475,9 @@ def apply_to_dashboard(
         nav = next((p for p in panels if p.get("id") == 1000), None)
         if nav is None:
             raise SystemExit(f"{safe_path.name}: missing panel id=1000")
-        compact_replay = current_uid == "bioetl-control-plane-v1" and any(p.get("id") == 9430 for p in panels)
+        compact_replay = current_uid == "bioetl-control-plane-v1" and any(
+            p.get("id") == 9430 for p in panels
+        )
         if not compact_replay:
             _stamp_nav_panel(nav, panels)
             _restore_minimum_first_window_heights(panels, current_uid=current_uid)
@@ -2540,17 +2546,18 @@ def apply_to_dashboard(
     )
 
     apply_provider_evidence_columns(payload)
-    # Retired Provider Health handoffs now resolve to the saved evidence on Overview.
-    payload = json.loads(json.dumps(payload).replace(
-        "/d/bioetl-provider-health-v2/4-provider-health",
-        "/d/bioetl-overview-v2/2-overview",
-    ).replace("Open Provider Health", "Open Provider Evidence"))
-    from scripts.ops.observability.grafana._overview_identity import apply_saved_evidence_readability
+    from scripts.ops.observability.grafana._overview_identity import (
+        apply_saved_evidence_readability,
+    )
+
     apply_saved_evidence_readability(payload)
     _pack_incident_tail_rows(payload)
     if current_uid == "bioetl-control-plane-v1":
         from scripts.ops.observability.grafana._replay_layout import apply_replay_layout
-        from scripts.ops.observability.grafana._replay_readiness_design import apply_replay_readiness_design, apply_trust_action_display
+        from scripts.ops.observability.grafana._replay_readiness_design import (
+            apply_replay_readiness_design,
+            apply_trust_action_display,
+        )
 
         apply_replay_layout(payload)
         apply_replay_readiness_design(payload)

@@ -64,8 +64,15 @@ def test_dashboard_rows_follow_progressive_disclosure_shape() -> None:
     )
 
 
-def test_every_dashboard_has_at_least_one_row() -> None:
-    observed = 0
+def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
+    expected_rows = {
+        "bioetl-control-plane-v1.json": 2,
+        "bioetl-dq-v2.json": 1,
+        "bioetl-incident-v1.json": 8,
+        "bioetl-overview-v2.json": 0,
+        "bioetl-run-explorer-v1.json": 0,
+    }
+    observed = {}
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         rows = [
@@ -73,13 +80,8 @@ def test_every_dashboard_has_at_least_one_row() -> None:
             for panel in get_dashboard_panels(dashboard)
             if panel.get("type") == "row"
         ]
-        if dashboard_path.name == "bioetl-run-explorer-v1.json":
-            assert rows == []
-            assert len(get_dashboard_panels(dashboard)) == 2
-        else:
-            assert rows, f"{dashboard_path.name} must declare at least one row group"
-        observed += len(rows)
-    assert observed >= 20
+        observed[dashboard_path.name] = len(rows)
+    assert observed == expected_rows
 
 
 def test_row_groups_materialize_expanded_for_test_stage() -> None:
@@ -97,7 +99,10 @@ def test_row_groups_materialize_expanded_for_test_stage() -> None:
         materialized = materialize_expanded(shipped)
         root_panels = materialized["panels"]
         rows = [panel for panel in root_panels if panel.get("type") == "row"]
-        if dashboard_path.name == "bioetl-run-explorer-v1.json":
+        if dashboard_path.name in {
+            "bioetl-run-explorer-v1.json",
+            "bioetl-overview-v2.json",
+        }:
             assert rows == []
             assert len(get_dashboard_panels(materialized)) == shipped_total
             continue
