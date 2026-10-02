@@ -328,3 +328,41 @@ def test_log_configured_export_status_delegates() -> None:
         gold_csv_exporter=None,
     )
     assert logger.info.call_count == 1  # save_json only
+
+
+@pytest.mark.parametrize("layer", ["bronze", "silver", "gold"])
+def test_canonical_relative_storage_paths_follow_isolated_data_root(tmp_path, layer):
+    root = tmp_path / "isolated-data" / "output" / layer
+    config = SimpleNamespace(path=f"data/output/{layer}/chembl/assay")
+    assert (
+        resolve_layer_path(config, root, use_yaml_paths=True) == root / "chembl/assay"
+    )
+
+
+def test_canonical_relative_csv_paths_follow_isolated_data_root(tmp_path):
+    from bioetl.composition.factories.storage._context_resolution import (
+        create_layer_exporters,
+    )
+
+    root = tmp_path / "isolated-data" / "output"
+    settings = SimpleNamespace(
+        test_mode=False, silver_path=root / "silver", gold_path=root / "gold"
+    )
+
+    def layer(name):
+        return SimpleNamespace(
+            csv_export=SimpleNamespace(
+                enabled=True, path=f"data/output/{name}/chembl/assay"
+            )
+        )
+
+    silver, gold = create_layer_exporters(
+        settings=settings,
+        logger=MagicMock(),
+        silver_config=layer("silver"),
+        gold_config=layer("gold"),
+        silver_path=root / "silver/chembl/assay",
+        gold_path=root / "gold/chembl/assay",
+    )
+    assert Path(silver.base_path) == root / "silver/chembl/assay"
+    assert Path(gold.base_path) == root / "gold/chembl/assay"
