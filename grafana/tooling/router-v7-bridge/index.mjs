@@ -1,5 +1,5 @@
 import React, { useCallback, useSyncExternalStore } from 'react';
-import { useHistory, Route as LegacyRoute } from 'react-router-dom';
+import { useHistory, Route as LegacyRoute } from 'react-router-dom-v5';
 import { Router, Routes, Route, Link, useResolvedPath } from 'react-router-v7';
 
 export * from 'react-router-v7';

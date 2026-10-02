@@ -68,7 +68,11 @@
     "@grafana/ui": "13.2.0",
     "@grafana/schema": "12.4.2",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-router-dom-v5-compat": "file:../../tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz"
   },
-  "packageManager": "npm@10.8.2"
+  "packageManager": "npm@10.8.2",
+  "overrides": {
+    "react-router-dom-v5-compat": "$react-router-dom-v5-compat"
+  }
 }

@@ -1,0 +1,2448 @@
+diff --git a/e2e-playwright/test-plugins/grafana-extensionstest-app/components/App/App.tsx b/e2e-playwright/test-plugins/grafana-extensionstest-app/components/App/App.tsx
+--- a/e2e-playwright/test-plugins/grafana-extensionstest-app/components/App/App.tsx
++++ b/e2e-playwright/test-plugins/grafana-extensionstest-app/components/App/App.tsx
+@@ -1,4 +1,4 @@
+-import { Route, Routes } from 'react-router-dom';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+
+ import { AppRootProps } from '@grafana/data';
+
+diff --git a/e2e-playwright/test-plugins/grafana-extensionstest-app/package.json b/e2e-playwright/test-plugins/grafana-extensionstest-app/package.json
+--- a/e2e-playwright/test-plugins/grafana-extensionstest-app/package.json
++++ b/e2e-playwright/test-plugins/grafana-extensionstest-app/package.json
+@@ -25,13 +25,13 @@
+     "node": ">= 22 <25"
+   },
+   "dependencies": {
++    "@bioetl/grafana-router-v7-bridge": "workspace:*",
+     "@grafana/data": "workspace:*",
+     "@grafana/i18n": "workspace:*",
+     "@grafana/runtime": "workspace:*",
+     "@grafana/ui": "workspace:*",
+     "react": "19.2.8",
+-    "react-dom": "19.2.8",
+-    "react-router-dom": "^6.26.1"
++    "react-dom": "19.2.8"
+   },
+   "peerDependencies": {
+     "@grafana/runtime": "*"
+diff --git a/package.json b/package.json
+--- a/package.json
++++ b/package.json
+@@ -262,6 +262,7 @@
+     "zod": "^4.3.0"
+   },
+   "dependencies": {
++    "@bioetl/grafana-router-v7-bridge": "workspace:*",
+     "@bsull/augurs": "^0.10.0",
+     "@codemirror/autocomplete": "6.20.3",
+     "@codemirror/lang-sql": "6.10.0",
+@@ -389,7 +390,6 @@
+     "react-resizable": "3.0.5",
+     "react-router": "5.3.4",
+     "react-router-dom": "5.3.4",
+-    "react-router-dom-v5-compat": "^6.26.1",
+     "react-select": "5.10.2",
+     "react-split-pane": "0.1.92",
+     "react-table": "7.8.0",
+diff --git a/packages/grafana-ui/package.json b/packages/grafana-ui/package.json
+--- a/packages/grafana-ui/package.json
++++ b/packages/grafana-ui/package.json
+@@ -63,6 +63,7 @@
+     "not IE 11"
+   ],
+   "dependencies": {
++    "@bioetl/grafana-router-v7-bridge": "workspace:*",
+     "@codemirror/autocomplete": "^6.20.1",
+     "@codemirror/lang-go": "^6.0.1",
+     "@codemirror/lang-html": "^6.4.11",
+@@ -123,7 +124,6 @@
+     "react-inlinesvg": "^4.5.0",
+     "react-loading-skeleton": "^3.5.0",
+     "react-router-dom": "^5.3.4",
+-    "react-router-dom-v5-compat": "^6.26.1",
+     "react-select": "^5.10.2",
+     "react-table": "^7.8.0",
+     "react-transition-group": "^4.4.5",
+diff --git a/packages/grafana-ui/src/components/Link/Link.tsx b/packages/grafana-ui/src/components/Link/Link.tsx
+--- a/packages/grafana-ui/src/components/Link/Link.tsx
++++ b/packages/grafana-ui/src/components/Link/Link.tsx
+@@ -1,5 +1,5 @@
+ import { type AnchorHTMLAttributes, forwardRef } from 'react';
+-import { Link as RouterLink } from 'react-router-dom-v5-compat';
++import { Link as RouterLink } from '@bioetl/grafana-router-v7-bridge';
+
+ import { locationUtil, textUtil } from '@grafana/data';
+
+diff --git a/packages/grafana-ui/src/components/Link/TextLink.test.tsx b/packages/grafana-ui/src/components/Link/TextLink.test.tsx
+--- a/packages/grafana-ui/src/components/Link/TextLink.test.tsx
++++ b/packages/grafana-ui/src/components/Link/TextLink.test.tsx
+@@ -1,6 +1,6 @@
+ import { render, screen } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+-import { MemoryRouter } from 'react-router-dom-v5-compat';
++import { MemoryRouter } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaConfig, locationUtil } from '@grafana/data';
+
+diff --git a/packages/grafana-ui/src/components/VizTooltip/VizTooltipFooter.test.tsx b/packages/grafana-ui/src/components/VizTooltip/VizTooltipFooter.test.tsx
+--- a/packages/grafana-ui/src/components/VizTooltip/VizTooltipFooter.test.tsx
++++ b/packages/grafana-ui/src/components/VizTooltip/VizTooltipFooter.test.tsx
+@@ -1,6 +1,6 @@
+ import { render, screen } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+-import { MemoryRouter } from 'react-router-dom-v5-compat';
++import { MemoryRouter } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type Field, FieldType, type LinkModel } from '@grafana/data';
+ import { selectors } from '@grafana/e2e-selectors';
+diff --git a/public/app/AppWrapper.tsx b/public/app/AppWrapper.tsx
+--- a/public/app/AppWrapper.tsx
++++ b/public/app/AppWrapper.tsx
+@@ -4,7 +4,7 @@
+ import { type ComponentType, Fragment, type ReactNode, useEffect, useState } from 'react';
+ import CacheProvider from 'react-inlinesvg/provider';
+ import { Provider } from 'react-redux';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+
+ import { config, navigationLogger, reportInteraction } from '@grafana/runtime';
+ import { getFeatureFlagClient } from '@grafana/runtime/internal';
+diff --git a/public/app/core/components/AppChrome/MegaMenu/MegaMenuItem.tsx b/public/app/core/components/AppChrome/MegaMenu/MegaMenuItem.tsx
+--- a/public/app/core/components/AppChrome/MegaMenu/MegaMenuItem.tsx
++++ b/public/app/core/components/AppChrome/MegaMenu/MegaMenuItem.tsx
+@@ -3,7 +3,7 @@
+ import { useEffect, useRef } from 'react';
+ import * as React from 'react';
+ import Skeleton from 'react-loading-skeleton';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+ import { useLocalStorage } from 'react-use';
+
+ import { FeatureState, type GrafanaTheme2, type NavModelItem, toIconName } from '@grafana/data';
+diff --git a/public/app/core/components/AppChrome/MegaMenu/hooks.ts b/public/app/core/components/AppChrome/MegaMenu/hooks.ts
+--- a/public/app/core/components/AppChrome/MegaMenu/hooks.ts
++++ b/public/app/core/components/AppChrome/MegaMenu/hooks.ts
+@@ -1,7 +1,7 @@
+ import { useBooleanFlagValue } from '@openfeature/react-sdk';
+ import { skipToken } from '@reduxjs/toolkit/query';
+ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+ import { useLocalStorage } from 'react-use';
+
+ import {
+diff --git a/public/app/core/components/AppChrome/TopBar/SignInLink.tsx b/public/app/core/components/AppChrome/TopBar/SignInLink.tsx
+--- a/public/app/core/components/AppChrome/TopBar/SignInLink.tsx
++++ b/public/app/core/components/AppChrome/TopBar/SignInLink.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useCallback } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2, locationUtil, textUtil } from '@grafana/data';
+ import { Trans } from '@grafana/i18n';
+diff --git a/public/app/core/components/AppNotifications/AppNotificationList.tsx b/public/app/core/components/AppNotifications/AppNotificationList.tsx
+--- a/public/app/core/components/AppNotifications/AppNotificationList.tsx
++++ b/public/app/core/components/AppNotifications/AppNotificationList.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useEffect, useRef } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type AlertErrorPayload, type AlertPayload, AppEvents, type GrafanaTheme2 } from '@grafana/data';
+ import { Portal, useStyles2, Stack } from '@grafana/ui';
+diff --git a/public/app/core/components/FormPrompt/FormPrompt.tsx b/public/app/core/components/FormPrompt/FormPrompt.tsx
+--- a/public/app/core/components/FormPrompt/FormPrompt.tsx
++++ b/public/app/core/components/FormPrompt/FormPrompt.tsx
+@@ -1,7 +1,7 @@
+ import { css } from '@emotion/css';
+ import type history from 'history';
+ import { useEffect, useState } from 'react';
+-import { Navigate } from 'react-router-dom-v5-compat';
++import { Navigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { Button, Modal } from '@grafana/ui';
+diff --git a/public/app/core/hooks/useQueryParams.ts b/public/app/core/hooks/useQueryParams.ts
+--- a/public/app/core/hooks/useQueryParams.ts
++++ b/public/app/core/hooks/useQueryParams.ts
+@@ -1,5 +1,5 @@
+ import { useCallback, useMemo } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type UrlQueryMap } from '@grafana/data';
+ import { locationSearchToObject, locationService } from '@grafana/runtime';
+diff --git a/public/app/core/navigation/GrafanaRoute.tsx b/public/app/core/navigation/GrafanaRoute.tsx
+--- a/public/app/core/navigation/GrafanaRoute.tsx
++++ b/public/app/core/navigation/GrafanaRoute.tsx
+@@ -1,5 +1,5 @@
+ import { Suspense, useEffect, useLayoutEffect } from 'react';
+-import { Navigate, useLocation, useParams } from 'react-router-dom-v5-compat';
++import { Navigate, useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { config, locationSearchToObject, navigationLogger, reportPageview } from '@grafana/runtime';
+ import { ErrorBoundary, PageLoader } from '@grafana/ui';
+diff --git a/public/app/core/navigation/GrafanaRouteError.tsx b/public/app/core/navigation/GrafanaRouteError.tsx
+--- a/public/app/core/navigation/GrafanaRouteError.tsx
++++ b/public/app/core/navigation/GrafanaRouteError.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { type ErrorInfo, useEffect } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2, locationUtil, PageLayoutType } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/core/navigation/hooks.ts b/public/app/core/navigation/hooks.ts
+--- a/public/app/core/navigation/hooks.ts
++++ b/public/app/core/navigation/hooks.ts
+@@ -1,4 +1,4 @@
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { locationService } from '@grafana/runtime';
+
+diff --git a/public/app/core/navigation/types.ts b/public/app/core/navigation/types.ts
+--- a/public/app/core/navigation/types.ts
++++ b/public/app/core/navigation/types.ts
+@@ -1,6 +1,6 @@
+ import { type Location } from 'history';
+ import { type ComponentType } from 'react';
+-import { type Params } from 'react-router-dom-v5-compat';
++import { type Params } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type UrlQueryMap } from '@grafana/data';
+
+diff --git a/public/app/features/admin/AdminEditOrgPage.tsx b/public/app/features/admin/AdminEditOrgPage.tsx
+--- a/public/app/features/admin/AdminEditOrgPage.tsx
++++ b/public/app/features/admin/AdminEditOrgPage.tsx
+@@ -1,6 +1,6 @@
+ import { useState, useEffect } from 'react';
+ import { useForm } from 'react-hook-form';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+ import { useAsyncFn } from 'react-use';
+
+ import { type NavModelItem, type OrgRole } from '@grafana/data';
+diff --git a/public/app/features/admin/UserAdminPage.tsx b/public/app/features/admin/UserAdminPage.tsx
+--- a/public/app/features/admin/UserAdminPage.tsx
++++ b/public/app/features/admin/UserAdminPage.tsx
+@@ -1,6 +1,6 @@
+ import { useEffect } from 'react';
+ import { connect, type ConnectedProps } from 'react-redux';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModelItem } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/admin/UserCreatePage.tsx b/public/app/features/admin/UserCreatePage.tsx
+--- a/public/app/features/admin/UserCreatePage.tsx
++++ b/public/app/features/admin/UserCreatePage.tsx
+@@ -1,6 +1,6 @@
+ import { useCallback } from 'react';
+ import { useForm } from 'react-hook-form';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModelItem } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/admin/Users/UsersTable.test.tsx b/public/app/features/admin/Users/UsersTable.test.tsx
+--- a/public/app/features/admin/Users/UsersTable.test.tsx
++++ b/public/app/features/admin/Users/UsersTable.test.tsx
+@@ -1,5 +1,5 @@
+ import { render } from '@testing-library/react';
+-import { MemoryRouter } from 'react-router-dom-v5-compat';
++import { MemoryRouter } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type UserDTO } from 'app/types/user';
+
+diff --git a/public/app/features/alerting/routes.tsx b/public/app/features/alerting/routes.tsx
+--- a/public/app/features/alerting/routes.tsx
++++ b/public/app/features/alerting/routes.tsx
+@@ -1,4 +1,4 @@
+-import { Navigate } from 'react-router-dom-v5-compat';
++import { Navigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { config } from '@grafana/runtime';
+ import { SafeDynamicImport } from 'app/core/components/DynamicImports/SafeDynamicImport';
+diff --git a/public/app/features/alerting/unified/MuteTimings.test.tsx b/public/app/features/alerting/unified/MuteTimings.test.tsx
+--- a/public/app/features/alerting/unified/MuteTimings.test.tsx
++++ b/public/app/features/alerting/unified/MuteTimings.test.tsx
+@@ -1,7 +1,7 @@
+ import { type InitialEntry } from 'history';
+ import { last } from 'lodash';
+ import { HttpResponse, http } from 'msw';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { render, screen, userEvent, within } from 'test/test-utils';
+ import { byTestId } from 'testing-library-selector';
+
+diff --git a/public/app/features/alerting/unified/NewSilencePage.tsx b/public/app/features/alerting/unified/NewSilencePage.tsx
+--- a/public/app/features/alerting/unified/NewSilencePage.tsx
++++ b/public/app/features/alerting/unified/NewSilencePage.tsx
+@@ -1,4 +1,4 @@
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { t } from '@grafana/i18n';
+ import {
+diff --git a/public/app/features/alerting/unified/NotificationPoliciesPage.test.tsx b/public/app/features/alerting/unified/NotificationPoliciesPage.test.tsx
+--- a/public/app/features/alerting/unified/NotificationPoliciesPage.test.tsx
++++ b/public/app/features/alerting/unified/NotificationPoliciesPage.test.tsx
+@@ -1,6 +1,6 @@
+ import { produce } from 'immer';
+ import { HttpResponse, http } from 'msw';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { clickSelectOption } from 'test/helpers/selectOptionInTest';
+ import { render, screen, testWithFeatureToggles, userEvent, waitFor, within } from 'test/test-utils';
+ import { byLabelText, byRole, byTestId } from 'testing-library-selector';
+diff --git a/public/app/features/alerting/unified/Receivers.test.tsx b/public/app/features/alerting/unified/Receivers.test.tsx
+--- a/public/app/features/alerting/unified/Receivers.test.tsx
++++ b/public/app/features/alerting/unified/Receivers.test.tsx
+@@ -1,4 +1,4 @@
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { selectOptionInTest } from 'test/helpers/selectOptionInTest';
+ import { render, screen, userEvent, waitFor } from 'test/test-utils';
+
+diff --git a/public/app/features/alerting/unified/RedirectToRuleViewer.test.tsx b/public/app/features/alerting/unified/RedirectToRuleViewer.test.tsx
+--- a/public/app/features/alerting/unified/RedirectToRuleViewer.test.tsx
++++ b/public/app/features/alerting/unified/RedirectToRuleViewer.test.tsx
+@@ -12,8 +12,8 @@
+
+ jest.mock('./hooks/useCombinedRule');
+ jest.mock('./utils/datasource');
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   Navigate: jest.fn(({}) => `Redirected`),
+ }));
+
+diff --git a/public/app/features/alerting/unified/RedirectToRuleViewer.tsx b/public/app/features/alerting/unified/RedirectToRuleViewer.tsx
+--- a/public/app/features/alerting/unified/RedirectToRuleViewer.tsx
++++ b/public/app/features/alerting/unified/RedirectToRuleViewer.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { type JSX, useMemo } from 'react';
+-import { Navigate } from 'react-router-dom-v5-compat';
++import { Navigate } from '@bioetl/grafana-router-v7-bridge';
+ import { useLocation } from 'react-use';
+
+ import { AlertLabels } from '@grafana/alerting/unstable';
+diff --git a/public/app/features/alerting/unified/RuleViewer.tsx b/public/app/features/alerting/unified/RuleViewer.tsx
+--- a/public/app/features/alerting/unified/RuleViewer.tsx
++++ b/public/app/features/alerting/unified/RuleViewer.tsx
+@@ -1,5 +1,5 @@
+ import { useMemo } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModelItem } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/alerting/unified/Silences.test.tsx b/public/app/features/alerting/unified/Silences.test.tsx
+--- a/public/app/features/alerting/unified/Silences.test.tsx
++++ b/public/app/features/alerting/unified/Silences.test.tsx
+@@ -1,5 +1,5 @@
+ import { HttpResponse, http } from 'msw';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { render, screen, userEvent, waitFor, within } from 'test/test-utils';
+ import { byLabelText, byPlaceholderText, byRole, byTestId, byText } from 'testing-library-selector';
+
+diff --git a/public/app/features/alerting/unified/Templates.test.tsx b/public/app/features/alerting/unified/Templates.test.tsx
+--- a/public/app/features/alerting/unified/Templates.test.tsx
++++ b/public/app/features/alerting/unified/Templates.test.tsx
+@@ -1,6 +1,6 @@
+ import { type InitialEntry } from 'history/createMemoryHistory';
+ import * as React from 'react';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { type Props } from 'react-virtualized-auto-sizer';
+ import { render, screen, waitFor, within } from 'test/test-utils';
+ import { byLabelText, byRole } from 'testing-library-selector';
+diff --git a/public/app/features/alerting/unified/Templates.tsx b/public/app/features/alerting/unified/Templates.tsx
+--- a/public/app/features/alerting/unified/Templates.tsx
++++ b/public/app/features/alerting/unified/Templates.tsx
+@@ -1,4 +1,4 @@
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+
+ import DuplicateMessageTemplate from './components/contact-points/DuplicateMessageTemplate';
+ import EditMessageTemplate from './components/contact-points/EditMessageTemplate';
+diff --git a/public/app/features/alerting/unified/components/PanelAlertRuleDrawer.tsx b/public/app/features/alerting/unified/components/PanelAlertRuleDrawer.tsx
+--- a/public/app/features/alerting/unified/components/PanelAlertRuleDrawer.tsx
++++ b/public/app/features/alerting/unified/components/PanelAlertRuleDrawer.tsx
+@@ -1,4 +1,4 @@
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type RuleFormValues } from '../types/rule-form';
+ import { createPanelAlertRuleNavigation } from '../utils/navigation';
+diff --git a/public/app/features/alerting/unified/components/contact-points/DuplicateMessageTemplate.tsx b/public/app/features/alerting/unified/components/contact-points/DuplicateMessageTemplate.tsx
+--- a/public/app/features/alerting/unified/components/contact-points/DuplicateMessageTemplate.tsx
++++ b/public/app/features/alerting/unified/components/contact-points/DuplicateMessageTemplate.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { t } from '@grafana/i18n';
+ import { config } from '@grafana/runtime';
+diff --git a/public/app/features/alerting/unified/components/contact-points/EditContactPoint.test.tsx b/public/app/features/alerting/unified/components/contact-points/EditContactPoint.test.tsx
+--- a/public/app/features/alerting/unified/components/contact-points/EditContactPoint.test.tsx
++++ b/public/app/features/alerting/unified/components/contact-points/EditContactPoint.test.tsx
+@@ -1,6 +1,6 @@
+ import 'core-js/stable/structured-clone';
+ import type { JSX } from 'react';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { clickSelectOption } from 'test/helpers/selectOptionInTest';
+ import { render, screen, within } from 'test/test-utils';
+
+diff --git a/public/app/features/alerting/unified/components/contact-points/EditContactPoint.tsx b/public/app/features/alerting/unified/components/contact-points/EditContactPoint.tsx
+--- a/public/app/features/alerting/unified/components/contact-points/EditContactPoint.tsx
++++ b/public/app/features/alerting/unified/components/contact-points/EditContactPoint.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { t } from '@grafana/i18n';
+ import { Alert, LoadingPlaceholder } from '@grafana/ui';
+diff --git a/public/app/features/alerting/unified/components/contact-points/EditMessageTemplate.tsx b/public/app/features/alerting/unified/components/contact-points/EditMessageTemplate.tsx
+--- a/public/app/features/alerting/unified/components/contact-points/EditMessageTemplate.tsx
++++ b/public/app/features/alerting/unified/components/contact-points/EditMessageTemplate.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { t } from '@grafana/i18n';
+ import { config } from '@grafana/runtime';
+diff --git a/public/app/features/alerting/unified/components/export/GrafanaModifyExport.test.tsx b/public/app/features/alerting/unified/components/export/GrafanaModifyExport.test.tsx
+--- a/public/app/features/alerting/unified/components/export/GrafanaModifyExport.test.tsx
++++ b/public/app/features/alerting/unified/components/export/GrafanaModifyExport.test.tsx
+@@ -1,5 +1,5 @@
+ import * as React from 'react';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { type Props } from 'react-virtualized-auto-sizer';
+ import { render, userEvent, waitFor, waitForElementToBeRemoved } from 'test/test-utils';
+ import { byRole, byTestId, byText } from 'testing-library-selector';
+diff --git a/public/app/features/alerting/unified/components/export/GrafanaModifyExport.tsx b/public/app/features/alerting/unified/components/export/GrafanaModifyExport.tsx
+--- a/public/app/features/alerting/unified/components/export/GrafanaModifyExport.tsx
++++ b/public/app/features/alerting/unified/components/export/GrafanaModifyExport.tsx
+@@ -1,5 +1,5 @@
+ import { useMemo } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { locationService } from '@grafana/runtime';
+diff --git a/public/app/features/alerting/unified/components/mute-timings/EditMuteTiming.tsx b/public/app/features/alerting/unified/components/mute-timings/EditMuteTiming.tsx
+--- a/public/app/features/alerting/unified/components/mute-timings/EditMuteTiming.tsx
++++ b/public/app/features/alerting/unified/components/mute-timings/EditMuteTiming.tsx
+@@ -1,4 +1,4 @@
+-import { Navigate } from 'react-router-dom-v5-compat';
++import { Navigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { t } from '@grafana/i18n';
+ import { config } from '@grafana/runtime';
+diff --git a/public/app/features/alerting/unified/components/notification-policies/Policy.test.tsx b/public/app/features/alerting/unified/components/notification-policies/Policy.test.tsx
+--- a/public/app/features/alerting/unified/components/notification-policies/Policy.test.tsx
++++ b/public/app/features/alerting/unified/components/notification-policies/Policy.test.tsx
+@@ -2,7 +2,7 @@
+ import userEvent from '@testing-library/user-event';
+ import { first, noop } from 'lodash';
+ import type { JSX } from 'react';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { render } from 'test/test-utils';
+
+ import { contextSrv } from 'app/core/services/context_srv';
+diff --git a/public/app/features/alerting/unified/components/notification-policies/PolicyPage.tsx b/public/app/features/alerting/unified/components/notification-policies/PolicyPage.tsx
+--- a/public/app/features/alerting/unified/components/notification-policies/PolicyPage.tsx
++++ b/public/app/features/alerting/unified/components/notification-policies/PolicyPage.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { isDefaultRoutingTreeName } from '@grafana/alerting';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/alerting/unified/components/panel-alerts-tab/NewRuleFromPanelButton.tsx b/public/app/features/alerting/unified/components/panel-alerts-tab/NewRuleFromPanelButton.tsx
+--- a/public/app/features/alerting/unified/components/panel-alerts-tab/NewRuleFromPanelButton.tsx
++++ b/public/app/features/alerting/unified/components/panel-alerts-tab/NewRuleFromPanelButton.tsx
+@@ -1,5 +1,5 @@
+ import { useState } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+ import { useAsync } from 'react-use';
+
+ import { urlUtil } from '@grafana/data';
+diff --git a/public/app/features/alerting/unified/components/receivers/NewReceiverView.test.tsx b/public/app/features/alerting/unified/components/receivers/NewReceiverView.test.tsx
+--- a/public/app/features/alerting/unified/components/receivers/NewReceiverView.test.tsx
++++ b/public/app/features/alerting/unified/components/receivers/NewReceiverView.test.tsx
+@@ -1,4 +1,4 @@
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { render, screen } from 'test/test-utils';
+ import { byPlaceholderText, byRole, byTestId } from 'testing-library-selector';
+
+diff --git a/public/app/features/alerting/unified/components/rule-editor/alert-rule-form/AlertRuleForm.tsx b/public/app/features/alerting/unified/components/rule-editor/alert-rule-form/AlertRuleForm.tsx
+--- a/public/app/features/alerting/unified/components/rule-editor/alert-rule-form/AlertRuleForm.tsx
++++ b/public/app/features/alerting/unified/components/rule-editor/alert-rule-form/AlertRuleForm.tsx
+@@ -1,7 +1,7 @@
+ import { css } from '@emotion/css';
+ import { useCallback, useEffect, useMemo, useState } from 'react';
+ import { FormProvider, type SubmitErrorHandler, type UseFormWatch, useForm } from 'react-hook-form';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2, store } from '@grafana/data';
+ import { selectors } from '@grafana/e2e-selectors';
+diff --git a/public/app/features/alerting/unified/components/rule-viewer/tabs/version-history/ConfirmVersionRestoreModal.tsx b/public/app/features/alerting/unified/components/rule-viewer/tabs/version-history/ConfirmVersionRestoreModal.tsx
+--- a/public/app/features/alerting/unified/components/rule-viewer/tabs/version-history/ConfirmVersionRestoreModal.tsx
++++ b/public/app/features/alerting/unified/components/rule-viewer/tabs/version-history/ConfirmVersionRestoreModal.tsx
+@@ -1,5 +1,5 @@
+ import { type ComponentProps } from 'react';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { urlUtil } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/alerting/unified/components/rules/CloneRule.tsx b/public/app/features/alerting/unified/components/rules/CloneRule.tsx
+--- a/public/app/features/alerting/unified/components/rules/CloneRule.tsx
++++ b/public/app/features/alerting/unified/components/rules/CloneRule.tsx
+@@ -1,5 +1,5 @@
+ import { forwardRef, useState } from 'react';
+-import { Navigate, useLocation } from 'react-router-dom-v5-compat';
++import { Navigate, useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { Button, ConfirmModal } from '@grafana/ui';
+diff --git a/public/app/features/alerting/unified/components/rules/CloudRules.tsx b/public/app/features/alerting/unified/components/rules/CloudRules.tsx
+--- a/public/app/features/alerting/unified/components/rules/CloudRules.tsx
++++ b/public/app/features/alerting/unified/components/rules/CloudRules.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useMemo } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2, urlUtil } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/alerting/unified/components/rules/central-state-history/EventListSceneObject.tsx b/public/app/features/alerting/unified/components/rules/central-state-history/EventListSceneObject.tsx
+--- a/public/app/features/alerting/unified/components/rules/central-state-history/EventListSceneObject.tsx
++++ b/public/app/features/alerting/unified/components/rules/central-state-history/EventListSceneObject.tsx
+@@ -1,6 +1,6 @@
+ import { css, cx } from '@emotion/css';
+ import { type ReactElement, useState } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+ import { useMeasure } from 'react-use';
+
+ import { AlertLabels } from '@grafana/alerting/unstable';
+diff --git a/public/app/features/alerting/unified/components/silences/SilenceViewPage.test.tsx b/public/app/features/alerting/unified/components/silences/SilenceViewPage.test.tsx
+--- a/public/app/features/alerting/unified/components/silences/SilenceViewPage.test.tsx
++++ b/public/app/features/alerting/unified/components/silences/SilenceViewPage.test.tsx
+@@ -1,5 +1,5 @@
+ import { HttpResponse } from 'msw';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { render, screen } from 'test/test-utils';
+
+ import { AlertState } from 'app/plugins/datasource/alertmanager/types';
+diff --git a/public/app/features/alerting/unified/components/silences/SilencesEditor.tsx b/public/app/features/alerting/unified/components/silences/SilencesEditor.tsx
+--- a/public/app/features/alerting/unified/components/silences/SilencesEditor.tsx
++++ b/public/app/features/alerting/unified/components/silences/SilencesEditor.tsx
+@@ -2,7 +2,7 @@
+ import { pickBy } from 'lodash';
+ import { useMemo, useState } from 'react';
+ import { FormProvider, useForm } from 'react-hook-form';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+ import { useDebounce } from 'react-use';
+
+ import {
+diff --git a/public/app/features/alerting/unified/extensions/tabExtensionRegistry.ts b/public/app/features/alerting/unified/extensions/tabExtensionRegistry.ts
+--- a/public/app/features/alerting/unified/extensions/tabExtensionRegistry.ts
++++ b/public/app/features/alerting/unified/extensions/tabExtensionRegistry.ts
+@@ -1,4 +1,4 @@
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModelItem } from '@grafana/data';
+ import { useSelector } from 'app/types/store';
+diff --git a/public/app/features/alerting/unified/group-details/GroupDetailsPage.test.tsx b/public/app/features/alerting/unified/group-details/GroupDetailsPage.test.tsx
+--- a/public/app/features/alerting/unified/group-details/GroupDetailsPage.test.tsx
++++ b/public/app/features/alerting/unified/group-details/GroupDetailsPage.test.tsx
+@@ -1,6 +1,6 @@
+ import { uniqueId } from 'lodash';
+ import { HttpResponse, http } from 'msw';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { type Props } from 'react-virtualized-auto-sizer';
+ import { render, screen, waitFor, within } from 'test/test-utils';
+ import { byRole, byTestId } from 'testing-library-selector';
+diff --git a/public/app/features/alerting/unified/group-details/GroupDetailsPage.tsx b/public/app/features/alerting/unified/group-details/GroupDetailsPage.tsx
+--- a/public/app/features/alerting/unified/group-details/GroupDetailsPage.tsx
++++ b/public/app/features/alerting/unified/group-details/GroupDetailsPage.tsx
+@@ -1,6 +1,6 @@
+ import { skipToken } from '@reduxjs/toolkit/query';
+ import { useState } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { Alert, Button, Dropdown, Icon, LinkButton, Menu, TextLink, withErrorBoundary } from '@grafana/ui';
+diff --git a/public/app/features/alerting/unified/group-details/GroupEditPage.test.tsx b/public/app/features/alerting/unified/group-details/GroupEditPage.test.tsx
+--- a/public/app/features/alerting/unified/group-details/GroupEditPage.test.tsx
++++ b/public/app/features/alerting/unified/group-details/GroupEditPage.test.tsx
+@@ -1,5 +1,5 @@
+ import { HttpResponse } from 'msw';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { render, screen } from 'test/test-utils';
+ import { byRole, byTestId, byText } from 'testing-library-selector';
+
+diff --git a/public/app/features/alerting/unified/group-details/GroupEditPage.tsx b/public/app/features/alerting/unified/group-details/GroupEditPage.tsx
+--- a/public/app/features/alerting/unified/group-details/GroupEditPage.tsx
++++ b/public/app/features/alerting/unified/group-details/GroupEditPage.tsx
+@@ -2,7 +2,7 @@
+ import { produce } from 'immer';
+ import { useCallback, useEffect, useState } from 'react';
+ import { type SubmitHandler, useForm } from 'react-hook-form';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2, type NavModelItem } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/alerting/unified/hooks/useReturnTo.test.tsx b/public/app/features/alerting/unified/hooks/useReturnTo.test.tsx
+--- a/public/app/features/alerting/unified/hooks/useReturnTo.test.tsx
++++ b/public/app/features/alerting/unified/hooks/useReturnTo.test.tsx
+@@ -1,4 +1,4 @@
+-import { MemoryRouter } from 'react-router-dom-v5-compat';
++import { MemoryRouter } from '@bioetl/grafana-router-v7-bridge';
+ import { renderHook } from 'test/test-utils';
+
+ import { useReturnTo } from './useReturnTo';
+diff --git a/public/app/features/alerting/unified/hooks/useSilenceViewData.test.tsx b/public/app/features/alerting/unified/hooks/useSilenceViewData.test.tsx
+--- a/public/app/features/alerting/unified/hooks/useSilenceViewData.test.tsx
++++ b/public/app/features/alerting/unified/hooks/useSilenceViewData.test.tsx
+@@ -1,6 +1,6 @@
+ import { HttpResponse } from 'msw';
+ import { type PropsWithChildren } from 'react';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { getWrapper, renderHook, waitFor } from 'test/test-utils';
+
+ import { AlertState } from 'app/plugins/datasource/alertmanager/types';
+diff --git a/public/app/features/alerting/unified/hooks/useSilenceViewData.ts b/public/app/features/alerting/unified/hooks/useSilenceViewData.ts
+--- a/public/app/features/alerting/unified/hooks/useSilenceViewData.ts
++++ b/public/app/features/alerting/unified/hooks/useSilenceViewData.ts
+@@ -1,5 +1,5 @@
+ import { useMemo } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type AlertmanagerAlert, type Silence } from 'app/plugins/datasource/alertmanager/types';
+
+diff --git a/public/app/features/alerting/unified/hooks/useURLSearchParams.ts b/public/app/features/alerting/unified/hooks/useURLSearchParams.ts
+--- a/public/app/features/alerting/unified/hooks/useURLSearchParams.ts
++++ b/public/app/features/alerting/unified/hooks/useURLSearchParams.ts
+@@ -1,5 +1,5 @@
+ import { useCallback, useMemo } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { locationService } from '@grafana/runtime';
+
+diff --git a/public/app/features/alerting/unified/navigation/useAlertActivityNav.test.ts b/public/app/features/alerting/unified/navigation/useAlertActivityNav.test.ts
+--- a/public/app/features/alerting/unified/navigation/useAlertActivityNav.test.ts
++++ b/public/app/features/alerting/unified/navigation/useAlertActivityNav.test.ts
+@@ -7,7 +7,7 @@
+ import { getAlertActivityNavId, useAlertActivityNav, useAlertGroupsNav, useAlertsNav } from './useAlertActivityNav';
+
+ // Mock dependencies
+-jest.mock('react-router-dom-v5-compat', () => ({
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
+   useLocation: jest.fn(() => ({ pathname: '/alerting/alerts' })),
+ }));
+
+diff --git a/public/app/features/alerting/unified/navigation/useAlertActivityNav.ts b/public/app/features/alerting/unified/navigation/useAlertActivityNav.ts
+--- a/public/app/features/alerting/unified/navigation/useAlertActivityNav.ts
++++ b/public/app/features/alerting/unified/navigation/useAlertActivityNav.ts
+@@ -1,5 +1,5 @@
+ import { useMemo } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModelItem } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/alerting/unified/navigation/useAlertRulesNav.ts b/public/app/features/alerting/unified/navigation/useAlertRulesNav.ts
+--- a/public/app/features/alerting/unified/navigation/useAlertRulesNav.ts
++++ b/public/app/features/alerting/unified/navigation/useAlertRulesNav.ts
+@@ -1,4 +1,4 @@
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModelItem } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/alerting/unified/navigation/useNotificationConfigNav.test.ts b/public/app/features/alerting/unified/navigation/useNotificationConfigNav.test.ts
+--- a/public/app/features/alerting/unified/navigation/useNotificationConfigNav.test.ts
++++ b/public/app/features/alerting/unified/navigation/useNotificationConfigNav.test.ts
+@@ -1,5 +1,5 @@
+ import { renderHook } from '@testing-library/react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { config } from '@grafana/runtime';
+ import { contextSrv } from 'app/core/services/context_srv';
+@@ -16,7 +16,7 @@
+ } from './useNotificationConfigNav';
+
+ // Mock dependencies
+-jest.mock('react-router-dom-v5-compat', () => ({
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
+   useLocation: jest.fn(),
+ }));
+
+diff --git a/public/app/features/alerting/unified/navigation/useNotificationConfigNav.ts b/public/app/features/alerting/unified/navigation/useNotificationConfigNav.ts
+--- a/public/app/features/alerting/unified/navigation/useNotificationConfigNav.ts
++++ b/public/app/features/alerting/unified/navigation/useNotificationConfigNav.ts
+@@ -1,5 +1,5 @@
+ import { useMemo } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModelItem } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/alerting/unified/notifications/NotificationDetailPage.test.tsx b/public/app/features/alerting/unified/notifications/NotificationDetailPage.test.tsx
+--- a/public/app/features/alerting/unified/notifications/NotificationDetailPage.test.tsx
++++ b/public/app/features/alerting/unified/notifications/NotificationDetailPage.test.tsx
+@@ -1,7 +1,7 @@
+ import { screen, waitFor } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+ import { HttpResponse, http } from 'msw';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { render } from 'test/test-utils';
+
+ import { type CreateNotificationqueryNotificationEntry } from '@grafana/api-clients/rtkq/historian.alerting/v0alpha1';
+diff --git a/public/app/features/alerting/unified/notifications/NotificationDetailPage.tsx b/public/app/features/alerting/unified/notifications/NotificationDetailPage.tsx
+--- a/public/app/features/alerting/unified/notifications/NotificationDetailPage.tsx
++++ b/public/app/features/alerting/unified/notifications/NotificationDetailPage.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useEffect, useState } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { AlertLabels } from '@grafana/alerting/unstable';
+ import {
+diff --git a/public/app/features/alerting/unified/rule-editor/RuleEditor.tsx b/public/app/features/alerting/unified/rule-editor/RuleEditor.tsx
+--- a/public/app/features/alerting/unified/rule-editor/RuleEditor.tsx
++++ b/public/app/features/alerting/unified/rule-editor/RuleEditor.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModelItem } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/alerting/unified/rule-editor/RuleEditorExisting.test.tsx b/public/app/features/alerting/unified/rule-editor/RuleEditorExisting.test.tsx
+--- a/public/app/features/alerting/unified/rule-editor/RuleEditorExisting.test.tsx
++++ b/public/app/features/alerting/unified/rule-editor/RuleEditorExisting.test.tsx
+@@ -1,4 +1,4 @@
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { ui } from 'test/helpers/alertingRuleEditor';
+ import { render, screen } from 'test/test-utils';
+
+diff --git a/public/app/features/alerting/unified/settings/navigation.ts b/public/app/features/alerting/unified/settings/navigation.ts
+--- a/public/app/features/alerting/unified/settings/navigation.ts
++++ b/public/app/features/alerting/unified/settings/navigation.ts
+@@ -1,4 +1,4 @@
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModelItem } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/auth-config/ProviderConfigPage.tsx b/public/app/features/auth-config/ProviderConfigPage.tsx
+--- a/public/app/features/auth-config/ProviderConfigPage.tsx
++++ b/public/app/features/auth-config/ProviderConfigPage.tsx
+@@ -1,5 +1,5 @@
+ import { useEffect } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModelItem } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/browse-dashboards/BrowseDashboardsPage.test.tsx b/public/app/features/browse-dashboards/BrowseDashboardsPage.test.tsx
+--- a/public/app/features/browse-dashboards/BrowseDashboardsPage.test.tsx
++++ b/public/app/features/browse-dashboards/BrowseDashboardsPage.test.tsx
+@@ -1,6 +1,6 @@
+ import { http, HttpResponse } from 'msw';
+ import { type ComponentProps } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+ import type AutoSizer from 'react-virtualized-auto-sizer';
+ import { of } from 'rxjs';
+ import { act, render as testRender, screen, waitFor, testWithFeatureToggles } from 'test/test-utils';
+@@ -42,8 +42,8 @@
+   };
+ });
+
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useParams: jest.fn().mockReturnValue({}),
+ }));
+
+diff --git a/public/app/features/browse-dashboards/BrowseDashboardsPage.tsx b/public/app/features/browse-dashboards/BrowseDashboardsPage.tsx
+--- a/public/app/features/browse-dashboards/BrowseDashboardsPage.tsx
++++ b/public/app/features/browse-dashboards/BrowseDashboardsPage.tsx
+@@ -1,7 +1,7 @@
+ import { css } from '@emotion/css';
+ import { useBooleanFlagValue } from '@openfeature/react-sdk';
+ import { memo, useEffect, useMemo, useRef, useState } from 'react';
+-import { useLocation, useParams } from 'react-router-dom-v5-compat';
++import { useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+ import AutoSizer, { type Size } from 'react-virtualized-auto-sizer';
+
+ import { type GrafanaTheme2 } from '@grafana/data';
+diff --git a/public/app/features/browse-dashboards/BrowseFolderAlertingPage.test.tsx b/public/app/features/browse-dashboards/BrowseFolderAlertingPage.test.tsx
+--- a/public/app/features/browse-dashboards/BrowseFolderAlertingPage.test.tsx
++++ b/public/app/features/browse-dashboards/BrowseFolderAlertingPage.test.tsx
+@@ -15,8 +15,8 @@
+ const folder = DEFAULT_FOLDERS[0];
+ const { uid: folderUid, title: folderTitle } = folder;
+
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useParams: jest.fn(() => ({ uid: folderUid })),
+ }));
+
+diff --git a/public/app/features/browse-dashboards/BrowseFolderAlertingPage.tsx b/public/app/features/browse-dashboards/BrowseFolderAlertingPage.tsx
+--- a/public/app/features/browse-dashboards/BrowseFolderAlertingPage.tsx
++++ b/public/app/features/browse-dashboards/BrowseFolderAlertingPage.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { t } from '@grafana/i18n';
+ import { Alert } from '@grafana/ui';
+diff --git a/public/app/features/browse-dashboards/BrowseFolderLibraryPanelsPage.test.tsx b/public/app/features/browse-dashboards/BrowseFolderLibraryPanelsPage.test.tsx
+--- a/public/app/features/browse-dashboards/BrowseFolderLibraryPanelsPage.test.tsx
++++ b/public/app/features/browse-dashboards/BrowseFolderLibraryPanelsPage.test.tsx
+@@ -1,5 +1,5 @@
+ import { http, HttpResponse } from 'msw';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+ import { render, screen } from 'test/test-utils';
+
+ import { config, setBackendSrv } from '@grafana/runtime';
+@@ -15,8 +15,8 @@
+ setBackendSrv(backendSrv);
+ setupMockServer();
+
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useParams: jest.fn(),
+ }));
+
+diff --git a/public/app/features/browse-dashboards/BrowseFolderLibraryPanelsPage.tsx b/public/app/features/browse-dashboards/BrowseFolderLibraryPanelsPage.tsx
+--- a/public/app/features/browse-dashboards/BrowseFolderLibraryPanelsPage.tsx
++++ b/public/app/features/browse-dashboards/BrowseFolderLibraryPanelsPage.tsx
+@@ -1,5 +1,5 @@
+ import { useState } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { useGetFolderQueryFacade, useUpdateFolder } from 'app/api/clients/folder/v1beta1/hooks';
+ import { Page } from 'app/core/components/Page/Page';
+diff --git a/public/app/features/browse-dashboards/BrowseFolderVariablesPage.test.tsx b/public/app/features/browse-dashboards/BrowseFolderVariablesPage.test.tsx
+--- a/public/app/features/browse-dashboards/BrowseFolderVariablesPage.test.tsx
++++ b/public/app/features/browse-dashboards/BrowseFolderVariablesPage.test.tsx
+@@ -1,6 +1,6 @@
+ import { http, HttpResponse } from 'msw';
+ import { act } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+ import { render, screen } from 'test/test-utils';
+
+ import { config, setBackendSrv } from '@grafana/runtime';
+@@ -19,8 +19,8 @@
+ setBackendSrv(backendSrv);
+ setupMockServer();
+
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useParams: jest.fn(),
+   useNavigate: jest.fn(() => jest.fn()),
+ }));
+diff --git a/public/app/features/browse-dashboards/BrowseFolderVariablesPage.tsx b/public/app/features/browse-dashboards/BrowseFolderVariablesPage.tsx
+--- a/public/app/features/browse-dashboards/BrowseFolderVariablesPage.tsx
++++ b/public/app/features/browse-dashboards/BrowseFolderVariablesPage.tsx
+@@ -1,5 +1,5 @@
+ import { useMemo } from 'react';
+-import { useNavigate, useParams } from 'react-router-dom-v5-compat';
++import { useNavigate, useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { locationUtil } from '@grafana/data';
+ import { t, Trans } from '@grafana/i18n';
+diff --git a/public/app/features/browse-dashboards/components/CreateNewButton.tsx b/public/app/features/browse-dashboards/components/CreateNewButton.tsx
+--- a/public/app/features/browse-dashboards/components/CreateNewButton.tsx
++++ b/public/app/features/browse-dashboards/components/CreateNewButton.tsx
+@@ -1,6 +1,6 @@
+ import { useBooleanFlagValue } from '@openfeature/react-sdk';
+ import { lazy, Suspense, useState } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { locationUtil } from '@grafana/data';
+ import { selectors } from '@grafana/e2e-selectors';
+diff --git a/public/app/features/connections/Connections.test.tsx b/public/app/features/connections/Connections.test.tsx
+--- a/public/app/features/connections/Connections.test.tsx
++++ b/public/app/features/connections/Connections.test.tsx
+@@ -1,5 +1,5 @@
+ import { type RenderResult, screen } from '@testing-library/react';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { render } from 'test/test-utils';
+
+ import { config } from '@grafana/runtime';
+diff --git a/public/app/features/connections/Connections.tsx b/public/app/features/connections/Connections.tsx
+--- a/public/app/features/connections/Connections.tsx
++++ b/public/app/features/connections/Connections.tsx
+@@ -1,4 +1,4 @@
+-import { Navigate, Routes, Route, useLocation } from 'react-router-dom-v5-compat';
++import { Navigate, Routes, Route, useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type StoreState, useSelector } from 'app/types/store';
+
+diff --git a/public/app/features/connections/components/ConnectionsRedirectNotice/ConnectionsRedirectNotice.test.tsx b/public/app/features/connections/components/ConnectionsRedirectNotice/ConnectionsRedirectNotice.test.tsx
+--- a/public/app/features/connections/components/ConnectionsRedirectNotice/ConnectionsRedirectNotice.test.tsx
++++ b/public/app/features/connections/components/ConnectionsRedirectNotice/ConnectionsRedirectNotice.test.tsx
+@@ -1,5 +1,5 @@
+ import { render, screen } from '@testing-library/react';
+-import { MemoryRouter } from 'react-router-dom-v5-compat';
++import { MemoryRouter } from '@bioetl/grafana-router-v7-bridge';
+
+ import { contextSrv } from '../../../../core/services/context_srv';
+
+diff --git a/public/app/features/connections/components/FeatureHighlightsTabPage.tsx b/public/app/features/connections/components/FeatureHighlightsTabPage.tsx
+--- a/public/app/features/connections/components/FeatureHighlightsTabPage.tsx
++++ b/public/app/features/connections/components/FeatureHighlightsTabPage.tsx
+@@ -1,5 +1,5 @@
+ import { css } from '@emotion/css';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2 } from '@grafana/data';
+ import { Trans } from '@grafana/i18n';
+diff --git a/public/app/features/connections/hooks/useDataSourceSettingsNav.ts b/public/app/features/connections/hooks/useDataSourceSettingsNav.ts
+--- a/public/app/features/connections/hooks/useDataSourceSettingsNav.ts
++++ b/public/app/features/connections/hooks/useDataSourceSettingsNav.ts
+@@ -1,4 +1,4 @@
+-import { useLocation, useParams } from 'react-router-dom-v5-compat';
++import { useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModel, type NavModelItem } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/connections/hooks/useDataSourceTabNav.ts b/public/app/features/connections/hooks/useDataSourceTabNav.ts
+--- a/public/app/features/connections/hooks/useDataSourceTabNav.ts
++++ b/public/app/features/connections/hooks/useDataSourceTabNav.ts
+@@ -1,4 +1,4 @@
+-import { useLocation, useParams } from 'react-router-dom-v5-compat';
++import { useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModel, type NavModelItem } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/connections/pages/DataSourceDashboardsPage.tsx b/public/app/features/connections/pages/DataSourceDashboardsPage.tsx
+--- a/public/app/features/connections/pages/DataSourceDashboardsPage.tsx
++++ b/public/app/features/connections/pages/DataSourceDashboardsPage.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Page } from 'app/core/components/Page/Page';
+ import { DataSourceDashboards } from 'app/features/datasources/components/DataSourceDashboards';
+diff --git a/public/app/features/connections/pages/DataSourceDetailsPage.tsx b/public/app/features/connections/pages/DataSourceDetailsPage.tsx
+--- a/public/app/features/connections/pages/DataSourceDetailsPage.tsx
++++ b/public/app/features/connections/pages/DataSourceDetailsPage.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { Alert, Badge, TextLink } from '@grafana/ui';
+diff --git a/public/app/features/connections/pages/EditDataSourcePage.tsx b/public/app/features/connections/pages/EditDataSourcePage.tsx
+--- a/public/app/features/connections/pages/EditDataSourcePage.tsx
++++ b/public/app/features/connections/pages/EditDataSourcePage.tsx
+@@ -1,4 +1,4 @@
+-import { useLocation, useParams } from 'react-router-dom-v5-compat';
++import { useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { AdvisorCheckProvider } from 'app/features/connections/hooks/useDatasourceAdvisorChecks';
+ import DataSourceTabPage from 'app/features/datasources/components/DataSourceTabPage';
+diff --git a/public/app/features/connections/tabs/ConnectData/ConnectDataLegacy.tsx b/public/app/features/connections/tabs/ConnectData/ConnectDataLegacy.tsx
+--- a/public/app/features/connections/tabs/ConnectData/ConnectDataLegacy.tsx
++++ b/public/app/features/connections/tabs/ConnectData/ConnectDataLegacy.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useId, useMemo, useState, type MouseEvent } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { PluginType, type GrafanaTheme2, type SelectableValue } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/connections/tabs/ConnectData/DataSourceTabs.test.tsx b/public/app/features/connections/tabs/ConnectData/DataSourceTabs.test.tsx
+--- a/public/app/features/connections/tabs/ConnectData/DataSourceTabs.test.tsx
++++ b/public/app/features/connections/tabs/ConnectData/DataSourceTabs.test.tsx
+@@ -1,5 +1,5 @@
+ import { type RenderResult, screen } from '@testing-library/react';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { render } from 'test/test-utils';
+
+ import { LayoutModes, PluginType } from '@grafana/data';
+diff --git a/public/app/features/connections/tabs/ConnectData/hooks/useConnectionFiltersFromQuery.ts b/public/app/features/connections/tabs/ConnectData/hooks/useConnectionFiltersFromQuery.ts
+--- a/public/app/features/connections/tabs/ConnectData/hooks/useConnectionFiltersFromQuery.ts
++++ b/public/app/features/connections/tabs/ConnectData/hooks/useConnectionFiltersFromQuery.ts
+@@ -1,5 +1,5 @@
+ import { useMemo } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { locationSearchToObject } from '@grafana/runtime';
+ import { Sorters } from 'app/features/plugins/admin/helpers';
+diff --git a/public/app/features/dashboard-scene/components/DashboardTemplateEditBanner.tsx b/public/app/features/dashboard-scene/components/DashboardTemplateEditBanner.tsx
+--- a/public/app/features/dashboard-scene/components/DashboardTemplateEditBanner.tsx
++++ b/public/app/features/dashboard-scene/components/DashboardTemplateEditBanner.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useEffect, useState } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2 } from '@grafana/data';
+ import { t, Trans } from '@grafana/i18n';
+diff --git a/public/app/features/dashboard-scene/components/DashboardTemplateSavedBanner.tsx b/public/app/features/dashboard-scene/components/DashboardTemplateSavedBanner.tsx
+--- a/public/app/features/dashboard-scene/components/DashboardTemplateSavedBanner.tsx
++++ b/public/app/features/dashboard-scene/components/DashboardTemplateSavedBanner.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useEffect, useState } from 'react';
+-import { useSearchParams } from 'react-router-dom-v5-compat';
++import { useSearchParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2 } from '@grafana/data';
+ import { t, Trans } from '@grafana/i18n';
+diff --git a/public/app/features/dashboard-scene/components/DashboardTemplateUseBanner.tsx b/public/app/features/dashboard-scene/components/DashboardTemplateUseBanner.tsx
+--- a/public/app/features/dashboard-scene/components/DashboardTemplateUseBanner.tsx
++++ b/public/app/features/dashboard-scene/components/DashboardTemplateUseBanner.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useEffect, useState } from 'react';
+-import { useLocation, useSearchParams } from 'react-router-dom-v5-compat';
++import { useLocation, useSearchParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2 } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/dashboard-scene/components/SuggestedDashboardsBanner.tsx b/public/app/features/dashboard-scene/components/SuggestedDashboardsBanner.tsx
+--- a/public/app/features/dashboard-scene/components/SuggestedDashboardsBanner.tsx
++++ b/public/app/features/dashboard-scene/components/SuggestedDashboardsBanner.tsx
+@@ -1,5 +1,5 @@
+ import { useState } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { Alert, TextLink } from '@grafana/ui';
+diff --git a/public/app/features/dashboard-scene/pages/DashboardScenePage.test.tsx b/public/app/features/dashboard-scene/pages/DashboardScenePage.test.tsx
+--- a/public/app/features/dashboard-scene/pages/DashboardScenePage.test.tsx
++++ b/public/app/features/dashboard-scene/pages/DashboardScenePage.test.tsx
+@@ -2,7 +2,7 @@
+ import { act, render, screen, waitFor } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+ import { cloneDeep } from 'lodash';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+ import { of } from 'rxjs';
+ import { TestProvider } from 'test/helpers/TestProvider';
+ import { getGrafanaContextMock } from 'test/mocks/getGrafanaContextMock';
+@@ -56,8 +56,8 @@
+   }),
+ }));
+
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useParams: jest.fn().mockReturnValue({ uid: 'my-dash-uid' }),
+ }));
+
+diff --git a/public/app/features/dashboard-scene/pages/DashboardScenePage.tsx b/public/app/features/dashboard-scene/pages/DashboardScenePage.tsx
+--- a/public/app/features/dashboard-scene/pages/DashboardScenePage.tsx
++++ b/public/app/features/dashboard-scene/pages/DashboardScenePage.tsx
+@@ -1,5 +1,5 @@
+ import { useEffect, useRef } from 'react';
+-import { type Params, useParams } from 'react-router-dom-v5-compat';
++import { type Params, useParams } from '@bioetl/grafana-router-v7-bridge';
+ import { usePrevious } from 'react-use';
+
+ import { PageLayoutType } from '@grafana/data';
+diff --git a/public/app/features/dashboard-scene/pages/PublicDashboardScenePage.test.tsx b/public/app/features/dashboard-scene/pages/PublicDashboardScenePage.test.tsx
+--- a/public/app/features/dashboard-scene/pages/PublicDashboardScenePage.test.tsx
++++ b/public/app/features/dashboard-scene/pages/PublicDashboardScenePage.test.tsx
+@@ -1,5 +1,5 @@
+ import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { of } from 'rxjs';
+ import { render } from 'test/test-utils';
+
+diff --git a/public/app/features/dashboard-scene/pages/PublicDashboardScenePage.tsx b/public/app/features/dashboard-scene/pages/PublicDashboardScenePage.tsx
+--- a/public/app/features/dashboard-scene/pages/PublicDashboardScenePage.tsx
++++ b/public/app/features/dashboard-scene/pages/PublicDashboardScenePage.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useEffect, useState } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2, PageLayoutType } from '@grafana/data';
+ import { selectors as e2eSelectors } from '@grafana/e2e-selectors';
+diff --git a/public/app/features/dashboard-scene/panel-edit/PanelDataPane/NewAlertRuleButton.tsx b/public/app/features/dashboard-scene/panel-edit/PanelDataPane/NewAlertRuleButton.tsx
+--- a/public/app/features/dashboard-scene/panel-edit/PanelDataPane/NewAlertRuleButton.tsx
++++ b/public/app/features/dashboard-scene/panel-edit/PanelDataPane/NewAlertRuleButton.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useState } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+ import { useAsync } from 'react-use';
+
+ import { type GrafanaTheme2 } from '@grafana/data';
+diff --git a/public/app/features/dashboard-scene/scene/DashboardSceneRenderer.tsx b/public/app/features/dashboard-scene/scene/DashboardSceneRenderer.tsx
+--- a/public/app/features/dashboard-scene/scene/DashboardSceneRenderer.tsx
++++ b/public/app/features/dashboard-scene/scene/DashboardSceneRenderer.tsx
+@@ -1,5 +1,5 @@
+ import { useEffect, useMemo } from 'react';
+-import { useLocation, useParams } from 'react-router-dom-v5-compat';
++import { useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { PageLayoutType } from '@grafana/data';
+ import { type SceneComponentProps } from '@grafana/scenes';
+diff --git a/public/app/features/dashboard-scene/scene/layout-tabs/TabItemRenderer.tsx b/public/app/features/dashboard-scene/scene/layout-tabs/TabItemRenderer.tsx
+--- a/public/app/features/dashboard-scene/scene/layout-tabs/TabItemRenderer.tsx
++++ b/public/app/features/dashboard-scene/scene/layout-tabs/TabItemRenderer.tsx
+@@ -1,7 +1,7 @@
+ import { css, cx } from '@emotion/css';
+ import { Draggable, type DraggableStateSnapshot } from '@hello-pangea/dnd';
+ import { useMemo } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2, locationUtil, textUtil } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/dashboard-scene/settings/utils.ts b/public/app/features/dashboard-scene/settings/utils.ts
+--- a/public/app/features/dashboard-scene/settings/utils.ts
++++ b/public/app/features/dashboard-scene/settings/utils.ts
+@@ -1,4 +1,4 @@
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { locationUtil, type NavModelItem } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/dashboard-scene/solo/SoloPanelPage.test.tsx b/public/app/features/dashboard-scene/solo/SoloPanelPage.test.tsx
+--- a/public/app/features/dashboard-scene/solo/SoloPanelPage.test.tsx
++++ b/public/app/features/dashboard-scene/solo/SoloPanelPage.test.tsx
+@@ -1,5 +1,5 @@
+ import { render, screen } from '@testing-library/react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+ import { getWrapper } from 'test/test-utils';
+
+ import { SceneTimeRange, VizPanel } from '@grafana/scenes';
+@@ -11,7 +11,7 @@
+ import { SoloPanelPage, SoloPanelRenderer, type Props } from './SoloPanelPage';
+
+ // Mock dependencies
+-jest.mock('react-router-dom-v5-compat', () => ({
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
+   useParams: jest.fn(),
+ }));
+
+diff --git a/public/app/features/dashboard-scene/solo/SoloPanelPage.tsx b/public/app/features/dashboard-scene/solo/SoloPanelPage.tsx
+--- a/public/app/features/dashboard-scene/solo/SoloPanelPage.tsx
++++ b/public/app/features/dashboard-scene/solo/SoloPanelPage.tsx
+@@ -1,7 +1,7 @@
+ // Libraries
+ import { css } from '@emotion/css';
+ import { type ReactNode, useEffect, useRef, useState } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2, type UrlQueryValue } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/dashboard/components/DashNav/DashNav.tsx b/public/app/features/dashboard/components/DashNav/DashNav.tsx
+--- a/public/app/features/dashboard/components/DashNav/DashNav.tsx
++++ b/public/app/features/dashboard/components/DashNav/DashNav.tsx
+@@ -1,7 +1,7 @@
+ import { css } from '@emotion/css';
+ import { memo, type ReactNode } from 'react';
+ import { connect, type ConnectedProps } from 'react-redux';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { textUtil } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/dashboard/containers/DashboardPageProxy.test.tsx b/public/app/features/dashboard/containers/DashboardPageProxy.test.tsx
+--- a/public/app/features/dashboard/containers/DashboardPageProxy.test.tsx
++++ b/public/app/features/dashboard/containers/DashboardPageProxy.test.tsx
+@@ -1,5 +1,5 @@
+ import { screen, waitFor } from '@testing-library/react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+ import { type Props } from 'react-virtualized-auto-sizer';
+ import { render } from 'test/test-utils';
+
+@@ -40,8 +40,8 @@
+     });
+ });
+
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useParams: jest.fn().mockReturnValue({}),
+ }));
+
+diff --git a/public/app/features/dashboard/containers/NewDashboardWithDS.tsx b/public/app/features/dashboard/containers/NewDashboardWithDS.tsx
+--- a/public/app/features/dashboard/containers/NewDashboardWithDS.tsx
++++ b/public/app/features/dashboard/containers/NewDashboardWithDS.tsx
+@@ -1,5 +1,5 @@
+ import { useEffect, useState } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans } from '@grafana/i18n';
+ import { getDataSourceSrv, locationService } from '@grafana/runtime';
+diff --git a/public/app/features/dashboard/containers/PublicDashboardPageProxy.test.tsx b/public/app/features/dashboard/containers/PublicDashboardPageProxy.test.tsx
+--- a/public/app/features/dashboard/containers/PublicDashboardPageProxy.test.tsx
++++ b/public/app/features/dashboard/containers/PublicDashboardPageProxy.test.tsx
+@@ -1,5 +1,5 @@
+ import { screen, waitFor } from '@testing-library/react';
+-import { Routes, Route } from 'react-router-dom-v5-compat';
++import { Routes, Route } from '@bioetl/grafana-router-v7-bridge';
+ import { of } from 'rxjs';
+ import { render } from 'test/test-utils';
+
+@@ -23,8 +23,8 @@
+   }),
+ }));
+
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useParams: () => ({ accessToken: 'an-access-token' }),
+ }));
+
+diff --git a/public/app/features/dashboard/dashgrid/DashboardEmpty/DashboardEmpty.test.tsx b/public/app/features/dashboard/dashgrid/DashboardEmpty/DashboardEmpty.test.tsx
+--- a/public/app/features/dashboard/dashgrid/DashboardEmpty/DashboardEmpty.test.tsx
++++ b/public/app/features/dashboard/dashgrid/DashboardEmpty/DashboardEmpty.test.tsx
+@@ -52,7 +52,7 @@
+ );
+
+ const mockSearchParams = new URLSearchParams();
+-jest.spyOn(require('react-router-dom-v5-compat'), 'useSearchParams').mockReturnValue([mockSearchParams]);
++jest.spyOn(require('@bioetl/grafana-router-v7-bridge'), 'useSearchParams').mockReturnValue([mockSearchParams]);
+
+ function setup(options?: Partial<Props>) {
+   const props = {
+diff --git a/public/app/features/dashboard/dashgrid/DashboardLibrary/TemplateDashboardModal.tsx b/public/app/features/dashboard/dashgrid/DashboardLibrary/TemplateDashboardModal.tsx
+--- a/public/app/features/dashboard/dashgrid/DashboardLibrary/TemplateDashboardModal.tsx
++++ b/public/app/features/dashboard/dashgrid/DashboardLibrary/TemplateDashboardModal.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useEffect, useRef, useState } from 'react';
+-import { useSearchParams } from 'react-router-dom-v5-compat';
++import { useSearchParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2 } from '@grafana/data';
+ import { t, Trans } from '@grafana/i18n';
+diff --git a/public/app/features/datasources/components/BuildDashboardButton.test.tsx b/public/app/features/datasources/components/BuildDashboardButton.test.tsx
+--- a/public/app/features/datasources/components/BuildDashboardButton.test.tsx
++++ b/public/app/features/datasources/components/BuildDashboardButton.test.tsx
+@@ -1,6 +1,6 @@
+ import { render, screen, fireEvent } from '@testing-library/react';
+ import { type ReactNode } from 'react';
+-import { MemoryRouter } from 'react-router-dom-v5-compat';
++import { MemoryRouter } from '@bioetl/grafana-router-v7-bridge';
+
+ import { config } from '@grafana/runtime';
+ import { DashboardLibraryInteractions } from 'app/features/dashboard/dashgrid/DashboardLibrary/interactions';
+diff --git a/public/app/features/datasources/components/DataSourceTestingStatus.test.tsx b/public/app/features/datasources/components/DataSourceTestingStatus.test.tsx
+--- a/public/app/features/datasources/components/DataSourceTestingStatus.test.tsx
++++ b/public/app/features/datasources/components/DataSourceTestingStatus.test.tsx
+@@ -1,6 +1,6 @@
+ import { render, screen, fireEvent } from '@testing-library/react';
+ import { type ReactNode } from 'react';
+-import { MemoryRouter } from 'react-router-dom-v5-compat';
++import { MemoryRouter } from '@bioetl/grafana-router-v7-bridge';
+
+ import {
+   PluginExtensionTypes,
+diff --git a/public/app/features/gops/configuration-tracker/components/ConfigureIRM.tsx b/public/app/features/gops/configuration-tracker/components/ConfigureIRM.tsx
+--- a/public/app/features/gops/configuration-tracker/components/ConfigureIRM.tsx
++++ b/public/app/features/gops/configuration-tracker/components/ConfigureIRM.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useEffect } from 'react';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2 } from '@grafana/data';
+ import { Trans } from '@grafana/i18n';
+diff --git a/public/app/features/invites/SignupInvited.test.tsx b/public/app/features/invites/SignupInvited.test.tsx
+--- a/public/app/features/invites/SignupInvited.test.tsx
++++ b/public/app/features/invites/SignupInvited.test.tsx
+@@ -17,8 +17,8 @@
+   getBackendSrv: () => backendSrv,
+ }));
+
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useParams: jest.fn().mockReturnValue({ code: 'some code' }),
+ }));
+
+diff --git a/public/app/features/invites/SignupInvited.tsx b/public/app/features/invites/SignupInvited.tsx
+--- a/public/app/features/invites/SignupInvited.tsx
++++ b/public/app/features/invites/SignupInvited.tsx
+@@ -1,6 +1,6 @@
+ import { css, cx } from '@emotion/css';
+ import { useState } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+ import { useAsync } from 'react-use';
+
+ import { type GrafanaTheme2 } from '@grafana/data';
+diff --git a/public/app/features/notebook/pages/NotebookScenePage.tsx b/public/app/features/notebook/pages/NotebookScenePage.tsx
+--- a/public/app/features/notebook/pages/NotebookScenePage.tsx
++++ b/public/app/features/notebook/pages/NotebookScenePage.tsx
+@@ -1,5 +1,5 @@
+ import { useEffect } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { PageLayoutType } from '@grafana/data';
+ import { useFlagDashboardNotebooks } from '@grafana/runtime/internal';
+diff --git a/public/app/features/notebook/pages/NotebooksListPage.tsx b/public/app/features/notebook/pages/NotebooksListPage.tsx
+--- a/public/app/features/notebook/pages/NotebooksListPage.tsx
++++ b/public/app/features/notebook/pages/NotebooksListPage.tsx
+@@ -1,5 +1,5 @@
+ import { useState } from 'react';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { useFlagDashboardNotebooks } from '@grafana/runtime/internal';
+diff --git a/public/app/features/playlist/PlaylistEditPage.tsx b/public/app/features/playlist/PlaylistEditPage.tsx
+--- a/public/app/features/playlist/PlaylistEditPage.tsx
++++ b/public/app/features/playlist/PlaylistEditPage.tsx
+@@ -1,5 +1,5 @@
+ import { useState } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModelItem } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/playlist/PlaylistStartPage.tsx b/public/app/features/playlist/PlaylistStartPage.tsx
+--- a/public/app/features/playlist/PlaylistStartPage.tsx
++++ b/public/app/features/playlist/PlaylistStartPage.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { useGetPlaylistQuery } from '../../api/clients/playlist/v1';
+
+diff --git a/public/app/features/plugins/admin/components/InstallControls/InstallControlsButton.tsx b/public/app/features/plugins/admin/components/InstallControls/InstallControlsButton.tsx
+--- a/public/app/features/plugins/admin/components/InstallControls/InstallControlsButton.tsx
++++ b/public/app/features/plugins/admin/components/InstallControls/InstallControlsButton.tsx
+@@ -1,5 +1,5 @@
+ import { useEffect, useState } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { AppEvents } from '@grafana/data';
+ import { t, Trans } from '@grafana/i18n';
+diff --git a/public/app/features/plugins/admin/components/PluginDetailsPage.tsx b/public/app/features/plugins/admin/components/PluginDetailsPage.tsx
+--- a/public/app/features/plugins/admin/components/PluginDetailsPage.tsx
++++ b/public/app/features/plugins/admin/components/PluginDetailsPage.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import * as React from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+ import { useMedia } from 'react-use';
+
+ import { type GrafanaTheme2, type NavModelItem } from '@grafana/data';
+diff --git a/public/app/features/plugins/admin/components/PluginList.test.tsx b/public/app/features/plugins/admin/components/PluginList.test.tsx
+--- a/public/app/features/plugins/admin/components/PluginList.test.tsx
++++ b/public/app/features/plugins/admin/components/PluginList.test.tsx
+@@ -8,10 +8,10 @@
+
+ import { PluginList } from './PluginList';
+
+-jest.mock('react-router-dom-v5-compat', () => ({ useLocation: jest.fn(), useSearchParams: jest.fn() }));
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({ useLocation: jest.fn(), useSearchParams: jest.fn() }));
+
+-const mockUseLocation = jest.requireMock('react-router-dom-v5-compat').useLocation;
+-const mockUseSearchParams = jest.requireMock('react-router-dom-v5-compat').useSearchParams;
++const mockUseLocation = jest.requireMock('@bioetl/grafana-router-v7-bridge').useLocation;
++const mockUseSearchParams = jest.requireMock('@bioetl/grafana-router-v7-bridge').useSearchParams;
+
+ const mockPlugin: CatalogPlugin = {
+   description: 'Test plugin description',
+diff --git a/public/app/features/plugins/admin/components/PluginList.tsx b/public/app/features/plugins/admin/components/PluginList.tsx
+--- a/public/app/features/plugins/admin/components/PluginList.tsx
++++ b/public/app/features/plugins/admin/components/PluginList.tsx
+@@ -1,4 +1,4 @@
+-import { useLocation, useSearchParams } from 'react-router-dom-v5-compat';
++import { useLocation, useSearchParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { selectors } from '@grafana/e2e-selectors';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/plugins/admin/hooks/usePluginDetailsTabs.test.tsx b/public/app/features/plugins/admin/hooks/usePluginDetailsTabs.test.tsx
+--- a/public/app/features/plugins/admin/hooks/usePluginDetailsTabs.test.tsx
++++ b/public/app/features/plugins/admin/hooks/usePluginDetailsTabs.test.tsx
+@@ -7,7 +7,7 @@
+
+ import { usePluginDetailsTabs } from './usePluginDetailsTabs';
+
+-jest.mock('react-router-dom-v5-compat', () => ({
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
+   useLocation: () => ({ pathname: '/plugins/test-plugin' }),
+ }));
+
+diff --git a/public/app/features/plugins/admin/hooks/usePluginDetailsTabs.tsx b/public/app/features/plugins/admin/hooks/usePluginDetailsTabs.tsx
+--- a/public/app/features/plugins/admin/hooks/usePluginDetailsTabs.tsx
++++ b/public/app/features/plugins/admin/hooks/usePluginDetailsTabs.tsx
+@@ -1,5 +1,5 @@
+ import { useMemo } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaPlugin, type NavModelItem, PluginIncludeType, PluginType } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/plugins/admin/pages/Browse.tsx b/public/app/features/plugins/admin/pages/Browse.tsx
+--- a/public/app/features/plugins/admin/pages/Browse.tsx
++++ b/public/app/features/plugins/admin/pages/Browse.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useId, useState } from 'react';
+-import { useLocation } from 'react-router-dom-v5-compat';
++import { useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type SelectableValue, type GrafanaTheme2, type PluginType } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/plugins/admin/pages/PluginDetails.test.tsx b/public/app/features/plugins/admin/pages/PluginDetails.test.tsx
+--- a/public/app/features/plugins/admin/pages/PluginDetails.test.tsx
++++ b/public/app/features/plugins/admin/pages/PluginDetails.test.tsx
+@@ -1,5 +1,5 @@
+ import { getDefaultNormalizer, type RenderResult, type SelectorMatcherOptions, waitFor } from '@testing-library/react';
+-import { Routes, Route } from 'react-router-dom-v5-compat';
++import { Routes, Route } from '@bioetl/grafana-router-v7-bridge';
+ import { render } from 'test/test-utils';
+
+ import {
+diff --git a/public/app/features/plugins/admin/pages/PluginDetails.tsx b/public/app/features/plugins/admin/pages/PluginDetails.tsx
+--- a/public/app/features/plugins/admin/pages/PluginDetails.tsx
++++ b/public/app/features/plugins/admin/pages/PluginDetails.tsx
+@@ -1,5 +1,5 @@
+ import type { JSX } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { PluginDetailsPage } from '../components/PluginDetailsPage';
+
+diff --git a/public/app/features/plugins/components/AppRootPage.test.tsx b/public/app/features/plugins/components/AppRootPage.test.tsx
+--- a/public/app/features/plugins/components/AppRootPage.test.tsx
++++ b/public/app/features/plugins/components/AppRootPage.test.tsx
+@@ -1,6 +1,6 @@
+ import { act, screen } from '@testing-library/react';
+ import { Component, useEffect } from 'react';
+-import { Routes, Route, Link } from 'react-router-dom-v5-compat';
++import { Routes, Route, Link } from '@bioetl/grafana-router-v7-bridge';
+ import { render } from 'test/test-utils';
+
+ import { AppPlugin, PluginType, type AppRootProps, type NavModelItem, PluginIncludeType, OrgRole } from '@grafana/data';
+diff --git a/public/app/features/plugins/components/AppRootPage.tsx b/public/app/features/plugins/components/AppRootPage.tsx
+--- a/public/app/features/plugins/components/AppRootPage.tsx
++++ b/public/app/features/plugins/components/AppRootPage.tsx
+@@ -2,7 +2,7 @@
+ import { type AnyAction, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+ import { useCallback, useEffect, useMemo, useReducer } from 'react';
+ import * as React from 'react';
+-import { useLocation, useParams } from 'react-router-dom-v5-compat';
++import { useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import {
+   AppEvents,
+diff --git a/public/app/features/plugins/loader/sharedDependencies.ts b/public/app/features/plugins/loader/sharedDependencies.ts
+--- a/public/app/features/plugins/loader/sharedDependencies.ts
++++ b/public/app/features/plugins/loader/sharedDependencies.ts
+@@ -118,13 +118,13 @@
+   //
+   // Plugins that would like update to "react-router-dom@v6" will need to bundle "react-router-dom",
+   // however they cannot bundle "react-router" - this would mean that we have two instances of "react-router"
+-  // in the app, which would casue issues. As the "react-router-dom-v5-compat" package re-exports everything from "react-router-dom@v6"
++  // in the app, which would casue issues. As the "@bioetl/grafana-router-v7-bridge" package re-exports everything from "react-router-dom@v6"
+   // which then re-exports everything from "react-router@v6", we are in the lucky state to be able to expose a compatible v6 version of the router to plugins by
+-  // just exposing "react-router-dom-v5-compat".
++  // just exposing "@bioetl/grafana-router-v7-bridge".
+   //
+   // (This means that we are exposing two versions of the same package).
+   'react-router-dom': () => import('react-router-dom'),
+-  'react-router': () => import('react-router-dom-v5-compat'),
++  'react-router': () => import('@bioetl/grafana-router-v7-bridge'),
+   redux: () => import('redux'),
+   rxjs: () => import('rxjs'),
+   'rxjs/operators': () => import('rxjs/operators'),
+diff --git a/public/app/features/provisioning/Config/ConfigForm.tsx b/public/app/features/provisioning/Config/ConfigForm.tsx
+--- a/public/app/features/provisioning/Config/ConfigForm.tsx
++++ b/public/app/features/provisioning/Config/ConfigForm.tsx
+@@ -1,7 +1,7 @@
+ import { skipToken } from '@reduxjs/toolkit/query/react';
+ import { useEffect, useMemo, useState } from 'react';
+ import { Controller, useForm } from 'react-hook-form';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { AppEvents } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/provisioning/Connection/ConnectionForm.tsx b/public/app/features/provisioning/Connection/ConnectionForm.tsx
+--- a/public/app/features/provisioning/Connection/ConnectionForm.tsx
++++ b/public/app/features/provisioning/Connection/ConnectionForm.tsx
+@@ -1,6 +1,6 @@
+ import { useEffect, useState } from 'react';
+ import { Controller, FormProvider, useForm } from 'react-hook-form';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { t } from '@grafana/i18n';
+ import { isFetchError, reportInteraction } from '@grafana/runtime';
+diff --git a/public/app/features/provisioning/Connection/ConnectionFormPage.tsx b/public/app/features/provisioning/Connection/ConnectionFormPage.tsx
+--- a/public/app/features/provisioning/Connection/ConnectionFormPage.tsx
++++ b/public/app/features/provisioning/Connection/ConnectionFormPage.tsx
+@@ -1,5 +1,5 @@
+ import { skipToken } from '@reduxjs/toolkit/query/react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { isFetchError } from '@grafana/runtime';
+diff --git a/public/app/features/provisioning/Connection/DeleteConnectionButton.tsx b/public/app/features/provisioning/Connection/DeleteConnectionButton.tsx
+--- a/public/app/features/provisioning/Connection/DeleteConnectionButton.tsx
++++ b/public/app/features/provisioning/Connection/DeleteConnectionButton.tsx
+@@ -1,5 +1,5 @@
+ import { useCallback } from 'react';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { AppEvents, isObject } from '@grafana/data';
+ import { t, Trans } from '@grafana/i18n';
+diff --git a/public/app/features/provisioning/File/FileHistoryPage.tsx b/public/app/features/provisioning/File/FileHistoryPage.tsx
+--- a/public/app/features/provisioning/File/FileHistoryPage.tsx
++++ b/public/app/features/provisioning/File/FileHistoryPage.tsx
+@@ -1,5 +1,5 @@
+ import { skipToken } from '@reduxjs/toolkit/query';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { Card, EmptyState, Spinner, Stack, Text, TextLink, UserIcon } from '@grafana/ui';
+diff --git a/public/app/features/provisioning/File/FileStatusPage.tsx b/public/app/features/provisioning/File/FileStatusPage.tsx
+--- a/public/app/features/provisioning/File/FileStatusPage.tsx
++++ b/public/app/features/provisioning/File/FileStatusPage.tsx
+@@ -1,5 +1,5 @@
+ import { useEffect, useState } from 'react';
+-import { useLocation, useParams } from 'react-router-dom-v5-compat';
++import { useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+ import AutoSizer from 'react-virtualized-auto-sizer';
+
+ import { urlUtil } from '@grafana/data';
+diff --git a/public/app/features/provisioning/HomePage.tsx b/public/app/features/provisioning/HomePage.tsx
+--- a/public/app/features/provisioning/HomePage.tsx
++++ b/public/app/features/provisioning/HomePage.tsx
+@@ -1,5 +1,5 @@
+ import { useMemo, useState } from 'react';
+-import { useSearchParams } from 'react-router-dom-v5-compat';
++import { useSearchParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { t, Trans } from '@grafana/i18n';
+ import { config } from '@grafana/runtime';
+diff --git a/public/app/features/provisioning/Repository/DeleteRepositoryButton.tsx b/public/app/features/provisioning/Repository/DeleteRepositoryButton.tsx
+--- a/public/app/features/provisioning/Repository/DeleteRepositoryButton.tsx
++++ b/public/app/features/provisioning/Repository/DeleteRepositoryButton.tsx
+@@ -1,5 +1,5 @@
+ import { useCallback } from 'react';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { t, Trans } from '@grafana/i18n';
+ import { reportInteraction } from '@grafana/runtime';
+diff --git a/public/app/features/provisioning/Repository/EditRepositoryPage.tsx b/public/app/features/provisioning/Repository/EditRepositoryPage.tsx
+--- a/public/app/features/provisioning/Repository/EditRepositoryPage.tsx
++++ b/public/app/features/provisioning/Repository/EditRepositoryPage.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { EmptyState, Text, TextLink } from '@grafana/ui';
+diff --git a/public/app/features/provisioning/Repository/RepositoryHealthCard.tsx b/public/app/features/provisioning/Repository/RepositoryHealthCard.tsx
+--- a/public/app/features/provisioning/Repository/RepositoryHealthCard.tsx
++++ b/public/app/features/provisioning/Repository/RepositoryHealthCard.tsx
+@@ -1,5 +1,5 @@
+ import { css } from '@emotion/css';
+-import { Link } from 'react-router-dom-v5-compat';
++import { Link } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2 } from '@grafana/data';
+ import { selectors } from '@grafana/e2e-selectors';
+diff --git a/public/app/features/provisioning/Repository/RepositoryStatusPage.tsx b/public/app/features/provisioning/Repository/RepositoryStatusPage.tsx
+--- a/public/app/features/provisioning/Repository/RepositoryStatusPage.tsx
++++ b/public/app/features/provisioning/Repository/RepositoryStatusPage.tsx
+@@ -1,5 +1,5 @@
+ import { useMemo } from 'react';
+-import { useLocation, useParams } from 'react-router-dom-v5-compat';
++import { useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type SelectableValue, urlUtil } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/provisioning/Shared/ConnectRepositoryButton.tsx b/public/app/features/provisioning/Shared/ConnectRepositoryButton.tsx
+--- a/public/app/features/provisioning/Shared/ConnectRepositoryButton.tsx
++++ b/public/app/features/provisioning/Shared/ConnectRepositoryButton.tsx
+@@ -1,4 +1,4 @@
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { t, Trans } from '@grafana/i18n';
+ import { Button, Dropdown, Icon, Menu, Stack } from '@grafana/ui';
+diff --git a/public/app/features/provisioning/Wizard/ConnectPage.tsx b/public/app/features/provisioning/Wizard/ConnectPage.tsx
+--- a/public/app/features/provisioning/Wizard/ConnectPage.tsx
++++ b/public/app/features/provisioning/Wizard/ConnectPage.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { t } from '@grafana/i18n';
+ import { useGetFrontendSettingsQuery } from 'app/api/clients/provisioning/v0alpha1';
+diff --git a/public/app/features/provisioning/Wizard/ProvisioningWizard.test.tsx b/public/app/features/provisioning/Wizard/ProvisioningWizard.test.tsx
+--- a/public/app/features/provisioning/Wizard/ProvisioningWizard.test.tsx
++++ b/public/app/features/provisioning/Wizard/ProvisioningWizard.test.tsx
+@@ -20,8 +20,8 @@
+
+ const mockNavigate = jest.fn();
+
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useNavigate: () => mockNavigate,
+ }));
+
+diff --git a/public/app/features/provisioning/Wizard/ProvisioningWizard.tsx b/public/app/features/provisioning/Wizard/ProvisioningWizard.tsx
+--- a/public/app/features/provisioning/Wizard/ProvisioningWizard.tsx
++++ b/public/app/features/provisioning/Wizard/ProvisioningWizard.tsx
+@@ -1,7 +1,7 @@
+ import { css } from '@emotion/css';
+ import { memo, useCallback, useEffect, useMemo } from 'react';
+ import { FormProvider, useForm } from 'react-hook-form';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { AppEvents, type GrafanaTheme2 } from '@grafana/data';
+ import { t, Trans } from '@grafana/i18n';
+diff --git a/public/app/features/provisioning/Wizard/hooks/useWizardCancellation.test.ts b/public/app/features/provisioning/Wizard/hooks/useWizardCancellation.test.ts
+--- a/public/app/features/provisioning/Wizard/hooks/useWizardCancellation.test.ts
++++ b/public/app/features/provisioning/Wizard/hooks/useWizardCancellation.test.ts
+@@ -8,7 +8,7 @@
+ import { useWizardCancellation, type UseWizardCancellationParams } from './useWizardCancellation';
+
+ const mockNavigate = jest.fn();
+-jest.mock('react-router-dom-v5-compat', () => ({
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
+   useNavigate: () => mockNavigate,
+ }));
+
+diff --git a/public/app/features/provisioning/Wizard/hooks/useWizardCancellation.ts b/public/app/features/provisioning/Wizard/hooks/useWizardCancellation.ts
+--- a/public/app/features/provisioning/Wizard/hooks/useWizardCancellation.ts
++++ b/public/app/features/provisioning/Wizard/hooks/useWizardCancellation.ts
+@@ -1,5 +1,5 @@
+ import { useCallback, useState } from 'react';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { reportInteraction } from '@grafana/runtime';
+ import { useDeleteRepositoryMutation } from 'app/api/clients/provisioning/v0alpha1';
+diff --git a/public/app/features/provisioning/Wizard/hooks/useWizardNavigation.test.ts b/public/app/features/provisioning/Wizard/hooks/useWizardNavigation.test.ts
+--- a/public/app/features/provisioning/Wizard/hooks/useWizardNavigation.test.ts
++++ b/public/app/features/provisioning/Wizard/hooks/useWizardNavigation.test.ts
+@@ -7,7 +7,7 @@
+ import { useWizardNavigation, type UseWizardNavigationParams } from './useWizardNavigation';
+
+ const mockNavigate = jest.fn();
+-jest.mock('react-router-dom-v5-compat', () => ({
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
+   useNavigate: () => mockNavigate,
+ }));
+
+diff --git a/public/app/features/provisioning/Wizard/hooks/useWizardNavigation.ts b/public/app/features/provisioning/Wizard/hooks/useWizardNavigation.ts
+--- a/public/app/features/provisioning/Wizard/hooks/useWizardNavigation.ts
++++ b/public/app/features/provisioning/Wizard/hooks/useWizardNavigation.ts
+@@ -1,5 +1,5 @@
+ import { useCallback, useMemo, useState } from 'react';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { reportInteraction } from '@grafana/runtime';
+
+diff --git a/public/app/features/provisioning/components/Dashboards/DeleteProvisionedDashboardForm.test.tsx b/public/app/features/provisioning/components/Dashboards/DeleteProvisionedDashboardForm.test.tsx
+--- a/public/app/features/provisioning/components/Dashboards/DeleteProvisionedDashboardForm.test.tsx
++++ b/public/app/features/provisioning/components/Dashboards/DeleteProvisionedDashboardForm.test.tsx
+@@ -12,8 +12,8 @@
+ setupProvisioningMswServer();
+
+ const mockNavigate = jest.fn();
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useNavigate: () => mockNavigate,
+ }));
+
+diff --git a/public/app/features/provisioning/components/Dashboards/DeleteProvisionedDashboardForm.tsx b/public/app/features/provisioning/components/Dashboards/DeleteProvisionedDashboardForm.tsx
+--- a/public/app/features/provisioning/components/Dashboards/DeleteProvisionedDashboardForm.tsx
++++ b/public/app/features/provisioning/components/Dashboards/DeleteProvisionedDashboardForm.tsx
+@@ -1,6 +1,6 @@
+ import { useCallback, useState } from 'react';
+ import { FormProvider, useForm } from 'react-hook-form';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { reportInteraction } from '@grafana/runtime';
+diff --git a/public/app/features/provisioning/components/Dashboards/MoveProvisionedDashboardForm.test.tsx b/public/app/features/provisioning/components/Dashboards/MoveProvisionedDashboardForm.test.tsx
+--- a/public/app/features/provisioning/components/Dashboards/MoveProvisionedDashboardForm.test.tsx
++++ b/public/app/features/provisioning/components/Dashboards/MoveProvisionedDashboardForm.test.tsx
+@@ -24,8 +24,8 @@
+ });
+
+ const mockNavigate = jest.fn();
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useNavigate: () => mockNavigate,
+ }));
+
+diff --git a/public/app/features/provisioning/components/Dashboards/MoveProvisionedDashboardForm.tsx b/public/app/features/provisioning/components/Dashboards/MoveProvisionedDashboardForm.tsx
+--- a/public/app/features/provisioning/components/Dashboards/MoveProvisionedDashboardForm.tsx
++++ b/public/app/features/provisioning/components/Dashboards/MoveProvisionedDashboardForm.tsx
+@@ -1,7 +1,7 @@
+ import { skipToken } from '@reduxjs/toolkit/query';
+ import { useCallback, useEffect, useState } from 'react';
+ import { FormProvider, useForm } from 'react-hook-form';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { AppEvents } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/provisioning/components/Dashboards/SaveProvisionedDashboardForm.test.tsx b/public/app/features/provisioning/components/Dashboards/SaveProvisionedDashboardForm.test.tsx
+--- a/public/app/features/provisioning/components/Dashboards/SaveProvisionedDashboardForm.test.tsx
++++ b/public/app/features/provisioning/components/Dashboards/SaveProvisionedDashboardForm.test.tsx
+@@ -60,8 +60,8 @@
+ });
+
+ const mockNavigate = jest.fn();
+-jest.mock('react-router-dom-v5-compat', () => {
+-  const actual = jest.requireActual('react-router-dom-v5-compat');
++jest.mock('@bioetl/grafana-router-v7-bridge', () => {
++  const actual = jest.requireActual('@bioetl/grafana-router-v7-bridge');
+   return {
+     ...actual,
+     useNavigate: () => mockNavigate,
+diff --git a/public/app/features/provisioning/components/Dashboards/SaveProvisionedDashboardForm.tsx b/public/app/features/provisioning/components/Dashboards/SaveProvisionedDashboardForm.tsx
+--- a/public/app/features/provisioning/components/Dashboards/SaveProvisionedDashboardForm.tsx
++++ b/public/app/features/provisioning/components/Dashboards/SaveProvisionedDashboardForm.tsx
+@@ -1,6 +1,6 @@
+ import { useCallback, useEffect, useRef, useState } from 'react';
+ import { Controller, useForm, FormProvider } from 'react-hook-form';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { locationUtil } from '@grafana/data';
+ import { selectors } from '@grafana/e2e-selectors';
+diff --git a/public/app/features/provisioning/components/Folders/DeleteProvisionedFolderForm.test.tsx b/public/app/features/provisioning/components/Folders/DeleteProvisionedFolderForm.test.tsx
+--- a/public/app/features/provisioning/components/Folders/DeleteProvisionedFolderForm.test.tsx
++++ b/public/app/features/provisioning/components/Folders/DeleteProvisionedFolderForm.test.tsx
+@@ -19,7 +19,7 @@
+
+ // Mock dependencies
+ const mockNavigate = jest.fn();
+-jest.mock('react-router-dom-v5-compat', () => ({
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
+   useNavigate: () => mockNavigate,
+ }));
+
+diff --git a/public/app/features/provisioning/components/Folders/DeleteProvisionedFolderForm.tsx b/public/app/features/provisioning/components/Folders/DeleteProvisionedFolderForm.tsx
+--- a/public/app/features/provisioning/components/Folders/DeleteProvisionedFolderForm.tsx
++++ b/public/app/features/provisioning/components/Folders/DeleteProvisionedFolderForm.tsx
+@@ -1,6 +1,6 @@
+ import { useState } from 'react';
+ import { FormProvider, useForm } from 'react-hook-form';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { reportInteraction } from '@grafana/runtime';
+diff --git a/public/app/features/provisioning/components/Folders/NewProvisionedFolderForm.test.tsx b/public/app/features/provisioning/components/Folders/NewProvisionedFolderForm.test.tsx
+--- a/public/app/features/provisioning/components/Folders/NewProvisionedFolderForm.test.tsx
++++ b/public/app/features/provisioning/components/Folders/NewProvisionedFolderForm.test.tsx
+@@ -55,8 +55,8 @@
+ jest.mock('app/features/provisioning/hooks/usePullRequestParam', () => ({
+   usePullRequestParam: jest.fn(),
+ }));
+-jest.mock('react-router-dom-v5-compat', () => {
+-  const actual = jest.requireActual('react-router-dom-v5-compat');
++jest.mock('@bioetl/grafana-router-v7-bridge', () => {
++  const actual = jest.requireActual('@bioetl/grafana-router-v7-bridge');
+   return {
+     ...actual,
+     useNavigate: () => jest.fn(),
+diff --git a/public/app/features/provisioning/components/Folders/NewProvisionedFolderForm.tsx b/public/app/features/provisioning/components/Folders/NewProvisionedFolderForm.tsx
+--- a/public/app/features/provisioning/components/Folders/NewProvisionedFolderForm.tsx
++++ b/public/app/features/provisioning/components/Folders/NewProvisionedFolderForm.tsx
+@@ -1,6 +1,6 @@
+ import { useState } from 'react';
+ import { FormProvider, useForm } from 'react-hook-form';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { reportInteraction } from '@grafana/runtime';
+diff --git a/public/app/features/provisioning/components/Folders/RenameProvisionedFolderForm.test.tsx b/public/app/features/provisioning/components/Folders/RenameProvisionedFolderForm.test.tsx
+--- a/public/app/features/provisioning/components/Folders/RenameProvisionedFolderForm.test.tsx
++++ b/public/app/features/provisioning/components/Folders/RenameProvisionedFolderForm.test.tsx
+@@ -36,8 +36,8 @@
+   useProvisionedFolderFormData: jest.fn(),
+ }));
+
+-jest.mock('react-router-dom-v5-compat', () => {
+-  const actual = jest.requireActual('react-router-dom-v5-compat');
++jest.mock('@bioetl/grafana-router-v7-bridge', () => {
++  const actual = jest.requireActual('@bioetl/grafana-router-v7-bridge');
+   return {
+     ...actual,
+     useNavigate: () => jest.fn(),
+diff --git a/public/app/features/provisioning/components/Shared/OrphanedResourceBanner.test.tsx b/public/app/features/provisioning/components/Shared/OrphanedResourceBanner.test.tsx
+--- a/public/app/features/provisioning/components/Shared/OrphanedResourceBanner.test.tsx
++++ b/public/app/features/provisioning/components/Shared/OrphanedResourceBanner.test.tsx
+@@ -13,8 +13,8 @@
+ jest.mock('../../hooks/useOrphanedResourceActions');
+
+ const mockNavigate = jest.fn();
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useNavigate: () => mockNavigate,
+ }));
+
+diff --git a/public/app/features/provisioning/components/Shared/OrphanedResourceBanner.tsx b/public/app/features/provisioning/components/Shared/OrphanedResourceBanner.tsx
+--- a/public/app/features/provisioning/components/Shared/OrphanedResourceBanner.tsx
++++ b/public/app/features/provisioning/components/Shared/OrphanedResourceBanner.tsx
+@@ -1,5 +1,5 @@
+ import { useCallback, useState } from 'react';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { Trans, t } from '@grafana/i18n';
+ import { Alert, Button, Stack } from '@grafana/ui';
+diff --git a/public/app/features/provisioning/components/Shared/SaveProvisionedResourceDrawer.test.tsx b/public/app/features/provisioning/components/Shared/SaveProvisionedResourceDrawer.test.tsx
+--- a/public/app/features/provisioning/components/Shared/SaveProvisionedResourceDrawer.test.tsx
++++ b/public/app/features/provisioning/components/Shared/SaveProvisionedResourceDrawer.test.tsx
+@@ -34,8 +34,8 @@
+ }));
+
+ const mockNavigate = jest.fn();
+-jest.mock('react-router-dom-v5-compat', () => {
+-  const actual = jest.requireActual('react-router-dom-v5-compat');
++jest.mock('@bioetl/grafana-router-v7-bridge', () => {
++  const actual = jest.requireActual('@bioetl/grafana-router-v7-bridge');
+   return {
+     ...actual,
+     useNavigate: () => mockNavigate,
+diff --git a/public/app/features/provisioning/hooks/useImportProvisionedSave.test.ts b/public/app/features/provisioning/hooks/useImportProvisionedSave.test.ts
+--- a/public/app/features/provisioning/hooks/useImportProvisionedSave.test.ts
++++ b/public/app/features/provisioning/hooks/useImportProvisionedSave.test.ts
+@@ -15,8 +15,8 @@
+ setupProvisioningMswServer();
+
+ const mockNavigate = jest.fn();
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useNavigate: () => mockNavigate,
+ }));
+
+diff --git a/public/app/features/provisioning/hooks/useImportProvisionedSave.ts b/public/app/features/provisioning/hooks/useImportProvisionedSave.ts
+--- a/public/app/features/provisioning/hooks/useImportProvisionedSave.ts
++++ b/public/app/features/provisioning/hooks/useImportProvisionedSave.ts
+@@ -1,5 +1,5 @@
+ import { useCallback, useState } from 'react';
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { locationUtil } from '@grafana/data';
+ import { t } from '@grafana/i18n';
+diff --git a/public/app/features/provisioning/hooks/useProvisionedResourceDrawerHandlers.ts b/public/app/features/provisioning/hooks/useProvisionedResourceDrawerHandlers.ts
+--- a/public/app/features/provisioning/hooks/useProvisionedResourceDrawerHandlers.ts
++++ b/public/app/features/provisioning/hooks/useProvisionedResourceDrawerHandlers.ts
+@@ -1,4 +1,4 @@
+-import { useNavigate } from 'react-router-dom-v5-compat';
++import { useNavigate } from '@bioetl/grafana-router-v7-bridge';
+
+ import { useDispatch } from 'app/types/store';
+
+diff --git a/public/app/features/provisioning/utils/routes.tsx b/public/app/features/provisioning/utils/routes.tsx
+--- a/public/app/features/provisioning/utils/routes.tsx
++++ b/public/app/features/provisioning/utils/routes.tsx
+@@ -1,4 +1,4 @@
+-import { Navigate, useLocation, useParams } from 'react-router-dom-v5-compat';
++import { Navigate, useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { config } from '@grafana/runtime';
+ import { SafeDynamicImport } from 'app/core/components/DynamicImports/SafeDynamicImport';
+diff --git a/public/app/features/scopes/dashboards/ScopesDashboardsTreeFolderItem.test.tsx b/public/app/features/scopes/dashboards/ScopesDashboardsTreeFolderItem.test.tsx
+--- a/public/app/features/scopes/dashboards/ScopesDashboardsTreeFolderItem.test.tsx
++++ b/public/app/features/scopes/dashboards/ScopesDashboardsTreeFolderItem.test.tsx
+@@ -1,6 +1,6 @@
+ import { render, screen } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+-import { MemoryRouter, useLocation } from 'react-router-dom-v5-compat';
++import { MemoryRouter, useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { locationService } from '@grafana/runtime';
+
+@@ -14,8 +14,8 @@
+   useQueryParams: jest.fn(() => [{}]),
+ }));
+
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useLocation: jest.fn(),
+ }));
+
+diff --git a/public/app/features/scopes/dashboards/ScopesNavigationTreeLink.test.tsx b/public/app/features/scopes/dashboards/ScopesNavigationTreeLink.test.tsx
+--- a/public/app/features/scopes/dashboards/ScopesNavigationTreeLink.test.tsx
++++ b/public/app/features/scopes/dashboards/ScopesNavigationTreeLink.test.tsx
+@@ -1,14 +1,14 @@
+ import { render, screen } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+-import { MemoryRouter, useLocation } from 'react-router-dom-v5-compat';
++import { MemoryRouter, useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { locationService } from '@grafana/runtime';
+
+ import { ScopesNavigationTreeLink } from './ScopesNavigationTreeLink';
+
+ // Mock react-router-dom's useLocation
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useLocation: jest.fn(),
+ }));
+
+diff --git a/public/app/features/scopes/dashboards/ScopesNavigationTreeLink.tsx b/public/app/features/scopes/dashboards/ScopesNavigationTreeLink.tsx
+--- a/public/app/features/scopes/dashboards/ScopesNavigationTreeLink.tsx
++++ b/public/app/features/scopes/dashboards/ScopesNavigationTreeLink.tsx
+@@ -1,6 +1,6 @@
+ import { css, cx } from '@emotion/css';
+ import { useMemo } from 'react';
+-import { Link, useLocation } from 'react-router-dom-v5-compat';
++import { Link, useLocation } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2, type IconName, locationUtil, type UrlQueryMap, urlUtil } from '@grafana/data';
+ import { locationService } from '@grafana/runtime';
+diff --git a/public/app/features/serviceaccounts/ServiceAccountPage.test.tsx b/public/app/features/serviceaccounts/ServiceAccountPage.test.tsx
+--- a/public/app/features/serviceaccounts/ServiceAccountPage.test.tsx
++++ b/public/app/features/serviceaccounts/ServiceAccountPage.test.tsx
+@@ -17,8 +17,8 @@
+   },
+ }));
+
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useParams: () => ({ id: '1' }),
+ }));
+
+diff --git a/public/app/features/serviceaccounts/ServiceAccountPage.tsx b/public/app/features/serviceaccounts/ServiceAccountPage.tsx
+--- a/public/app/features/serviceaccounts/ServiceAccountPage.tsx
++++ b/public/app/features/serviceaccounts/ServiceAccountPage.tsx
+@@ -1,6 +1,6 @@
+ import { useEffect, useState, type JSX } from 'react';
+ import { type ConnectedProps, connect } from 'react-redux';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type NavModelItem, getTimeZone } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/teams/TeamPages.test.tsx b/public/app/features/teams/TeamPages.test.tsx
+--- a/public/app/features/teams/TeamPages.test.tsx
++++ b/public/app/features/teams/TeamPages.test.tsx
+@@ -1,4 +1,4 @@
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+ import { screen, render, testWithLicenseFeatures, waitFor } from 'test/test-utils';
+
+ import { setBackendSrv } from '@grafana/runtime';
+diff --git a/public/app/features/teams/TeamPages.tsx b/public/app/features/teams/TeamPages.tsx
+--- a/public/app/features/teams/TeamPages.tsx
++++ b/public/app/features/teams/TeamPages.tsx
+@@ -1,6 +1,6 @@
+ import { createSelector } from '@reduxjs/toolkit';
+ import { memo, useRef } from 'react';
+-import { useParams } from 'react-router-dom-v5-compat';
++import { useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { featureEnabled } from '@grafana/runtime';
+ import { Page } from 'app/core/components/Page/Page';
+diff --git a/public/app/features/teams/create-team/CreateTeam.test.tsx b/public/app/features/teams/create-team/CreateTeam.test.tsx
+--- a/public/app/features/teams/create-team/CreateTeam.test.tsx
++++ b/public/app/features/teams/create-team/CreateTeam.test.tsx
+@@ -1,5 +1,5 @@
+ import { type UserEvent } from '@testing-library/user-event';
+-import { Route, Routes } from 'react-router-dom-v5-compat';
++import { Route, Routes } from '@bioetl/grafana-router-v7-bridge';
+
+ import { setBackendSrv } from '@grafana/runtime';
+ import { setupMockServer } from '@grafana/test-utils/server';
+diff --git a/public/app/features/trails/RedirectToDrilldownApp.tsx b/public/app/features/trails/RedirectToDrilldownApp.tsx
+--- a/public/app/features/trails/RedirectToDrilldownApp.tsx
++++ b/public/app/features/trails/RedirectToDrilldownApp.tsx
+@@ -1,4 +1,4 @@
+-import { Navigate, useLocation, useParams } from 'react-router-dom-v5-compat';
++import { Navigate, useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { getRouteForAppPlugin } from 'app/features/plugins/routes';
+
+diff --git a/public/app/features/variables-management/VariableEditorView.tsx b/public/app/features/variables-management/VariableEditorView.tsx
+--- a/public/app/features/variables-management/VariableEditorView.tsx
++++ b/public/app/features/variables-management/VariableEditorView.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useEffect, useMemo, useState } from 'react';
+-import { useSearchParams } from 'react-router-dom-v5-compat';
++import { useSearchParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2 } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/features/variables-management/VariablesManagementPage.tsx b/public/app/features/variables-management/VariablesManagementPage.tsx
+--- a/public/app/features/variables-management/VariablesManagementPage.tsx
++++ b/public/app/features/variables-management/VariablesManagementPage.tsx
+@@ -1,6 +1,6 @@
+ import { css } from '@emotion/css';
+ import { useMemo, useState } from 'react';
+-import { useLocation, useParams } from 'react-router-dom-v5-compat';
++import { useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { type GrafanaTheme2, type NavModelItem } from '@grafana/data';
+ import { Trans, t } from '@grafana/i18n';
+diff --git a/public/app/plugins/datasource/alertmanager/ConfigEditor.tsx b/public/app/plugins/datasource/alertmanager/ConfigEditor.tsx
+--- a/public/app/plugins/datasource/alertmanager/ConfigEditor.tsx
++++ b/public/app/plugins/datasource/alertmanager/ConfigEditor.tsx
+@@ -1,6 +1,6 @@
+ import { produce } from 'immer';
+ import { useEffect } from 'react';
+-import { Link } from 'react-router-dom-v5-compat';
++import { Link } from '@bioetl/grafana-router-v7-bridge';
+
+ import { SIGV4ConnectionConfig } from '@grafana/aws-sdk';
+ import { type DataSourcePluginOptionsEditorProps, type SelectableValue } from '@grafana/data';
+diff --git a/public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx b/public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx
+--- a/public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx
++++ b/public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx
+@@ -30,8 +30,8 @@
+
+ const theme = createTheme();
+
+-jest.mock('react-router-dom-v5-compat', () => ({
+-  ...jest.requireActual('react-router-dom-v5-compat'),
++jest.mock('@bioetl/grafana-router-v7-bridge', () => ({
++  ...jest.requireActual('@bioetl/grafana-router-v7-bridge'),
+   useLocation: () => ({
+     pathname: '/',
+     search: '',
+diff --git a/public/app/routes/RoutesWrapper.tsx b/public/app/routes/RoutesWrapper.tsx
+--- a/public/app/routes/RoutesWrapper.tsx
++++ b/public/app/routes/RoutesWrapper.tsx
+@@ -1,7 +1,7 @@
+ import { type ComponentType, type ReactNode, type JSX } from 'react';
+ // eslint-disable-next-line no-restricted-imports
+ import { Router } from 'react-router-dom';
+-import { CompatRouter } from 'react-router-dom-v5-compat';
++import { CompatRouter } from '@bioetl/grafana-router-v7-bridge';
+
+ import { locationService, LocationServiceProvider } from '@grafana/runtime';
+ import { ModalRoot, Stack } from '@grafana/ui';
+diff --git a/public/app/routes/routes.tsx b/public/app/routes/routes.tsx
+--- a/public/app/routes/routes.tsx
++++ b/public/app/routes/routes.tsx
+@@ -1,5 +1,5 @@
+ import { useEffect } from 'react';
+-import { Navigate, useLocation, useParams } from 'react-router-dom-v5-compat';
++import { Navigate, useLocation, useParams } from '@bioetl/grafana-router-v7-bridge';
+
+ import { isTruthy } from '@grafana/data';
+ import { NavLandingPage } from 'app/core/components/NavLandingPage/NavLandingPage';
+diff --git a/yarn.lock b/yarn.lock
+--- a/yarn.lock
++++ b/yarn.lock
+@@ -566,7 +566,7 @@
+   languageName: node
+   linkType: hard
+
+-"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.11.1, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.16.3, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.24.4, @babel/runtime@npm:^7.24.5, @babel/runtime@npm:^7.25.6, @babel/runtime@npm:^7.26.7, @babel/runtime@npm:^7.27.0, @babel/runtime@npm:^7.28.4, @babel/runtime@npm:^7.28.6, @babel/runtime@npm:^7.29.2, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.7":
++"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.11.1, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.16.3, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.24.4, @babel/runtime@npm:^7.24.5, @babel/runtime@npm:^7.25.6, @babel/runtime@npm:^7.26.7, @babel/runtime@npm:^7.27.0, @babel/runtime@npm:^7.28.4, @babel/runtime@npm:^7.28.6, @babel/runtime@npm:^7.29.2, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.7":
+   version: 7.29.7
+   resolution: "@babel/runtime@npm:7.29.7"
+   checksum: 10/9883b4951787779fd382b121f22f92966d85f19434841f65fb00b2dfec232107e139683f47c6f252891826ad8ee18317b46c3a0e4819116a9885f47b46d7126a
+@@ -647,6 +647,19 @@
+   checksum: 10/1a1f0e356a3bb30b5f1ced6f79c413e6ebacf130421f15fac5fcd8be5ddf98aedb4404d7f5624e3285b700e041f9ef938321f3ca4d359d5b716f96afa120d88d
+   languageName: node
+   linkType: hard
++
++"@bioetl/grafana-router-v7-bridge@workspace:*, @bioetl/grafana-router-v7-bridge@workspace:packages/bioetl-router-v7-bridge":
++  version: 0.0.0-use.local
++  resolution: "@bioetl/grafana-router-v7-bridge@workspace:packages/bioetl-router-v7-bridge"
++  dependencies:
++    "@types/react-router-dom-v5": "npm:@types/react-router-dom@5.3.3"
++    react-router-dom-v5: "npm:react-router-dom@5.3.4"
++    react-router-v7: "npm:react-router@7.18.4"
++  peerDependencies:
++    react: ">=18 <20"
++    react-dom: ">=18 <20"
++  languageName: unknown
++  linkType: soft
+
+ "@braidai/lang@npm:^1.0.0":
+   version: 1.1.1
+@@ -3151,6 +3164,7 @@
+   version: 0.0.0-use.local
+   resolution: "@grafana/ui@workspace:packages/grafana-ui"
+   dependencies:
++    "@bioetl/grafana-router-v7-bridge": "workspace:*"
+     "@codemirror/autocomplete": "npm:^6.20.1"
+     "@codemirror/lang-go": "npm:^6.0.1"
+     "@codemirror/lang-html": "npm:^6.4.11"
+@@ -3255,7 +3269,6 @@
+     react-inlinesvg: "npm:^4.5.0"
+     react-loading-skeleton: "npm:^3.5.0"
+     react-router-dom: "npm:^5.3.4"
+-    react-router-dom-v5-compat: "npm:^6.26.1"
+     react-select: "npm:^5.10.2"
+     react-select-event: "npm:^5.1.0"
+     react-table: "npm:^7.8.0"
+@@ -7556,13 +7569,6 @@
+   languageName: node
+   linkType: hard
+
+-"@remix-run/router@npm:1.23.3":
+-  version: 1.23.3
+-  resolution: "@remix-run/router@npm:1.23.3"
+-  checksum: 10/a12ae9994bf017d47392ce2be24252b4e2281f4b27eac78f0e9b48afa5f522be9c0ec64b85db013ded1fff140d9512b97ac8ea5dd182138dcd6d3ded3136cbf6
+-  languageName: node
+-  linkType: hard
+-
+ "@rolldown/binding-android-arm64@npm:1.2.1":
+   version: 1.2.1
+   resolution: "@rolldown/binding-android-arm64@npm:1.2.1"
+@@ -9847,6 +9853,7 @@
+   version: 0.0.0-use.local
+   resolution: "@test-plugins/extensions-test-app@workspace:e2e-playwright/test-plugins/grafana-extensionstest-app"
+   dependencies:
++    "@bioetl/grafana-router-v7-bridge": "workspace:*"
+     "@grafana/data": "workspace:*"
+     "@grafana/i18n": "workspace:*"
+     "@grafana/plugin-configs": "workspace:*"
+@@ -9858,7 +9865,6 @@
+     i18next-cli: "npm:^1.48.0"
+     react: "npm:19.2.8"
+     react-dom: "npm:19.2.8"
+-    react-router-dom: "npm:^6.26.1"
+     typescript: "npm:6.0.2"
+     webpack: "npm:^5.105.0"
+     webpack-merge: "npm:5.10.0"
+@@ -11111,7 +11117,7 @@
+   languageName: node
+   linkType: hard
+
+-"@types/react-router-dom@npm:5.3.3":
++"@types/react-router-dom-v5@npm:@types/react-router-dom@5.3.3, @types/react-router-dom@npm:5.3.3":
+   version: 5.3.3
+   resolution: "@types/react-router-dom@npm:5.3.3"
+   dependencies:
+@@ -14970,6 +14976,13 @@
+   version: 0.7.2
+   resolution: "cookie@npm:0.7.2"
+   checksum: 10/24b286c556420d4ba4e9bc09120c9d3db7d28ace2bd0f8ccee82422ce42322f73c8312441271e5eefafbead725980e5996cc02766dbb89a90ac7f5636ede608f
++  languageName: node
++  linkType: hard
++
++"cookie@npm:^1.0.1":
++  version: 1.1.1
++  resolution: "cookie@npm:1.1.1"
++  checksum: 10/85538153054791155cf4d38d2e807e3b9382d71bf71d92fc46fca348515ea574049d0d9ef8eb84d2d54a681ad1d7a7316b1989b901dace50a6c0f4c3858dbdb2
+   languageName: node
+   linkType: hard
+
+@@ -19544,6 +19557,7 @@
+   dependencies:
+     "@arethetypeswrong/cli": "npm:^0.18.2"
+     "@axe-core/playwright": "npm:^4.11.1"
++    "@bioetl/grafana-router-v7-bridge": "workspace:*"
+     "@bsull/augurs": "npm:^0.10.0"
+     "@codemirror/autocomplete": "npm:6.20.3"
+     "@codemirror/lang-sql": "npm:6.10.0"
+@@ -19809,7 +19823,6 @@
+     react-resizable: "npm:3.0.5"
+     react-router: "npm:5.3.4"
+     react-router-dom: "npm:5.3.4"
+-    react-router-dom-v5-compat: "npm:^6.26.1"
+     react-select: "npm:5.10.2"
+     react-select-event: "npm:5.5.1"
+     react-split-pane: "npm:0.1.92"
+@@ -20089,15 +20102,6 @@
+     tiny-warning: "npm:^1.0.0"
+     value-equal: "npm:^1.0.1"
+   checksum: 10/042373f69dad6419a4d551b995ef40f449a8854775a1157c4e9f077ee39aea6ca7ed8f45ec3e1762ef1891357a724d17dad11f2fe7d0edeebcbcf9f48ed3e4d4
+-  languageName: node
+-  linkType: hard
+-
+-"history@npm:^5.3.0":
+-  version: 5.3.0
+-  resolution: "history@npm:5.3.0"
+-  dependencies:
+-    "@babel/runtime": "npm:^7.7.6"
+-  checksum: 10/52ba685b842ca6438ff11ef459951eb13d413ae715866a8dc5f7c3b1ea0cdeb8db6aabf7254551b85f56abc205e6e2d7e1d5afb36b711b401cdaff4f2cf187e9
+   languageName: node
+   linkType: hard
+
+@@ -29223,22 +29227,7 @@
+   languageName: node
+   linkType: hard
+
+-"react-router-dom-v5-compat@npm:^6.26.1":
+-  version: 6.30.4
+-  resolution: "react-router-dom-v5-compat@npm:6.30.4"
+-  dependencies:
+-    "@remix-run/router": "npm:1.23.3"
+-    history: "npm:^5.3.0"
+-    react-router: "npm:6.30.4"
+-  peerDependencies:
+-    react: ">=16.8"
+-    react-dom: ">=16.8"
+-    react-router-dom: 4 || 5
+-  checksum: 10/4574f62ec40b48c8d961caa7eb7c7e4d7509262c816751b6ecdc71b880307050067dab653b6bfae1cf121af120fb4ba912884fda580ade804ba4d0db96ff5db8
+-  languageName: node
+-  linkType: hard
+-
+-"react-router-dom@npm:5.3.4, react-router-dom@npm:^5.3.4":
++"react-router-dom-v5@npm:react-router-dom@5.3.4, react-router-dom@npm:5.3.4, react-router-dom@npm:^5.3.4":
+   version: 5.3.4
+   resolution: "react-router-dom@npm:5.3.4"
+   dependencies:
+@@ -29255,16 +29244,19 @@
+   languageName: node
+   linkType: hard
+
+-"react-router-dom@npm:^6.26.1":
+-  version: 6.30.4
+-  resolution: "react-router-dom@npm:6.30.4"
+-  dependencies:
+-    "@remix-run/router": "npm:1.23.3"
+-    react-router: "npm:6.30.4"
+-  peerDependencies:
+-    react: ">=16.8"
+-    react-dom: ">=16.8"
+-  checksum: 10/e220abac766bb9bcc56a99b78d30d99745cae3618f84baa92bd6ec481eccb6afb12c724d49dc68e6f870b70ff449f751f20f4aa33f1896d3f7d3bda8e47a6ce1
++"react-router-v7@npm:react-router@7.18.4":
++  version: 7.18.4
++  resolution: "react-router@npm:7.18.4"
++  dependencies:
++    cookie: "npm:^1.0.1"
++    set-cookie-parser: "npm:^2.6.0"
++  peerDependencies:
++    react: ">=18"
++    react-dom: ">=18"
++  peerDependenciesMeta:
++    react-dom:
++      optional: true
++  checksum: 10/2c4c6e23a38fe5994b126d55590f6dbfe810d47939b765cd7af97b4b26a16c3dab20c1b048811e05dc74bc93787a3d0c3fc5f29df19fd0732059cccc6bf7180a
+   languageName: node
+   linkType: hard
+
+@@ -29284,17 +29276,6 @@
+   peerDependencies:
+     react: ">=15"
+   checksum: 10/99d54a99af6bc6d7cad2e5ea7eee9485b62a8b8e16a1182b18daa7fad7dafa5e526850eaeebff629848b297ae055a9cb5b4aba8760e81af8b903efc049d48f5c
+-  languageName: node
+-  linkType: hard
+-
+-"react-router@npm:6.30.4":
+-  version: 6.30.4
+-  resolution: "react-router@npm:6.30.4"
+-  dependencies:
+-    "@remix-run/router": "npm:1.23.3"
+-  peerDependencies:
+-    react: ">=16.8"
+-  checksum: 10/59c1b64a210cde2f1d069ffc47dce2d58991bd4d81bb0743e22ba7c6b742e63ebbdc976c42c3a3ebd90bf38a2f05258bd0efa82c162b259be000d39787716043
+   languageName: node
+   linkType: hard
+
+@@ -30838,6 +30819,13 @@
+   version: 2.0.0
+   resolution: "set-blocking@npm:2.0.0"
+   checksum: 10/8980ebf7ae9eb945bb036b6e283c547ee783a1ad557a82babf758a065e2fb6ea337fd82cac30dd565c1e606e423f30024a19fff7afbf4977d784720c4026a8ef
++  languageName: node
++  linkType: hard
++
++"set-cookie-parser@npm:^2.6.0":
++  version: 2.7.2
++  resolution: "set-cookie-parser@npm:2.7.2"
++  checksum: 10/4b6f5ec4e3fa1aef471d9207117704d217ba6bb6443400b41f5ea945c4a7f6fc08e405a122c1a32b4ebde41f06dea75e02c2af87cee9abb27f3e3fe911e5839b
+   languageName: node
+   linkType: hard
+
+diff --git a/packages/bioetl-router-v7-bridge/index.mjs b/packages/bioetl-router-v7-bridge/index.mjs
+new file mode 100644
+--- /dev/null
++++ b/packages/bioetl-router-v7-bridge/index.mjs
+@@ -0,0 +1,46 @@
++import React, { useCallback, useSyncExternalStore } from 'react';
++import { useHistory, Route as LegacyRoute } from 'react-router-dom-v5';
++import { Router, Routes, Route, Link, useResolvedPath } from 'react-router-v7';
++
++export * from 'react-router-v7';
++
++/** Explicit internal-link boundary; native Link still supports external URLs. */
++export const InternalLink = React.forwardRef(function InternalLink({ to, ...props }, ref) {
++  const pathname = typeof to === 'string' ? to : to?.pathname;
++  if (pathname && /^[a-z][a-z0-9+.-]*:/i.test(pathname)) {
++    throw new TypeError('InternalLink only accepts route paths');
++  }
++  const resolved = useResolvedPath(to);
++  return React.createElement(Link, { ...props, to: resolved, ref });
++});
++
++/** Candidate bridge: both routers share legacy history, not private v6 APIs. */
++export function CompatRouter({ children }) {
++  const history = useHistory();
++  const subscribe = useCallback((notify) => history.listen(notify), [history]);
++  const snapshot = useCallback(() => history.location, [history]);
++  const location = useSyncExternalStore(subscribe, snapshot, snapshot);
++
++  return React.createElement(
++    Router,
++    { location, navigationType: history.action, navigator: history },
++    React.createElement(Routes, null, React.createElement(Route, { path: '*', element: children }))
++  );
++}
++
++/** Preserve v5 Route rendering while supplying a matching v7 Route context. */
++export function CompatRoute(props) {
++  const paths = props.path == null ? [null] : Array.isArray(props.path) ? props.path : [props.path];
++  return React.createElement(
++    Routes,
++    { location: props.location },
++    ...paths.map((path, index) => {
++      const routePath = path == null ? '*' : props.exact ? path : `${path.replace(/\/+$/, '')}/*`;
++      return React.createElement(Route, {
++        key: index,
++        path: routePath,
++        element: React.createElement(LegacyRoute, props),
++      });
++    })
++  );
++}
+diff --git a/packages/bioetl-router-v7-bridge/index.d.ts b/packages/bioetl-router-v7-bridge/index.d.ts
+new file mode 100644
+--- /dev/null
++++ b/packages/bioetl-router-v7-bridge/index.d.ts
+@@ -0,0 +1,8 @@
++import type { ForwardRefExoticComponent, ReactElement, ReactNode, RefAttributes } from 'react';
++import type { RouteProps } from 'react-router-dom-v5';
++import type { LinkProps } from 'react-router-v7';
++
++export * from 'react-router-v7';
++export declare function CompatRouter(props: { children?: ReactNode }): ReactElement;
++export declare function CompatRoute(props: RouteProps): ReactElement;
++export declare const InternalLink: ForwardRefExoticComponent<LinkProps & RefAttributes<HTMLAnchorElement>>;
+diff --git a/packages/bioetl-router-v7-bridge/package.json b/packages/bioetl-router-v7-bridge/package.json
+new file mode 100644
+--- /dev/null
++++ b/packages/bioetl-router-v7-bridge/package.json
+@@ -0,0 +1,30 @@
++{
++  "name": "@bioetl/grafana-router-v7-bridge",
++  "version": "0.3.0",
++  "private": true,
++  "type": "module",
++  "exports": {
++    ".": {
++      "types": "./index.d.ts",
++      "import": "./index.mjs",
++      "default": "./index.mjs"
++    }
++  },
++  "engines": {
++    "node": ">=20"
++  },
++  "dependencies": {
++    "@types/react-router-dom-v5": "npm:@types/react-router-dom@5.3.3",
++    "react-router-dom-v5": "npm:react-router-dom@5.3.4",
++    "react-router-v7": "npm:react-router@7.18.4"
++  },
++  "peerDependencies": {
++    "react": ">=18 <20",
++    "react-dom": ">=18 <20"
++  },
++  "types": "./index.d.ts",
++  "files": [
++    "index.mjs",
++    "index.d.ts"
++  ]
++}
