@@ -316,6 +316,7 @@ reviews:
 
     custom_checks:
       - name: "architecture-boundaries"
+        mode: "error"
         instructions: |
           PASS: Changed code respects BioETL dependency direction and layer ownership.
           FAIL on concrete evidence of: infrastructure/application/composition/interfaces imported by domain;
@@ -325,6 +326,7 @@ reviews:
           Require an exact import, construction site, or call path as evidence; do not fail on naming/style alone.
 
       - name: "security-regression"
+        mode: "error"
         instructions: |
           PASS: No concrete security regression is introduced by the diff.
           FAIL on evidence of hardcoded secrets; secret/token leakage in logs or artifacts; weakened auth,
@@ -335,6 +337,7 @@ reviews:
           Cite the exact path and vulnerable data/control flow. Do not fail on hypothetical vulnerabilities.
 
       - name: "public-contract-compatibility"
+        mode: "error"
         instructions: |
           PASS: No changes to public contracts (API, schema, CLI, events, config formats, data formats) OR changes include version bump, ADR reference, migration notes, and rollback procedure.
           FAIL: Unversioned breaking change to public contract without migration path.
@@ -343,6 +346,7 @@ reviews:
           Cite specific symbol/path/contract when failing.
 
       - name: "behavioral-test-adequacy"
+        mode: "warning"
         instructions: |
           PASS: Behavior changes include meaningful automated verification (unit, integration, or contract tests) OR change is trivial refactor with identical behavior.
           FAIL: Material behavior change without observable test coverage.
@@ -351,6 +355,7 @@ reviews:
           Cite specific function/path requiring test when failing.
 
       - name: "data-reproducibility-integrity"
+        mode: "error"
         instructions: |
           PASS: Data pipeline changes maintain schema, units, seeds, provenance, ordering, idempotency, and partial output semantics OR include explicit migration plan.
           FAIL: Silent change to data contracts, units, or ordering without migration.
