@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **51** live GitHub Actions
+This page is the canonical published inventory of the **52** live GitHub Actions
 workflow files tracked under `.github/workflows/` on the default branch.
 The count is derived from those tracked `*.yml` files; it is not a separately
 maintained target and it is **not** equal to the GitHub Actions API
@@ -25,7 +25,7 @@ Live GET `2026-09-17`: API `total_count` is **79**.
 
 | Bucket | Count | Meaning |
 | --- | --- | --- |
-| Tracked `.github/workflows/*.yml` | 51 | Canonical inventory on `main`; this page |
+| Tracked `.github/workflows/*.yml` | 52 | Canonical inventory on `main`; this page |
 | GitHub-hosted `dynamic/**` | 10 | Dependabot, CodeQL default, agent reviewers; not PR gates |
 | GitHub-only orphan temp/codex IDs | 16 | Files left `main`; `disabled_manually` after #10265 |
 | GitHub-only residual deleted files | 3 | Former tracked workflows; `disabled_manually`; not gates |
@@ -83,6 +83,7 @@ new spend/safety decision.
 | `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; GitHub required context is job `pr-gate-complete` (ruleset 13643213) |
 | `port-contracts.yml` | `Port Contract Tests` | `push`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Port-protocol and hypothesis contract tests |
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `push`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Provider contract replay/drift gate |
+| `router-v7-bridge.yml` | `Router 7 bridge candidate` | `push`, `pull_request` | pending first publication | `active` | Path-filtered migration candidate tests, browser build, and dependency audit; host acceptance remains separate |
 | `root-hygiene.yml` | `Root Hygiene` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Root-surface cleanliness and governance checks |
 | `schema-governance.yml` | `Schema Governance` | `workflow_call`, `push` | `active` | `active` | Generated artifacts, schema parity, schema drift |
 | `codeql.yml` | `CodeQL` | `workflow_call`, `push`, `schedule` | `active` | `active` | Advanced Python CodeQL SAST; default setup off |
