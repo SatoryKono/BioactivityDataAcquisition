@@ -231,8 +231,8 @@ def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
     assert primary_registry.issubset(evidence_uids)
     assert adjunct.issubset(set(registry))
     assert "bioetl-silver-reject-explorer" not in registry
-    assert len(registry) == closure.get("required_dashboard_count") == 7
-    assert len(primary_registry) == closure.get("primary_pipeline_universe_count") == 5
+    assert len(registry) == closure.get("required_dashboard_count") == 5
+    assert len(primary_registry) == closure.get("primary_pipeline_universe_count") == 3
     assert len(dashboards) >= len(primary_registry)
 
     shared_metrics = contract.get("shared_query_metrics")
@@ -251,6 +251,8 @@ def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
     for dashboard in dashboards:
         uid = dashboard.get("uid")
         if uid in {
+            "bioetl-runtime",
+            "bioetl-provider-health-v2",
             "bioetl-silver-reject-explorer",
             "bioetl-workflow-overview",
             "bioetl-alerts-slo",
@@ -347,18 +349,12 @@ def test_role_local_pipeline_handoffs_have_visible_recovery_paths() -> None:
         navigation.get("options", {}).get("content", "")
     )
 
-    for panel_id in (9410, 9411):
-        panel = _panel_by_id("bioetl-control-plane-v1.json", panel_id)
-        guidance = " ".join(
-            (
-                str(panel.get("description", "")),
-                str(panel.get("options", {}).get("content", "")),
-            )
-        ).lower()
-        assert "scope" in guidance
-        assert "health" in guidance
-
-    # Silver Reject Explorer recovery copy was removed with the dashboard.
+    scope = _panel_by_id("bioetl-control-plane-v1.json", 9400)
+    assert "SELECTED RUN" in str(scope).upper()
+    assert "Run ID" in str(scope)
+    verdict = _panel_by_id("bioetl-control-plane-v1.json", 9422)
+    assert "not CURRENT health" in verdict["description"]
+    assert any("viewPanel=9423" in link["url"] for link in verdict["links"])
 
 
 def test_overview_universe_is_an_exact_runtime_alias() -> None:
@@ -403,8 +399,6 @@ def test_dashboard_families_cover_all_shipped_dashboards() -> None:
     [
         ("bioetl-control-plane-v1.json", "bioetl-control-plane-v1"),
         ("bioetl-overview-v2.json", "bioetl-overview-v2"),
-        ("bioetl-runtime.json", "bioetl-runtime"),
-        ("bioetl-provider-health-v2.json", "bioetl-provider-health-v2"),
         ("bioetl-dq-v2.json", "bioetl-dq-v2"),
         ("bioetl-incident-v1.json", "bioetl-incident-v1"),
         ("bioetl-run-explorer-v1.json", "bioetl-run-explorer-v1"),
@@ -529,22 +523,14 @@ def test_current_dashboards_do_not_ship_future_execution_selectors() -> None:
         )
 
 
-def test_provider_health_selector_follows_selected_run() -> None:
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json").read_text(
-            encoding="utf-8"
-        )
-    )
-    variable = next(
-        item
-        for item in dashboard["templating"]["list"]
-        if item.get("name") == "provider"
-    )
-    assert variable.get("includeAll") is False
-    query = variable["query"]["infinityQuery"]["url"]
-    assert query.startswith("/ops/observability/selected-run-status?")
-    assert "pipeline=${pipeline}" in query
-    assert "run_id=${run_id}" in query
+def test_provider_evidence_follows_selected_run_without_retired_selector() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    variables = {v["name"] for v in dashboard["templating"]["list"]}
+    assert not {"provider", "pipeline_context", "adapter"} & variables
+    provider = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9480)
+    assert "run_id=${run_id}" in str(provider["targets"])
+    assert "selected-run-status" in str(provider["targets"])
+    assert not Path("grafana/dashboards/bioetl-provider-health-v2.json").exists()
 
 
 def test_http_selector_frames_declare_columns_for_empty_catalogs() -> None:

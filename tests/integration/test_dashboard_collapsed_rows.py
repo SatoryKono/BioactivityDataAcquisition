@@ -69,7 +69,7 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
         "bioetl-control-plane-v1.json": 2,
         "bioetl-dq-v2.json": 1,
         "bioetl-incident-v1.json": 8,
-        "bioetl-overview-v2.json": 0,
+        "bioetl-overview-v2.json": 1,
         "bioetl-run-explorer-v1.json": 0,
     }
     observed = {}
@@ -101,7 +101,6 @@ def test_row_groups_materialize_expanded_for_test_stage() -> None:
         rows = [panel for panel in root_panels if panel.get("type") == "row"]
         if dashboard_path.name in {
             "bioetl-run-explorer-v1.json",
-            "bioetl-overview-v2.json",
         }:
             assert rows == []
             assert len(get_dashboard_panels(materialized)) == shipped_total

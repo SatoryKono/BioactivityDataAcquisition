@@ -384,3 +384,23 @@ def test_qa_cli_report_dashboard_inventory_help_mentions_health_and_deployed_dir
     assert result.returncode == 0
     assert "--health-summary" in result.stdout
     assert "--deployed-dir" in result.stdout
+
+
+def test_inventory_counts_contextual_dashboard_destinations() -> None:
+    payload = {
+        "panels": [
+            {
+                "id": 9002,
+                "fieldConfig": {
+                    "defaults": {
+                        "links": [
+                            {
+                                "url": "/d/bioetl-dq-v2/5-data-quality?var-run_id=selected"
+                            }
+                        ]
+                    }
+                },
+            }
+        ]
+    }
+    assert inventory._extract_link_uids(payload) == ["bioetl-dq-v2"]

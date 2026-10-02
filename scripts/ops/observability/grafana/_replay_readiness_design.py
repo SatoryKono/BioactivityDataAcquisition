@@ -5,14 +5,21 @@ from copy import deepcopy
 
 def apply_trust_action_display(payload: dict) -> None:
     """Only materialize a linked Action field when a saved reason exists."""
-    trust = next(p for p in payload["panels"] if p.get("id") == 9418)
+    pending = list(payload["panels"])
+    by_id = {}
+    while pending:
+        panel = pending.pop()
+        by_id[panel["id"]] = panel
+        pending.extend(panel.get("panels", []))
+    trust = by_id[9418]
     expression = (
         '[presentation_trust.($base := $sift($, function($v,$k){$k != "trust_reasons_action"}); '
         '$merge([$base, reasons_count > 0 ? {"trust_reasons_action":"View trust reasons"} : '
         '{"trust_action_note": reasons_count = 0 ? "No trust issues" : "Not assessed"}]))]'
     )
     trust["targets"][0].update(
-        parser="uql", root_selector="",
+        parser="uql",
+        root_selector="",
         uql='parse-json | jsonata "' + expression.replace('"', '\\"') + '"',
     )
     for transform in trust["transformations"]:
@@ -27,18 +34,28 @@ def apply_trust_action_display(payload: dict) -> None:
     overrides = trust["fieldConfig"]["overrides"]
     if any(item["matcher"].get("options") == "Action" for item in overrides):
         overrides[:] = [
-            item for item in overrides
+            item
+            for item in overrides
             if item["matcher"].get("options") != "trust_reasons_action"
         ]
     for item in overrides:
         if item["matcher"].get("options") == "Action":
             item["matcher"]["options"] = "trust_reasons_action"
             item["properties"].append({"id": "displayName", "value": "Action"})
-    overrides[:] = [item for item in overrides if item["matcher"].get("options") != "trust_action_note"]
-    overrides.append({
-        "matcher": {"id": "byName", "options": "trust_action_note"},
-        "properties": [{"id": "displayName", "value": "Action"}, {"id": "links", "value": []}],
-    })
+    overrides[:] = [
+        item
+        for item in overrides
+        if item["matcher"].get("options") != "trust_action_note"
+    ]
+    overrides.append(
+        {
+            "matcher": {"id": "byName", "options": "trust_action_note"},
+            "properties": [
+                {"id": "displayName", "value": "Action"},
+                {"id": "links", "value": []},
+            ],
+        }
+    )
 
 
 def apply_replay_readiness_design(payload: dict) -> None:
@@ -55,7 +72,8 @@ def apply_replay_readiness_design(payload: dict) -> None:
         "OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. "
         "UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is "
         "selected; QUERY ERROR means backend unavailable or request failure. "
-        "UNKNOWN means no assessed value, never READY. Open replay checks for basis."
+        "UNKNOWN means no assessed value, never READY. Open replay checks for basis. "
+        "Saved processing_status and trust_status are separate outcomes, not this exact-replay verdict."
     )
     card["options"] = {
         "reduceOptions": {
@@ -71,7 +89,10 @@ def apply_replay_readiness_design(payload: dict) -> None:
         "text": {"valueSize": 22, "titleSize": 12},
     }
     card["transformations"] = [
-        {"id": "filterFieldsByName", "options": {"include": {"names": ["verdict", "explanation"]}}}
+        {
+            "id": "filterFieldsByName",
+            "options": {"include": {"names": ["verdict", "explanation"]}},
+        }
     ]
     colors = {
         "READY": "green",
@@ -89,12 +110,19 @@ def apply_replay_readiness_design(payload: dict) -> None:
             "noValue": "UNKNOWN",
             "mappings": [
                 {
+                    "type": "special",
+                    "options": {
+                        "match": "null",
+                        "result": {"text": "UNKNOWN", "color": "gray"},
+                    },
+                },
+                {
                     "type": "value",
                     "options": {
                         state: {"text": state, "color": color}
                         for state, color in colors.items()
                     },
-                }
+                },
             ],
             "color": {"mode": "thresholds"},
             "thresholds": {
@@ -102,10 +130,14 @@ def apply_replay_readiness_design(payload: dict) -> None:
                 "steps": [{"color": "#555555", "value": None}],
             },
         },
-        "overrides": [{
-            "matcher": {"id": "byName", "options": "verdict"},
-            "properties": [{"id": "displayName", "value": "${__data.fields.explanation}"}],
-        }],
+        "overrides": [
+            {
+                "matcher": {"id": "byName", "options": "verdict"},
+                "properties": [
+                    {"id": "displayName", "value": "${__data.fields.explanation}"}
+                ],
+            }
+        ],
     }
     card["links"] = [
         {

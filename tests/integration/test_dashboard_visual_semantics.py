@@ -23,52 +23,39 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
-def test_dq_history_colors_survive_trailing_missing_samples() -> None:
-    """#10502: a missing final sample must not recolor measured 100% gray."""
+def test_saved_dq_errors_do_not_become_healthy_history() -> None:
+    """DQ no longer projects range-history colors onto a saved Run ID."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panels = {panel["id"]: panel for panel in get_dashboard_panels(dashboard)}
-    defaults = panels[153]["fieldConfig"]["defaults"]
-    assert defaults["thresholds"] == panels[2]["fieldConfig"]["defaults"]["thresholds"]
-    assert defaults["color"]["seriesBy"] == "min"
-    assert defaults["custom"]["gradientMode"] == "none"
-    assert defaults["custom"]["fillOpacity"] == 0
-    assert defaults["custom"]["spanNulls"] is False
-    assert "color=minimum observed" in panels[153]["targets"][0]["legendFormat"]
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    assert 153 not in panels
+    status = panels[9406]
+    assert "SELECTED RUN" in status["description"]
+    assert "QUERY ERROR" in str(status)
+    assert "INCOMPLETE" in str(status)
+    assert "run_id=${run_id}" in str(status["targets"])
+    assert not any("expr" in t for t in status["targets"])
 
 
-def test_status_panels_have_correct_value_mapping():
-    """Current-status stat panels must have explicit value mapping for OK/WARN/CRIT/UNKNOWN."""
-    status_dashboards = [
-        "bioetl-runtime.json",
-        "bioetl-provider-health-v2.json",
-        "bioetl-dq-v2.json",
-    ]
-    for dashboard_name in status_dashboards:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        for panel in get_dashboard_panels(dashboard):
-            title = panel.get("title", "")
-            # Check for status/severity panels
-            if "Status" in title or "Severity Matrix" in title:
-                options = panel.get("options", {})
-                color_mode = options.get("colorMode")
-                # Background color mode is expected for current-status stat panels
-                if color_mode == "background":
-                    mappings = options.get("mappings", [])
-                    if mappings:
-                        # If mappings exist, validate they have proper structure
-                        assert isinstance(mappings, list), (
-                            f"{dashboard_name}:{title} mappings must be a list"
-                        )
-                        # Check for at least some status mappings
-                        mapping_values = {
-                            m.get("value")
-                            for m in mappings
-                            if m.get("value") is not None
-                        }
-                        # Don't enforce specific values, just ensure mappings exist
-                        assert len(mapping_values) >= 1, (
-                            f"{dashboard_name}:{title} must have at least one mapping"
-                        )
+def test_saved_provider_status_has_fail_closed_mapping() -> None:
+    panel = next(
+        p
+        for p in get_dashboard_panels(
+            load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+        )
+        if p["id"] == 9481
+    )
+    defaults = panel["fieldConfig"]["defaults"]
+    assert defaults["noValue"] == "UNKNOWN"
+    values = next(m["options"] for m in defaults["mappings"] if m["type"] == "value")
+    assert values["UNKNOWN"]["color"] == "gray"
+    assert values["OK"]["color"] == "green"
+    assert values["ERROR"]["color"] == "red"
+    assert any(
+        m["type"] == "special"
+        and m["options"]["match"] == "null"
+        and m["options"]["result"]["text"] == "UNKNOWN"
+        for m in defaults["mappings"]
+    )
 
 
 def test_thresholds_configuration():

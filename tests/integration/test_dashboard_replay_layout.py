@@ -34,5 +34,5 @@ def test_replay_layout_preserves_checks_and_identity_scope():
     for panel in by_id.values():
         for target in panel.get("targets", []):
             assert "run_id=${run_id}" in target["url"]
-    assert {p["id"] for p in by_id[9430]["panels"]} == {9414, 9415, 9416}
+    assert {p["id"] for p in by_id[9430]["panels"]} == {9408, 9418, 9414, 9415, 9416}
     assert {p["id"] for p in by_id[9431]["panels"]} == {9413, 9406}

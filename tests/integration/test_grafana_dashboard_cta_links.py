@@ -130,7 +130,9 @@ def test_all_runbook_links_use_canonical_github_urls_and_resolve_locally() -> No
                 continue
             observed += 1
             if "${__data.fields.alert_runbook}" in url:
-                source = Path("scripts/ops/observability/grafana/_incident_explanations.py").read_text(encoding="utf-8")
+                source = Path(
+                    "scripts/ops/observability/grafana/_incident_explanations.py"
+                ).read_text(encoding="utf-8")
                 for slug in ("incident-response", "docker-stability"):
                     assert f'"{slug}"' in source
                     assert Path(f"docs/05-operations/runbooks/{slug}.md").is_file()
@@ -382,7 +384,11 @@ def test_overview_domain_actions_preserve_all_three_operator_questions() -> None
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     actions = {link["title"]: link for link in panels[9002]["links"]}
-    assert set(actions) == {"Open Control Plane", "Open Data Quality", "Open Provider Evidence"}
+    assert set(actions) == {
+        "Open Control Plane",
+        "Open Data Quality",
+        "Open Provider Evidence",
+    }
     provider = actions["Open Provider Evidence"]
     assert "viewPanel=9480" in provider["url"]
     assert 9480 in panels
@@ -412,8 +418,26 @@ def test_run_explorer_links_distinguish_provider_report_and_replay_evidence() ->
     assert "viewPanel=9480" in links["Provider Evidence"]
     assert "/d/bioetl-control-plane-v1/" in links["Saved Evidence"]
     assert "viewPanel=9408" in links["Saved Evidence"]
-    assert len({links[k] for k in ("Provider Evidence", "Saved Evidence", "Run Overview", "Replay Readiness")}) == 4
-    for key in ("Provider Evidence", "Saved Evidence", "Run Overview", "Replay Readiness"):
+    assert (
+        len(
+            {
+                links[k]
+                for k in (
+                    "Provider Evidence",
+                    "Saved Evidence",
+                    "Run Overview",
+                    "Replay Readiness",
+                )
+            }
+        )
+        == 4
+    )
+    for key in (
+        "Provider Evidence",
+        "Saved Evidence",
+        "Run Overview",
+        "Replay Readiness",
+    ):
         assert "${__data.fields.run_id:percentencode}" in links[key]
         assert "${__url_time_range}" in links[key]
 
@@ -423,4 +447,8 @@ def test_dq_summary_routes_to_selected_run_evidence() -> None:
     panel = _find_panel_by_id(dashboard, 9406)
     links = _iter_panel_data_links(panel)
     assert any(link["title"] == "Open Run Explorer" for link in links)
-    assert all("${run_id:queryparam}" in link["url"] for link in links if link["url"].startswith("/d/"))
+    assert all(
+        "${run_id:queryparam}" in link["url"]
+        for link in links
+        if link["url"].startswith("/d/")
+    )

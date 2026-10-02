@@ -56,7 +56,7 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 _CONTROL_PLANE = Path("grafana/dashboards/bioetl-control-plane-v1.json")
-_RUNTIME = Path("grafana/dashboards/bioetl-runtime.json")
+_DQ = Path("grafana/dashboards/bioetl-dq-v2.json")
 _OVERVIEW = Path("grafana/dashboards/bioetl-overview-v2.json")
 
 
@@ -180,25 +180,17 @@ def test_dash_first_001_operator_question_contract() -> None:
 
 def test_dash_first_001_fails_closed_when_next_action_token_drifts() -> None:
     dashboard = copy.deepcopy(load_dashboard(_OVERVIEW))
-    for panel in dashboard.get("panels") or []:
-        if not isinstance(panel, dict):
-            continue
-        for key in ("title", "description"):
-            value = panel.get(key)
-            if isinstance(value, str):
-                panel[key] = value.replace("Open Run Explorer", "Open Something Else")
-        for link in panel.get("links") or []:
-            if isinstance(link, dict) and isinstance(link.get("title"), str):
-                link["title"] = link["title"].replace(
-                    "Open Run Explorer", "Open Something Else"
-                )
-        defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
-        if isinstance(defaults, dict):
-            for link in defaults.get("links") or []:
-                if isinstance(link, dict) and isinstance(link.get("title"), str):
-                    link["title"] = link["title"].replace(
-                        "Open Run Explorer", "Open Something Else"
-                    )
+
+    def remove_next_action(value):
+        if isinstance(value, str):
+            return value.replace("Open Run Explorer", "Open Something Else")
+        if isinstance(value, dict):
+            return {key: remove_next_action(child) for key, child in value.items()}
+        if isinstance(value, list):
+            return [remove_next_action(child) for child in value]
+        return value
+
+    dashboard = remove_next_action(dashboard)
     with pytest.raises(AssertionError, match="next_action token"):
         violations = first_screen_decision_violations(
             "bioetl-overview-v2.json", dashboard
@@ -213,13 +205,13 @@ def test_dash_first_002_forensic_rows_collapsed() -> None:
 
 
 def test_dash_first_002_fails_closed_on_uncollapsed_or_unallowlisted_inspect() -> None:
-    dashboard = copy.deepcopy(load_dashboard(_RUNTIME))
+    dashboard = copy.deepcopy(load_dashboard(_DQ))
     for panel in dashboard.get("panels") or []:
         if isinstance(panel, dict) and panel.get("type") == "row":
             panel["collapsed"] = False
             break
     with pytest.raises(AssertionError, match="must ship collapsed"):
-        violations = forensic_first_window_violations("bioetl-runtime.json", dashboard)
+        violations = forensic_first_window_violations("bioetl-dq-v2.json", dashboard)
         assert not violations, "\n".join(violations)
 
     overview = copy.deepcopy(load_dashboard(_OVERVIEW))
@@ -325,13 +317,14 @@ def test_dash_copy_001_data_panels_name_empty_state() -> None:
 
 
 def test_dash_copy_001_fails_closed_without_empty_state_copy() -> None:
-    dashboard = copy.deepcopy(load_dashboard(_RUNTIME))
-    panel = _panel_by_id(dashboard, 9998)
+    dashboard = copy.deepcopy(load_dashboard(_DQ))
+    panel = _panel_by_id(dashboard, 9406)
     panel["description"] = "Pipeline status."
     defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
     defaults["noValue"] = ""
-    violations = data_panel_empty_state_violations("bioetl-runtime.json", dashboard)
-    assert violations, "mutated runtime 9998 must fail DASH-COPY-001 empty-state copy"
+    defaults["mappings"] = []
+    violations = data_panel_empty_state_violations("bioetl-overview-v2.json", dashboard)
+    assert violations, "mutated runtime 9603 must fail DASH-COPY-001 empty-state copy"
 
 
 def test_requirement_coverage_module_is_wired_as_required_dashboard_check() -> None:

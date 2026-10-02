@@ -493,7 +493,7 @@ def test_scalar_density_survey_runs_on_shipped_dashboards() -> None:
         result = scalar_report.survey_dashboard(dashboard)
         assert isinstance(result.get("groups"), list)
         surveyed += 1
-    assert surveyed >= 7
+    assert surveyed == 5
 
 
 def test_group_scalar_density_exceeds_first_screen_where_enforced() -> None:

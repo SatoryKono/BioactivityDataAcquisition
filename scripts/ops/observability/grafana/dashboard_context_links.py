@@ -108,9 +108,10 @@ def build_handoff_url(
     if target_uid in RETIRED_UID_REDIRECTS:
         target_uid = RETIRED_UID_REDIRECTS[target_uid]
         extras = {
-            k: v for k, v in (extras or {}).items()
-            if k not in {"stage", "provider_hint", "provider", "pipeline_context", "adapter"}
-
+            k: v
+            for k, v in (extras or {}).items()
+            if k
+            not in {"stage", "provider_hint", "provider", "pipeline_context", "adapter"}
         }
     if target_uid not in PATH_BY_UID:
         raise ValueError(f"unknown dashboard uid: {target_uid}")
@@ -222,6 +223,11 @@ class _HandoffQuery:
     var_values: dict[str, str] = field(default_factory=dict)
 
     def add(self, key: str, value: str) -> None:
+        template = re.fullmatch(r"\$\{([a-z_]+):queryparam\}", key)
+        if template:
+            name = template.group(1)
+            self.var_values[name] = f"${name}"
+            return
         if key == TIME_TOKEN or key.startswith("${__url_time_range"):
             self.has_time_token = True
             return
@@ -292,10 +298,15 @@ def rewrite_dashboard_handoff_url(url: str) -> str:
     state = _HandoffQuery(has_time_token=TIME_TOKEN in raw)
     for key, value in query_pairs:
         if overview_target == "bioetl-overview-v2" and key in {
-            "var-stage", "var-provider_hint", "var-provider",
-            "var-pipeline_context", "var-adapter",
-            "${stage:queryparam}", "${provider:queryparam}",
-            "${provider_hint:queryparam}", "${pipeline_context:queryparam}",
+            "var-stage",
+            "var-provider_hint",
+            "var-provider",
+            "var-pipeline_context",
+            "var-adapter",
+            "${stage:queryparam}",
+            "${provider:queryparam}",
+            "${provider_hint:queryparam}",
+            "${pipeline_context:queryparam}",
             "${adapter:queryparam}",
         }:
             continue
@@ -358,7 +369,10 @@ def _rewrite_links(value: object) -> None:
     elif isinstance(value, dict):
         for key, item in value.items():
             if isinstance(item, str) and key == "url" and item.startswith("/d/"):
-                if any(item.startswith(f"/d/{uid}/") for uid in (*RETIRED_UID_REDIRECTS, "bioetl-overview-v2")):
+                if any(
+                    item.startswith(f"/d/{uid}/")
+                    for uid in (*RETIRED_UID_REDIRECTS, "bioetl-overview-v2")
+                ):
                     item = rewrite_dashboard_handoff_url(item)
                 value[key] = serialize_selection_parameters(item)
             elif isinstance(item, str) and key == "content":

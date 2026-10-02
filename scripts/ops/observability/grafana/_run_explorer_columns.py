@@ -82,7 +82,7 @@ def apply_overall_verdict(payload: dict) -> None:
         "id": 9604,
         "type": "stat",
         "title": "Review Overall Verdict",
-        "description": "Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
+        "description": "SELECTED RUN · Saved overall verdict for the selected Run ID, identical to Review Selected Run Status. This verdict does not authorize replay. Missing evidence remains UNKNOWN; request errors remain errors.",
         "gridPos": {
             "x": source["gridPos"]["x"],
             "y": 2,
@@ -190,7 +190,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     panel = panels[3010]
     panel["gridPos"].update(y=3, h=13)
     panel["description"] = (
-        "Last 10 launches, newest Started first, independent of the time range. "
+        "GLOBAL · Browse the last 10 launches, newest Started first, independent of the time range. "
         "Workflow and Pipeline open passports. Run ID opens the persisted Report; "
         "inspect its full UUID in the cell. Overview is processing status, not replay readiness. "
         "Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. "

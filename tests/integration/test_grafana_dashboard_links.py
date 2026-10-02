@@ -84,7 +84,9 @@ def test_ops_http_health_links_use_same_origin_grafana_proxy() -> None:
             if _FORBIDDEN_OPS_HTTP_BROWSER_HOST_RE.match(url):
                 forbidden.append(f"{dashboard_path.name}:{title!r} -> {url}")
 
-    assert health_links, "Authored backend-health CTAs must remain available after retirement"
+    assert health_links, (
+        "Authored backend-health CTAs must remain available after retirement"
+    )
     assert not forbidden, (
         "Browser-side Ops HTTP health links must not target loopback, "
         "host.docker.internal, or container service DNS:\n" + "\n".join(forbidden)

@@ -48,7 +48,6 @@ HIDDEN_CHIP_VARS = {
 }
 SUMMARY_PANELS = {
     "bioetl-overview-v2.json": 9603,
-    "bioetl-runtime.json": 9998,
     "bioetl-dq-v2.json": 9406,
     "bioetl-incident-v1.json": 2101,
 }
@@ -165,31 +164,19 @@ def test_query_panel_descriptions_carry_scope_badge() -> None:
 
 
 def test_first_window_coverage_set_range_and_refresh_copy() -> None:
-    required = (
-        "Effective refresh",
-        "60s",
-        "timezone",
-        "Run coverage",
-        "IN RANGE",
-        "OUT OF RANGE",
-    )
-    missing: list[str] = []
+    expected = {
+        "bioetl-incident-v1.json": "GLOBAL",
+        "bioetl-run-explorer-v1.json": "BROWSE",
+    }
     for path in get_dashboard_files():
         dashboard = _load(path)
-        blob = _first_window_blob(dashboard)
-        for token in (
-            required[:3] if path.name == "bioetl-run-explorer-v1.json" else required
-        ):
-            if token not in blob:
-                missing.append(f"{path.name} missing {token}")
+        blob = _first_window_blob(dashboard).upper()
+        assert expected.get(path.name, "SELECTED RUN") in blob
+        assert dashboard["refresh"] == "60s"
+        assert dashboard["timezone"] == "browser"
         if path.name == "bioetl-run-explorer-v1.json":
-            assert "not this time range" in blob
-            assert "Open Report" in blob
-        elif "Set range to run" not in blob and "Open run in Run Explorer" not in blob:
-            missing.append(f"{path.name} missing run-range action copy")
-        assert dashboard.get("refresh") == "60s", path.name
-        assert dashboard.get("timezone") == "browser", path.name
-    assert not missing, "coverage/refresh header:\n" + "\n".join(missing)
+            assert "TIME PICKER" in blob and "DOES NOT FILTER" in blob
+            assert "REPORT" in blob
 
 
 def test_hidden_vars_have_read_only_chips() -> None:
@@ -256,22 +243,16 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
 
 
 def test_provider_reason_and_causes_share_empty_state() -> None:
-    dashboard = _load(DASHBOARD_DIR / "bioetl-provider-health-v2.json")
-    row = next(item for item in _root_panels(dashboard) if item.get("id") == 9106)
-    assert row.get("type") == "row"
-    assert row.get("collapsed") is True
-    assert int(row["gridPos"]["y"]) + int(row["gridPos"]["h"]) >= FIRST_WINDOW_Y
-    nested_ids = {
-        item.get("id") for item in row.get("panels") or [] if isinstance(item, dict)
-    }
-    assert {9102, 9103} <= nested_ids
-    reason = next(
-        item for item in _iter_panels(_root_panels(dashboard)) if item.get("id") == 9107
-    )
-    assert int((reason.get("gridPos") or {}).get("y", 99)) < FIRST_WINDOW_Y
-    expr = str((reason.get("targets") or [{}])[0].get("expr") or "")
-    assert "bioetl_provider_current_status_info" in expr
-    assert "run_id" not in expr
+    dashboard = _load(DASHBOARD_DIR / "bioetl-overview-v2.json")
+    row = next(item for item in _root_panels(dashboard) if item.get("id") == 9483)
+    assert row["collapsed"] is True
+    assert row["gridPos"]["y"] >= FIRST_WINDOW_Y - 1
+    panels = {p["id"]: p for p in _iter_panels(row["panels"])}
+    for panel_id in (9480, 9481):
+        panel = panels[panel_id]
+        assert "UNKNOWN" in panel["description"]
+        assert "QUERY ERROR" in panel["description"]
+        assert "run_id=${run_id}" in panel["targets"][0]["url"]
 
 
 def test_promql_targets_do_not_select_run_id_label() -> None:
@@ -298,19 +279,19 @@ def test_run_explorer_selects_rows_without_removed_detail_groups() -> None:
     override = next(
         o
         for o in browse["fieldConfig"]["overrides"]
-        if o["matcher"]["options"] == "Run"
+        if o["matcher"]["options"] == "Run ID"
     )
     link = next(p["value"][0] for p in override["properties"] if p["id"] == "links")
     assert link["targetBlank"] is False
     assert "viewPanel" not in link["url"]
     for token in (
-        "var-pipeline=${__data.fields.Pipeline}",
-        "var-run_type=${__data.fields.run_type}",
-        "var-run_id=${__data.fields.Run:percentencode}",
+        "var-pipeline=${__data.fields.Pipeline:percentencode}",
+        "var-run_type=${__data.fields.run_type:percentencode}",
+        "var-run_id=${__data.fields.run_id:percentencode}",
         "${__url_time_range}",
     ):
         assert token in link["url"]
     assert browse["options"]["footer"]["enablePagination"] is False
     assert browse["options"]["cellHeight"] == "sm"
     banner = next(p for p in roots if p["id"] == 1)
-    assert "<br>Pipeline:" in banner["options"]["content"]
+    assert "Reset filters" in banner["options"]["content"]

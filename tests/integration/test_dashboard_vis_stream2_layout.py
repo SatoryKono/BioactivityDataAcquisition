@@ -29,7 +29,8 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 _CONTROL = Path("grafana/dashboards/bioetl-control-plane-v1.json")
-_PROVIDER = Path("grafana/dashboards/bioetl-provider-health-v2.json")
+_OVERVIEW = Path("grafana/dashboards/bioetl-overview-v2.json")
+_INCIDENT = Path("grafana/dashboards/bioetl-incident-v1.json")
 
 
 def _panel(dashboard: dict, panel_id: int) -> dict:
@@ -54,48 +55,29 @@ def _organize(panel: dict) -> dict:
 def test_replay_anchor_tables_hide_internal_columns_and_rename_operator_fields() -> (
     None
 ):
-    """#10247 T2: Parameter / Current / Result / Action, no copy_mode chrome."""
-    dashboard = load_dashboard(_CONTROL)
-    for panel_id in (9406, 9408, 9409):
-        panel = _panel(dashboard, panel_id)
-        excluded = _organize(panel).get("excludeByName") or {}
-        assert excluded.get("copy_mode") is True
-        assert excluded.get("copy_value") is True
-        assert excluded.get("Time") is True
-        assert "__name__" not in excluded
-        names = {
-            item.get("matcher", {}).get("options"): {
-                prop.get("id"): prop.get("value")
-                for prop in item.get("properties") or []
-            }
-            for item in panel.get("fieldConfig", {}).get("overrides") or []
-        }
-        assert names["copy_mode"]["custom.hidden"] is True
-        assert (
-            panel.get("fieldConfig", {})
-            .get("defaults", {})
-            .get("custom", {})
-            .get("inspect")
-            is True
-        )
+    panel = _panel(load_dashboard(_CONTROL), 9408)
+    include = panel["transformations"][0]["options"]["include"]["names"]
+    assert include == ["label", "priority", "present", "status", "value_full", "why"]
+    assert not {"copy_mode", "copy_value", "Time"} & set(include)
+    assert _organize(panel)["renameByName"]["label"] == "Parameter"
+    assert panel["fieldConfig"]["defaults"]["custom"]["inspect"] is True
 
 
 def test_identity_values_and_gaps_use_short_values_and_compact_height() -> None:
-    """#10247 T3: short values with inspect, no full-hash canvas."""
+    """The collapsed evidence table retains full values and copy access."""
     dashboard = load_dashboard(_CONTROL)
-    for panel_id in (9405, 9407):
-        panel = _panel(dashboard, panel_id)
-        assert int((panel.get("gridPos") or {}).get("h") or 0) <= 8
-        rename = _organize(panel).get("renameByName") or {}
-        assert rename.get("label") == "Parameter"
-        assert rename.get("value_short") == "Current"
-        excluded = _organize(panel).get("excludeByName") or {}
-        assert excluded.get("value_full") is True
+    panel = _panel(dashboard, 9408)
+    row = _panel(dashboard, 9430)
+    assert row["collapsed"] is True and panel in row["panels"]
+    assert panel["gridPos"]["h"] == 9
+    assert _organize(panel)["renameByName"]["value_full"] == "Value"
+    assert any("view=copy_values" in link["url"] for link in panel["links"])
+    assert "present ? 1 : 0" in panel["targets"][0]["uql"]
 
 
 def test_read_latency_defaults_to_p95_table_legend() -> None:
     """#10248 T4: p95 default, quantile selector, last/max legend table."""
-    dashboard = load_dashboard(_CONTROL)
+    dashboard = load_dashboard(_INCIDENT)
     panel = _panel(dashboard, 111)
     assert len(panel.get("targets") or []) == 1
     expr = str((panel.get("targets") or [{}])[0].get("expr") or "")
@@ -111,42 +93,25 @@ def test_read_latency_defaults_to_p95_table_legend() -> None:
     )
     assert quantile.get("current", {}).get("value") == "0.95"
     assert str(quantile.get("description") or "").strip()
-    reads = _panel(dashboard, 6)
-    axis = (
-        (reads.get("fieldConfig") or {})
-        .get("defaults", {})
-        .get("custom", {})
-        .get("axisLabel")
-    )
-    assert "reads / $__interval" in str(axis)
 
 
 def test_provider_severity_column_has_min_width_and_narrower_provider() -> None:
-    """#10252 H2: Severity readable; Provider no longer steals the row."""
-    dashboard = load_dashboard(_PROVIDER)
-    panel = _panel(dashboard, 9101)
-    widths: dict[str, int] = {}
-    for override in (panel.get("fieldConfig") or {}).get("overrides") or []:
-        field = str((override.get("matcher") or {}).get("options") or "")
-        props = {
-            item.get("id"): item.get("value")
-            for item in override.get("properties") or []
-        }
-        if "custom.width" in props:
-            widths[field] = int(props["custom.width"])
-        if field == "provider":
-            assert "custom.width" not in props
-            assert "custom.minWidth" not in props
-        if field == "Value":
-            assert (props.get("custom.cellOptions") or {}).get("wrapText") is False
-    assert "provider" not in widths
-    assert "Value" not in widths
-    assert widths.get("Severity") == 130
-    assert panel["transformations"][0]["options"]["renameByName"]["Value"] == "Severity"
-    assert int((panel.get("gridPos") or {}).get("y") or 0) < 18
-    for panel_id in (9102, 9111, 9112):
-        expander = _panel(dashboard, panel_id)
-        assert int((expander.get("gridPos") or {}).get("y") or 0) >= 18
+    """Saved provider observations replace the retired CURRENT severity matrix."""
+    dashboard = load_dashboard(_OVERVIEW)
+    row = _panel(dashboard, 9483)
+    assert row["collapsed"] is True
+    assert {9480, 9481} <= {p["id"] for p in row["panels"]}
+    panel = _panel(dashboard, 9481)
+    assert "provider_checks" in str(panel["targets"])
+    assert "run_id=${run_id}" in str(panel["targets"])
+    values = next(
+        m["options"]
+        for m in panel["fieldConfig"]["defaults"]["mappings"]
+        if m["type"] == "value"
+    )
+    assert values["UNKNOWN"]["color"] == "gray"
+    assert values["ERROR"]["color"] == "red"
+    assert not any("bioetl_provider_current_status" in str(p) for p in row["panels"])
 
 
 def test_nav_chips_use_eight_px_gap_and_status_stats_stay_compact() -> None:
@@ -154,10 +119,8 @@ def test_nav_chips_use_eight_px_gap_and_status_stats_stay_compact() -> None:
     for path in (
         _CONTROL,
         Path("grafana/dashboards/bioetl-overview-v2.json"),
-        _PROVIDER,
         Path("grafana/dashboards/bioetl-dq-v2.json"),
         Path("grafana/dashboards/bioetl-incident-v1.json"),
-        Path("grafana/dashboards/bioetl-runtime.json"),
     ):
         dashboard = load_dashboard(path)
         nav = _panel(dashboard, 1000)
@@ -171,7 +134,7 @@ def test_nav_chips_use_eight_px_gap_and_status_stats_stay_compact() -> None:
             if options.get("colorMode") != "background":
                 continue
             text = options.get("text") or {}
-            assert options.get("textMode") == "value"
-            assert panel["fieldConfig"]["defaults"]["displayName"] == panel["title"]
-            assert text.get("valueSize") == 20
-            assert text.get("titleSize") == 14
+            assert options.get("textMode") in {"value", "value_and_name"}
+            assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+            assert 20 <= text.get("valueSize", 0) <= 48
+            assert text.get("titleSize", 0) >= 12

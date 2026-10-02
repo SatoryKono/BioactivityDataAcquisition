@@ -2579,15 +2579,103 @@ def apply_to_dashboard(
             pending.extend(children)
     if current_uid == "bioetl-overview-v2":
         payload["panels"] = [p for p in payload["panels"] if p.get("id") != 9450]
-        pending = list(payload["panels"])
-        while pending:
-            panel = pending.pop()
-            pending.extend(panel.get("panels", []))
-            panel["title"] = panel.get("title", "").removeprefix("Review ")
     if current_uid == "bioetl-control-plane-v1":
         from scripts.ops.observability.grafana._replay_layout import apply_replay_layout
 
         apply_replay_layout(payload)
+    if current_uid == "bioetl-overview-v2":
+        detail_ids = {9480, 9481, 9460, 9482}
+        details = [
+            panel for panel in payload["panels"] if panel.get("id") in detail_ids
+        ]
+        payload["panels"] = [
+            panel
+            for panel in payload["panels"]
+            if panel.get("id") not in detail_ids | {9483}
+        ]
+        payload["panels"].append(
+            {
+                "id": 9483,
+                "type": "row",
+                "title": "Inspect Saved Provider / Stage / Data Quality Evidence",
+                "collapsed": True,
+                "gridPos": {"x": 0, "y": 17, "w": 24, "h": 1},
+                "panels": details,
+            }
+        )
+        names = {
+            9603: "Review Selected Run Status",
+            9604: "Review Overall Verdict",
+            9300: "Review Run Identity",
+            9480: "Inspect Provider Evidence",
+            9481: "Review Provider Check",
+            9482: "Review Data Quality",
+        }
+        for panel in _walk_panels(payload["panels"]):
+            if panel.get("id") in names:
+                panel["title"] = names[panel["id"]]
+            if panel.get("id") == 9481:
+                panel["gridPos"].update(w=8, h=3)
+            if panel.get("id") == 9002:
+                panel["options"]["cellHeight"] = "sm"
+            if panel.get("id") == 9603:
+                for override in panel["fieldConfig"]["overrides"]:
+                    override["properties"] = [
+                        prop
+                        for prop in override["properties"]
+                        if prop.get("id") != "custom.width"
+                    ]
+    if current_uid == "bioetl-dq-v2":
+        for panel in _walk_panels(payload["panels"]):
+            if panel.get("id") == 9403:
+                panel["options"]["footer"]["enablePagination"] = True
+                for override in panel["fieldConfig"]["overrides"]:
+                    override["properties"] = [
+                        prop
+                        for prop in override["properties"]
+                        if prop.get("id") != "custom.width"
+                    ]
+    if current_uid == "bioetl-incident-v1":
+        variables = payload["templating"]["list"]
+        if not any(v.get("name") == "read_latency_quantile" for v in variables):
+            variables.append(
+                {
+                    "name": "read_latency_quantile",
+                    "label": "Read latency",
+                    "type": "custom",
+                    "query": "p50 : 0.5,p95 : 0.95,p99 : 0.99",
+                    "description": "Histogram quantile for global read latency; p95 by default.",
+                    "current": {"text": "p95", "value": "0.95", "selected": True},
+                    "options": [
+                        {"text": label, "value": value, "selected": value == "0.95"}
+                        for label, value in [
+                            ("p50", "0.5"),
+                            ("p95", "0.95"),
+                            ("p99", "0.99"),
+                        ]
+                    ],
+                    "includeAll": False,
+                    "multi": False,
+                    "hide": 0,
+                }
+            )
+        for panel in _walk_panels(payload["panels"]):
+            description = str(panel.get("description") or "")
+            if description.startswith("GLOBAL · ") and not description.startswith(
+                ("GLOBAL · CURRENT", "GLOBAL · TIME RANGE")
+            ):
+                targets = panel.get("targets") or []
+                temporal = (
+                    "CURRENT"
+                    if targets
+                    and all(target.get("instant") is True for target in targets)
+                    else "TIME RANGE"
+                )
+                panel["description"] = description.replace(
+                    "GLOBAL · ", f"GLOBAL · {temporal} · ", 1
+                )
+            if panel.get("id") == 9102 and "GLOBAL" not in description:
+                panel["description"] = "GLOBAL · " + description
     # Late evidence appenders must obey the same retired-UID and selector policy.
     finalize_dashboard_links(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"

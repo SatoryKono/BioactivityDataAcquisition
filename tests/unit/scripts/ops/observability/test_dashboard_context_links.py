@@ -82,7 +82,9 @@ def test_urls_for_context_do_not_keep_a_foreign_uuid() -> None:
 
 
 @pytest.mark.parametrize("retired", ["bioetl-runtime", "bioetl-provider-health-v2"])
-def test_legacy_handoff_maps_to_live_owner_without_losing_identity_or_time(retired: str) -> None:
+def test_legacy_handoff_maps_to_live_owner_without_losing_identity_or_time(
+    retired: str,
+) -> None:
     from urllib.parse import parse_qs, urlsplit
 
     run_id = "68c11d41-1d2f-5dc9-b041-9265bc485046"
@@ -94,9 +96,12 @@ def test_legacy_handoff_maps_to_live_owner_without_losing_identity_or_time(retir
     parsed = urlsplit(url)
     assert parsed.path == "/d/bioetl-overview-v2/2-overview"
     assert parse_qs(parsed.query) == {
-        "var-workflow": ["wf"], "var-pipeline": ["chembl_assay"],
-        "var-run_type": ["backfill"], "var-run_id": [run_id],
-        "from": ["1000"], "to": ["2000"],
+        "var-workflow": ["wf"],
+        "var-pipeline": ["chembl_assay"],
+        "var-run_type": ["backfill"],
+        "var-run_id": [run_id],
+        "from": ["1000"],
+        "to": ["2000"],
     }
     assert rewrite_dashboard_handoff_url(url) == url
 
@@ -113,9 +118,15 @@ def test_legacy_template_builder_never_emits_retired_selectors(retired: str) -> 
 def test_context_urls_and_routes_cover_exactly_the_shipped_portfolio() -> None:
     import json
     from pathlib import Path
-    from scripts.ops.observability.grafana.dashboard_context_links import ACTIVE_UIDS, PATH_BY_UID
+    from scripts.ops.observability.grafana.dashboard_context_links import (
+        ACTIVE_UIDS,
+        PATH_BY_UID,
+    )
 
-    shipped = {json.loads(p.read_text(encoding="utf-8"))["uid"] for p in Path("grafana/dashboards").glob("*.json")}
+    shipped = {
+        json.loads(p.read_text(encoding="utf-8"))["uid"]
+        for p in Path("grafana/dashboards").glob("*.json")
+    }
     assert set(ACTIVE_UIDS) == set(PATH_BY_UID) == shipped
     with pytest.raises(ValueError, match="unknown dashboard"):
         build_handoff_url("unknown-dashboard")
@@ -231,3 +242,22 @@ def test_severity_colors_are_never_normalized_to_unknown(color: str) -> None:
     )
 
     assert _semantic_palette({"text": "UNKNOWN", "color": color})["color"] == color
+
+
+def test_queryparam_handoffs_remain_stable_across_regeneration() -> None:
+    from scripts.ops.observability.grafana.dashboard_context_links import (
+        finalize_dashboard_links,
+    )
+
+    link = {
+        "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}"
+    }
+    payload = {"links": [link]}
+    finalize_dashboard_links(payload)
+    first = link["url"]
+    for _ in range(3):
+        finalize_dashboard_links(payload)
+        assert link["url"] == first
+    for name in ("workflow", "pipeline", "run_type", "run_id"):
+        assert first.count("${" + name + ":queryparam}") == 1
+        assert "${" + name + ":queryparam}=" not in first

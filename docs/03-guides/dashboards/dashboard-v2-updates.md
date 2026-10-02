@@ -1,3 +1,7 @@
+## Five-dashboard retirement and navigation — 2026-10-02
+
+Legacy workspace handoffs preserve exact-run identity and time. Overview retains three domain CTAs. Supplementary evidence groups ship collapsed while status, domains and identity remain in the answer band. Static validation and outstanding browser/coverage work are recorded in [the UX report](../../reports/dashboard-ux-checks/2026-10-02.md) (`docs/reports/dashboard-ux-checks/2026-10-02.md`).
+
 ______________________________________________________________________
 
 ## UX report artifact requirement

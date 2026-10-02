@@ -52,12 +52,12 @@ operator_question:
   bioetl-control-plane-v1.json:
     answer_ids:
     - 9422
-    next_action_id: 9418
+    next_action_id: 9422
     basis_tokens:
-    - CURRENT
+    - SELECTED RUN
     - trust_status
     next_action_tokens:
-    - processing_status
+    - View replay checks
   bioetl-overview-v2.json:
     answer_ids:
     - 9603

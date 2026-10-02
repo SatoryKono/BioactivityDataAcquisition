@@ -276,6 +276,38 @@
           "refId": "StandardVariableQuery"
         },
         "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
+      },
+      {
+        "name": "read_latency_quantile",
+        "label": "Read latency",
+        "type": "custom",
+        "query": "p50 : 0.5,p95 : 0.95,p99 : 0.99",
+        "description": "Histogram quantile for global read latency; p95 by default.",
+        "current": {
+          "text": "p95",
+          "value": "0.95",
+          "selected": true
+        },
+        "options": [
+          {
+            "text": "p50",
+            "value": "0.5",
+            "selected": false
+          },
+          {
+            "text": "p95",
+            "value": "0.95",
+            "selected": true
+          },
+          {
+            "text": "p99",
+            "value": "0.99",
+            "selected": false
+          }
+        ],
+        "includeAll": false,
+        "multi": false,
+        "hide": 0
       }
     ]
   },
@@ -1699,7 +1731,7 @@
               "links": [
                 {
                   "title": "Open domain workspace",
-                  "url": "/d/bioetl-overview-v2/2-overview?${run_id:queryparam}&${workflow:queryparam}=&${pipeline:queryparam}=&${run_type:queryparam}=&${run_id:queryparam}=&${__url_time_range}",
+                  "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
                   "includeVars": false,
                   "targetBlank": false
                 }
@@ -1932,7 +1964,7 @@
               "links": [
                 {
                   "title": "Open domain workspace",
-                  "url": "/d/bioetl-overview-v2/2-overview?${run_id:queryparam}&${workflow:queryparam}=&${pipeline:queryparam}=&${run_type:queryparam}=&${run_id:queryparam}=&${__url_time_range}",
+                  "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
                   "includeVars": false,
                   "targetBlank": false
                 }
@@ -3303,7 +3335,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · Endpoint is scrape availability; expected stage signals measure presence, not freshness. Rule age is evaluation age, not event freshness. Monitoring quality (10m) reports missing telemetry, rule failures or missed evaluations in the last 10 minutes, including recovered events. DEGRADED is a monitoring warning, not proof that the selected pipeline has incomplete stage evidence. Evidence confidence is monitoring quality, not the selected Run ID verdict.",
+          "description": "GLOBAL · CURRENT · Endpoint is scrape availability; expected stage signals measure presence, not freshness. Rule age is evaluation age, not event freshness. Monitoring quality (10m) reports missing telemetry, rule failures or missed evaluations in the last 10 minutes, including recovered events. DEGRADED is a monitoring warning, not proof that the selected pipeline has incomplete stage evidence. Evidence confidence is monitoring quality, not the selected Run ID verdict.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -6041,7 +6073,7 @@
               },
               {
                 "title": "Open Provider Evidence",
-                "url": "/d/bioetl-overview-v2/2-overview?${run_id:queryparam}&${workflow:queryparam}=&${pipeline:queryparam}=&${run_type:queryparam}=&${run_id:queryparam}=&${__url_time_range}",
+                "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false,
                 "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. Provider alert query may scope by $provider_hint when validated."
@@ -6206,7 +6238,7 @@
               },
               {
                 "title": "Open Provider Evidence",
-                "url": "/d/bioetl-overview-v2/2-overview?${run_id:queryparam}&${workflow:queryparam}=&${pipeline:queryparam}=&${run_type:queryparam}=&${run_id:queryparam}=&${__url_time_range}",
+                "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
                 "targetBlank": false,
                 "includeVars": false,
                 "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. GLOBAL card sums cluster-wide adapter latency and rate-limiter wait conditions."

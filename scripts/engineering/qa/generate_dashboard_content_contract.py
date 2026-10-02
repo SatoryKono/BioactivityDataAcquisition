@@ -142,6 +142,17 @@ def _evidence_source(panel: dict[str, object]) -> str:
 
 def _scope(title: str, panel: dict[str, object]) -> str:
     normalized = title.lower()
+    description = str(panel.get("description") or "").upper()
+    for badge, scope in [
+        ("SELECTED RUN", "selected_run"),
+        ("GLOBAL · CURRENT", "current"),
+        ("GLOBAL / CURRENT", "current"),
+        ("GLOBAL · TIME RANGE", "time_range"),
+        ("TIME RANGE", "time_range"),
+        ("CURRENT", "current"),
+    ]:
+        if description.startswith(badge):
+            return scope
     if panel.get("type") in {"row", "text"}:
         return "global"
     if _is_ops_http(panel) and (
@@ -358,10 +369,7 @@ def _dashboard_panel_contracts(
         if not isinstance(panel_id, int):
             continue
         generated = _record(panel)
-        if generated["scope"] == "selected_run":
-            generated["evidence_source"] = _resolved_evidence_source(
-                panel, panels_by_id
-            )
+        generated["evidence_source"] = _resolved_evidence_source(panel, panels_by_id)
         generated["empty_state_class"] = _empty_state_class(
             panel, generated["role"], generated["evidence_source"]
         )

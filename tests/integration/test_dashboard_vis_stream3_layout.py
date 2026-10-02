@@ -52,13 +52,15 @@ def _root_ids(dashboard: dict) -> set[object]:
 
 
 def test_overview_dq_timeline_hides_dotstar_and_in_band_state() -> None:
-    """#10249 O1: All not .*; no clipped in-band state text."""
-    dashboard = load_dashboard(_OVERVIEW)
-    panel = _panel(dashboard, 9019)
-    expr = str((panel.get("targets") or [{}])[0].get("expr") or "")
-    assert '"pipeline","All"' in expr
-    assert '"run_type","All"' in expr
-    assert (panel.get("options") or {}).get("showValue") == "never"
+    """The saved DQ card uses exact-run accounting, never a range timeline."""
+    panel = _panel(load_dashboard(_OVERVIEW), 9482)
+    assert panel["type"] == "canvas"
+    target = panel["targets"][0]
+    assert "run_id=${run_id:percentencode}" in target["url"]
+    assert "excluded_by_contract" in target["uql"]
+    assert "records_out" in target["uql"]
+    assert "UNKNOWN" in target["uql"]
+    assert "expr" not in target
 
 
 def test_set_range_action_names_run_explorer_handoff() -> None:
@@ -69,28 +71,28 @@ def test_set_range_action_names_run_explorer_handoff() -> None:
     assert "Open run in Run Explorer" in blob
     assert '"text": "Set range to run"' not in blob
     assert "${__url_time_range}" in blob
-    assert "Set range to run" in panel["description"]
+    assert "SELECTED RUN" in panel["description"]
     assert "var-run_id" in blob or "${run_id:queryparam}" in blob
 
 
 def test_overview_and_dq_lower_handoffs_are_explicit_links() -> None:
-    """#10250 O3: lower Navigate Diagnostics names are one-click links."""
     overview = load_dashboard(_OVERVIEW)
-    content = str((_panel(overview, 9021).get("options") or {}).get("content") or "")
-    assert "<a href=" in content
-    assert "bioetl-control-plane-v1" in content
-    assert "bioetl-runtime" in content
+    links = _panel(overview, 9002)["links"]
+    assert {link["title"] for link in links} == {
+        "Open Control Plane",
+        "Open Data Quality",
+        "Open Provider Evidence",
+    }
+    for link in links:
+        assert "${__url_time_range}" in link["url"]
+        assert "${run_id:queryparam}" in link["url"]
+        assert link["includeVars"] is False
+        assert "bioetl-runtime" not in link["url"]
+        assert "bioetl-provider-health-v2" not in link["url"]
+    provider = next(link for link in links if link["title"] == "Open Provider Evidence")
+    assert "viewPanel=9480" in provider["url"]
     dq = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    html = " ".join(
-        str((panel.get("options") or {}).get("content") or "")
-        for panel in get_dashboard_panels(dq)
-        if panel.get("type") == "text"
-    )
-    assert "bioetl-control-plane-v1" in html
-    assert "<a href=" in html
-    assert "canonical" in html
-    assert ">Control Plane</a>" in html
-    assert "${__url_time_range}" in content
+    assert "Open Run Explorer" in str(_panel(dq, 9406))
 
 
 def test_incident_current_alerts_share_first_window_with_runbook() -> None:
@@ -158,15 +160,11 @@ def test_run_id_selector_and_recent_runs_do_not_label_uuid_as_count() -> None:
         for item in (recent.get("transformations") or [])
         if item.get("id") == "organize"
     )
-    assert ((organize.get("options") or {}).get("excludeByName") or {}).get(
-        "Value"
-    ) is True
-    rename = (organize.get("options") or {}).get("renameByName") or {}
-    assert rename.get("run_id") == "Run"
-    assert rename.get("started_at") == "Started"
-    assert rename.get("status") == "Processing"
-    assert rename.get("trust_status") == "Replay readiness"
-    assert rename.get("overview_handoff") == "Run Overview"
-    assert rename.get("diagnostics_handoff") == "Pipeline Diagnostics"
-    assert rename.get("quality_handoff") == "Data Quality"
-    assert rename.get("provider_handoff") == "Provider Health"
+    names = organize["options"]["indexByName"]
+    assert "Value" not in names and "Count" not in names
+    rename = organize["options"]["renameByName"]
+    assert rename["run_label"] == "Run ID"
+    assert rename["started_at"] == "Started"
+    assert rename["status"] == "Overview"
+    assert rename["saved_evidence_status"] == "Saved Evidence"
+    assert rename["data_quality_status"] == "Data Quality"

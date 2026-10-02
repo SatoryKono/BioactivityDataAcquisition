@@ -39,7 +39,7 @@ dashboards:
     answer_panel_ids:
     - 2010
     next_action_tokens:
-    - Open Pipeline Diagnostics
+    - Open domain diagnostics
     basis_tokens:
     - TIME RANGE
     - VALID EMPTY

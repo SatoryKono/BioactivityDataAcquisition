@@ -50,6 +50,7 @@ pytestmark = pytest.mark.integration
 ALLOWED_PANEL_TYPES = frozenset(
     {
         "text",
+        "canvas",
         "row",
         "stat",
         "gauge",
@@ -370,8 +371,7 @@ def test_internal_dashboard_links_resolve_to_shipped_uids() -> None:
                     )
                 }
                 assert resolved == {
-                    "bioetl-runtime",
-                    "bioetl-provider-health-v2",
+                    "bioetl-overview-v2",
                     "bioetl-dq-v2",
                 }
                 assert resolved <= shipped

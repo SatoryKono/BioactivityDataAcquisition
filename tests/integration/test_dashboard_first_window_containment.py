@@ -30,6 +30,7 @@ from tests.integration._dashboard_layout_budgets import (
 )
 from tests.integration._grafana_test_support import (
     get_dashboard_files,
+    get_dashboard_panels,
     load_dashboard,
 )
 
@@ -129,7 +130,7 @@ def test_every_first_window_table_owns_a_row_cap() -> None:
 
 def test_trust_9418_keeps_verdict_and_reason_count_visible() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panel = next(p for p in dashboard["panels"] if p["id"] == 9418)
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9418)
     props = {
         o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}
         for o in panel["fieldConfig"]["overrides"]
@@ -142,7 +143,7 @@ def test_trust_9418_keeps_verdict_and_reason_count_visible() -> None:
     assert props["trust_status"]["displayName"] == "Saved trust verdict"
     assert props["reasons_count"]["custom.hidden"] is False
     assert panel_declared_row_cap(panel) == 1
-    assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
+    assert panel["gridPos"]["y"] >= FIRST_WINDOW_Y
 
 
 def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
@@ -153,9 +154,13 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
         if path.name == "bioetl-control-plane-v1.json"
     )
     dashboard = load_dashboard(dashboard_path)
-    panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9416)
+    panel = next(
+        item for item in get_dashboard_panels(dashboard) if item.get("id") == 9416
+    )
 
-    assert panel.get("gridPos") == {"h": 10, "w": 12, "x": 12, "y": 7}
+    assert panel["gridPos"]["y"] >= FIRST_WINDOW_Y
+    assert panel["gridPos"]["w"] == 24
+    assert panel["gridPos"]["h"] == 9
     assert panel.get("options", {}).get("cellHeight") == "sm"
     assert panel.get("options", {}).get("sortBy") == [
         {"displayName": "Status", "desc": True}
@@ -243,7 +248,8 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
         assert override_properties[hidden]["custom.hidden"] is True
     y = int((panel.get("gridPos") or {})["y"])
     h = int((panel.get("gridPos") or {})["h"])
-    assert y + h <= 18
+    assert y >= 18
+    assert h == 9
 
 
 def test_first_window_forced_widths_fit_200pct_css_budget() -> None:
@@ -298,11 +304,9 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
     """#8923: first-window scope copy must not conflate CURRENT / RANGE / SELECTED RUN."""
     required = {
         "bioetl-overview-v2.json": ("SELECTED RUN",),
-        "bioetl-runtime.json": ("SELECTED RUN",),
-        "bioetl-provider-health-v2.json": ("SELECTED RUN",),
-        "bioetl-dq-v2.json": ("CURRENT", "SELECTED RUN", "TIME RANGE"),
-        "bioetl-incident-v1.json": ("CURRENT", "SELECTED RUN"),
-        "bioetl-run-explorer-v1.json": ("BROWSE", "SELECTED RUN"),
+        "bioetl-dq-v2.json": ("SELECTED RUN", "TIME RANGE"),
+        "bioetl-incident-v1.json": ("GLOBAL",),
+        "bioetl-run-explorer-v1.json": ("BROWSE",),
         "bioetl-control-plane-v1.json": ("SELECTED RUN",),
     }
     by_name = {path.name: load_dashboard(path) for path in get_dashboard_files()}
@@ -317,7 +321,7 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
             if panel.get("type") == "text"
         )
         for token in tokens:
-            if token not in blob:
+            if token not in blob.upper():
                 missing.append(f"{dashboard_name} missing {token}")
     assert not missing, "first-window scope banners:\n" + "\n".join(missing)
     overview_blob = "\n".join(

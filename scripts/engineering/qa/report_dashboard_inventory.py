@@ -51,10 +51,8 @@ MANDATORY_LINK_UIDS: dict[str, set[str]] = {
         "bioetl-overview-v2",
         "bioetl-control-plane-v1",
     },
-    "bioetl-control-plane-v1": {
-        "bioetl-overview-v2",
-        "bioetl-dq-v2",
-    },
+    # Data Quality is contextual from Run Overview after workspace retirement.
+    "bioetl-control-plane-v1": {"bioetl-overview-v2"},
 }
 
 
@@ -133,18 +131,21 @@ def _extract_variables(payload: dict[str, Any]) -> list[str]:
 
 
 def _extract_link_uids(payload: dict[str, Any]) -> list[str]:
-    links = list(payload.get("links", []))
-    for panel in payload.get("panels", []):
-        if panel.get("id") != 1000:
-            continue
-        panel_links = panel.get("links", [])
-        if isinstance(panel_links, list):
-            links.extend(link for link in panel_links if isinstance(link, dict))
+    # Contextual panel handoffs are part of the accepted navigation contract.
     discovered: set[str] = set()
-    for link in links:
-        url = str(link.get("url", ""))
-        matches = re.findall(r"/d/(\w+(?:-\w+)*)", url)
-        discovered.update(matches)
+
+    def visit(value: object) -> None:
+        if isinstance(value, dict):
+            for key, child in value.items():
+                if key == "url" and isinstance(child, str):
+                    discovered.update(re.findall(r"/d/(\w+(?:-\w+)*)", child))
+                else:
+                    visit(child)
+        elif isinstance(value, list):
+            for child in value:
+                visit(child)
+
+    visit(payload)
     return sorted(discovered)
 
 
@@ -720,9 +721,10 @@ def _provisioning_field_errors(
         errors.append(
             "provisioning: BioETL updateIntervalSeconds must be a positive integer"
         )
-    if path_basename != "dashboards":
+    leaf_path = "/var/lib/grafana/dashboards/bioetl-run-explorer-v1.json"
+    if path_basename != "dashboards" and path != leaf_path:
         errors.append(
-            "provisioning: BioETL provider path must target a dashboards directory, "
+            "provisioning: BioETL provider path must target a dashboards directory or the Run Explorer leaf, "
             f"got {path!r}"
         )
     return errors

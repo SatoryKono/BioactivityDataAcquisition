@@ -74,19 +74,6 @@ def _derive_provider(pipeline: str, workflow: str) -> str:
     return labels["hint"]
 
 
-def test_runtime_variable_dependencies():
-    """bioetl-runtime: $run_type depends on $pipeline, $stage defaults to All."""
-    variables = _templating_map("grafana/dashboards/bioetl-runtime.json")
-
-    assert "pipeline" in variables, "bioetl-runtime must have $pipeline variable"
-    assert "run_type" in variables, "bioetl-runtime must have $run_type variable"
-    assert "stage" in variables, "bioetl-runtime must have $stage variable"
-    stage_var = variables["stage"]
-    assert stage_var.get("includeAll") is True
-    assert stage_var.get("current", {}).get("value") == "$__all"
-    assert stage_var.get("current", {}).get("text") == "All"
-
-
 def test_dq_variable_dependencies():
     """bioetl-dq-v2: $stage depends on pipeline/run_type and defaults to All."""
     variables = _templating_map("grafana/dashboards/bioetl-dq-v2.json")
@@ -98,27 +85,6 @@ def test_dq_variable_dependencies():
     assert stage_var.get("includeAll") is True
     assert stage_var.get("current", {}).get("value") == "$__all"
     assert stage_var.get("current", {}).get("text") == "All"
-
-
-def test_provider_health_variable_dependencies():
-    """bioetl-provider-health-v2: provider derives from pipeline/workflow."""
-    variables = _templating_map("grafana/dashboards/bioetl-provider-health-v2.json")
-
-    assert "provider" in variables, (
-        "bioetl-provider-health-v2 must have $provider variable"
-    )
-    provider = variables["provider"]
-    query = str(provider.get("definition") or "")
-    assert query == "label_values(bioetl_provider_current_status, provider)"
-    assert "${pipeline}" not in query and "${workflow}" not in query
-    assert provider.get("current", {}).get("value") == "$__all"
-
-    assert "pipeline_context" in variables, (
-        "bioetl-provider-health-v2 must have $pipeline_context variable"
-    )
-    pipeline_context = variables["pipeline_context"]
-    hide_value = pipeline_context.get("hide")
-    assert hide_value is True or hide_value == 2, "$pipeline_context should be hidden"
 
 
 def test_incident_provider_derives_from_pipeline_or_workflow():
@@ -196,3 +162,20 @@ def test_provider_derivation_queries_are_re2_compatible_and_in_sync():
     }
     for case, (pipeline, workflow, expected) in cases.items():
         assert _derive_provider(pipeline, workflow) == expected, case
+
+
+def test_saved_run_workspace_uses_identity_catalog_without_retired_selectors():
+    variables = _templating_map("grafana/dashboards/bioetl-overview-v2.json")
+    assert {"workflow", "pipeline", "run_type", "run_id"} <= set(variables)
+    assert not {
+        "provider",
+        "pipeline_context",
+        "stage",
+        "provider_hint",
+        "adapter",
+    } & set(variables)
+    assert variables["run_id"].get("multi") is not True
+    assert variables["run_id"].get("includeAll") is not True
+    assert "filter-options" in str(variables["pipeline"])
+    for name in ("bioetl-runtime.json", "bioetl-provider-health-v2.json"):
+        assert not Path("grafana/dashboards", name).exists()

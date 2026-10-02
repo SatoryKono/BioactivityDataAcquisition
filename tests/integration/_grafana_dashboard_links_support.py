@@ -815,7 +815,9 @@ def _assert_cross_dashboard_link_policy(
         elif target_uid == "bioetl-run-explorer-v1" and "var-lookup_run_id=" in url:
             values = _extract_link_var_values(url)
             assert values == {
-                "workflow": ".*", "pipeline": ".*", "run_type": ".*",
+                "workflow": ".*",
+                "pipeline": ".*",
+                "run_type": ".*",
                 "run_id": "-",
             }, "Global Run Explorer navigation must clear selection explicitly"
         elif current_uid == "bioetl-run-explorer-v1" and "${__data.fields." in url:
@@ -1513,9 +1515,7 @@ def _assert_visual_bus_base_content(
         assert title in content, (
             f"{dashboard_name} visual navigation bus must render '{title}'"
         )
-    _assert_titles_in_order(
-        content, titles, dashboard_name=dashboard_name
-    )
+    _assert_titles_in_order(content, titles, dashboard_name=dashboard_name)
     assert "<style" not in content.lower(), (
         f"{dashboard_name} navigation must survive Grafana Text-panel "
         "sanitization without a style block"

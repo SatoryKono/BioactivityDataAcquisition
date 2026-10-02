@@ -967,7 +967,7 @@
         "h": 8
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are hidden. Request failure is QUERY ERROR.",
+      "description": "SELECTED RUN · Saved record accounting evidence: count in is the saved input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays N/A. N/A means the value was not recorded. Skipped outcomes are not displayed. Accounting evidence is not OK or a verdict. Request failure is QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1060,10 +1060,6 @@
                   "type": "color-text",
                   "wrapText": false
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 170
               }
             ]
           },
@@ -1094,10 +1090,6 @@
                   "mode": "fixed",
                   "fixedColor": "text"
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 100
               },
               {
                 "id": "noValue",
@@ -1148,10 +1140,6 @@
                 }
               },
               {
-                "id": "custom.width",
-                "value": 100
-              },
-              {
                 "id": "displayName",
                 "value": "percentage of Bronze"
               },
@@ -1188,10 +1176,6 @@
               {
                 "id": "displayName",
                 "value": ""
-              },
-              {
-                "id": "custom.width",
-                "value": 1
               },
               {
                 "id": "custom.align",
@@ -1266,10 +1250,6 @@
                 }
               },
               {
-                "id": "custom.width",
-                "value": 100
-              },
-              {
                 "id": "noValue",
                 "value": "N/A"
               },
@@ -1310,10 +1290,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 90
-              },
-              {
                 "id": "custom.align",
                 "value": "right"
               },
@@ -1352,10 +1328,6 @@
                 "value": "right"
               },
               {
-                "id": "custom.width",
-                "value": 100
-              },
-              {
                 "id": "noValue",
                 "value": "N/A"
               },
@@ -1385,10 +1357,6 @@
               "options": "value A"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 100
-              },
               {
                 "id": "noValue",
                 "value": "N/A"
@@ -1459,7 +1427,7 @@
         ],
         "footer": {
           "show": false,
-          "enablePagination": false
+          "enablePagination": true
         },
         "cellHeight": "sm"
       },

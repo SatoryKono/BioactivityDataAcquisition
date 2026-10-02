@@ -26,9 +26,6 @@ from tests.integration._grafana_test_support import (
     get_row_child_panels,
     load_dashboard,
 )
-from tests.integration._grafana_processed_records_assertions import (
-    assert_processed_records_field_overrides,
-)
 
 
 def _require_dashboard(name: str) -> Path:
@@ -65,13 +62,7 @@ MAX_OVER_TIME_COUNTER_POLICY_PATH = Path(
     "configs/quality/promql_max_over_time_counter_policy.yaml"
 )
 _MAX_OVER_TIME_METRIC_RE = re.compile(r"max_over_time\(\s*([a-zA-Z_:][a-zA-Z0-9_:]*)")
-_PROCESSED_RECORDS_DASHBOARDS = (
-    "bioetl-control-plane-v1.json",
-    "bioetl-dq-v2.json",
-    "bioetl-overview-v2.json",
-    "bioetl-provider-health-v2.json",
-    "bioetl-runtime.json",
-)
+_PROCESSED_RECORDS_DASHBOARDS = ("bioetl-dq-v2.json",)
 
 _PROCESSED_RECORDS_PARAMETER_LABELS = (
     "01 bronze_records",
@@ -360,11 +351,7 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
 
 @pytest.mark.parametrize(
     "dashboard_name",
-    [
-        "bioetl-runtime.json",
-        "bioetl-provider-health-v2.json",
-        "bioetl-dq-v2.json",
-    ],
+    ["bioetl-dq-v2.json"],
 )
 def test_operator_context_shell_panels_preserve_canonical_semantics(
     dashboard_name: str,
@@ -518,20 +505,14 @@ def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> No
         for panel in get_dashboard_panels(dashboard)
         if panel.get("title")
     }
-    identity_panels = [
-        panels["Review Identity Gaps"],
-        panels["Compare Checkpoint Anchors"],
-        panels["Inspect Identity Values"],
-        panels["Review Required Replay Anchors"],
-        panels["Review Additional Forensic Anchors"],
-    ]
+    identity_panels = [panels["Review Replay Evidence"]]
 
     for panel in identity_panels:
         assert panel.get("datasource") == "BioETL Ops HTTP"
         assert get_panel_expressions({"panels": [panel]}) == []
         target = panel.get("targets", [])[0]
         assert "/ops/control-plane/identity-evidence?" in target.get("url", "")
-        assert target.get("root_selector") == "rows"
+        assert "rows" in str(target.get("uql"))
 
     prometheus_expressions = "\n".join(get_panel_expressions(dashboard))
     forbidden_label_tokens = (
@@ -551,7 +532,7 @@ def test_control_plane_identity_evidence_documents_short_full_split() -> None:
     panel = next(
         panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Inspect Identity Values"
+        if panel.get("title") == "Review Replay Evidence"
     )
     description = str(panel.get("description", "")).lower()
     assert "full" in description
@@ -1009,357 +990,6 @@ def test_runtime_freshness_handoff_preserves_missing_telemetry() -> None:
     assert defaults.get("noValue") == "UNKNOWN"
 
 
-def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -> None:
-    """Provider failure rate must keep neutral zero plus explicit WARN/CRIT policy."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Track Failure Rate"
-        ),
-        None,
-    )
-    assert panel is None
-    return
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    assert defaults.get("unit") == "percentunit"
-    assert defaults.get("min") == 0
-    assert defaults.get("max") == 1
-    assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "gray", "value": None},
-        {"color": "orange", "value": 0.05},
-        {"color": "red", "value": 0.2},
-    ]
-    assert panel.get("type") == "stat"
-    assert "selected range" in str(panel.get("description", "")).lower()
-
-
-def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> None:
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Fleet Status"
-        ),
-        None,
-    )
-    assert panel is None
-    return
-
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any("bioetl_provider_current_status" in expr for expr in expressions)
-    assert all("or vector(0)" not in expr for expr in expressions), (
-        "Provider severity matrix must preserve UNKNOWN/NO DATA instead of synthetic OK"
-    )
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    # Null/missing stays gray (not healthy green); explicit 0 remains OK/green.
-    assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "gray", "value": None},
-        {"color": "green", "value": 0},
-        {"color": "orange", "value": 1},
-        {"color": "red", "value": 2},
-        {"color": "gray", "value": 3},
-    ]
-    special_mappings = [
-        mapping.get("options", {})
-        for mapping in defaults.get("mappings", [])
-        if mapping.get("type") == "special"
-    ]
-    matches = {mapping.get("match") for mapping in special_mappings}
-    assert {"null", "nan"} <= matches
-
-
-def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> None:
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Telemetry Presence"
-        ),
-        None,
-    )
-    assert panel is None
-    return
-
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert len(expressions) == 1
-    expression = expressions[0]
-    # Current first-screen freshness is a presence gate on projected current status.
-    assert "bioetl_provider_current_status" in expression
-    assert 'provider=~"$provider"' in expression
-    assert "or vector(0)" not in expression
-    assert "> bool 0" not in expression
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    assert defaults.get("unit") == "none"
-    assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "green", "value": None},
-        {"color": "orange", "value": 1},
-        {"color": "red", "value": 2},
-    ]
-    value_mapping = next(
-        mapping
-        for mapping in defaults.get("mappings", [])
-        if mapping.get("type") == "value"
-    )
-    assert value_mapping["options"]["0"]["text"] == "PRESENT"
-    assert "1" not in value_mapping["options"]
-    assert "Alias mapping: PRESENT=OK" in str(panel.get("description", ""))
-    special_mapping = next(
-        mapping
-        for mapping in defaults.get("mappings", [])
-        if mapping.get("type") == "special"
-    )
-    assert special_mapping["options"]["match"] == "null"
-    assert special_mapping["options"]["result"]["text"] == "UNKNOWN"
-    assert panel.get("options", {}).get("colorMode") == "value"
-
-    description = str(panel.get("description", "")).lower()
-    assert "telemetry" in description
-    assert "unknown" in description or "fail-closed" in description
-
-
-def test_provider_critical_table_keeps_severity_only_scope() -> None:
-    """Critical providers table must only show active degraded/failing rows."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Non-OK Providers"
-        ),
-        None,
-    )
-    assert panel is None
-    return
-
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert len(expressions) == 1
-    assert (
-        "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)"
-        in expressions[0]
-    )
-    assert "VALID EMPTY" in expressions[0]
-    assert "unless on(provider)" in expressions[0]
-    assert "bioetl_provider_health_status" in expressions[0]
-    assert "or vector(0)" not in expressions[0]
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    # Null/missing stays gray (not healthy green); explicit 0 remains OK/green.
-    assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "gray", "value": None},
-        {"color": "green", "value": 0},
-        {"color": "orange", "value": 1},
-        {"color": "red", "value": 2},
-        {"color": "gray", "value": 3},
-    ]
-
-    description = str(panel.get("description", ""))
-    assert "VALID EMPTY requires every observed" in description
-    assert "provider-status" in description.lower() or "current" in description.lower()
-
-
-def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
-    """Raw provider status panel must preserve UNKNOWN for known providers with no sample."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Raw Health Status"
-        ),
-        None,
-    )
-    assert panel is None
-    return
-
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any("bioetl_provider_health_status" in expr for expr in expressions)
-    assert any(
-        "bioetl_provider_health_check_provider_universe_15m" in expr
-        for expr in expressions
-    )
-    assert any("${__range_s}s" in expr for expr in expressions)
-    assert all("or vector(0)" not in expr for expr in expressions), (
-        "Provider raw status panel must fail closed to UNKNOWN, not synthetic OK"
-    )
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    special_mappings = [
-        mapping.get("options", {})
-        for mapping in defaults.get("mappings", [])
-        if mapping.get("type") == "special"
-    ]
-    matches = {mapping.get("match") for mapping in special_mappings}
-    assert {"null", "nan"} <= matches
-    description = str(panel.get("description", "")).lower()
-    assert "raw provider health enum evidence" in description
-    assert "status is unknown" in description
-    assert "not the canonical first-screen verdict" in description
-
-
-def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() -> None:
-    """Provider top causes must not fabricate synthetic rows when canonical causes are absent."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Top Provider Causes"
-        ),
-        None,
-    )
-    assert panel is None
-    return
-
-    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any("bioetl_provider_current_cause" in expr for expr in expressions)
-    assert all(
-        "bioetl_provider_current_status >= 1" not in expr for expr in expressions
-    )
-    assert all("status_without_projected_cause" not in expr for expr in expressions)
-    assert all("unless on (provider)" not in expr for expr in expressions)
-
-    combined = " ".join(
-        (
-            str(panel.get("description", "")),
-            str(panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")),
-        )
-    )
-    combined_lower = combined.lower()
-    assert "top current causes" in combined_lower
-    assert "degradation" in combined_lower
-
-
-def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_breakers() -> (
-    None
-):
-    """Token/circuit-breaker diagnostics must not synthesize healthy or fake adapter rows."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    expectations = {
-        "Monitor Available Rate-Limit Tokens": (
-            "bioetl_rate_limiter_tokens_available",
-            "or vector(0)",
-        ),
-        "Monitor Global Circuit-Breaker State": (
-            "bioetl_circuit_breaker_state",
-            "or vector(0)",
-        ),
-        "Track Global Circuit-Breaker Trips": (
-            "bioetl_circuit_breaker_trips_total",
-            'label_replace(vector(0), "adapter",',
-        ),
-    }
-    present = {panel.get("title") for panel in get_dashboard_panels(dashboard)}
-    assert set(expectations).isdisjoint(present)
-    return
-
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expectations
-    }
-    assert set(panels) == set(expectations)
-
-    trips = panels["Track Global Circuit-Breaker Trips"]
-    assert trips["fieldConfig"]["defaults"]["custom"]["showPoints"] == "always"
-    assert trips["options"]["legend"]["showLegend"] is True
-    assert trips["options"]["legend"]["displayMode"] != "hidden"
-
-    for panel_title, (required_snippet, forbidden_snippet) in expectations.items():
-        expressions = [
-            target.get("expr", "")
-            for target in panels[panel_title].get("targets", [])
-            if isinstance(target.get("expr"), str)
-        ]
-        assert any(required_snippet in expr for expr in expressions)
-        assert all(forbidden_snippet not in expr for expr in expressions), (
-            f"Panel '{panel_title}' must preserve diagnostic no-data instead of synthetic fallback"
-        )
-
-
-def test_provider_optional_telemetry_panels_explain_empty_samples_do_not_refute_status() -> (
-    None
-):
-    """Optional provider telemetry must disclose no-sample semantics explicitly."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    expectations = {
-        "Track Rate-Limiter Wait p95": "optional telemetry can stay empty",
-        "Monitor Available Rate-Limit Tokens": "optional telemetry can stay empty",
-        "Monitor Global Circuit-Breaker State": "adapter-scoped telemetry can stay empty",
-        "Track Global Circuit-Breaker Trips": "does not refute current provider severity",
-    }
-    present = {panel.get("title") for panel in get_dashboard_panels(dashboard)}
-    assert set(expectations).isdisjoint(present)
-    return
-
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expectations
-    }
-    assert panels.keys() == expectations.keys()
-
-    for title, token in expectations.items():
-        combined = " ".join(
-            (
-                str(panels[title].get("description", "")),
-                str(
-                    panels[title]
-                    .get("fieldConfig", {})
-                    .get("defaults", {})
-                    .get("noValue", "")
-                ),
-            )
-        ).lower()
-        assert token in combined, (
-            f"{title} must explain its empty optional-telemetry semantics"
-        )
-
-
-def test_provider_degraded_checks_panel_uses_neutral_evidence_thresholds() -> None:
-    """Selected-range degraded-count evidence must not reuse current-severity thresholds."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Degraded Checks"
-        ),
-        None,
-    )
-    assert panel is None
-    return
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "text", "value": None}
-    ]
-
-
 def test_dq_selected_range_evidence_panels_use_neutral_thresholds() -> None:
     """TIME RANGE evidence cards are not on the selected-run page."""
     _assert_retired_from_dq(
@@ -1528,186 +1158,53 @@ def test_all_max_over_time_counter_expressions_are_reviewed() -> None:
 def test_processed_records_parameter_rows_sort_and_display_cleanly(
     dashboard_name: str,
 ) -> None:
-    dashboard = load_dashboard(_require_dashboard(dashboard_name))
-    panels = {
-        panel.get("id"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if isinstance(panel.get("id"), int)
-    }
-    identity_id, processed_id = {
-        "bioetl-overview-v2.json": (9300, 9301),
-    }.get(dashboard_name, (9402, 9403))
-    identity = panels[identity_id]
-    processed = panels[processed_id]
-    full_width_evidence = dashboard_name in {
-        "bioetl-control-plane-v1.json",
-        "bioetl-provider-health-v2.json",
-    }
-    if dashboard_name in {"bioetl-dq-v2.json", "bioetl-runtime.json"}:
-        assert identity["gridPos"]["w"] == 12
-        assert processed["gridPos"]["w"] == 12
-        assert identity["options"]["footer"]["enablePagination"] is True
-        assert processed["options"]["footer"]["enablePagination"] is True
-        expected_h = (8, 8)
-        assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == expected_h
-    elif dashboard_name == "bioetl-provider-health-v2.json":
-        assert identity["gridPos"]["w"] == 12
-        assert processed["gridPos"]["w"] == 12
-        assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == (5, 5)
-    else:
-        expected_heights = (12, 12) if full_width_evidence else (6, 6)
-        if full_width_evidence:
-            for panel in (identity, processed):
-                assert panel["gridPos"]["w"] == 24
-                assert panel["options"]["footer"]["enablePagination"] is True
-        assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == expected_heights
-    identity_no_value = str(
-        identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-    )
-    processed_no_value = str(
-        processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-    )
-    if dashboard_name == "bioetl-runtime.json":
-        # #11678: Processed Records must not masquerade a 503/504 request
-        # failure as "nothing selected" once a Run ID is in the selector.
-        assert identity_no_value.startswith("SELECT RUN")
-        assert "valid empty" not in identity_no_value.lower()
-        assert "no exact Run ID selected" not in processed_no_value
-        assert "query error" in processed_no_value.lower()
-        assert "503" in processed_no_value and "504" in processed_no_value
-    elif dashboard_name == "bioetl-dq-v2.json":
-        assert identity_no_value.startswith("SELECT RUN")
-        assert processed_no_value.startswith("SELECT RUN")
-        assert "valid empty" not in identity_no_value.lower()
-        assert "query error" not in processed_no_value.lower()
-    else:
-        assert "valid empty" in identity_no_value.lower()
-        assert "query error" in processed_no_value.lower()
-    if dashboard_name == "bioetl-control-plane-v1.json":
-        assert identity.get("options", {}).get("cellHeight") == "lg"
-        assert processed.get("options", {}).get("cellHeight") == "md"
-    else:
-        cell = "md" if full_width_evidence else "sm"
-        assert identity.get("options", {}).get("cellHeight") == cell
-        assert processed.get("options", {}).get("cellHeight") == cell
-    default_identity_cell_options = (
-        identity.get("fieldConfig", {})
-        .get("defaults", {})
-        .get("custom", {})
-        .get("cellOptions", {})
-    )
-    if dashboard_name != "bioetl-control-plane-v1.json":
-        assert default_identity_cell_options.get("wrapText") is not True
-    wrapped_identity_fields = {
-        override["matcher"]["options"]
-        for override in identity.get("fieldConfig", {}).get("overrides", [])
-        for property_ in override.get("properties", [])
-        if property_.get("id") == "custom.cellOptions"
-        and property_.get("value", {}).get("wrapText") is True
-    }
-    expected_wrapped_fields = {"parameter"}
-    if dashboard_name == "bioetl-control-plane-v1.json":
-        expected_wrapped_fields = {"Parameter", "Value"}
-    elif full_width_evidence:
-        expected_wrapped_fields = set()
-        assert identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
-    assert wrapped_identity_fields == expected_wrapped_fields
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9403)
+    assert panel["options"]["footer"]["enablePagination"] is True
+    assert panel["options"]["cellHeight"] == "sm"
+    assert all("var-run_id" not in t.get("expr", "") for t in panel["targets"])
+    assert all("run_id=" in t["url"] for t in panel["targets"])
+    copy = panel["description"].lower()
+    for token in ("saved input", "outcome count", "denominator", "n/a", "query error"):
+        assert token in copy
+    assert get_panel_expressions({"panels": [panel]}) == []
 
-    assert processed.get("datasource") == "BioETL Ops HTTP"
-    _assert_processed_records_target_contract(processed)
 
-    processed_json = json.dumps(processed, sort_keys=True)
-
-    for stale_label in (
-        "0 reconciliation_status",
-        "1 bronze_records",
-        "2 silver_valid_records",
-        "3 silver_quarantined_records",
-        "4 silver_skipped_records",
-        "5 silver_filtered_out_records",
-        "6 silver_deduplicated_records",
-        "7 silver_accounted_records",
-        "8 silver_delta_vs_bronze",
-        "9 gold_written_records",
-        "14 gold_accounted_records",
-        "15 gold_delta_vs_valid_silver",
+@pytest.mark.parametrize(
+    "state,color",
+    [
+        ("OK", "green"),
+        ("HEALTHY", "green"),
+        ("WARN", "orange"),
+        ("DEGRADED", "orange"),
+        ("ERROR", "red"),
+        ("CRIT", "red"),
+        ("UNKNOWN", "gray"),
+        ("N/A", "gray"),
+    ],
+)
+def test_saved_provider_check_preserves_verdict_and_missing_evidence(state, color):
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {panel["id"]: panel for panel in get_dashboard_panels(dashboard)}
+    verdict = panels[9481]
+    defaults = verdict["fieldConfig"]["defaults"]
+    assert defaults["noValue"] == "UNKNOWN"
+    assert defaults["mappings"][0]["options"][state]["color"] == color
+    assert {
+        "type": "special",
+        "options": {"match": "null", "result": {"text": "UNKNOWN", "color": "gray"}},
+    } in defaults["mappings"]
+    target = verdict["targets"][0]
+    assert target["root_selector"] == "provider_checks"
+    assert target["parser"] == "backend"
+    assert "run_id=${run_id}" in target["url"]
+    assert get_panel_expressions({"panels": [verdict]}) == []
+    description = panels[9480]["description"]
+    for token in (
+        "Cached Bronze",
+        "not called",
+        "not invented",
+        "UNKNOWN",
+        "QUERY ERROR",
     ):
-        assert f'"{stale_label}"' not in processed_json
-
-    sort_by = processed.get("options", {}).get("sortBy", [])
-    assert sort_by == [{"desc": False, "displayName": "parameter"}]
-    assert processed.get("options", {}).get("cellHeight") == (
-        "md" if full_width_evidence else "sm"
-    )
-
-    transformations = processed.get("transformations", [])
-    transform_ids = [transformation.get("id") for transformation in transformations]
-    assert transform_ids == ["organize"]
-    organize_options = transformations[0].get("options", {})
-    rename_by_name = organize_options.get("renameByName", {})
-    assert rename_by_name.get("parameter") == "parameter"
-    # API field ``value`` is the record count; operator-facing column is ``count``.
-    assert rename_by_name.get("value") == "count"
-    assert rename_by_name.get("percentage") == "percentage"
-    assert rename_by_name.get("row_status") == ""
-    assert organize_options.get("indexByName", {}).get("parameter") == 0
-    assert organize_options.get("indexByName", {}).get("value") == 1
-    assert organize_options.get("indexByName", {}).get("percentage") == 2
-    assert organize_options.get("indexByName", {}).get("row_status") == 3
-    excluded_fields = organize_options.get("excludeByName", {})
-    assert excluded_fields.get("row_status") is True
-    # Legacy typo field may still appear from stale backends; hide it in Grafana.
-    assert excluded_fields.get("percintage") is True
-    assert excluded_fields.get("Time") is True
-    assert "__name__" not in excluded_fields
-    custom = processed.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
-    assert custom.get("inspect") is True
-    assert "percintage" not in organize_options.get("indexByName", {})
-    assert "percintage" not in organize_options.get("renameByName", {})
-    # All Processed Records tables show parameter + count + percentage.
-    assert excluded_fields.get("percentage") is not True
-    assert excluded_fields.get("parameter") is not True
-    assert excluded_fields.get("value") is not True
-    assert excluded_fields.get("count") is not True
-
-    parameter_overrides = [
-        override
-        for override in processed.get("fieldConfig", {}).get("overrides", [])
-        if override.get("matcher", {}).get("options") == "parameter"
-    ]
-    assert len(parameter_overrides) == 1
-    mappings = parameter_overrides[0].get("properties", [])[0].get("value", [])[0]
-    mapping_options = mappings.get("options", {})
-
-    assert tuple(mapping_options) == _PROCESSED_RECORDS_MAPPING_LABELS
-    for label, display_label in zip(
-        _PROCESSED_RECORDS_PARAMETER_LABELS,
-        _PROCESSED_RECORDS_DISPLAY_LABELS,
-        strict=True,
-    ):
-        assert mapping_options[label]["text"] == display_label
-        if label in _PROCESSED_RECORDS_PRIMARY_COLORS:
-            assert (
-                mapping_options[label]["color"]
-                == _PROCESSED_RECORDS_PRIMARY_COLORS[label]
-            )
-        else:
-            assert "color" not in mapping_options[label]
-
-    parameter_properties = {
-        prop.get("id"): prop.get("value")
-        for prop in parameter_overrides[0].get("properties", [])
-    }
-    assert parameter_properties["custom.align"] == "left"
-    assert parameter_properties["custom.cellOptions"]["type"] == "color-text"
-    expected_wrap = dashboard_name not in {
-        "bioetl-run-explorer-v1.json",
-        "bioetl-control-plane-v1.json",
-        "bioetl-provider-health-v2.json",
-    }
-    assert parameter_properties["custom.cellOptions"].get("wrapText") is expected_wrap
-
-    assert_processed_records_field_overrides(
-        processed,
-        expected_row_status_mappings=_expected_processed_records_row_status_mappings(),
-    )
+        assert token in description

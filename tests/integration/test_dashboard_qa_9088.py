@@ -41,7 +41,9 @@ QUERY_TYPES = {
 }
 
 
-def test_canonical_context_trims_run_id_and_shares_uuid_across_five_active_uids() -> None:
+def test_canonical_context_trims_run_id_and_shares_uuid_across_five_active_uids() -> (
+    None
+):
     with pytest.raises(RunIdError):
         normalize_run_id("%20%20")
     with pytest.raises(RunIdError):

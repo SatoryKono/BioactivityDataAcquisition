@@ -110,16 +110,16 @@ first_window_containment_types:
 - stat
 - table
 first_window_summary_tables:
+- dashboard: bioetl-control-plane-v1.json
+  id: 9423
+  max_rows: 5
+  owner: '@bioetl-observability'
+  bind: paginate
 - dashboard: bioetl-overview-v2.json
   id: 9603
   max_rows: 1
   owner: '@bioetl-observability'
   bind: limit
-- dashboard: bioetl-overview-v2.json
-  id: 215
-  max_rows: 2
-  owner: '@bioetl-observability'
-  bind: topk
 - dashboard: bioetl-overview-v2.json
   id: 9002
   max_rows: 6
@@ -129,12 +129,7 @@ first_window_summary_tables:
   id: 9300
   max_rows: 5
   owner: '@bioetl-observability'
-  bind: paginate
-- dashboard: bioetl-overview-v2.json
-  id: 9301
-  max_rows: 5
-  owner: '@bioetl-observability'
-  bind: paginate
+  bind: limit
 - dashboard: bioetl-dq-v2.json
   id: 9402
   max_rows: 5
@@ -196,9 +191,9 @@ answer_panels:
     title: Review Exact Replay Readiness
   bioetl-overview-v2.json:
   - id: 9603
-    title: Selected Run Status
+    title: Review Selected Run Status
   - id: 9002
-    title: Run Domains
+    title: Review Run Domains
   bioetl-dq-v2.json:
   - id: 9406
     title: Review Selected Run Status
