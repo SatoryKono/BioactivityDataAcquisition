@@ -47,11 +47,9 @@ from tests.integration._grafana_dashboard_links_support import (
 pytestmark = pytest.mark.integration
 
 
-def test_runtime_incident_panels_do_not_duplicate_control_plane_dashboard_link() -> (
-    None
-):
+def test_incident_panels_do_not_duplicate_control_plane_dashboard_link() -> None:
     """Runtime incident panels must not duplicate the top-level Control Plane link."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     panel_titles = {
         "Inspect Control Plane Alerts",
         "Monitor No-Records Runs",
@@ -67,7 +65,7 @@ def test_runtime_incident_panels_do_not_duplicate_control_plane_dashboard_link()
             None,
         )
         assert panel is not None, (
-            f"Panel '{panel_title}' not found in bioetl-runtime.json"
+            f"Panel '{panel_title}' not found in bioetl-incident-v1.json"
         )
         data_links = panel.get("options", {}).get("dataLinks", [])
         dashboard_links = [
@@ -135,9 +133,9 @@ def test_runtime_first_screen_status_panels_expose_actionable_drilldowns() -> No
         assert detail_urls[link_title].endswith(expected_suffix)
 
 
-def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
+def test_incident_alert_condition_panels_expose_direct_runbook_links() -> None:
     """Runtime condition-summary panels should route operators directly to runbooks."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     expectations = {
         "Monitor Pipeline Alerts": (
             "Open Pipeline Failure Runbook",
@@ -179,7 +177,7 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
             None,
         )
         assert panel is not None, (
-            f"Panel '{panel_title}' not found in bioetl-runtime.json"
+            f"Panel '{panel_title}' not found in bioetl-incident-v1.json"
         )
         data_links = panel.get("options", {}).get("dataLinks", [])
         link = next(
