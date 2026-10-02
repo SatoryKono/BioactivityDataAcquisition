@@ -9,12 +9,13 @@ import {
 } from '@grafana/scenes';
 
 import { WorkspaceRoute } from '../routes/registry';
+import { dashboardTimeRangeUrl } from './contracts';
 
 function fallbackLinks(route: WorkspaceRoute): string {
   return route.compatibilityUids
     .map(
       (uid) =>
-        `<a href="/d/${uid}\${__url_time_range}" style="margin-right:12px">Open JSON: ${uid}</a>`
+        `<a href="${dashboardTimeRangeUrl(uid)}" style="margin-right:12px">Open JSON: ${uid}</a>`
     )
     .join('');
 }

@@ -7,11 +7,15 @@ on:
   pull_request:
     paths:
       - "grafana/tooling/router-v7-bridge/**"
+      - "grafana/plugins/bioetl-scenes-app/**"
+      - "grafana/plugins/bioetl-selectorshell-panel/**"
       - ".github/workflows/router-v7-bridge.yml"
   push:
     branches: [main]
     paths:
       - "grafana/tooling/router-v7-bridge/**"
+      - "grafana/plugins/bioetl-scenes-app/**"
+      - "grafana/plugins/bioetl-selectorshell-panel/**"
       - ".github/workflows/router-v7-bridge.yml"
 
 concurrency:
@@ -36,6 +40,8 @@ jobs:
           node-version: "24"
       - name: Install locked dependencies
         run: npm ci --ignore-scripts
+      - name: Verify committed private bridge archive
+        run: node verify-packed-bridge.mjs
       - name: Test bridge behavior and security boundaries
         run: npm test
       - name: Check exported TypeScript API
@@ -44,3 +50,86 @@ jobs:
         run: npm run build
       - name: Audit candidate dependencies
         run: npm audit --audit-level=moderate
+
+  plugin-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: [bioetl-scenes-app, bioetl-selectorshell-panel]
+    defaults:
+      run:
+        working-directory: grafana/plugins/${{ matrix.plugin }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "24"
+      - name: Install locked plugin dependencies
+        run: npm ci --ignore-scripts
+      - name: Audit plugin dependencies
+        run: npm audit --audit-level=moderate
+      - name: Check plugin types
+        run: npm run typecheck
+      - name: Test plugin behavior
+        run: npm run test:ci
+      - name: Build plugin
+        run: npm run build
+
+  host-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+      GOMAXPROCS: "2"
+      NODE_ENV: production
+      NO_SOURCEMAP: "0"
+    steps:
+      - name: Checkout migration candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Checkout inspected Grafana source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: grafana/grafana
+          ref: 6193dc03311b631b9727b560d24369e683dc396e # v13.2.3
+          path: reports/qa/router-v7-grafana-host
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "24"
+      - name: Apply migration to pristine upstream source
+        working-directory: reports/qa/router-v7-grafana-host
+        run: |
+          git -c core.autocrlf=false apply --check "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch"
+          git -c core.autocrlf=false apply "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch"
+          cmp packages/bioetl-router-v7-bridge/index.mjs "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/index.mjs"
+          cmp packages/bioetl-router-v7-bridge/index.d.ts "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/index.d.ts"
+      - name: Install immutable upstream dependency graph
+        working-directory: reports/qa/router-v7-grafana-host
+        run: node .yarn/releases/yarn-4.17.1.cjs install --immutable --mode=skip-build
+      - name: Build production frontend and Swagger with bounded workers
+        working-directory: reports/qa/router-v7-grafana-host
+        run: |
+          cat > scripts/webpack/webpack.router-security.mjs <<'EOF'
+          import original from './webpack.prod.ts';
+          export default (env = {}) => {
+            const configs = original(env);
+            configs.parallelism = 1;
+            for (const config of configs) {
+              config.parallelism = 2;
+              for (const plugin of config.optimization?.minimizer ?? []) {
+                if (plugin.constructor.name === 'CssMinimizerPlugin') plugin.options.parallel = 1;
+              }
+            }
+            return configs;
+          };
+          EOF
+          node node_modules/webpack-cli/bin/cli.js --config scripts/webpack/webpack.router-security.mjs

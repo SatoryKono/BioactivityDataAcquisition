@@ -90,6 +90,20 @@ test('mixed separator navigation paths preserve origin and normalize to internal
       const anchor = view.node.querySelector('a');
       assert.equal(new URL(anchor.href).origin, window.location.origin);
     } finally { await view.dispose(); }
+    let navigate;
+    let current;
+    function ObserveNavigation() {
+      navigate = bridge.useNavigate();
+      current = bridge.useLocation();
+      return null;
+    }
+    const navigation = await mount(React.createElement(bridge.CompatRouter, null,
+      React.createElement(ObserveNavigation)));
+    try {
+      await act(async () => assert.throws(() => navigate(to), /External navigation is not allowed/));
+      assert.equal(current.pathname, '/home');
+      assert.equal(new URL(current.pathname, window.location.href).origin, window.location.origin);
+    } finally { await navigation.dispose(); }
   }
 });
 

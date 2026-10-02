@@ -83,3 +83,7 @@ export function dashboardUrl(uid: string, context: RouteContext): string {
   const suffix = serializeRouteContext(context);
   return `/d/${uid}?${suffix}`;
 }
+
+export function dashboardTimeRangeUrl(uid: string): string {
+  return `/d/${uid}?\${__url_time_range}`;
+}
