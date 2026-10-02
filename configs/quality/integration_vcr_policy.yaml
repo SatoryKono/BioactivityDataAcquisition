@@ -172,6 +172,7 @@ tracked_suite_inventory:
     - tests/integration/test_dashboard_provider_context_mapping.py
     - tests/integration/test_dashboard_qa_9088.py
     - tests/integration/test_dashboard_qa_check_gates.py
+    - tests/integration/test_dashboard_replay_layout.py
     - tests/integration/test_dashboard_required_panel_links.py
     - tests/integration/test_dashboard_requirement_coverage.py
     - tests/integration/test_dashboard_requirement_gates.py
@@ -194,6 +195,7 @@ tracked_suite_inventory:
     - tests/integration/test_json_hash_stability.py
     - tests/integration/test_organism_classification_csv_coverage.py
     - tests/integration/test_pipeline_diagnostics_evidence_actions.py
+    - tests/integration/test_pipeline_diagnostics_retirement.py
     - tests/integration/test_run_explorer_columns.py
     - tests/integration/test_run_explorer_http_catalog.py
     - tests/integration/test_run_explorer_request_fixtures.py
