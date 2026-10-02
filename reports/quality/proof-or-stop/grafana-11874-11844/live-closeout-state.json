@@ -1,0 +1,44 @@
+{
+  "issues": [
+    {
+      "number": 11874,
+      "title": "[dashboards][P1] Provider retirement не согласован с navigation contract и context URLs",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-02T22:19:39Z",
+      "html_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11874"
+    },
+    {
+      "number": 11844,
+      "title": "Обновить скриншоты Grafana: префлайт аудита reports stale для 5 дашбордов",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-02T22:19:43Z",
+      "html_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11844"
+    },
+    {
+      "number": 11895,
+      "title": "[dashboards][P2] Unavailable UI: Canvas 9482 Field not found и обрезанный TREE_MISSING",
+      "state": "open",
+      "state_reason": null,
+      "closed_at": null,
+      "html_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11895"
+    },
+    {
+      "number": 11899,
+      "title": "[coverage][P2] config_root: R11 97.5% при historical inventory 100%",
+      "state": "open",
+      "state_reason": null,
+      "closed_at": null,
+      "html_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11899"
+    }
+  ],
+  "pr": {
+    "headRefOid": "91a1443fe81dd5706d21c7fe0a5ae4b42741be42",
+    "mergeCommit": {
+      "oid": "5b30ee958d33c27d47d0c5f4344dd8f8a189d42e"
+    },
+    "state": "MERGED",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/11898"
+  }
+}

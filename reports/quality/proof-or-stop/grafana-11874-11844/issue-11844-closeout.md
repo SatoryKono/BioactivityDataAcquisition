@@ -1,0 +1,10 @@
+Закрываю как completed: свежие browser screenshot bundles получены для всех пяти shipped dashboards.
+
+- Canonical audit cycle выполнен в изолированном runtime: Grafana `:3002`, source-bound Ops HTTP `:8014`, существующий Prometheus `:9090`; `.env` только читался.
+- Native Chromium capture на чистом commit `91a1443fe81dd5706d21c7fe0a5ae4b42741be42`: dark, viewport **1600×2200**, native scale, раскрытые rows, full-page PNG и tiles. DOM/API parity и обязательные panel terminal states проверены для `bioetl-control-plane-v1`, `bioetl-dq-v2`, `bioetl-incident-v1`, `bioetl-overview-v2`, `bioetl-run-explorer-v1`.
+- Свежие файлы скопированы в стандартный `reports/observability/grafana/screenshots/` acceptance checkout. Повторный preflight с explicit Grafana/Ops HTTP URLs: **exit 0**, **screenshots: ok**, runtime source identity matched, active Prometheus target UP. PNG-сигнатуры проверены; HTML-ответы Render API исключены из evidence. Все пять изображений просмотрены.
+- [PR #11898](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/11898) merged в `5b30ee958d33c27d47d0c5f4344dd8f8a189d42e`; весь merged tree совпадает с capture/validation head, включая dashboard/render sources.
+
+[Immutable PNG/tiles, render manifest, standard-directory preflight и merged-source receipts](https://github.com/SatoryKono/BioactivityDataAcquisition/tree/06fdb533aaa69456d1480f902cc149a02a21385f/reports/quality/proof-or-stop/grafana-11874-11844/five-dashboard-final-native). [Acceptance summary](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/06fdb533aaa69456d1480f902cc149a02a21385f/reports/quality/proof-or-stop/grafana-11874-11844/acceptance-main.json).
+
+Общий audit-cycle остаётся **FAIL** по отдельному live semantic gate; screenshot freshness/render gate — **PASS**. Это не полная live visual release acceptance: реальные `Field not found` в Overview и обрезанный `TREE_MISSING` в Run Explorer остаются в #11895. CI = **BLOCKED_EXTERNAL_PERMANENT**, CI PASS не заявляется. Screenshot freshness из этой задачи подтверждена независимо от этих blockers.

@@ -1,0 +1,15 @@
+{
+  "degraded": false,
+  "kind": "post-task",
+  "ok": true,
+  "persistence_mode": "read-only",
+  "promoted_note": null,
+  "prune_report": null,
+  "refresh_output_root": null,
+  "refresh_report": null,
+  "summary_note": null,
+  "task_id": "grafana-11874-11844-final-tests",
+  "title": "Grafana retirement and screenshot closeout",
+  "validation_issues": [],
+  "validation_status": "completed"
+}
