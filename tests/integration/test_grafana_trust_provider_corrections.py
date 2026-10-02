@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections
+from tests.integration._grafana_test_support import get_dashboard_panels
 
 pytestmark = pytest.mark.integration
 ROOT = Path(__file__).resolve().parents[2]
@@ -20,7 +21,7 @@ def _dashboard(uid):
 def test_retention_does_not_repeat_hash_verification_for_header():
     dashboard = _dashboard("bioetl-control-plane-v1")
     apply_corrections(dashboard)
-    panel = next(p for p in dashboard["panels"] if p["id"] == 9416)
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9416)
     assert [target["refId"] for target in panel["targets"]] == ["A"]
     assert panel["targets"][0]["root_selector"] == "rows"
     assert "error_as_row=1" in panel["targets"][0]["url"]
