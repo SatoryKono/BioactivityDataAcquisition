@@ -2551,20 +2551,6 @@ def apply_to_dashboard(
     )
 
     apply_provider_evidence_columns(payload)
-    # Retired Provider Health handoffs now resolve to the saved evidence on Overview.
-    payload = json.loads(
-        json.dumps(payload)
-        .replace(
-            "/d/bioetl-provider-health-v2/4-provider-health",
-            "/d/bioetl-overview-v2/2-overview",
-        )
-        .replace("Open Provider Health", "Open Provider Evidence")
-        .replace(
-            "Handoff: Provider Health",
-            "Handoff: CURRENT provider signals in Pipeline fleet and range on this page; "
-            "saved Provider Evidence is in Run Overview.",
-        )
-    )
     from scripts.ops.observability.grafana._overview_identity import (
         apply_saved_evidence_readability,
     )
@@ -2713,6 +2699,13 @@ def apply_to_dashboard(
     while pending:
         panel = pending.pop()
         pending.extend(panel.get("panels", []))
+        description = panel.get("description", "")
+        if "Handoff: Provider Health" in description:
+            panel["description"] = description.replace(
+                "Handoff: Provider Health",
+                "Handoff: CURRENT provider signals in Pipeline fleet and range on this page; "
+                "saved Provider Evidence is in Run Overview.",
+            )
         if panel.get("type") == "table":
             panel.setdefault("fieldConfig", {}).setdefault("defaults", {}).setdefault(
                 "custom", {}

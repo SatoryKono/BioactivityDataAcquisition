@@ -2081,7 +2081,7 @@ tests:
       - expr: bioetl_incident_ranked_provider
         eval_time: 1m
         exp_samples:
-          - labels: '{__name__="bioetl_incident_ranked_provider",action="UNKNOWN",action_dashboard_uid="bioetl-overview-v2",action_scope="viewPanel=9480",domain="provider",pipeline="unknown",provider="unknown",signal="telemetry_gap"}'
+          - labels: '{__name__="bioetl_incident_ranked_provider",action="UNKNOWN",action_dashboard_uid="bioetl-overview-v2",action_scope="var-pipeline=unknown&viewPanel=9480",domain="provider",pipeline="unknown",provider="unknown",signal="telemetry_gap"}'
             value: 0
       - expr: bioetl_incident_ranked_dq
         eval_time: 1m

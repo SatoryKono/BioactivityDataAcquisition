@@ -165,7 +165,8 @@ def test_content_contract_fails_closed_when_table_columns_are_omitted(
     assert isinstance(panels, dict)
     records = panels["9300"]
     assert isinstance(records, dict)
-    records.pop("required_columns")
+    records["role"] = "accounting_table"
+    records.pop("required_columns", None)
     contract_path = tmp_path / "panel-content-contract.yaml"
     _write_yaml(contract_path, contract)
 

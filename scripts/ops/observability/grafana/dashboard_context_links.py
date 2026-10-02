@@ -523,21 +523,27 @@ def retire_runtime_links(node: object) -> None:
     elif isinstance(node, dict):
         for key, value in node.items():
             if isinstance(value, str):
-                if "bioetl-runtime" in value:
-                    value = re.sub(
-                        r"/d/bioetl-runtime(?:/[^?\s\"<>]+)?",
-                        "/d/bioetl-overview-v2/2-overview",
-                        value,
-                    )
-                    value = value.replace("bioetl-runtime", "bioetl-overview-v2")
+                for retired_uid in ("bioetl-runtime", "bioetl-provider-health-v2"):
+                    if retired_uid in value:
+                        value = re.sub(
+                            rf"/d/{retired_uid}(?:/[^?\s\"<>]+)?",
+                            "/d/bioetl-overview-v2/2-overview",
+                            value,
+                        )
+                        value = value.replace(retired_uid, "bioetl-overview-v2")
                 if "/d/bioetl-overview-v2/" in value:
                     value = re.sub(
-                        r"&(?:amp;)?var-(?:stage|provider_hint)=[^&\s\"<>]*", "", value
+                        r"&(?:amp;)?var-(?:stage|provider_hint|provider|pipeline_context|adapter)=[^&\s\"<>]*",
+                        "",
+                        value,
                     )
                     value = re.sub(
-                        r"&(?:amp;)?\$\{(?:stage|provider_hint):queryparam\}", "", value
+                        r"&(?:amp;)?\$\{(?:stage|provider_hint|provider|pipeline_context|adapter):queryparam\}",
+                        "",
+                        value,
                     )
                 value = value.replace("Pipeline Diagnostics", "Run Overview")
+                value = value.replace("Open Provider Health", "Open Provider Evidence")
                 node[key] = value
             else:
                 retire_runtime_links(value)

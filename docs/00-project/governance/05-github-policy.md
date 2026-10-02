@@ -93,12 +93,12 @@ ______________________________________________________________________
 
 ## 2. CI/CD Workflows
 
-BioETL uses **51 GitHub Actions workflows** (including reusable helper workflows).
+BioETL uses **52 GitHub Actions workflows** (including reusable helper workflows).
 That number is the tracked `.github/workflows/*.yml` inventory, not GitHub's
 `GET /actions/workflows` `total_count` (live GET `2026-09-17`: **79** objects =
 50 tracked files + hosted `dynamic/**` workflows + GitHub-only orphan/residual
 IDs, snapshotted before `no-partial-tree-commits.yml` landed). For the
-file-level inventory and the 51-vs-79 breakdown, see
+file-level inventory and the 52-vs-79 breakdown, see
 [GitHub Actions Workflows](../../04-reference/github-actions-workflows.md).
 Temporary and Codex diagnostic workflows MUST NOT remain `active` after merge;
 GitHub-only orphan objects are disabled, not treated as canonical PR gates.

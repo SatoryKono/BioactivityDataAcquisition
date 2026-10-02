@@ -16,6 +16,7 @@ import pytest
 
 from tests.integration._grafana_test_support import (
     _collect_dashboard_links,
+    get_dashboard_panels,
     load_dashboard,
 )
 
@@ -80,7 +81,6 @@ def test_cross_scope_links_have_required_tooltip_tokens():
 
 
 def _panels(uid: str):
-    from tests.integration._grafana_test_support import get_dashboard_panels
 
     return {
         p["id"]: p
@@ -109,6 +109,15 @@ def test_workflow_status_panel_repeats_selected_range_contract() -> None:
         assert description.startswith("TIME RANGE")
         assert "selected range" in description
         assert "TELEMETRY MISSING is not a zero" in description
+    panel = incident[9996]
+    description = panel["description"]
+    assert "Workflow only, not a single Run ID" in description
+    assert "Pipeline does not filter this count" in description
+    assert "not current Workflow or Pipeline Health" in description
+    expression = panel["targets"][0]["expr"]
+    assert 'workflow=~"$workflow"' in expression
+    assert "[$__range]" in expression
+    assert "run_id" not in expression
 
 
 def test_provider_health_descriptions_separate_global_and_selected_scope() -> None:
@@ -119,6 +128,10 @@ def test_provider_health_descriptions_separate_global_and_selected_scope() -> No
         assert description.startswith("SELECTED RUN")
         assert "saved" in description.lower()
         assert "UNKNOWN" in description
+        url = saved[pid]["targets"][0]["url"]
+        assert url.startswith("/ops/observability/selected-run-status?")
+        assert "run_id=${run_id}" in url
+    assert "not live fleet health" in saved[9481]["description"]
     assert current[2003]["description"].startswith("GLOBAL")
     assert "pipeline and run selectors do not filter" in current[2003]["description"]
     assert "VALID EMPTY is not TELEMETRY MISSING" in current[2003]["description"]
