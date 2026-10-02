@@ -13,7 +13,7 @@ from bioetl.domain.context import (
     PipelineRunContext,
     VacuumSettings,
 )
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import ExecutionContext, RunID, RunType
 
 __all__ = [
     "PipelineRunContextService",
@@ -74,7 +74,11 @@ class PipelineRunContextService:
         input_filter = self._build_input_filter(options)
         vacuum = VacuumSettings(
             enabled=options.vacuum_after_run,
-            retention_days=options.vacuum_retention_days or 7,
+            retention_days=(
+                7
+                if options.vacuum_retention_days is None
+                else options.vacuum_retention_days
+            ),
         )
         cached_bronze = self._build_cached_bronze(options)
 
@@ -91,6 +95,9 @@ class PipelineRunContextService:
             start_offset=options.start_offset,
             limit=options.limit,
             dry_run=options.dry_run,
+            ignore_yaml_filter=options.ignore_yaml_filter,
+            skip_gold=options.skip_gold,
+            execution_context=ExecutionContext(options.execution_context),
             input_filter=input_filter,
             vacuum=vacuum,
             log_level=options.log_level,
@@ -113,6 +120,10 @@ class PipelineRunContextService:
 
     def _build_input_filter(self, options: RunOptions) -> InputFilterContext:
         """Resolve input filter mode from options."""
+        if options.multi_filter_ids:
+            return InputFilterContext.from_multi_ids(
+                multi_filter_ids=options.multi_filter_ids
+            )
         if options.input_csv:
             return InputFilterContext.from_csv(
                 source_path=options.input_csv,

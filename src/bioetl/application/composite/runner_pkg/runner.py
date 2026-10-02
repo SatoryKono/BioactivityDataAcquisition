@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.lifecycle_observer_service import (
@@ -60,6 +61,9 @@ if TYPE_CHECKING:
 
     from bioetl.application.composite.checkpoint import CompositeCheckpointState
     from bioetl.application.composite.key_extractor import KeyExtractorService
+    from bioetl.application.services.run_reports.composite import (
+        CompositeRunReportService,
+    )
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import ClockPort, LockPort, TracingPort
 
@@ -95,8 +99,12 @@ class CompositePipelineRunner(
         runtime: CompositeRuntimeConfig,
         deps: CompositeRunnerDependencies,
         run_id: str | None = None,
+        reporter: CompositeRunReportService | None = None,
+        contract_evidence_finalizer: Callable[[str, bool], None] | None = None,
     ) -> None:
         """Initialize composite runner with config, runtime flags, and deps."""
+        self._reporter = reporter
+        self._contract_evidence_finalizer = contract_evidence_finalizer
         self._config = config
         self._runtime = runtime
         bind_runner_dependencies(self, deps)
@@ -149,6 +157,12 @@ class CompositePipelineRunner(
         start_run_lifecycle(self._as_lifecycle_host())
 
     async def run(self) -> CompositeResult:
+        """Execute and persist the parent outcome independently of child reports."""
+        if self._reporter is not None:
+            return await self._reporter.execute(self.run_id, self._run_with_lifecycle)
+        return await self._run_with_lifecycle()
+
+    async def _run_with_lifecycle(self) -> CompositeResult:
         """Execute full composite pipeline under runtime lock."""
         validate_runner_can_start(
             finished=self._finished,
@@ -240,6 +254,8 @@ class CompositePipelineRunner(
 
     async def _run_with_lock(self) -> CompositeResult:
         """Execute pipeline stages while lock is held."""
+        if self._contract_evidence_finalizer is not None:
+            self._contract_evidence_finalizer(self.run_id, self._runtime.resume)
         state = await self._prepare_run_state()
         state, execution_context = await self._execute_locked_run_phases(state)
         return await self._complete_successful_run(state, execution_context)

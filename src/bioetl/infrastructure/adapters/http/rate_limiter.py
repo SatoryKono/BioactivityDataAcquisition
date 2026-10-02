@@ -39,7 +39,7 @@ class TokenBucketRateLimiter:
         - UniProt: fair-use throttling (configurable)
         - OpenAlex: 10 req/sec (polite pool, with mailto)
         - Crossref: 50 req/sec (polite pool, with mailto)
-        - Semantic Scholar: 1 req/sec (no key) / 10 req/sec (with API key)
+        - Semantic Scholar: configured anonymous and authenticated source YAML rates
         - PubMed: 3 req/sec (10 with API key via NCBI E-utilities)
 
     """

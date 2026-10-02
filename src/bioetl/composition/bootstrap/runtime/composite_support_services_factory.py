@@ -131,7 +131,11 @@ class CompositeSupportServicesFactory:
         )
         merger = build_composite_merge_service(
             config=self._config,
-            storage=self._infra.storage,
+            storage=(
+                self._infra.storage_for_manifest(runtime_context.control_plane_bundle)
+                if self._infra.storage_for_manifest is not None
+                else self._infra.storage
+            ),
             resolve_gold_schema=self._resolve_gold_schema,
             delta_reader=runtime_context.delta_reader,
             field_group_registry=runtime_context.field_group_registry,

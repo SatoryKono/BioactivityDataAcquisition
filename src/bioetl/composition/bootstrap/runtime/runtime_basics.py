@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
@@ -17,6 +18,9 @@ from bioetl.composition.bootstrap.composite_infrastructure_context import (
 )
 from bioetl.composition.bootstrap.runtime._dependency_runner_support import (
     resolve_required_gold_pipelines,
+)
+from bioetl.composition.bootstrap.runtime.composite_child_runner import (
+    build_reported_child_runner,
 )
 from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (
     initialize_domain_enum_fields,
@@ -33,7 +37,7 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-    from bioetl.application.composite.runtime_wiring_api import PipelineRunner
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort as PipelineRunner
     from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.composition.bootstrap.composite_infrastructure_context import (
         CompositeRuntimeStorageProtocol,
@@ -57,6 +61,7 @@ if TYPE_CHECKING:
         LockPort,
         LoggerPort,
         MetricsPort,
+        PipelineControlPlaneArtifacts,
         TracingPort,
     )
     from bioetl.infrastructure.config.settings_api import Settings
@@ -110,6 +115,30 @@ def bootstrap_runtime_basics(
         enable_csv_export=True,
         settings=settings,
     )
+
+    def storage_for_manifest(
+        artifacts: PipelineControlPlaneArtifacts,
+    ) -> CompositeRuntimeStorageProtocol:
+        bound_context = replace(
+            storage_run_context,
+            manifest_id=artifacts.manifest_id,
+            config_hash=artifacts.config_hash,
+            resolved_config_hash=artifacts.resolved_config_hash,
+            effective_config_hash=artifacts.effective_config_hash,
+            execution_fingerprint=artifacts.execution_fingerprint,
+            dq_contract_compatibility_hash=artifacts.dq_contract_compatibility_hash,
+            effective_config_artifact_id=artifacts.effective_config_artifact_id,
+            input_snapshot_fingerprint=artifacts.input_snapshot_fingerprint,
+        )
+        return storage_bootstrapper(
+            run_context=bound_context,
+            logger=logger,
+            metrics=metrics,
+            tracing=tracer,
+            enable_csv_export=True,
+            settings=settings,
+        )
+
     lock = lock_factory()
     return CompositeInfrastructureContext(
         run_id=effective_run_id,
@@ -118,6 +147,7 @@ def bootstrap_runtime_basics(
         metrics=metrics,
         tracer=tracer,
         storage=storage,
+        storage_for_manifest=storage_for_manifest,
         lock=lock,
         clock=clock,
     )
@@ -177,6 +207,9 @@ def build_runner_factories(
         run_options_cls=run_options_factory,
         build_context=build_context_fn,
         pipeline_runner_builder=pipeline_runner_builder,
+        reporting_runner_builder=lambda context, options: build_reported_child_runner(
+            context=context, options=options, runner_builder=pipeline_runner_builder
+        ),
         filter_extraction_service=filter_extraction_service,
         gold_required_pipelines=resolve_required_gold_pipelines(config),
         required_persistence_profile=getattr(
