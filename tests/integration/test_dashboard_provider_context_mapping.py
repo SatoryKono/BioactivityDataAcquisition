@@ -22,35 +22,26 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
-def test_provider_context_mapping_preserves_source_values():
-    """Provider health handoffs must preserve source dashboard provider/adapter values."""
-    # bioetl-runtime → bioetl-provider-health-v2 should preserve provider context
-    runtime_dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    runtime_links = _collect_dashboard_links(runtime_dashboard)
-
-    for link in runtime_links:
-        url = str(link.get("url", ""))
-        title = str(link.get("title", ""))
-
-        # Check links to provider-health
-        if "/d/bioetl-provider-health-v2/" in url:
-            # Runtime to provider-health should preserve pipeline context
-            # This is a SHOULD check - just verify the pattern exists
-            assert "var-pipeline_context" in url or "var-provider" in url, (
-                f"Runtime link '{title}' to Provider Health should include provider context mapping"
-            )
-
-    # bioetl-dq-v2 → bioetl-provider-health-v2 should preserve provider context
-    dq_dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    dq_links = _collect_dashboard_links(dq_dashboard)
-
-    for link in dq_links:
-        url = str(link.get("url", ""))
-        title = str(link.get("title", ""))
-
-        # Check links to provider-health
-        if "/d/bioetl-provider-health-v2/" in url:
-            # DQ to provider-health should preserve pipeline context
-            assert "var-pipeline_context" in url or "var-provider" in url, (
-                f"DQ link '{title}' to Provider Health should include provider context mapping"
-            )
+@pytest.mark.parametrize("source", ["bioetl-incident-v1", "bioetl-run-explorer-v1"])
+def test_provider_context_mapping_preserves_source_values(source: str) -> None:
+    """Provider evidence handoffs retain exact run identity on Run Overview."""
+    dashboard = load_dashboard(Path(f"grafana/dashboards/{source}.json"))
+    links = [
+        link
+        for link in _collect_dashboard_links(dashboard)
+        if "provider" in str(link.get("title", "")).lower()
+        and str(link.get("url", "")).startswith("/d/")
+    ]
+    assert links, f"{source} must expose provider evidence navigation"
+    for link in links:
+        url = link["url"]
+        assert url.startswith("/d/bioetl-overview-v2/")
+        assert "${__url_time_range}" in url
+        if source == "bioetl-run-explorer-v1":
+            assert "var-pipeline=${__data.fields.Pipeline:percentencode}" in url
+            assert "var-run_id=${__data.fields.run_id:percentencode}" in url
+        else:
+            assert "${pipeline:queryparam}" in url
+            assert "${run_id:queryparam}" in url
+        for retired in ("var-provider=", "var-pipeline_context=", "var-adapter="):
+            assert retired not in url

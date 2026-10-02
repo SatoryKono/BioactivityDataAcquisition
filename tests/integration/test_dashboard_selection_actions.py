@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
@@ -23,9 +24,22 @@ def test_navigation_preserves_selector_url_values(path: Path) -> None:
     dashboard = json.loads(path.read_text(encoding="utf-8"))
     nav = next(p for p in panels(dashboard) if p["id"] == 1000)
     for link in nav["links"]:
-        assert "${run_type:queryparam}" in link["url"]
-        assert "${workflow:queryparam}" in link["url"]
-        assert "${__url_time_range}" in link["url"]
+        url = link["url"]
+        assert "${__url_time_range}" in url
+        if url.startswith("/d/bioetl-run-explorer-v1/"):
+            # Returning to the run picker deliberately clears the prior selection.
+            query = parse_qs(urlsplit(url).query, keep_blank_values=True)
+            for selector in ("workflow", "pipeline", "run_type"):
+                assert query[f"var-{selector}"] == [".*"]
+            assert query["var-run_id"] == ["-"]
+            assert query["var-lookup_run_id"] == [""]
+            assert "Scope reset:" in link["tooltip"]
+            assert link["includeVars"] is False
+        else:
+            assert "${run_type:queryparam}" in url
+            assert "${workflow:queryparam}" in url
+            assert "${pipeline:queryparam}" in url
+            assert "${run_id:queryparam}" in url
 
 
 @pytest.mark.parametrize("path", sorted(Path("grafana/dashboards").glob("*.json")))

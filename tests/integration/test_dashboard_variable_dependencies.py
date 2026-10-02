@@ -74,17 +74,15 @@ def _derive_provider(pipeline: str, workflow: str) -> str:
     return labels["hint"]
 
 
-def test_runtime_variable_dependencies():
-    """bioetl-runtime: $run_type depends on $pipeline, $stage defaults to All."""
-    variables = _templating_map("grafana/dashboards/bioetl-runtime.json")
-
-    assert "pipeline" in variables, "bioetl-runtime must have $pipeline variable"
-    assert "run_type" in variables, "bioetl-runtime must have $run_type variable"
-    assert "stage" in variables, "bioetl-runtime must have $stage variable"
-    stage_var = variables["stage"]
-    assert stage_var.get("includeAll") is True
-    assert stage_var.get("current", {}).get("value") == "$__all"
-    assert stage_var.get("current", {}).get("text") == "All"
+def test_overview_variable_dependencies():
+    """Run Overview owns runtime context after Pipeline Diagnostics retirement."""
+    variables = _templating_map("grafana/dashboards/bioetl-overview-v2.json")
+    assert {"workflow", "pipeline", "run_type", "run_id"} <= variables.keys()
+    assert 'pipeline=~"$pipeline"' in variables["run_type"]["definition"]
+    run_query = variables["run_id"]["definition"]
+    for selector in ("${workflow}", "${pipeline}", "${run_type:csv}"):
+        assert selector in run_query
+    assert "stage" not in variables
 
 
 def test_dq_variable_dependencies():
@@ -100,25 +98,22 @@ def test_dq_variable_dependencies():
     assert stage_var.get("current", {}).get("text") == "All"
 
 
-def test_provider_health_variable_dependencies():
-    """bioetl-provider-health-v2: provider derives from pipeline/workflow."""
-    variables = _templating_map("grafana/dashboards/bioetl-provider-health-v2.json")
-
-    assert "provider" in variables, (
-        "bioetl-provider-health-v2 must have $provider variable"
+def test_overview_provider_context_is_derived_from_pipeline():
+    """Provider evidence is bound to the selected run, not a fleet selector."""
+    variables = _templating_map("grafana/dashboards/bioetl-overview-v2.json")
+    provider = variables["provider_for_pipeline"]
+    assert provider["definition"] == (
+        'label_values(bioetl_workflow_pipeline_expected{pipeline=~"$pipeline"}, provider)'
     )
-    provider = variables["provider"]
-    query = str(provider.get("definition") or "")
-    assert query == "label_values(bioetl_provider_current_status, provider)"
-    assert "${pipeline}" not in query and "${workflow}" not in query
-    assert provider.get("current", {}).get("value") == "$__all"
-
-    assert "pipeline_context" in variables, (
-        "bioetl-provider-health-v2 must have $pipeline_context variable"
-    )
-    pipeline_context = variables["pipeline_context"]
-    hide_value = pipeline_context.get("hide")
-    assert hide_value is True or hide_value == 2, "$pipeline_context should be hidden"
+    assert provider["hide"] == 2
+    assert not {"provider", "pipeline_context", "adapter"} & variables.keys()
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {panel["id"]: panel for panel in dashboard["panels"]}
+    for panel_id in (9480, 9481):
+        target = panels[panel_id]["targets"][0]
+        assert target["url"].startswith("/ops/observability/selected-run-status?")
+        assert "pipeline=${pipeline}" in target["url"]
+        assert "run_id=${run_id}" in target["url"]
 
 
 def test_incident_provider_derives_from_pipeline_or_workflow():
