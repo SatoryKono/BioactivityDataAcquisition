@@ -24,7 +24,7 @@ def test_activity_raw_compound_unit_contract(value: str, valid: bool) -> None:
     payload = yaml.safe_load(
         (root / "configs/entities/chembl/activity.yaml").read_text(encoding="utf-8")
     )
-    rules = payload["quality"]["field_validations"]
+    rules = payload["quality"]["entity_field_validations"]
     raw = next(rule for rule in rules if rule["field"] == "units")
     standard = next(rule for rule in rules if rule["field"] == "standard_units")
     assert bool(re.fullmatch(raw["pattern"], value)) is valid
