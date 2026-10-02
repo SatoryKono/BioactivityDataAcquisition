@@ -1,0 +1,12 @@
+{
+  "pr": 11898,
+  "pr_head_sha": "91a1443fe81dd5706d21c7fe0a5ae4b42741be42",
+  "merge_commit_sha": "5b30ee958d33c27d47d0c5f4344dd8f8a189d42e",
+  "all_tree_changes_between_pr_and_merge": [],
+  "critical_source_test_qa_dashboard_changes": [],
+  "coverage_producer_head_sha": "f9d20f27b43bc9cdc2b2dbd2d23aafce6fa94854",
+  "source_tree_sha256": "5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f",
+  "screenshots_capture_head_sha": "91a1443fe81dd5706d21c7fe0a5ae4b42741be42",
+  "artifact_commit": "2d0c66aae1b895f47d511b178b8ded7f9cbe411e",
+  "CI": "BLOCKED_EXTERNAL_PERMANENT"
+}
