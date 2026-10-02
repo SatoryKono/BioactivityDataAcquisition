@@ -354,7 +354,7 @@ class TestValidateQuarterlyTargetsSection:
         )
         assert errors == []
 
-    def test_zero_floor_flat_continuation_passes(self) -> None:
+    def test_quarterly_zero_floor_flat_continuation_passes(self) -> None:
         """Flat continuation at the zero floor is compliant steady state."""
         raw = {
             "quarterly_targets": [
@@ -383,7 +383,7 @@ class TestValidateQuarterlyTargetsSection:
         )
         assert errors == []
 
-    def test_flat_above_zero_still_violation(self) -> None:
+    def test_quarterly_flat_above_zero_still_violation(self) -> None:
         """Flat budgets above the zero floor still violate the ratchet."""
         raw = {
             "quarterly_targets": [

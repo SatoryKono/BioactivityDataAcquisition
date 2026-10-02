@@ -18,6 +18,9 @@ from bioetl.infrastructure.control_plane.file_effective_config_artifact_store im
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 def _artifact(data_dir: str, bronze_path: str, limit: int = 1000):
     settings = {"settings": {"data_root_mode": "explicit", "data_dir": data_dir}}
     settings["snapshot_hash"] = f"sha256:{stable_json_hash(settings)}"
