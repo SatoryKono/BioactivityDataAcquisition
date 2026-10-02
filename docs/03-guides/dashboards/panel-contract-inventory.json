@@ -610,11 +610,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider_hint\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0)",
+      "formula": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider\"}) > bool 0)",
       "kind": "promql",
       "panel_id": 6,
       "panel_title": "Inspect Provider Alerts",
-      "query": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider_hint\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0)",
+      "query": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider\"}) > bool 0)",
       "query_tokens": [
         "bioetl_provider_current_status",
         "bioetl_runtime_provider_alert_count"

@@ -2097,8 +2097,10 @@ def _stamp_runtime_fleet_panel(panel: dict[str, Any]) -> None:
     if panel.get("id") == 18940:
         panel["title"] = "Monitor Pipeline Status"
         panel["description"] = (
-            "CURRENT · Pipeline / Run Type readiness. Mapping: 0=OK, 1=WARN, "
-            "2=CRIT, 3/null=UNKNOWN. This is not the selected Run ID verdict."
+            "CURRENT · Worst domain priority in the selected workflow/pipeline/run-type "
+            "scope. Mapping: 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT; null is UNKNOWN. "
+            "Run ID does not filter this card. A workflow-wide failure does not "
+            "prove that this pipeline or the selected run failed."
         )
     if panel_id == 9102 and "evidence confidence" not in description.lower():
         panel["description"] = (
@@ -2457,6 +2459,11 @@ def apply_to_dashboard(
         _stash_trust_range_panels(payload)
     elif current_uid == "bioetl-incident-v1":
         _attach_runtime_fleet_row(payload)
+        for panel in _walk_panels(payload.get("panels", [])):
+            for target in panel.get("targets", []):
+                expression = target.get("expr")
+                if isinstance(expression, str):
+                    target["expr"] = expression.replace("$provider_hint", "$provider")
     # Remove generated details before earlier layout passes measure bottom rows.
     payload["panels"] = [
         panel for panel in payload.get("panels", []) if panel.get("id") != 9450
