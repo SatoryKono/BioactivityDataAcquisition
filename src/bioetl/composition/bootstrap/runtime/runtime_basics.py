@@ -9,7 +9,6 @@ from uuid import UUID
 
 from bioetl.application.composite.runtime_wiring_api import (
     JOIN_KEY_NORMALIZATION_POLICIES,
-    CompositeCheckpointService,
     validate_join_key_normalization_policies,
 )
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
@@ -21,6 +20,9 @@ from bioetl.composition.bootstrap.runtime._dependency_runner_support import (
 )
 from bioetl.composition.bootstrap.runtime.composite_child_runner import (
     build_reported_child_runner,
+)
+from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
+    build_support_services,
 )
 from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (
     initialize_domain_enum_fields,
@@ -38,29 +40,22 @@ if TYPE_CHECKING:
 
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.domain.ports import ExecutionMetricsRunnerPort as PipelineRunner
-    from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.composition.bootstrap.composite_infrastructure_context import (
         CompositeRuntimeStorageProtocol,
     )
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
         CompositeFilterExtractor,
     )
-    from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
-        CompositeSupportServices,
-        CompositeSupportServicesFactory,
-    )
     from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
         BronzeRunOptions,
         RunnerFactoryBuilder,
     )
     from bioetl.domain.composite import CompositeConfig
-    from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import (
         ClockPort,
         LockPort,
         LoggerPort,
-        MetricsPort,
         PipelineControlPlaneArtifacts,
         TracingPort,
     )
@@ -236,46 +231,3 @@ def build_runner_factories(
         ),
     )
     return seed_factory, dependency_factory, enricher_factory
-
-
-def build_support_services(
-    *,
-    config: CompositeConfig,
-    runtime: CompositeRuntimeConfig,
-    infra_context: CompositeInfrastructureContext,
-    support_services_factory_cls: type[CompositeSupportServicesFactory],
-    resolve_gold_schema_fn: Callable[[str], type | None],
-    load_field_group_registry_fn: Callable[
-        [str, LoggerPort], FieldGroupRegistry | None
-    ],
-    create_dq_report_service_fn: Callable[
-        [LoggerPort, Settings, MetricsPort],
-        DQReportService,
-    ],
-) -> CompositeSupportServices:
-    """Build composite support service bundle consumed by runner facade.
-
-    Args:
-        config: CompositeConfig for this composite run.
-        runtime: Runtime options (resume, concurrency, etc.).
-        infra_context: Bundle of infrastructure primitives.
-        support_services_factory_cls: Factory class that assembles the bundle.
-        resolve_gold_schema_fn: Callable returning the Gold Pandera schema for
-            a composite pipeline name, or None if not registered.
-        load_field_group_registry_fn: Callable returning the FieldGroupRegistry
-            for a composite pipeline name, or None.
-        create_dq_report_service_fn: Callable returning a DQReportService
-            given a logger and settings.
-
-    Returns:
-        CompositeSupportServices bundle with all services required by the runner.
-    """
-    return support_services_factory_cls(
-        config=config,
-        runtime=runtime,
-        infra_context=infra_context,
-        resolve_gold_schema=resolve_gold_schema_fn,
-        load_field_group_registry=load_field_group_registry_fn,
-        create_dq_report_service=create_dq_report_service_fn,
-        checkpoint_manager_cls=CompositeCheckpointService,
-    ).build()

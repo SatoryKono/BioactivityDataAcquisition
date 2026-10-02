@@ -421,4 +421,76 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
     }
     panels[:] = [p for p in panels if p.get("id") not in {9460, 9482}]
     panels.extend([stages, quality])
+    _apply_reconciliation_evidence(payload)
     panels.sort(key=lambda p: (p["gridPos"]["y"], p["gridPos"]["x"]))
+
+
+def _apply_reconciliation_evidence(payload: dict) -> None:
+    """Show bounded comparison separately from saved trust and replay verdicts."""
+    panels = payload["panels"]
+    panels[:] = [panel for panel in panels if panel.get("id") != 9483]
+    columns = {
+        "step_id": "Workflow step",
+        "mode": "Mode",
+        "scope": "Row scope",
+        "pins": "Compared snapshots",
+        "limit": "Limit",
+        "result": "Result",
+        "meaning": "Interpretation",
+    }
+    panels.append(
+        {
+            "id": 9483,
+            "type": "table",
+            "title": "Review FK Comparison Scope",
+            "description": (
+                "SELECTED RUN · Persisted FK comparison in the exact parent workflow. "
+                "selected-snapshot means absence only inside the pinned reference, "
+                "not absence from the complete provider. Expiry can affect all selected "
+                "rows while execution succeeds; remaining rows and scope stay explicit. "
+                "Missing evidence is UNKNOWN and failed requests remain QUERY ERROR. "
+                "Saved Evidence and Replay Readiness retain their independent checks."
+            ),
+            "gridPos": {"x": 0, "y": 29, "w": 24, "h": 12},
+            "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http",
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "type": "json",
+                    "source": "url",
+                    "format": "table",
+                    "parser": "backend",
+                    "url": (
+                        "/ops/observability/selected-run-status?pipeline=${pipeline}"
+                        "&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+                    ),
+                    "url_options": {"method": "GET", "data": ""},
+                    "root_selector": "reconciliation_display",
+                    "columns": [
+                        {"selector": key, "text": title, "type": "string"}
+                        for key, title in columns.items()
+                    ],
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "noValue": "UNKNOWN",
+                    "custom": {
+                        "align": "left",
+                        "minWidth": 60,
+                        "wrapText": True,
+                        "cellOptions": {"type": "auto", "wrapText": True},
+                    },
+                },
+                "overrides": [],
+            },
+            "options": {
+                "showHeader": True,
+                "cellHeight": "sm",
+                "footer": {"show": False, "enablePagination": False},
+            },
+        }
+    )

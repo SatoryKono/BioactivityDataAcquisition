@@ -2163,6 +2163,97 @@
       ],
       "transformations": [],
       "links": []
+    },
+    {
+      "id": 9483,
+      "type": "table",
+      "title": "Review FK Comparison Scope",
+      "description": "SELECTED RUN · Persisted FK comparison in the exact parent workflow. selected-snapshot means absence only inside the pinned reference, not absence from the complete provider. Expiry can affect all selected rows while execution succeeds; remaining rows and scope stay explicit. Missing evidence is UNKNOWN and failed requests remain QUERY ERROR. Saved Evidence and Replay Readiness retain their independent checks. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 24,
+        "h": 12
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "reconciliation_display",
+          "columns": [
+            {
+              "selector": "step_id",
+              "text": "Workflow step",
+              "type": "string"
+            },
+            {
+              "selector": "mode",
+              "text": "Mode",
+              "type": "string"
+            },
+            {
+              "selector": "scope",
+              "text": "Row scope",
+              "type": "string"
+            },
+            {
+              "selector": "pins",
+              "text": "Compared snapshots",
+              "type": "string"
+            },
+            {
+              "selector": "limit",
+              "text": "Limit",
+              "type": "string"
+            },
+            {
+              "selector": "result",
+              "text": "Result",
+              "type": "string"
+            },
+            {
+              "selector": "meaning",
+              "text": "Interpretation",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "custom": {
+            "align": "left",
+            "minWidth": 60,
+            "wrapText": true,
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "enablePagination": false
+        }
+      }
     }
   ]
 }

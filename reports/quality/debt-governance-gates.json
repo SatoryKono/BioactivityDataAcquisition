@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "0fdee4cdfc19d0bfeb05631ba2720e27e353140c94e24645e474bed34d1e6bed",
-      "limit": "0fdee4cdfc19d0bfeb05631ba2720e27e353140c94e24645e474bed34d1e6bed",
+      "current": "05df6f1174f3f29499fe16f3df40e8de1c65dfff4814c64b9137fa7513d4e3a9",
+      "limit": "05df6f1174f3f29499fe16f3df40e8de1c65dfff4814c64b9137fa7513d4e3a9",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,14 +56,14 @@
     },
     {
       "current": {
-        "source_module_count": 2550,
-        "source_tree_sha256": "0fdee4cdfc19d0bfeb05631ba2720e27e353140c94e24645e474bed34d1e6bed",
+        "source_module_count": 2551,
+        "source_tree_sha256": "05df6f1174f3f29499fe16f3df40e8de1c65dfff4814c64b9137fa7513d4e3a9",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2550,
-        "source_tree_sha256": "0fdee4cdfc19d0bfeb05631ba2720e27e353140c94e24645e474bed34d1e6bed",
+        "source_module_count": 2551,
+        "source_tree_sha256": "05df6f1174f3f29499fe16f3df40e8de1c65dfff4814c64b9137fa7513d4e3a9",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -92,13 +92,13 @@
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "budget_warnings",
       "name": "hotspot_family_baseline_budget_warnings",
       "remediation": "Reduce hotspot-family metrics to stay at or below reviewed budgets.",
       "source_artifact": "reports/quality/hotspot-family-baseline.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "9f0b11fd1221365549b7f629f7668b74b5a706071ef3fdc3fc9448aa4147ce50",
+      "current": "4b3537cca4c755ec0d6fd754cb14c27cb2f80f571c16c2206db83c88985cfc09",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -467,20 +467,18 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 1,
-    "pass": 45,
+    "fail": 0,
+    "pass": 46,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 9.39,
+    "architecture_quality_scorecard_integral_score": 9.47,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 1,
-    "failing_gates": [
-      "hotspot_family_baseline_budget_warnings"
-    ],
+    "fail_count": 0,
+    "failing_gates": [],
     "gate_count": 46,
-    "pass_count": 45,
-    "release_gate_status": "failing",
+    "pass_count": 46,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }

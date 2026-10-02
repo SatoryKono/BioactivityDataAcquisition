@@ -3,7 +3,7 @@
     "snapshot_date": "2026-09-11",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 1,
+    "budget_warnings": 0,
     "budget_review_notes": 0
   },
   "families": [
@@ -1574,8 +1574,8 @@
       ],
       "duplication_clusters": 0,
       "files": 53,
-      "total_loc": 6445,
-      "files_ge_250_loc": 1,
+      "total_loc": 6444,
+      "files_ge_250_loc": 0,
       "helper_function_ratio": 0.301,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
@@ -1586,8 +1586,8 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 2,
-          "1": 36,
-          "2": 15
+          "1": 35,
+          "2": 16
         },
         "modules": [
           {
@@ -1818,9 +1818,10 @@
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.composite_support_services_factory",
-            "fan_in": 1,
+            "fan_in": 2,
             "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime.composite_support_helpers"
+              "bioetl.composition.bootstrap.runtime.composite_support_helpers",
+              "bioetl.composition.bootstrap.runtime.runtime_basics"
             ]
           },
           {
@@ -1981,6 +1982,7 @@
           "bioetl.composition.bootstrap.runtime._runner_assembly_support",
           "bioetl.composition.bootstrap.runtime.assembly",
           "bioetl.composition.bootstrap.runtime.composite_filter_extraction_service",
+          "bioetl.composition.bootstrap.runtime.composite_support_services_factory",
           "bioetl.composition.bootstrap.runtime.dq_bootstrap",
           "bioetl.composition.bootstrap.runtime.logger_bootstrap",
           "bioetl.composition.bootstrap.runtime.metrics_bootstrap",
@@ -1992,9 +1994,7 @@
           "bioetl.composition.bootstrap.runtime.tracing_bootstrap"
         ]
       },
-      "budget_warnings": [
-        "over_budget:files_ge_250_loc=1/0"
-      ],
+      "budget_warnings": [],
       "budget_review_notes": [],
       "at_budget_modules": [],
       "at_budget_module_count": 0

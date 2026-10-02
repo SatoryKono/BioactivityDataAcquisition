@@ -337,7 +337,25 @@ async def test_workflow_report_handles_found_and_missing_payloads(
         lambda **_kwargs: expected,
     )
     await observability_routing.handle_workflow_run_report(host, writer, query)
-    assert host.sent[-1] == ("payload", 200, expected)
+    assert host.sent[-1] == (
+        "payload",
+        200,
+        {
+            **expected,
+            "reconciliation_display": [
+                {
+                    "step_id": "—",
+                    "mode": "Not recorded",
+                    "scope": "UNKNOWN",
+                    "pins": "UNKNOWN",
+                    "limit": "UNKNOWN",
+                    "result": "UNKNOWN",
+                    "meaning": "FK reconciliation evidence not recorded",
+                }
+            ],
+        },
+    )
+    assert "reconciliation_display" not in expected
 
 
 @pytest.mark.asyncio

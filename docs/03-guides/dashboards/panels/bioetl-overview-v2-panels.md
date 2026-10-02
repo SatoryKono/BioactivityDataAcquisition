@@ -69,4 +69,5 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9481 | Review Provider Check | stat |
 | 9460 | Inspect Selected Run Stages | table |
 | 9482 | Review Data Quality | canvas |
+| 9483 | Review FK Comparison Scope | table |
 <!-- END SHIPPED PANEL INVENTORY -->
