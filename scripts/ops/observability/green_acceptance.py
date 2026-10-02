@@ -62,6 +62,8 @@ def command(case: Case) -> list[str]:
         *args,
         "--limit",
         "1000",
+        "--required-persistence-profile",
+        "degraded_observable",
     ]
 
 
@@ -175,6 +177,11 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
         BIOETL_METRICS_ENABLED="false",
         BIOETL_PUSHGATEWAY_URL="",
         PYTHONDONTWRITEBYTECODE="1",
+        OPENBLAS_NUM_THREADS="1",
+        OMP_NUM_THREADS="1",
+        MKL_NUM_THREADS="1",
+        NUMEXPR_NUM_THREADS="1",
+        POLARS_MAX_THREADS="2",
     )
     args = command(case)
     failures = []
