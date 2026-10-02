@@ -14,13 +14,24 @@ workflow:
     - kind: pipeline
       step_id: run_chembl_target
       pipeline_name: chembl_target
+      reference_cohort:
+        step_id: run_chembl_assay
+        table: chembl.assay
+        column: target_id
+        filter_field: target_id
       depends_on:
         - run_chembl_assay
     - kind: pipeline
       step_id: run_chembl_publication
       pipeline_name: chembl_publication
+      reference_cohort:
+        step_id: run_chembl_assay
+        table: chembl.assay
+        column: publication_id
+        filter_field: publication_id
       depends_on:
         - run_chembl_target
+        - run_chembl_assay
     - kind: transform
       step_id: reconcile_assay_target_orphans
       transform_name: reconcile_foreign_keys
@@ -38,6 +49,7 @@ workflow:
         primary_keys:
           - assay_id
         action: delete_orphans
+        require_closed_cohort: true
         nulls_equal: false
     - kind: transform
       step_id: reconcile_assay_publication_orphans
@@ -56,6 +68,7 @@ workflow:
         primary_keys:
           - assay_id
         action: delete_orphans
+        require_closed_cohort: true
         nulls_equal: false
     - kind: transform
       step_id: reconcile_target_assay_orphans
@@ -73,6 +86,7 @@ workflow:
         primary_keys:
           - target_id
         action: delete_orphans
+        require_closed_cohort: true
         nulls_equal: false
     - kind: transform
       step_id: reconcile_publication_assay_orphans
@@ -90,4 +104,5 @@ workflow:
         primary_keys:
           - publication_id
         action: delete_orphans
+        require_closed_cohort: true
         nulls_equal: false
