@@ -3,8 +3,8 @@
   "additive_coverage_xml_sha256": "4bed3befe08092efc88fecbd8388d8829665fe1126d74f526322592c4bf2f3ff",
   "additive_measured_module_count": 2478,
   "canonical_coverage_lane": "coverage-verify",
-  "coverage_xml_path": "reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-d65e6f4/coverage.xml",
-  "coverage_xml_sha256": "e66c8cdd3f11384f725d72f2e2c28767c82eb763b75679fa7e1e1ec6476b9955",
+  "coverage_xml_path": "reports/coverage/coverage.xml",
+  "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
