@@ -46,6 +46,7 @@ class ForeignKeyReconciliationRequest:
     transform_name: str | None = None
     debug_export_enabled: bool = False
     debug_export_dir: str | None = None
+    require_closed_cohort: bool = False
     source_scope: str = "all_current"
     source_run_ids: tuple[str, ...] = ()
     _: KW_ONLY

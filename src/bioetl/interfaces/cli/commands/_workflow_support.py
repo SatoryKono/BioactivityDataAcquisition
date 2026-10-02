@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import asdict, replace
 
 from bioetl.application.services.control_plane.workflow.inspection_service import (
     WorkflowInspectionResult,
@@ -95,6 +95,11 @@ def build_status_payload(
                     "kind": "pipeline",
                     "pipeline_name": step.pipeline_name,
                     "run_options": step.run_options.to_mapping(),
+                    **(
+                        {"reference_cohort": asdict(step.reference_cohort)}
+                        if step.reference_cohort
+                        else {}
+                    ),
                 }
             )
         else:
