@@ -59,6 +59,7 @@ class UnifiedHTTPClient(
 
     _client: httpx.AsyncClient | None = field(init=False, default=None)
     _client_enter_depth: int = field(init=False, default=0)
+    _request_not_before: float = field(init=False, default=0.0)
     _tracer: TracingPort | None = field(init=False)
     _metrics: MetricsPort | None = field(init=False)
 

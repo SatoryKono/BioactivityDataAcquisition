@@ -379,8 +379,9 @@ async def test_health_check_probe_timeout_returns_degraded(
 ) -> None:
     """A stuck ChEMBL status probe should fail fast as DEGRADED."""
 
-    async def _hang(_url: str) -> None:
-        await asyncio.sleep(1)
+    async def _hang(_url: str, *, request_timeout: float) -> None:
+        async with asyncio.timeout(request_timeout):
+            await asyncio.sleep(1)
 
     monkeypatch.setattr(
         "bioetl.infrastructure.adapters.chembl.health.CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS",

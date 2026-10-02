@@ -29,10 +29,13 @@ from bioetl.infrastructure.adapters.http._client_retry_policy import (
 from bioetl.infrastructure.adapters.http._client_retry_request_flow import (
     HTTPClientRetryRequestFlow,
 )
+from bioetl.infrastructure.adapters.http.request_timing import execute_timed_request
 
 
 class HTTPClientRetryMixin(HTTPClientRetryRequestFlow):
     """Retry policy orchestration extracted from UnifiedHTTPClient."""
+
+    _request_not_before: float = 0.0
 
     retry_config: RetryConfig = cast(Any, None)  # Any: host attr default (PD6)
     _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD6)
@@ -65,6 +68,15 @@ class HTTPClientRetryMixin(HTTPClientRetryRequestFlow):
                 retry_after_delay = _parse_retry_after(retry_after)
                 if retry_after_delay is not None:
                     delay = self.retry_config.clamp_retry_after(retry_after_delay)
+        if self.logger is not None:
+            self.logger.info(
+                "http_retry_wait",
+                provider=self.provider,
+                run_id=self._observability_run_id(),
+                attempt=attempt + 1,
+                wait_seconds=float(delay),
+                status_code=response.status_code if response is not None else None,
+            )
         await asyncio.sleep(delay)
         return float(delay)
 
@@ -141,11 +153,13 @@ class HTTPClientRetryMixin(HTTPClientRetryRequestFlow):
         client: httpx.AsyncClient,
         method: str,
         url: str,
+        attempt_number: int = 1,
         **kwargs: Any,  # Any: forwarding arbitrary request kwargs to underlying HTTP client
     ) -> httpx.Response:
         """Execute one rate-limited circuit-breaker guarded request."""
-        await self.rate_limiter.acquire()
-        return await self.circuit_breaker.call(client.request, method, url, **kwargs)
+        return await execute_timed_request(
+            self, client, method, url, kwargs, attempt_number=attempt_number
+        )
 
     def _should_continue_retry(
         self,

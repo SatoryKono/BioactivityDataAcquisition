@@ -29,8 +29,8 @@ source:
         failure_threshold: 10
         recovery_timeout: 600
     rate_limit:
-        # Anonymous access: at most one request every 50 seconds, without bursts.
-        requests_per_second: 0.02
+        # Anonymous access: at most one request every 100 seconds, without bursts.
+        requests_per_second: 0.01
         burst: 1
         with_api_key:
             requests_per_second: 1.0
