@@ -22,10 +22,11 @@ if TYPE_CHECKING:
     from bioetl.domain.composite import (
         DependencyConfig,
         EnricherConfig,
+        MergeConfig,
     )
     from bioetl.domain.composite.cross_validation import CrossValidationStats
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import MergedStoragePort
+    from bioetl.domain.ports import LoggerPort, MergedStoragePort
 
 
 class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
@@ -37,10 +38,15 @@ class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
     """
 
     # -- Host-class attributes (set by MergeService.__init__) --
-    _storage: MergedStoragePort
     _field_group_registry: FieldGroupRegistry | None = None
     _cross_validator: EnrichmentCrossValidator | None = None
     _gold_schema: object | None = None
+
+    def __init__(
+        self, config: MergeConfig, logger: LoggerPort, storage: MergedStoragePort
+    ) -> None:
+        super().__init__(config, logger)
+        self._storage = storage
 
     async def _apply_dependency_joins_if_needed(
         self,
