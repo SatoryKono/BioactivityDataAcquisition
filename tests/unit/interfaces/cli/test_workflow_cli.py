@@ -30,7 +30,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import inspect
 from pathlib import Path
 from typing import Any
@@ -481,14 +481,28 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
     )
 
 
-def test_workflow_run_rejects_delete_orphans_when_limit_follows_extracts(
+@pytest.mark.parametrize("bound_cohort", [True, False])
+def test_workflow_run_limits_require_bound_reference_cohorts(
     cli_runner: CliRunner,
     monkeypatch: Any,
     tmp_path: Path,
+    bound_cohort: bool,
 ) -> None:
-    """CLI limits cannot prove referential completeness, even within one run."""
+    """A linked cohort permits bounded runs; independent extracts fail closed."""
     import bioetl.interfaces.cli.commands.workflow as workflow_cmd
 
+    workflow = workflow_cmd.load_workflow_config("chembl_core")
+    if not bound_cohort:
+        workflow = replace(
+            workflow,
+            steps=tuple(
+                replace(step, reference_cohort=None)
+                if isinstance(step, WorkflowStepConfig)
+                else step
+                for step in workflow.steps
+            ),
+        )
+    monkeypatch.setattr(workflow_cmd, "load_workflow_config", lambda _name: workflow)
     fake_service = _FakeWorkflowRunnerService()
     cached_bronze_path = tmp_path / "bronze"
     cached_bronze_path.mkdir()
@@ -514,9 +528,17 @@ def test_workflow_run_rejects_delete_orphans_when_limit_follows_extracts(
         ],
     )
 
-    assert result.exit_code != 0
-    assert "independently bounded extracts" in result.output
-    assert fake_service.received_config is None
+    if bound_cohort:
+        assert result.exit_code == 0, result.output
+        assert fake_service.received_config is not None
+        assert all(
+            step.run_options.limit == 1000
+            for step in fake_service.received_config.pipeline_steps
+        )
+    else:
+        assert result.exit_code != 0
+        assert "independently bounded extracts" in result.output
+        assert fake_service.received_config is None
 
 
 def test_workflow_run_forwards_baseline_resume_repair_steps(

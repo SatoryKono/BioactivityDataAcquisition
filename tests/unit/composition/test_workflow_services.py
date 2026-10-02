@@ -44,7 +44,9 @@ pytestmark = pytest.mark.unit
 
 def test_workflow_composition_passes_configured_report_root(monkeypatch, tmp_path):
     settings = SimpleNamespace(
-        data_dir=tmp_path / "data", report_root=tmp_path / "reports"
+        data_dir=tmp_path / "data",
+        gold_path=tmp_path / "data" / "output" / "gold",
+        report_root=tmp_path / "reports",
     )
     monkeypatch.setattr(_workflow_services, "get_settings", lambda: settings)
     monkeypatch.setattr(

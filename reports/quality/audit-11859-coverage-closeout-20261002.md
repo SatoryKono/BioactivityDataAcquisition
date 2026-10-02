@@ -79,3 +79,9 @@ Runtime AI sources/mirrors were not changed in this cutover, so mirror synchroni
 ## Later upstream inventory reconciliation
 
 Main `f892511e55993` contains a parallel full measured inventory for the R9 production source SHA, with identical 2546 paths. Its candidate values improve none of the accepted rows and lower 67 of them. Accepted nonregressing values were retained. The parallel XML remains identified by upstream path `reports/quality/proof-or-stop/grafana-11874-11844/full-coverage-d65e6f4/coverage.xml` and normalized SHA-256 `e66c8cdd3f11384f725d72f2e2c28767c82eb763b75679fa7e1e1ec6476b9955`. This did not measure the subsequently added `request_timing.py`; a separate full producer is required for that later source tree.
+
+## Latest-main workflow contract reconciliation
+
+Main `42f364a39526e42bec9f23e813910052ca5eb440` introduces bound reference cohorts. Source SHA-256 is `5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f`, with 2548 Python module paths. R10 on merge commit `309dd80b256851ab665f8b9493583a58cbee7574` is incomplete: application, infrastructure and other unit groups failed on stale config/payload and composition fixtures. It was stopped after complete diagnostic runs; no R10 combined XML was generated or reused.
+
+Complete diagnostics found 2 application, 4 infrastructure and 2 other-unit failures. Integration remained green (2673 PASS, 60 SKIP). Fixtures now include the new closed-cohort fields and Gold reader settings. Both YAML-config and CLI contracts preserve rejection of independently bounded extracts while permitting explicitly bound cohorts. The HTTP fixture fixes retain real response status, synchronous circuit-breaker state and a local virtual admission clock; long provider waits fail closed and remain cancellable. Focused workflow contracts passed 71 tests, and the HTTP timing/retry selection passed 53 tests. Full replacement coverage is required before publication.
