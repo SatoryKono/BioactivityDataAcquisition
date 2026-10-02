@@ -487,6 +487,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ci_check_docs_parity.sh": {
+      "decision": "compatibility_wrapper",
+      "next_step": "Retain the retired non-CI wrapper only for legacy local invocations; the active gate is python -m scripts.data_quality check-entity-config-parity (#11858, DOCS-PIPE-010).",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
+    },
     "scripts/data_quality/__main__.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the unified data-quality module dispatcher; keep operator commands routed through python -m scripts.data_quality and do not promote this package boundary into a second command implementation.",
@@ -738,6 +744,12 @@
       "next_step": "Retain as the internal passport validation helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/docs_parity_check.py": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain the retired non-CI broader parity report for manual local diagnosis; do not treat it as the published or CI parity gate (#11858, DOCS-PIPE-010).",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
     },
     "scripts/engineering/apply_s1_c2_fixes.py": {
       "decision": "legacy_manual_utility",

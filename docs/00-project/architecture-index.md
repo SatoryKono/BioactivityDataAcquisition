@@ -58,7 +58,8 @@ Three architecture scanners count different populations. They are not interchang
 and a numeric gap is not a layer violation. Re-measure with the live commands before
 copying these integers forward.
 
-Live counts below: coverage inventory and the dependency map were re-measured 2026-09-25. The import-linter file count remains the 2026-09-23 review pass. Grafana/ops Python
+Counts below were checked against the working tree and committed artifacts on
+2026-10-02. The import-linter file count remains the 2026-09-23 review pass. Grafana/ops Python
 under `scripts/ops/observability/grafana/` stays outside RF-06 hotspot families
 (decision C / `#10447`); do not fold those files into `debt_scorecard.yaml`
 without a separate ADR.
@@ -66,16 +67,18 @@ without a separate ADR.
 Hash-only coverage refresh (`--allow-missing-coverage-xml`) hashes all
 `src/bioetl/**/*.py` and drops deleted inventory paths. It does not add rows
 for new modules until a coverage XML refresh. After `#10610` the committed
-inventory matches the live tree (`source_module_count=2492`) after the
-`src/bioetl/composition` count is 282 modules live per the architecture scorecard
-(`max_modules` held at 295, shrink-only; ARCH-011, #11859; verified 2026-10-01).
-`composition_runtime_builders` family inventory is 56 modules (measured=56);
-hotspot coverage floors stay at those live counts without raising debt budgets.
+inventory is a coverage snapshot, not proof that newly added source files were
+measured. The committed inventory has 2521 rows while the live tree has 2541
+Python files; refresh coverage evidence before claiming complete measurement.
+`src/bioetl/composition` has 282 live modules, matching the architecture scorecard
+(`max_modules` held at 295, shrink-only; ARCH-005/ARCH-011, #11859).
+`composition_runtime_builders` has 57 live modules in the hotspot-family baseline;
+coverage floors and debt budgets remain unchanged.
 
 | Scanner | Artifact / command | What it counts |
 | --- | --- | --- |
-| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2522 rows; live tree 2522 files). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; new modules are added only from a coverage XML refresh (`--refresh-nonregressing-from-coverage-xml` or the coverage-verify lane). |
-| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2490). Excludes package-root modules without a hexagonal layer tag. |
+| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Committed coverage snapshot: 2521 rows; live tree: 2541 files. `report-module-coverage --allow-missing-coverage-xml` refreshes source identity without creating measurement evidence. New modules require coverage XML evidence (`--refresh-nonregressing-from-coverage-xml` or the coverage-verify lane). |
+| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Modules scanned by the dependency reporter (committed `scanned_modules=2535`). This population differs from coverage-fact rows; use the reporter's summary rather than assuming equal counts. |
 | import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (2426 files in the 2026-09-23 review pass; Windows: `importlinter.cli.lint_imports(..., no_cache=True)` when `lint-imports.exe` is absent). Excludes stubs / non-imported modules |
 
 `families_at_budget` on the architecture scorecard is currently empty after
@@ -83,7 +86,7 @@ hotspot coverage floors stay at those live counts without raising debt budgets.
 `composition_runtime_builders` fan-in is 2/3. `module_boundaries_coupling` is
 10.0. Do not raise the fan-in or loc caps; keep new internal imports and
 oversized files flat. `composition_factories_pipeline` `files_ge_250_loc` is
-0/0 (budget unchanged). `application_core` live LOC is 23443 with `files=194`
+0/0 (budget unchanged). `application_core` live LOC is 24774 with `files=200`
 (budget unchanged).
 
 Closeout evidence: `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py`

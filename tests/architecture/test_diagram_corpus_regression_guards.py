@@ -19,6 +19,7 @@ from pathlib import Path
 from types import ModuleType
 
 import pytest
+from scripts.diagrams.fix.prune_orphan_nodes import analyse_file, detect_diagram_type
 
 
 pytestmark = pytest.mark.architecture
@@ -37,6 +38,19 @@ MMD_COLLECTIONS = {
     "providers": DIAGRAM_ROOT / "providers",
 }
 VIEW_COLLECTION = DIAGRAM_ROOT / "views"
+
+
+def test_high_level_hexagonal_orphan_check_is_not_silently_skipped() -> None:
+    result = analyse_file(DIAGRAM_ROOT / "architecture/01-high-level-hexagonal.mmd")
+    assert result.diagram_type == "flowchart"
+    assert result.orphan_ids == set()
+
+
+@pytest.mark.parametrize("declaration", ["graph TB", "flowchart LR", "sequenceDiagram"])
+def test_orphan_detection_skips_multiline_mermaid_init(declaration: str) -> None:
+    lines = ["%%{init: {", "  'layout': 'elk'", "}}%%", declaration]
+    expected = "sequence" if declaration == "sequenceDiagram" else "flowchart"
+    assert detect_diagram_type(lines) == expected
 
 
 def _load_apply_elk_layout() -> ModuleType:
@@ -108,6 +122,10 @@ def test_mmdc_docker_fallback_is_version_pinned() -> None:
     ).read_text(encoding="utf-8")
 
     assert "minlag/mermaid-cli:10.6.1" in wrapper
+    assert re.search(
+        r"MMDC_DOCKER_IMAGE:-minlag/mermaid-cli:10\.6\.1@sha256:[0-9a-f]{64}\}",
+        wrapper,
+    ), "The default Docker fallback must pin both the version and image digest (#11857)"
     assert 'MMDC_REQUIRED_VERSION="${MMDC_REQUIRED_VERSION:-10.6.1}"' in wrapper
     assert "MMDC_ALLOW_VERSION_DRIFT" in wrapper
     assert "MMDC_DOCKER_IMAGE:-minlag/mermaid-cli}" not in wrapper
