@@ -13,6 +13,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TextIO
 
 import yaml
 
@@ -22,10 +23,45 @@ class Case:
     kind: str
     name: str
     steps: tuple[str, ...] = ()
+    prerequisites: tuple[str, ...] = ()
 
     @property
     def id(self) -> str:
         return f"{self.kind}-{self.name}"
+
+
+def pipeline_prerequisites(name: str, root: Path) -> tuple[str, ...]:
+    """Prepare upstream tables from the canonical companion workflow DAG."""
+    path = root / "configs/workflows" / f"{name}.yaml"
+    if not path.is_file():
+        return ()
+    rows = yaml.safe_load(path.read_text(encoding="utf-8"))["workflow"]["steps"]
+    by_id = {row["step_id"]: row for row in rows}
+    targets = [row for row in rows if row.get("pipeline_name") == name]
+    if len(targets) != 1:
+        return ()
+    ordered: list[str] = []
+    visited: set[str] = set()
+    visiting: set[str] = set()
+
+    def visit(step_id: str) -> None:
+        if step_id in visited:
+            return
+        if step_id in visiting:
+            raise ValueError(f"Cyclic prerequisite workflow: {name}")
+        visiting.add(step_id)
+        row = by_id[step_id]
+        for parent in row.get("depends_on", []):
+            visit(parent)
+        visiting.remove(step_id)
+        visited.add(step_id)
+        if row is not targets[0]:
+            if row["kind"] != "pipeline":
+                raise ValueError(f"Unsupported prerequisite kind: {row['kind']}")
+            ordered.append(row["pipeline_name"])
+
+    visit(targets[0]["step_id"])
+    return tuple(ordered)
 
 
 def discover(root: Path) -> tuple[Case, ...]:
@@ -34,7 +70,8 @@ def discover(root: Path) -> tuple[Case, ...]:
     for path in sorted((root / "configs/entities").glob("*/*.yaml")):
         config = yaml.safe_load(path.read_text(encoding="utf-8"))
         kind = "composite" if config["provider"] == "composite" else "pipeline"
-        cases.append(Case(kind, config["pipeline"]["pipeline_name"]))
+        name = config["pipeline"]["pipeline_name"]
+        cases.append(Case(kind, name, prerequisites=pipeline_prerequisites(name, root)))
     for path in sorted((root / "configs/workflows").glob("*.yaml")):
         workflow = yaml.safe_load(path.read_text(encoding="utf-8"))["workflow"]
         cases.append(
@@ -197,31 +234,13 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
         ] = "true"
     args = command(case)
     failures = []
+    launches = [command(Case("pipeline", name)) for name in case.prerequisites]
+    launches.append(args)
     with (folder / "launch.log").open("w", encoding="utf-8") as log:
-        try:
-            process = subprocess.Popen(
-                args,
-                cwd=folder,
-                env=environment,
-                stdout=log,
-                stderr=subprocess.STDOUT,
-            )
-            returncode = process.wait(timeout=1800)
-            if returncode:
-                failures.append(f"exit_code={returncode}")
-        except subprocess.TimeoutExpired:
-            if sys.platform == "win32":
-                subprocess.run(
-                    ["taskkill", "/PID", str(process.pid), "/T", "/F"],
-                    stdout=log,
-                    stderr=subprocess.STDOUT,
-                    check=False,
-                    timeout=30,
-                )
-            else:
-                process.kill()
-            process.wait(timeout=30)
-            failures.append("launch_timeout=1800s")
+        for launch in launches:
+            failures.extend(run_launch(launch, folder, environment, log))
+            if failures:
+                break
     failures.extend(logged_errors((folder / "launch.log").read_text(encoding="utf-8")))
     paths = sorted(reports.glob("pipeline/*/*/pipeline-run-report.json"))
     if not paths:
@@ -231,39 +250,21 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
             failures.extend(inspect_pipeline(path, reports, data))
         except Exception as exc:
             failures.append(f"{path.name}: {type(exc).__name__}: {exc}")
-    if case.kind == "pipeline" and (
-        len(paths) != 1 or paths[0].parent.parent.name != case.name
+    expected_names = sorted([case.name, *case.prerequisites])
+    if (
+        case.kind == "pipeline"
+        and sorted(p.parent.parent.name for p in paths) != expected_names
     ):
         failures.append("pipeline_report_coverage_mismatch")
     if case.kind == "workflow":
-        parents = list(reports.glob(f"workflow/{case.name}/*/workflow-run-report.json"))
-        if len(parents) != 1:
-            failures.append("workflow_report_missing_or_ambiguous")
-        else:
-            parent = json.loads(parents[0].read_text(encoding="utf-8"))
-            rows = parent.get("execution", [])
-            if parent["identity"].get("status") != "success":
-                failures.append("workflow_status_not_success")
-            if sorted(row["step_id"] for row in rows) != sorted(case.steps):
-                failures.append("workflow_step_coverage_mismatch")
-            for row in rows:
-                if (
-                    row.get("status") != "success"
-                    or row.get("error_type")
-                    or row.get("error_message")
-                ):
-                    failures.append(f"workflow_step_failed:{row['step_id']}")
-                if row.get("kind") == "pipeline" and not any(
-                    p.parent.name == row.get("pipeline_run_id")
-                    and p.parent.parent.name == row.get("pipeline_name")
-                    for p in paths
-                ):
-                    failures.append(f"workflow_child_report_missing:{row['step_id']}")
+        failures.extend(inspect_workflow(case, reports, paths))
+    failures.extend(inspect_composite_parents(case, data, paths))
     (folder / "result.json").write_text(
         json.dumps(
             {
                 "case": case.id,
                 "command": args,
+                "launches": launches,
                 "limit": 1000,
                 "source_commit": subprocess.check_output(
                     ["git", "rev-parse", "HEAD"], cwd=root, text=True
@@ -275,4 +276,98 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
         ),
         encoding="utf-8",
     )
+    return failures
+
+
+def run_launch(
+    args: list[str], folder: Path, environment: dict[str, str], log: TextIO
+) -> list[str]:
+    """Run one bounded launch and terminate its complete Windows process tree."""
+    failures = []
+    try:
+        process = subprocess.Popen(
+            args,
+            cwd=folder,
+            env=environment,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+        )
+        returncode = process.wait(timeout=1800)
+        if returncode:
+            failures.append(f"exit_code={returncode}")
+    except subprocess.TimeoutExpired:
+        if sys.platform == "win32":
+            subprocess.run(
+                ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                stdout=log,
+                stderr=subprocess.STDOUT,
+                check=False,
+                timeout=30,
+            )
+        else:
+            process.kill()
+        process.wait(timeout=30)
+        failures.append("launch_timeout=1800s")
+    return failures
+
+
+def inspect_workflow(case: Case, reports: Path, paths: list[Path]) -> list[str]:
+    """Require the complete successful workflow and every bound child report."""
+    failures = []
+    parents = list(reports.glob(f"workflow/{case.name}/*/workflow-run-report.json"))
+    if len(parents) != 1:
+        failures.append("workflow_report_missing_or_ambiguous")
+        return failures
+    parent = json.loads(parents[0].read_text(encoding="utf-8"))
+    if parent.get("schema_version") != "workflow_run_report_v1":
+        failures.append("workflow_report_schema_mismatch")
+    if (
+        parent.get("identity", {}).get("workflow_name") != case.name
+        or parent.get("identity", {}).get("workflow_run_id") != parents[0].parent.name
+    ):
+        failures.append("workflow_report_identity_mismatch")
+    rows = parent.get("execution", [])
+    if parent["identity"].get("status") != "success":
+        failures.append("workflow_status_not_success")
+    if sorted(row["step_id"] for row in rows) != sorted(case.steps):
+        failures.append("workflow_step_coverage_mismatch")
+    for row in rows:
+        if (
+            row.get("status") != "success"
+            or row.get("error_type")
+            or row.get("error_message")
+        ):
+            failures.append(f"workflow_step_failed:{row['step_id']}")
+        if row.get("kind") == "pipeline" and not any(
+            p.parent.name == row.get("pipeline_run_id")
+            and p.parent.parent.name == row.get("pipeline_name")
+            for p in paths
+        ):
+            failures.append(f"workflow_child_report_missing:{row['step_id']}")
+    return failures
+
+
+def inspect_composite_parents(case: Case, data: Path, paths: list[Path]) -> list[str]:
+    """Do not infer parent evidence or replay readiness from successful children."""
+    manifests = []
+    for path in (data / "output/control/run_manifest").glob("*.json"):
+        if path.name.endswith(".contract-evidence.json"):
+            continue
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if payload.get("provider") == "composite":
+            manifests.append(payload)
+    failures = []
+    if case.kind == "composite" and not any(
+        manifest.get("pipeline_name") == case.name for manifest in manifests
+    ):
+        failures.append("composite_parent_manifest_missing")
+    for manifest in manifests:
+        if not any(
+            path.parent.parent.name == manifest.get("pipeline_name")
+            and path.parent.name == manifest.get("run_id")
+            for path in paths
+        ):
+            failures.append(
+                f"composite_parent_report_missing:{manifest.get('pipeline_name')}"
+            )
     return failures

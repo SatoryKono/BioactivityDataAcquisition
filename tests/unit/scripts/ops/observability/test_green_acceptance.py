@@ -3,8 +3,53 @@
 from __future__ import annotations
 
 import pytest
+import json
+from pathlib import Path
 
 from scripts.ops.observability.green_acceptance import Case, command, green_failures
+
+
+def test_composite_children_cannot_substitute_parent_evidence(tmp_path):
+    from scripts.ops.observability.green_acceptance import inspect_composite_parents
+
+    folder = tmp_path / "output/control/run_manifest"
+    folder.mkdir(parents=True)
+    (folder / "parent.json").write_text(
+        json.dumps(
+            {
+                "provider": "composite",
+                "pipeline_name": "composite_activity",
+                "run_id": "parent",
+            }
+        )
+    )
+    failures = inspect_composite_parents(
+        Case("composite", "composite_activity"),
+        tmp_path,
+        [tmp_path / "pipeline/chembl_activity/child/pipeline-run-report.json"],
+    )
+    assert failures == ["composite_parent_report_missing:composite_activity"]
+
+
+def test_matrix_covers_every_case_and_prepares_derived_inputs():
+    from scripts.ops.observability.green_acceptance import discover
+
+    root = Path(__file__).resolve().parents[5]
+    cases = discover(root)
+    assert len(cases) == 54
+    target = next(
+        case
+        for case in cases
+        if case.id == "pipeline-chembl_target_protein_classification"
+    )
+    assert set(target.prerequisites) == {
+        "chembl_target",
+        "chembl_target_component",
+        "chembl_protein_class",
+    }
+    for prerequisite in target.prerequisites:
+        args = command(Case("pipeline", prerequisite))
+        assert args[args.index("--limit") + 1] == "1000"
 
 
 def test_error_log_cannot_be_hidden_by_successful_exit():

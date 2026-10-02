@@ -14,12 +14,21 @@ CASES = discover(ROOT)
 
 
 @pytest.mark.network
-@pytest.mark.timeout(1900)
 @pytest.mark.skipif(
     os.environ.get("BIOETL_GREEN_ACCEPTANCE") != "1",
     reason="Explicit live launch opt-in required",
 )
-@pytest.mark.parametrize("case", CASES, ids=lambda case: case.id)
+@pytest.mark.parametrize(
+    "case",
+    [
+        pytest.param(
+            case,
+            id=case.id,
+            marks=pytest.mark.timeout(1900 * (1 + len(case.prerequisites))),
+        )
+        for case in CASES
+    ],
+)
 def test_live_run_is_green(case):
     output = Path(os.environ["BIOETL_GREEN_OUTPUT"]).resolve()
     env_file = Path(os.environ["BIOETL_GREEN_ENV_FILE"]).resolve()
