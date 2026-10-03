@@ -1,0 +1,80 @@
+{
+  "actual_b_commit": "41802dd5d65af189b1bf00d3f215126cb7701224",
+  "files": [
+    {
+      "actor": {
+        "identity": "/root/independent_closeout_evaluator",
+        "role": "independent"
+      },
+      "artifact_role": "lifecycle_audit",
+      "destination": "audit/final/lifecycle_audit.json",
+      "provenance": {
+        "type": "public_safe_original"
+      },
+      "public_qualified_by": "/root/independent_closeout_evaluator",
+      "sha256": "3f2aff5d06542044744aafc02dee42921c327e379aeae44cb27d1a1caadbb61c",
+      "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b"
+    },
+    {
+      "actor": {
+        "identity": "/root/independent_closeout_evaluator",
+        "role": "independent"
+      },
+      "artifact_role": "closed_snapshot",
+      "destination": "audit/final/closed_snapshot.json",
+      "provenance": {
+        "type": "public_safe_original"
+      },
+      "public_qualified_by": "/root/independent_closeout_evaluator",
+      "sha256": "dcfe3a239eb24a8c7686ea48781c55320c3d7bb684679ad93b9bc5e781ad9d6b",
+      "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b"
+    },
+    {
+      "actor": {
+        "identity": "/root/independent_closeout_evaluator",
+        "role": "independent"
+      },
+      "artifact_role": "canonical_bundle",
+      "destination": "audit/final/canonical_bundle.json",
+      "provenance": {
+        "type": "public_safe_original"
+      },
+      "public_qualified_by": "/root/independent_closeout_evaluator",
+      "sha256": "9d2b883f172166b566e97eb3078f7c359dc5b03aaa2e58995b31a14892e71d4c",
+      "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b"
+    },
+    {
+      "actor": {
+        "identity": "/root/independent_closeout_evaluator",
+        "role": "independent"
+      },
+      "artifact_role": "canonical_verification",
+      "destination": "audit/final/canonical_verification.json",
+      "provenance": {
+        "type": "public_safe_original"
+      },
+      "public_qualified_by": "/root/independent_closeout_evaluator",
+      "sha256": "69dfc0a7a5c1e7fd870d7dfe8ca087feb4b039967d70c17da91cc73d4cf6cddc",
+      "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b"
+    },
+    {
+      "actor": {
+        "identity": "/root/independent_closeout_evaluator",
+        "role": "independent"
+      },
+      "artifact_role": "verifier_execution",
+      "destination": "audit/final/verifier_execution.json",
+      "provenance": {
+        "type": "public_safe_original"
+      },
+      "public_qualified_by": "/root/independent_closeout_evaluator",
+      "sha256": "40e7bfdbeb4c2cbc602f387a3eb4f8f15c05adc7f87680119c024a062ead4a4a",
+      "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b"
+    }
+  ],
+  "independent_authority_sha256": "5f7da968d4031096348d2c5a7ff749a37c287b57e1c508913a7d959c00f70795",
+  "policy": "#11709 orphan supplement; never merge main",
+  "publication_b_receipt_sha256": "7e60c98efa178030322a8d4b8eefabed76e7d81b0ee0f5a5df84570f15cc4e6e",
+  "schema_version": 1,
+  "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b"
+}

@@ -1,0 +1,548 @@
+[
+  {
+    "number": 11865,
+    "state": "CLOSED",
+    "closedAt": "2026-10-03T23:50:24Z",
+    "stateReason": "completed",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11865",
+    "body": "## Проблема\r\n\r\n`chembl_baseline` и `chembl_core` содержат `delete_orphans`; существующий контракт запрещает их исполнение после независимо ограниченных pipeline extracts. Пользователь явно допускает полное удаление данных внутри изолированной тестовой серии. Требуется новый opt-in режим с честной семантикой ограниченных снимков.\r\n\r\n## Решение и порядок\r\n\r\nДобавить `--reconciliation-mode complete-reference|selected-snapshot`. Default остаётся прежним; opt-in допускает отсутствие совпадения внутри закреплённого снимка как основание для scoped deletion. Не объявлять ограниченный справочник полным.\r\n\r\nЗависимости: RF-001 → RF-002 → RF-003 → RF-004 → RF-005 → RF-006. Финальная приёмка зависит от всех предыдущих этапов.\r\n\r\n## Критерии завершения\r\n\r\n- [x] Все шесть дочерних задач завершены с проверенными evidence.\r\n- [x] `chembl_baseline` и `chembl_core` проходят с `--limit 1000` в явном selected-snapshot режиме.\r\n- [x] Default protections, scoped mutations, dry-run/resume и report integrity покрыты тестами.\r\n- [x] Saved Evidence, Replay Readiness и Overview подтверждены на тех же run IDs; пустой результат допускается только при корректном выполнении.\r\n- [x] Документация и обязательные generated artifacts актуальны; бюджеты техдолга не увеличены.\r\n\r\n## Альтернативы\r\n\r\nГлобально снять guard — теряется безопасность default. Проставить `reference_completeness=complete` для bounded extracts — недостоверное evidence. Запустить без лимита — нарушает установленное пользователем условие этой серии. Поэтому выбран отдельный явно включаемый режим.\r\n\r\n## Общий контракт\r\n\r\n- Обычный режим `complete-reference` сохраняет требование полноты справочника и действующие защиты.\r\n- Новый явно выбранный `selected-snapshot` трактует отсутствие ключа только относительно закреплённой ограниченной выборки; удаление всех строк выбранного source допустимо.\r\n- Не подменять `reference_completeness=unproven` значением `complete`; режим и полнота — разные свойства.\r\n- Область мутации — строки текущего workflow в изолированном локальном хранилище. Git-ветка сама по себе не изолирует пути данных.\r\n- Не отключать проверки digest, evidence, архивирования или Replay Readiness ради зелёного статуса.\r\n- Не менять `.env`, не увеличивать бюджеты техдолга; не добавлять обязательные Docker/Redis зависимости.\r\n\r\n## Границы\r\n\r\nЭта задача относится к ограниченной FK-сверке `chembl_baseline`/`chembl_core`. Она не закрывает поддержку strict replay для composites и не означает выполнения кампании из 100000 запусков.\r\n\r\n## Дочерние задачи\r\n\r\n- [x] #11866 — Определить контракт selected-snapshot для ограниченной FK-сверки\r\n- [x] #11867 — Провести reconciliation-mode через CLI, конфигурацию и доменные модели\r\n- [x] #11868 — Реализовать удаление по закреплённым ограниченным снимкам\r\n- [x] #11869 — Сохранить scope, снимки и результаты сверки в evidence и resume identity\r\n- [x] #11870 — Показать ограниченную семантику сверки в Saved Evidence и Overview\r\n- [x] #11871 — Проверить chembl_baseline и chembl_core с limit 1000 и закрыть изменение\r\n",
+    "title": "[Tracking] Ограниченная FK-сверка selected-snapshot для workflow --limit 1000",
+    "updatedAt": "2026-10-03T23:50:29Z",
+    "body_sha256": "07dacc26771380e6cd37dccc0b237aeb585d35546c37a672cd12aba27b819a2a",
+    "criteria": [
+      {
+        "ordinal": 1,
+        "checked": true,
+        "text": "Все шесть дочерних задач завершены с проверенными evidence."
+      },
+      {
+        "ordinal": 2,
+        "checked": true,
+        "text": "`chembl_baseline` и `chembl_core` проходят с `--limit 1000` в явном selected-snapshot режиме."
+      },
+      {
+        "ordinal": 3,
+        "checked": true,
+        "text": "Default protections, scoped mutations, dry-run/resume и report integrity покрыты тестами."
+      },
+      {
+        "ordinal": 4,
+        "checked": true,
+        "text": "Saved Evidence, Replay Readiness и Overview подтверждены на тех же run IDs; пустой результат допускается только при корректном выполнении."
+      },
+      {
+        "ordinal": 5,
+        "checked": true,
+        "text": "Документация и обязательные generated artifacts актуальны; бюджеты техдолга не увеличены."
+      },
+      {
+        "ordinal": 6,
+        "checked": true,
+        "text": "#11866 — Определить контракт selected-snapshot для ограниченной FK-сверки"
+      },
+      {
+        "ordinal": 7,
+        "checked": true,
+        "text": "#11867 — Провести reconciliation-mode через CLI, конфигурацию и доменные модели"
+      },
+      {
+        "ordinal": 8,
+        "checked": true,
+        "text": "#11868 — Реализовать удаление по закреплённым ограниченным снимкам"
+      },
+      {
+        "ordinal": 9,
+        "checked": true,
+        "text": "#11869 — Сохранить scope, снимки и результаты сверки в evidence и resume identity"
+      },
+      {
+        "ordinal": 10,
+        "checked": true,
+        "text": "#11870 — Показать ограниченную семантику сверки в Saved Evidence и Overview"
+      },
+      {
+        "ordinal": 11,
+        "checked": true,
+        "text": "#11871 — Проверить chembl_baseline и chembl_core с limit 1000 и закрыть изменение"
+      }
+    ]
+  },
+  {
+    "number": 11866,
+    "state": "CLOSED",
+    "closedAt": "2026-10-03T23:46:00Z",
+    "stateReason": "completed",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11866",
+    "body": "Родительская задача: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11865\r\r\n\r\r\n## Зависимости\r\r\n\r\r\n- Нет; первый этап.\r\r\n\r\r\n## Проблема и результат\r\r\n\r\r\n`delete_orphans` сейчас отвергается при любом upstream `limit`: отсутствие записи в первых 1000 строках не доказывает её отсутствие в полном источнике. Требуется отдельная тестовая семантика, в которой именно выбранный снимок является областью сравнения, а полное удаление внутри выбранного source допустимо.\r\r\n\r\r\n## План реализации\r\r\n\r\r\n1. Описать режимы `complete-reference` и `selected-snapshot`, default — первый. Согласовать единый enum/type и точное отображение CLI ↔ domain ↔ persisted JSON.\r\r\n2. Зафиксировать выбор source: только идентифицированные строки pipeline-шагов текущего workflow; исторические строки вне области не удалять. Определить идентификацию при SCD2 и повторном появлении одинакового business key.\r\r\n3. Зафиксировать reference: снимок результата указанного producer; для цепочки transforms следующая сверка использует зафиксированный результат предыдущей мутации, а не неявный latest.\r\r\n4. Описать `NULL`/`nulls_equal`, пустой существующий снимок, отсутствующую таблицу, повреждённый снимок и отсутствие run identity. Только пустой существующий снимок допускает удаление всех выбранных source; ошибки чтения должны оставаться ошибками.\r\r\n5. Определить поведение dry-run, resume и изменения режима. Определить как доказывается изоляция storage root; не полагаться только на имя Git-ветки.\r\r\n6. Закрепить семантику в документации workflow/ограниченных запусков; определить необходимость ADR через нормативный индекс.\r\r\n\r\r\n## Поверхности\r\r\n\r\r\n`src/bioetl/domain/workflow/_delete_orphans_scope.py`, `foreign_key_reconciliation.py`, `foreign_key_reconciliation_models.py`; `docs/05-operations/runbooks/bounded-pipeline-smoke.md`; `docs/00-project/NORMATIVE_SOURCES.md`.\r\r\n\r\r\n## Проверка и приёмка\r\r\n\r\r\n- [x] Таблица поведения покрывает оба режима, лимит/без лимита, empty/missing/corrupt reference, dry-run и resume.\r\r\n- [x] Все случаи имеют ожидаемые mutation status и evidence semantics.\r\r\n- [x] Нет утверждения о полноте полного провайдера на основании ограниченного снимка.\r\r\n\r\r\n## Риски / откат\r\r\n\r\r\nГлавный риск — неоднозначная область удаления. До RF-003 этот этап не меняет исполнение; откат — отмена документационных изменений.\r\r\n\r\r\n## Общий контракт\r\r\n\r\r\n- Обычный режим `complete-reference` сохраняет требование полноты справочника и действующие защиты.\r\r\n- Новый явно выбранный `selected-snapshot` трактует отсутствие ключа только относительно закреплённой ограниченной выборки; удаление всех строк выбранного source допустимо.\r\r\n- Не подменять `reference_completeness=unproven` значением `complete`; режим и полнота — разные свойства.\r\r\n- Область мутации — строки текущего workflow в изолированном локальном хранилище. Git-ветка сама по себе не изолирует пути данных.\r\r\n- Не отключать проверки digest, evidence, архивирования или Replay Readiness ради зелёного статуса.\r\r\n- Не менять `.env`, не увеличивать бюджеты техдолга; не добавлять обязательные Docker/Redis зависимости.\r\r\n\r\r\n## Границы\r\r\n\r\r\nЭта задача относится к ограниченной FK-сверке `chembl_baseline`/`chembl_core`. Она не закрывает поддержку strict replay для composites и не означает выполнения кампании из 100000 запусков.\r\n\r\n## Пофайловый план закрытия — 2026-10-03\r\n\r\nПлан составлен по текущему main `6689445eba0251c030793db2d163ab42be28077b` и готовой ветке `codex/fk-selected-snapshot-11865` (`65c0779564b8f947b42b48a2f1064105947dfe74`). Это план интеграции и приёмки уже подготовленной реализации, а не утверждение о её наличии в main. Исторический receipt на `61560a0` содержит 4033 PASS / 8 SKIP / 0 failures/errors и успешные bounded workflow; полным repository suite он не является.\r\n\r\nСвежий локальный Proof-or-Stop: `DEGRADED`, errors=[]; `trust_tier:local_single_host`, done claim unqualified. Прежний governance STOP снят; новый ADMIT пока не подтверждён. Billing lock считаем постоянным: `CI=BLOCKED_EXTERNAL_PERMANENT`. Для требуемой trust acceptance получить реальную допустимую независимую аттестацию по текущему policy; не переименовывать локальный прогон в independent evaluation и не менять trust policy ради закрытия.\r\n\r\n### Зависимости\r\n\r\nНет. Контракт фиксируется до интеграции #11867–#11869.\r\n\r\n### Файлы и оставшиеся действия\r\n\r\n- [x] `src/bioetl/domain/workflow/foreign_key_reconciliation_models.py` — Сверить mode, current_run scope, producer identities и обязательные snapshot pins; неизвестный mode и неоднозначная identity должны отклоняться.\r\n- [x] `src/bioetl/domain/workflow/foreign_key_reconciliation.py` — Согласовать типы и invariants с request/result и сохранением unproven completeness.\r\n- [x] `src/bioetl/domain/workflow/_delete_orphans_scope.py` — Сохранить default guard по всему upstream DAG; документировать точные условия явного opt-in.\r\n- [x] `docs/05-operations/runbooks/bounded-pipeline-smoke.md` — Интегрировать таблицу обоих режимов: limits, NULL/composite keys, empty/missing/corrupt reference, drift, dry-run, resume, single-writer storage isolation и восстановление.\r\n- [x] `docs/00-project/NORMATIVE_SOURCES.md` — Проверить нормативные ссылки и необходимость ADR; менять индекс только при появлении нового принятого нормативного источника.\r\n\r\n### Проверки\r\n\r\nПрогонять после переноса на окончательный SHA; отсутствие новых файлов в main устраняется интеграцией готовой ветки. На Windows использовать `.venv-win/Scripts/python.exe` с импортом src из проверяемого checkout.\r\n\r\n```text\r\npython -m pytest tests/unit/domain/workflow/test_delete_orphans_scope.py tests/unit/application/workflow/test_selected_snapshot_contracts.py\r\n```\r\n\r\n### Критерий закрытия\r\n\r\nКонтракт и поведение согласованы на одном SHA; отсутствуют заявления о полноте провайдера по bounded extract; приложены таблица поведения и результаты default/opt-in regressions.\r\n\r\n### Общие gates и откат\r\n\r\n- `.env` не менять; budgets/thresholds/exemptions не повышать.\r\n- Общие source files между этапами имеют одного владельца интеграции. Сначала domain/CLI/storage/evidence, затем HTTP/generators; generated artifacts обновлять совместно после интеграции.\r\n- После Python source changes: `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml` и architecture hash guard; для CI-family drift применять `python -m scripts.engineering.qa refresh-ci-drift-families`, не budget ratchet.\r\n- При docs link/header changes: `python -m scripts.docs generate-cleanup-inventory --update`, затем `--check` и `python -m scripts.docs check-links`.\r\n- `git diff --check`; `python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`; runtime mirror parity N/A, пока runtime sources не меняются.\r\n- Перед live mutation сохранить Delta versions и immutable input identities; rollback кода не восстанавливает данные. Restore проверять counts и историческими строками.\r\n- Публикация PR/evidence, интеграция, повторная SHA-bound приёмка и обновление issue checklist предшествуют закрытию. `DEGRADED` и billing-blocked CI не обозначать PASS/ADMIT.\r\n\r\n",
+    "title": "[RF-001] Определить контракт selected-snapshot для ограниченной FK-сверки",
+    "updatedAt": "2026-10-03T23:46:04Z",
+    "body_sha256": "9cd7b92d1d5b1adbd4268c4adfd324ea07d533251d828c7a2ac72a73b08e26b8",
+    "criteria": [
+      {
+        "ordinal": 1,
+        "checked": true,
+        "text": "Таблица поведения покрывает оба режима, лимит/без лимита, empty/missing/corrupt reference, dry-run и resume."
+      },
+      {
+        "ordinal": 2,
+        "checked": true,
+        "text": "Все случаи имеют ожидаемые mutation status и evidence semantics."
+      },
+      {
+        "ordinal": 3,
+        "checked": true,
+        "text": "Нет утверждения о полноте полного провайдера на основании ограниченного снимка."
+      },
+      {
+        "ordinal": 4,
+        "checked": true,
+        "text": "`src/bioetl/domain/workflow/foreign_key_reconciliation_models.py` — Сверить mode, current_run scope, producer identities и обязательные snapshot pins; неизвестный mode и неоднозначная identity должны отклоняться."
+      },
+      {
+        "ordinal": 5,
+        "checked": true,
+        "text": "`src/bioetl/domain/workflow/foreign_key_reconciliation.py` — Согласовать типы и invariants с request/result и сохранением unproven completeness."
+      },
+      {
+        "ordinal": 6,
+        "checked": true,
+        "text": "`src/bioetl/domain/workflow/_delete_orphans_scope.py` — Сохранить default guard по всему upstream DAG; документировать точные условия явного opt-in."
+      },
+      {
+        "ordinal": 7,
+        "checked": true,
+        "text": "`docs/05-operations/runbooks/bounded-pipeline-smoke.md` — Интегрировать таблицу обоих режимов: limits, NULL/composite keys, empty/missing/corrupt reference, drift, dry-run, resume, single-writer storage isolation и восстановление."
+      },
+      {
+        "ordinal": 8,
+        "checked": true,
+        "text": "`docs/00-project/NORMATIVE_SOURCES.md` — Проверить нормативные ссылки и необходимость ADR; менять индекс только при появлении нового принятого нормативного источника."
+      }
+    ]
+  },
+  {
+    "number": 11867,
+    "state": "CLOSED",
+    "closedAt": "2026-10-03T23:46:25Z",
+    "stateReason": "completed",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11867",
+    "body": "Родительская задача: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11865\r\r\n\r\r\n## Зависимости\r\r\n\r\r\n- Требует завершения RF-001: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11866\r\r\n\r\r\n## План реализации\r\r\n\r\r\n1. Добавить `--reconciliation-mode complete-reference|selected-snapshot` к `bioetl workflow run` с безопасным default.\r\r\n2. Провести значение через типизированные CLI overrides и эффективную workflow config до FK transform; проверить inheritance defaults/step overrides и приоритет CLI.\r\r\n3. Расширить schema validation и доменные request/config types единым закрытым набором значений; неизвестные значения отклонять.\r\r\n4. В `reject_delete_orphans_after_limited_extracts` сохранить обход всего upstream DAG. Исключение разрешать исключительно для явно выбранного `selected-snapshot`, с условиями области из RF-001.\r\r\n5. Не включать новый режим по умолчанию в `chembl_baseline.yaml`/`chembl_core.yaml`; включение для кампании выполняется явным CLI-параметром.\r\r\n6. Проверить, что effective config и fingerprint видят новый параметр, а downstream не теряет его при преобразованиях конфигурации.\r\r\n\r\r\n## Файлы\r\r\n\r\r\n`src/bioetl/interfaces/cli/commands/workflow.py`, `_workflow_override_support.py` и связанные модели overrides; `src/bioetl/infrastructure/schemas/workflow_config.py`; `src/bioetl/domain/workflow/_delete_orphans_scope.py`, `foreign_key_reconciliation_models.py`; конфигурации `configs/workflows/chembl_baseline.yaml`, `chembl_core.yaml` как regression fixtures.\r\r\n\r\r\n## Тесты / приёмка\r\r\n\r\r\n- [x] `tests/unit/interfaces/cli/test_workflow_cli.py`: default продолжает отклонять limited delete_orphans; явный режим проходит только допустимую конфигурацию.\r\r\n- [x] `tests/unit/domain/workflow/test_delete_orphans_scope.py`: проверяется транзитивный upstream DAG.\r\r\n- [x] `tests/unit/infrastructure/config/test_workflow_reconcile_foreign_keys_config.py`: round-trip, неверное значение, приоритет overrides.\r\r\n- [x] Старые YAML без нового поля сохраняют поведение.\r\r\n\r\r\n## Риски / откат\r\r\n\r\r\nРиск — случайный глобальный bypass. Откат — удалить opt-in параметр из invocation; existing default guard должен работать независимо от наличия нового поля в коде.\r\r\n\r\r\n## Общий контракт\r\r\n\r\r\n- Обычный режим `complete-reference` сохраняет требование полноты справочника и действующие защиты.\r\r\n- Новый явно выбранный `selected-snapshot` трактует отсутствие ключа только относительно закреплённой ограниченной выборки; удаление всех строк выбранного source допустимо.\r\r\n- Не подменять `reference_completeness=unproven` значением `complete`; режим и полнота — разные свойства.\r\r\n- Область мутации — строки текущего workflow в изолированном локальном хранилище. Git-ветка сама по себе не изолирует пути данных.\r\r\n- Не отключать проверки digest, evidence, архивирования или Replay Readiness ради зелёного статуса.\r\r\n- Не менять `.env`, не увеличивать бюджеты техдолга; не добавлять обязательные Docker/Redis зависимости.\r\r\n\r\r\n## Границы\r\r\n\r\r\nЭта задача относится к ограниченной FK-сверке `chembl_baseline`/`chembl_core`. Она не закрывает поддержку strict replay для composites и не означает выполнения кампании из 100000 запусков.\r\n\r\n## Пофайловый план закрытия — 2026-10-03\r\n\r\nПлан составлен по текущему main `6689445eba0251c030793db2d163ab42be28077b` и готовой ветке `codex/fk-selected-snapshot-11865` (`65c0779564b8f947b42b48a2f1064105947dfe74`). Это план интеграции и приёмки уже подготовленной реализации, а не утверждение о её наличии в main. Исторический receipt на `61560a0` содержит 4033 PASS / 8 SKIP / 0 failures/errors и успешные bounded workflow; полным repository suite он не является.\r\n\r\nСвежий локальный Proof-or-Stop: `DEGRADED`, errors=[]; `trust_tier:local_single_host`, done claim unqualified. Прежний governance STOP снят; новый ADMIT пока не подтверждён. Billing lock считаем постоянным: `CI=BLOCKED_EXTERNAL_PERMANENT`. Для требуемой trust acceptance получить реальную допустимую независимую аттестацию по текущему policy; не переименовывать локальный прогон в independent evaluation и не менять trust policy ради закрытия.\r\n\r\n### Зависимости\r\n\r\n#11866 → #11867; затем #11868 и #11869.\r\n\r\n### Файлы и оставшиеся действия\r\n\r\n- [x] `src/bioetl/interfaces/cli/commands/workflow.py` — Интегрировать --reconciliation-mode с click.Choice и безопасным default; проверить help и отказ при неизвестных значениях.\r\n- [x] `src/bioetl/interfaces/cli/commands/_workflow_command_options.py` — Провести параметр через command options без потери при запуске workflow.\r\n- [x] `src/bioetl/interfaces/cli/commands/_workflow_override_support.py` — Проверить CLI precedence, defaults и step overrides в effective config.\r\n- [x] `src/bioetl/infrastructure/schemas/workflow_config.py` — Согласовать закрытый набор mode, validation и чтение старых YAML.\r\n- [x] `src/bioetl/domain/workflow/_run_options_config.py` — Согласовать типизированные run options со schema и эффективной конфигурацией.\r\n- [x] `src/bioetl/domain/workflow/_delete_orphans_scope.py` — Проверить полный upstream DAG; исключение только для explicit selected-snapshot.\r\n- [x] `configs/workflows/chembl_baseline.yaml` — Использовать как regression fixture: новый режим не включать по умолчанию.\r\n- [x] `configs/workflows/chembl_core.yaml` — Подтвердить прежний default; opt-in задаётся invocation, а не скрытой сменой YAML.\r\n\r\n### Проверки\r\n\r\nПрогонять после переноса на окончательный SHA; отсутствие новых файлов в main устраняется интеграцией готовой ветки. На Windows использовать `.venv-win/Scripts/python.exe` с импортом src из проверяемого checkout.\r\n\r\n```text\r\npython -m pytest tests/unit/interfaces/cli/test_workflow_cli.py tests/unit/domain/workflow/test_delete_orphans_scope.py tests/unit/infrastructure/config/test_workflow_reconcile_foreign_keys_config.py tests/unit/domain/config/test_effective_config_payloads.py tests/unit/application/workflow/test_selected_snapshot_contracts.py\r\n```\r\n\r\n### Критерий закрытия\r\n\r\nCLI → schema → domain → effective config сохраняют mode; legacy YAML совместимы; default limited destructive execution остаётся запрещённым.\r\n\r\n### Общие gates и откат\r\n\r\n- `.env` не менять; budgets/thresholds/exemptions не повышать.\r\n- Общие source files между этапами имеют одного владельца интеграции. Сначала domain/CLI/storage/evidence, затем HTTP/generators; generated artifacts обновлять совместно после интеграции.\r\n- После Python source changes: `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml` и architecture hash guard; для CI-family drift применять `python -m scripts.engineering.qa refresh-ci-drift-families`, не budget ratchet.\r\n- При docs link/header changes: `python -m scripts.docs generate-cleanup-inventory --update`, затем `--check` и `python -m scripts.docs check-links`.\r\n- `git diff --check`; `python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`; runtime mirror parity N/A, пока runtime sources не меняются.\r\n- Перед live mutation сохранить Delta versions и immutable input identities; rollback кода не восстанавливает данные. Restore проверять counts и историческими строками.\r\n- Публикация PR/evidence, интеграция, повторная SHA-bound приёмка и обновление issue checklist предшествуют закрытию. `DEGRADED` и billing-blocked CI не обозначать PASS/ADMIT.\r\n\r\n",
+    "title": "[RF-002] Провести reconciliation-mode через CLI, конфигурацию и доменные модели",
+    "updatedAt": "2026-10-03T23:46:30Z",
+    "body_sha256": "ace070c56c0aac8b4f463e5ab560fa05a827541aad625d5e735f35f70c4a937f",
+    "criteria": [
+      {
+        "ordinal": 1,
+        "checked": true,
+        "text": "`tests/unit/interfaces/cli/test_workflow_cli.py`: default продолжает отклонять limited delete_orphans; явный режим проходит только допустимую конфигурацию."
+      },
+      {
+        "ordinal": 2,
+        "checked": true,
+        "text": "`tests/unit/domain/workflow/test_delete_orphans_scope.py`: проверяется транзитивный upstream DAG."
+      },
+      {
+        "ordinal": 3,
+        "checked": true,
+        "text": "`tests/unit/infrastructure/config/test_workflow_reconcile_foreign_keys_config.py`: round-trip, неверное значение, приоритет overrides."
+      },
+      {
+        "ordinal": 4,
+        "checked": true,
+        "text": "Старые YAML без нового поля сохраняют поведение."
+      },
+      {
+        "ordinal": 5,
+        "checked": true,
+        "text": "`src/bioetl/interfaces/cli/commands/workflow.py` — Интегрировать --reconciliation-mode с click.Choice и безопасным default; проверить help и отказ при неизвестных значениях."
+      },
+      {
+        "ordinal": 6,
+        "checked": true,
+        "text": "`src/bioetl/interfaces/cli/commands/_workflow_command_options.py` — Провести параметр через command options без потери при запуске workflow."
+      },
+      {
+        "ordinal": 7,
+        "checked": true,
+        "text": "`src/bioetl/interfaces/cli/commands/_workflow_override_support.py` — Проверить CLI precedence, defaults и step overrides в effective config."
+      },
+      {
+        "ordinal": 8,
+        "checked": true,
+        "text": "`src/bioetl/infrastructure/schemas/workflow_config.py` — Согласовать закрытый набор mode, validation и чтение старых YAML."
+      },
+      {
+        "ordinal": 9,
+        "checked": true,
+        "text": "`src/bioetl/domain/workflow/_run_options_config.py` — Согласовать типизированные run options со schema и эффективной конфигурацией."
+      },
+      {
+        "ordinal": 10,
+        "checked": true,
+        "text": "`src/bioetl/domain/workflow/_delete_orphans_scope.py` — Проверить полный upstream DAG; исключение только для explicit selected-snapshot."
+      },
+      {
+        "ordinal": 11,
+        "checked": true,
+        "text": "`configs/workflows/chembl_baseline.yaml` — Использовать как regression fixture: новый режим не включать по умолчанию."
+      },
+      {
+        "ordinal": 12,
+        "checked": true,
+        "text": "`configs/workflows/chembl_core.yaml` — Подтвердить прежний default; opt-in задаётся invocation, а не скрытой сменой YAML."
+      }
+    ]
+  },
+  {
+    "number": 11868,
+    "state": "CLOSED",
+    "closedAt": "2026-10-03T23:46:50Z",
+    "stateReason": "completed",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11868",
+    "body": "Родительская задача: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11865\r\r\n\r\r\n## Зависимости\r\r\n\r\r\n- Требует завершения RF-001: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11866\r\r\n- Требует завершения RF-002: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11867\r\r\n\r\r\n## План реализации\r\r\n\r\r\n1. В application transform собрать типизированный request с mode, source producer run IDs и точными source/reference snapshot identities. Не дублировать storage-логику в фасаде.\r\r\n2. В существующем storage adapter разделить проверку полноты полного справочника и исполнение явно выбранной семантики selected-snapshot.\r\r\n3. Читать конкретные версии source/reference; перед мутацией проверить, что выбранные версии/область не изменились. При конфликте прекратить мутацию и записать диагностический результат.\r\r\n4. Ограничить source строками текущего workflow согласно RF-001; при отсутствии или неоднозначности identity отказать, а не расширять область до all_current.\r\r\n5. Использовать существующие механизмы SCD2 expiry / записи и quarantine. Сохранить предусмотренную атомарность и учёт частичного отказа.\r\r\n6. Обработать ноль совпадений и удаление 100% source как допустимый результат. Отсутствующую/повреждённую reference не превращать в пустой снимок.\r\r\n7. Для нескольких FK transforms передавать результат и snapshot последнего шага; обеспечить корректность повторного исполнения и resume.\r\r\n\r\r\n## Файлы\r\r\n\r\r\n`src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py`, `reconcile_foreign_keys_config.py`; `src/bioetl/domain/workflow/foreign_key_reconciliation_models.py`; `src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py`, `workflow_foreign_key_reconciliation_loaded.py`, `workflow_foreign_key_reconciliation_reads.py` и support/identity helpers; соответствующий domain port.\r\r\n\r\r\n## Тесты / приёмка\r\r\n\r\r\n- [x] Default + unproven reference по-прежнему блокирует удаление.\r\r\n- [x] Opt-in покрывает no-op, partial deletion, total deletion, empty existing reference, missing/corrupt reference, NULL и составные ключи.\r\r\n- [x] Исторические строки вне выбранного source сохранены.\r\r\n- [x] Snapshot drift, quarantine/storage failure и dry-run не дают ложного success.\r\r\n- [x] `tests/integration/application/workflow/test_reconcile_fk_parity.py` подтверждает parity фасада и adapter.\r\r\n- [x] `tests/integration/workflow/test_workflow_foreign_key_reconciliation.py` покрывает последовательность transforms.\r\r\n\r\r\n## Риски / откат\r\r\n\r\r\nВысокий риск мутации данных. Перед live validation сохранить версии Delta и ссылки на исходные immutable artifacts. Откат кода не восстанавливает данные: восстановление выполняется из сохранённых версий отдельной проверяемой операцией.\r\r\n\r\r\n## Общий контракт\r\r\n\r\r\n- Обычный режим `complete-reference` сохраняет требование полноты справочника и действующие защиты.\r\r\n- Новый явно выбранный `selected-snapshot` трактует отсутствие ключа только относительно закреплённой ограниченной выборки; удаление всех строк выбранного source допустимо.\r\r\n- Не подменять `reference_completeness=unproven` значением `complete`; режим и полнота — разные свойства.\r\r\n- Область мутации — строки текущего workflow в изолированном локальном хранилище. Git-ветка сама по себе не изолирует пути данных.\r\r\n- Не отключать проверки digest, evidence, архивирования или Replay Readiness ради зелёного статуса.\r\r\n- Не менять `.env`, не увеличивать бюджеты техдолга; не добавлять обязательные Docker/Redis зависимости.\r\r\n\r\r\n## Границы\r\r\n\r\r\nЭта задача относится к ограниченной FK-сверке `chembl_baseline`/`chembl_core`. Она не закрывает поддержку strict replay для composites и не означает выполнения кампании из 100000 запусков.\r\n\r\n## Пофайловый план закрытия — 2026-10-03\r\n\r\nПлан составлен по текущему main `6689445eba0251c030793db2d163ab42be28077b` и готовой ветке `codex/fk-selected-snapshot-11865` (`65c0779564b8f947b42b48a2f1064105947dfe74`). Это план интеграции и приёмки уже подготовленной реализации, а не утверждение о её наличии в main. Исторический receipt на `61560a0` содержит 4033 PASS / 8 SKIP / 0 failures/errors и успешные bounded workflow; полным repository suite он не является.\r\n\r\nСвежий локальный Proof-or-Stop: `DEGRADED`, errors=[]; `trust_tier:local_single_host`, done claim unqualified. Прежний governance STOP снят; новый ADMIT пока не подтверждён. Billing lock считаем постоянным: `CI=BLOCKED_EXTERNAL_PERMANENT`. Для требуемой trust acceptance получить реальную допустимую независимую аттестацию по текущему policy; не переименовывать локальный прогон в independent evaluation и не менять trust policy ради закрытия.\r\n\r\n### Зависимости\r\n\r\n#11866 + #11867 → #11868; затем #11869.\r\n\r\n### Файлы и оставшиеся действия\r\n\r\n- [x] `src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py` — Перенести сборку request с producer IDs и точными source/reference pins; storage алгоритм оставить в adapter.\r\n- [x] `src/bioetl/application/workflow/transforms/selected_snapshot_inputs.py` — Проверить lineage последовательных transforms, запрет ambiguous pins и implicit latest.\r\n- [x] `src/bioetl/application/services/execution/workflow_runner_step_execution.py` — Сохранять результаты producer и снимки для downstream transform.\r\n- [x] `src/bioetl/application/services/execution/pipeline_runner_models.py` — Согласовать типизированный producer output с snapshot metadata.\r\n- [x] `src/bioetl/infrastructure/storage/workflow_selected_snapshots.py` — Проверить pinned table IDs/versions, корректность чтения и fail-closed drift detection.\r\n- [x] `src/bioetl/infrastructure/storage/workflow_producer_ownership.py` — Сохранить scope текущего producer, в том числе entity_id/content_hash membership для таблиц без row run IDs.\r\n- [x] `src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py` — Проверить orchestration guarded mutation и корректные terminal outcomes.\r\n- [x] `src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py` — Сохранить NULL/composite-key semantics, partial/total deletion и исторические строки.\r\n- [x] `src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py` — Quarantine должна завершаться до mutation; отказ не даёт ложного success.\r\n- [x] `src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py` — Согласовать counts, identities и optimistic checks с финальным adapter.\r\n\r\n### Проверки\r\n\r\nПрогонять после переноса на окончательный SHA; отсутствие новых файлов в main устраняется интеграцией готовой ветки. На Windows использовать `.venv-win/Scripts/python.exe` с импортом src из проверяемого checkout.\r\n\r\n```text\r\npython -m pytest tests/unit/application/workflow/test_selected_snapshot_contracts.py tests/unit/infrastructure/storage/test_workflow_foreign_key_reconciliation.py tests/integration/application/workflow/test_reconcile_fk_parity.py tests/integration/workflow/test_workflow_foreign_key_reconciliation.py tests/integration/workflow/test_selected_snapshot_reconciliation.py\r\n```\r\n\r\n### Критерий закрытия\r\n\r\nНа реальной Delta fixture доказаны no-op, partial/total expiry, missing/corrupt failures, snapshot drift, quarantine failures, dry-run, сохранность historical/unrelated rows и цепочка версий. Перед mutation сохранены версии для восстановления.\r\n\r\n### Общие gates и откат\r\n\r\n- `.env` не менять; budgets/thresholds/exemptions не повышать.\r\n- Общие source files между этапами имеют одного владельца интеграции. Сначала domain/CLI/storage/evidence, затем HTTP/generators; generated artifacts обновлять совместно после интеграции.\r\n- После Python source changes: `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml` и architecture hash guard; для CI-family drift применять `python -m scripts.engineering.qa refresh-ci-drift-families`, не budget ratchet.\r\n- При docs link/header changes: `python -m scripts.docs generate-cleanup-inventory --update`, затем `--check` и `python -m scripts.docs check-links`.\r\n- `git diff --check`; `python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`; runtime mirror parity N/A, пока runtime sources не меняются.\r\n- Перед live mutation сохранить Delta versions и immutable input identities; rollback кода не восстанавливает данные. Restore проверять counts и историческими строками.\r\n- Публикация PR/evidence, интеграция, повторная SHA-bound приёмка и обновление issue checklist предшествуют закрытию. `DEGRADED` и billing-blocked CI не обозначать PASS/ADMIT.\r\n\r\n",
+    "title": "[RF-003] Реализовать удаление по закреплённым ограниченным снимкам",
+    "updatedAt": "2026-10-03T23:46:55Z",
+    "body_sha256": "993a4ba292b77511f090b68c1823942d462cc83c07323d2b12695fa510d71c3b",
+    "criteria": [
+      {
+        "ordinal": 1,
+        "checked": true,
+        "text": "Default + unproven reference по-прежнему блокирует удаление."
+      },
+      {
+        "ordinal": 2,
+        "checked": true,
+        "text": "Opt-in покрывает no-op, partial deletion, total deletion, empty existing reference, missing/corrupt reference, NULL и составные ключи."
+      },
+      {
+        "ordinal": 3,
+        "checked": true,
+        "text": "Исторические строки вне выбранного source сохранены."
+      },
+      {
+        "ordinal": 4,
+        "checked": true,
+        "text": "Snapshot drift, quarantine/storage failure и dry-run не дают ложного success."
+      },
+      {
+        "ordinal": 5,
+        "checked": true,
+        "text": "`tests/integration/application/workflow/test_reconcile_fk_parity.py` подтверждает parity фасада и adapter."
+      },
+      {
+        "ordinal": 6,
+        "checked": true,
+        "text": "`tests/integration/workflow/test_workflow_foreign_key_reconciliation.py` покрывает последовательность transforms."
+      },
+      {
+        "ordinal": 7,
+        "checked": true,
+        "text": "`src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py` — Перенести сборку request с producer IDs и точными source/reference pins; storage алгоритм оставить в adapter."
+      },
+      {
+        "ordinal": 8,
+        "checked": true,
+        "text": "`src/bioetl/application/workflow/transforms/selected_snapshot_inputs.py` — Проверить lineage последовательных transforms, запрет ambiguous pins и implicit latest."
+      },
+      {
+        "ordinal": 9,
+        "checked": true,
+        "text": "`src/bioetl/application/services/execution/workflow_runner_step_execution.py` — Сохранять результаты producer и снимки для downstream transform."
+      },
+      {
+        "ordinal": 10,
+        "checked": true,
+        "text": "`src/bioetl/application/services/execution/pipeline_runner_models.py` — Согласовать типизированный producer output с snapshot metadata."
+      },
+      {
+        "ordinal": 11,
+        "checked": true,
+        "text": "`src/bioetl/infrastructure/storage/workflow_selected_snapshots.py` — Проверить pinned table IDs/versions, корректность чтения и fail-closed drift detection."
+      },
+      {
+        "ordinal": 12,
+        "checked": true,
+        "text": "`src/bioetl/infrastructure/storage/workflow_producer_ownership.py` — Сохранить scope текущего producer, в том числе entity_id/content_hash membership для таблиц без row run IDs."
+      },
+      {
+        "ordinal": 13,
+        "checked": true,
+        "text": "`src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py` — Проверить orchestration guarded mutation и корректные terminal outcomes."
+      },
+      {
+        "ordinal": 14,
+        "checked": true,
+        "text": "`src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py` — Сохранить NULL/composite-key semantics, partial/total deletion и исторические строки."
+      },
+      {
+        "ordinal": 15,
+        "checked": true,
+        "text": "`src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py` — Quarantine должна завершаться до mutation; отказ не даёт ложного success."
+      },
+      {
+        "ordinal": 16,
+        "checked": true,
+        "text": "`src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py` — Согласовать counts, identities и optimistic checks с финальным adapter."
+      }
+    ]
+  },
+  {
+    "number": 11869,
+    "state": "CLOSED",
+    "closedAt": "2026-10-03T23:47:14Z",
+    "stateReason": "completed",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11869",
+    "body": "Родительская задача: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11865\r\r\n\r\r\n## Зависимости\r\r\n\r\r\n- Требует завершения RF-002: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11867\r\r\n- Требует завершения RF-003: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11868\r\r\n\r\r\n## План реализации\r\r\n\r\r\n1. Расширить reconciliation payload: mode, фактические source/reference scope, producer run IDs, snapshot versions/refs, лимиты, scanned/retained/deleted counts, mutation mode и причина отказа.\r\r\n2. Протянуть сведения из результата transform в persisted transform artifact, workflow execution rows/report, manifest/launch context и destructive commit record.\r\r\n3. Проверить whitelist в `_reconciliation_details` workflow builder: новые поля не должны теряться при построении отчёта.\r\r\n4. Включить mode и семантическую область в execution fingerprint. Resume с другим режимом или несовместимым snapshot должен отклоняться либо требовать нового запуска согласно RF-001.\r\r\n5. Обеспечить совместимость чтения старых отчётов: отсутствие новых полей не означает opt-in и не доказывает полноту reference.\r\r\n6. Пересчитать digest только каноническим publisher после финальной публикации; сохранить immutable revisions и проверить архивирование поздней workflow revision.\r\r\n\r\r\n## Файлы\r\r\n\r\r\n`src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py`; `src/bioetl/domain/run_reports/workflow_builder.py`; `src/bioetl/application/services/workflow/workflow_runner_reports.py`, `workflow_transform_artifacts.py`; `src/bioetl/application/services/run_reports/snapshots.py`, `workflow_observations.py`; найти и обновить schema/serializer/fingerprint consumers по repo search.\r\r\n\r\r\n## Тесты / приёмка\r\r\n\r\r\n- [x] JSON/report/artifact round-trip сохраняет режим и scope.\r\r\n- [x] Счётчики совпадают с фактическим состоянием до/после удаления, включая 100% deletion.\r\r\n- [x] Старый отчёт читается без выдуманного `complete`.\r\r\n- [x] Смена режима меняет fingerprint; несовместимый resume не проходит.\r\r\n- [x] JSON/Markdown digests, поздняя revision и архив проверяются на новом workflow run.\r\r\n\r\r\n## Риски / откат\r\r\n\r\r\nРиск — потеря параметра в одном из serializers и ложная replay-ready оценка. Откат требует совместимого reader для уже созданных отчётов; исторические evidence не переписывать.\r\r\n\r\r\n## Общий контракт\r\r\n\r\r\n- Обычный режим `complete-reference` сохраняет требование полноты справочника и действующие защиты.\r\r\n- Новый явно выбранный `selected-snapshot` трактует отсутствие ключа только относительно закреплённой ограниченной выборки; удаление всех строк выбранного source допустимо.\r\r\n- Не подменять `reference_completeness=unproven` значением `complete`; режим и полнота — разные свойства.\r\r\n- Область мутации — строки текущего workflow в изолированном локальном хранилище. Git-ветка сама по себе не изолирует пути данных.\r\r\n- Не отключать проверки digest, evidence, архивирования или Replay Readiness ради зелёного статуса.\r\r\n- Не менять `.env`, не увеличивать бюджеты техдолга; не добавлять обязательные Docker/Redis зависимости.\r\r\n\r\r\n## Границы\r\r\n\r\r\nЭта задача относится к ограниченной FK-сверке `chembl_baseline`/`chembl_core`. Она не закрывает поддержку strict replay для composites и не означает выполнения кампании из 100000 запусков.\r\n\r\n## Пофайловый план закрытия — 2026-10-03\r\n\r\nПлан составлен по текущему main `6689445eba0251c030793db2d163ab42be28077b` и готовой ветке `codex/fk-selected-snapshot-11865` (`65c0779564b8f947b42b48a2f1064105947dfe74`). Это план интеграции и приёмки уже подготовленной реализации, а не утверждение о её наличии в main. Исторический receipt на `61560a0` содержит 4033 PASS / 8 SKIP / 0 failures/errors и успешные bounded workflow; полным repository suite он не является.\r\n\r\nСвежий локальный Proof-or-Stop: `DEGRADED`, errors=[]; `trust_tier:local_single_host`, done claim unqualified. Прежний governance STOP снят; новый ADMIT пока не подтверждён. Billing lock считаем постоянным: `CI=BLOCKED_EXTERNAL_PERMANENT`. Для требуемой trust acceptance получить реальную допустимую независимую аттестацию по текущему policy; не переименовывать локальный прогон в independent evaluation и не менять trust policy ради закрытия.\r\n\r\n### Зависимости\r\n\r\n#11867 + #11868 → #11869; затем #11870.\r\n\r\n### Файлы и оставшиеся действия\r\n\r\n- [x] `src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py` — Проверить полный reconciliation payload: mode, scope, IDs, pins, limits, scanned/retained/deleted counts, mutation outcome и refusal reason.\r\n- [x] `src/bioetl/domain/run_reports/workflow_builder.py` — Проверить whitelist reconciliation details: все новые поля доходят до persisted report.\r\n- [x] `src/bioetl/domain/run_reports/workflow_totals.py` — Сверить агрегацию counts с реальными mutation results, включая total expiry.\r\n- [x] `src/bioetl/domain/control_plane/workflow_execution_state.py` — Сохранить snapshot metadata в persisted execution state; legacy отсутствие данных не превращать в opt-in.\r\n- [x] `src/bioetl/application/services/workflow/control_plane/execution_recording_payloads.py` — Проверить сериализацию producer/transform snapshot payload без потери полей.\r\n- [x] `src/bioetl/application/services/workflow/control_plane/execution_recording_state.py` — Проверить round-trip и восстановление completed execution rows.\r\n- [x] `src/bioetl/application/services/workflow/control_plane/selected_snapshot_resume.py` — Восстанавливать закреплённые outputs; отклонять несовместимый resume и legacy pins.\r\n- [x] `src/bioetl/application/services/workflow/control_plane/execution_service.py` — Проверить execution fingerprint и отказ при изменении режима/несовместимой identity.\r\n- [x] `src/bioetl/application/services/workflow/workflow_runner_service.py` — Согласовать publication/finalization и propagation evidence.\r\n- [x] `src/bioetl/application/services/workflow/workflow_runner_support.py` — Проверить supporting propagation selected snapshots и effective options.\r\n\r\n### Проверки\r\n\r\nПрогонять после переноса на окончательный SHA; отсутствие новых файлов в main устраняется интеграцией готовой ветки. На Windows использовать `.venv-win/Scripts/python.exe` с импортом src из проверяемого checkout.\r\n\r\n```text\r\npython -m pytest tests/unit/application/workflow/test_selected_snapshot_contracts.py tests/integration/workflow/test_selected_snapshot_reconciliation.py\r\n```\r\n\r\n### Критерий закрытия\r\n\r\nRound-trip сохраняет mode/scope/pins; counts совпадают с Delta; режим влияет на fingerprint; invalid resume запрещён; canonical JSON/Markdown digests, destructive records и late revisions в archive проверены на итоговых run IDs.\r\n\r\n### Общие gates и откат\r\n\r\n- `.env` не менять; budgets/thresholds/exemptions не повышать.\r\n- Общие source files между этапами имеют одного владельца интеграции. Сначала domain/CLI/storage/evidence, затем HTTP/generators; generated artifacts обновлять совместно после интеграции.\r\n- После Python source changes: `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml` и architecture hash guard; для CI-family drift применять `python -m scripts.engineering.qa refresh-ci-drift-families`, не budget ratchet.\r\n- При docs link/header changes: `python -m scripts.docs generate-cleanup-inventory --update`, затем `--check` и `python -m scripts.docs check-links`.\r\n- `git diff --check`; `python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`; runtime mirror parity N/A, пока runtime sources не меняются.\r\n- Перед live mutation сохранить Delta versions и immutable input identities; rollback кода не восстанавливает данные. Restore проверять counts и историческими строками.\r\n- Публикация PR/evidence, интеграция, повторная SHA-bound приёмка и обновление issue checklist предшествуют закрытию. `DEGRADED` и billing-blocked CI не обозначать PASS/ADMIT.\r\n\r\n",
+    "title": "[RF-004] Сохранить scope, снимки и результаты сверки в evidence и resume identity",
+    "updatedAt": "2026-10-03T23:47:19Z",
+    "body_sha256": "62b59619b95f9fdcac18adc8695ff1f9262d9a74c31185a7e9974051d6a8c890",
+    "criteria": [
+      {
+        "ordinal": 1,
+        "checked": true,
+        "text": "JSON/report/artifact round-trip сохраняет режим и scope."
+      },
+      {
+        "ordinal": 2,
+        "checked": true,
+        "text": "Счётчики совпадают с фактическим состоянием до/после удаления, включая 100% deletion."
+      },
+      {
+        "ordinal": 3,
+        "checked": true,
+        "text": "Старый отчёт читается без выдуманного `complete`."
+      },
+      {
+        "ordinal": 4,
+        "checked": true,
+        "text": "Смена режима меняет fingerprint; несовместимый resume не проходит."
+      },
+      {
+        "ordinal": 5,
+        "checked": true,
+        "text": "JSON/Markdown digests, поздняя revision и архив проверяются на новом workflow run."
+      },
+      {
+        "ordinal": 6,
+        "checked": true,
+        "text": "`src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py` — Проверить полный reconciliation payload: mode, scope, IDs, pins, limits, scanned/retained/deleted counts, mutation outcome и refusal reason."
+      },
+      {
+        "ordinal": 7,
+        "checked": true,
+        "text": "`src/bioetl/domain/run_reports/workflow_builder.py` — Проверить whitelist reconciliation details: все новые поля доходят до persisted report."
+      },
+      {
+        "ordinal": 8,
+        "checked": true,
+        "text": "`src/bioetl/domain/run_reports/workflow_totals.py` — Сверить агрегацию counts с реальными mutation results, включая total expiry."
+      },
+      {
+        "ordinal": 9,
+        "checked": true,
+        "text": "`src/bioetl/domain/control_plane/workflow_execution_state.py` — Сохранить snapshot metadata в persisted execution state; legacy отсутствие данных не превращать в opt-in."
+      },
+      {
+        "ordinal": 10,
+        "checked": true,
+        "text": "`src/bioetl/application/services/workflow/control_plane/execution_recording_payloads.py` — Проверить сериализацию producer/transform snapshot payload без потери полей."
+      },
+      {
+        "ordinal": 11,
+        "checked": true,
+        "text": "`src/bioetl/application/services/workflow/control_plane/execution_recording_state.py` — Проверить round-trip и восстановление completed execution rows."
+      },
+      {
+        "ordinal": 12,
+        "checked": true,
+        "text": "`src/bioetl/application/services/workflow/control_plane/selected_snapshot_resume.py` — Восстанавливать закреплённые outputs; отклонять несовместимый resume и legacy pins."
+      },
+      {
+        "ordinal": 13,
+        "checked": true,
+        "text": "`src/bioetl/application/services/workflow/control_plane/execution_service.py` — Проверить execution fingerprint и отказ при изменении режима/несовместимой identity."
+      },
+      {
+        "ordinal": 14,
+        "checked": true,
+        "text": "`src/bioetl/application/services/workflow/workflow_runner_service.py` — Согласовать publication/finalization и propagation evidence."
+      },
+      {
+        "ordinal": 15,
+        "checked": true,
+        "text": "`src/bioetl/application/services/workflow/workflow_runner_support.py` — Проверить supporting propagation selected snapshots и effective options."
+      }
+    ]
+  },
+  {
+    "number": 11870,
+    "state": "CLOSED",
+    "closedAt": "2026-10-03T23:47:39Z",
+    "stateReason": "completed",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11870",
+    "body": "Родительская задача: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11865\r\r\n\r\r\n## Зависимости\r\r\n\r\r\n- Требует завершения RF-004: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11869\r\r\n\r\r\n## План реализации\r\r\n\r\r\n1. Найти HTTP projections и канонические генераторы панелей, которые представляют workflow reconciliation; начать с `src/bioetl/interfaces/http/_pipeline_run_report_table.py` и связанных report/status projections.\r\r\n2. Добавить операторское описание: режим сверки, выбранные снимки, лимит и «удалено X/Y». Термин «сирота» пояснить как отсутствие совпадения внутри выбранной reference.\r\r\n3. При подтверждённом успешном выполнении разрешить зелёный execution status даже при удалении всех выбранных строк; отдельно показывать scope и количество оставшихся строк.\r\r\n4. Сохранить UNKNOWN/INCOMPLETE/QUERY ERROR при недостатке evidence. Не заменять проверки Saved Evidence/Replay Readiness статическим значением или правилом только по exit code.\r\r\n5. Обновлять dashboard JSON через канонические generators; проверить ссылки Overview ↔ Replay Readiness ↔ Run Explorer.\r\r\n6. Выполнить source-bound HTTP и browser validation для partial deletion и total deletion на изолированном datasource; сохранить скриншоты и точные run IDs.\r\r\n\r\r\n## Поверхности\r\r\n\r\r\n`src/bioetl/interfaces/http/`; источники генерации в `scripts/ops/observability/grafana/`; `grafana/dashboards/bioetl-overview-v2.json`, `bioetl-control-plane-v1.json`, `bioetl-run-explorer-v1.json` по фактической необходимости.\r\r\n\r\r\n## Приёмка\r\r\n\r\r\n- [x] UI сообщает selected-snapshot semantics и корректные счётчики.\r\r\n- [x] Отсутствие поля в старом отчёте не выдаётся за полноту или успешный opt-in.\r\r\n- [x] HTTP данные, JSON evidence и screenshot относятся к одному run ID.\r\r\n- [x] Replay Readiness определяется реальной доступностью/целостностью артефактов.\r\r\n\r\r\n## Риски / откат\r\r\n\r\r\nРиск — зелёный статус скрывает неполноту исходного провайдера. Разделять корректность выполнения и полноту источника. Откат — возврат canonical generator + регенерация; изолированные копии dashboards сохранять отдельно от общего provisioning.\r\r\n\r\r\n## Общий контракт\r\r\n\r\r\n- Обычный режим `complete-reference` сохраняет требование полноты справочника и действующие защиты.\r\r\n- Новый явно выбранный `selected-snapshot` трактует отсутствие ключа только относительно закреплённой ограниченной выборки; удаление всех строк выбранного source допустимо.\r\r\n- Не подменять `reference_completeness=unproven` значением `complete`; режим и полнота — разные свойства.\r\r\n- Область мутации — строки текущего workflow в изолированном локальном хранилище. Git-ветка сама по себе не изолирует пути данных.\r\r\n- Не отключать проверки digest, evidence, архивирования или Replay Readiness ради зелёного статуса.\r\r\n- Не менять `.env`, не увеличивать бюджеты техдолга; не добавлять обязательные Docker/Redis зависимости.\r\r\n\r\r\n## Границы\r\r\n\r\r\nЭта задача относится к ограниченной FK-сверке `chembl_baseline`/`chembl_core`. Она не закрывает поддержку strict replay для composites и не означает выполнения кампании из 100000 запусков.\r\n\r\n## Пофайловый план закрытия — 2026-10-03\r\n\r\nПлан составлен по текущему main `6689445eba0251c030793db2d163ab42be28077b` и готовой ветке `codex/fk-selected-snapshot-11865` (`65c0779564b8f947b42b48a2f1064105947dfe74`). Это план интеграции и приёмки уже подготовленной реализации, а не утверждение о её наличии в main. Исторический receipt на `61560a0` содержит 4033 PASS / 8 SKIP / 0 failures/errors и успешные bounded workflow; полным repository suite он не является.\r\n\r\nСвежий локальный Proof-or-Stop: `DEGRADED`, errors=[]; `trust_tier:local_single_host`, done claim unqualified. Прежний governance STOP снят; новый ADMIT пока не подтверждён. Billing lock считаем постоянным: `CI=BLOCKED_EXTERNAL_PERMANENT`. Для требуемой trust acceptance получить реальную допустимую независимую аттестацию по текущему policy; не переименовывать локальный прогон в independent evaluation и не менять trust policy ради закрытия.\r\n\r\n### Зависимости\r\n\r\n#11869 → #11870; изменения общих Grafana generators согласовать с #11895 и текущим main до регенерации.\r\n\r\n### Файлы и оставшиеся действия\r\n\r\n- [x] `src/bioetl/interfaces/http/_reconciliation_display.py` — Показать mode, pinned scope/snapshots, limit, expired X/Y, retained и unproven semantics; legacy/missing evidence остаётся UNKNOWN/INCOMPLETE.\r\n- [x] `src/bioetl/interfaces/http/_pipeline_run_report_table.py` — Согласовать report table projection с сохранёнными JSON counts и selected run identity.\r\n- [x] `src/bioetl/interfaces/http/selected_run_status.py` — Разделять execution success, evidence completeness и Replay Readiness; total expiry само по себе не означает READY.\r\n- [x] `scripts/ops/observability/grafana/_overview_identity.py` — Интегрировать операторские поля и ссылки из canonical generator с актуальным main.\r\n- [x] `scripts/ops/observability/grafana/render_nav_bus.py` — Единый владелец навигации/генерации: сохранить retirement и context URL contracts; регенерировать после объединения изменений.\r\n- [x] `grafana/dashboards/bioetl-overview-v2.json` — Получить generator output и проверить отображение partial/total expiry.\r\n- [x] `grafana/dashboards/bioetl-control-plane-v1.json` — Проверить Saved Evidence/Replay Readiness и ссылки на тот же run ID; менять только через generator при необходимости.\r\n- [x] `grafana/dashboards/bioetl-run-explorer-v1.json` — Проверить counts, terminal diagnostics и контекст переходов; менять через generator при необходимости.\r\n- [x] `docs/03-guides/dashboards/contracts/panel-content-contract.yaml` — Синхронизировать операторский контракт только для реально изменённых панелей.\r\n- [x] `docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md` — Синхронизировать смысл полей и ограничения bounded reference.\r\n\r\n### Проверки\r\n\r\nПрогонять после переноса на окончательный SHA; отсутствие новых файлов в main устраняется интеграцией готовой ветки. На Windows использовать `.venv-win/Scripts/python.exe` с импортом src из проверяемого checkout.\r\n\r\n```text\r\npython -m pytest tests/unit/interfaces/http/test_reconciliation_display.py tests/integration/test_run_explorer_http_catalog.py tests/integration/test_grafana_evidence_readability.py tests/integration/test_dashboard_navigation_contract_sync.py\r\n```\r\n\r\n### Критерий закрытия\r\n\r\nHTTP, persisted JSON, browser DTO и PNG привязаны к одному source SHA/run ID. Проверены partial deletion, total deletion, legacy/missing evidence и ошибки. Обновлён browser proof после интеграции: сохранённая проверка 7652173 не объявляется проверкой нового SHA.\r\n\r\n### Общие gates и откат\r\n\r\n- `.env` не менять; budgets/thresholds/exemptions не повышать.\r\n- Общие source files между этапами имеют одного владельца интеграции. Сначала domain/CLI/storage/evidence, затем HTTP/generators; generated artifacts обновлять совместно после интеграции.\r\n- После Python source changes: `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml` и architecture hash guard; для CI-family drift применять `python -m scripts.engineering.qa refresh-ci-drift-families`, не budget ratchet.\r\n- При docs link/header changes: `python -m scripts.docs generate-cleanup-inventory --update`, затем `--check` и `python -m scripts.docs check-links`.\r\n- `git diff --check`; `python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`; runtime mirror parity N/A, пока runtime sources не меняются.\r\n- Перед live mutation сохранить Delta versions и immutable input identities; rollback кода не восстанавливает данные. Restore проверять counts и историческими строками.\r\n- Публикация PR/evidence, интеграция, повторная SHA-bound приёмка и обновление issue checklist предшествуют закрытию. `DEGRADED` и billing-blocked CI не обозначать PASS/ADMIT.\r\n\r\n",
+    "title": "[RF-005] Показать ограниченную семантику сверки в Saved Evidence и Overview",
+    "updatedAt": "2026-10-03T23:47:44Z",
+    "body_sha256": "e5f2b3d9c2a30e5b2a6b4cedf159ea91f34b1891555257b2a55551bc75879ff3",
+    "criteria": [
+      {
+        "ordinal": 1,
+        "checked": true,
+        "text": "UI сообщает selected-snapshot semantics и корректные счётчики."
+      },
+      {
+        "ordinal": 2,
+        "checked": true,
+        "text": "Отсутствие поля в старом отчёте не выдаётся за полноту или успешный opt-in."
+      },
+      {
+        "ordinal": 3,
+        "checked": true,
+        "text": "HTTP данные, JSON evidence и screenshot относятся к одному run ID."
+      },
+      {
+        "ordinal": 4,
+        "checked": true,
+        "text": "Replay Readiness определяется реальной доступностью/целостностью артефактов."
+      },
+      {
+        "ordinal": 5,
+        "checked": true,
+        "text": "`src/bioetl/interfaces/http/_reconciliation_display.py` — Показать mode, pinned scope/snapshots, limit, expired X/Y, retained и unproven semantics; legacy/missing evidence остаётся UNKNOWN/INCOMPLETE."
+      },
+      {
+        "ordinal": 6,
+        "checked": true,
+        "text": "`src/bioetl/interfaces/http/_pipeline_run_report_table.py` — Согласовать report table projection с сохранёнными JSON counts и selected run identity."
+      },
+      {
+        "ordinal": 7,
+        "checked": true,
+        "text": "`src/bioetl/interfaces/http/selected_run_status.py` — Разделять execution success, evidence completeness и Replay Readiness; total expiry само по себе не означает READY."
+      },
+      {
+        "ordinal": 8,
+        "checked": true,
+        "text": "`scripts/ops/observability/grafana/_overview_identity.py` — Интегрировать операторские поля и ссылки из canonical generator с актуальным main."
+      },
+      {
+        "ordinal": 9,
+        "checked": true,
+        "text": "`scripts/ops/observability/grafana/render_nav_bus.py` — Единый владелец навигации/генерации: сохранить retirement и context URL contracts; регенерировать после объединения изменений."
+      },
+      {
+        "ordinal": 10,
+        "checked": true,
+        "text": "`grafana/dashboards/bioetl-overview-v2.json` — Получить generator output и проверить отображение partial/total expiry."
+      },
+      {
+        "ordinal": 11,
+        "checked": true,
+        "text": "`grafana/dashboards/bioetl-control-plane-v1.json` — Проверить Saved Evidence/Replay Readiness и ссылки на тот же run ID; менять только через generator при необходимости."
+      },
+      {
+        "ordinal": 12,
+        "checked": true,
+        "text": "`grafana/dashboards/bioetl-run-explorer-v1.json` — Проверить counts, terminal diagnostics и контекст переходов; менять через generator при необходимости."
+      },
+      {
+        "ordinal": 13,
+        "checked": true,
+        "text": "`docs/03-guides/dashboards/contracts/panel-content-contract.yaml` — Синхронизировать операторский контракт только для реально изменённых панелей."
+      },
+      {
+        "ordinal": 14,
+        "checked": true,
+        "text": "`docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md` — Синхронизировать смысл полей и ограничения bounded reference."
+      }
+    ]
+  },
+  {
+    "number": 11871,
+    "state": "CLOSED",
+    "closedAt": "2026-10-03T23:48:06Z",
+    "stateReason": "completed",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11871",
+    "body": "Родительская задача: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11865\r\r\n\r\r\n## Зависимости\r\r\n\r\r\n- Требует завершения RF-001: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11866\r\r\n- Требует завершения RF-002: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11867\r\r\n- Требует завершения RF-003: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11868\r\r\n- Требует завершения RF-004: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11869\r\r\n- Требует завершения RF-005: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11870\r\r\n\r\r\n## План реализации\r\r\n\r\r\n1. На финальном commit проверить чистоту изолированной ветки и отдельные data/report/archive roots; зафиксировать source SHA и effective config.\r\r\n2. Выполнить unit/CLI/config/storage tests и integration parity/workflow tests из RF-002–RF-004, а также report/schema/resume regressions.\r\r\n3. Выполнить реальные `bioetl workflow run chembl_baseline --limit 1000 --reconciliation-mode selected-snapshot` и аналогичный `chembl_core`, с остальными необходимыми изолированными runtime/persistence параметрами. Новый CLI синтаксис — проектируемый, до RF-002 его нет.\r\r\n4. После каждого запуска проверить все pipeline и transform steps, родительский отчёт, фактические Delta изменения, scoped deletion и immutable artifacts. При ошибке исправить причину и повторить.\r\r\n5. Отдельными integration fixtures доказать полное удаление и сохранность исторических строк; не подбирать production input ради искусственного зелёного результата.\r\r\n6. Сохранить source-bound evidence: команды, SHA, run IDs, exit codes, counts, snapshots, digest/archive checks, Saved Evidence, Replay Readiness и Overview screenshots.\r\r\n7. Обновить `docs/05-operations/runbooks/bounded-pipeline-smoke.md` с точной семантикой, командой opt-in, восстановлением данных и ограничениями.\r\r\n8. После Python source changes выполнить `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml` и architecture hash guard. После изменения docs links/headers — `python -m scripts.docs generate-cleanup-inventory --update`. Выполнить `git diff --check`; mirror parity — если менялись runtime sources, иначе явно N/A. Бюджеты техдолга не повышать.\r\r\n\r\r\n## Основные команды проверки\r\r\n\r\r\n```text\r\r\npython -m pytest tests/unit/domain/workflow/test_delete_orphans_scope.py tests/unit/interfaces/cli/test_workflow_cli.py tests/unit/infrastructure/config/test_workflow_reconcile_foreign_keys_config.py\r\r\npython -m pytest tests/unit/application/workflow/test_reconcile_foreign_keys.py tests/unit/infrastructure/storage/test_workflow_foreign_key_reconciliation.py\r\r\npython -m pytest tests/integration/application/workflow/test_reconcile_fk_parity.py tests/integration/workflow/test_workflow_foreign_key_reconciliation.py\r\r\n```\r\r\n\r\r\nНа Windows использовать `.venv-win/Scripts/python.exe` и гарантировать импорт исходников из изолированной ветки. Добавленные тестовые модули также включить в итоговый прогон.\r\r\n\r\r\n## Приёмка / закрытие\r\r\n\r\r\n- [x] Оба workflow выполняются с фактическим limit=1000 и явным новым режимом.\r\r\n- [x] Default safety regressions проходят.\r\r\n- [x] Удаление соответствует закреплённым снимкам, evidence полное и source-bound.\r\r\n- [x] Все проверки/пропуски и существующие посторонние failures перечислены честно.\r\r\n- [x] Закрытие этой задачи не закрывает composites replay или кампанию 100000 запусков.\r\r\n\r\r\n## Риски / откат\r\r\n\r\r\nПеред мутацией сохранить доступные версии Delta. При неуспехе оставить evidence неуспешного запуска неизменным, выключить opt-in и восстановить данные из сохранённых версий; rollback подтвердить счётчиками и проверкой исторических строк.\r\r\n\r\r\n## Общий контракт\r\r\n\r\r\n- Обычный режим `complete-reference` сохраняет требование полноты справочника и действующие защиты.\r\r\n- Новый явно выбранный `selected-snapshot` трактует отсутствие ключа только относительно закреплённой ограниченной выборки; удаление всех строк выбранного source допустимо.\r\r\n- Не подменять `reference_completeness=unproven` значением `complete`; режим и полнота — разные свойства.\r\r\n- Область мутации — строки текущего workflow в изолированном локальном хранилище. Git-ветка сама по себе не изолирует пути данных.\r\r\n- Не отключать проверки digest, evidence, архивирования или Replay Readiness ради зелёного статуса.\r\r\n- Не менять `.env`, не увеличивать бюджеты техдолга; не добавлять обязательные Docker/Redis зависимости.\r\r\n\r\r\n## Границы\r\r\n\r\r\nЭта задача относится к ограниченной FK-сверке `chembl_baseline`/`chembl_core`. Она не закрывает поддержку strict replay для composites и не означает выполнения кампании из 100000 запусков.\r\n\r\n## Пофайловый план закрытия — 2026-10-03\r\n\r\nПлан составлен по текущему main `6689445eba0251c030793db2d163ab42be28077b` и готовой ветке `codex/fk-selected-snapshot-11865` (`65c0779564b8f947b42b48a2f1064105947dfe74`). Это план интеграции и приёмки уже подготовленной реализации, а не утверждение о её наличии в main. Исторический receipt на `61560a0` содержит 4033 PASS / 8 SKIP / 0 failures/errors и успешные bounded workflow; полным repository suite он не является.\r\n\r\nСвежий локальный Proof-or-Stop: `DEGRADED`, errors=[]; `trust_tier:local_single_host`, done claim unqualified. Прежний governance STOP снят; новый ADMIT пока не подтверждён. Billing lock считаем постоянным: `CI=BLOCKED_EXTERNAL_PERMANENT`. Для требуемой trust acceptance получить реальную допустимую независимую аттестацию по текущему policy; не переименовывать локальный прогон в independent evaluation и не менять trust policy ради закрытия.\r\n\r\n### Зависимости\r\n\r\n#11866 → #11867 → #11868 → #11869 → #11870 → #11871 → parent #11865.\r\n\r\n### Файлы и оставшиеся действия\r\n\r\n- [x] `tests/integration/workflow/test_selected_snapshot_reconciliation.py` — Включить реальные Delta сценарии и default regressions в финальную selection.\r\n- [x] `tests/unit/application/workflow/test_selected_snapshot_contracts.py` — Включить CLI/config/resume/snapshot identity regressions; не ослаблять assertions ради прохождения.\r\n- [x] `docs/05-operations/runbooks/bounded-pipeline-smoke.md` — Зафиксировать окончательные invocation, isolated roots, restore procedure и ограничение single writer.\r\n- [x] `reports/quality/module-coverage-inventory.json` — После source changes обновить source_tree_sha256 canonical report-module-coverage; исторические coverage values не выдавать за новые measurements.\r\n- [x] `docs/reports/generated/documentation-cleanup-inventory.json` — При изменении docs links/headers обновить вместе с Markdown pair canonical generator.\r\n- [x] `docs/reports/generated/documentation-cleanup-inventory.md` — Проверить parity с JSON после canonical update.\r\n- [x] `reports/quality/debt-governance-gates.json` — Обновить применимые checks canonical reporter после source integration; budgets/thresholds/exemptions не повышать.\r\n- [x] `reports/quality/debt-governance-gates.md` — Синхронизировать generated pair на том же SHA.\r\n- [x] `reports/quality/architecture-debt-remote-main-baseline.json` — Привязать remote-main evidence canonical CI-family refresh при необходимости; синхронизировать Markdown pair.\r\n- [x] `reports/quality/architecture-debt-remote-main-baseline.md` — Не выбирать конфликтующий hash вручную; проверить canonical freshness.\r\n\r\n### Проверки\r\n\r\nПрогонять после переноса на окончательный SHA; отсутствие новых файлов в main устраняется интеграцией готовой ветки. На Windows использовать `.venv-win/Scripts/python.exe` с импортом src из проверяемого checkout.\r\n\r\n```text\r\npython -m pytest tests/unit/domain/workflow/test_delete_orphans_scope.py tests/unit/interfaces/cli/test_workflow_cli.py tests/unit/infrastructure/config/test_workflow_reconcile_foreign_keys_config.py tests/unit/application/workflow/test_selected_snapshot_contracts.py tests/integration/application/workflow/test_reconcile_fk_parity.py tests/integration/workflow/test_selected_snapshot_reconciliation.py\r\n```\r\n\r\n### Критерий закрытия\r\n\r\nПосле интеграции оба workflow проходят с фактическим limit=1000 и explicit mode в отдельных data/report/archive roots. Приложены SHA/run IDs/exit codes, Delta counts/pins, immutable inputs, digests/archives, UI evidence, checks/skips. Выполнены full-tree guard и обязательная proof acceptance. Закрывать дочерние карточки и parent только после квалифицированного lifecycle proof; composites replay и 100000-run campaign вне scope.\r\n\r\n### Общие gates и откат\r\n\r\n- `.env` не менять; budgets/thresholds/exemptions не повышать.\r\n- Общие source files между этапами имеют одного владельца интеграции. Сначала domain/CLI/storage/evidence, затем HTTP/generators; generated artifacts обновлять совместно после интеграции.\r\n- После Python source changes: `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml` и architecture hash guard; для CI-family drift применять `python -m scripts.engineering.qa refresh-ci-drift-families`, не budget ratchet.\r\n- При docs link/header changes: `python -m scripts.docs generate-cleanup-inventory --update`, затем `--check` и `python -m scripts.docs check-links`.\r\n- `git diff --check`; `python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`; runtime mirror parity N/A, пока runtime sources не меняются.\r\n- Перед live mutation сохранить Delta versions и immutable input identities; rollback кода не восстанавливает данные. Restore проверять counts и историческими строками.\r\n- Публикация PR/evidence, интеграция, повторная SHA-bound приёмка и обновление issue checklist предшествуют закрытию. `DEGRADED` и billing-blocked CI не обозначать PASS/ADMIT.\r\n\r\n",
+    "title": "[RF-006] Проверить chembl_baseline и chembl_core с limit 1000 и закрыть изменение",
+    "updatedAt": "2026-10-03T23:48:11Z",
+    "body_sha256": "c55f41b3a726ccbcbf0697beda9553a4eec5d17f61ba14f1449f5491d2d19fa7",
+    "criteria": [
+      {
+        "ordinal": 1,
+        "checked": true,
+        "text": "Оба workflow выполняются с фактическим limit=1000 и явным новым режимом."
+      },
+      {
+        "ordinal": 2,
+        "checked": true,
+        "text": "Default safety regressions проходят."
+      },
+      {
+        "ordinal": 3,
+        "checked": true,
+        "text": "Удаление соответствует закреплённым снимкам, evidence полное и source-bound."
+      },
+      {
+        "ordinal": 4,
+        "checked": true,
+        "text": "Все проверки/пропуски и существующие посторонние failures перечислены честно."
+      },
+      {
+        "ordinal": 5,
+        "checked": true,
+        "text": "Закрытие этой задачи не закрывает composites replay или кампанию 100000 запусков."
+      },
+      {
+        "ordinal": 6,
+        "checked": true,
+        "text": "`tests/integration/workflow/test_selected_snapshot_reconciliation.py` — Включить реальные Delta сценарии и default regressions в финальную selection."
+      },
+      {
+        "ordinal": 7,
+        "checked": true,
+        "text": "`tests/unit/application/workflow/test_selected_snapshot_contracts.py` — Включить CLI/config/resume/snapshot identity regressions; не ослаблять assertions ради прохождения."
+      },
+      {
+        "ordinal": 8,
+        "checked": true,
+        "text": "`docs/05-operations/runbooks/bounded-pipeline-smoke.md` — Зафиксировать окончательные invocation, isolated roots, restore procedure и ограничение single writer."
+      },
+      {
+        "ordinal": 9,
+        "checked": true,
+        "text": "`reports/quality/module-coverage-inventory.json` — После source changes обновить source_tree_sha256 canonical report-module-coverage; исторические coverage values не выдавать за новые measurements."
+      },
+      {
+        "ordinal": 10,
+        "checked": true,
+        "text": "`docs/reports/generated/documentation-cleanup-inventory.json` — При изменении docs links/headers обновить вместе с Markdown pair canonical generator."
+      },
+      {
+        "ordinal": 11,
+        "checked": true,
+        "text": "`docs/reports/generated/documentation-cleanup-inventory.md` — Проверить parity с JSON после canonical update."
+      },
+      {
+        "ordinal": 12,
+        "checked": true,
+        "text": "`reports/quality/debt-governance-gates.json` — Обновить применимые checks canonical reporter после source integration; budgets/thresholds/exemptions не повышать."
+      },
+      {
+        "ordinal": 13,
+        "checked": true,
+        "text": "`reports/quality/debt-governance-gates.md` — Синхронизировать generated pair на том же SHA."
+      },
+      {
+        "ordinal": 14,
+        "checked": true,
+        "text": "`reports/quality/architecture-debt-remote-main-baseline.json` — Привязать remote-main evidence canonical CI-family refresh при необходимости; синхронизировать Markdown pair."
+      },
+      {
+        "ordinal": 15,
+        "checked": true,
+        "text": "`reports/quality/architecture-debt-remote-main-baseline.md` — Не выбирать конфликтующий hash вручную; проверить canonical freshness."
+      }
+    ]
+  }
+]

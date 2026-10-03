@@ -1,0 +1,12 @@
+{
+  "bundle": "E:\\github\\bda-fk-selected-snapshot-11865\\reports\\quality\\proof-or-stop\\fk-11865-final-6a7f2e7-all-seven-done-independent\\bundle.json",
+  "bundle_digest": "1c94857bcebceb62b51693260088066c93832a23ffeff47e027fe5531ef428c5",
+  "claim": "done",
+  "claim_qualified": true,
+  "degradations": [],
+  "errors": [],
+  "exit_code": 0,
+  "outcome": "ADMIT",
+  "run_id": "fk-11865-final-6a7f2e7-all-seven-done-independent",
+  "schema_version": 1
+}
