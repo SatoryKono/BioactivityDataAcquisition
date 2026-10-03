@@ -44,7 +44,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--bind-host",
         default=DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST,
-        help="Listen address for the detached backend (default 0.0.0.0 for Docker/Grafana).",
+        help="Listen address for the detached backend (default 127.0.0.1 for local-only access).",
     )
     parser.add_argument(
         "--probe-host",

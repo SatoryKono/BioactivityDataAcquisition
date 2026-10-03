@@ -182,7 +182,7 @@ def test_ensure_backend_starts_detached_process_when_probe_fails() -> None:
     assert result.backend_available is True
     assert result.pid == 321
     assert result.command == ("python", "-m", "bioetl")
-    start.assert_called_once_with(bind_host="0.0.0.0", port=8082)
+    start.assert_called_once_with(bind_host="127.0.0.1", port=8082)
     wait.assert_called_once()
     wait_required.assert_called_once()
     info.assert_called_once()
@@ -459,7 +459,7 @@ def test_start_detached_quarantine_backend_sets_repo_cwd_and_env() -> None:
         "8081",
     ]
     assert isinstance(kwargs, dict)
-    assert str(kwargs["cwd"]).endswith("BioactivityDataAcquisition2")
+    assert str(kwargs["cwd"]).endswith("BioactivityDataAcquisition")
     assert "env" in kwargs
     assert "stdout" in kwargs
     assert "stderr" in kwargs

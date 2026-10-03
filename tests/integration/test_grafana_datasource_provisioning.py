@@ -34,7 +34,7 @@ def test_quarantine_explorer_backend_contract_is_documented() -> None:
     readme = Path("grafana/README.md").read_text(encoding="utf-8")
     env_example = Path(".env.example").read_text(encoding="utf-8")
 
-    assert "bioetl quarantine serve --host 0.0.0.0 --port 8081" in readme
+    assert "bioetl quarantine serve --host 127.0.0.1 --port 8081" in readme
     assert "dedicated long-lived BioETL HTTP" in readme
     assert "compatibility entrypoint" in readme
     assert (
@@ -42,18 +42,18 @@ def test_quarantine_explorer_backend_contract_is_documented() -> None:
     )
 
 
-def test_quarantine_explorer_compose_uses_host_gateway_backend() -> None:
-    """Grafana must resolve the Quarantine Explorer backend through host-gateway by default."""
+def test_quarantine_explorer_compose_uses_internal_backend() -> None:
+    """Grafana must resolve the Quarantine Explorer backend on the monitoring network by default."""
     monitoring = _load_monitoring_compose()
     grafana = monitoring["services"]["grafana"]
     root = yaml.safe_load(Path("docker-compose.yml").read_text(encoding="utf-8"))
     bioetl = root["services"]["bioetl"]
 
     assert (
-        "BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://host.docker.internal:8081}"
+        "BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://quarantine-explorer:8081}"
         in grafana["environment"]
     )
-    assert "host.docker.internal:host-gateway" in grafana["extra_hosts"]
+    assert "quarantine-explorer:8081" in " ".join(grafana["environment"])
     assert bioetl["command"] == [
         "quarantine",
         "serve",
@@ -72,13 +72,13 @@ def test_grafana_compose_installs_infinity_plugin() -> None:
     assert "GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource" in content
 
 
-def test_quarantine_explorer_defaults_to_host_gateway_backend() -> None:
-    """Monitoring compose should route explorer traffic through host-gateway by default."""
+def test_quarantine_explorer_defaults_to_internal_backend() -> None:
+    """Monitoring compose should keep explorer traffic on the internal network by default."""
     compose_path = Path("docker-compose.monitoring.yml")
     content = compose_path.read_text(encoding="utf-8")
     monitoring = _load_monitoring_compose()
     assert (
-        "BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://host.docker.internal:8081}"
+        "BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://quarantine-explorer:8081}"
         in content
     )
     assert monitoring["networks"]["monitoring"]["name"] == "bioetl-monitoring"
