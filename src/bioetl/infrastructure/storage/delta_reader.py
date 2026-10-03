@@ -84,6 +84,9 @@ class DeltaReader:
         table_path: str,
         columns: list[str] | None = None,
         limit: int | None = None,
+        *,
+        snapshot_version: int | None = None,
+        snapshot_table_id: str | None = None,
     ) -> pa.Table:
         """Read data from a Delta Lake table.
 
@@ -91,6 +94,8 @@ class DeltaReader:
             table_path: Path to the Delta table (relative or absolute).
             columns: Optional list of columns to read (projection pushdown).
             limit: Optional maximum number of rows to read.
+            snapshot_version: Exact current version required by a producer pin.
+            snapshot_table_id: Table identity required with snapshot_version.
 
         Returns:
             PyArrow Table with the requested data.
@@ -99,6 +104,8 @@ class DeltaReader:
             FileNotFoundError: If table does not exist.
         """
         resolved_path = self._resolve_path(table_path)
+        if (snapshot_version is None) != (snapshot_table_id is None):
+            raise ValueError("pinned Delta reads require version and table identity")
 
         def _read() -> pa.Table:
             try:
@@ -107,6 +114,14 @@ class DeltaReader:
                 raise FileNotFoundError(
                     f"Delta table not found: {resolved_path}"
                 ) from e
+
+            if snapshot_version is not None:
+                if (
+                    dt.version() != snapshot_version
+                    or str(dt.metadata().id) != snapshot_table_id
+                ):
+                    raise ValueError("reference_cohort producer snapshot drift")
+                dt = DeltaTable(str(resolved_path), version=snapshot_version)
 
             scanner = dt.to_pyarrow_dataset().scanner(columns=columns)
             if limit is not None:

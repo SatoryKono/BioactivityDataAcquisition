@@ -109,6 +109,7 @@ async def execute_pipeline_step(
     ]
     | None = None,
     upstream_outputs: Mapping[str, object] | None = None,
+    capture_producer_snapshot: bool = False,
 ) -> WorkflowStepExecutionResult:
     """Run one pipeline step and project step-level metrics."""
     if step_started_callback is not None:
@@ -126,24 +127,21 @@ async def execute_pipeline_step(
             workflow_name=workflow_name,
             workflow_step_id=step.step_id,
         )
-        if step.run_options.reconciliation_mode == "selected-snapshot":
+        capture_required = (
+            capture_producer_snapshot
+            or step.run_options.reconciliation_mode == "selected-snapshot"
+        )
+        if capture_required:
             if snapshot_reader is None:
-                raise ValueError(
-                    "selected-snapshot requires a producer snapshot reader"
-                )
+                raise ValueError("producer scope requires a snapshot reader")
             await snapshot_reader(step.pipeline_name, "")
         result = await pipeline_runner.run(
             step.pipeline_name,
             options=step_options,
         )
-        if (
-            result.is_success
-            and step.run_options.reconciliation_mode == "selected-snapshot"
-        ):
+        if result.is_success and capture_required:
             if snapshot_reader is None:
-                raise ValueError(
-                    "selected-snapshot requires a producer snapshot reader"
-                )
+                raise ValueError("producer scope requires a snapshot reader")
             snapshots = await snapshot_reader(step.pipeline_name, result.run_id)
             for snapshot in snapshots.values():
                 snapshot["limit"] = step.run_options.limit
