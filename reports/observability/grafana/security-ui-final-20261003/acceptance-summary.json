@@ -1,0 +1,85 @@
+{
+  "scope": [
+    "11888",
+    "11889",
+    "11895"
+  ],
+  "branch": "codex/grafana-security-ui-final-20261003",
+  "base_sha": "1a3cb433b3e02f5cf09d796627a6f07e75c53e8e",
+  "source_tree_sha256": "6095f461e4e6dfa03331a68a6e354305dc6d5038f7b9091b34b2e034634b2870",
+  "artifact_sha256": {
+    "grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch": "66c5f4d7cf91284963fa35876a56c70c6ba0acc0f0f9c0829612ee08734ca269",
+    "grafana/tooling/router-v7-bridge/grafana-canvas-query-error.patch": "b70dc7ed11637b43764fccf7c9680d8616ea37c8be71ee461f39c2cc9519176f",
+    "grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch": "c177d3f3663431138d3fd12a31692b8cf21471f96730ea749c3eec0e329200dd",
+    "grafana/tooling/router-v7-bridge/index.mjs": "eb4c404b42c0af3f3d1715ad4b191bd9e73564873b0fb650ba807c56ab580c3c",
+    "grafana/tooling/router-v7-bridge/package-lock.json": "01a8eaf5b0e18140f2f79a9146124a2b4826f729f04ababc2ca9f41c08343bde",
+    "grafana/plugins/bioetl-scenes-app/package-lock.json": "e086743153b13e780dd7adc3b4327a84095be61318ed6f1aac961da2f8063f14",
+    "grafana/plugins/bioetl-scenes-app/dist/module.js": "e2de531920743355b25abe89c68d12c224ce3b14ff51e331a6b2fa0e4a020b2f",
+    "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "da40dad1e7f6c8f4f0ccd7225bedb6728ad2ba69d9c8b757986ab7ba1315bc07",
+    "grafana/plugins/bioetl-selectorshell-panel/dist/module.js": "147c463a1c3d1707a8db6f78064d1607cd5cf6bb80934b5050f8121338c48464",
+    "grafana/dashboards/bioetl-overview-v2.json": "24c906ac9f2a0601b0a3d3175334c46bb7f674ff5a68250a6cc9d050089c139c",
+    "grafana/dashboards/bioetl-run-explorer-v1.json": "caa422d91c7fa4f9c5d3514b9882c7f35a37a4326f7aa01242f14f8966f15988",
+    "grafana/tooling/router-v7-bridge/workflow-canvas-acceptance.patch": "7218966ea2566f064aa26a82f9ba9fae2192290180e6576ce1b0b1ef0b572778"
+  },
+  "browser_image_sha256": {
+    "http-query-error.jpg": "87cf46822d9c21421bf1601e51c5dbf9515738a9b5a43f2423d0f4419cb644b3",
+    "http-recovered.jpg": "b9e7422deacdbc2654e82fac71b930e269a89e109499fd27598ca2f87c01a347",
+    "missing-report-unknown.jpg": "984c64402884cca15125d0ed6efb269f0d59be7fd19349194cea0b0aa0f4a548",
+    "scenes-navigation.jpg": "0444baff7e109d4c4694e16400e55a861c9b2c0f4c6b0fb1fd3b110988f17b6e",
+    "select-run.jpg": "3718f41e941f040476fc0763c111d9b30e6b5cc21f162c1c018bf4e311c38631",
+    "selected-run-warn.jpg": "64f2c63d75c53cd766f7cc5c05562ef9c21dd4ff10b2815aedf947bc17c96128",
+    "tree-missing-narrow-dashboard.jpg": "e0747276a348048211f25bbd579ea77954e7c891af8baf99c584c87afa778306",
+    "tree-missing.jpg": "06dd8fa20e31159fdf633676f3d49f91890f2d4b2ee3b1dd717d44daa24c4354"
+  },
+  "host": {
+    "upstream_sha": "6193dc03311b631b9727b560d24369e683dc396e",
+    "base_image_digest": "grafana/grafana@sha256:d84563330dc9d2fd2bc096d0fb96021b5319c75bf6ed555566709998e823dec4",
+    "isolated_container": "bioetl-grafana-security-ui-final-20261003",
+    "status": "running",
+    "delivery": "Candidate frontend overlays; shared production host remains unchanged"
+  },
+  "browser": {
+    "normal_viewport": [
+      1280,
+      720
+    ],
+    "narrow_viewport": [
+      1024,
+      768
+    ],
+    "checks": {
+      "no_run": "SELECT RUN / Choose a run",
+      "missing_report": "UNKNOWN / excluded UNKNOWN",
+      "missing_tree": "TREE_MISSING visible at narrow full-dashboard viewport; clientWidth=scrollWidth=103",
+      "real_saved_run": "excluded 14% from persisted Bronze=100, Silver=100, Gold=86; saved verdict remains OK",
+      "http_failure": "QUERY ERROR preserves real connection-refused datasource error and hides stale success/missing fields",
+      "http_recovery": "excluded 14% restored after Ops HTTP recovery",
+      "scenes_routes": 6,
+      "scenes_link_back_forward": "PASS"
+    },
+    "limitations": [
+      "Selector context could not resolve the copied pipeline run because its control-plane manifest was unavailable",
+      "Host-level malicious navigation fixtures and constructor injection acceptance are not complete",
+      "This is not production delivery or full catalog source-identity acceptance"
+    ]
+  },
+  "blocking_acceptance": [
+    "Plugin audits: 31 High package entries each, one unique GHSA-vfj7-8cjw-p6xm; no advisory suppression",
+    "CI account billing lock; exact published HEAD must be checked",
+    "Baseline governance: 337 active scripts vs cap 336",
+    "Baseline composition_bootstrap_runtime: one >=250 LOC file vs budget zero",
+    "Proof-or-Stop must not admit done/ready_to_merge while required checks fail",
+    "Host migration, rollout backup, SBOM and post-merge delivery acceptance remain pending",
+    "Existing root-env GitHub tokens lack workflow scope. The tested workflow change is retained as workflow-canvas-acceptance.patch and is not active in this PR."
+  ],
+  "closure_status": "BLOCKED; keep all three issues open",
+  "tests": {
+    "tests": 292,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exit_code": 0
+  },
+  "docs_verify_exit_code": 0,
+  "runtime_ai_mirror": "Not applicable: no AI runtime source edits"
+}

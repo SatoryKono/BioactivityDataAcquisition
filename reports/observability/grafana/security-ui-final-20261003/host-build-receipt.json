@@ -1,0 +1,21 @@
+{
+  "container": "bioetl-router-v7-canvas-build-v5-20261003",
+  "exit_code": 0,
+  "oom_killed": false,
+  "canvas_tests_passed": 2,
+  "canvas_tests_skipped": 37,
+  "compilers": [
+    {
+      "name": "grafana",
+      "errors": 0,
+      "warnings": 2
+    },
+    {
+      "name": "swagger",
+      "errors": 0,
+      "warnings": 2
+    }
+  ],
+  "upstream_sha": "6193dc03311b631b9727b560d24369e683dc396e",
+  "runtime_acceptance": "pending"
+}

@@ -131,6 +131,7 @@ def unavailable_status(
             }
         ],
         "provider_options": [],
+        "quality_evidence": {"pipeline": pipeline, "funnel": None},
         "rows": rows,
         "trust": [trust],
         **_readiness_fields(
@@ -249,6 +250,10 @@ def _present_status(
         "presentation_domains": presentation_rows(rows),
         "provider_checks": provider_check_rows(report),
         "provider_options": provider_selector_options(report),
+        "quality_evidence": {
+            "pipeline": summary["pipeline"],
+            "funnel": report.get("funnel"),
+        },
         "rows": rows,
         "trust": [trust],
         **readiness_fields,

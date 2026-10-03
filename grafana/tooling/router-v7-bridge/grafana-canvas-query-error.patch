@@ -1,0 +1,51 @@
+diff --git a/public/app/plugins/panel/canvas/CanvasPanel.tsx b/public/app/plugins/panel/canvas/CanvasPanel.tsx
+--- a/public/app/plugins/panel/canvas/CanvasPanel.tsx
++++ b/public/app/plugins/panel/canvas/CanvasPanel.tsx
+@@ -5,4 +5,4 @@
+-import { type PanelProps } from '@grafana/data';
++import { LoadingState, type PanelProps } from '@grafana/data';
+ import { locationService } from '@grafana/runtime';
+-import { type PanelContext, PanelContextRoot } from '@grafana/ui';
++import { Alert, type PanelContext, PanelContextRoot } from '@grafana/ui';
+ import { type CanvasFrameOptions } from 'app/features/canvas/frame';
+@@ -340,2 +340,10 @@
+   render() {
++    // Failed queries must not render missing-field placeholders or stale success.
++    if (this.props.data.state === LoadingState.Error || this.props.data.error) {
++      return (
++        <Alert severity="error" title="QUERY ERROR">
++          {this.props.data.error?.message ?? 'Unable to load panel data'}
++        </Alert>
++      );
++    }
+     return (
+diff --git a/public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx b/public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx
+--- a/public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx
++++ b/public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx
+@@ -634,2 +634,26 @@
+   };
++  it('shows a query error instead of missing fields or stale successful data', () => {
++    const failedData = {
++      series: [successIconFrame],
++      state: LoadingState.Error,
++      timeRange: getDefaultTimeRange(),
++      error: { message: 'HTTP 503 local test failure' },
++    };
++    const view = setUp({ data: failedData });
++    expect(screen.getByText('QUERY ERROR')).toBeVisible();
++    expect(screen.getByText('HTTP 503 local test failure')).toBeVisible();
++    expect(screen.queryByTestId('canvas-scene')).not.toBeInTheDocument();
++    expect(screen.queryByText('Field not found')).not.toBeInTheDocument();
++    view.rerender(canvasPanelElement());
++    expect(screen.queryByText('QUERY ERROR')).not.toBeInTheDocument();
++    expect(screen.getByTestId('canvas-scene')).toBeVisible();
++  });
++
++  it('shows a query error even when the datasource supplies no message', () => {
++    setUp({ data: { series: [], state: LoadingState.Error, timeRange: getDefaultTimeRange() } });
++    expect(screen.getByText('QUERY ERROR')).toBeVisible();
++    expect(screen.getByText('Unable to load panel data')).toBeVisible();
++    expect(screen.queryByText('Field not found')).not.toBeInTheDocument();
++  });
++
+   const setUpWithPanelContext = (
