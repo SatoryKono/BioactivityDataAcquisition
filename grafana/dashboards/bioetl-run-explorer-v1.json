@@ -576,7 +576,7 @@
             "properties": [
               {
                 "id": "custom.minWidth",
-                "value": 50
+                "value": 180
               },
               {
                 "id": "custom.inspect",
@@ -584,7 +584,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 85
+                "value": 180
               },
               {
                 "id": "links",

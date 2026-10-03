@@ -7,7 +7,7 @@
 - warn_count: 0
 - fail_count: 1
 - release_gate_status: `failing`
-- architecture_quality_scorecard_integral_score: `9.47`
+- architecture_quality_scorecard_integral_score: `9.39`
 - architecture_quality_scorecard_interpretation: `good_targeted_improvements`
 
 | gate | status | metric | current | limit | source |
@@ -17,11 +17,11 @@
 | `debt_budget_growth_policy` | `pass` | `budget_growth_allowed` | `False` | `False` | `configs/quality/debt_scorecard.yaml` |
 | `flaky_test_review_input_preflight` | `pass` | `required_json_input` | `available_valid_object` | `available_valid_object` | `reports/quality/flaky-test-burndown-review.json` |
 | `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `not_evaluated_without_changed_from_ref` | `0` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f` | `5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f` | `reports/quality/module-coverage-inventory.json` |
-| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2548, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f'}` | `{'source_module_count': 2548, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '5115449e8c670f5393a58c7009693f666f0eff818fbaa80e0e9ea63f9827ae0f'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
+| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `6095f461e4e6dfa03331a68a6e354305dc6d5038f7b9091b34b2e034634b2870` | `6095f461e4e6dfa03331a68a6e354305dc6d5038f7b9091b34b2e034634b2870` | `reports/quality/module-coverage-inventory.json` |
+| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2548, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '6095f461e4e6dfa03331a68a6e354305dc6d5038f7b9091b34b2e034634b2870'}` | `{'source_module_count': 2548, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '6095f461e4e6dfa03331a68a6e354305dc6d5038f7b9091b34b2e034634b2870'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
-| `hotspot_family_baseline_budget_warnings` | `pass` | `budget_warnings` | `0` | `0` | `reports/quality/hotspot-family-baseline.json` |
+| `hotspot_family_baseline_budget_warnings` | `fail` | `budget_warnings` | `1` | `0` | `reports/quality/hotspot-family-baseline.json` |
 | `compatibility_twin_pairs` | `pass` | `twin_pair_count` | `0` | `0` | `reports/quality/compatibility-importer-census.json` |
 | `retained_public_export_facade_growth` | `pass` | `retained_public_export_facade_count` | `3` | `3` | `configs/quality/debt_scorecard.yaml#sanctioned_public_entrypoint_governance.metrics.public_export_facade_count.max_count` |
 | `sanctioned_public_entrypoint_growth` | `pass` | `retained_entrypoint_count` | `12` | `12` | `configs/quality/debt_scorecard.yaml#sanctioned_public_entrypoint_governance.metrics.public_entrypoint_count.max_count` |
@@ -56,5 +56,5 @@
 | `observability_touched_metric_inventory_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_touched_metric_review_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_review.json` |
 | `adr_enforcement_blocking_gaps` | `pass` | `blocking_gap_count` | `0` | `0` | `reports/quality/adr-enforcement-matrix.json` |
-| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `9f0b11fd1221365549b7f629f7668b74b5a706071ef3fdc3fc9448aa4147ce50` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
-| `generated_artifact_drift` | `fail` | `stale_artifact_count` | `{'count': 3, 'artifacts': ['adr_enforcement_matrix', 'hotspot_family_baseline', 'remote_main_baseline']}` | `0` | `reports/quality/*.json` |
+| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `62073cb9a0b74d8a388da4c365b0cf1722ea4d23bcfebaf0b426e5aac1fb2f03` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
+| `generated_artifact_drift` | `pass` | `stale_artifact_count` | `{'count': 0, 'artifacts': []}` | `0` | `reports/quality/*.json` |

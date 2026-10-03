@@ -43,14 +43,13 @@ export const SimplePanel: React.FC<Props> = ({ options, replaceVariables }) => {
   const [result, setResult] = useState<SelectorContextResult | null>(null);
   const appliedSignatureRef = useRef<string>('');
 
+  const workflow = replaceVariables('${workflow:text}');
+  const pipeline = replaceVariables('${pipeline:text}');
+  const runType = replaceVariables('${run_type:text}');
+  const runId = replaceVariables('${run_id:text}');
   const current = useMemo<VisibleSelectorState>(
-    () => ({
-      workflow: replaceVariables('${workflow:text}'),
-      pipeline: replaceVariables('${pipeline:text}'),
-      runType: replaceVariables('${run_type:text}'),
-      runId: replaceVariables('${run_id:text}'),
-    }),
-    [replaceVariables]
+    () => ({ workflow, pipeline, runType, runId }),
+    [workflow, pipeline, runType, runId]
   );
 
   const url = buildSelectorContextUrl(mergedOptions.selectorContextPath, {

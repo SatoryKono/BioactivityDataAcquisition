@@ -360,6 +360,10 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
     target = deepcopy(stages["targets"][1])
     target.update(
         refId="A",
+        url=(
+            "/ops/observability/selected-run-status?pipeline=${pipeline:percentencode}"
+            "&run_id=${run_id:percentencode}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ),
         root_selector=expression,
         uql='parse-json | jsonata "' + expression.replace('"', '\\"') + '"',
     )

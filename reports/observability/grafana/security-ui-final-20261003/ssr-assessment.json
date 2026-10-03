@@ -1,0 +1,32 @@
+{
+  "upstream_sha": "6193dc03311b631b9727b560d24369e683dc396e",
+  "scope": "Pinned browser bootstrap and route wrapper only",
+  "files": [
+    {
+      "path": "public/app/app.ts",
+      "source_url": "https://raw.githubusercontent.com/grafana/grafana/6193dc03311b631b9727b560d24369e683dc396e/public/app/app.ts",
+      "sha256": "fddd518c5005bb504b66633ffffeb631dc884c6e06032bb45a1d855f636dd605",
+      "markers": {
+        "createRoot": [
+          9,
+          369
+        ],
+        "hydrateRoot": [],
+        "hydrationData": [],
+        "StaticRouter": []
+      }
+    },
+    {
+      "path": "public/app/routes/RoutesWrapper.tsx",
+      "source_url": "https://raw.githubusercontent.com/grafana/grafana/6193dc03311b631b9727b560d24369e683dc396e/public/app/routes/RoutesWrapper.tsx",
+      "sha256": "3fe23c3c20c87a6a516490028c1a41c2996cb33352da5c0b55632070b2986c20",
+      "markers": {
+        "createRoot": [],
+        "hydrateRoot": [],
+        "hydrationData": [],
+        "StaticRouter": []
+      }
+    }
+  ],
+  "assessment": "Browser bootstrap uses createRoot. No hydrateRoot/hydrationData/StaticRouter markers in these two files. This bounded client-path assessment does not prove host-wide SSR unreachability or constructor-injection fixture rejection. Those acceptance requirements remain pending."
+}
