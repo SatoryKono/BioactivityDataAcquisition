@@ -1,5 +1,7 @@
 FROM grafana/grafana@sha256:d84563330dc9d2fd2bc096d0fb96021b5319c75bf6ed555566709998e823dec4
 USER root
+# COPY merges existing directories; remove obsolete base frontend assets first.
+RUN rm -rf /usr/share/grafana/public/build
 COPY --chown=root:root host-build/ /usr/share/grafana/public/build/
 # The managed data volume masks /var/lib/grafana; keep shipped plugins in the
 # host's bundled-plugin directory so the complete artifact set survives it.
