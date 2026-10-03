@@ -11,6 +11,7 @@ const scopes = [
   '/usr/share/grafana/data/plugins-bundled/bioetl-selectorshell-panel',
 ];
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
+const baseImage = 'grafana/grafana@sha256:d84563330dc9d2fd2bc096d0fb96021b5319c75bf6ed555566709998e823dec4';
 
 // Fixed trusted executable locations; do not resolve commands through caller PATH.
 const docker = process.platform === 'win32'
@@ -18,7 +19,7 @@ const docker = process.platform === 'win32'
 
 export function validateImage(image) {
   assert.ok(typeof image === 'string' && !/\s/.test(image) && (
-    image === 'bioetl-router-host:acceptance' || /^sha256:[0-9a-f]{64}$/.test(image) ||
+    image === baseImage || image === 'bioetl-router-host:acceptance' || /^sha256:[0-9a-f]{64}$/.test(image) ||
     /^satorykono\/bioetl-grafana-router7-canvas@sha256:[0-9a-f]{64}$/.test(image)
   ), 'Unsupported image reference');
   return image;
@@ -44,7 +45,7 @@ function writeReceipt(receipt) {
   finally { closeSync(fd); }
 }
 
-export function verifyImages(built, manifest, inspect, fingerprint) {
+export function verifyImages(built, manifest, inspect, fingerprint, filesystem, base) {
   validateImage(built);
   validateImage(manifest.image);
   assert.match(manifest.image, /^satorykono\/bioetl-grafana-router7-canvas@sha256:[0-9a-f]{64}$/);
@@ -55,12 +56,22 @@ export function verifyImages(built, manifest, inspect, fingerprint) {
   for (const key of ['Architecture', 'Os', 'Config']) {
     assert.deepEqual(actual[key], expected[key], `Image configuration mismatch: ${key}`);
   }
-  // Docker verifies layer digests on pull. Compare the complete ordered diff-ID
-  // chain before running any executable from either image, including hash tools.
-  assert.equal(actual.RootFS?.Type, 'layers', 'Built image must expose layer digests');
-  assert.ok(actual.RootFS.Layers?.length > 0, 'Built image layers must not be empty');
-  for (const layer of actual.RootFS.Layers) assert.match(layer, /^sha256:[0-9a-f]{64}$/);
-  assert.deepEqual(actual.RootFS, expected.RootFS, 'Complete image RootFS mismatch');
+  for (const image of [actual, expected]) {
+    assert.equal(image.RootFS?.Type, 'layers', 'Image must expose layer digests');
+    assert.ok(image.RootFS.Layers?.length > 0, 'Image layers must not be empty');
+    for (const layer of image.RootFS.Layers) assert.match(layer, /^sha256:[0-9a-f]{64}$/);
+  }
+  assert.equal(base?.RootFS?.Type, 'layers', 'Trusted base layers are required');
+  assert.ok(base.RootFS.Layers?.length > 0, 'Trusted base must not be empty');
+  for (const image of [actual, expected]) {
+    assert.deepEqual(image.RootFS.Layers.slice(0, base.RootFS.Layers.length), base.RootFS.Layers,
+      'Trusted base layer prefix mismatch');
+  }
+  // Independent COPY/RUN tar metadata changes diff IDs. Compare all exported
+  // paths and contents using host tools before running any image executable.
+  const rootfs = filesystem(built);
+  assert.match(rootfs, /^[0-9a-f]{64}$/);
+  assert.equal(rootfs, filesystem(manifest.image), 'Complete image filesystem mismatch');
   const artifacts = {};
   for (const scope of scopes) {
     const produced = fingerprint(built, scope);
@@ -76,8 +87,15 @@ export function verifyImages(built, manifest, inspect, fingerprint) {
   return {
     status: 'PASS', built_image_config_digest: actual.Id,
     declared_image: manifest.image, declared_image_config_digest: expected.Id,
-    rootfs: actual.RootFS, artifacts,
+    rootfs_sha256: rootfs, built_layers: actual.RootFS.Layers, declared_layers: expected.RootFS.Layers, artifacts,
   };
+}
+
+function filesystem(image) {
+  const python = process.platform === 'win32'
+    ? 'E:/github/BioactivityDataAcquisition/.venv-win/Scripts/python.exe' : '/usr/bin/python3';
+  return execFileSync(python, [fileURLToPath(new URL('./fingerprint-rootfs.py', import.meta.url)),
+    validateImage(image)], { encoding: 'utf8' }).trim();
 }
 
 function inspect(image) {
@@ -102,7 +120,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const recipe = readFileSync(new URL('./Dockerfile.host', import.meta.url));
   assert.equal(sha256(recipe), manifest.artifact_sha256['grafana/tooling/router-v7-bridge/Dockerfile.host']);
   const built = parseArguments(process.argv.slice(2));
-  const receipt = verifyImages(built, manifest, inspect, fingerprint);
+  const receipt = verifyImages(built, manifest, inspect, fingerprint, filesystem, inspect(baseImage));
   writeReceipt(receipt);
   console.log('Built host image matches the declared image artifact set');
 }

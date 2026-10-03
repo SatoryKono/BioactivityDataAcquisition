@@ -48,6 +48,9 @@ jobs:
         run: node --test runtime-probe/module.test.mjs
       - name: Test image identity and artifact parity guard
         run: node --test verify-host-image.test.mjs
+      - name: Test trusted rootfs timestamp normalization
+        working-directory: grafana/tooling/router-v7-bridge
+        run: /usr/bin/python3 fingerprint-rootfs.test.py
       - name: Check exported TypeScript API
         run: npm run typecheck
       - name: Build browser candidate

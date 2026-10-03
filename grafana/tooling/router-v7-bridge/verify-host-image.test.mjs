@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { parseArguments, validateImage, verifyImages } from './verify-host-image.mjs';
+import { parseArguments, validateImage, verifyImages as verifyImagesImpl } from './verify-host-image.mjs';
 
 const digest = 'a'.repeat(64);
+const verifyImages = (built, manifest, inspect, fingerprint, filesystem = () => digest,
+  base = { RootFS: { Type: 'layers', Layers: ['sha256:' + digest] } }) =>
+  verifyImagesImpl(built, manifest, inspect, fingerprint, filesystem, base);
 const manifest = {
   image: 'satorykono/bioetl-grafana-router7-canvas@sha256:' + digest,
   artifact_sha256: Object.fromEntries(['bioetl-scenes-app', 'bioetl-selectorshell-panel']
@@ -67,13 +70,19 @@ test('manifest argument injection is rejected before invoking Docker callbacks',
 });
 
 
-test('changed backend, entrypoint or system-library layers fail before image tools execute', () => {
-  for (const file of ['/usr/share/grafana/bin/grafana', '/run.sh', '/lib/libc.so']) {
-    assert.throws(() => verifyImages('bioetl-router-host:acceptance', manifest, (image) => ({
-      ...inspect(image),
-      RootFS: { Type: 'layers', Layers: ['sha256:' + (image === manifest.image ? 'd' : 'a').repeat(64)] },
-    }), () => assert.fail('Unverified image tools must not execute: ' + file)), /Complete image RootFS mismatch/);
-  }
+test('different layer timestamps can pass with identical complete filesystem contents', () => {
+  const receipt = verifyImages('bioetl-router-host:acceptance', manifest, (image) => ({
+    ...inspect(image), RootFS: { Type: 'layers', Layers: ['sha256:' + digest, 'sha256:' + (image === manifest.image ? 'd' : 'a').repeat(64)] },
+  }), fingerprint);
+  assert.equal(receipt.status, 'PASS');
+  assert.equal(receipt.rootfs_sha256, digest);
+  assert.notDeepEqual(receipt.built_layers, receipt.declared_layers);
+});
+
+test('changed complete filesystem fails before any image tools execute', () => {
+  assert.throws(() => verifyImages('bioetl-router-host:acceptance', manifest, inspect,
+    () => assert.fail('Unverified image tools must not execute'),
+    (image) => (image === manifest.image ? 'd' : 'a').repeat(64)), /Complete image filesystem mismatch/);
 });
 
 test('missing or empty rootfs evidence cannot pass', () => {
@@ -81,4 +90,10 @@ test('missing or empty rootfs evidence cannot pass', () => {
     assert.throws(() => verifyImages('bioetl-router-host:acceptance', manifest,
       (image) => ({ ...inspect(image), RootFS }), fingerprint), /layer/);
   }
+});
+
+test('an unrelated base cannot pass complete content parity', () => {
+  assert.throws(() => verifyImages('bioetl-router-host:acceptance', manifest, inspect, fingerprint,
+    () => assert.fail('Untrusted base must fail before export'),
+    { RootFS: { Type: 'layers', Layers: ['sha256:' + 'd'.repeat(64)] } }), /Trusted base layer prefix mismatch/);
 });
