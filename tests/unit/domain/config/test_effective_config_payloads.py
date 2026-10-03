@@ -1,11 +1,14 @@
 """Persist selected reconciliation overrides with isolated execution roots."""
 
+import pytest
+
 from bioetl.domain.config.effective_config_payloads import _runtime_overrides_payload
 from bioetl.domain.control_plane.effective_config_artifact import (
     RuntimeOverrideSnapshot,
 )
 
 
+@pytest.mark.unit
 def test_selected_mode_and_isolated_roots_survive_payload_projection():
     overrides = RuntimeOverrideSnapshot(
         cli_overrides={"reconciliation_mode": "selected-snapshot", "limit": 1000},

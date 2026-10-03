@@ -48,7 +48,9 @@ def _node_eval(program: str) -> str:
     return result.stdout.strip()
 
 
-def test_navigation_matches_canonical_links_and_retains_focus_and_geometry_guards() -> None:
+def test_navigation_matches_canonical_links_and_retains_focus_and_geometry_guards() -> (
+    None
+):
     output = _node_eval(r"""
 const fs = require('fs');
 const {navigationValidationFromDom: validate, dashboardEntryFromPayload} = require(process.argv[1]);
@@ -79,6 +81,8 @@ global.getComputedStyle = () => ({outlineStyle:'solid',outlineWidth:'2px',
   outlineColor:focusVisible ? 'rgb(255,255,255)' : 'rgba(255,255,255,0)',boxShadow:'none'});
 const check = () => validate({expectedNavigationHtml:html});
 const good = check();
+const explicitCount = validate({expectedNavigationHtml:html,expectedLinkCount:entry.navigationLinkCount});
+const wrongCount = validate({expectedNavigationHtml:html,expectedLinkCount:entry.navigationLinkCount + 1});
 actual = canonical.slice(0,-1);
 const missing = check();
 actual = [...canonical, link('Extra dashboard','Extra')];
@@ -95,10 +99,12 @@ panelRect = {...rect,right:900};
 const overflow = check();
 panelRect = rect;
 const absentContract = validate();
-console.log(JSON.stringify({good,missing,extra,foreign,wrongTitle,invisibleFocus,overflow,absentContract}));
+console.log(JSON.stringify({good,explicitCount,wrongCount,missing,extra,foreign,wrongTitle,invisibleFocus,overflow,absentContract}));
 """)
     result = json.loads(output)
     assert result["good"]["status"] == "ok"
+    assert result["explicitCount"]["status"] == "ok"
+    assert result["wrongCount"]["status"] == "error"
     assert result["good"]["linkCount"] == result["good"]["expectedLinkCount"] == 4
     assert result["good"]["linkNames"] == result["good"]["expectedLinkNames"]
     for case in ("missing", "extra", "foreign", "wrongTitle", "absentContract"):

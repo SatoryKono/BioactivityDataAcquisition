@@ -1885,7 +1885,7 @@ function navigationValidationFromDom({expectedNavigationHtml = "", expectedLinkC
         !evidence.titleFound &&
         evidence.linkNamesPresent &&
         evidence.canonicalLinksMatch &&
-        evidence.linkCount === expectedLinkCount &&
+        evidence.linkCount === (expectedLinkCount ?? expectedLinks.length) &&
         evidence.contentInsidePanel &&
         evidence.linksInsidePanel &&
         evidence.linkTextFits &&

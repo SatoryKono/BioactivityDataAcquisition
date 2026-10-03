@@ -339,6 +339,7 @@ def test_canonical_relative_storage_paths_follow_isolated_data_root(tmp_path, la
     )
 
 
+@pytest.mark.unit
 def test_canonical_relative_csv_paths_follow_isolated_data_root(tmp_path):
     from bioetl.composition.factories.storage._context_resolution import (
         create_layer_exporters,
