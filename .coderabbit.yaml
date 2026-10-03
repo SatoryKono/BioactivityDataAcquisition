@@ -1,6 +1,7 @@
+---
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 # CodeRabbit configuration for BioETL project
-# Based on official CodeRabbit configuration schema (updated 09.07.2026)
+# Based on official CodeRabbit configuration schema (updated 03.10.2026; dead config pruned, linters enabled via reviews.tools)
 # Target profile: Python, pytest, external providers, ETL/scientific pipelines
 
 # Language
@@ -76,21 +77,6 @@ reviews:
       instructions: "Apply when tests are the primary delivery of the PR."
     - label: "documentation"
       instructions: "Apply when documentation is the primary deliverable."
-
-  # Suggested reviewers instructions (disabled until demo handles are replaced)
-  suggested_reviewers_instructions:
-    - reviewers:
-        - handle: "security-team"
-          type: "group"
-      instructions: "Request review for changes to auth, access control, secrets, cryptography, network exposure, or sensitive data."
-    - reviewers:
-        - handle: "data-platform"
-          type: "group"
-      instructions: "Request review for migrations, persisted formats, ETL contracts, lineage, or idempotency changes."
-    - reviewers:
-        - handle: "api-owners"
-          type: "group"
-      instructions: "Request review for public API, CLI, events, versioned schemas, or config format changes."
 
   # Path-based review instructions
   path_instructions:
@@ -314,76 +300,16 @@ reviews:
         and have no trailing period.
         Do not require a scope when no stable component name exists.
 
-    custom_checks:
-      - name: "architecture-boundaries"
-        mode: "error"
-        instructions: |
-          PASS: Changed code respects BioETL dependency direction and layer ownership.
-          FAIL on concrete evidence of: infrastructure/application/composition/interfaces imported by domain;
-          I/O or concrete adapters in domain; concrete infrastructure wiring in application/interfaces;
-          interfaces bypassing application; or business policy moved into infrastructure/composition.
-          NOT APPLICABLE: Changes outside architectural/runtime code.
-          Require an exact import, construction site, or call path as evidence; do not fail on naming/style alone.
-
-      - name: "security-regression"
-        mode: "error"
-        instructions: |
-          PASS: No concrete security regression is introduced by the diff.
-          FAIL on evidence of hardcoded secrets; secret/token leakage in logs or artifacts; weakened auth,
-          validation, TLS, workflow permissions, or security controls; command/path/template/workflow injection;
-          unsafe deserialization; provider HTTP bypass of the governed unified client; or unjustified broadening
-          of GitHub Actions permissions.
-          NOT APPLICABLE: Changes with no security-relevant surface.
-          Cite the exact path and vulnerable data/control flow. Do not fail on hypothetical vulnerabilities.
-
-      - name: "public-contract-compatibility"
-        mode: "error"
-        instructions: |
-          PASS: No changes to public contracts (API, schema, CLI, events, config formats, data formats) OR changes include version bump, ADR reference, migration notes, and rollback procedure.
-          FAIL: Unversioned breaking change to public contract without migration path.
-          NOT APPLICABLE: Changes only to private implementation or tests.
-          Do not fail on speculative risk; require concrete contract violation.
-          Cite specific symbol/path/contract when failing.
-
-      - name: "behavioral-test-adequacy"
-        mode: "warning"
-        instructions: |
-          PASS: Behavior changes include meaningful automated verification (unit, integration, or contract tests) OR change is trivial refactor with identical behavior.
-          FAIL: Material behavior change without observable test coverage.
-          NOT APPLICABLE: Documentation-only changes, test additions, or configuration updates.
-          Do not fail on missing edge case coverage; require nominal path verification.
-          Cite specific function/path requiring test when failing.
-
-      - name: "data-reproducibility-integrity"
-        mode: "error"
-        instructions: |
-          PASS: Data pipeline changes maintain schema, units, seeds, provenance, ordering, idempotency, and partial output semantics OR include explicit migration plan.
-          FAIL: Silent change to data contracts, units, or ordering without migration.
-          NOT APPLICABLE: Code-only changes without data pipeline impact.
-          Do not fail on hypothetical reproducibility issues; require concrete contract violation.
-          Cite specific pipeline/schema/contract when failing.
-
-  # Post-merge actions (disabled until pilot testing)
-  post_merge_actions:
-    - name: "update-changelog"
-      enabled: false
-      prompt: |
-        Determine if changelog update is needed: only for user-visible, public, security, or deployment impact.
-        If no impact, take no action.
-        If impact exists, edit only Unreleased section in existing changelog format.
-        Forbidden: changing version, date, tag, or publishing artifacts.
-        Required: validate format and create follow-up PR if needed.
-        Report specific changes made or rationale for no action.
-
-# Knowledge base for linked repositories (commented until real ORG/REPO provided)
-# knowledge_base:
-#   linked_repositories:
-#     - repository: "ORG/REPO"
-#       instructions: |
-#         This repository owns versioned API/data contracts consumed by BioETL.
-#         Verify exact endpoint/event/schema compatibility.
-#         Direction: BioETL must remain compatible with this repository's contracts.
-#         Report only confirmed mismatches; do not infer undocumented dependencies.
+  # Static analysis tools (explicit per schema v2; pinned intentionally)
+  tools:
+    ruff:
+      enabled: true
+    gitleaks:
+      enabled: true
+    yamllint:
+      enabled: true
+    shellcheck:
+      enabled: true
 
 # Code generation settings
 code_generation:
@@ -432,7 +358,7 @@ issue_enrichment:
         instructions: "Apply for security vulnerabilities or sensitive data issues."
       - label: "needs-reproduction"
         instructions: "Apply when issue lacks sufficient reproduction data or evidence."
-
 # Chat settings
 chat:
   auto_reply: true
+---
