@@ -20,11 +20,11 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "d97762b253cd9c99eefedab556036c0c407038348e0442921ede9b416c4d11d2",
-    "bioetl-dq-v2": "b293b2ef8f0e17d9f812c8cda2b2c1f60c9fc86ecd4d0acb5b25551ab3e6b91d",
-    "bioetl-incident-v1": "cd43b6364cdcba995fbcfcb860dc499ee2d8c6390a4fbecce60ace87f2322206",
-    "bioetl-overview-v2": "ea824818170be4095a3568a629dd270dbf1e4e3c24c5128627207421529b79c9",
-    "bioetl-run-explorer-v1": "f60bdaf8bb0320a0e53c1b1428ebbdfe45759df05b91093d44ce28999312dba0"
+    "bioetl-control-plane-v1": "3828f74ee3d57bc136cc03c88228b39324e0fa3b4a6d76a0521c3a9ae638ce82",
+    "bioetl-dq-v2": "73bbd0f3dde6d84dfbf55a4ebfc96697d2b09b45c4c62a20a8b33372f1525101",
+    "bioetl-incident-v1": "b749fdbc08d7786d9429f1e59b9175ecc901ac9931091d753bce91eadfdc936d",
+    "bioetl-overview-v2": "9a3cc257082fbe8d897174ba33066fe8b959c604f370ce4f2a08d34099fb0366",
+    "bioetl-run-explorer-v1": "09b4c578a25c4bc4ce377b8e902047eebae46136e5cc8a97d9b81ae227c3e1ea"
   },
   "panels": [
     {
@@ -72,8 +72,8 @@
       "panel_title": "Review Exact Replay Readiness",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -91,8 +91,8 @@
       "panel_title": "Review Exact Replay Checks",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -110,8 +110,8 @@
       "panel_title": "Review Replay Evidence",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=anchors"
         ],
@@ -129,8 +129,8 @@
       "panel_title": "Review Selected-Run Trust",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -148,8 +148,8 @@
       "panel_title": "Review Manifest Validation",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/control-plane/manifest-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ],
@@ -167,8 +167,8 @@
       "panel_title": "Review Lineage Validation",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/control-plane/lineage-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ],
@@ -186,8 +186,8 @@
       "panel_title": "Review Retention Compliance",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1"
         ],
@@ -205,8 +205,8 @@
       "panel_title": "Review Checkpoint Validation",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/control-plane/checkpoint-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ],
@@ -224,8 +224,8 @@
       "panel_title": "Compare Checkpoint Anchors",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=checkpoint_compare"
         ],
@@ -277,8 +277,8 @@
       "panel_title": "Review Selected Run Status",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -296,8 +296,8 @@
       "panel_title": "Inspect Run Identity",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
@@ -315,8 +315,8 @@
       "panel_title": "Inspect Processed Records",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
           "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}"
@@ -335,8 +335,8 @@
       "panel_title": "Inspect Selected Run Stages",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json"
@@ -355,8 +355,8 @@
       "panel_title": "Inspect Selected Run Domains",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -374,8 +374,8 @@
       "panel_title": "Inspect Selected Run Identity",
       "route": "data-trust-recovery",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -613,8 +613,8 @@
       "panel_title": "Review Selected Run Status",
       "route": "incident-console",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -710,8 +710,8 @@
       "panel_title": "Review Total Run Duration",
       "route": "incident-console",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -2071,8 +2071,8 @@
       "panel_title": "Inspect Selected Run Stages",
       "route": "incident-console",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json"
@@ -2091,8 +2091,8 @@
       "panel_title": "Inspect Selected Run Domains",
       "route": "incident-console",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -2110,8 +2110,8 @@
       "panel_title": "Inspect Selected Run Identity",
       "route": "incident-console",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -2200,8 +2200,8 @@
       "panel_title": "Review Run Domains",
       "route": "dependency-health",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -2236,8 +2236,8 @@
       "panel_title": "Review Run Identity",
       "route": "dependency-health",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&workflow=${workflow:csv}"
         ],
@@ -2255,8 +2255,8 @@
       "panel_title": "Review Provider Evidence",
       "route": "dependency-health",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -2274,8 +2274,8 @@
       "panel_title": "Review Provider Check",
       "route": "dependency-health",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
@@ -2293,8 +2293,8 @@
       "panel_title": "Inspect Selected Run Stages",
       "route": "dependency-health",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
@@ -2314,10 +2314,29 @@
       "panel_title": "Review Data Quality",
       "route": "dependency-health",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
-          "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json"
+          "/ops/observability/selected-run-status?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-overview-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-overview-v2",
+      "panel_id": 9483,
+      "panel_title": "Review FK Comparison Scope",
+      "route": "dependency-health",
+      "source": {
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
         ],
         "target_count": 1
       }
@@ -2350,8 +2369,8 @@
       "panel_title": "Inspect Recent Runs (last 10)",
       "route": "run-explorer",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}"
         ],
@@ -2365,7 +2384,7 @@
     "dashboard_uid_count": 5,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 123,
+    "panel_disposition_count": 124,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],

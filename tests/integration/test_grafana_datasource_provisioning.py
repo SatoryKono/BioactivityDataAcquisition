@@ -59,7 +59,18 @@ def test_private_host_delivery_binds_source_and_survives_data_volume() -> None:
     assert (
         "COPY", "--chown=root:root", "host-build/", "/usr/share/grafana/public/build/"
     ) in copies
+    active = [
+        tuple(shlex.split(line, comments=True))
+        for line in recipe.replace("\\\n", " ").splitlines()
+        if line.lstrip().upper().startswith(("RUN ", "COPY "))
+    ]
+    assert active.index(("RUN", "rm", "-rf", "/usr/share/grafana/public/build")) < active.index(
+        ("COPY", "--chown=root:root", "host-build/", "/usr/share/grafana/public/build/")
+    )
     for plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"):
+        metadata = json.loads(Path(f"grafana/plugins/{plugin}/src/plugin.json").read_text())
+        assert metadata["info"]["updated"] == manifest["plugin_release_date"]
+
         assert (
             "COPY", "--chown=root:root", plugin + "/",
             "/usr/share/grafana/data/plugins-bundled/" + plugin + "/",
