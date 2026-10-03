@@ -593,13 +593,13 @@
       },
       {
         "allowed": [],
-        "error_message": "units must be a canonical unit token when present",
+        "error_message": "units must be a raw unit token or compound unit expression when present",
         "field": "units",
         "max_length": null,
         "max_value": null,
         "min_value": null,
         "nullable": true,
-        "pattern": "^(?:[A-Za-zµ%][A-Za-z0-9µ%._-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$",
+        "pattern": "^[A-Za-zµ%][A-Za-z0-9µ%._-]*(?:[ /][A-Za-zµ%][A-Za-z0-9µ%._-]*)*$",
         "severity": "error",
         "severity_enricher": null,
         "validation_type": "pattern",
@@ -853,7 +853,7 @@
       "value": false
     }
   ],
-  "generated_date": "2026-09-11",
+  "generated_date": "2026-10-02",
   "generator_version": "1.0.0",
   "gold": {
     "contract_field_count": 72,

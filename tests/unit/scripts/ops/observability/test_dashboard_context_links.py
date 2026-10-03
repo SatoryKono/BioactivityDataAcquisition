@@ -213,3 +213,29 @@ def test_retired_provider_route_opens_local_saved_evidence_without_foreign_selec
         assert key not in url
     assert "${run_id:queryparam}" in url
     assert "${__url_time_range}" in url
+
+
+def test_finalizing_serialized_context_tokens_is_idempotent():
+    from copy import deepcopy
+    from scripts.ops.observability.grafana.dashboard_context_links import (
+        finalize_dashboard_links,
+    )
+
+    payload = {
+        "panels": [
+            {
+                "links": [
+                    {
+                        "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                        "includeVars": True,
+                    }
+                ]
+            }
+        ]
+    }
+    finalize_dashboard_links(payload)
+    expected = deepcopy(payload)
+    for _ in range(3):
+        finalize_dashboard_links(payload)
+        assert payload == expected
+    assert "${run_id:queryparam}=" not in str(payload)

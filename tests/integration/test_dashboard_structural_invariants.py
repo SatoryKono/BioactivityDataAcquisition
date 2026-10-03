@@ -50,6 +50,7 @@ pytestmark = pytest.mark.integration
 ALLOWED_PANEL_TYPES = frozenset(
     {
         "text",
+        "canvas",
         "row",
         "stat",
         "gauge",
@@ -58,7 +59,6 @@ ALLOWED_PANEL_TYPES = frozenset(
         "timeseries",
         "state-timeline",
         "heatmap",
-        "canvas",
     }
 )
 

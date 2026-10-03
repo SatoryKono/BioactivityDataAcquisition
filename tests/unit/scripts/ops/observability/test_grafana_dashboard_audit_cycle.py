@@ -1698,3 +1698,19 @@ def test_live_audit_semantic_gate_blocks_invalid_query() -> None:
     assert evidence["status"] == "fail"
     assert evidence["blocking_count"] == 1
     assert evidence["panel_outcomes"][0]["canonical_classification"] == "query_invalid"
+
+
+def test_preflight_checks_selected_ops_backend_source(monkeypatch) -> None:
+    captured = []
+    monkeypatch.setattr(
+        preflight_subject, "main", lambda argv: captured.extend(argv) or 0
+    )
+    config = cycle_subject._parse_args(["--app-base-url", "http://localhost:8014"])
+    assert (
+        cycle_subject._run_preflight(
+            config, app_base_url="http://localhost:8014", include_screenshot_check=False
+        )
+        == 0
+    )
+    index = captured.index("--ops-http-base-url")
+    assert captured[index + 1] == "http://localhost:8014"

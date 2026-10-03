@@ -337,6 +337,7 @@ async def test_executor_returns_serializable_metadata_only() -> None:
         "quarantine_rows_written": 0,
         "quarantine_error_code": None,
         "reference_completeness": "complete",
+        "closed_cohort_verified": False,
         "unproven_unmatched_rows": 0,
     }
 

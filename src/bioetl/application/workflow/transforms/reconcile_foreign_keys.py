@@ -96,6 +96,10 @@ def _build_reconcile_payload(
         "quarantine_rows_written": r.quarantine_rows_written,
         "quarantine_error_code": r.quarantine_error_code,
         "reference_completeness": request.reference_completeness,
+        "closed_cohort_verified": request.require_closed_cohort
+        and request.reconciliation_mode == "complete-reference"
+        and r.retained_rows == r.scanned_rows
+        and not r.mutated,
         "unproven_unmatched_rows": getattr(r, "unproven_unmatched_rows", 0),
     }
     if request.reconciliation_mode == "selected-snapshot":
@@ -244,6 +248,7 @@ def _build_request(
         reference_key=reference_key,
         primary_keys=primary_keys,
         action="delete_orphans",
+        require_closed_cohort=config.get("require_closed_cohort") is True,
         source_layer=source_layer,
         reference_layer=reference_layer,
         mutation_layer=_optional_layer(config, "mutation_layer", default=None),

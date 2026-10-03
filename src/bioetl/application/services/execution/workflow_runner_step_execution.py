@@ -104,12 +104,21 @@ async def execute_pipeline_step(
     workflow_run_id: str | None,
     snapshot_reader: Callable[[str, str], Awaitable[dict[str, dict[str, object]]]]
     | None = None,
+    cohort_resolver: Callable[
+        [WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]
+    ]
+    | None = None,
+    upstream_outputs: Mapping[str, object] | None = None,
 ) -> WorkflowStepExecutionResult:
     """Run one pipeline step and project step-level metrics."""
     if step_started_callback is not None:
         step_started_callback(step, fingerprint=None)
     started = monotonic()
     try:
+        if step.reference_cohort is not None:
+            if cohort_resolver is None:
+                raise ValueError("reference_cohort resolver unavailable")
+            step = await cohort_resolver(step, upstream_outputs or {})
         step_options = replace(
             run_options_from_config(step.run_options),
             workflow_id=workflow_name,

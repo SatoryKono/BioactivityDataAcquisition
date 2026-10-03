@@ -294,6 +294,16 @@ def first_window_copy(dashboard: dict[str, Any]) -> str:
             for link in defaults.get("links") or []:
                 if isinstance(link, dict):
                     chunks.append(str(link.get("title") or ""))
+        for override in (panel.get("fieldConfig") or {}).get("overrides") or []:
+            props = {
+                item.get("id"): item.get("value")
+                for item in override.get("properties") or []
+            }
+            if props.get("custom.hidden") is True:
+                continue
+            for link in props.get("links") or []:
+                if isinstance(link, dict):
+                    chunks.append(str(link.get("title") or ""))
         options = panel.get("options") or {}
         if isinstance(options, dict):
             for link in options.get("dataLinks") or []:

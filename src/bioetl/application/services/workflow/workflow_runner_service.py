@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, replace
 from datetime import datetime
 from pathlib import Path
@@ -100,6 +100,12 @@ class WorkflowRunnerService:
         None
     )
     report_root: Path | None = None
+    cohort_resolver: (
+        Callable[
+            [WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]
+        ]
+        | None
+    ) = None
 
     async def run_workflow(
         self,
@@ -300,6 +306,8 @@ class WorkflowRunnerService:
         if isinstance(step, WorkflowStepConfig):
             return await execute_pipeline_step(
                 pipeline_runner=self.pipeline_runner,
+                cohort_resolver=self.cohort_resolver,
+                upstream_outputs=step_outputs,
                 metrics=self.metrics,
                 monotonic=self.monotonic,
                 workflow_name=workflow_name,

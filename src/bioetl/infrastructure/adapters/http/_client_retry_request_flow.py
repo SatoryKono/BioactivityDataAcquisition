@@ -90,7 +90,9 @@ class HTTPClientRetryRequestFlow:
     ) -> httpx.Response | _RequestAttemptOutcome:
         """Execute one request attempt and return response or retry decision."""
         try:
-            response = await self._execute_single_attempt(client, method, url, **kwargs)
+            response = await self._execute_single_attempt(
+                client, method, url, attempt_number=attempt + 1, **kwargs
+            )
             return await self._handle_response_attempt(
                 response,
                 method=method,

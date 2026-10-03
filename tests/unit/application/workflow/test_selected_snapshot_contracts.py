@@ -30,7 +30,12 @@ from bioetl.application.workflow.transforms.selected_snapshot_inputs import (
 )
 from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowStepState
 from bioetl.domain.run_reports.workflow_builder import _reconciliation_details
-from bioetl.domain.workflow import TransformStepConfig, WorkflowRunOptionsConfig
+from bioetl.domain.workflow import (
+    TransformStepConfig,
+    WorkflowRunOptionsConfig,
+    WorkflowStepConfig,
+)
+from bioetl.domain.workflow.config import WorkflowReferenceCohort
 from bioetl.infrastructure.schemas.workflow_config import (
     WorkflowConfigFileSchema,
     WorkflowRunOptionsSchema,
@@ -81,9 +86,22 @@ def test_selected_mode_roundtrip_and_cli_overrides_bind_scope():
         s.config["reconciliation_mode"] == "selected-snapshot"
         for s in [s for s in selected.steps if isinstance(s, TransformStepConfig)]
     )
+    complete = apply_cli_overrides(
+        selected, reconciliation_mode="complete-reference", limit=1000
+    )
+    assert complete.defaults.reconciliation_mode == "complete-reference"
+    independent = replace(
+        selected,
+        steps=tuple(
+            replace(step, reference_cohort=None)
+            if isinstance(step, WorkflowStepConfig)
+            else step
+            for step in selected.steps
+        ),
+    )
     with pytest.raises(ValueError, match="independently bounded"):
         apply_cli_overrides(
-            selected, reconciliation_mode="complete-reference", limit=1000
+            independent, reconciliation_mode="complete-reference", limit=1000
         )
 
 
@@ -134,7 +152,8 @@ def test_ambiguous_producer_lineage_rejected(candidate):
 
 
 @pytest.mark.asyncio
-async def test_pipeline_captures_version_and_limits_before_completion():
+@pytest.mark.parametrize("bound_cohort", [False, True])
+async def test_pipeline_captures_version_and_limits_before_completion(bound_cohort):
     selected = apply_cli_overrides(
         config(), reconciliation_mode="selected-snapshot", limit=1000
     )
@@ -146,22 +165,44 @@ async def test_pipeline_captures_version_and_limits_before_completion():
         manifest_id="child",
     )
     capture = AsyncMock(return_value=pin())
+    producer = selected.pipeline_steps[0]
+    if bound_cohort:
+        producer = replace(
+            producer,
+            reference_cohort=WorkflowReferenceCohort(
+                "upstream", "chembl.target", "target_id", "target_id"
+            ),
+        )
+    resolved = replace(
+        producer,
+        run_options=replace(producer.run_options, filter_ids=("selected-target",)),
+    )
+    resolver = AsyncMock(return_value=resolved)
+    runner = SimpleNamespace(run=AsyncMock(return_value=result))
+    upstream = {"upstream": {"run_id": "upstream-producer"}}
     completed = await execute_pipeline_step(
-        pipeline_runner=SimpleNamespace(run=AsyncMock(return_value=result)),
+        pipeline_runner=runner,
         metrics=MagicMock(),
         monotonic=lambda: 1.0,
         workflow_name=selected.name,
-        step=selected.pipeline_steps[0],
+        step=producer,
         workflow_context_labels={},
         step_started_callback=None,
         workflow_run_id="workflow",
         snapshot_reader=capture,
+        cohort_resolver=resolver,
+        upstream_outputs=upstream,
     )
     assert completed.status == "success"
     capture.assert_has_awaits(
         [call("chembl_assay", ""), call("chembl_assay", "producer")]
     )
     assert completed.payload.selected_snapshots["gold:chembl.assay"]["limit"] == 1000
+    if bound_cohort:
+        resolver.assert_awaited_once_with(producer, upstream)
+        assert runner.run.await_args.kwargs["options"].filter_ids == ["selected-target"]
+    else:
+        resolver.assert_not_awaited()
 
 
 def test_durable_state_restores_producer_and_transform_snapshots():

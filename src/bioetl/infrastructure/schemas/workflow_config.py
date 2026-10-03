@@ -15,6 +15,7 @@ from bioetl.domain.workflow import (
     WorkflowStepConfig,
     reject_delete_orphans_after_limited_extracts,
 )
+from bioetl.domain.workflow.config import WorkflowReferenceCohort
 from bioetl.infrastructure.schemas.workflow_config_fk import (
     _normalize_fk_optional_name,
     _normalize_fk_optional_names,
@@ -155,6 +156,16 @@ class WorkflowDefaultsSchema(BaseModel):
         return self.run_options.to_domain()
 
 
+class WorkflowReferenceCohortSchema(BaseModel):
+    """Strict selection binding; no independently sampled reference universe."""
+
+    model_config = ConfigDict(extra="forbid")
+    step_id: str = Field(..., min_length=1)
+    table: str = Field(..., pattern=r"^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$")
+    column: str = Field(..., min_length=1)
+    filter_field: str = Field(..., min_length=1)
+
+
 class WorkflowPipelineStepSchema(BaseModel):
     """Strict schema for pipeline workflow steps."""
 
@@ -163,6 +174,7 @@ class WorkflowPipelineStepSchema(BaseModel):
     kind: Literal["pipeline"] = "pipeline"
     step_id: str = Field(..., min_length=1)
     pipeline_name: str = Field(..., min_length=1)
+    reference_cohort: WorkflowReferenceCohortSchema | None = None
     depends_on: list[str] = Field(default_factory=list)
     run_options: WorkflowRunOptionsSchema = Field(
         default_factory=WorkflowRunOptionsSchema
@@ -173,6 +185,11 @@ class WorkflowPipelineStepSchema(BaseModel):
         return WorkflowStepConfig(
             step_id=self.step_id,
             pipeline_name=self.pipeline_name,
+            reference_cohort=WorkflowReferenceCohort(
+                **self.reference_cohort.model_dump()
+            )
+            if self.reference_cohort
+            else None,
             depends_on=tuple(self.depends_on),
             run_options=defaults.merged_with(self.run_options.to_domain()),
         )
@@ -190,6 +207,7 @@ class WorkflowReconcileRowsConfigSchema(BaseModel):
     right_columns: list[str] = Field(..., min_length=1)
     left_primary_keys: list[str] = Field(..., min_length=1)
     nulls_equal: bool = False
+    require_closed_cohort: bool = False
     type_policy: Literal["strict"] = "strict"
     report_only: bool = True
     preserve_order: bool = True
@@ -244,6 +262,7 @@ class WorkflowReconcileForeignKeysConfigSchema(BaseModel):
     )
     source_scope: Literal["all_current", "current_run"] = "all_current"
     nulls_equal: bool = False
+    require_closed_cohort: bool = False
 
     @model_validator(mode="after")
     def validate_foreign_key_invariants(self) -> Self:

@@ -17,6 +17,13 @@ workflow:
     - kind: pipeline
       step_id: chembl_target_ingest
       pipeline_name: chembl_target
+      reference_cohort:
+        step_id: chembl_assay_ingest
+        table: chembl.assay
+        column: target_id
+        filter_field: target_id
+      depends_on:
+        - chembl_assay_ingest
     - kind: transform
       step_id: reconcile_assay_target_orphans
       transform_name: reconcile_foreign_keys
@@ -34,6 +41,7 @@ workflow:
         primary_keys:
           - assay_id
         action: delete_orphans
+        require_closed_cohort: true
     - kind: transform
       step_id: summarize_core_extracts
       transform_name: summarize_upstream_outputs

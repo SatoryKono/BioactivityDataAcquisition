@@ -226,6 +226,11 @@ class _HandoffQuery:
     var_values: dict[str, str] = field(default_factory=dict)
 
     def add(self, key: str, value: str) -> None:
+        template = re.fullmatch(r"\$\{([a-z_]+):queryparam\}", key)
+        if template:
+            name = template.group(1)
+            self.var_values[name] = f"${name}"
+            return
         if key == TIME_TOKEN or key.startswith("${__url_time_range"):
             self.has_time_token = True
             return

@@ -857,6 +857,8 @@ function dashboardEntryFromPayload(payload) {
     requiredTerminalPanelIds:
       uid === "bioetl-silver-reject-explorer" ? [13] : [],
     collapsedRowTitles,
+    navigationLinkCount: (panels.find(panel => panel.id === 1000)?.options?.content || '')
+      .match(/class="bioetl-nav-(?:link|current)"/g)?.length || 0,
   };
 }
 
@@ -895,21 +897,28 @@ async function tryExpandCollapsedRow(page, title, index, total, uid) {
     page.getByText(title, { exact: true }).first(),
   ];
 
-  for (const candidate of candidates) {
-    if ((await candidate.count()) === 0) {
-      continue;
-    }
-    const visible = await candidate.isVisible().catch(() => false);
-    if (!visible) {
-      continue;
-    }
-    try {
+  const metrics = await dashboardCaptureMetrics(page);
+  const step = Math.max(250, Math.floor((await page.evaluate(() => innerHeight)) * 0.75));
+  const bottom = Math.max(metrics.scrollBottom, metrics.panelBottom);
+  for (let position = 0; position <= bottom + step; position += step) {
+    await setDashboardScrollPosition(page, position);
+    await page.waitForTimeout(250);
+    for (const candidate of candidates) {
+      if ((await candidate.count()) === 0) {
+        continue;
+      }
       await candidate.scrollIntoViewIfNeeded().catch(() => {});
-      await candidate.click({ timeout: 5000 });
-      console.log(`[${index}/${total}] expanded row '${title}' in ${uid}`);
-      return true;
-    } catch {
-      continue;
+      const visible = await candidate.isVisible().catch(() => false);
+      if (!visible) {
+        continue;
+      }
+      try {
+        await candidate.click({ timeout: 5000 });
+        console.log(`[${index}/${total}] expanded row '${title}' in ${uid}`);
+        return true;
+      } catch {
+        continue;
+      }
     }
   }
 
@@ -930,7 +939,7 @@ async function expandCollapsedRows(page, dashboard, index, total) {
   );
   let expanded = 0;
   dashboard.rowExpansion = [];
-  for (const title of titles) {
+  for (const title of titles.slice().reverse()) {
     const clicked = await tryExpandCollapsedRow(page, title, index, total, dashboard.uid);
     dashboard.rowExpansion.push({title, clicked});
     if (clicked) {
@@ -1767,12 +1776,16 @@ async function collectPanelContainment(page, dashboard) {
   });
 }
 
-function navigationValidationFromDom({expectedNavigationHtml = ""} = {}) {
+function navigationValidationFromDom({expectedNavigationHtml = "", expectedLinkCount} = {}) {
     const panel =
       document.querySelector('[data-panelid="1000"]') ||
       document.querySelector('[data-viz-panel-key="panel-1000"]') ||
       document.querySelector('[data-griditem-key="grid-item-1000"]');
     const nav = panel?.querySelector(".bioetl-nav") || null;
+    if (expectedLinkCount === 0) {
+      return {status: panel || nav ? 'error' : 'ok', panelFound: Boolean(panel),
+        navigationFound: Boolean(nav), mode: 'leaf-without-navigation'};
+    }
     const title =
       panel?.querySelector("[data-bioetl-panel-title]") ||
       panel?.querySelector(".bioetl-panel-title") ||
@@ -1872,6 +1885,7 @@ function navigationValidationFromDom({expectedNavigationHtml = ""} = {}) {
         !evidence.titleFound &&
         evidence.linkNamesPresent &&
         evidence.canonicalLinksMatch &&
+        evidence.linkCount === expectedLinkCount &&
         evidence.contentInsidePanel &&
         evidence.linksInsidePanel &&
         evidence.linkTextFits &&
@@ -1896,7 +1910,7 @@ async function collectNavigationValidation(page, dashboard) {
   // Grafana's native focus shadow has a 200 ms transition. Sampling in the
   // focus event frame observes its transparent start rather than the indicator.
   await page.waitForTimeout(250);
-  return page.evaluate(navigationValidationFromDom, {expectedNavigationHtml: dashboard.navigationHtml});
+  return page.evaluate(navigationValidationFromDom, {expectedNavigationHtml: dashboard.navigationHtml, expectedLinkCount: dashboard.navigationLinkCount});
 }
 
 function typographyValidationFromDom({
@@ -2505,7 +2519,13 @@ async function renderDashboard(page, dashboard, index, total) {
   await verifyRenderedPanelCount(page, dashboard, index, total);
   // Bracket the actual PNG with terminal evidence; a later settled panel cannot
   // retroactively validate a screenshot taken while it was still blank/loading.
-  await collectVerifiedTerminalState(page, dashboard, index, total);
+  if (CONFIG.captureSurface === 'full') {
+    // Virtualized panels outside this viewport do not exist in the DOM yet.
+    // Each tile is bracketed below; the merged result still requires every ID.
+    dashboard.terminalStateValidation = await validateVisibleTerminalState(page, dashboard, index, total);
+  } else {
+    await collectVerifiedTerminalState(page, dashboard, index, total);
+  }
   dashboard.preCaptureTerminalStateValidation = dashboard.terminalStateValidation;
   const viewportChanged = await prepareDashboardForCapture(page);
   if (viewportChanged) {

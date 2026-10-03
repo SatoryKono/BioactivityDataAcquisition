@@ -105,8 +105,9 @@ async def request(storage, *, reference=(), source=None, dry_run=False):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("matched", [False, True])
+@pytest.mark.parametrize("require_closed_cohort", [False, True])
 async def test_partial_and_total_deletion_preserve_other_runs_and_history(
-    storage, matched
+    storage, matched, require_closed_cohort
 ):
     selected = [row("a", "x"), row("b", "y")]
     untouched = [row("old", "absent", "history"), row("a", "z", "history", False)]
@@ -115,6 +116,7 @@ async def test_partial_and_total_deletion_preserve_other_runs_and_history(
         source=selected + untouched,
         reference=[row("x", "", "producer")] if matched else [],
     )
+    req = replace(req, require_closed_cohort=require_closed_cohort)
     result = await storage.reconcile_foreign_keys(req)
     assert result.scanned_rows == 2
     assert result.retained_rows == int(matched)
@@ -135,6 +137,43 @@ async def test_partial_and_total_deletion_preserve_other_runs_and_history(
     assert result.input_snapshots["gold:test.source"]["version"] == 0
     assert result.selected_snapshots["gold:test.source"]["version"] == 1
     assert storage.quarantine.write_many.await_count == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("empty_source", [False, True])
+async def test_selected_snapshot_matching_rows_do_not_claim_closed_cohort(
+    storage, empty_source
+):
+    from bioetl.application.workflow.transforms.reconcile_foreign_keys import (
+        _build_reconcile_payload,
+    )
+    from bioetl.domain.workflow import TransformStepConfig, WorkflowTransformSpec
+
+    req = await request(
+        storage,
+        source=[] if empty_source else [row("a", "x")],
+        reference=[row("x", "")],
+    )
+    req = replace(req, require_closed_cohort=True)
+    result = await storage.reconcile_foreign_keys(req)
+    payload = _build_reconcile_payload(
+        spec=WorkflowTransformSpec.from_step(
+            TransformStepConfig("fk", "reconcile_foreign_keys")
+        ),
+        request=req,
+        result=result,
+        workflow_name="selected",
+    )
+    assert result.scanned_rows == result.retained_rows == int(not empty_source)
+    assert result.mutated is False
+    assert payload["closed_cohort_verified"] is False
+    assert payload["reference_completeness"] == "unproven"
+    assert payload["reconciliation_mode"] == "selected-snapshot"
+    assert (
+        DeltaTable(storage.gold_writer._resolve_table_path("test.source")).version()
+        == 0
+    )
+    storage.quarantine.write_many.assert_not_awaited()
 
 
 @pytest.mark.asyncio

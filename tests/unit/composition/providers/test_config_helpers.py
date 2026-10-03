@@ -101,7 +101,7 @@ class TestCreateHttpDataSource:
 
         # Verify HTTP client created for provider
         support.create_http_client.assert_called_once_with(
-            "test_provider", settings, metrics=metrics
+            "test_provider", settings, metrics=metrics, logger=logger
         )
 
         # Verify helpers created

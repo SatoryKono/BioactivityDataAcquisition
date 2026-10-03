@@ -91,6 +91,7 @@ def test_reconcile_foreign_keys_config_is_normalized_into_domain_config() -> Non
         "primary_keys": ["assay_id"],
         "action": "delete_orphans",
         "nulls_equal": False,
+        "require_closed_cohort": False,
     }
 
 
@@ -229,12 +230,32 @@ def test_delete_orphans_rejects_limited_pipeline_behind_intermediary() -> None:
 
 
 @pytest.mark.parametrize("workflow_name", ["chembl_core", "chembl_baseline"])
-def test_cli_limit_override_rejects_incomplete_references(workflow_name: str) -> None:
+@pytest.mark.parametrize("bound_cohort", [True, False])
+def test_cli_limit_override_requires_bound_references(
+    workflow_name: str, bound_cohort: bool
+) -> None:
+    from dataclasses import replace
+
+    from bioetl.domain.workflow import WorkflowStepConfig
     from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
     from bioetl.interfaces.cli.commands._workflow_override_support import (
         apply_cli_overrides,
     )
 
     workflow = load_workflow_config(workflow_name)
-    with pytest.raises(ValueError, match="independently bounded extracts"):
-        apply_cli_overrides(workflow, limit=1000)
+    if bound_cohort:
+        bounded = apply_cli_overrides(workflow, limit=1000)
+        assert all(step.run_options.limit == 1000 for step in bounded.pipeline_steps)
+        assert any(step.reference_cohort is not None for step in bounded.pipeline_steps)
+    else:
+        independent = replace(
+            workflow,
+            steps=tuple(
+                replace(step, reference_cohort=None)
+                if isinstance(step, WorkflowStepConfig)
+                else step
+                for step in workflow.steps
+            ),
+        )
+        with pytest.raises(ValueError, match="independently bounded extracts"):
+            apply_cli_overrides(independent, limit=1000)

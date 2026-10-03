@@ -25,7 +25,10 @@ from bioetl.infrastructure.time import SystemClock
 @pytest.mark.asyncio
 @pytest.mark.parametrize("outcome", ["success", "error", "cancel"])
 @pytest.mark.parametrize("child_verdict", ["OK", "WARN"])
-async def test_parent_records_terminal_evidence(tmp_path, outcome, child_verdict):
+@pytest.mark.parametrize("dq_verdict", ["OK", "WARN", "ERROR", None])
+async def test_parent_records_terminal_evidence(
+    tmp_path, outcome, child_verdict, dq_verdict
+):
     archive = MagicMock()
     service = CompositeRunReportService(
         "composite_assay",
@@ -42,7 +45,10 @@ async def test_parent_records_terminal_evidence(tmp_path, outcome, child_verdict
         json.dumps(
             {
                 "identity": {"run_id": "child-id"},
-                "observations": {"Provider": {"verdict": child_verdict}},
+                "observations": {
+                    "Provider": {"verdict": child_verdict},
+                    **({"Data Quality": {"verdict": dq_verdict}} if dq_verdict else {}),
+                },
             }
         )
     )
@@ -109,6 +115,12 @@ async def test_parent_records_terminal_evidence(tmp_path, outcome, child_verdict
         == {"success": "success", "error": "failed", "cancel": "shutdown"}[outcome]
     )
     assert report["observations"]["Provider"]["verdict"] == child_verdict
+    assert report["observations"]["Data Quality"]["verdict"] == (
+        dq_verdict or "INCOMPLETE"
+    )
+    assert report["observations"]["Data Quality"]["facts"]["child_run_ids"] == [
+        "child-id"
+    ]
     assert (
         report["observations"]["Data Validation"]["reason"] == "actual_merge_validation"
     )

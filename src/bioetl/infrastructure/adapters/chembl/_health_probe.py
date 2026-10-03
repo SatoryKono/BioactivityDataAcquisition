@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import HealthStatus
@@ -74,9 +73,8 @@ async def probe_chembl_status(
     """Perform ChEMBL-specific health probe against the status endpoint."""
     try:
         with adapter_metrics.measure_request("/status"):
-            response = await asyncio.wait_for(
-                http_client.get_once(CHEMBL_STATUS_URL),
-                timeout=timeout_seconds,
+            response = await http_client.get_once(
+                CHEMBL_STATUS_URL, request_timeout=timeout_seconds
             )
         return handle_response(response)
     except health_errors as exc:

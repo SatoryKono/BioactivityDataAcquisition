@@ -305,7 +305,9 @@ def _create_http_data_source(
     """
 
     support = resolve_provider_assembly_support(assembly_support)
-    http_client = support.create_http_client(provider, settings, metrics=metrics)
+    http_client = support.create_http_client(
+        provider, settings, metrics=metrics, logger=logger
+    )
     helper_services = AdapterHelpersFactory.create_http_helpers(
         provider=provider,
         logger=logger,

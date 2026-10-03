@@ -370,7 +370,7 @@ class TestResolvedHttpConfig:
             (
                 "semanticscholar",
                 "semanticscholar_api_key",
-                (0.02, 1),
+                (0.01, 1),
                 (1.0, 5),
             ),
             ("uniprot", "uniprot_api_key", (10.0, 20), (100.0, 200)),

@@ -439,3 +439,23 @@ def test_ops_http_uid_uses_reviewed_datasource_name():
         )
         == "BioETL Ops HTTP"
     )
+
+
+def test_inventory_counts_contextual_dashboard_destinations() -> None:
+    payload = {
+        "panels": [
+            {
+                "id": 9002,
+                "fieldConfig": {
+                    "defaults": {
+                        "links": [
+                            {
+                                "url": "/d/bioetl-dq-v2/5-data-quality?var-run_id=selected"
+                            }
+                        ]
+                    }
+                },
+            }
+        ]
+    }
+    assert inventory._extract_link_uids(payload) == ["bioetl-dq-v2"]

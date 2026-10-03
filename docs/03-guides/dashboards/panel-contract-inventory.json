@@ -3652,11 +3652,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~\"duplicate|overwrite\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "formula": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",risk_type=~\"duplicate|overwrite\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
       "kind": "promql",
       "panel_id": 9491,
       "panel_title": "Inspect Telemetry Coverage",
-      "query": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~\"duplicate|overwrite\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "query": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",risk_type=~\"duplicate|overwrite\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
       "query_tokens": [
         "bioetl_control_plane_run_type_universe",
         "bioetl_replay_duplicate_overwrite_risk_total"
@@ -3686,11 +3686,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~\"consistent|inconsistent\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "formula": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\",integrity_type=~\"consistent|inconsistent\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
       "kind": "promql",
       "panel_id": 9491,
       "panel_title": "Inspect Telemetry Coverage",
-      "query": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~\"consistent|inconsistent\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
+      "query": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\",integrity_type=~\"consistent|inconsistent\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
       "query_tokens": [
         "bioetl_control_plane_run_type_universe",
         "bioetl_manifest_ledger_integrity_ratio"

@@ -180,25 +180,17 @@ def test_dash_first_001_operator_question_contract() -> None:
 
 def test_dash_first_001_fails_closed_when_next_action_token_drifts() -> None:
     dashboard = copy.deepcopy(load_dashboard(_OVERVIEW))
-    for panel in dashboard.get("panels") or []:
-        if not isinstance(panel, dict):
-            continue
-        for key in ("title", "description"):
-            value = panel.get(key)
-            if isinstance(value, str):
-                panel[key] = value.replace("Open Run Explorer", "Open Something Else")
-        for link in panel.get("links") or []:
-            if isinstance(link, dict) and isinstance(link.get("title"), str):
-                link["title"] = link["title"].replace(
-                    "Open Run Explorer", "Open Something Else"
-                )
-        defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
-        if isinstance(defaults, dict):
-            for link in defaults.get("links") or []:
-                if isinstance(link, dict) and isinstance(link.get("title"), str):
-                    link["title"] = link["title"].replace(
-                        "Open Run Explorer", "Open Something Else"
-                    )
+
+    def remove_action(value):
+        if isinstance(value, dict):
+            return {key: remove_action(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [remove_action(item) for item in value]
+        if isinstance(value, str):
+            return value.replace("Open Run Explorer", "Open Something Else")
+        return value
+
+    dashboard = remove_action(dashboard)
     with pytest.raises(AssertionError, match="next_action token"):
         violations = first_screen_decision_violations(
             "bioetl-overview-v2.json", dashboard
