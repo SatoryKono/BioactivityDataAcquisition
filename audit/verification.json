@@ -1,0 +1,12 @@
+{
+  "bundle": "E:\\github\\bda-fk-selected-snapshot-11865\\reports\\quality\\proof-or-stop\\fk-11865-final-6a7f2e7-public-A-reviewed-independent\\bundle.json",
+  "bundle_digest": "08fe2d13289445892f35aac551e9b8b3e7b71fd1fbac50374f0a8cea41abba9a",
+  "claim": "reviewed",
+  "claim_qualified": true,
+  "degradations": [],
+  "errors": [],
+  "exit_code": 0,
+  "outcome": "ADMIT",
+  "run_id": "fk-11865-final-6a7f2e7-public-A-reviewed-independent",
+  "schema_version": 1
+}
