@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
-import { pathToFileURL } from 'node:url';
+import { closeSync, constants, lstatSync, mkdirSync, openSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const scopes = [
   '/usr/share/grafana/public/build',
@@ -11,8 +12,42 @@ const scopes = [
 ];
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
+// Fixed trusted executable locations; do not resolve commands through caller PATH.
+const docker = process.platform === 'win32'
+  ? 'C:/Program Files/Docker/Docker/resources/bin/docker.exe' : '/usr/bin/docker';
+
+export function validateImage(image) {
+  assert.ok(typeof image === 'string' && !/\s/.test(image) && (
+    image === 'bioetl-router-host:acceptance' || /^sha256:[0-9a-f]{64}$/.test(image) ||
+    /^satorykono\/bioetl-grafana-router7-canvas@sha256:[0-9a-f]{64}$/.test(image)
+  ), 'Unsupported image reference');
+  return image;
+}
+
+export function parseArguments(args) {
+  assert.equal(args.length, 1, 'Usage: verify-host-image.mjs IMAGE (receipt: reports/qa/router-v7-image-parity.json)');
+  return validateImage(args[0]);
+}
+
+function writeReceipt(receipt) {
+  const root = realpathSync(fileURLToPath(new URL('../../../', import.meta.url)));
+  const reports = join(root, 'reports');
+  assert.equal(realpathSync(reports), reports, 'Reports directory must not redirect writes');
+  const directory = join(reports, 'qa');
+  mkdirSync(directory, { recursive: true });
+  assert.equal(realpathSync(directory), directory, 'Receipt directory must not redirect writes');
+  const target = join(directory, 'router-v7-image-parity.json');
+  const existing = lstatSync(target, { throwIfNoEntry: false });
+  assert.ok(!existing || (existing.isFile() && existing.nlink === 1), 'Receipt must be a regular file with no additional links');
+  const fd = openSync(target, constants.O_WRONLY | constants.O_CREAT | constants.O_TRUNC | (constants.O_NOFOLLOW ?? 0), 0o600);
+  try { writeFileSync(fd, JSON.stringify(receipt, null, 2) + '\n'); }
+  finally { closeSync(fd); }
+}
+
 export function verifyImages(built, manifest, inspect, fingerprint) {
-  assert.match(manifest.image, /@sha256:[0-9a-f]{64}$/);
+  validateImage(built);
+  validateImage(manifest.image);
+  assert.match(manifest.image, /^satorykono\/bioetl-grafana-router7-canvas@sha256:[0-9a-f]{64}$/);
   const actual = inspect(built);
   const expected = inspect(manifest.image);
   assert.ok(expected.RepoDigests.includes(manifest.image), 'Declared registry digest was not inspected');
@@ -40,7 +75,7 @@ export function verifyImages(built, manifest, inspect, fingerprint) {
 }
 
 function inspect(image) {
-  return JSON.parse(execFileSync('docker', ['image', 'inspect', image], { encoding: 'utf8' }))[0];
+  return JSON.parse(execFileSync(docker, ['image', 'inspect', validateImage(image)], { encoding: 'utf8' }))[0];
 }
 
 function fingerprint(image, scope) {
@@ -48,8 +83,8 @@ function fingerprint(image, scope) {
   // and symlink target. Registry manifest and image-config digests differ.
   const command = 'set -o pipefail; cd "$1"; find . -type f -exec sha256sum {} + | LC_ALL=C sort; ' +
     'find . -exec stat -c "%F %u:%g %a %N" {} + | LC_ALL=C sort';
-  const output = execFileSync('docker', [
-    'run', '--rm', '--network', 'none', '--entrypoint', 'sh', image,
+  const output = execFileSync(docker, [
+    'run', '--rm', '--network', 'none', '--entrypoint', 'sh', validateImage(image),
     '-ec', command, 'verify-artifacts', scope,
   ], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
   const module = output.split('\n').find((line) => /^[0-9a-f]{64}\s+\.\/module\.js$/.test(line));
@@ -60,8 +95,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const manifest = JSON.parse(readFileSync(new URL('./host-image.json', import.meta.url), 'utf8'));
   const recipe = readFileSync(new URL('./Dockerfile.host', import.meta.url));
   assert.equal(sha256(recipe), manifest.artifact_sha256['grafana/tooling/router-v7-bridge/Dockerfile.host']);
-  assert.ok(process.argv[2] && process.argv[3], 'Usage: verify-host-image.mjs IMAGE RECEIPT.json');
-  const receipt = verifyImages(process.argv[2], manifest, inspect, fingerprint);
-  writeFileSync(process.argv[3], JSON.stringify(receipt, null, 2) + '\n');
+  const built = parseArguments(process.argv.slice(2));
+  const receipt = verifyImages(built, manifest, inspect, fingerprint);
+  writeReceipt(receipt);
   console.log('Built host image matches the declared image artifact set');
 }

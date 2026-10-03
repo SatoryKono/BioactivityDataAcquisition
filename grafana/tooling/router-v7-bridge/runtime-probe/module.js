@@ -44,7 +44,10 @@ define(['react', 'react-dom/client', '@grafana/data', 'react-router'], function 
         for (const to of ['/detail?run=42#panel', '/%2f%2fexample.invalid', '/%5cexample.invalid']) {
           navigate(to);
           await new Promise((resolve) => setTimeout(resolve, 30));
-          check('internal/encoded origin: ' + to, new URL(location.pathname, window.location.href).origin === origin);
+          const expected = new URL(to, origin);
+          check('internal/encoded navigation: ' + to,
+            location.pathname === expected.pathname && location.search === expected.search &&
+            location.hash === expected.hash && window.location.origin === origin);
         }
         for (const subtype of ['BioETLHarmlessProbe', 'constructor', '__proto__', 'TypeError']) {
           let calls = 0;

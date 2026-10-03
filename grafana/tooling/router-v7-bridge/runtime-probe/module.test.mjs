@@ -65,3 +65,18 @@ test('probe detects a transition committed after navigation throws', async () =>
   assert.equal(receipt.status, 'FAIL');
   assert.match(receipt.error, /^useNavigate rejects:/);
 });
+
+
+test('probe rejects no-op internal navigation', async () => {
+  const receipt = await runProbe(source, {
+    ...bridge,
+    useNavigate() {
+      const navigate = bridge.useNavigate();
+      return (to) => {
+        if (to.includes('example.invalid') && !to.startsWith('/%')) return navigate(to);
+      };
+    },
+  });
+  assert.equal(receipt.status, 'FAIL');
+  assert.match(receipt.error, /^internal\/encoded navigation:/);
+});
