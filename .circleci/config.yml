@@ -247,6 +247,11 @@ jobs:
     docker:
       - image: cimg/python:3.13
     resource_class: small
+    environment:
+      # Auto-detection sees the physical host, not the two-CPU runner quota.
+      PYTEST_XDIST_AUTO_NUM_WORKERS: "2"
+      OPENBLAS_NUM_THREADS: "1"
+      POLARS_MAX_THREADS: "2"
     parameters:
       test-group:
         type: string
@@ -385,7 +390,10 @@ jobs:
   duplication:
     docker:
       - image: cimg/python:3.12-node
-    resource_class: small
+    # The complete src/tests scan exhausted the small runner heap.
+    resource_class: medium
+    environment:
+      NODE_OPTIONS: --max-old-space-size=3072
     steps:
       - checkout
       - setup-python-uv
