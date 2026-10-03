@@ -564,8 +564,8 @@ python -m scripts.ops check-observability-ports --json
      `curl "http://127.0.0.1:8081/ops/quarantine/filter-options?pipeline=<pipeline_name>"`.
   1. Убедитесь, что в dashboard выбран конкретный `$pipeline` (single-select),
      а не общий scope.
-  1. Проверьте, что сервер поднят с внешним bind для Grafana container:
-     `bioetl quarantine serve --host 0.0.0.0 --port 8081`.
+  1. Проверьте, что сервер поднят локально или как compose service для Grafana container:
+     `bioetl quarantine serve --host 127.0.0.1 --port 8081`.
   1. Проверьте наличие Infinity plugin и datasource:
      `curl -u admin:<password> http://localhost:3000/api/datasources` должен содержать `Quarantine Explorer`,
      а `curl -u admin:<password> http://localhost:3000/api/plugins/yesoreyeram-infinity-datasource/settings`
@@ -573,10 +573,10 @@ python -m scripts.ops check-observability-ports --json
   1. Для Grafana 12+ используйте `GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource`
      (legacy `GF_INSTALL_PLUGINS` оставляем только для обратной совместимости).
   1. Убедитесь, что Grafana datasource `Quarantine Explorer` указывает на
-     `http://host.docker.internal:8081` через host-gateway mapping Grafana
-     container (или ваш override `BIOETL_QUARANTINE_EXPLORER_URL`).
-  1. Проверьте, что host-side backend запущен как
-     `bioetl quarantine serve --host 0.0.0.0 --port 8081`.
+     `http://quarantine-explorer:8081` внутри monitoring compose network
+     (или ваш override `BIOETL_QUARANTINE_EXPLORER_URL`).
+  1. Проверьте, что backend запущен как
+     `bioetl quarantine serve --host 127.0.0.1 --port 8081` для локального доступа или как compose service `quarantine-explorer`.
   1. Если Grafana уходит в restart loop, проверьте `docker logs bioetl-grafana`:
      shipped bootstrap entrypoint удаляет stale local `grafana-image-renderer`
      plugin из persistent volume, когда включён remote renderer sidecar.

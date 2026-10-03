@@ -186,7 +186,7 @@ def get_filtered_record(
         payload_hash=payload_hash,
         from_ts=None,
         to_ts=None,
-        include_payload=True,
+        include_payload=False,
         include_payload_preview=True,
     )
     if not rows:

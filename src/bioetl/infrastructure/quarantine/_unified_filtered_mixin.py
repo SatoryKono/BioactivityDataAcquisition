@@ -65,7 +65,7 @@ class UnifiedQuarantineFilteredMixin:
         payload_hash: str,
         pipeline: str | None = None,
     ) -> JsonDict | None:
-        """Return one filtered Silver record with full payload details."""
+        """Return one filtered Silver record with preview-only payload details."""
         await asyncio.sleep(0)
         return get_filtered_record(
             self.base_path,

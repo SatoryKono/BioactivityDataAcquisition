@@ -150,7 +150,7 @@ class QuarantinePort(Protocol):
         payload_hash: str,
         pipeline: str | None = None,
     ) -> MetaDict | None:
-        """Return one Silver-filter record including detail payload."""
+        """Return one Silver-filter record detail without raw payload disclosure."""
         ...
 
     def get_record(
