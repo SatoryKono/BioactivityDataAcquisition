@@ -1800,7 +1800,7 @@
     },
     {
       "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
-      "line": 118,
+      "line": 121,
       "layer": "application",
       "category": "unjustified",
       "justified": false,
@@ -1830,7 +1830,7 @@
     },
     {
       "path": "src/bioetl/composition/factories/services/pipeline_batch_executor_builder.py",
-      "line": 193,
+      "line": 195,
       "layer": "composition",
       "category": "unjustified",
       "justified": false,
@@ -2260,7 +2260,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 37,
+      "line": 40,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2270,7 +2270,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 38,
+      "line": 41,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2280,7 +2280,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 39,
+      "line": 42,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2290,7 +2290,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 40,
+      "line": 43,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2300,7 +2300,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 41,
+      "line": 44,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2310,7 +2310,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 42,
+      "line": 45,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2320,7 +2320,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 45,
+      "line": 48,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2330,7 +2330,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
-      "line": 46,
+      "line": 49,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -3370,7 +3370,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py",
-      "line": 194,
+      "line": 209,
       "layer": "infrastructure",
       "category": "unjustified",
       "justified": false,
@@ -3380,7 +3380,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py",
-      "line": 217,
+      "line": 232,
       "layer": "infrastructure",
       "category": "unjustified",
       "justified": false,
