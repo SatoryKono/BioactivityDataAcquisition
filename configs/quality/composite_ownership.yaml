@@ -120,7 +120,7 @@ areas:
     depends_on: [join]
     modules:
       - src/bioetl/application/composite/dependency_coordinator.py
-      - src/bioetl/application/composite/dependency_join_context_builders.py
+      - src/bioetl/application/composite/dependency_join_context_assembly.py
       - src/bioetl/application/composite/dependency_join_execution.py
       - src/bioetl/application/composite/dependency_join_models.py
       - src/bioetl/application/composite/dependency_join_support.py

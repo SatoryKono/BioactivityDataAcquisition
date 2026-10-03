@@ -130,24 +130,14 @@ def _has_bound_reference_cohort(
         options.get("source_table"),
         options.get("reference_table"),
     )
-    for producer in config.pipeline_steps:
-        cohort = producer.reference_cohort
-        if cohort is None:
-            continue
-        table = producer.pipeline_name.replace("_", ".", 1)
-        if (
-            table == reference_table
-            and cohort.table == source_table
-            and cohort.column == options.get("source_key")
-        ):
-            return True
-        if (
-            table == source_table
-            and cohort.table == reference_table
-            and cohort.column == options.get("reference_key")
-        ):
-            return True
-    return False
+    expected_links = (
+        (reference_table, source_table, options.get("source_key")),
+        (source_table, reference_table, options.get("reference_key")),
+    )
+    return any(
+        _producer_cohort_link(producer) in expected_links
+        for producer in config.pipeline_steps
+    )
 
 
 def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None:
@@ -162,11 +152,31 @@ def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None
         transform = _delete_orphans_transform(step)
         if transform is None:
             continue
-        limited = _limited_upstream_pipeline_ids(transform.step_id, config, steps_by_id)
-        if limited and not _has_bound_reference_cohort(transform, config):
-            raise ValueError(
-                "reconcile_foreign_keys action=delete_orphans cannot depend on "
-                "pipeline steps with run_options.limit "
-                f"({', '.join(limited)}); independently bounded extracts "
-                "make Gold FK orphans false positives"
-            )
+        _reject_limited_delete_orphans(transform, config, steps_by_id)
+
+
+def _producer_cohort_link(producer: WorkflowStepConfig) -> tuple[str, str, str] | None:
+    """Describe a selected cohort link without duplicating the orientation checks."""
+    cohort = producer.reference_cohort
+    if cohort is None:
+        return None
+    return producer.pipeline_name.replace("_", ".", 1), cohort.table, cohort.column
+
+
+def _reject_limited_delete_orphans(
+    transform: TransformStepConfig,
+    config: WorkflowConfig,
+    steps_by_id: dict[str, WorkflowStep],
+) -> None:
+    """Reject one destructive transform unless its limited cohort is bound."""
+    limited = _limited_upstream_pipeline_ids(transform.step_id, config, steps_by_id)
+    if not limited:
+        return
+    if _has_bound_reference_cohort(transform, config):
+        return
+    raise ValueError(
+        "reconcile_foreign_keys action=delete_orphans cannot depend on "
+        "pipeline steps with run_options.limit "
+        f"({', '.join(limited)}); independently bounded extracts "
+        "make Gold FK orphans false positives"
+    )

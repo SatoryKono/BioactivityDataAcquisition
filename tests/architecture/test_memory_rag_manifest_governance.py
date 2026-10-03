@@ -40,9 +40,18 @@ def test_derived_rag_lane_tracks_only_policy_files() -> None:
 
 
 def test_derived_rag_lane_ignores_generated_payloads() -> None:
-    ignore_file = Path("src/memory/derived/rag/manifests/.gitignore")
-    patterns = set(ignore_file.read_text(encoding="utf-8").splitlines())
-
-    assert "*" in patterns
-    assert "!.gitignore" in patterns
-    assert "!README.md" in patterns
+    # Derived manifests are machine-local; the tracked root policy must ignore
+    # the entire lane even in a fresh clone without generated memory payloads.
+    result = subprocess.run(
+        [
+            "git",
+            "check-ignore",
+            "--no-index",
+            "src/memory/derived/rag/manifests/probe.json",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "src/memory/derived/rag/manifests/probe.json"

@@ -27,10 +27,8 @@ from bioetl.domain.types import BronzeRecord
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.application.core.publication_term_enrichment import (
-        PublicationTermPayloadEnricher,
-    )
     from bioetl.domain.ports import DataSourcePort
+    from bioetl.domain.ports.data_source import PublicationTermEnrichmentPort
 
 
 class PublicationTermDataSource(
@@ -50,7 +48,7 @@ class PublicationTermDataSource(
     def __init__(
         self,
         data_source: DataSourcePort,
-        term_payload_enricher: PublicationTermPayloadEnricher | None = None,
+        term_payload_enricher: PublicationTermEnrichmentPort | None = None,
     ) -> None:
         self._data_source = data_source
         self._term_payload_enricher = term_payload_enricher

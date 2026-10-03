@@ -8,6 +8,8 @@ from pathlib import Path
 import pytest
 from scripts.ops.observability.green_acceptance import discover, execute, launch_timeout
 
+pytestmark = pytest.mark.integration
+
 ROOT = Path(__file__).resolve().parents[2]
 CASES = discover(ROOT)
 

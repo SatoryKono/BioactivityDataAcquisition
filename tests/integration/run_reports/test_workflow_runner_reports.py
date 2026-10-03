@@ -105,7 +105,7 @@ def test_attach_workflow_run_report_logs_warning_on_failure(
         steps=(WorkflowStepConfig(step_id="p1", pipeline_name="chembl_activity"),),
     )
     monkeypatch.setattr(
-        "bioetl.domain.run_reports.workflow_builder.build_workflow_run_report",
+        "bioetl.domain.run_reports.workflow_report_assembly.build_workflow_run_report",
         lambda **_kwargs: (_ for _ in ()).throw(RuntimeError("report boom")),
     )
 
@@ -142,7 +142,7 @@ def test_attach_workflow_run_report_records_completed_at(
         steps=(WorkflowStepConfig(step_id="p1", pipeline_name="chembl_activity"),),
     )
     monkeypatch.setattr(
-        "bioetl.domain.run_reports.workflow_builder.build_workflow_run_report",
+        "bioetl.domain.run_reports.workflow_report_assembly.build_workflow_run_report",
         _capture_build,
     )
 
@@ -167,7 +167,9 @@ def test_report_unwraps_real_transform_execution_result() -> None:
     from bioetl.application.services.workflow.workflow_runner_reports import (
         _execution_rows_from_result,
     )
-    from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
+    from bioetl.domain.run_reports.workflow_report_assembly import (
+        build_workflow_run_report,
+    )
 
     transform = WorkflowTransformExecutionResult(
         step_id="reconcile",

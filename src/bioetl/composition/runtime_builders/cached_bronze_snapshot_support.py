@@ -5,7 +5,12 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
+from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.control_plane import RunInputSnapshotRef
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+    normalize_required_persistence_profile,
+)
 
 __all__ = [
     "CACHED_BRONZE_EMPTY_SNAPSHOT_PROVENANCE_MESSAGE",
@@ -89,3 +94,33 @@ def _compute_cached_bronze_batch_content_hash(batch_file: Path) -> str:
                 break
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _coerce_optional_str(value: object | None) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _fail_fast_empty_explicit_cached_bronze(ctx: PipelineRunContext) -> None:
+    cached_bronze = getattr(ctx, "cached_bronze", None)
+    if cached_bronze is None or not getattr(cached_bronze, "enabled", False):
+        return
+    strict = bool(getattr(ctx, "exact_replay", False)) or (
+        normalize_required_persistence_profile(
+            getattr(ctx, "required_persistence_profile", None)
+        )
+        in STRICT_PERSISTENCE_PROFILES
+    )
+    # degraded_observable must persist the run manifest before failing so the
+    # audit trail lands; strict profiles fail closed without artifacts.
+    if not strict:
+        return
+    bronze_path = _coerce_optional_str(getattr(cached_bronze, "bronze_path", None))
+    if bronze_path is None:
+        return
+    require_cached_bronze_input_snapshot_refs(
+        bronze_root=Path(bronze_path),
+        bronze_date=_coerce_optional_str(getattr(cached_bronze, "bronze_date", None)),
+    )

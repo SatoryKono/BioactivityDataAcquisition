@@ -1,4 +1,4 @@
-"""Internal policy helpers for HTTP client retry orchestration."""
+"""Shared policy helpers for HTTP client retry orchestration."""
 
 from __future__ import annotations
 
@@ -13,8 +13,10 @@ from bioetl.domain.ports import MetricsPort
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.time.system_clock import SystemClock
 
+__all__ = ["can_retry", "parse_retry_after"]
 
-def _parse_retry_after(value: str, *, now: float | None = None) -> float | None:
+
+def parse_retry_after(value: str, *, now: float | None = None) -> float | None:
     """Parse a Retry-After delay-seconds or HTTP-date value."""
     normalized = value.strip()
     if not normalized:
@@ -37,7 +39,7 @@ def _parse_retry_after(value: str, *, now: float | None = None) -> float | None:
         return None
 
 
-def _can_retry(
+def can_retry(
     retry_config: RetryConfig,
     attempt: int,
     retries_used: int,

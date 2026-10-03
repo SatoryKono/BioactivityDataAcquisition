@@ -288,7 +288,9 @@ def test_archive_restores_without_changing_source_and_rejects_overwrite(archive_
 
 def test_archive_preserves_selected_run_snapshot_and_revisions(archive_case, tmp_path):
     from bioetl.application.services.run_reports.writer import write_pipeline_run_report
-    from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+    from bioetl.domain.run_reports.pipeline_report_assembly import (
+        build_pipeline_run_report,
+    )
     from bioetl.infrastructure.storage.run_report_store_adapter import (
         FileRunReportStoreAdapter,
     )
@@ -514,7 +516,9 @@ def test_archive_containment_rechecks_parent_links(archive_case, monkeypatch):
 
 def test_late_run_evidence_creates_new_archive_version(archive_case, tmp_path):
     from bioetl.application.services.run_reports.writer import write_pipeline_run_report
-    from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+    from bioetl.domain.run_reports.pipeline_report_assembly import (
+        build_pipeline_run_report,
+    )
     from bioetl.infrastructure.storage.run_report_store_adapter import (
         FileRunReportStoreAdapter,
     )

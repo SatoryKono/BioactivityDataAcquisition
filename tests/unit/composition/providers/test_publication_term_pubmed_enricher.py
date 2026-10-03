@@ -182,3 +182,28 @@ def test_create_enricher_skips_without_email() -> None:
     assert result is None
     logger.warning.assert_called_once()
     assert logger.warning.call_args.kwargs["reason"] == "missing_pubmed_email"
+
+
+@pytest.mark.parametrize(
+    "xml_text",
+    [
+        '<!DOCTYPE root [<!ENTITY x "unsafe">]><root>&x;</root>',
+        '<!DOCTYPE root [<!ENTITY x SYSTEM "file:///nonexistent">]><root>&x;</root>',
+    ],
+)
+def test_parse_pubmed_mesh_xml_rejects_entities(xml_text: str) -> None:
+    assert parse_pubmed_mesh_xml(xml_text) == ([], [])
+
+
+@pytest.mark.asyncio
+async def test_enrich_many_propagates_programming_errors() -> None:
+    class BrokenSource:
+        async def fetch_filtered(self, **kwargs: object):
+            raise TypeError("invalid provider contract")
+            yield {}
+
+    logger = MagicMock()
+    enricher = PubMedPublicationTermPayloadEnricher(BrokenSource(), logger)
+    with pytest.raises(TypeError, match="invalid provider contract"):
+        await enricher.enrich_many([{"publication_id": "CHEMBL1", "pubmed_id": "1"}])
+    logger.warning.assert_not_called()

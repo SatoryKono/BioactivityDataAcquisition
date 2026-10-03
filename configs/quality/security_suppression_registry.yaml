@@ -282,17 +282,6 @@ entries:
     review_date: "2027-03-18"
     rationale: >-
       DQ status enum literals "pass" (check and report status); not credentials.
-  # --- yaml.load with SafeLoader subclass (B506) ---
-  - id: SUP-YL-001
-    path: src/bioetl/domain/control_plane/config_source_hashing.py
-    line: 75
-    rule: B506
-    symbol: yaml.load
-    owner: stream-b
-    review_date: "2027-03-18"
-    rationale: >-
-      Loader is _UniqueKeySafeLoader, a yaml.SafeLoader subclass with
-      duplicate-key rejection; no arbitrary object construction.
   # --- best-effort telemetry cleanup (B110) ---
   - id: SUP-TE-001
     path: src/bioetl/infrastructure/observability/tracing.py

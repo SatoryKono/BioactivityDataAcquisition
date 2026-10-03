@@ -7,11 +7,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from bioetl.application.composite.runner_pkg.runner import CompositePipelineRunner
-from bioetl.composition.bootstrap.runtime.composite_contract_evidence import (
+from bioetl.composition.bootstrap.runtime._composite_control_plane_support import (
     create_composite_contract_finalizer,
 )
 
-MODULE = "bioetl.composition.bootstrap.runtime.composite_contract_evidence"
+MODULE = "bioetl.composition.bootstrap.runtime._composite_control_plane_support"
 
 
 @pytest.mark.parametrize("resume", [False, True])

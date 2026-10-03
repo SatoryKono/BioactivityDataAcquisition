@@ -34,7 +34,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.services.lineage.metadata_lineage_node_builders import (
+from bioetl.application.services.lineage.metadata_lineage_node_assembly import (
     build_fragment_id,
     build_semantic_fragment_id,
     bronze_batch_node_from_input,

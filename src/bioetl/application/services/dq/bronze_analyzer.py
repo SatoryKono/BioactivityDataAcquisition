@@ -20,7 +20,7 @@ from typing import Any
 
 import orjson
 
-from bioetl.application.services.dq.dq_report_builders import (
+from bioetl.application.services.dq.dq_report_assembly import (
     build_summary,
     update_counts,
 )

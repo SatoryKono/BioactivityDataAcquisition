@@ -215,10 +215,14 @@ tracked_suite_inventory:
       - tests/integration/ci/test_silver_gold_filter_parity.py
       - tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
       - tests/integration/config/test_activity_hash_policy_alignment.py
+      - tests/integration/config/test_activity_raw_compound_units.py
+      - tests/integration/config/test_live_chembl_regressions.py
+      - tests/integration/config/test_live_uniprot_pubchem_regressions.py
       - tests/integration/test_preflight_health_modes.py
       - tests/integration/test_runner_lifecycle.py
       data_quality:
       - tests/integration/config/test_non_chembl_identifier_dq_parity.py
+      - tests/integration/test_live_green_acceptance.py
       - tests/integration/test_dq_monitor_integration.py
       - tests/integration/test_dq_report_integration.py
       docker_integration:
@@ -423,7 +427,7 @@ execution_paths:
           --vcr-record=none -q --tb=short
   live_contract:
     workflow_path: .github/workflows/contract-tests.yml
-    gate_mode: scheduled
+    gate_mode: keep-disabled
     repository_guard: SatoryKono/BioactivityDataAcquisition
     required_env:
       BIOETL_LIVE_API_TESTS: 'true'

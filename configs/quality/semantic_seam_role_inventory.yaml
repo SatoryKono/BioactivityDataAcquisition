@@ -22,7 +22,7 @@ seams:
   caller_guard:
     max_src_importer_count: 4
     allowed_src_importers:
-    - src/bioetl/application/core/_batch_write_support.py
+    - src/bioetl/application/core/_batch_write_events.py
     - src/bioetl/application/core/batch_shared_operation_errors.py
     - src/bioetl/application/core/runner_execution_flow.py
     - src/bioetl/application/core/runner_flow.py

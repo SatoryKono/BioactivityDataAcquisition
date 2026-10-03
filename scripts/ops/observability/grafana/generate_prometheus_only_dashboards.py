@@ -63,6 +63,9 @@ def render_notices(root: Path = ROOT, *, check: bool = False) -> bool:
                 print(f"drift prometheus_only/{source.name}")
                 ok = False
         else:
-            destination.mkdir(parents=True, exist_ok=True)
-            target.write_text(serialized, encoding="utf-8")
+            from scripts.ops.observability.grafana.render_nav_bus import (
+                write_dashboard_source,
+            )
+
+            write_dashboard_source(target, serialized, root=root)
     return ok

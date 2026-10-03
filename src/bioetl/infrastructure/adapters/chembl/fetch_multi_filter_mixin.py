@@ -150,7 +150,7 @@ class ChemblFetchMultiFilterMixin:
         Returns:
             Async iterator of deduplicated BronzeRecord dicts matching all filters.
         """
-        if not filters or any(not values for values in filters.values()):
+        if not filters or not all(filters.values()):
             return
         if limit is not None and limit <= 0:
             return

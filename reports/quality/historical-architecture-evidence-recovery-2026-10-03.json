@@ -1,0 +1,237 @@
+{
+  "kind": "retained_historical_inputs_not_new_measurements",
+  "source_checkout": "E:/github/BioactivityDataAcquisition",
+  "files": [
+    {
+      "path": "reports/quality/docker-stability-baseline.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "0bff28476ff838265faa1715b6a8f6f2fce2fd0175fd3373e19b97da46560d6e",
+      "size": 18449,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/control-plane-duplication.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "20789919b5f150b33523f87fcc4a4e08f6ccd3a3a577deea492249e7f10fc084",
+      "size": 1346,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/governance/ruleset-10267-closeout-get-2026-09-10.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "7bc0eb98c09d1903e8aa2cb6b7aa3de4c89b7de463c157fa9b91bf50a6929293",
+      "size": 1379,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/layer-contract-coverage-matrix.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "773df614e5dd19ae2e472f51f96eae9e972f8154143e628cc1c8713336f98b86",
+      "size": 112148,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/observability-export-dashboard-rollout-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "96115f7e164ce92415a12863d5f7c0b425933a93d24f7d590579a4b906b0c264",
+      "size": 8333,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issue-6062-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "d60a4a5493a9046c775b33a4ef29fac6536d9b7a963003417ae4818968cec219",
+      "size": 5486,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issues-5387-5394-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "d13e9817bbb3f6f5453777acd0968eab24bff360979d1ffe240f9d127361a35a",
+      "size": 6197,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issues-5553-5558-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "047a116b3b1a49edf70d6cd75ae191193ddcd112e859b5ab7795bebea66d9d65",
+      "size": 3469,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issues-5559-5563-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "626602b54054132561ee3c03e24aeabe6213b3ec40fe850dc99eabaa991cbba5",
+      "size": 3311,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issues-5565-5569-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "1062f2c9f272c9a30d10aa088303ae4611ed57177b7217ac0949a0854aef36e6",
+      "size": 3180,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/observability/runtime_cardinality_allowlist_review_5574.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "5194cc5b704d59a57255454a1721e90a7fde4449755570e700cfef8670ffc445",
+      "size": 3462,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/hotspot-coverage-tail-owner-map.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "706121968f7ebbc457bb868c4b41467ad23f505938978f133f2c0a6c73e21a66",
+      "size": 3154,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issues-5570-5578-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "d3ea3e7d3115a84eb998b5ab3521a1400aeca701804959b4c5103526d57bd8b0",
+      "size": 5400,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tasks_architecture_metric_exemptions_2026-06-26-15-51.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "1d824df3311e63b16f4b33b7a9cec1fadaac63bb307111d04a7cf921c979595d",
+      "size": 21063,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issues-5677-5685-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "677fabe1fa03ae475822e7eba5ac1e4bb41ccb0455de9b8b443e27767d2c52d5",
+      "size": 5633,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/coverage/runtime-basics-targeted-5795.xml",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "4afe3c3d5b8b4519141997885ae816160eee527e7521ad57e7bb08e3c2a52d40",
+      "size": 2151,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/scripts_deprecation_backlog.md",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "cb065fd2e6e4a0cbf8d492ed8e4dedbc1002a7d840b90a50bf973e17c6d4bd3d",
+      "size": 48809,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/root-hygiene-review-evidence.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "f5c4362d777ec0b696c029716f31dabb1796c8f3e2c25c0689c6ac9b57248213",
+      "size": 87334,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issues-5847-5852-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "e6bf57b9545643c671ffb5cad94839e392323de1b24b7d6caf86b4f5f20bd94a",
+      "size": 5594,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issues-5933-5944-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "6eef1964b30e6cf9c81a340211ac7f62b0191c612417a328bc7b177afe3900e9",
+      "size": 9355,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issues-5956-5961-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "fb677c818bff02fea1c964b42e16041c6753b97e4a9326a5ed277d56bdd8a276",
+      "size": 3027,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issues-5974-5977-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "fa1c6379cb8a49be7d405607dab0e5cffe208ab752523dce673acd3b0f9d7afd",
+      "size": 6456,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issues-5978-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "942de23172b14c4909687ee426d2153e6ffe8deebcdfd61dfb68e4f9bcad0d3e",
+      "size": 3011,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/branch-coverage-gate-evidence.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "c8bce546eba346fda2d4398854ac1cfb85f543a15563cd155fb7076c97bb35c1",
+      "size": 1297,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/duplication-baseline.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "0d3076f59e388135d505df9f4d014a5da6bdbab5f6521af521b02d62b64fc71d",
+      "size": 63308,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/tech-debt-issues-6022-6028-closeout.json",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "5b2af3a669ea45cf8573141996e69c6036d80ac3e0f8083bc68bff754db640fd",
+      "size": 3015,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "docs/reports/evidence/project-package-topology/SUMMARY.md",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "sha256": "d3dadbe6aaf7260f32720f14b98da1d7ca3df603158f5600e57b37f2e0016d1e",
+      "size": 13823,
+      "purpose": "Unmodified historical input; not fresh test or CI evidence"
+    },
+    {
+      "path": "reports/quality/runtime-builders-duplication.json",
+      "sha256": "7471771011718108b92ca9169cb1b0028dc92908e609857ee5d47e0c98fef114",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "kind": "historical_input_not_new_measurement"
+    },
+    {
+      "path": "reports/quality/control-plane-duplication.md",
+      "sha256": "355cbecaa220e19cee2e612cdd3a8c329539e2444132b5657d392802c81a1753",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "kind": "historical_input_not_new_measurement"
+    },
+    {
+      "path": "reports/quality/semantic-ddd-use-case-audit-2026-06-17.md",
+      "sha256": "b33f643528e8d7ad82e0476714fd3ccc4d70ead05154782a5cd8886c6f19267b",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "kind": "historical_input_not_new_measurement"
+    },
+    {
+      "path": "reports/quality/architecture_debt_execution_plan_2026-06-26-15-51.json",
+      "sha256": "23ecb5f3ad0f512498f306ae7708849e3440f0407d335b11c8a6743b4aacdb0e",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "kind": "historical_input_not_new_measurement"
+    },
+    {
+      "path": "reports/quality/root-hygiene-cleanup-classification.json",
+      "sha256": "878e5c8656c1617d2c518716925c84b09dcddf86d01f827d21aa4460415353dc",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "kind": "historical_input_not_new_measurement"
+    },
+    {
+      "path": "reports/quality/tasks_architecture_metric_exemptions_2026-07-12-12-33.json",
+      "sha256": "1d824df3311e63b16f4b33b7a9cec1fadaac63bb307111d04a7cf921c979595d",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "kind": "historical_input_not_new_measurement"
+    },
+    {
+      "path": "reports/test-telemetry/s7-governance-hotspots.json",
+      "sha256": "e061de0553b40efbbba674005b1deb92480407a03876685d479f84935b8dcb18",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "kind": "historical_input_not_new_measurement"
+    }
+  ]
+}

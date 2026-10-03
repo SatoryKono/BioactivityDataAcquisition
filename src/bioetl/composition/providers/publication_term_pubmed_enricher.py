@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET  # nosec B405 - parse-error type only
 from collections.abc import Sequence
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING, cast
 
 import defusedxml.ElementTree as defused_ET
+from defusedxml.common import DefusedXmlException
+from bioetl.domain.exceptions import BioETLError
 
 from bioetl.application.core.publication_term_runtime import (
     mesh_terms_from_pubmed_headings,
@@ -44,8 +45,8 @@ def parse_pubmed_mesh_xml(
     try:
         root = defused_ET.fromstring(xml_text)
     except (
-        ET.ParseError,
-        getattr(defused_ET, "EntitiesForbidden", ET.ParseError),
+        defused_ET.ParseError,
+        DefusedXmlException,
     ):
         return [], []
 
@@ -162,7 +163,7 @@ class PubMedPublicationTermPayloadEnricher:
                     pmid = _as_pmid(pubmed_record.get("pmid"))
                     if pmid is not None:
                         pubmed_by_pmid[pmid] = pubmed_record
-        except Exception as exc:
+        except (BioETLError, OSError, RuntimeError, ValueError) as exc:
             self._logger.warning(
                 "publication_term_pubmed_enrichment_failed",
                 error=str(exc),
@@ -222,7 +223,7 @@ def create_pubmed_publication_term_enricher(
             email=email,
             metrics=metrics,
         )
-    except Exception as exc:
+    except (BioETLError, OSError, RuntimeError, ValueError) as exc:
         logger.warning(
             "publication_term_pubmed_enricher_unavailable",
             error=str(exc),

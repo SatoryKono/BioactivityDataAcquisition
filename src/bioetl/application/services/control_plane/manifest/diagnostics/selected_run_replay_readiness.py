@@ -29,7 +29,7 @@ SELECT_RUN = "SELECT RUN"
 QUERY_ERROR = "QUERY ERROR"
 
 
-class ReplayReadinessProjection(TypedDict):
+class ReplayReadinessSnapshot(TypedDict):
     """Operator-facing replay-readiness projection for one selected run."""
 
     run_id: str
@@ -131,7 +131,7 @@ def project_selected_run_replay_readiness(
     inventory_present: bool = False,
     evidence_revision: str = "",
     checked_at: str = "",
-) -> ReplayReadinessProjection:
+) -> ReplayReadinessSnapshot:
     """Project operator readiness. Capability alone never yields READY."""
     checks = [
         *_identity_checks(identity),
@@ -169,7 +169,7 @@ def empty_replay_readiness(
     run_id: str,
     verdict: str,
     reason: str,
-) -> ReplayReadinessProjection:
+) -> ReplayReadinessSnapshot:
     """HTTP states that are not a domain READY."""
     if verdict not in {SELECT_RUN, QUERY_ERROR, INSUFFICIENT, BLOCKED, UNSUPPORTED}:
         verdict = INSUFFICIENT

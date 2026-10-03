@@ -74,25 +74,22 @@ def test_silver_surfaces_do_not_emit_gold_candidate_or_readiness_flags() -> None
 def test_dq_dashboard_gold_reject_panel_is_not_silver_alias_surface() -> None:
     dashboard = json.loads(DQ_DASHBOARD.read_text(encoding="utf-8"))
     panel = next(
-        (
-            item
-            for item in _iter_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Gold Reject Outcomes by Pipeline"
-        ),
+        (item for item in _iter_dashboard_panels(dashboard) if item.get("id") == 9403),
         None,
     )
 
     assert panel is not None
-    expressions = [
-        target.get("expr", "")
-        for target in panel.get("targets", [])
-        if isinstance(target.get("expr"), str)
-    ]
-    joined = "\n".join(expressions)
-    assert "bioetl_processed_records_gold_quarantined_current" in joined
-    assert "bioetl_processed_records_gold_excluded_by_contract_current" in joined
-    assert "bioetl_silver_filter_rejections_total" not in joined
-    assert 'stage="filtered_out"' not in joined
+    assert panel["title"] == "Inspect Processed Records"
+    targets = panel["targets"]
+    assert targets[0]["url"].startswith("/ops/observability/processed-records?")
+    assert "run_id=${run_id}" in targets[0]["url"]
+    stage_input = next(target for target in targets if target["refId"] == "StageInput")
+    projection = stage_input["uql"]
+    assert "gold_quarantined_records" in projection
+    assert "gold_excluded_by_contract_records" in projection
+    assert "stage_id = $layerName" in projection
+    assert "bioetl_silver_filter_rejections_total" not in str(targets)
+    assert 'stage="filtered_out"' not in str(targets)
 
     links = [
         *panel.get("links", []),

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.dq.disabled_gold_filter import DisabledGoldFilter
+from bioetl.application.services.dq.disabled_gold_filter import (
+    DisabledGoldFilterService,
+)
 
 from typing import Any, TYPE_CHECKING, cast
 
@@ -129,7 +131,7 @@ def _resolve_gold_filter(
             table_name=_resolve_effective_gold_table(pipeline),
             state="disabled",
         )
-        return DisabledGoldFilter()
+        return DisabledGoldFilterService()
     return callbacks.gold_filter
 
 

@@ -16,16 +16,16 @@ from bioetl.infrastructure.adapters.http._client_retry_models import (
     _RequestAttemptOutcome,
     _RetryRequestState,
 )
-from bioetl.infrastructure.adapters.http._client_retry_policy import (
-    _is_retryable_error,
-    _status_code_from_error,
-)
 from bioetl.infrastructure.adapters.http.client_retry_observability import (
     SpanLike,
     finalize_request_observability,
     handle_circuit_breaker_trip,
     raise_retry_exhausted,
     start_request_span,
+)
+from bioetl.infrastructure.adapters.http.client_retry_policy import (
+    _is_retryable_error,
+    _status_code_from_error,
 )
 
 __all__ = ["HTTPClientRetryRequestFlow"]

@@ -507,7 +507,11 @@ def main() -> int:
                 print(f"drift {path.name}")
                 drift = True
         else:
-            path.write_text(rendered, encoding="utf-8")
+            from scripts.ops.observability.grafana.render_nav_bus import (
+                write_dashboard_source,
+            )
+
+            write_dashboard_source(path, rendered, root=directory.parents[1])
     return int(drift)
 
 

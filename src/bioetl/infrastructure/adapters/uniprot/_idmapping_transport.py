@@ -12,11 +12,10 @@ from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.common.response_shapes import extract_response_text
 from bioetl.infrastructure.adapters.uniprot._idmapping_errors import IDMappingJobError
 from bioetl.infrastructure.adapters.uniprot._idmapping_url_policy import (
+    resolve_idmapping_result_redirect,
     trusted_idmapping_url,
 )
 
-_REDIRECT_STATUS_CODES = frozenset({301, 302, 303, 307, 308})
-_MAX_RESULT_REDIRECTS = 3
 _MAX_RESULT_PAGES = 50
 
 if TYPE_CHECKING:
@@ -188,15 +187,12 @@ class IDMappingTransportMixin:
         redirect_count: int,
     ) -> tuple[str, int] | None:
         """Return one validated redirect target and its bounded hop count."""
-        if response.status_code not in _REDIRECT_STATUS_CODES:
-            return None
-        next_count = redirect_count + 1
-        if next_count > _MAX_RESULT_REDIRECTS:
-            raise ValueError("UniProt ID mapping redirect limit exceeded")
-        location = response.headers.get("location")
-        if not location:
-            raise ValueError("UniProt ID mapping redirect omitted Location")
-        return trusted_idmapping_url(deps.base_url, location), next_count
+        return resolve_idmapping_result_redirect(
+            base_url=deps.base_url,
+            status_code=response.status_code,
+            location=response.headers.get("location"),
+            redirect_count=redirect_count,
+        )
 
     def _resolve_entries(
         self,
@@ -223,7 +219,7 @@ class IDMappingTransportMixin:
         deps = self._transport_deps()
         found_count = sum(1 for value in results.values() if value is not None)
         multiple_count = sum(
-            1 for value in results.values() if value and value.get("all_mappings")
+            bool(value and value.get("all_mappings")) for value in results.values()
         )
         deps.logger.info(
             "idmapping_results_fetched",
