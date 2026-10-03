@@ -8,13 +8,13 @@
 | --- | --- |
 | Typed identity `[type:provider_entity]` | `pipeline:chembl_assay_parameters` |
 | Status | `active` |
-| Gold contract | `chembl.assay_parameters v1.0.0` |
+| Gold contract | `chembl.assay_parameters v2.0.0` |
 
 ## Назначение и обработка данных
 
-Extract experimental assay parameters from ChEMBL API. Источник — `chembl:assay_parameters` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: assay_param_id=IDs from data/input/assay_parameters.csv column assay_param_id; CLI may override the input CSV.
+Extract experimental assay parameters from ChEMBL API. Источник — `chembl:assay_parameters` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: assay_id=IDs from data/input/assay_parameters.csv column assay_id; CLI may override the input CSV.
 В business-проекцию входят `assay_param_id`, `assay_id`, `type_raw`, `parameter_type`, `parameter_relation`, `parameter_value`, `qudt_units`, `qudt_unit_iri` и ещё 14 полей.
-Silver использует профиль `chembl.assay_parameters` и проверяет обязательные поля `assay_id`, `assay_param_id`, `parameter_type`, `type`; невалидные записи направляются в `quarantine`.
+Silver использует профиль `chembl.assay_parameters` и проверяет обязательные поля `assay_id`, `assay_param_id`, `parameter_type`; невалидные записи направляются в `quarantine`.
 Перед Gold применяется строгий Pandera-контракт `chembl.assay_parameters`; Gold filters/constraints заданы в entity config (6 групп правил).
 
 ## Извлечение данных
@@ -24,7 +24,7 @@ Silver использует профиль `chembl.assay_parameters` и пров
 | Source | `derived` · `chembl:assay_parameters` |
 | Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/assay` |
 | Resource / tables | `assay` |
-| Filters | `assay_param_id`: IDs from data/input/assay_parameters.csv column assay_param_id; CLI may override the input CSV |
+| Filters | `assay_id`: IDs from data/input/assay_parameters.csv column assay_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (22 fields) |
 
 ## Silver и Data Quality
@@ -35,7 +35,7 @@ Silver использует профиль `chembl.assay_parameters` и пров
 
 ## Gold
 
-- Contract: `chembl.assay_parameters v1.0.0`; strict validation: `True`.
+- Contract: `chembl.assay_parameters v2.0.0`; strict validation: `True`.
 - Write mode: `scd2`.
 - SCD2: current_flag_col=_is_current; valid_from_col=_valid_from; valid_to_col=_valid_to; version_col=_version.
 - Technical exclusions: `_dq_*`, `_source_batch_id`, `_index`.

@@ -5,7 +5,15 @@ import { locationService } from '@grafana/runtime';
 import { defaultOptions, SelectorContextPayload } from '../types';
 import { SimplePanel } from './SimplePanel';
 
-jest.mock('@grafana/runtime', () => ({ locationService: { partial: jest.fn() } }));
+jest.mock('@grafana/runtime', () => {
+  const { BehaviorSubject } = jest.requireActual<typeof import('rxjs')>('rxjs');
+  const changes = new BehaviorSubject({ search: '' });
+  return { locationService: {
+    partial: jest.fn(),
+    getLocation: () => changes.value,
+    getLocationObservable: () => changes,
+  } };
+});
 jest.mock('@grafana/ui', () => ({
   useStyles2: () => ({ wrapper: 'wrapper', code: 'code' }),
   Stack: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -51,11 +59,14 @@ describe('selector context request lifecycle', () => {
     const fetchMock = jest.fn().mockResolvedValue(response());
     global.fetch = fetchMock;
     const panelProps = { ...props(), replaceVariables };
-    const view = render(<SimplePanel {...panelProps} />);
+    render(<SimplePanel {...panelProps} />);
     await screen.findByText(/Resolved run-123/);
     runId = 'run-456';
     fetchMock.mockResolvedValue(response(runId));
-    view.rerender(<SimplePanel {...panelProps} />);
+    act(() => {
+      const changes = locationService.getLocationObservable() as unknown as import('rxjs').BehaviorSubject<{ search: string }>;
+      changes.next({ search: '?var-run_id=run-456' });
+    });
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
       '/selector-context?run_id=run-456', expect.objectContaining({ credentials: 'same-origin' })
     ));

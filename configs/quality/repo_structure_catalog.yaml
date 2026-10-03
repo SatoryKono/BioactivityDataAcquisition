@@ -33,6 +33,8 @@ docs_code_zones:
 
 root_tooling_roots:
   approved_roots:
+    - path: .circleci
+      role: canonical_circleci_project_configuration
     - path: .agents
       role: derived_native_agent_skill_discovery_surface
     - path: .claude

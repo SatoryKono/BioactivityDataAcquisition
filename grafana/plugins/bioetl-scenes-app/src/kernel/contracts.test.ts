@@ -13,6 +13,7 @@ describe('route context contract', () => {
     pipeline: 'chembl_activity',
     from: 'now-6h',
     to: 'now',
+    timezone: 'UTC',
     runType: 'incremental',
     runId: 'run-42',
     provider: 'chembl',

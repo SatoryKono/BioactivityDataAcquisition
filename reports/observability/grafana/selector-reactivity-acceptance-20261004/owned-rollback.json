@@ -1,0 +1,36 @@
+{
+  "scope": "isolated acceptance host and its separate database only; not managed rollout",
+  "backup_bytes": 1900544,
+  "backup_sha256": "f55a14a247403675f385704bcef083c92e3f9d72d7f4f345601803464f4ac3c9",
+  "candidate_before": {
+    "image": "satorykono/bioetl-grafana-router7-canvas@sha256:abace6d89d5f03680f40edcce05b7a05e2dd1b688ecd17a455d19bd9752c3609",
+    "config_digest": "sha256:5893953e261ab8908bb2db9736c1de609dec37872315f5c62a60ecbaaae075ab",
+    "state": "running"
+  },
+  "preserved_prior": {
+    "image": "satorykono/bioetl-grafana-router7-canvas@sha256:6b06ed07d91d3dee737f9a2d7bb2f5bf933e21d4eef00525584bc81f4afdaa69",
+    "config_digest": "sha256:341db58b1c054b06e8ec2a8d08097e0b872ac570730177a7a85763849aaf799c",
+    "state": "exited"
+  },
+  "rollback_health": {
+    "database": "ok",
+    "version": "13.2.3",
+    "commit": "90ffed056f0884267356c12a0eeb72a022af53f1"
+  },
+  "rollback_runtime": {
+    "image": "satorykono/bioetl-grafana-router7-canvas@sha256:6b06ed07d91d3dee737f9a2d7bb2f5bf933e21d4eef00525584bc81f4afdaa69",
+    "config_digest": "sha256:341db58b1c054b06e8ec2a8d08097e0b872ac570730177a7a85763849aaf799c",
+    "state": "running"
+  },
+  "restored_candidate_health": {
+    "database": "ok",
+    "version": "13.2.3",
+    "commit": "90ffed056f0884267356c12a0eeb72a022af53f1"
+  },
+  "candidate_after": {
+    "image": "satorykono/bioetl-grafana-router7-canvas@sha256:abace6d89d5f03680f40edcce05b7a05e2dd1b688ecd17a455d19bd9752c3609",
+    "config_digest": "sha256:5893953e261ab8908bb2db9736c1de609dec37872315f5c62a60ecbaaae075ab",
+    "state": "running"
+  },
+  "status": "PASS"
+}

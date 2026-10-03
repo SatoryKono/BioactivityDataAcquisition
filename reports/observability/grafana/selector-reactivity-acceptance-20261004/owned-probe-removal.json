@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "scope": "isolated acceptance host only",
+  "probe_mounts_removed": true,
+  "probe_unsigned_allowlist_removed": true,
+  "image_config_digest": "sha256:5893953e261ab8908bb2db9736c1de609dec37872315f5c62a60ecbaaae075ab",
+  "health": {
+    "database": "ok",
+    "version": "13.2.3",
+    "commit": "90ffed056f0884267356c12a0eeb72a022af53f1"
+  },
+  "preserved_original_container": "bioetl-five-issues-acceptance-20261003-final-probe"
+}

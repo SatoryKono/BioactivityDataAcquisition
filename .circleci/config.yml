@@ -84,7 +84,7 @@ jobs:
             HEAD_SHA="$CIRCLE_SHA1"
             if [ "$CIRCLE_BRANCH" = "main" ] || [ "$CIRCLE_BRANCH" = "master" ]; then
               echo "Default-branch push: all gates required (fail-closed)."
-              python3 - "$HEAD_SHA" <<'EOF' > /tmp/pr-gate-decisions.json
+              python3 - "$HEAD_SHA" \<<'EOF' > /tmp/pr-gate-decisions.json
             import json, sys
             head = sys.argv[1]
             gates = ["lint-arch","tests","type-checking","security","codeql","docker",
@@ -98,6 +98,7 @@ jobs:
               git fetch --no-tags origin main:refs/remotes/origin/main
               BASE_SHA="$(git merge-base origin/main "$HEAD_SHA")"
               echo "Classifying $BASE_SHA...$HEAD_SHA"
+              export GITHUB_OUTPUT=/tmp/pr-gate-classifier-output
               uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \
                 --catalog configs/quality/github_required_checks.yaml \
                 --event-name pull_request \
@@ -164,7 +165,7 @@ jobs:
             mkdir -p reports/test-telemetry
             HYPOTHESIS_PROFILE=fast \
             uv run --frozen --no-build pytest tests/architecture \
-              -m not-slow-not-benchmark-not-memory \
+              -m "not slow and not benchmark and not memory" \
               -q --tb=short \
               --junitxml=reports/test-telemetry/junit-arch.xml
       - store_test_results:
@@ -176,12 +177,12 @@ jobs:
     docker:
       - image: cimg/python:3.12
     resource_class: small
-    no_output_timeout: 35m
     steps:
       - checkout
       - setup-python-uv
       - run:
           name: mypy strict gate (src/bioetl + src/memory)
+          no_output_timeout: 35m
           command: |
             export PATH="$HOME/.local/bin:$PATH"
             mkdir -p reports
@@ -246,6 +247,11 @@ jobs:
     docker:
       - image: cimg/python:3.13
     resource_class: small
+    environment:
+      # Auto-detection sees the physical host, not the two-CPU runner quota.
+      PYTEST_XDIST_AUTO_NUM_WORKERS: "2"
+      OPENBLAS_NUM_THREADS: "1"
+      POLARS_MAX_THREADS: "2"
     parameters:
       test-group:
         type: string
@@ -384,7 +390,10 @@ jobs:
   duplication:
     docker:
       - image: cimg/python:3.12-node
-    resource_class: small
+    # The complete src/tests scan exhausted the small runner heap.
+    resource_class: medium
+    environment:
+      NODE_OPTIONS: --max-old-space-size=3072
     steps:
       - checkout
       - setup-python-uv
@@ -451,7 +460,8 @@ jobs:
     resource_class: small
     steps:
       - checkout
-      - setup-python-uv
+      - setup-python-uv:
+          extras: "dev tracing docs"
       - check-gate:
           gate: docs-governance
       - run:
@@ -511,6 +521,11 @@ jobs:
             "$HOME/.local/bin/hadolint" Dockerfile.bioetl
       - run:
           name: docker compose config validation
+          environment:
+            # Static interpolation only; no runtime services are started here.
+            NEO4J_PASSWORD: ci-compose-validation-placeholder
+            GF_SECURITY_ADMIN_PASSWORD: ci-compose-validation-placeholder
+            GF_RENDERING_RENDERER_TOKEN: ci-compose-validation-placeholder
           command: |
             docker compose config > /dev/null
             docker compose -f docker-compose.monitoring.yml config > /dev/null
