@@ -6,6 +6,9 @@ import pytest
 from bioetl.infrastructure.provenance import code_revision as revision
 
 
+pytestmark = pytest.mark.unit
+
+
 @pytest.mark.parametrize(
     "returncode,expected", [(0, "clean"), (1, "dirty"), (128, "dirty_state_unknown")]
 )

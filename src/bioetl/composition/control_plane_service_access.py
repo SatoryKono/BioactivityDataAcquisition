@@ -28,16 +28,16 @@ from bioetl.composition._services import get_lock_service as get_lock_service
 from bioetl.composition._services import (
     get_run_manifest_service as get_run_manifest_service,
 )
-from bioetl.composition._workflow_services import (
+from bioetl.composition.factories.services._workflow_services import (
     get_workflow_execution_service as get_workflow_execution_service,
 )
-from bioetl.composition._workflow_services import (
+from bioetl.composition.factories.services._workflow_services import (
     get_workflow_inspection_service as get_workflow_inspection_service,
 )
-from bioetl.composition._workflow_services import (
+from bioetl.composition.factories.services._workflow_services import (
     get_workflow_runner_service as get_workflow_runner_service,
 )
-from bioetl.composition._workflow_services import (
+from bioetl.composition.factories.services._workflow_services import (
     load_workflow_config as load_workflow_config,
 )
 from bioetl.composition.bootstrap.cli import (

@@ -35,13 +35,11 @@ def _check(
 
 
 def _present(value: object) -> bool:
-    if value is None:
-        return False
     if isinstance(value, str):
         return bool(value.strip())
     if isinstance(value, (list, tuple, dict, set)):
         return bool(value)
-    return True
+    return value is not None
 
 
 def _capability(source: Mapping[str, object]) -> tuple[ReplayCapability, bool]:
@@ -99,13 +97,9 @@ def _family_supported(manifest: Mapping[str, object]) -> bool | None:
         supported = manifest.get("strict_exact_replay_supported")
     if supported is None:
         return None
-    if isinstance(supported, bool):
-        return supported
     token = str(supported).strip().lower()
-    if token in {"true", "1", "yes"}:
-        return True
-    if token in {"false", "0", "no"}:
-        return False
+    if token in {"true", "1", "yes", "false", "0", "no"}:
+        return token in {"true", "1", "yes"}
     return None
 
 

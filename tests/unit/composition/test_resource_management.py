@@ -623,6 +623,7 @@ class TestResourceBootstrapLazyImports:
         }
 
 
+@pytest.mark.unit
 def test_resource_bootstrap_uses_providers_scope() -> None:
     """#11222: bootstrap/cleanup register providers without pipeline registry."""
     with (

@@ -53,7 +53,10 @@ def _resolve_artifact_path(
             return None, "artifact_path_escape"
         return candidate, ""
     if len(raw.parts) == 1:
-        return (root / raw.name).resolve(), ""
+        candidate = (root / raw.name).resolve()
+        if not candidate.is_relative_to(root):
+            return None, "artifact_path_escape"
+        return candidate, ""
     if kind in _SELF_REPORT_KINDS:
         return None, "artifact_missing"
     candidate = (root / raw).resolve()

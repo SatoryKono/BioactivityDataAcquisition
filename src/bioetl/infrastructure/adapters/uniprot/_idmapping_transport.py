@@ -198,11 +198,7 @@ class IDMappingTransportMixin:
         self,
         entries_by_id: dict[str, list[JsonDict]],
     ) -> dict[str, JsonDict | None]:  # Any: untyped API JSON
-        """Select primary entry for each ID and return final results.
-
-        Returns:
-            Dictionary mapping each source ID to its resolved UniProt entry dict, or None if not found.
-        """
+        """Select each source ID's primary entry, preserving input order."""
         deps = self._transport_deps()
         return {
             id_: deps._select_primary_entry(entries)

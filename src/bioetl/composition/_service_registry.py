@@ -246,7 +246,7 @@ _register_lazy_service(
 )
 _register_lazy_service(
     typed_port[WorkflowInspectionServiceProtocol](WorkflowInspectionServiceProtocol),
-    "bioetl.composition._workflow_services",
+    "bioetl.composition.factories.services._workflow_services",
     "get_workflow_inspection_service",
 )
 _register_lazy_contextual_factory(

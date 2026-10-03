@@ -96,7 +96,7 @@ def build_composite_report(
                 for c in children
             ],
         },
-        observations=run_observations(),
+        observations=dict(run_observations()),
     )
 
 

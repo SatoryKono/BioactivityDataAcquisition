@@ -32,15 +32,15 @@ truth; existing documentation is evidence only when it matches those sources.
 
 ## Architecture Quality Evidence
 
-Current committed quality artifacts agree on the following architecture evidence:
+The following values describe the retained coverage inventory and current quality artifacts. A source-hash refresh preserves historical coverage rows; it does not certify newly moved modules. Full 17-group measurement and inventory adoption for #11854 / #11899 remain pending.
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
 | Architecture quality score | `9.47` (`good_targeted_improvements`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2521` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2533` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
-| Coverage inventory status counts | `2490` fully covered, `27` partially covered, `4` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `2505` fully covered, `27` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |

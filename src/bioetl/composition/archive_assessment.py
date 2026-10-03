@@ -13,7 +13,9 @@ from bioetl.application.services.run_reports.observations import (
 )
 from bioetl.application.services.run_reports.snapshots import publish_snapshot
 from bioetl.application.services.run_reports.writer import write_json
-from bioetl.composition.bootstrap.runtime.run_status import create_run_status_capture
+from bioetl.composition.bootstrap.runtime.run_status_capture import (
+    create_run_status_capture,
+)
 from bioetl.infrastructure.control_plane.archive_assessment import (
     refresh_archived_assessment as refresh_archived_assessment_impl,
 )

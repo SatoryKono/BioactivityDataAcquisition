@@ -80,7 +80,7 @@ FORBIDDEN_RUNTIME_SCCS: tuple[frozenset[str], ...] = (
     frozenset(
         {
             "bioetl.composition._services",
-            "bioetl.composition._workflow_services",
+            "bioetl.composition.factories.services._workflow_services",
         }
     ),
     frozenset(

@@ -232,6 +232,18 @@
       "sha256": "e061de0553b40efbbba674005b1deb92480407a03876685d479f84935b8dcb18",
       "source_checkout": "E:\\github\\BioactivityDataAcquisition",
       "kind": "historical_input_not_new_measurement"
+    },
+    {
+      "path": "reports/quality/runtime-builders-duplication.md",
+      "sha256": "4872ad97c2e6af359c6f350eb6d0e651dd92af624d5e4e2067eb12442ce37b66",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "kind": "historical_input_not_new_measurement"
+    },
+    {
+      "path": "reports/quality/reports-workspace-review.json",
+      "sha256": "af5e034620857321fffeec94e64b2073707a6544acddecd8e051fc6a4a47c962",
+      "source_checkout": "E:\\github\\BioactivityDataAcquisition",
+      "kind": "historical_input_not_new_measurement"
     }
   ]
 }

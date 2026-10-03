@@ -111,8 +111,8 @@ class HeartbeatTask:
                 )
             except (BioETLError, OSError, RuntimeError) as exc:
                 self._logger.error(
-                    "Heartbeat failed during execution: %s",
-                    type(exc).__name__,
+                    "Heartbeat failed during execution",
+                    error_type=type(exc).__name__,
                     reason_code="LOCK_HEARTBEAT_FAILED",
                 )
                 self._shutdown_signal.request()

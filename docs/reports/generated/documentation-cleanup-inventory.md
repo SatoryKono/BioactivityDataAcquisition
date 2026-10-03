@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3425 |
-| Tracked doc-like files | 3425 |
+| Doc-like files | 3462 |
+| Tracked doc-like files | 3462 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3425 |
+| tracked | 3462 |
 
 ## Lifecycle Counts
 
@@ -26,14 +26,14 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 278 |
-| active_quality_baseline | 39 |
-| closeout_evidence | 56 |
+| active_quality_baseline | 41 |
+| closeout_evidence | 71 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 27 |
 | docs_reports_generated_or_route_owned | 7 |
-| docs_reports_retention_sensitive_evidence | 20 |
+| docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_reference_mirror | 19 |
-| generated_test_run_evidence | 3 |
+| generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
 | issue_pack | 60 |
@@ -41,7 +41,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 799 |
+| working_report | 816 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -57,30 +57,30 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 747 |
-| Archived | 276 |
+| Active | 748 |
+| Archived | 277 |
 | Canonical | 74 |
-| Generated | 1056 |
-| Working | 1272 |
+| Generated | 1057 |
+| Working | 1306 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 747 |
-| archive | 276 |
+| active | 748 |
+| archive | 277 |
 | canonical | 74 |
-| generated | 1056 |
-| working | 1272 |
+| generated | 1057 |
+| working | 1306 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 338 |
-| archive-after-migration | 831 |
-| generate-automatically | 1056 |
-| keep | 1192 |
+| archive-after-migration | 848 |
+| generate-automatically | 1057 |
+| keep | 1211 |
 | reconcile-with-github-state | 8 |
 
 ## Cleanup Candidates

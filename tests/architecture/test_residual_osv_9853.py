@@ -146,18 +146,47 @@ def test_vendored_extract_zip_validates_symlink_targets() -> None:
 
 
 def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
-    """Grafana 13 host still ships react-router 6; do not fake a 7.x/uuid 11 closeout."""
-    for package_json in (SCENES_PKG, SELECTOR_PKG):
-        payload = _json(package_json)
-        assert "overrides" not in payload
-
-    scenes = _lock_packages(SCENES_LOCK)
-    selector = _lock_packages(SELECTOR_LOCK)
-    assert scenes["node_modules/react-router"]["version"].startswith("6.")
-    assert scenes["node_modules/uuid"]["version"].startswith("9.")
-    assert "6.30.6" in {
-        selector["node_modules/react-router-dom-v5-compat"]["version"],
-        selector["node_modules/react-router-dom-v5-compat/node_modules/react-router"][
-            "version"
-        ],
+    """Only the explicit scenes bridge candidate may override the router seam."""
+    selector_pkg = _json(SELECTOR_PKG)
+    assert selector_pkg["overrides"] == {
+        "react-router-dom-v5-compat": "$react-router-dom-v5-compat"
     }
+    scenes_pkg = _json(SCENES_PKG)
+    bridge_ref = (
+        "file:../../tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz"
+    )
+    assert scenes_pkg["dependencies"]["react-router-dom-v5-compat"] == bridge_ref
+    assert selector_pkg["dependencies"]["react-router-dom-v5-compat"] == bridge_ref
+    assert scenes_pkg["overrides"] == {
+        "@grafana/scenes": {"react-router-dom": "7.18.4"},
+        "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
+    }
+    # This candidate has a real adapter for Grafana's legacy history contract;
+    # a lockfile major alone is never host/runtime qualification evidence.
+    bridge_root = ROOT / "grafana" / "tooling" / "router-v7-bridge"
+    bridge = _json(bridge_root / "package.json")
+    assert bridge["name"] == "@bioetl/grafana-router-v7-bridge"
+    assert bridge["version"] == "0.3.0"
+    assert bridge["dependencies"]["react-router-v7"] == "npm:react-router@7.18.4"
+    assert bridge["dependencies"]["react-router-dom-v5"] == "npm:react-router-dom@5.3.4"
+    assert (bridge_root / "bioetl-grafana-router-v7-bridge-0.3.0.tgz").is_file()
+    scenes = _lock_packages(SCENES_LOCK)
+    locked_bridge = scenes["node_modules/react-router-dom-v5-compat"]
+    assert locked_bridge["name"] == bridge["name"]
+    assert locked_bridge["version"] == bridge["version"]
+    assert locked_bridge["resolved"] == bridge_ref
+    assert scenes["node_modules/react-router"]["version"] == "7.18.4"
+    assert scenes["node_modules/react-router-dom"]["version"] == "7.18.4"
+    assert scenes["node_modules/react-router-v7"]["version"] == "7.18.4"
+    # uuid comes from the declared Grafana dependency graph, without a forced
+    # override or an invented security closeout.
+    assert "uuid" not in scenes_pkg["overrides"]
+    assert scenes["node_modules/uuid"]["version"] == "11.1.1"
+    selector = _lock_packages(SELECTOR_LOCK)
+    selector_bridge = selector["node_modules/react-router-dom-v5-compat"]
+    assert selector_bridge["name"] == bridge["name"]
+    assert selector_bridge["version"] == bridge["version"]
+    assert selector_bridge["resolved"] == bridge_ref
+    assert selector["node_modules/react-router"]["version"] == "5.3.4"
+    assert selector["node_modules/react-router-dom"]["version"] == "5.3.4"
+    assert selector["node_modules/react-router-v7"]["version"] == "7.18.4"

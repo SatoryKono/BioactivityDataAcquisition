@@ -20,16 +20,17 @@ from bioetl.composition.providers._registration_biblio_adapters import (
 from bioetl.composition.providers._registration_contracts import (
     resolve_provider_assembly_support,
 )
-from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 
 if TYPE_CHECKING:
+    from bioetl.domain.types import BronzeRecord
     from bioetl.composition.providers._models import ProviderSettingsProtocol
     from bioetl.composition.providers._registration_contracts import (
         ProviderAssemblySupport,
     )
     from bioetl.domain.ports import FilterableDataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 __all__ = [
     "PubMedPublicationTermPayloadEnricher",
@@ -174,11 +175,11 @@ class PubMedPublicationTermPayloadEnricher:
         enriched: list[BronzeRecord] = []
         for record in records:
             pmid = publication_pubmed_id(record)
-            pubmed_record = pubmed_by_pmid.get(pmid) if pmid is not None else None
-            if pubmed_record is None:
+            matched_record = pubmed_by_pmid.get(pmid) if pmid is not None else None
+            if matched_record is None:
                 enriched.append(record)
                 continue
-            headings, keywords = pubmed_term_payload(pubmed_record)
+            headings, keywords = pubmed_term_payload(matched_record)
             mesh_terms, keyword_terms = mesh_terms_from_pubmed_headings(
                 headings, keywords
             )
@@ -190,7 +191,7 @@ class PubMedPublicationTermPayloadEnricher:
                 attached["mesh_terms"] = mesh_terms
             if keyword_terms:
                 attached["keywords"] = keyword_terms
-            enriched.append(cast("BronzeRecord", attached))
+            enriched.append(attached)
         return enriched
 
 
@@ -217,7 +218,7 @@ def create_pubmed_publication_term_enricher(
         )
         adapter = _build_pubmed_adapter_from_settings(
             adapter_cls=PubMedAdapter,
-            http_client=http_client,
+            http_client=cast("UnifiedHTTPClient", http_client),
             logger=logger,
             settings=settings,
             email=email,

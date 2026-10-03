@@ -12,7 +12,7 @@ from bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases import (
     prepare_runtime_registry,
 )
 from bioetl.composition.registry_api import PipelineRegistry
-from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
+from bioetl.composition.factories.pipeline_support.checkpoint_policy_helpers import (
     _fail_fast_empty_explicit_cached_bronze,
 )
 from bioetl.composition.runtime_builders.config_access import resolve_configs_root

@@ -9,7 +9,7 @@ from typing import Protocol
 import httpx
 
 from bioetl.domain.ports import CircuitBreakerPort, LoggerPort, RateLimiterPort
-from bioetl.domain.types import RunID
+from bioetl.domain.types import JsonDict, RunID
 from bioetl.infrastructure.adapters.http.client_retry_policy import parse_retry_after
 
 
@@ -27,7 +27,7 @@ async def execute_timed_request(
     client: httpx.AsyncClient,
     method: str,
     url: str,
-    request_kwargs: dict[str, object],
+    request_kwargs: JsonDict,  # Heterogeneous kwargs forwarded to the HTTP client.
     *,
     request_timeout: float | None = None,
     attempt_number: int = 1,

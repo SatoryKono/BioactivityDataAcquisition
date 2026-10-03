@@ -14,7 +14,7 @@ import bioetl.composition.factories.services.port_factories as port_factories
 import bioetl.composition.bootstrap.runtime.composite_support_helpers as composite_support
 import bioetl.composition.factories.pipeline._assembler_factory as assembler_factory
 import bioetl.composition.observability_runtime as observability_runtime
-from bioetl.composition import _workflow_services
+from bioetl.composition.factories.services import _workflow_services
 from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
     _composite_basics_uuid_factory,
     bootstrap_runtime_basics_facade,

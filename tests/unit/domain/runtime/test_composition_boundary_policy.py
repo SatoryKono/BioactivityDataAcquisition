@@ -5,6 +5,9 @@ import pytest
 from bioetl.domain.runtime import composition_boundary_policy as policy
 
 
+pytestmark = pytest.mark.unit
+
+
 @pytest.mark.parametrize(
     "enabled,server,expected",
     [

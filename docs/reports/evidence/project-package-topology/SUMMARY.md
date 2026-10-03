@@ -1,5 +1,11 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-10-03): source binding for the local #11854 / #11899 repair branch. This identifies the retained inventory, not a fresh coverage measurement. Full 17-group measurement and adoption remain pending. Historical notes below remain historical.
+
+`source_tree_sha256=124e2cce22ff31ef8cd086a8a7149b3b40c641ae338341c9f30a083637ccec67`
+
+`source_module_count=2533`
+
 Refresh note (2026-09-24): hash-only reconcile after arch-guard landing. Counts and the source fingerprint below come from `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
 
 `source_tree_sha256=9bb646a395d0ba313f842417d23126c262f2f4cda021b26001034a38b73e6784`

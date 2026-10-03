@@ -720,7 +720,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 47,
+      "line": 54,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -730,7 +730,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 48,
+      "line": 55,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -740,7 +740,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 49,
+      "line": 56,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -750,7 +750,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 52,
+      "line": 59,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -760,7 +760,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 55,
+      "line": 62,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -770,7 +770,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 56,
+      "line": 63,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -780,7 +780,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 57,
+      "line": 64,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -790,7 +790,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 58,
+      "line": 65,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -800,7 +800,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 61,
+      "line": 68,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -810,7 +810,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 62,
+      "line": 69,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -820,7 +820,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 63,
+      "line": 70,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -830,7 +830,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 64,
+      "line": 71,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -840,7 +840,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 65,
+      "line": 72,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -850,7 +850,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 66,
+      "line": 73,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -860,7 +860,7 @@
     },
     {
       "path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-      "line": 69,
+      "line": 76,
       "layer": "application",
       "category": "pd3_host_attr_default",
       "justified": true,
@@ -1830,7 +1830,7 @@
     },
     {
       "path": "src/bioetl/composition/factories/services/pipeline_batch_executor_builder.py",
-      "line": 195,
+      "line": 197,
       "layer": "composition",
       "category": "unjustified",
       "justified": false,
@@ -2989,7 +2989,7 @@
       "snippet": "_resolve_bronze_path: Callable[[str, str, str, str], str] = cast("
     },
     {
-      "path": "src/bioetl/infrastructure/storage/bronze/metadata_builders.py",
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_assembly.py",
       "line": 111,
       "layer": "infrastructure",
       "category": "unjustified",

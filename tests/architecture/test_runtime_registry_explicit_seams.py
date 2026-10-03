@@ -31,7 +31,7 @@ RUNTIME_REGISTRY_SEAMS = {
         "get_workflow_execution_service",
         "get_workflow_runner_service",
     },
-    "src/bioetl/composition/_workflow_services.py": {
+    "src/bioetl/composition/factories/services/_workflow_services.py": {
         "_default_pipeline_runner_service_factory",
         "get_workflow_execution_service",
         "get_workflow_runner_service",

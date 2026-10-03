@@ -12,6 +12,9 @@ from bioetl.domain.value_objects.protein_class_hierarchy import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 def test_component_filter_resolves_all_linked_targets_in_stable_order():
     targets, components = build_target_component_indexes(
         [

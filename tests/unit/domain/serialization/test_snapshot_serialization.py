@@ -1,6 +1,8 @@
 """Snapshots normalize nested data without leaking private object attributes."""
 
 from __future__ import annotations
+
+import pytest
 from dataclasses import dataclass
 from datetime import timedelta
 from decimal import Decimal
@@ -9,6 +11,9 @@ from bioetl.domain.serialization.snapshot_serialization import (
     normalize_snapshot,
     to_serializable_mapping,
 )
+
+
+pytestmark = pytest.mark.unit
 
 
 @dataclass

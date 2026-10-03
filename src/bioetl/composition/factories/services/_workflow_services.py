@@ -14,7 +14,7 @@ from pathlib import Path
 import threading
 from typing import TYPE_CHECKING, cast
 
-from bioetl.composition._workflow_transform_registry import (
+from bioetl.composition.factories.services._workflow_transform_registry import (
     build_workflow_transform_registry,
 )
 from bioetl.composition.occurrence_identity import (
@@ -25,7 +25,9 @@ from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.time import SystemClock
-from bioetl.composition._workflow_transform_registry import WorkflowCohortResolver
+from bioetl.composition.factories.services._workflow_transform_registry import (
+    WorkflowCohortResolver,
+)
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 

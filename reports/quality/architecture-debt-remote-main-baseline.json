@@ -1,12 +1,12 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "18c954c06e04ce477c447575a3da3c9baa3ae4076fe6a2f6cf059f23fb6c131b",
+      "blob_sha256": "50e3aa086bd15763be44b1b8904ed22cba4c8f6496795140685904c9c66da7d3",
       "introduced_after_remote_main": false,
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "6b43964bf76d6bd0fcd4eec51e081e7a3651df34",
+      "source_revision": "472fb413e79383e55ab4443bf1cc3fea75fdf527",
       "summary": {
         "available": true,
         "integral_score": 9.47,
@@ -15,19 +15,19 @@
       }
     },
     {
-      "blob_sha256": "b2c45d243b20169dd8729c73b035511d053010479b7d18ae0cd593cb1c72b09f",
+      "blob_sha256": "d9390616aec413939eb4412d2a318173005f61b5febfcec97c767db2c84b18b1",
       "introduced_after_remote_main": false,
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "6b43964bf76d6bd0fcd4eec51e081e7a3651df34",
+      "source_revision": "472fb413e79383e55ab4443bf1cc3fea75fdf527",
       "summary": {
         "available": true,
         "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
         "schema_version": 1,
         "snapshot_date": "2026-09-18",
         "source_module_count": 2563,
-        "source_tree_sha256": "26c7165949c501b7030682e95afaecdd99b4d764f4cce9d9e26edb9a6a25c7df",
+        "source_tree_sha256": "fe6c50a1ea474d29d3329a9fa8e41520a0827c8472e4b864ae5dc953adbe5226",
         "unmeasured_module_count": 0
       }
     },
@@ -37,7 +37,7 @@
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "6b43964bf76d6bd0fcd4eec51e081e7a3651df34",
+      "source_revision": "472fb413e79383e55ab4443bf1cc3fea75fdf527",
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -45,12 +45,12 @@
       }
     },
     {
-      "blob_sha256": "ea50c6cc501f1060a0c0227edf5e5681265fe88bfe8f5ce3a668c4fe084344fd",
+      "blob_sha256": "18794ec7c2c2881f1531cd9bba04852c776bc31f1c978b99d2b5bbdca841de81",
       "introduced_after_remote_main": false,
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "6b43964bf76d6bd0fcd4eec51e081e7a3651df34",
+      "source_revision": "472fb413e79383e55ab4443bf1cc3fea75fdf527",
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -63,7 +63,7 @@
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "6b43964bf76d6bd0fcd4eec51e081e7a3651df34",
+      "source_revision": "472fb413e79383e55ab4443bf1cc3fea75fdf527",
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -76,13 +76,13 @@
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
       "required_on_remote": false,
-      "source_revision": "6b43964bf76d6bd0fcd4eec51e081e7a3651df34",
+      "source_revision": "472fb413e79383e55ab4443bf1cc3fea75fdf527",
       "summary": {
         "available": true
       }
     }
   ],
-  "baseline_artifact_fingerprint": "62073cb9a0b74d8a388da4c365b0cf1722ea4d23bcfebaf0b426e5aac1fb2f03",
+  "baseline_artifact_fingerprint": "73f563e4f037adf0296efdb2ba711057b3a6ff0044d5a6a17bfd16fc98b8b14e",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
@@ -102,9 +102,9 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
-  "local_tracking_ref_sha": "6b43964bf76d6bd0fcd4eec51e081e7a3651df34",
+  "local_tracking_ref_sha": "472fb413e79383e55ab4443bf1cc3fea75fdf527",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "6b43964bf76d6bd0fcd4eec51e081e7a3651df34",
+  "remote_main_sha": "472fb413e79383e55ab4443bf1cc3fea75fdf527",
   "schema_version": 1
 }

@@ -488,12 +488,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 50
-      total_loc: 6388
+      files: 49
+      total_loc: 6170
       files_ge_250_loc: 0
-      helper_function_ratio: 0.295
-      max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime._composite_control_plane_support
+      helper_function_ratio: 0.298
+      max_internal_fan_in: 2
+      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
       status: reviewed_2026-07-27_observability_bundle_support_extraction
       next_action: 2026-07-27 refreshes measured bootstrap/runtime metrics after the observability_bundle
@@ -543,7 +543,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 130
-      total_loc: 15562
+      total_loc: 15556
       files_ge_250_loc: 0
       helper_function_ratio: 0.399
       max_internal_fan_in: 1
@@ -571,9 +571,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 55
-      total_loc: 6676
+      total_loc: 6641
       files_ge_250_loc: 0
-      helper_function_ratio: 0.348
+      helper_function_ratio: 0.342
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.runtime_builders.runner_inputs
     trend:

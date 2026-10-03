@@ -175,7 +175,7 @@ def test_entrypoints_register_e2_ports_with_canonical_lazy_targets() -> None:
             "bootstrap_run_manifest_service",
         ),
         WorkflowInspectionServiceProtocol: (
-            "bioetl.composition._workflow_services",
+            "bioetl.composition.factories.services._workflow_services",
             "get_workflow_inspection_service",
         ),
     }

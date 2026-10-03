@@ -7,11 +7,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from bioetl.application.composite.runner_pkg.runner import CompositePipelineRunner
-from bioetl.composition.bootstrap.runtime._composite_control_plane_support import (
+from bioetl.composition.bootstrap.runtime.run_status import (
     create_composite_contract_finalizer,
 )
 
-MODULE = "bioetl.composition.bootstrap.runtime._composite_control_plane_support"
+MODULE = "bioetl.composition.bootstrap.runtime.run_status"
+
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize("resume", [False, True])
@@ -73,3 +76,27 @@ async def test_contract_finalization_precedes_locked_phase_execution():
     with pytest.raises(RuntimeError, match="cannot persist"):
         await runner._run_with_lock()
     runner._execute_locked_run_phases.assert_not_called()
+
+
+def test_composite_archive_bootstrap_imports_in_fresh_process():
+    """Capture/report assembly must not cycle with archive assessment imports."""
+    import os
+    from pathlib import Path
+    import subprocess
+    import sys
+
+    root = Path(__file__).resolve().parents[5]
+    environment = dict(os.environ, PYTHONPATH=str(root / "src"))
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import bioetl.composition.control_plane_archive; import bioetl.composition.bootstrap.runtime.runtime_basics",
+        ],
+        cwd=root,
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    assert result.returncode == 0, result.stderr
