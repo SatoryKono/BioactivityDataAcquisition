@@ -174,3 +174,39 @@ derives local identity and all measurement inputs; historical CI bindings
 are preserved explicitly as unverified history. Local evidence retains
 `local_single_host` trust and `CI=BLOCKED_EXTERNAL_PERMANENT`, without a
 GitHub run URL, CI PASS claim or lifecycle ADMIT.
+
+
+## Complete local measurement and current bindings — 2026-10-04
+
+Wave 30 completed all 17 canonical groups on
+`b7334cc49d144a50a26f656e0241ea6dfe42d0e9`: 32354 passed, 179 skipped,
+zero failures/errors; 99.74% line and 94.43% branch coverage. Actual product
+source SHA-256 is `8d3e76877a6e5c205d49b926d60e57775d94015f9222ba2f4202ccc55c1026c8`;
+actual test-tree SHA-256 is `625ee449d2aee798640e74ea0ca0bab5f77e428cced423ef541644cf1bf32a10`.
+`config_root` was measured at 40/40 lines and 18/18 branches, line 32 hit=1.
+A separate 22-test targeted run on the same pinned SHA passed without skips
+and measured the same complete line/branch coverage. The bootstrap profile
+passed 427 tests without skips on this SHA.
+
+The direct raw candidate still records 67 other module regressions and two
+new source paths after the ownership moves. Canonical nonregressing adoption
+passed with the exact 2545 maintained module paths, preserving historical
+floors; current status counts are 2513 fully covered, 31 partially covered,
+one no-executable-lines module, zero uncovered and zero unmeasured. These
+accepted values do not claim freshly measured global nonregression.
+
+The local telemetry baseline was materialized from this verified manifest,
+with 32354 executed and 179 skipped cases, explicit existing lane accounting,
+actual completion timestamp and no GitHub Actions run URL. Its historical CI
+binding remains an explicitly unverified preserved snapshot. Formatting the
+existing lane accounting as structured records corrects a telemetry schema
+defect without changing any test selection, skip policy, thresholds or gates.
+
+Comparable strict mypy (`src/bioetl src/memory`) remains FAIL: 108 errors in
+39 files versus 157 errors in 51 files in the baseline, 49 removed and zero
+new error messages. A separate broader `src scripts` diagnostic is also FAIL
+with 719 errors in 184 files; it is a different scope and is not compared with
+the 157-error baseline. Changed product and telemetry/governance modules
+passed their scoped strict checks. No claim of global typing cleanliness is
+made. Final full architecture, docs/governance/debt validation and applicable
+trust-tier admission remain required before lifecycle closure.

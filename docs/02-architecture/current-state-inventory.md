@@ -32,15 +32,15 @@ truth; existing documentation is evidence only when it matches those sources.
 
 ## Architecture Quality Evidence
 
-The following values describe the accepted inventory after a complete 17-group local measurement on `24f569369ce169cf971fd19691158f7e78edf806`. Canonical nonregressing adoption preserves historical rows where fresh raw coverage is lower. The raw comparison records 67 remaining module regressions; accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
+The following values describe the accepted inventory after a complete 17-group local measurement on `b7334cc49d144a50a26f656e0241ea6dfe42d0e9`. Canonical nonregressing adoption preserves historical rows where fresh raw coverage is lower. The raw comparison records 67 remaining module regressions; accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
-| Architecture quality score | `9.47` (`good_targeted_improvements`) | `reports/quality/architecture-quality-scorecard.json` |
+| Architecture quality score | `10.0` (`excellent`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2546` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2545` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
-| Coverage inventory status counts | `2514` fully covered, `31` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `2513` fully covered, `31` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |

@@ -183,8 +183,26 @@ def build_local_baseline(manifest_path: Path, *, repo_root: Path) -> dict[str, A
             },
             "lane_wall_time_source": "producer_monotonic_clock",
             "explicit_exclusions": [
-                "architecture gates run separately; excluded from product coverage",
-                "canonical 17-shard marker selection; recorded in manifest commands",
+                {
+                    "lane": "live-provider-contracts",
+                    "reason": "canonical contract-confidence marker excludes live network-owned contracts",
+                },
+                {
+                    "lane": "performance",
+                    "reason": "benchmark-owned non-blocking workflow; outside the canonical 17-group plan",
+                },
+                {
+                    "lane": "manual-e2e",
+                    "reason": "operator-triggered external-runtime lane; excluded by the canonical serial command",
+                },
+                {
+                    "lane": "architecture",
+                    "reason": "architecture gates run separately, outside product coverage",
+                },
+                {
+                    "lane": "memory",
+                    "reason": "existing canonical 17-group marker selection excludes memory; commands remain unchanged",
+                },
             ],
         }
     )

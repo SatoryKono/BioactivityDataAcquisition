@@ -51,15 +51,28 @@
         "reason": "Issue #5244 requires zero below-tier production modules; the live inventory now reports zero modules below the default floor, while this closeout remains the #5272 application-core evidence pack."
       },
       "notes": "Application core coverage improved significantly (49.09% -> 99.93%) and application_core uncovered/unmeasured modules remain zero. Repo-level unmeasured modules is 0. Parent epic #5244 floor metric is now zero below-85 modules in the committed inventory."
+    },
+    {
+      "snapshot_date": "2026-08-17",
+      "current_metrics": {
+        "repo_uncovered_module_count": 0,
+        "repo_unmeasured_module_count": 0,
+        "application_core_covered_line_percent": 99.82,
+        "application_core_uncovered_module_count": 0,
+        "application_core_unmeasured_module_count": 0
+      },
+      "parent_epic_status": {
+        "status": "not_closeable_under_current_definition_of_done",
+        "remaining_below_85_module_count": 0,
+        "reason": "Issue #5244 requires zero below-tier production modules; the live inventory now reports zero modules below the default floor, while this closeout remains the #5272 application-core evidence pack."
+      },
+      "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
     }
   ],
   "current_binding_refresh": {
-    "measured_head": "24f569369ce169cf971fd19691158f7e78edf806",
-    "source_tree_sha256": "3b2e81219500a0aa6a5c796addb7772d66cff70704e8a85a690ad04726693a75",
-    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-28/manifest.json",
-    "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate.",
-    "previous_current_source_tree_sha256": "57404f9168a198c9f4398b1cd519f397d3d90e901588e8ecc6469b41af57d203",
-    "measured_source_tree_sha256": "57404f9168a198c9f4398b1cd519f397d3d90e901588e8ecc6469b41af57d203",
-    "source_only_rebind_note": "Explicit re-export preserves the existing UniProt helper API. Current accepted source binding differs from the earlier raw measurement; a fresh final full producer remains required."
+    "measured_head": "b7334cc49d144a50a26f656e0241ea6dfe42d0e9",
+    "source_tree_sha256": "8d3e76877a6e5c205d49b926d60e57775d94015f9222ba2f4202ccc55c1026c8",
+    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-30/manifest.json",
+    "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate."
   }
 }

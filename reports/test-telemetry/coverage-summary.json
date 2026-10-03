@@ -1,16 +1,169 @@
 {
   "source_branch": "codex/architecture-coverage-closeout-11854-11899",
-  "source_commit": "44f8b30752b793c437753c6692aae09cdda50587",
-  "source_run_id": "36202183545",
-  "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/36202183545",
-  "source_tree_sha256": "7fc0b4f6d6d43bcd6d6f5f19fce5ca7090f887cb228c2be8ee82e608ed46a4d3",
-  "refreshed_at_utc": "2026-10-03T13:32:48.945300+00:00",
+  "source_commit": "b7334cc49d144a50a26f656e0241ea6dfe42d0e9",
+  "source_run_id": "local-full-coverage-wave-30",
+  "source_event": "local_coverage_verify",
+  "source_run_url": null,
+  "source_tree_sha256": "625ee449d2aee798640e74ea0ca0bab5f77e428cced423ef541644cf1bf32a10",
+  "refreshed_at_utc": "2026-10-03T23:23:13.065956+00:00",
   "refresh_status": "captured",
-  "coverage_percent": 96.74,
+  "coverage_percent": 99.74,
   "coverage": {
     "threshold_percent": 85.0,
-    "actual_percent": 96.74,
+    "actual_percent": 99.74,
     "threshold_satisfied": true
+  },
+  "measurement_provenance": {
+    "producer": "run_local_coverage_verify.py",
+    "trust_tier": "local_single_host",
+    "ci_status": "BLOCKED_EXTERNAL_PERMANENT",
+    "complete": true,
+    "manifest_sha256": "c4d5579302a62821adfb68ffe6a2d143305eeaa96e5dcf43abe349ccd878fde2",
+    "coverage_xml_sha256": "89c1f0e1485423951fa449a16454f4cf4a48202e4daf9e2d66410cdfc264b7da",
+    "source_tree_sha256": "8d3e76877a6e5c205d49b926d60e57775d94015f9222ba2f4202ccc55c1026c8",
+    "test_tree_sha256": "625ee449d2aee798640e74ea0ca0bab5f77e428cced423ef541644cf1bf32a10",
+    "head": "b7334cc49d144a50a26f656e0241ea6dfe42d0e9",
+    "required_shards": [
+      "smoke",
+      "contract-confidence",
+      "repo-backed-unit-product",
+      "repo-backed-unit-tooling",
+      "repo-backed-unit-ops",
+      "unit-scripts-tooling-passport",
+      "unit-scripts-tooling-debt-governance",
+      "unit-scripts-tooling-other",
+      "unit-filesystem-contracts",
+      "unit-subprocess-backed",
+      "unit-domain",
+      "unit-application",
+      "unit-infrastructure",
+      "unit-other",
+      "integration",
+      "security",
+      "serial"
+    ],
+    "started_at_utc": "2026-10-03T22:58:45.370259+00:00",
+    "finished_at_utc": "2026-10-03T23:23:13.065956+00:00",
+    "shards": [
+      {
+        "name": "smoke",
+        "exit_code": 0,
+        "seconds": 46.07,
+        "coverage_sha256": "39688d8ebd48ab144a058905a47043fdd584c7f93068023a19f4726ec7088589",
+        "junit_telemetry_sha256": "69225ac5bf74a1ad2171719c21728bc19a8e38cff721f7b6afaf1465f5f257ab"
+      },
+      {
+        "name": "contract-confidence",
+        "exit_code": 0,
+        "seconds": 93.92,
+        "coverage_sha256": "2cc3e1e2ef99a5b9fa22ad58c1a53b1250c4dc911ee35a753962b89366fa5897",
+        "junit_telemetry_sha256": "09ea670e1ee2954dec7c73313c48e90d7920a5a93878cb377b4a98fa1f036e0c"
+      },
+      {
+        "name": "repo-backed-unit-product",
+        "exit_code": 0,
+        "seconds": 35.62,
+        "coverage_sha256": "86f816e4ae28985fe71631a3e461b5dbc83c9332254d40ac764306293618bbd9",
+        "junit_telemetry_sha256": "cc589a9f3b0aeeb9d76efd7e7a82b5c47a7d8db5d52ffa772b09feb649f82402"
+      },
+      {
+        "name": "repo-backed-unit-tooling",
+        "exit_code": 0,
+        "seconds": 127.35,
+        "coverage_sha256": "02d1bdeda2e85d7d3920b9e59ea55c8d782bbeaba3384f16e5a785b84ef75ed1",
+        "junit_telemetry_sha256": "92bff6de6c4a933c6473eb98d0a9caa4ca433a8ea532cc286aebbf362ff116f9"
+      },
+      {
+        "name": "repo-backed-unit-ops",
+        "exit_code": 0,
+        "seconds": 52.25,
+        "coverage_sha256": "9d10e30d69de4f199faffbbaf11b797d4b1ae2c5fb4dbbdd8541872c7e355fd0",
+        "junit_telemetry_sha256": "8d3541886420bdcb2cb59e7255e87f7d6a6c6b223b84924cc7dde0711521311b"
+      },
+      {
+        "name": "unit-scripts-tooling-passport",
+        "exit_code": 0,
+        "seconds": 16.75,
+        "coverage_sha256": "50361dd3ca74c3c359e0745d0c85a2f875a7eecdc38c04bf505193aef63a4f58",
+        "junit_telemetry_sha256": "ec61c0191f53465273cded86a2d1ead8b042bb55d135c07caa83c61fe55bd2ab"
+      },
+      {
+        "name": "unit-scripts-tooling-debt-governance",
+        "exit_code": 0,
+        "seconds": 45.64,
+        "coverage_sha256": "898e2dc15e69ed0e017a0ac2061536359195a27c7e3dd97d3e02953d1e550910",
+        "junit_telemetry_sha256": "da918d0042d18d02805c9302d52e12913bbfda21c9ffca326cd7cb1469c16dba"
+      },
+      {
+        "name": "unit-scripts-tooling-other",
+        "exit_code": 0,
+        "seconds": 127.98,
+        "coverage_sha256": "fb888b9a21c3f07539144d3a8429d479152ba667cc91ecbfbcacb9ea445193d8",
+        "junit_telemetry_sha256": "41ce7d34589bb7fa972e5a2a7eecd528754e907a7f946b468c51c7cf9c845582"
+      },
+      {
+        "name": "unit-filesystem-contracts",
+        "exit_code": 0,
+        "seconds": 145.78,
+        "coverage_sha256": "8a94ebe38475447d0e31d7f196bdd14ec4e4f401f4f3c2565d06969509a9150e",
+        "junit_telemetry_sha256": "ce706d35795ae003d3198dc1c6a46f5cae7b48d0e6a6c76acea5419e8238c418"
+      },
+      {
+        "name": "unit-subprocess-backed",
+        "exit_code": 0,
+        "seconds": 58.3,
+        "coverage_sha256": "f1b2b1145e83545cfc378e17b190a5195a2d7fc1375c35e5103c3c3f9512d626",
+        "junit_telemetry_sha256": "d49b6a033999509ae63e470fd7f44b1932ea981468c9eeebce9aedb9c546e142"
+      },
+      {
+        "name": "unit-domain",
+        "exit_code": 0,
+        "seconds": 94.58,
+        "coverage_sha256": "688813b08daebfd0fceac57670a904dd9dae0b59f6fae3a2bfe111174a4ca292",
+        "junit_telemetry_sha256": "2f88c7947eae47fa0a5bd590187be3ae73d52b57f3125f10bfe2f44fd4795b19"
+      },
+      {
+        "name": "unit-application",
+        "exit_code": 0,
+        "seconds": 67.5,
+        "coverage_sha256": "2a007d60223694e0ef9842fbc290870a9aca6439549d8a20842e24068662b1f9",
+        "junit_telemetry_sha256": "abe94bb432ecaec126681a141219372fd59b0befd1962af14e901fa181883807"
+      },
+      {
+        "name": "unit-infrastructure",
+        "exit_code": 0,
+        "seconds": 64.35,
+        "coverage_sha256": "5783958108b9c8d4920bea0c9d51457e1ee50b8fecd3149311a5ffb87afc52aa",
+        "junit_telemetry_sha256": "68f4fc0849424d7f6c606b02e092e512d41e4823132a219e3b279a9897517deb"
+      },
+      {
+        "name": "unit-other",
+        "exit_code": 0,
+        "seconds": 87.9,
+        "coverage_sha256": "e9258213d30cb5e3c4beb77b820a4dfcdf3f6b6fbc257afacd25e5a4a9c13b94",
+        "junit_telemetry_sha256": "3958132aa1614cc20661c27f63a2013e42314d4ba65072d496e4bf0180ef9705"
+      },
+      {
+        "name": "integration",
+        "exit_code": 0,
+        "seconds": 245.9,
+        "coverage_sha256": "432fd815976cac61234e4c623c10eec343db1ab88872feebfb1f7b41a5fff5d3",
+        "junit_telemetry_sha256": "b89ccb16a5fd87baaafeb6246ddbb929a760c56999bcf16732f07898ba759d2c"
+      },
+      {
+        "name": "security",
+        "exit_code": 0,
+        "seconds": 16.13,
+        "coverage_sha256": "2e1b77c274c9fc220905ae58e88b73f52cbe300a82a4ae3ed8ce781646049fae",
+        "junit_telemetry_sha256": "d73ab01b6102b60c6cbedd367756d609bef5246b88ced7fed24cf88df4a56ea4"
+      },
+      {
+        "name": "serial",
+        "exit_code": 0,
+        "seconds": 111.36,
+        "coverage_sha256": "851c71e4511a955149336dd1e8a6abd3ca166d04a94226c8e2b35b6edfbdaa54",
+        "junit_telemetry_sha256": "28ad99cd71f3de53cb030dfaf3cd9e04e6cd6fde28c7e325c35e53440d660286"
+      }
+    ]
   }
 }
