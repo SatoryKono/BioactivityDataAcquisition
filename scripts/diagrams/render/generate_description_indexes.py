@@ -8,7 +8,7 @@ import os
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -68,7 +68,7 @@ def deterministic_stamp(source: Path) -> str:
     """UTC stamp from SOURCE_DATE_EPOCH or the newest commit touching source."""
     epoch = os.environ.get("SOURCE_DATE_EPOCH", "").strip()
     if epoch:
-        moment = datetime.fromtimestamp(int(epoch), tz=timezone.utc)
+        moment = datetime.fromtimestamp(int(epoch), tz=UTC)
         return moment.isoformat(timespec="seconds")
     result = subprocess.run(
         ["git", "log", "-1", "--format=%cI", "--", source.as_posix()],
@@ -82,8 +82,8 @@ def deterministic_stamp(source: Path) -> str:
         return "1970-01-01T00:00:00+00:00"
     moment = datetime.fromisoformat(raw)
     if moment.tzinfo is None:
-        moment = moment.replace(tzinfo=timezone.utc)
-    return moment.astimezone(timezone.utc).isoformat(timespec="seconds")
+        moment = moment.replace(tzinfo=UTC)
+    return moment.astimezone(UTC).isoformat(timespec="seconds")
 
 
 def normalize_generated_stamp(text: str) -> str:

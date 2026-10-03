@@ -6,6 +6,7 @@ from typing import cast
 
 from bioetl.application.services.execution.pipeline_runner_models import RunResult
 from bioetl.domain.workflow.config import WorkflowStepConfig
+from bioetl.composition.workflow_cohort_lineage import resolve_cohort_lineage
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads import (
     filter_current_rows,
@@ -33,8 +34,9 @@ class WorkflowCohortResolver:
             raise ValueError("reference_cohort requires a successful source run")
         if source.pipeline_name != cohort.table.replace(".", "_", 1):
             raise ValueError("reference_cohort source identity mismatch")
-        snapshots = source.selected_snapshots
-        entry = None if snapshots is None else snapshots.get(f"gold:{cohort.table}")
+        entry, expected_count = resolve_cohort_lineage(
+            source, upstream, f"gold:{cohort.table}"
+        )
         if (
             not isinstance(entry, Mapping)
             or type(entry.get("version")) is not int
@@ -63,7 +65,7 @@ class WorkflowCohortResolver:
             rows = [row for row in current if str(row[run_column]) == source.run_id]
         else:
             rows = filter_owned_entities(current, entry)
-        if len(rows) != source.records_gold:
+        if len(rows) != expected_count:
             raise ValueError("reference_cohort source count or run identity mismatch")
         keys = tuple(
             sorted(

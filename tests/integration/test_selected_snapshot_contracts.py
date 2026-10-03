@@ -19,6 +19,9 @@ from bioetl.application.services.execution.workflow_runner_step_execution import
 from bioetl.application.services.workflow.control_plane.execution_recording_state import (
     _apply_completed_step_state,
 )
+from bioetl.application.services.workflow.control_plane.execution_recording_payloads import (
+    build_step_completion_details,
+)
 from bioetl.application.services.workflow.control_plane.selected_snapshot_resume import (
     restore_selected_snapshot_outputs,
 )
@@ -31,6 +34,7 @@ from bioetl.application.workflow.transforms.selected_snapshot_inputs import (
 from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowStepState
 from bioetl.domain.run_reports.workflow_builder import _reconciliation_details
 from bioetl.domain.workflow import (
+    WorkflowConfig,
     TransformStepConfig,
     WorkflowRunOptionsConfig,
     WorkflowStepConfig,
@@ -209,12 +213,44 @@ async def test_pipeline_captures_version_and_limits_before_completion(
 
 
 def test_durable_state_restores_producer_and_transform_snapshots():
-    selected = apply_cli_overrides(config(), reconciliation_mode="selected-snapshot")
+    selected = WorkflowConfig(
+        "resume",
+        steps=(
+            WorkflowStepConfig("seed", "chembl_assay"),
+            TransformStepConfig(
+                "clean", "reconcile_foreign_keys", depends_on=("seed",)
+            ),
+        ),
+        defaults=WorkflowRunOptionsConfig(reconciliation_mode="selected-snapshot"),
+    )
+    snapshots = {
+        key: {**entry, "producer_pipeline": "chembl_assay", "table_id": "table"}
+        for key, entry in pin().items()
+    }
+    original = RunResult(
+        PipelineRunResult.SUCCESS,
+        "chembl_assay",
+        "producer",
+        "backfill",
+        manifest_id="child-manifest",
+        records_gold=10,
+        selected_snapshots=snapshots,
+    )
+    completion = build_step_completion_details(
+        WorkflowStepExecutionResult(
+            "seed",
+            "pipeline",
+            "success",
+            payload=original,
+            child_run_id="producer",
+            child_manifest_id="child-manifest",
+        )
+    )
     producer = WorkflowStepState(
         "seed",
         "pipeline",
         "success",
-        output_details={"child_run_id": "producer", "selected_snapshots": pin()},
+        output_details=completion,
     )
     transform = WorkflowStepState(
         "clean",
@@ -222,7 +258,10 @@ def test_durable_state_restores_producer_and_transform_snapshots():
         "success",
         output_details={
             "transform_result_summary": {
-                "selected_snapshots": pin(1, (0,)),
+                "selected_snapshots": {
+                    key: {**entry, "version": 1, "ancestor_versions": [0]}
+                    for key, entry in snapshots.items()
+                },
                 "source_run_ids": ["producer"],
                 "reconciliation_mode": "selected-snapshot",
             }
@@ -233,8 +272,14 @@ def test_durable_state_restores_producer_and_transform_snapshots():
     outputs = restore_selected_snapshot_outputs(
         selected, restored_state, frozenset({"seed", "clean"})
     )
-    assert outputs["seed"]["run_id"] == "producer"
-    assert selected_snapshot_inputs(outputs) == pin(1, (0,))
+    assert isinstance(outputs["seed"], RunResult)
+    assert outputs["seed"].run_id == "producer"
+    assert outputs["seed"].records_gold == original.records_gold == 10
+    assert outputs["seed"].selected_snapshots == snapshots
+    assert (
+        selected_snapshot_inputs(outputs)
+        == transform.output_details["transform_result_summary"]["selected_snapshots"]
+    )
     skipped = WorkflowStepExecutionResult(
         step_id="seed",
         step_kind="pipeline",
@@ -253,10 +298,11 @@ def test_durable_state_restores_producer_and_transform_snapshots():
 
 def test_legacy_resume_does_not_invent_selected_snapshot_evidence():
     legacy = _state()
-    assert (
-        restore_selected_snapshot_outputs(config(), legacy, frozenset({"seed"})) == {}
+    unbound = WorkflowConfig(
+        "legacy", steps=(WorkflowStepConfig("seed", "chembl_assay"),)
     )
-    selected = apply_cli_overrides(config(), reconciliation_mode="selected-snapshot")
+    assert restore_selected_snapshot_outputs(unbound, legacy, frozenset({"seed"})) == {}
+    selected = apply_cli_overrides(unbound, reconciliation_mode="selected-snapshot")
     with pytest.raises(ValueError, match="lacks producer evidence"):
         restore_selected_snapshot_outputs(selected, legacy, frozenset({"seed"}))
     assert "output_details" not in legacy.steps[0].to_dict()

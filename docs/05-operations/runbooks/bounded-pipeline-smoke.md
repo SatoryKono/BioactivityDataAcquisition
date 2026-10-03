@@ -286,6 +286,14 @@ stand in for a persisted producer snapshot. Missing snapshots fail closed.
 Resume restores completed producers' pinned versions and transform descendants
 from durable step evidence. A changed mode/scope changes the execution
 fingerprint; missing legacy snapshots and incompatible versions reject resume.
+Completed producers retain their original identity, counts and pinned snapshots
+in a versioned receipt. A downstream reference cohort may follow an exact
+workflow-owned FK descendant: each source mutation must preserve producer
+membership and table identity, advance the recorded pin by one version, and
+reconcile the previous scoped count with retained, expired and quarantined rows.
+Reference-only transforms, no-op results and dry runs cannot replace that count.
+Resume requires this producer receipt for explicit reference cohorts in both
+reconciliation modes; external snapshot drift still fails closed.
 An uncertain post-commit outcome records destructive commit evidence and requires
 explicit repair. Old reports lacking a mode remain legacy evidence; readers must
 not infer opt-in or reference completeness from absent fields.
