@@ -90,7 +90,7 @@
       "exit_code": 1,
       "head_unchanged": true
     },
-    "workflow_provisioning_repair": "27 PASS, 14 SKIP before clean-artifact recheck"
+    "workflow_provisioning_repair": "39 PASS, 2 Windows POSIX skips on 300db9f1166; clean-artifact assertions enabled"
   },
   "blockers": [
     "GitHub Actions blocked by account billing",
@@ -141,6 +141,11 @@
     "architecture-run.json": {
       "bytes": 490,
       "sha256": "81ec23d4af5b2dffc4f32454ef4296cf7cc9bccbd204dd05dc09f0eef558e912"
+    },
+    "owned-probe-removal.json": {
+      "bytes": 454,
+      "sha256": "1ea61439a713b708f38d2f42b19b38b8bbf2edfaf2f0bb0dd6bbd6811f69f88e"
     }
-  }
+  },
+  "probe_cleanup": "PASS; active host mount and unsigned probe allowlist removed; candidate digest unchanged"
 }
