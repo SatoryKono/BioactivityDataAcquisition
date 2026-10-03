@@ -17,7 +17,7 @@ function fallbackLinks(route: WorkspaceRoute, query: string): string {
   return route.compatibilityUids
     .map(
       (uid) =>
-        `<a href="${dashboardUrl(uid, context).replace(/&/g, '&amp;')}" style="margin-right:12px">Open JSON: ${uid}</a>`
+        `<a href="${dashboardUrl(uid, context).replaceAll('&', '&amp;')}" style="margin-right:12px">Open JSON: ${uid}</a>`
     )
     .join('');
 }
