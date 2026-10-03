@@ -460,7 +460,8 @@ jobs:
     resource_class: small
     steps:
       - checkout
-      - setup-python-uv
+      - setup-python-uv:
+          extras: "dev tracing docs"
       - check-gate:
           gate: docs-governance
       - run:
