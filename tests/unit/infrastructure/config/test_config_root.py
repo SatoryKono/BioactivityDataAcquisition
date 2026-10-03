@@ -24,7 +24,7 @@
 # pyright: reportFunctionMemberAccess=false
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
-# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 from __future__ import annotations
 
 from pathlib import Path, PureWindowsPath
@@ -58,6 +58,7 @@ def test_rooted_explicit_path_detection_is_platform_independent(
     explicit_path: Path | PureWindowsPath,
     expected: bool,
 ) -> None:
+    """Classify rooted paths independently of the host platform."""
     assert ConfigRootResolver._is_rooted_explicit_path(explicit_path) is expected
 
 
