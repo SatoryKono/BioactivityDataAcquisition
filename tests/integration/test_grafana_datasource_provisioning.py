@@ -37,7 +37,10 @@ def test_private_host_delivery_binds_source_and_survives_data_volume() -> None:
     owner = Path("grafana/tooling/router-v7-bridge")
     manifest = json.loads((owner / "host-image.json").read_text(encoding="utf-8"))
     assert (
-        manifest["image"] == _load_monitoring_compose()["services"]["grafana"]["image"]
+        manifest["image"]
+        == yaml.safe_load((owner / "compose.acceptance.yml").read_text(encoding="utf-8"))[
+            "services"
+        ]["grafana"]["image"]
     )
     assert manifest["grafana_version"] == "13.2.3"
     assert manifest["router_version"] == "7.18.4"
@@ -172,8 +175,8 @@ def test_grafana_compose_pins_compatible_infinity_plugin() -> None:
 def test_monitoring_images_are_pinned_and_pushgateway_is_not_a_datasource() -> None:
     monitoring = _load_monitoring_compose()
     assert monitoring["services"]["grafana"]["image"] == (
-        "satorykono/bioetl-grafana-router7-canvas@sha256:"
-        "1c4f97db55558c1dcce64a00ed489ed9c4252a77c19d901dc940c99ff67cb5c0"
+        "mirror.gcr.io/grafana/grafana:12.2.5@sha256:"
+        "e67fa772c14a0c728df61d7ac1b46d0da24e557efa729dbe1c404bf4403d6f35"
     )
     assert monitoring["services"]["prometheus"]["image"] == (
         "prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893"

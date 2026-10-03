@@ -103,7 +103,7 @@ services:
       { driver: json-file, options: { max-size: "100m", max-file: "10" } }
 
   grafana:
-    image: satorykono/bioetl-grafana-router7-canvas@sha256:1c4f97db55558c1dcce64a00ed489ed9c4252a77c19d901dc940c99ff67cb5c0
+    image: mirror.gcr.io/grafana/grafana:12.2.5@sha256:e67fa772c14a0c728df61d7ac1b46d0da24e557efa729dbe1c404bf4403d6f35
     container_name: bioetl-grafana
     ports:
       - "127.0.0.1:3000:3000"
@@ -112,7 +112,6 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_METRICS_ENABLED=true
       - GF_LOG_LEVEL=info
-      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=bioetl-scenes-app,bioetl-selectorshell-panel
       - GF_SERVER_ROOT_URL=http://localhost:3000
       - GF_SERVER_SERVE_FROM_SUB_PATH=false
       # Operator-facing clock on all shipped dashboards: YYYY-MM-DD HH:mm

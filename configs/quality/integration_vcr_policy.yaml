@@ -151,6 +151,7 @@ tracked_suite_inventory:
     - tests/integration/run_reports/test_query.py
     - tests/integration/run_reports/test_workflow_runner_reports.py
     - tests/integration/run_reports/test_writer.py
+    - tests/integration/test_composite_report.py
     - tests/integration/test_cross_pipeline_normalization.py
     - tests/integration/test_cross_provider_doi_normalization.py
     - tests/integration/test_dashboard_collapsed_rows.py
@@ -201,6 +202,7 @@ tracked_suite_inventory:
     - tests/integration/test_run_explorer_http_catalog.py
     - tests/integration/test_run_explorer_request_fixtures.py
     - tests/integration/test_runtime_metric_emission_consistency.py
+    - tests/integration/test_selected_snapshot_contracts.py
     - tests/integration/test_trust_telemetry_coverage.py
     - tests/integration/test_uniprot_idmapping_pipeline.py
     - tests/integration/workflow/test_selected_snapshot_reconciliation.py
