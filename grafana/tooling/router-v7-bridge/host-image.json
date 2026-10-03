@@ -1,5 +1,5 @@
 {
-  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:8c17eb9a8b5da0aa983da2ba0aa316e55ee8d0204f8ab49e641dcf3bdf3175e9",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:1c4f97db55558c1dcce64a00ed489ed9c4252a77c19d901dc940c99ff67cb5c0",
   "grafana_version": "13.2.3",
   "upstream_sha": "6193dc03311b631b9727b560d24369e683dc396e",
   "base_image": "grafana/grafana@sha256:d84563330dc9d2fd2bc096d0fb96021b5319c75bf6ed555566709998e823dec4",
@@ -11,7 +11,7 @@
     "grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch": "c177d3f3663431138d3fd12a31692b8cf21471f96730ea749c3eec0e329200dd",
     "grafana/tooling/router-v7-bridge/index.mjs": "eb4c404b42c0af3f3d1715ad4b191bd9e73564873b0fb650ba807c56ab580c3c",
     "grafana/tooling/router-v7-bridge/package-lock.json": "01a8eaf5b0e18140f2f79a9146124a2b4826f729f04ababc2ca9f41c08343bde",
-    "grafana/tooling/router-v7-bridge/Dockerfile.host": "0cfe8286155356bbb4d08d39765e5371afaec37c07aec0406bdc89fe42bbb17d",
+    "grafana/tooling/router-v7-bridge/Dockerfile.host": "93d97c8264ab27ee6dc315336762498b6a4d6edf19f783d381f476bb6f501970",
     "grafana/plugins/bioetl-scenes-app/package-lock.json": "e086743153b13e780dd7adc3b4327a84095be61318ed6f1aac961da2f8063f14",
     "grafana/plugins/bioetl-scenes-app/dist/module.js": "e2de531920743355b25abe89c68d12c224ce3b14ff51e331a6b2fa0e4a020b2f",
     "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "da40dad1e7f6c8f4f0ccd7225bedb6728ad2ba69d9c8b757986ab7ba1315bc07",

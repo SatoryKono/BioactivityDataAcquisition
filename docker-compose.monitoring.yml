@@ -103,7 +103,7 @@ services:
       { driver: json-file, options: { max-size: "100m", max-file: "10" } }
 
   grafana:
-    image: satorykono/bioetl-grafana-router7-canvas@sha256:8c17eb9a8b5da0aa983da2ba0aa316e55ee8d0204f8ab49e641dcf3bdf3175e9
+    image: satorykono/bioetl-grafana-router7-canvas@sha256:1c4f97db55558c1dcce64a00ed489ed9c4252a77c19d901dc940c99ff67cb5c0
     container_name: bioetl-grafana
     ports:
       - "127.0.0.1:3000:3000"

@@ -161,7 +161,7 @@ def test_monitoring_images_are_pinned_and_pushgateway_is_not_a_datasource() -> N
     monitoring = _load_monitoring_compose()
     assert monitoring["services"]["grafana"]["image"] == (
         "satorykono/bioetl-grafana-router7-canvas@sha256:"
-        "8c17eb9a8b5da0aa983da2ba0aa316e55ee8d0204f8ab49e641dcf3bdf3175e9"
+        "1c4f97db55558c1dcce64a00ed489ed9c4252a77c19d901dc940c99ff67cb5c0"
     )
     assert monitoring["services"]["prometheus"]["image"] == (
         "prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893"
