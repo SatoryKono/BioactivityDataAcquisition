@@ -3,6 +3,7 @@
 import asyncio
 from dataclasses import replace
 from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
@@ -382,4 +383,37 @@ async def test_table_identity_drift_blocks_even_when_version_matches(storage):
     pins["gold:test.source"]["table_id"] = "foreign-table"
     with pytest.raises(ValueError, match="snapshot drift"):
         await storage.reconcile_foreign_keys(replace(req, selected_snapshots=pins))
+    storage.quarantine.write_many.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("empty_source", [False, True])
+async def test_corrupt_pinned_reference_fails_before_source_mutation(
+    storage, empty_source
+):
+    req = await request(
+        storage,
+        source=[] if empty_source else [row("a", "x"), row("old", "y", "history")],
+        reference=[row("x", "")],
+    )
+    source_path = storage.gold_writer._resolve_table_path("test.source")
+    before = DeltaTable(source_path)
+    source_rows = before.to_pyarrow_table().to_pylist()
+    reference_path = Path(storage.gold_writer._resolve_table_path("test.reference"))
+    parquet_files = list(reference_path.rglob("*.parquet"))
+    assert len(parquet_files) == 1
+    parquet_files[0].write_bytes(b"x" * parquet_files[0].stat().st_size)
+    reference = DeltaTable(str(reference_path))
+    assert (
+        reference.version() == req.selected_snapshots["gold:test.reference"]["version"]
+    )
+    assert (
+        reference.metadata().id
+        == req.selected_snapshots["gold:test.reference"]["table_id"]
+    )
+    with pytest.raises(pa.ArrowInvalid, match="Parquet magic bytes"):
+        await storage.reconcile_foreign_keys(req)
+    after = DeltaTable(source_path)
+    assert after.version() == before.version() == 0
+    assert after.to_pyarrow_table().to_pylist() == source_rows
     storage.quarantine.write_many.assert_not_awaited()
