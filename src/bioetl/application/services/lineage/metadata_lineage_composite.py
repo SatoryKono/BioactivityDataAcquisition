@@ -97,8 +97,6 @@ def _build_composite_source_nodes_and_edges(
             attributes={
                 "provider": provider,
                 "composite_source": True,
-                "composite_run_id": composite_run_id,
-                "composite_name": composite_name,
             },
         )
         nodes.append(node)

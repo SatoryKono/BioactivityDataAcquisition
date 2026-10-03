@@ -10,6 +10,7 @@ from pathlib import Path
 from bioetl.application.services.run_reports.artifact_digest import (
     canonical_report_sha256,
 )
+from bioetl.interfaces.http._composite_child_artifact import probe_child_artifact
 from bioetl.interfaces.http._forensic_request_budget import (
     _deadline_exceeded_error,
     request_deadline_exceeded,
@@ -123,6 +124,12 @@ def _artifact_probes(
             )
             continue
         kind = str(item.get("kind") or "")
+        if kind == "composite_child_run_report":
+            result, reason = probe_child_artifact(root, relative, item)
+            probes.append(
+                {"code": code, "result": result, "reason": reason, "evidence_ref": ref}
+            )
+            continue
         candidate, resolve_error = _resolve_artifact_path(root, relative, kind or code)
         if resolve_error or candidate is None or not candidate.is_file():
             probes.append(
