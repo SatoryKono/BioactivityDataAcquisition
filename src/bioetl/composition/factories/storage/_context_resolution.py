@@ -62,8 +62,16 @@ def resolve_layer_path(
 ) -> Path:
     """Resolve storage path from sink config or fall back to default."""
     if use_yaml_paths and layer_config and layer_config.path:
-        return Path(layer_config.path)
+        return rebase_local_data_path(Path(layer_config.path), default_path)
     return default_path
+
+
+def rebase_local_data_path(configured: Path, layer_root: Path) -> Path:
+    """Keep canonical relative data paths inside the configured runtime root."""
+    prefix = ("data", "output", layer_root.name)
+    if layer_root.parent.name == "output" and configured.parts[:3] == prefix:
+        return layer_root.joinpath(*configured.parts[3:])
+    return configured
 
 
 def get_layer_configs(
@@ -99,15 +107,33 @@ def create_layer_exporters(
     gold_path: Path,
 ) -> tuple[CsvExporter | None, CsvExporter | None]:
     """Create optional CSV exporters for Silver and Gold layers."""
-    override = silver_path if settings.test_mode else None
+    override = (
+        silver_path
+        if settings.test_mode
+        else _csv_path_override(silver_config, settings.silver_path)
+    )
     silver_csv = create_csv_exporter_from_config(
         silver_config.csv_export if silver_config else None, logger, override
     )
-    override = gold_path if settings.test_mode else None
+    override = (
+        gold_path
+        if settings.test_mode
+        else _csv_path_override(gold_config, settings.gold_path)
+    )
     gold_csv = create_csv_exporter_from_config(
         gold_config.csv_export if gold_config else None, logger, override
     )
     return silver_csv, gold_csv
+
+
+def _csv_path_override(config: SinkLayerConfig | None, layer_root: Path) -> Path | None:
+    csv_config = config.csv_export if config else None
+    path = getattr(csv_config, "path", None)
+    if path is None:
+        return None
+    configured = Path(path)
+    rebased = rebase_local_data_path(configured, layer_root)
+    return rebased if rebased != configured else None
 
 
 def resolve_export_flags(

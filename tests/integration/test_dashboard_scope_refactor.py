@@ -111,7 +111,12 @@ def test_overview_selected_run_summary_is_in_first_window() -> None:
     assert "SELECTED RUN" in blob
     assert panel["datasource"]["uid"] == "-- Dashboard --"
     assert panel["targets"] == [
-        {"panelId": 9002, "refId": "A", "withTransforms": False}
+        {
+            "panelId": 9002,
+            "refId": "A",
+            "withTransforms": False,
+            "datasource": {"type": "datasource", "uid": "-- Dashboard --"},
+        }
     ]
     source = next(item for item in root if item.get("id") == 9002)
     assert "selected-run-status" in source["targets"][0]["url"]
@@ -220,7 +225,14 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
         targets = panel.get("targets") or []
         if name == "bioetl-overview-v2.json":
             assert panel["datasource"]["uid"] == "-- Dashboard --"
-            assert targets == [{"panelId": 9002, "refId": "A", "withTransforms": False}]
+            assert targets == [
+                {
+                    "panelId": 9002,
+                    "refId": "A",
+                    "withTransforms": False,
+                    "datasource": {"type": "datasource", "uid": "-- Dashboard --"},
+                }
+            ]
             targets = next(
                 item for item in _root_panels(dashboard) if item.get("id") == 9002
             )["targets"]

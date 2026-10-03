@@ -204,6 +204,97 @@ Provider-family shortcut (ChEMBL only; still sequential):
 or UniProt in one invocation. Use the per-pipeline table below for a full
 catalog smoke.
 
+## Bounded workflow FK reconciliation (`selected-snapshot`)
+
+`chembl_baseline` and `chembl_core` require explicit opt-in when extracts are
+independently limited. `complete-reference` remains the default: limited
+extracts are rejected, and an unproven reference cannot authorize deletion.
+
+`selected-snapshot` compares current rows owned by the selected workflow's
+producer run IDs against current rows owned by the reference producer in its
+pinned Delta version. A missing key means absent from that bounded snapshot;
+it does not prove absence from ChEMBL. `reference_completeness=unproven` stays
+unproven. NULL or blank foreign-key components retain the existing semantics:
+source rows with such components remain retained. Composite keys use the
+existing key normalization.
+
+The behavior matrix separates mutation permission from provider completeness:
+
+| Mode / condition | Mutation outcome | Persisted evidence |
+| --- | --- | --- |
+| Default `complete-reference`, any upstream limit/offset | CLI/config rejects destructive workflow execution. | No reconciliation commit; validation error. |
+| `complete-reference`, no limit, nonempty source, reference `unproven` | `blocked`; all scanned rows retained. | `reference_completeness_unproven`, unmatched count; completeness remains `unproven`. |
+| `complete-reference`, no limit, proven complete reference | Existing guarded deletion/Gold expiry; `no_op` when no orphans. | Completeness identity and actual mutation counts. |
+| Explicit `selected-snapshot`, limited or unlimited producers | Scoped deletion/Gold expiry, including partial or total expiry. | Mode, current-run ownership, producer IDs, pinned table IDs/versions, limits and counts; completeness remains `unproven`. |
+| `selected-snapshot`, existing empty pinned reference | All non-null FK rows in the selected source may expire/delete. | Actual `deleted X/X`, retained 0 when every selected row is an orphan; unrelated/history rows preserved. |
+| Either mode, nonempty source and missing/corrupt reference | Read error; never interpreted as a valid empty reference. | Failed step; no successful mutation receipt. |
+| `selected-snapshot`, empty source | `no_op` only after source/reference pins and identities validate. | Scanned/deleted/retained 0; invalid or missing reference still fails. |
+| Either otherwise permitted mode, dry-run with pinned producer evidence | `dry_run_preview` when mutation would occur; no quarantine or commit. | `mutated=false`, `would_mutate=true`, preview counts; a new pipeline preview cannot fabricate producer pins. |
+| Resume with unchanged identity and intact pinned evidence | Restore completed producer/transform outputs; never recapture implicit latest. | Original mode/scope/pins and completed mutation evidence. |
+| Resume with changed mode, missing legacy pins or incompatible versions | Reject resume before repeating destructive work. | Fingerprint/evidence failure; ambiguous prior commits require explicit repair. |
+
+After each successful pipeline, the workflow records Silver/Gold versions and
+producer IDs together with the effective limit and offset. For analytical tables
+that omit row-level run IDs, the producer records new/changed current entities
+by `entity_id` and `content_hash` across its pre/post snapshots. These persisted
+identities scope both reads and mutation predicates; previously unchanged rows
+remain outside that producer's mutation scope. Chained transforms
+consume the preceding transform's committed version, rather than selecting the
+latest table implicitly. An existing empty reference may expire/delete every
+selected source row. Missing or corrupt tables, missing row/producer identities and
+snapshot drift fail closed. Gold expires current SCD2 rows; historical rows and
+other producers remain unchanged. Silver performs an atomic scoped key deletion.
+Quarantine must complete before mutation. Source/reference versions are checked
+again after quarantine and the source commit uses an optimistic Delta check.
+This is a local single-instance contract, not a cross-table distributed
+transaction: concurrent external writers must be excluded from these roots.
+
+Use a separate Git branch **and** separate data, report and archive roots for
+each workflow. Load credentials from the existing repository `.env` into the
+process without copying or editing `.env` files. On Windows, invoke the dev
+interpreter with `PYTHONPATH` pointing at the isolated branch's `src` directory.
+For example, after preparing immutable Bronze batches under the isolated
+`data/output/bronze/chembl/<entity>/<date>/` directories:
+
+```powershell
+$env:PYTHONPATH = '<isolated-checkout>/src'
+$env:BIOETL_DATA_DIR = '<isolated-runtime>/chembl_baseline/data'
+$env:BIOETL_REPORT_ROOT = '<isolated-runtime>/chembl_baseline/reports'
+$env:BIOETL_ARCHIVE_ROOT = '<isolated-runtime>/chembl_baseline/archive'
+& '<dev-venv>/Scripts/python.exe' -m bioetl workflow run chembl_baseline `
+  --limit 1000 --reconciliation-mode selected-snapshot --use-cached-bronze
+```
+
+Repeat for `chembl_core` with three different roots. Default `replay_ready`
+requires immutable Bronze inputs; `--use-cached-bronze` reads those inputs while
+preserving that evidence floor. Do not lower the profile, disable digest
+validation or fabricate completeness to obtain a passing assessment. Save input
+hashes and source commit/tree identity before running. Record exact commands,
+effective config, exit codes, workflow/child run IDs, input/post-commit Delta
+versions, scanned/retained/deleted counts, and the immutable transform artifact,
+report revision and archive integrity results. UI acceptance uses Saved Evidence,
+Replay Readiness and Overview for the same run IDs; backend success alone does
+not satisfy that acceptance.
+
+`--dry-run` never writes quarantine or commits a reconciliation. Pipeline
+preview steps do not produce persisted rows, so a new dry-run workflow cannot
+stand in for a persisted producer snapshot. Missing snapshots fail closed.
+Resume restores completed producers' pinned versions and transform descendants
+from durable step evidence. A changed mode/scope changes the execution
+fingerprint; missing legacy snapshots and incompatible versions reject resume.
+An uncertain post-commit outcome records destructive commit evidence and requires
+explicit repair. Old reports lacking a mode remain legacy evidence; readers must
+not infer opt-in or reference completeness from absent fields.
+
+Before mutation, preserve all input Delta versions and avoid VACUUM. To roll
+back a failed isolated series, disable opt-in, inspect its immutable evidence,
+and restore each affected table to its saved version with `DeltaTable.restore`.
+Restore creates a new Delta commit; verify current/physical counts and historical
+rows against the saved input version, and retain both failed-run and rollback
+evidence. Never restore shared production roots from this smoke. These workflows
+do not establish strict replay support for composites or validate the separate
+100000-run campaign.
+
 ## Execution order
 
 Run **one** command at a time. Stop on the first non-zero exit, classify, fix,

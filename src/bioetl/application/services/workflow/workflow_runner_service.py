@@ -124,12 +124,15 @@ class WorkflowRunnerService:
             Callable[[WorkflowTransformDestructiveCommit], None] | None
         ) = None,
         created_at_factory: Callable[[], datetime] | None = None,
+        restored_step_outputs: Mapping[str, object] | None = None,
     ) -> WorkflowRunExecutionResult:
         """Run a workflow config and stop on first failed step."""
         started_at = current_utc_time()
         started_monotonic = perf_counter()
         self.record_expected_pipeline_metrics(config)
-        state = WorkflowExecutionState(step_results=[], step_outputs={})
+        state = WorkflowExecutionState(
+            step_results=[], step_outputs=dict(restored_step_outputs or {})
+        )
         workflow_context_labels = config.workflow_context_labels
         effective_dry_run = bool(config.defaults.dry_run)
         debug_export_enabled = bool(config.defaults.debug_export_enabled)
@@ -240,14 +243,27 @@ class WorkflowRunnerService:
                 ),
             )
         if policy.disposition == "skip_completed":
+            completed = build_resume_skipped_step_result(
+                metrics=self.metrics,
+                workflow_name=workflow_name,
+                step=step,
+                context_labels=workflow_context_labels,
+            )
+            restored = state.step_outputs.get(step.step_id)
+            if isinstance(restored, Mapping):
+                run_id = restored.get("run_id")
+                child_manifest = restored.get("manifest_id")
+                completed = replace(
+                    completed,
+                    payload=restored,
+                    child_run_id=str(run_id) if run_id is not None else None,
+                    child_manifest_id=str(child_manifest)
+                    if child_manifest is not None
+                    else None,
+                )
             return ResolvedWorkflowStepTransitionRecord(
                 policy=policy,
-                result=build_resume_skipped_step_result(
-                    metrics=self.metrics,
-                    workflow_name=workflow_name,
-                    step=step,
-                    context_labels=workflow_context_labels,
-                ),
+                result=completed,
             )
         return ResolvedWorkflowStepTransitionRecord(
             policy=policy,
@@ -299,6 +315,11 @@ class WorkflowRunnerService:
                 workflow_context_labels=workflow_context_labels,
                 step_started_callback=step_started_callback,
                 workflow_run_id=workflow_run_id,
+                snapshot_reader=getattr(
+                    getattr(self.transform_service, "registry", None),
+                    "snapshot_reader",
+                    None,
+                ),
             )
         return await execute_transform_step(
             transform_service=self.transform_service,

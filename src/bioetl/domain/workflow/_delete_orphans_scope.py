@@ -162,6 +162,12 @@ def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None
         transform = _delete_orphans_transform(step)
         if transform is None:
             continue
+        mode = (transform.config or {}).get(
+            "reconciliation_mode",
+            config.defaults.reconciliation_mode or "complete-reference",
+        )
+        if mode == "selected-snapshot":
+            continue
         limited = _limited_upstream_pipeline_ids(transform.step_id, config, steps_by_id)
         if limited and not _has_bound_reference_cohort(transform, config):
             raise ValueError(
@@ -170,3 +176,58 @@ def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None
                 f"({', '.join(limited)}); independently bounded extracts "
                 "make Gold FK orphans false positives"
             )
+
+
+def apply_reconciliation_mode(
+    config: WorkflowConfig, mode: str | None = None
+) -> WorkflowConfig:
+    """Bind effective mode and bounded source scope into transform fingerprints."""
+    from bioetl.domain.workflow.foreign_key_reconciliation import (
+        require_reconciliation_mode,
+    )
+
+    steps: list[WorkflowStep] = []
+    producers: set[str] = set()
+    definitions = {step.step_id: step for step in config.steps}
+    for step in config.steps:
+        transform = _delete_orphans_transform(step)
+        if transform is None:
+            steps.append(step)
+            continue
+        values = dict(transform.config or {})
+        effective = require_reconciliation_mode(
+            mode
+            or config.defaults.reconciliation_mode
+            or str(values.get("reconciliation_mode", "complete-reference"))
+        )
+        if effective == "selected-snapshot":
+            values.update(reconciliation_mode=effective, source_scope="current_run")
+            pending = list(transform.depends_on)
+            seen: set[str] = set()
+            while pending:
+                identity = pending.pop()
+                if identity in seen:
+                    continue
+                seen.add(identity)
+                ancestor = definitions[identity]
+                pending.extend(ancestor.depends_on)
+                if isinstance(ancestor, WorkflowStepConfig):
+                    producers.add(identity)
+            steps.append(replace(transform, config=values))
+        elif mode is not None:
+            values["reconciliation_mode"] = effective
+            steps.append(replace(transform, config=values))
+        else:
+            steps.append(step)
+    captured = tuple(
+        replace(
+            step,
+            run_options=replace(
+                step.run_options, reconciliation_mode="selected-snapshot"
+            ),
+        )
+        if isinstance(step, WorkflowStepConfig) and step.step_id in producers
+        else step
+        for step in steps
+    )
+    return replace(config, steps=captured)

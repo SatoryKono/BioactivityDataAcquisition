@@ -283,7 +283,10 @@ def test_http_identity_panel_docs_match_shipped_datasource_contract(
 
     for panel in (identity_panel, processed_panel):
         if panel is not None:
-            assert panel["datasource"] == "BioETL Ops HTTP"
+            assert panel["datasource"] == {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http",
+            }
     identity_endpoint = (
         "/ops/observability/selected-run-status"
         if dashboard_name == "bioetl-overview-v2"
@@ -317,7 +320,10 @@ def test_overview_identity_docs_match_selected_run_status_contract() -> None:
         encoding="utf-8"
     )
     section = _documented_panel_section(doc_text, "Review Run Identity")
-    assert panel["datasource"] == "BioETL Ops HTTP"
+    assert panel["datasource"] == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
     assert str(panel["targets"][0]["url"]).startswith(
         "/ops/observability/selected-run-status"
     )

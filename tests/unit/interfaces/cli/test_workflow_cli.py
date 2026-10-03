@@ -1121,3 +1121,40 @@ def test_multi_pipeline_push_failure_preserves_success_and_report(
         assert entry["error_type"] == "ConnectionRefusedError"
         assert "private gateway exception detail" not in str(entry)
     assert all(attempt["grouping_key"] == {} for attempt in attempts)
+
+
+def test_workflow_run_accepts_selected_snapshot_with_bounded_extracts(
+    cli_runner, monkeypatch, tmp_path
+):
+    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+
+    fake_service = _FakeWorkflowRunnerService()
+    monkeypatch.setattr(
+        workflow_cmd,
+        "get_workflow_execution_service",
+        lambda registry=None: fake_service,
+    )
+    cache = tmp_path / "bronze"
+    cache.mkdir()
+    result = cli_runner.invoke(
+        cli,
+        [
+            "workflow",
+            "run",
+            "chembl_core",
+            "--limit",
+            "1000",
+            "--reconciliation-mode",
+            "selected-snapshot",
+            "--use-cached-bronze",
+            "--cached-bronze-path",
+            str(cache),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert (
+        fake_service.received_config.defaults.reconciliation_mode == "selected-snapshot"
+    )
+    assert all(
+        s.run_options.limit == 1000 for s in fake_service.received_config.pipeline_steps
+    )

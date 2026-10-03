@@ -7,7 +7,7 @@
     "prometheus-only",
     "ops-http-unavailable"
   ],
-  "schemaVersion": 30,
+  "schemaVersion": 42,
   "version": 1,
   "editable": false,
   "timezone": "browser",

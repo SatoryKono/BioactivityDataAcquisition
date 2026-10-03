@@ -59,6 +59,7 @@ class WorkflowCommandOptions:
     ensure_observability_backend: bool
     observability_backend_port: int
     no_control_plane_archive: bool
+    reconciliation_mode: str | None = None
 
     @classmethod
     def from_click_kwargs(
@@ -72,6 +73,7 @@ class WorkflowCommandOptions:
             run_type=optional_option(raw, "run_type", str),
             start_offset=optional_option(raw, "start_offset", int),
             limit=optional_option(raw, "limit", int),
+            reconciliation_mode=optional_option(raw, "reconciliation_mode", str),
             input_csv=optional_option(raw, "input_csv", str),
             filter_column=optional_option(raw, "filter_column", str),
             filter_field=optional_option(raw, "filter_field", str),
@@ -123,6 +125,7 @@ class WorkflowCommandOptions:
             "run_type": self.run_type,
             "start_offset": self.start_offset,
             "limit": self.limit,
+            "reconciliation_mode": self.reconciliation_mode,
             "input_csv": self.input_csv,
             "filter_column": self.filter_column,
             "filter_field": self.filter_field,

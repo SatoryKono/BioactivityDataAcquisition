@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `3e631ceb8af181eec56a0868858008e8482c61bebef6ba9469fa06a66c7b49e4`
+Evidence surface SHA-256: `c928f5af3acfab8a163f3faa293ba434c516254cee2d2c71e97617d3b7402365`
 
 ## Current evidence summary
 
@@ -34,15 +34,15 @@ reported separately in the issue closeout evidence.
 
 <!-- current-audit-headlines:start -->
 
-Debt-governance gates: **45 pass / 1 fail**
+Debt-governance gates: **46 pass / 0 fail**
 
-Architecture quality integral score: **9.39** (`good_targeted_improvements`)
+Architecture quality integral score: **9.47** (`good_targeted_improvements`)
 
-source_module_count: **2548**
+source_module_count: **2563**
 
-fully_covered: **2517**
+fully_covered: **2518**
 
-partially_covered: **30**
+partially_covered: **44**
 
 no_executable_lines: **1**
 
@@ -50,7 +50,7 @@ uncovered: **0**
 
 unmeasured: **0**
 
-= 2548 == source_module_count
+= 2563 == source_module_count
 
 Contract coverage matrix schema: **contract-coverage-matrix-v3**
 
@@ -68,22 +68,22 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "3e631ceb8af181eec56a0868858008e8482c61bebef6ba9469fa06a66c7b49e4",
+  "evidence_surface_sha256": "c928f5af3acfab8a163f3faa293ba434c516254cee2d2c71e97617d3b7402365",
   "metrics": {
-    "architecture_integral_score": 9.39,
+    "architecture_integral_score": 9.47,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 46,
-    "debt_gate_fail_count": 1,
-    "debt_gate_pass_count": 45,
+    "debt_gate_fail_count": 0,
+    "debt_gate_pass_count": 46,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 2517,
+    "fully_covered_module_count": 2518,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 1,
-    "partially_covered_module_count": 30,
-    "source_module_count": 2548,
+    "partially_covered_module_count": 44,
+    "source_module_count": 2563,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,

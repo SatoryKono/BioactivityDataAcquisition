@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2546,
-    "total_internal_imports": 8054,
+    "scanned_modules": 2551,
+    "total_internal_imports": 8079,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 344,
+    "cross_layer_group_edges_total": 345,
     "violations": 0,
-    "source_fingerprint": "85374d71674a12c52efdaa3ebdab0c25247f0d2f301974c4923d1c300a02f505"
+    "source_fingerprint": "8e7211d4085f972cf5e7fda64a8ff62b0b9af6f6adddc1f215794669dd2748bd"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1588,
+      "imports": 1591,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1073,
+      "imports": 1075,
       "allowed": true
     },
     {
@@ -30,7 +30,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 644,
+      "imports": 645,
       "allowed": true
     },
     {
@@ -48,19 +48,19 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1279,
+      "imports": 1281,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 778,
+      "imports": 782,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1242,
+      "imports": 1251,
       "allowed": true
     },
     {
@@ -78,13 +78,13 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 84,
+      "imports": 85,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 447,
+      "imports": 450,
       "allowed": true
     }
   ],
@@ -92,7 +92,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 141
+      "imports": 142
     },
     {
       "source": "infrastructure.adapters",
@@ -360,8 +360,8 @@
       "imports": 15
     },
     {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.observability",
+      "source": "application.services",
+      "target": "domain.workflow",
       "imports": 14
     }
   ],

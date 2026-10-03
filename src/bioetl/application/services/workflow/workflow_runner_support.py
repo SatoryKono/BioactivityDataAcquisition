@@ -228,7 +228,9 @@ def step_result_from_transform_result(
 
 def run_options_from_config(config: WorkflowRunOptionsConfig) -> RunOptions:
     """Project workflow run options onto pipeline runner options."""
-    return RunOptions(**config.to_mapping())
+    values = config.to_mapping()
+    values.pop("reconciliation_mode", None)
+    return RunOptions(**values)
 
 
 def workflow_result_from_state(

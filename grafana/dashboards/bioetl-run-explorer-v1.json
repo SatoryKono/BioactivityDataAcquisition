@@ -21,7 +21,7 @@
   "id": null,
   "links": [],
   "refresh": "60s",
-  "schemaVersion": 39,
+  "schemaVersion": 42,
   "tags": [
     "bioetl",
     "run-explorer",
@@ -36,7 +36,10 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=workflow&response_shape=options&allow_stale=1",
         "description": "Browse scope from the local control-plane catalog. Default All includes every workflow. Filters the recent-launches table.",
         "hide": 0,
@@ -90,7 +93,10 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
         "hide": 0,
         "includeAll": true,
@@ -144,7 +150,10 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=run_type&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&allow_stale=1",
         "hide": 0,
         "includeAll": true,
@@ -198,7 +207,10 @@
           "text": "-",
           "value": "-"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
@@ -342,7 +354,10 @@
         "x": 0,
         "y": 3
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1291,6 +1306,10 @@
           "url_options": {
             "data": "",
             "method": "GET"
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
           }
         }
       ],

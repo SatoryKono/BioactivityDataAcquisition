@@ -25,6 +25,18 @@ __all__ = [
 ForeignKeyReconciliationLayer = Literal["silver", "gold"]
 ForeignKeyReconciliationAction = Literal["delete_orphans"]
 ReferenceCompletenessStatus = Literal["complete", "unproven"]
+ReconciliationMode = Literal["complete-reference", "selected-snapshot"]
+
+
+def require_reconciliation_mode(value: str) -> ReconciliationMode:
+    """Validate the opt-in reconciliation semantics without implying completeness."""
+    if value not in {"complete-reference", "selected-snapshot"}:
+        raise ValueError(
+            "reconciliation_mode must be complete-reference or selected-snapshot"
+        )
+    return cast(ReconciliationMode, value)
+
+
 ForeignKeyReconciliationMutationMode = Literal[
     "unknown",
     "delete_orphans",

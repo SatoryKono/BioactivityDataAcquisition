@@ -28,6 +28,7 @@ from bioetl.interfaces.http._processed_records_value_support import (
     _parse_grafana_ms,
     _parse_iso_to_ms,
 )
+from bioetl.interfaces.http._reconciliation_display import reconciliation_display
 from bioetl.interfaces.http._run_summary_accounting import summary_accounting
 
 
@@ -232,6 +233,7 @@ def _table_shape_workflow_run_report(
     """Expose workflow totals as stable parameter/value rows for Grafana tables."""
     shaped = dict(payload)
     totals = payload.get("totals")
+    shaped["reconciliation_display"] = reconciliation_display(payload)
     if isinstance(totals, dict):
         shaped["totals_rows"] = _param_value_rows(
             totals, key_order=_WORKFLOW_TOTALS_ROW_ORDER

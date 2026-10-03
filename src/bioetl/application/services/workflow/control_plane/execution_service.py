@@ -24,6 +24,10 @@ from bioetl.application.services.workflow.control_plane.execution_recording impo
     record_workflow_finished,
     record_workflow_started,
 )
+from bioetl.application.services.workflow.control_plane.selected_snapshot_resume import (
+    SelectedSnapshotResumeOptions,
+    restore_selected_snapshot_outputs,
+)
 from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunExecutionResult,
     WorkflowRunnerService,
@@ -205,6 +209,11 @@ async def _run_locked_workflow(
     now_factory: Callable[[], datetime],
     incremental: bool = False,
 ) -> WorkflowRunExecutionResult:
+    restored_outputs = (
+        restore_selected_snapshot_outputs(config, recorder.state, completed_step_ids)
+        if resumed
+        else {}
+    )
     if not resumed:
         recorder.ledger.record_manifest_created(prepared_manifest)
     record_workflow_started(
@@ -213,6 +222,9 @@ async def _run_locked_workflow(
         repair_steps=repair_steps,
         force_steps=force_steps,
     )
+    resume_options: SelectedSnapshotResumeOptions = {}
+    if restored_outputs:
+        resume_options["restored_step_outputs"] = restored_outputs
     result = await runner.run_workflow(
         config,
         workflow_run_id=str(prepared_manifest.workflow_run_id),
@@ -225,6 +237,7 @@ async def _run_locked_workflow(
         step_completed_callback=partial(record_step_completed, recorder),
         transform_commit_callback=partial(record_transform_commit, recorder),
         created_at_factory=now_factory,
+        **resume_options,
     )
 
     if incremental:

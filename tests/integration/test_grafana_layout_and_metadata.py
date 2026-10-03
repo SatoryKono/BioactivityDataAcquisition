@@ -894,7 +894,7 @@ def test_dq_score_chart_keeps_readable_height_with_semantic_legend() -> None:
 
 def test_dashboard_metadata_policy_invariants() -> None:
     """Metadata should follow documented policy without mechanical suite-wide rewrites."""
-    allowed_schema_versions = {30, 39}
+    allowed_schema_versions = {42}
 
     for dashboard_path in sorted(Path("grafana/dashboards").glob("*.json")):
         dashboard = load_dashboard(dashboard_path)
@@ -928,7 +928,7 @@ def test_dashboard_design_system_documents_metadata_policy() -> None:
     )
     required_tokens = {
         '`timezone` MUST быть `"browser"`',
-        "`schemaVersion` MAY remain `30` or `39`",
+        "`schemaVersion` MUST be `42`",
         "`iteration` is optional",
         "`tags` MUST include the baseline suite tag `bioetl`",
         "`refresh=60s`",

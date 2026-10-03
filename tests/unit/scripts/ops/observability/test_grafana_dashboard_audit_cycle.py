@@ -139,6 +139,8 @@ def test_grafana_audit_preflight_router_exposes_command() -> None:
 def test_grafana_audit_preflight_parser_uses_grafana_env_defaults(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
+    monkeypatch.delenv("GF_SECURITY_ADMIN_PASSWORD", raising=False)
+    monkeypatch.delenv("GRAFANA_ADMIN_PASSWORD", raising=False)
     monkeypatch.setenv("GRAFANA_USERNAME", "viewer")
     monkeypatch.setenv("GRAFANA_PASSWORD", "secret")
 

@@ -171,4 +171,51 @@ class CompositeSupportServicesFactory:
         )
 
 
-__all__ = ["CompositeSupportServices", "CompositeSupportServicesFactory"]
+def build_support_services(
+    *,
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    infra_context: CompositeInfrastructureContext,
+    support_services_factory_cls: type[CompositeSupportServicesFactory],
+    resolve_gold_schema_fn: Callable[[str], type | None],
+    load_field_group_registry_fn: Callable[
+        [str, LoggerPort], FieldGroupRegistry | None
+    ],
+    create_dq_report_service_fn: Callable[
+        [LoggerPort, Settings, MetricsPort],
+        DQReportService,
+    ],
+) -> CompositeSupportServices:
+    """Build composite support service bundle consumed by runner facade.
+
+    Args:
+        config: CompositeConfig for this composite run.
+        runtime: Runtime options (resume, concurrency, etc.).
+        infra_context: Bundle of infrastructure primitives.
+        support_services_factory_cls: Factory class that assembles the bundle.
+        resolve_gold_schema_fn: Callable returning the Gold Pandera schema for
+            a composite pipeline name, or None if not registered.
+        load_field_group_registry_fn: Callable returning the FieldGroupRegistry
+            for a composite pipeline name, or None.
+        create_dq_report_service_fn: Callable returning a DQReportService
+            given a logger and settings.
+
+    Returns:
+        CompositeSupportServices bundle with all services required by the runner.
+    """
+    return support_services_factory_cls(
+        config=config,
+        runtime=runtime,
+        infra_context=infra_context,
+        resolve_gold_schema=resolve_gold_schema_fn,
+        load_field_group_registry=load_field_group_registry_fn,
+        create_dq_report_service=create_dq_report_service_fn,
+        checkpoint_manager_cls=CompositeCheckpointService,
+    ).build()
+
+
+__all__ = [
+    "CompositeSupportServices",
+    "CompositeSupportServicesFactory",
+    "build_support_services",
+]

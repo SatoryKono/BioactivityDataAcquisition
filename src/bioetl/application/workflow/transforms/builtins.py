@@ -26,6 +26,11 @@ def register_builtin_workflow_transforms(
     """Register baseline built-in transforms on the provided registry."""
     registry.register("summarize_upstream_outputs", _summarize_upstream_outputs)
     if foreign_key_reconciliation_port is not None:
+        reader = getattr(
+            foreign_key_reconciliation_port, "capture_pipeline_snapshots", None
+        )
+        if callable(reader):
+            registry.snapshot_reader = reader
         registry.register(
             "reconcile_foreign_keys",
             build_reconcile_foreign_keys_executor(foreign_key_reconciliation_port),

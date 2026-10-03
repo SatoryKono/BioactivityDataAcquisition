@@ -15,6 +15,7 @@ from bioetl.domain.workflow.foreign_key_reconciliation import (
     require_non_empty_primary_keys,
     require_non_empty_str,
     require_optional_str,
+    require_reconciliation_mode,
     require_source_scope,
     validate_optional_source_reference_keys_pair,
 )
@@ -53,6 +54,9 @@ class ForeignKeyReconciliationRequest:
     source_layer: ForeignKeyReconciliationLayer = "silver"
     reference_layer: ForeignKeyReconciliationLayer = "silver"
     mutation_layer: ForeignKeyReconciliationLayer | None = None
+    reconciliation_mode: str = "complete-reference"
+    selected_snapshots: dict[str, dict[str, object]] | None = None
+    source_snapshot_version: int | None = None
     reference_completeness: ReferenceCompletenessStatus = "unproven"
     reference_identity: str | None = None
     reference_snapshot_version: str | None = None
@@ -85,6 +89,18 @@ class ForeignKeyReconciliationRequest:
         require_optional_str(self.transform_name, "transform_name")
         require_optional_str(self.debug_export_dir, "debug_export_dir")
         require_source_scope(self.source_scope)
+        require_reconciliation_mode(self.reconciliation_mode)
+        if self.reconciliation_mode == "selected-snapshot":
+            if (
+                self.source_scope != "current_run"
+                or not self.workflow_run_id
+                or not self.source_run_ids
+            ):
+                raise ValueError(
+                    "selected-snapshot requires current_run scope and workflow/producer run identities"
+                )
+            if not self.selected_snapshots:
+                raise ValueError("selected-snapshot requires pinned producer snapshots")
         object.__setattr__(
             self,
             "source_run_ids",
@@ -148,6 +164,9 @@ class ForeignKeyReconciliationResult:
     quarantine_rows_written: int = 0
     quarantine_error_code: str | None = None
     source_snapshot: dict[str, int] | None = None
+    reconciliation_mode: str = "complete-reference"
+    selected_snapshots: dict[str, dict[str, object]] | None = None
+    input_snapshots: dict[str, dict[str, object]] | None = None
     mutation_blocked_reason: str | None = None
     unproven_unmatched_rows: int = 0
     reference_completeness: ReferenceCompletenessStatus = "unproven"

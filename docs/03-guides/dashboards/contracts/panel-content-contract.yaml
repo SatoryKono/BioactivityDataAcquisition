@@ -3174,6 +3174,31 @@ dashboards:
         - full_dark
         - full_light
         - zoom_200
+      '9483':
+        title: Review FK Comparison Scope
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - UNKNOWN
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
       '9603':
         title: Review Selected Run Status
         role: evidence_table

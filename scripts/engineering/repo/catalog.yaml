@@ -28,7 +28,6 @@ policies:
     - generate_adr_registry.py
     - generate_test_github_issues.py
     - optimized_test_runner.py
-    - test_selection_strategy.py
 entrypoints:
   package_console_scripts:
     bioetl: src/bioetl/interfaces/cli/main.py

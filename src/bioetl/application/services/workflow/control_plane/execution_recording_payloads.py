@@ -14,6 +14,13 @@ _TRANSFORM_RESULT_SUMMARY_KEYS = (
     "manifest_id",
     "step_id",
     "source_table",
+    "reconciliation_mode",
+    "reference_completeness",
+    "source_scope",
+    "reference_scope",
+    "source_run_ids",
+    "input_snapshots",
+    "selected_snapshots",
     "reference_table",
     "source_key",
     "reference_key",
@@ -111,6 +118,9 @@ def _pipeline_child_details(
         "child_run_id": child_run_id,
         "child_manifest_id": child_manifest_id,
     }
+    snapshots = getattr(result.payload, "selected_snapshots", None)
+    if snapshots:
+        details["selected_snapshots"] = snapshots
     if fingerprint is not None:
         details["fingerprint"] = fingerprint
     return details

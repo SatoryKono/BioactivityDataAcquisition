@@ -386,6 +386,61 @@ def test_qa_cli_report_dashboard_inventory_help_mentions_health_and_deployed_dir
     assert "--deployed-dir" in result.stdout
 
 
+def test_sync_contract_preserves_reviewed_fields_and_is_idempotent(
+    tmp_path, monkeypatch
+):
+    path = tmp_path / "inventory.yaml"
+    reviewed = {
+        "uid": "sample",
+        "owner": "team",
+        "owner_route": "runbook.md",
+        "key_panels": [{"id": 1, "title": "Reviewed"}],
+        "panel_count": 1,
+    }
+    path.write_text(
+        yaml.safe_dump({"dashboards": [reviewed]}, sort_keys=False), encoding="utf-8"
+    )
+    monkeypatch.setattr(inventory, "DASHBOARD_INVENTORY_CONTRACT", path)
+    inventory.sync_inventory_panel_counts([{"uid": "sample", "panel_count": 3}])
+    refreshed = yaml.safe_load(path.read_text())["dashboards"][0]
+    assert refreshed == {**reviewed, "panel_count": 3}
+    before = path.read_bytes()
+    inventory.sync_inventory_panel_counts([{"uid": "sample", "panel_count": 3}])
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize(
+    "actual",
+    [
+        [],
+        [{"uid": "foreign", "panel_count": 3}],
+        [{"uid": "sample", "panel_count": 2}, {"uid": "sample", "panel_count": 3}],
+    ],
+)
+def test_sync_contract_rejects_roster_drift_without_writing(
+    tmp_path, monkeypatch, actual
+):
+    path = tmp_path / "inventory.yaml"
+    path.write_text(
+        yaml.safe_dump({"dashboards": [{"uid": "sample", "panel_count": 1}]}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(inventory, "DASHBOARD_INVENTORY_CONTRACT", path)
+    before = path.read_bytes()
+    with pytest.raises(ValueError, match="UID roster"):
+        inventory.sync_inventory_panel_counts(actual)
+    assert path.read_bytes() == before
+
+
+def test_ops_http_uid_uses_reviewed_datasource_name():
+    assert (
+        inventory._normalize_datasource_ref(
+            {"uid": "bioetl-ops-http", "type": "yesoreyeram-infinity-datasource"}
+        )
+        == "BioETL Ops HTTP"
+    )
+
+
 def test_inventory_counts_contextual_dashboard_destinations() -> None:
     payload = {
         "panels": [

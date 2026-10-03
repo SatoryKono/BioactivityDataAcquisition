@@ -225,7 +225,10 @@ def test_run_explorer_visible_selectors_use_ops_http_catalog() -> None:
     }
     for name in ("workflow", "pipeline", "run_type", "run_id"):
         variable = variables[name]
-        assert variable["datasource"] == "BioETL Ops HTTP"
+        assert variable["datasource"] == {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http",
+        }
         query = variable["query"]["infinityQuery"]["url"]
         assert query.startswith("/ops/control-plane/filter-options?dimension=")
         assert "label_values(" not in query
