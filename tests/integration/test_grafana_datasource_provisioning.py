@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import hashlib
 import os
+import shlex
 from pathlib import Path
 import shutil
 import subprocess
@@ -47,8 +48,19 @@ def test_private_host_delivery_binds_source_and_survives_data_volume() -> None:
     recipe = (owner / "Dockerfile.host").read_text(encoding="utf-8")
     assert "FROM " + manifest["base_image"] in recipe
     assert "runtime-probe" not in recipe
+    copies = [
+        tuple(shlex.split(line, comments=True))
+        for line in recipe.splitlines()
+        if line.lstrip().upper().startswith("COPY ")
+    ]
+    assert (
+        "COPY", "--chown=root:root", "host-build/", "/usr/share/grafana/public/build/"
+    ) in copies
     for plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"):
-        assert "/usr/share/grafana/data/plugins-bundled/" + plugin in recipe
+        assert (
+            "COPY", "--chown=root:root", plugin + "/",
+            "/usr/share/grafana/data/plugins-bundled/" + plugin + "/",
+        ) in copies
 
 
 _REMOVED_MONITORING_SERVICES = (

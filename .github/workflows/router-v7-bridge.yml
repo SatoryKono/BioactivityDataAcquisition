@@ -44,6 +44,8 @@ jobs:
         run: node verify-packed-bridge.mjs
       - name: Test bridge behavior and security boundaries
         run: npm test
+      - name: Test host probe observes committed navigation
+        run: node --test runtime-probe/module.test.mjs
       - name: Check exported TypeScript API
         run: npm run typecheck
       - name: Build browser candidate
@@ -82,8 +84,31 @@ jobs:
         run: npm run test:ci
       - name: Build plugin
         run: npm run build
+      - name: Verify built bundle against shipped host manifest
+        env:
+          BIOETL_PLUGIN: ${{ matrix.plugin }}
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["GITHUB_WORKSPACE"])
+          plugin = os.environ["BIOETL_PLUGIN"]
+          assert plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"), plugin
+          relative = f"grafana/plugins/{plugin}/dist/module.js"
+          bundle = root / relative
+          assert bundle.is_file(), f"Missing built bundle: {relative}"
+          manifest = json.loads((root / "grafana/tooling/router-v7-bridge/host-image.json").read_text())
+          expected = manifest["artifact_sha256"][relative]
+          actual = hashlib.sha256(bundle.read_bytes()).hexdigest()
+          assert actual == expected, f"Bundle SHA-256 mismatch: {relative}: {actual} != {expected}"
+          print(f"Verified {relative}: {actual}")
+          PY
 
   host-build:
+    needs: plugin-tests
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:

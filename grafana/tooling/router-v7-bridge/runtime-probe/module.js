@@ -38,6 +38,7 @@ define(['react', 'react-dom/client', '@grafana/data', 'react-router'], function 
           check('InternalLink origin: ' + JSON.stringify(to), anchor && new URL(anchor.href).origin === origin);
           let rejected = false;
           try { navigate(to); } catch (error) { rejected = /External navigation is not allowed/.test(error.message); }
+          await new Promise((resolve) => setTimeout(resolve, 30));
           check('useNavigate rejects: ' + JSON.stringify(to), rejected && location.pathname === '/home');
         }
         for (const to of ['/detail?run=42#panel', '/%2f%2fexample.invalid', '/%5cexample.invalid']) {
