@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-03T13:19:20.565625+00:00",
+  "generated_at": "2026-10-03T16:48:45.132708+00:00",
   "summary": {
     "total_scripts": 635,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 48,
       "scripts": 530,
       "skills": 12,
-      "tests": 447
+      "tests": 448
     }
   },
   "scripts": [
@@ -20214,7 +20214,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_nav_bus.py",
-          "line": 20,
+          "line": 51,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._latest_complete_run_panel import ("
         }
@@ -20354,7 +20354,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
@@ -20366,6 +20366,12 @@
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 2544,
           "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_nav_bus.py",
+          "line": 20,
+          "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         }
       ]
