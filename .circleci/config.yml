@@ -1,0 +1,77 @@
+# Pilot config — CircleCI migration v2, phase 1 (03.10.2026)
+# Repo: SatoryKono/BioactivityDataAcquisition
+# Purpose: verify that CircleCI builds run and post commit statuses to the
+# billing-locked GitHub account; measure credit consumption of one lane.
+# Install: copy this file to <repo>/.circleci/config.yml, commit, push.
+# CircleCI auto-detects it on push.
+version: 2.1
+
+# Port of .github/actions/setup-python-uv (simplified for the pilot):
+# Python 3.12 baseline, uv 0.11.26, uv cache, `uv sync --frozen` with dev extras.
+commands:
+  setup-python-uv:
+    description: "Install uv, restore cache, sync deps (port of GH composite action)"
+    steps:
+      - run:
+          name: Install uv 0.11.26
+          command: |
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
+            "$HOME/.local/bin/uv" --version
+      - restore_cache:
+          name: Restore uv cache
+          keys:
+            - uv-v1-{{ checksum "uv.lock" }}-py312
+      - run:
+          name: Sync dependencies (uv sync --frozen --extra dev --extra tracing)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            export UV_CACHE_DIR="$HOME/.cache/uv"
+            uv sync --frozen --extra dev --extra tracing
+      - save_cache:
+          name: Save uv cache
+          key: uv-v1-{{ checksum "uv.lock" }}-py312
+          paths:
+            - ~/.cache/uv
+
+jobs:
+  lint-ruff:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: ruff check (mirrors `make lint` / pr-required lint-arch)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            uv run --frozen ruff check src tests scripts
+
+  pytest-fast:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: pytest unit-domain fast lane (mirrors tests.yml test-fast)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            mkdir -p reports/test-telemetry
+            HYPOTHESIS_PROFILE=fast \
+            uv run --frozen --no-build pytest tests/unit/domain/ \
+              -m "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" \
+              -p no:xdist \
+              -q --tb=short \
+              --junitxml=reports/test-telemetry/junit-fast.unit-domain.xml
+      - store_test_results:
+          path: reports/test-telemetry
+
+workflows:
+  version: 2
+  pilot:
+    jobs:
+      - lint-ruff
+      - pytest-fast
