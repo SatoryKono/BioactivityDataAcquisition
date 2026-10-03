@@ -68437,6 +68437,34 @@
       "canonical_successor": null,
       "catalog_lifecycle": null,
       "commit_policy": null,
+      "declared_class": "historical-note",
+      "declared_status": "archived",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "historical",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "Engineering",
+      "path": "docs/99-archive/root-status-artifacts/jules-bolt-performance-note-2023-10-24.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "99-archive",
+      "status": "Archived",
+      "surface_family": "archive",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
       "declared_class": null,
       "declared_status": "archived",
       "diagram_kind": null,
@@ -97540,7 +97568,7 @@
       "archive-after-github-state-check": 338,
       "archive-after-migration": 860,
       "generate-automatically": 1056,
-      "keep": 1192,
+      "keep": 1193,
       "reconcile-with-github-state": 8
     },
     "by_section": {
@@ -97553,7 +97581,7 @@
       "04-reference": 334,
       "05-engineering": 2,
       "05-operations": 92,
-      "99-archive": 276,
+      "99-archive": 277,
       "AGENTS.md": 1,
       "CHANGELOG.md": 1,
       "CONTRIBUTING.md": 1,
@@ -97570,20 +97598,20 @@
     },
     "by_status": {
       "Active": 747,
-      "Archived": 276,
+      "Archived": 277,
       "Canonical": 74,
       "Generated": 1056,
       "Working": 1301
     },
     "by_surface_family": {
       "active": 747,
-      "archive": 276,
+      "archive": 277,
       "canonical": 74,
       "generated": 1056,
       "working": 1301
     },
     "by_tracking_state": {
-      "tracked": 3454
+      "tracked": 3455
     },
     "docs_reports_local_count": 56,
     "duplicate_group_count": 7,
@@ -97599,8 +97627,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3454,
+    "total_doc_like": 3455,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3454
+    "total_doc_like_tracked": 3455
   }
 }

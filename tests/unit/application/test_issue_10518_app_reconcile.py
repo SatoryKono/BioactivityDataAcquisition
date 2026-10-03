@@ -33,6 +33,7 @@ def test_build_payload_blocked_reason_and_dry_run() -> None:
         nulls_equal=True,
         reference_completeness="complete",
         require_closed_cohort=False,
+        reconciliation_mode="complete-reference",
     )
     result = SimpleNamespace(
         source_table="src",
